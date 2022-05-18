@@ -1,0 +1,207 @@
+<!-- <!DOCTYPE HTML> -->
+<html lang="zh-Hant">
+
+<head>
+    <title>ExpTech 氣象 | 訊息面板</title>
+    <meta charset="utf-8" />
+    <meta content="ExpTech | 探索科技" property="og:title" />
+    <meta content="編程、設計、創意、實用 - 努力成為真正的高手" property="og:description" />
+    <meta content="https://exptechtw.github.io/" property="og:url" />
+    <meta content="https://raw.githubusercontent.com/ExpTechTW/ExpTechTW.github.io/Release/image/main/ExpTech.jpg"
+        property="og:image" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="./css/main/main.css" />
+    <noscript>
+        <link rel="stylesheet" href="./css/main/noscript.css" />
+    </noscript>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+        integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+        integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+        crossorigin=""></script>
+    <script src="https://unpkg.com/ipfs-api/dist/index.js"></script>
+    <script src="http://exptechweb.mywire.org/DataBase/JavaScript/UUID/UUID-1.0.0.js"></script>
+</head>
+
+<body class="index is-preload" style="background-color: black;">
+    <article class="main" id="#main">
+        <script>
+            var Main = document.getElementById("#main")
+            Main.style.width = document.documentElement.scrollWidth
+        </script>
+        <div class="map">
+            <div id="map"></div>
+            <script>
+                var MAP = document.getElementById("map")
+                MAP.style.height = document.documentElement.scrollHeight
+            </script>
+        </div>
+
+        <div class="roll" id="rolllist" style="overflow-y:auto;">
+            <script src="./js/main/earthquake.js"></script>
+            <script>
+                var roll = document.getElementById("rolllist")
+                roll.style.height = document.documentElement.scrollHeight
+            </script>
+        </div>
+        <style>
+            html {
+                overflow: -moz-hidden-unscrollable;
+                height: 100%;
+            }
+
+            body::-webkit-scrollbar {
+                display: none;
+            }
+
+            body {
+                -ms-overflow-style: none;
+                height: 100%;
+                width: calc(100vw + 18px);
+                overflow: auto;
+            }
+        </style>
+        </div>
+    </article>
+
+    <!-- <div class="weather">
+        <div id="SatelliteImages">
+            <img src="" id="radar" />
+            <script src="../../js/main/radar.js"></script>
+        </div>
+    </div> -->
+    <!-- <footer id="footer" style="background-color: black;">
+        <ul class="icons">
+            <li><a href="https://github.com/ExpTechTW" class="icon brands circle fa-github"><span
+                        class="label">GitHub</span></a></li>
+            <li><a href="https://discord.gg/5dbHqV8ees" class="icon brands circle fa-discord"><span
+                        class="label">Discord</span></a></li>
+            <li><a href="https://www.instagram.com/exptech.tw/" class="icon brands circle fa-instagram"><span
+                        class="label">Instagram</span></a></li>
+        </ul>
+        <ul class="copyright">
+            <li>&copy; ExpTech.tw | 探索科技</li>
+        </ul>
+    </footer> -->
+
+    <audio id="warning-update-player">
+        <source src="./audio/main/update.wav" type="audio/wav">
+    </audio>
+
+    <script>
+        window.onbeforeunload = function () {
+            window.scrollTo(0, 0)
+        }
+    </script>
+
+    <!-- <button class="btn-pop" onclick="show()">彈出一個視窗</button>
+    <div id="background-pop">
+        <div id="div-pop">
+            <div class="div-top">
+                <span id="close-button">X</span>
+                <div>彈窗頂部(可以寫個標題)</div>
+            </div>
+            <div class="div-content">
+                放點內容進來<br>
+                點擊灰色位置和右上角x關閉彈窗
+            </div>
+            <div class="div-footer">
+                頁尾
+            </div>
+        </div>
+    </div>
+    <style>
+        .btn-pop {
+            background-color: #ffd475;
+            border-radius: 10px;
+            border: 0px;
+            zoom: 50%;
+
+        }
+
+        #background-pop {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        #div-pop {
+            background: #ffffff;
+            width: 30%;
+            z-index: 1;
+            margin: 12% auto;
+            overflow: auto;
+            border-radius: 10px;
+            z-index: 3;
+        }
+
+        .div-top {
+            width: 100%;
+            height: auto;
+            background-color: #28a3e7;
+            color: #ffffff;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            z-index: 1;
+        }
+
+        .div-top div {
+            padding: 3px 5px 5px 8px;
+        }
+
+        span {
+            color: white;
+            margin-bottom: 10px;
+            margin-left: 20px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .div-content {
+            width: auto;
+            height: 200px;
+            overflow: auto;
+        }
+
+        .div-footer {
+            text-align: center;
+            background-color: darkgray;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            z-index: 2;
+        }
+    </style>
+    <script>
+        var div = document.getElementById('background-pop');
+        var close = document.getElementById('close-button');
+        function show() {
+            div.style.display = "block";
+        }
+        close.onclick = function close() {
+            div.style.display = "none";
+        }
+        window.onclick = function close(e) {
+            if (e.target == div) {
+                div.style.display = "none";
+
+            }
+        }
+    </script> -->
+    
+    <script src="./js/main/jquery.min.js"></script>
+    <script src="./js/main/jquery.dropotron.min.js"></script>
+    <script src="./js/main/jquery.scrolly.min.js"></script>
+    <script src="./js/main/jquery.scrollex.min.js"></script>
+    <script src="./js/main/browser.min.js"></script>
+    <script src="./js/main/breakpoints.min.js"></script>
+    <script src="./js/main/util.js"></script>
+    <script src="./js/main/main.js"></script>
+</body>
+
+</html>
