@@ -1,6 +1,5 @@
 let Lat = 25.0421407
 let Long = 121.5198716
-let audio = null
 let audioList = []
 let audioLock = false
 let isPlay = false
@@ -43,83 +42,85 @@ if ("WebSocket" in window) {
         if (json.Function == "report") {
             main(json)
         } else if (json.Function == "earthquake") {
-            if (audio == true) {
-                audioPlay("./audio/main/1/alert.wav")
-                let point = Math.sqrt(Math.pow(Math.abs(Lat + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(Long + (Number(json.EastLongitude) * -1)) * 101, 2))
-                let distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2))
-                let value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
+            audioPlay("./audio/main/1/alert.wav")
+            let point = Math.sqrt(Math.pow(Math.abs(Lat + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(Long + (Number(json.EastLongitude) * -1)) * 101, 2))
+            let distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2))
+            let value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
 
-                let level = "0"
-                let PGA = (1.657 * Math.pow(Math.E, (1.533 * json.Scale)) * Math.pow(distance, -1.607)).toFixed(3)
-                if (PGA >= 800) {
-                    level = "7"
-                } else if (800 >= PGA && 440 < PGA) {
-                    level = "6+"
-                } else if (440 >= PGA && 250 < PGA) {
-                    level = "6-"
-                } else if (250 >= PGA && 140 < PGA) {
-                    level = "5+"
-                } else if (140 >= PGA && 80 < PGA) {
-                    level = "5-"
-                } else if (80 >= PGA && 25 < PGA) {
-                    level = "4"
-                } else if (25 >= PGA && 8 < PGA) {
-                    level = "3"
-                } else if (8 >= PGA && 2.5 < PGA) {
-                    level = "2"
-                } else if (2.5 >= PGA && 0.8 < PGA) {
-                    level = "1"
+            let level = "0"
+            let PGA = (1.657 * Math.pow(Math.E, (1.533 * json.Scale)) * Math.pow(distance, -1.607)).toFixed(3)
+            if (PGA >= 800) {
+                level = "7"
+            } else if (800 >= PGA && 440 < PGA) {
+                level = "6+"
+            } else if (440 >= PGA && 250 < PGA) {
+                level = "6-"
+            } else if (250 >= PGA && 140 < PGA) {
+                level = "5+"
+            } else if (140 >= PGA && 80 < PGA) {
+                level = "5-"
+            } else if (80 >= PGA && 25 < PGA) {
+                level = "4"
+            } else if (25 >= PGA && 8 < PGA) {
+                level = "3"
+            } else if (8 >= PGA && 2.5 < PGA) {
+                level = "2"
+            } else if (2.5 >= PGA && 0.8 < PGA) {
+                level = "1"
+            } else {
+                level = "0"
+            }
+            audioPlay(`./audio/main/1/${level.replace("+", "").replace("-", "")}.wav`)
+            if (level.includes("+")) {
+                audioPlay(`./audio/main/1/intensity-strong.wav`)
+            } else if (level.includes("-")) {
+                audioPlay(`./audio/main/1/intensity-weak.wav`)
+            } else {
+                audioPlay(`./audio/main/1/intensity.wav`)
+            }
+            if (value > 0) {
+                if (value <= 10) {
+                    audioPlay(`./audio/main/1/${value.toString()}.wav`)
+                } else if (value < 20) {
+                    audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
                 } else {
-                    level = "0"
+                    audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
+                    audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
                 }
-                audioPlay(`./audio/main/1/${level.replace("+", "").replace("-", "")}.wav`)
-                if (level.includes("+")) {
-                    audioPlay(`./audio/main/1/intensity-strong.wav`)
-                } else if (level.includes("-")) {
-                    audioPlay(`./audio/main/1/intensity-weak.wav`)
-                } else {
-                    audioPlay(`./audio/main/1/intensity.wav`)
-                }
-                if (value > 0) {
-                    if (value <= 10) {
-                        audioPlay(`./audio/main/1/${value.toString()}.wav`)
-                    } else if (value < 20) {
-                        audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
+                audioPlay(`./audio/main/1/second.wav`)
+            }
+            let time = -1
+            let Stamp = 0
+            let t = setInterval(async () => {
+                value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
+                if (Stamp != value) {
+                    Stamp = value
+                    if (time >= 0) {
+                        audioPlay(`./audio/main/1/ding.wav`)
+                        time++
+                        if (time >= 10) {
+                            clearInterval(t)
+                        }
                     } else {
-                        audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
-                        audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
-                    }
-                    audioPlay(`./audio/main/1/second.wav`)
-                }
-                let time = -1
-                let Stamp = 0
-                let t = setInterval(async () => {
-                    value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
-                    if (Stamp != value) {
-                        Stamp = value
-                        if (time >= 0) {
-                            audioPlay(`./audio/main/1/ding.wav`)
-                            time++
-                            if (time >= 10) {
-                                clearInterval(t)
-                            }
-                        } else {
-                            if (value > 10) {
-                                if (value.toString().substring(1, 2) == "0") {
-                                    audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
-                                    audioPlay(`./audio/main/1/x0.wav`)
-                                } else {
-                                    audioPlay(`./audio/main/1/ding.wav`)
-                                }
-                            } else if (value > 0) {
-                                audioPlay(`./audio/main/1/${value.toString()}.wav`)
+                        if (value > 10) {
+                            if (value.toString().substring(1, 2) == "0") {
+                                audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
+                                audioPlay(`./audio/main/1/x0.wav`)
                             } else {
-                                audioPlay(`./audio/main/1/arrive.wav`)
-                                time = 0
+                                audioPlay(`./audio/main/1/ding.wav`)
                             }
+                        } else if (value > 0) {
+                            audioPlay(`./audio/main/1/${value.toString()}.wav`)
+                        } else {
+                            audioPlay(`./audio/main/1/arrive.wav`)
+                            time = 0
                         }
                     }
-                }, 0)
+                }
+            }, 0)
+            if (ReportMarkID != null) {
+                map.removeLayer(ReportMark)
+                ReportMarkID = null
             }
             var myIcon = L.icon({
                 iconUrl: './image/main/cross.png',
@@ -197,7 +198,6 @@ async function audioPlay(src) {
             audioList.splice(audioList.indexOf(src), 1)
             var audioDOM = document.getElementById("warning-update-player")
             audioDOM.src = src
-            audioDOM.playbackRate = 2
             var promise = audioDOM.play()
             promise.then(resolve => {
                 audioDOM.addEventListener("ended", function () {
@@ -236,23 +236,6 @@ function add() {
     map.addLayer(marker)
     map.setView([Lat, Long], 7.5)
 }
-
-function playAudio() {
-    setTimeout(function () {
-        var audioDOM = document.getElementById("warning-update-player")
-        var promise = audioDOM.play()
-        promise.then(resolve => {
-            audio = true
-        }).catch(reject => {
-            if (audio == null) {
-                alert("當前為靜音模式 點擊任意位置取消靜音\nUUID >> " + UUID)
-                audio = false
-            }
-            playAudio()
-        })
-    }, 0)
-}
-playAudio()
 
 async function click(time) {
     // var roll = document.getElementById("rolllist")
