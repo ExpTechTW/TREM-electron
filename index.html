@@ -15,7 +15,7 @@
         crossorigin="" />
 </head>
 
-<body class="index is-preload" style="background-color: black;">
+<body class="index is-preload" style="background-color: black;overflow:hidden;">
     <article class="main" id="#main">
         <div class="map">
             <div id="map"></div>
@@ -35,10 +35,9 @@
     </article>
 
     <script>
-        var Main = document.getElementById("#main")
-        Main.style.width = document.documentElement.scrollWidth
-        window.onbeforeunload = function () {
-            window.scrollTo(0, 0)
+        window.onresize = function () {
+            var Main = document.getElementById("#main")
+            Main.style.width = document.documentElement.scrollWidth
         }
     </script>
 
