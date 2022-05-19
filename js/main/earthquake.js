@@ -8,7 +8,7 @@ let ReportCache = {}
 let ReportMark = null
 let ReportMarkID = null
 let UUID = uuid()
-let marker=null
+let marker = null
 
 let data = {
     "APIkey": "a5ef9cb2cf9b0c86b6ba71d0fc39e329",
@@ -231,7 +231,7 @@ navigator.geolocation.getCurrentPosition(function (position) {
 add()
 
 function add() {
-    if(marker!=null)  map.removeLayer(marker)
+    if (marker != null) map.removeLayer(marker)
     marker = L.marker([Lat, Long])
     map.addLayer(marker)
     map.setView([Lat, Long], 7.5)
@@ -259,6 +259,7 @@ async function click(time) {
     // roll.scrollTo(0,0)
     if (ReportMarkID == time) {
         map.removeLayer(ReportMark)
+        ReportMarkID = null
     } else {
         ReportMarkID = time
         if (ReportMark != null) map.removeLayer(ReportMark)
@@ -266,13 +267,14 @@ async function click(time) {
             iconUrl: './image/main/star.png',
             iconSize: [30, 30],
         })
-        map.setView([Number(ReportCache[time].NorthLatitude), Number(ReportCache[time].EastLongitude)], 7.5)
-        ReportMark = L.marker([Number(ReportCache[time].NorthLatitude), Number(ReportCache[time].EastLongitude)], { icon: myIcon }).addTo(map)
+        map.setView([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], 7.5)
+        ReportMark = L.marker([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], { icon: myIcon }).addTo(map)
     }
 }
 
 async function main(Data) {
-    for (let index = 0; index < Data["response"].length; index++) {
+    for (let index = 0; index < Data["response"]["data"].length; index++) {
+        let DATA = Data["response"]["data"][index]
         var roll = document.getElementById("rolllist")
         var Div = document.createElement("DIV")
         Div.style.height = "auto"
@@ -282,51 +284,51 @@ async function main(Data) {
             Div.innerHTML =
                 `<div class="background" style="display: flex; align-items:center; padding:2%;">
                 <div class="left" style="width:30%; text-align: center;">
-                    <font color="white" size="3">最大震度</font><br><b><font color="white" size="7">${Data["response"][index]["Max"]}</font></b>
+                    <font color="white" size="3">最大震度</font><br><b><font color="white" size="7">${DATA["data"][0]["areaIntensity"]}</font></b>
                 </div>
                 <div class="middle" style="width:60%;">
-                    <b><font color="white" size="4">${Data["response"][index]["Location"].substring(Data["response"][index]["Location"].indexOf("(") + 1, Data["response"][index]["Location"].indexOf(")")).replace("位於", "")}</font></b>
-                    <br><font color="white" size="2">${Data["response"][index]["UTC+8"]}</font>
-                    <br><b><font color="white" size="5">M${Data["response"][index]["Scale"]} </font></b><font color="white" size="2"> 深度: </font><b><font color="white" size="4">${Data["response"][index]["Depth"]}km</font></b>
+                    <b><font color="white" size="4">${DATA["location"].substring(DATA["location"].indexOf("(") + 1, DATA["location"].indexOf(")")).replace("位於", "")}</font></b>
+                    <br><font color="white" size="2">${DATA["originTime"]}</font>
+                    <br><b><font color="white" size="6">M${DATA["magnitudeValue"]} </font></b><br><font color="white" size="2"> 深度: </font><b><font color="white" size="4">${DATA["depth"]}km</font></b>
                 </div>
             </div>`
         } else {
             Div.innerHTML =
                 `<div class="background" style="display: flex; align-items:center;">
                 <div class="left" style="width:20%; text-align: center;">
-                    <b><font color="white" size="6">${Data["response"][index]["Max"]}</font></b>
+                    <b><font color="white" size="6">${DATA["data"][0]["areaIntensity"]}</font></b>
                 </div>
                 <div class="middle" style="width:60%;">
-                    <b><font color="white" size="3">${Data["response"][index]["Location"].substring(Data["response"][index]["Location"].indexOf("(") + 1, Data["response"][index]["Location"].indexOf(")")).replace("位於", "")}</font></b>
-                    <br><font color="white" size="2">${Data["response"][index]["UTC+8"]}</font>
+                    <b><font color="white" size="3">${DATA["location"].substring(DATA["location"].indexOf("(") + 1, DATA["location"].indexOf(")")).replace("位於", "")}</font></b>
+                    <br><font color="white" size="2">${DATA["originTime"]}</font>
                 </div>
                 <div class="right">
-                <b><font color="white" size="5">M${Data["response"][index]["Scale"]}</font></b>
+                <b><font color="white" size="5">M${DATA["magnitudeValue"]}</font></b>
                 </div>
             </div>`
         }
-        if (Data["response"][index]["Max"] == 1) {
+        if (DATA["data"][0]["areaIntensity"] == 1) {
             Div.style.backgroundColor = "gray"
-        } else if (Data["response"][index]["Max"] == 2) {
+        } else if (DATA["data"][0]["areaIntensity"] == 2) {
             Div.style.backgroundColor = "#0072E3"
-        } else if (Data["response"][index]["Max"] == 3) {
+        } else if (DATA["data"][0]["areaIntensity"] == 3) {
             Div.style.backgroundColor = "#00DB00"
-        } else if (Data["response"][index]["Max"] == 4) {
+        } else if (DATA["data"][0]["areaIntensity"] == 4) {
             Div.style.backgroundColor = "#EAC100"
-        } else if (Data["response"][index]["Max"] == 5) {
+        } else if (DATA["data"][0]["areaIntensity"] == 5) {
             Div.style.backgroundColor = "#FFA042"
-        } else if (Data["response"][index]["Max"] == 5) {
+        } else if (DATA["data"][0]["areaIntensity"] == 5) {
             Div.style.backgroundColor = "#D94600"
-        } else if (Data["response"][index]["Max"] == 6) {
+        } else if (DATA["data"][0]["areaIntensity"] == 6) {
             Div.style.backgroundColor = "#EA0000"
-        } else if (Data["response"][index]["Max"] == 6) {
+        } else if (DATA["data"][0]["areaIntensity"] == 6) {
             Div.style.backgroundColor = "#AE0000"
-        } else if (Data["response"][index]["Max"] == 7) {
+        } else if (DATA["data"][0]["areaIntensity"] == 7) {
             Div.style.backgroundColor = "#930093"
         }
         Div.addEventListener("click", function () {
-            ReportCache[Data["response"][index]["Time"]] = Data["response"][index]
-            click(Data["response"][index]["Time"])
+            ReportCache[DATA["originTime"]] = Data["response"]["data"][index]
+            click(DATA["originTime"])
         })
         roll.appendChild(Div)
     }
