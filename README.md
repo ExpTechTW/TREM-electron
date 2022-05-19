@@ -1,17 +1,26 @@
-# 模板
+# TREM
 <img alt="Discord" src="https://img.shields.io/discord/926545182407688273">
 
 ------
 
-- 這是一個 ExpTech Github 模板
+- Taiwan Real-time Earthquake Monitoring ( 台灣實時地震監測 )
 
 ## 索引
+- [文檔](#文檔)
+- [設備](#設備)
 - [貢獻者](#貢獻者)
 - [發佈規則](#發佈規則)
 - [合作](#合作)
 
+## 文檔
+- 
+
+## 設備
+- 
+
 ## 貢獻者
-- whes1015 `文檔`
+- whes1015 `程式開發` `文檔`
+- darian-YT `程式開發`
 
 ------
 
