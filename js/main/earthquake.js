@@ -5,6 +5,7 @@ let audioLock = false
 let ReportCache = {}
 let ReportMark = null
 let ReportMarkID = null
+let MarkList = []
 let UUID = uuid()
 let marker = null
 let map
@@ -46,7 +47,7 @@ if ("WebSocket" in window) {
             "Function": "earthquakeService",
             "Type": "subscription",
             "FormatVersion": 1,
-            "UUID": UUID
+            "UUID": "UUID"
         }))
         console.log("UUID >> " + UUID)
     }
@@ -205,21 +206,23 @@ function Loc() {
 //#region 音頻播放
 async function audioPlay(src) {
     audioList.push(src)
-    if (audioLock == false) {
-        audioLock = true
-        let T = setInterval(async () => {
+
+    let T = setInterval(async () => {
+        if (audioLock == false) {
+            audioLock = true
             if (audioList.length != 0) {
+                console.log(audioList[0])
                 Audio(audioList[0])
             } else {
                 clearInterval(T)
             }
-        }, 0)
-    }
+        }
+    }, 0)
 
     function Audio(src) {
         audioLock = true
         audioList.splice(audioList.indexOf(src), 1)
-        var audioDOM = document.getElementById("warning-update-player")
+        var audioDOM = document.getElementById("audio-player")
         audioDOM.src = src
         var promise = audioDOM.play()
         promise.then(resolve => {
@@ -239,7 +242,8 @@ function ReportGET() {
         "APIkey": "https://github.com/ExpTechTW",
         "Function": "data",
         "Type": "earthquake",
-        "FormatVersion": 1
+        "FormatVersion": 1,
+        "Value": 1000
     }
 
     axios.post('http://150.117.110.118:10150', data)
@@ -257,36 +261,91 @@ async function ReportClick(time) {
     if (ReportMarkID == time) {
         map.removeLayer(ReportMark)
         ReportMarkID = null
+        for (let index = 0; index < MarkList.length; index++) {
+            map.removeLayer(MarkList[index])
+        }
     } else {
         ReportMarkID = time
         if (ReportMark != null) map.removeLayer(ReportMark)
+        for (let index = 0; index < MarkList.length; index++) {
+            map.removeLayer(MarkList[index])
+        }
+        for (let Index = 0; Index < ReportCache[time].data.length; Index++) {
+            for (let index = 0; index < ReportCache[time].data[Index]["eqStation"].length; index++) {
+                let data = ReportCache[time].data[Index]["eqStation"][index]
+                var myIcon = L.icon({
+                    iconUrl: `./image/main/${data["stationIntensity"]}.png`,
+                    iconSize: [10, 10],
+                })
+                ReportMark = L.marker([Number(data["stationLat"]), Number(data["stationLon"])], { icon: myIcon })
+                let Level = ""
+                if (data["stationIntensity"] == 5) {
+                    Level = "5-"
+                } else if (data["stationIntensity"] == 6) {
+                    Level = "5+"
+                } else if (data["stationIntensity"] == 7) {
+                    Level = "6-"
+                } else if (data["stationIntensity"] == 8) {
+                    Level = "6+"
+                } else if (data["stationIntensity"] == 9) {
+                    Level = "7"
+                } else {
+                    Level = data["stationIntensity"] ?? "?"
+                }
+                ReportMark.bindPopup(`站名: ${ReportCache[time].data[Index]["areaName"]} ${data["stationName"]}<br>經度: ${data["stationLon"]}<br>緯度: ${data["stationLat"]}<br>震度: ${Level}`).openPopup()
+                map.addLayer(ReportMark)
+                MarkList.push(ReportMark)
+            }
+        }
+        map.setView([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], 7.5)
         var myIcon = L.icon({
             iconUrl: './image/main/star.png',
             iconSize: [30, 30],
         })
-        map.setView([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], 7.5)
-        ReportMark = L.marker([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], { icon: myIcon }).addTo(map)
+        ReportMark = L.marker([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], { icon: myIcon })
+        ReportMark.bindPopup(`編號: ${ReportCache[time]["earthquakeNo"]}<br>經度: ${ReportCache[time]["epicenterLon"]}<br>緯度: ${ReportCache[time]["epicenterLat"]}<br>深度: ${ReportCache[time]["depth"]}<br>規模: ${ReportCache[time]["magnitudeValue"]}<br>位置: ${ReportCache[time]["location"]}<br>時間: ${ReportCache[time]["originTime"]}`).openPopup()
+        map.addLayer(ReportMark)
     }
 }
 //#endregion
 
 //#region Report list
 async function ReportList(Data) {
-    for (let index = 0; index < Data["response"]["data"].length; index++) {
-        let DATA = Data["response"]["data"][index]
+    for (let index = 0; index < Data["response"].length; index++) {
+        let DATA = Data["response"][index]
         var roll = document.getElementById("rolllist")
         var Div = document.createElement("DIV")
         Div.style.height = "auto"
         Div.style.overflow = "hidden"
         Div.style.paddingRight = "3%"
+        let Level = ""
+        if (DATA["data"][0]["areaIntensity"] == 5) {
+            Level = "5-"
+        } else if (DATA["data"][0]["areaIntensity"] == 6) {
+            Level = "5+"
+        } else if (DATA["data"][0]["areaIntensity"] == 7) {
+            Level = "6-"
+        } else if (DATA["data"][0]["areaIntensity"] == 8) {
+            Level = "6+"
+        } else if (DATA["data"][0]["areaIntensity"] == 9) {
+            Level = "7"
+        } else {
+            Level = DATA["data"][0]["areaIntensity"] ?? "?"
+        }
+        let msg = ""
+        if (DATA["location"].includes("(")) {
+            msg = DATA["location"].substring(DATA["location"].indexOf("(") + 1, DATA["location"].indexOf(")")).replace("位於", "")
+        } else {
+            msg = DATA["location"]
+        }
         if (index == 0) {
             Div.innerHTML =
                 `<div class="background" style="display: flex; align-items:center; padding:2%;">
                 <div class="left" style="width:30%; text-align: center;">
-                    <font color="white" size="3">最大震度</font><br><b><font color="white" size="7">${DATA["data"][0]["areaIntensity"]}</font></b>
+                    <font color="white" size="3">最大震度</font><br><b><font color="white" size="7">${Level}</font></b>
                 </div>
                 <div class="middle" style="width:60%;">
-                    <b><font color="white" size="4">${DATA["location"].substring(DATA["location"].indexOf("(") + 1, DATA["location"].indexOf(")")).replace("位於", "")}</font></b>
+                    <b><font color="white" size="4">${msg}</font></b>
                     <br><font color="white" size="2">${DATA["originTime"]}</font>
                     <br><b><font color="white" size="6">M${DATA["magnitudeValue"]} </font></b><br><font color="white" size="2"> 深度: </font><b><font color="white" size="4">${DATA["depth"]}km</font></b>
                 </div>
@@ -295,10 +354,10 @@ async function ReportList(Data) {
             Div.innerHTML =
                 `<div class="background" style="display: flex; align-items:center;">
                 <div class="left" style="width:20%; text-align: center;">
-                    <b><font color="white" size="6">${DATA["data"][0]["areaIntensity"]}</font></b>
+                    <b><font color="white" size="6">${Level}</font></b>
                 </div>
                 <div class="middle" style="width:60%;">
-                    <b><font color="white" size="3">${DATA["location"].substring(DATA["location"].indexOf("(") + 1, DATA["location"].indexOf(")")).replace("位於", "")}</font></b>
+                    <b><font color="white" size="3">${msg}</font></b>
                     <br><font color="white" size="2">${DATA["originTime"]}</font>
                 </div>
                 <div class="right">
@@ -309,24 +368,24 @@ async function ReportList(Data) {
         if (DATA["data"][0]["areaIntensity"] == 1) {
             Div.style.backgroundColor = "gray"
         } else if (DATA["data"][0]["areaIntensity"] == 2) {
-            Div.style.backgroundColor = "#0072E3"
+            Div.style.backgroundColor = "#0066CC"
         } else if (DATA["data"][0]["areaIntensity"] == 3) {
-            Div.style.backgroundColor = "#00DB00"
+            Div.style.backgroundColor = "#00BB00"
         } else if (DATA["data"][0]["areaIntensity"] == 4) {
             Div.style.backgroundColor = "#EAC100"
         } else if (DATA["data"][0]["areaIntensity"] == 5) {
-            Div.style.backgroundColor = "#FFA042"
-        } else if (DATA["data"][0]["areaIntensity"] == 5) {
+            Div.style.backgroundColor = "#EA7500"
+        } else if (DATA["data"][0]["areaIntensity"] == 6) {
             Div.style.backgroundColor = "#D94600"
-        } else if (DATA["data"][0]["areaIntensity"] == 6) {
-            Div.style.backgroundColor = "#EA0000"
-        } else if (DATA["data"][0]["areaIntensity"] == 6) {
-            Div.style.backgroundColor = "#AE0000"
         } else if (DATA["data"][0]["areaIntensity"] == 7) {
+            Div.style.backgroundColor = "#A23400"
+        } else if (DATA["data"][0]["areaIntensity"] == 8) {
+            Div.style.backgroundColor = "#984B4B"
+        } else if (DATA["data"][0]["areaIntensity"] == 9) {
             Div.style.backgroundColor = "#930093"
         }
         Div.addEventListener("click", function () {
-            ReportCache[DATA["originTime"]] = Data["response"]["data"][index]
+            ReportCache[DATA["originTime"]] = Data["response"][index]
             ReportClick(DATA["originTime"])
         })
         roll.appendChild(Div)
