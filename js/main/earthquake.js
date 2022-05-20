@@ -6,6 +6,8 @@ let ReportCache = {}
 let ReportMark = null
 let ReportMarkID = null
 let MarkList = []
+let EarthquakeList = {}
+let Break = false
 let UUID = uuid()
 let marker = null
 let map
@@ -47,7 +49,7 @@ if ("WebSocket" in window) {
             "Function": "earthquakeService",
             "Type": "subscription",
             "FormatVersion": 1,
-            "UUID": "UUID"
+            "UUID": UUID
         }))
         console.log("UUID >> " + UUID)
     }
@@ -57,134 +59,156 @@ if ("WebSocket" in window) {
         if (json.Function == "report") {
             ReportGET()
         } else if (json.Function == "earthquake") {
-            audioPlay("./audio/main/1/alert.wav")
-            let point = Math.sqrt(Math.pow(Math.abs(Lat + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(Long + (Number(json.EastLongitude) * -1)) * 101, 2))
-            let distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2))
-            let value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
+            if (audioList.length != 0) {
+                Break = true
+                let t = setInterval(() => {
+                    if (Break == false) {
+                        clearInterval(t)
+                        handler()
+                    }
+                }, 100);
+            } else {
+                handler()
+            }
+            async function handler() {
+                audioPlay("./audio/main/1/alert.wav")
+                let point = Math.sqrt(Math.pow(Math.abs(Lat + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(Long + (Number(json.EastLongitude) * -1)) * 101, 2))
+                let distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2))
+                let value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
 
-            let level = "0"
-            let PGA = (1.657 * Math.pow(Math.E, (1.533 * json.Scale)) * Math.pow(distance, -1.607)).toFixed(3)
-            if (PGA >= 800) {
-                level = "7"
-            } else if (800 >= PGA && 440 < PGA) {
-                level = "6+"
-            } else if (440 >= PGA && 250 < PGA) {
-                level = "6-"
-            } else if (250 >= PGA && 140 < PGA) {
-                level = "5+"
-            } else if (140 >= PGA && 80 < PGA) {
-                level = "5-"
-            } else if (80 >= PGA && 25 < PGA) {
-                level = "4"
-            } else if (25 >= PGA && 8 < PGA) {
-                level = "3"
-            } else if (8 >= PGA && 2.5 < PGA) {
-                level = "2"
-            } else if (2.5 >= PGA && 0.8 < PGA) {
-                level = "1"
-            } else {
-                level = "0"
-            }
-            audioPlay(`./audio/main/1/${level.replace("+", "").replace("-", "")}.wav`)
-            if (level.includes("+")) {
-                audioPlay(`./audio/main/1/intensity-strong.wav`)
-            } else if (level.includes("-")) {
-                audioPlay(`./audio/main/1/intensity-weak.wav`)
-            } else {
-                audioPlay(`./audio/main/1/intensity.wav`)
-            }
-            if (value > 0) {
-                if (value <= 10) {
-                    audioPlay(`./audio/main/1/${value.toString()}.wav`)
-                } else if (value < 20) {
-                    audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
+                let level = "0"
+                let PGA = (1.657 * Math.pow(Math.E, (1.533 * json.Scale)) * Math.pow(distance, -1.607)).toFixed(3)
+                if (PGA >= 800) {
+                    level = "7"
+                } else if (800 >= PGA && 440 < PGA) {
+                    level = "6+"
+                } else if (440 >= PGA && 250 < PGA) {
+                    level = "6-"
+                } else if (250 >= PGA && 140 < PGA) {
+                    level = "5+"
+                } else if (140 >= PGA && 80 < PGA) {
+                    level = "5-"
+                } else if (80 >= PGA && 25 < PGA) {
+                    level = "4"
+                } else if (25 >= PGA && 8 < PGA) {
+                    level = "3"
+                } else if (8 >= PGA && 2.5 < PGA) {
+                    level = "2"
+                } else if (2.5 >= PGA && 0.8 < PGA) {
+                    level = "1"
                 } else {
-                    audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
-                    audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
+                    level = "0"
                 }
-                audioPlay(`./audio/main/1/second.wav`)
-            }
-            let time = -1
-            let Stamp = 0
-            let t = setInterval(async () => {
-                value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
-                if (Stamp != value) {
-                    Stamp = value
-                    if (time >= 0) {
-                        audioPlay(`./audio/main/1/ding.wav`)
-                        time++
-                        if (time >= 10) {
-                            clearInterval(t)
-                        }
+                audioPlay(`./audio/main/1/${level.replace("+", "").replace("-", "")}.wav`)
+                if (level.includes("+")) {
+                    audioPlay(`./audio/main/1/intensity-strong.wav`)
+                } else if (level.includes("-")) {
+                    audioPlay(`./audio/main/1/intensity-weak.wav`)
+                } else {
+                    audioPlay(`./audio/main/1/intensity.wav`)
+                }
+                if (value > 0) {
+                    if (value <= 10) {
+                        audioPlay(`./audio/main/1/${value.toString()}.wav`)
+                    } else if (value < 20) {
+                        audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
                     } else {
-                        if (value > 10) {
-                            if (value.toString().substring(1, 2) == "0") {
-                                audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
-                                audioPlay(`./audio/main/1/x0.wav`)
-                            } else {
-                                audioPlay(`./audio/main/1/ding.wav`)
+                        audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
+                        audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
+                    }
+                    audioPlay(`./audio/main/1/second.wav`)
+                }
+                let time = -1
+                let Stamp = 0
+                let t = setInterval(async () => {
+                    if (Break == true) {
+                        Break = false
+                        audioList = []
+                        clearInterval(t)
+                    }
+                    value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
+                    if (Stamp != value) {
+                        Stamp = value
+                        if (time >= 0) {
+                            audioPlay(`./audio/main/1/ding.wav`)
+                            time++
+                            if (time >= 10) {
+                                clearInterval(t)
                             }
-                        } else if (value > 0) {
-                            audioPlay(`./audio/main/1/${value.toString()}.wav`)
                         } else {
-                            audioPlay(`./audio/main/1/arrive.wav`)
-                            time = 0
+                            if (value > 10) {
+                                if (value.toString().substring(1, 2) == "0") {
+                                    audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
+                                    audioPlay(`./audio/main/1/x0.wav`)
+                                } else {
+                                    audioPlay(`./audio/main/1/ding.wav`)
+                                }
+                            } else if (value > 0) {
+                                audioPlay(`./audio/main/1/${value.toString()}.wav`)
+                            } else {
+                                audioPlay(`./audio/main/1/arrive.wav`)
+                                time = 0
+                            }
                         }
                     }
+                }, 0)
+                if (ReportMarkID != null) {
+                    map.removeLayer(ReportMark)
+                    ReportMarkID = null
                 }
-            }, 0)
-            if (ReportMarkID != null) {
-                map.removeLayer(ReportMark)
-                ReportMarkID = null
+                var myIcon = L.icon({
+                    iconUrl: './image/main/cross.png',
+                    iconSize: [30, 30],
+                })
+                let Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon })
+                Cross.bindPopup(`經度: ${json["EastLongitude"]}<br>緯度: ${json["NorthLatitude"]}<br>深度: ${json["Depth"]}<br>規模: ${json["Scale"]}<br>時間: ${json["UTC+8"] ?? "測試模式"}`).openPopup()
+                EarthquakeList[json.Time] = Cross
+                map.addLayer(Cross)
+                map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 7.5)
+                var Pcircle = null
+                var Scircle = null
+                let Loom = 0
+                let Timer = setInterval(async () => {
+                    let T = json.Time
+                    if (Pcircle != null) map.removeLayer(Pcircle)
+                    Pcircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
+                        color: '#6FB7B7',
+                        fillColor: 'transparent',
+                        radius: Math.sqrt(Math.pow((new Date().getTime() - json.Time) * 6.5, 2) - Math.pow(Number(json.Depth) * 1000, 2))
+                    })
+                    map.addLayer(Pcircle)
+                    if (Scircle != null) map.removeLayer(Scircle)
+                    Scircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
+                        color: 'red',
+                        fillColor: '#F8E7E7',
+                        fillOpacity: 0.1,
+                        radius: Math.sqrt(Math.pow((new Date().getTime() - json.Time) * 3.5, 2) - Math.pow(Number(json.Depth) * 1000, 2))
+                    })
+                    map.addLayer(Scircle)
+                    if (new Date().getTime() - json.Time > 180000) {
+                        map.removeLayer(Scircle)
+                        map.removeLayer(Pcircle)
+                        map.removeLayer(EarthquakeList[T])
+                        clearInterval(Timer)
+                        map.setView([Lat, Long], 7.5)
+                    }
+                    if ((new Date().getTime() - json.Time) * 6.5 > 150000 && Loom < 150000) {
+                        Loom = 150000
+                        map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 7)
+                    } else if ((new Date().getTime() - json.Time) * 6.5 > 250000 && Loom < 250000) {
+                        Loom = 250000
+                        map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 6)
+                    } else if ((new Date().getTime() - json.Time) * 6.5 > 500000 && Loom < 500000) {
+                        Loom = 500000
+                        map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 5)
+                    } else if ((new Date().getTime() - json.Time) * 6.5 > 1000000 && Loom < 1000000) {
+                        Loom = 1000000
+                        map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 4)
+                    }
+                }, 100)
             }
-            var myIcon = L.icon({
-                iconUrl: './image/main/cross.png',
-                iconSize: [30, 30],
-            })
-            L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon }).addTo(map)
-            map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 7.5)
-            var Pcircle = null
-            var Scircle = null
-            let Loom = 0
-            let Timer = setInterval(async () => {
-                if (Pcircle != null) map.removeLayer(Pcircle)
-                Pcircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
-                    color: '#6FB7B7',
-                    fillColor: 'transparent',
-                    radius: Math.sqrt(Math.pow((new Date().getTime() - json.Time) * 6.5, 2) - Math.pow(Number(json.Depth) * 1000, 2))
-                })
-                map.addLayer(Pcircle)
-                if (Scircle != null) map.removeLayer(Scircle)
-                Scircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
-                    color: 'red',
-                    fillColor: '#F8E7E7',
-                    fillOpacity: 0.1,
-                    radius: Math.sqrt(Math.pow((new Date().getTime() - json.Time) * 3.5, 2) - Math.pow(Number(json.Depth) * 1000, 2))
-                })
-                map.addLayer(Scircle)
-                if (new Date().getTime() - json.Time > 180000) {
-                    map.removeLayer(Scircle)
-                    map.removeLayer(Pcircle)
-                    clearInterval(Timer)
-                    map.setView([Lat, Long], 7.5)
-                }
-                if ((new Date().getTime() - json.Time) * 6.5 > 150000 && Loom < 150000) {
-                    Loom = 150000
-                    map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 7)
-                } else if ((new Date().getTime() - json.Time) * 6.5 > 250000 && Loom < 250000) {
-                    Loom = 250000
-                    map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 6)
-                } else if ((new Date().getTime() - json.Time) * 6.5 > 500000 && Loom < 500000) {
-                    Loom = 500000
-                    map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 5)
-                } else if ((new Date().getTime() - json.Time) * 6.5 > 1000000 && Loom < 1000000) {
-                    Loom = 1000000
-                    map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 4)
-                }
-            }, 100)
         }
     }
-
     ws.onclose = function () {
         ws = new WebSocket("ws://150.117.110.118:910")
         alert("已重新連接至伺服器")
@@ -211,9 +235,9 @@ async function audioPlay(src) {
         if (audioLock == false) {
             audioLock = true
             if (audioList.length != 0) {
-                console.log(audioList[0])
                 Audio(audioList[0])
             } else {
+                audioLock = false
                 clearInterval(T)
             }
         }
@@ -230,7 +254,6 @@ async function audioPlay(src) {
                 audioLock = false
             })
         }).catch(reject => {
-
         })
     }
 }
@@ -243,7 +266,7 @@ function ReportGET() {
         "Function": "data",
         "Type": "earthquake",
         "FormatVersion": 1,
-        "Value": 1000
+        "Value": 100
     }
 
     axios.post('http://150.117.110.118:10150', data)
