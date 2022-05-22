@@ -21,6 +21,11 @@ let EEW = false
 //#region 初始化
 init()
 function init() {
+    var roll = document.getElementById("rolllist")
+    roll.style.height = window.innerHeight
+    var MAP = document.getElementById("map")
+    MAP.style.height = window.innerHeight
+
     map = L.map('map', {
         attributionControl: false,
         closePopupOnClick: false
@@ -33,11 +38,26 @@ function init() {
         zoomOffset: -1
     }).addTo(map)
 
-    navigator.geolocation.getCurrentPosition(function (position) {
-        Lat = Number(position.coords.latitude)
-        Long = Number(position.coords.longitude)
+    
+    var options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+    };
+    
+    function success(pos) {
+        var crd = pos.coords;
+        Lat = Number(crd.latitude)
+        Long = Number(crd.longitude)
         Loc()
-    })
+        console.log(`誤差 ${crd.accuracy} 公尺`);
+    }
+    
+    function error(err) {
+        console.warn(`ERROR(${err.code}): ${err.message}`);
+    }
+    
+    navigator.geolocation.getCurrentPosition(success, error, options);
 
     Loc()
 
@@ -61,7 +81,7 @@ function init() {
                             "FormatVersion": 1,
                         }
 
-                        axios.post('http://150.117.110.118:10150', data)
+                        axios.post('https://exptech.mywire.org:1015', data)
                             .then(function (response) {
                                 let Json = response.data["response"]
                                 pga = {}
@@ -179,7 +199,7 @@ function init() {
 if ("WebSocket" in window) {
     webSocket()
     async function webSocket() {
-        var ws = new WebSocket("ws://150.117.110.118:910")
+        var ws = new WebSocket("wss://exptech.mywire.org:1015")
 
         ws.onopen = async function () {
             ws.send(JSON.stringify({
@@ -187,7 +207,7 @@ if ("WebSocket" in window) {
                 "Function": "earthquakeService",
                 "Type": "subscription",
                 "FormatVersion": 1,
-                "UUID": UUID
+                "UUID": "UUID"
             }))
             console.log("UUID >> " + UUID)
         }
@@ -337,18 +357,9 @@ if ("WebSocket" in window) {
                             clearInterval(Timer)
                             map.setView([Lat, Long], 7.5)
                         }
-                        if ((new Date().getTime() - json.Time) * 6.5 > 150000 && Loom < 150000) {
-                            Loom = 150000
-                            map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 7)
-                        } else if ((new Date().getTime() - json.Time) * 6.5 > 250000 && Loom < 250000) {
+                        if ((new Date().getTime() - json.Time) * 6.5 > 250000 && Loom < 250000) {
                             Loom = 250000
-                            map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 6)
-                        } else if ((new Date().getTime() - json.Time) * 6.5 > 500000 && Loom < 500000) {
-                            Loom = 500000
-                            map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 5)
-                        } else if ((new Date().getTime() - json.Time) * 6.5 > 1000000 && Loom < 1000000) {
-                            Loom = 1000000
-                            map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 4)
+                            map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 7)
                         }
                     }, 100)
                 }
@@ -377,6 +388,17 @@ function Loc() {
     if (marker != null) map.removeLayer(marker)
     marker = L.marker([Lat, Long])
     map.addLayer(marker)
+    map.setView([Lat, Long], 7.5)
+}
+//#endregion
+
+//#region 視窗大小刷新
+window.onresize = function () {
+    map.invalidateSize()
+    var roll = document.getElementById("rolllist")
+    roll.style.height = window.innerHeight
+    var MAP = document.getElementById("map")
+    MAP.style.height = window.innerHeight
     map.setView([Lat, Long], 7.5)
 }
 //#endregion
@@ -423,7 +445,7 @@ function ReportGET() {
         "Value": 100
     }
 
-    axios.post('http://150.117.110.118:10150', data)
+    axios.post('https://exptech.mywire.org:1015', data)
         .then(function (response) {
             ReportList(response.data)
         })
@@ -518,7 +540,7 @@ async function ReportList(Data) {
         }
         if (index == 0) {
             Div.innerHTML =
-                `<div class="background" style="display: flex; align-items:center; padding:2%;">
+                `<div class="background" style="display: flex; align-items:center; padding:2%;padding-right: 1vh;">
                 <div class="left" style="width:30%; text-align: center;">
                     <font color="white" size="3">最大震度</font><br><b><font color="white" size="7">${Level}</font></b>
                 </div>
@@ -530,7 +552,7 @@ async function ReportList(Data) {
             </div>`
         } else {
             Div.innerHTML =
-                `<div class="background" style="display: flex; align-items:center;">
+                `<div class="background" style="display: flex; align-items:center;padding-right: 1vh;">
                 <div class="left" style="width:20%; text-align: center;">
                     <b><font color="white" size="6">${Level}</font></b>
                 </div>
