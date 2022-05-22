@@ -16,12 +16,21 @@
 </head>
 
 <body class="index is-preload" style="background-color: black;overflow:hidden;">
-    <article class="main" id="#main">
+    <article class="main" id="#main" style="display: flex;">
         <div class="map">
             <div id="map"></div>
         </div>
 
-        <div class="roll" id="rolllist" style="overflow-y:auto;"></div>
+        <div class="info" id="Info">
+            <div class="roll" id="rolllist" style="overflow-y:auto;height: 92%;"></div>
+            <div class="eew" id="EEW" style="overflow-y:auto;height: 0%;"></div>
+
+            <div>
+                <button type="button" id="button" onclick="setting()" style="height:8%; ">
+                    <font color="white" size="4">設定</font>
+                </button>
+            </div>
+        </div>
     </article>
 
     <audio id="audio-player">

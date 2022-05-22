@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "台灣即時地震監測",
   "main": "main.js",
   "scripts": {
@@ -25,10 +25,7 @@
       ]
     },
     "win": {
-      "target": [
-        "nsis",
-        "msi"
-      ],
+      "target": [],
       "icon": "TREM.ico"
     },
     "linux": {

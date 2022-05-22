@@ -2991,39 +2991,12 @@ ul.pages li a:hover:not(.active) {
 	background-color: blue;
 }
 
-.weather {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding-top: 5%;
-	padding-bottom: 5%;
-}
-
 .map {
 	float: left;
 	width: 80%;
 }
 
-.roll{
-	scrollbar-width:0px;
-}
-
-html {
-	overflow: -moz-hidden-unscrollable;
-	height: 100%;
-}
-
-body::-webkit-scrollbar {
+::-webkit-scrollbar {
+	/*隱藏滾輪*/
 	display: none;
-}
-
-body {
-	-ms-overflow-style: none;
-	height: 100%;
-	width: calc(100vw + 18px);
-	overflow: auto;
-}
-
-.background {
-	z-index:1;
 }

@@ -3,7 +3,6 @@ let Long = 121.5198716
 let audioList = []
 let audioLock = false
 let ReportCache = {}
-let ReportMark = null
 let ReportMarkID = null
 let MarkList = []
 let EarthquakeList = {}
@@ -17,12 +16,13 @@ let pga = {}
 let PGAaudio = false
 let PGALock = 0
 let EEW = false
+let MAXPGA = { pga: 0, station: "NA", level: 0 }
 
 //#region 初始化
 init()
 function init() {
-    var roll = document.getElementById("rolllist")
-    roll.style.height = window.innerHeight
+    var info = document.getElementById("Info")
+    info.style.height = window.innerHeight
     var MAP = document.getElementById("map")
     MAP.style.height = window.innerHeight
 
@@ -38,13 +38,13 @@ function init() {
         zoomOffset: -1
     }).addTo(map)
 
-    
+
     var options = {
         enableHighAccuracy: true,
         timeout: 5000,
         maximumAge: 0
     };
-    
+
     function success(pos) {
         var crd = pos.coords;
         Lat = Number(crd.latitude)
@@ -52,11 +52,11 @@ function init() {
         Loc()
         console.log(`誤差 ${crd.accuracy} 公尺`);
     }
-    
+
     function error(err) {
         console.warn(`ERROR(${err.code}): ${err.message}`);
     }
-    
+
     navigator.geolocation.getCurrentPosition(success, error, options);
 
     Loc()
@@ -85,6 +85,7 @@ function init() {
                             .then(function (response) {
                                 let Json = response.data["response"]
                                 pga = {}
+                                MAXPGA = { pga: 0, station: "NA", level: 0 }
                                 for (let index = 0; index < Object.keys(Json).length; index++) {
                                     Sdata = Json[Object.keys(Json)[index]]
                                     let amount = 0;
@@ -92,7 +93,7 @@ function init() {
                                         if (Number(Sdata["MaxPGA"][Index]) > amount) amount = Number(Sdata["MaxPGA"][Index])
                                     }
                                     let Intensity = 0
-                                    if (new Date().getTime() - Sdata["TimeStamp"] > 1500) {
+                                    if (new Date().getTime() - Sdata["TimeStamp"] > 2000) {
                                         Intensity = "NA"
                                     } else if (amount >= 800) {
                                         Intensity = 9
@@ -140,11 +141,19 @@ function init() {
                                         ":" + now.getSeconds() +
                                         ":" + now.getMilliseconds()
                                     if (Station[Object.keys(Json)[index]] != undefined) map.removeLayer(Station[Object.keys(Json)[index]])
-                                    ReportMark.bindPopup(`站名: ${Object.keys(Json)[index]}<br>經度: ${station[Object.keys(Json)[index]]["Long"]}<br>緯度: ${station[Object.keys(Json)[index]]["Lat"]}<br>震度: ${Level}<br>MaxPGA: ${amount}<br>時間: ${Now}`)
+                                    ReportMark.bindPopup(`站名: ${Object.keys(Json)[index]}<br>位置: ${station[Object.keys(Json)[index]]["Loc"]}<br>經度: ${station[Object.keys(Json)[index]]["Long"]}<br>緯度: ${station[Object.keys(Json)[index]]["Lat"]}<br>震度: ${Level}<br>MaxPGA: ${amount}<br>時間: ${Now}`)
                                     map.addLayer(ReportMark)
                                     //ReportMark.openPopup()
                                     Station[Object.keys(Json)[index]] = ReportMark
                                     if ((pga[station[Object.keys(Json)[index]]["PGA"]] == undefined || pga[station[Object.keys(Json)[index]]["PGA"]] < amount) && Intensity != "NA") pga[station[Object.keys(Json)[index]]["PGA"]] = Intensity
+                                    if (MAXPGA["pga"] < amount) {
+                                        MAXPGA["pga"] = amount
+                                        MAXPGA["station"] = Object.keys(Json)[index]
+                                        MAXPGA["level"] = Level
+                                        MAXPGA["lat"] = station[Object.keys(Json)[index]]["Lat"]
+                                        MAXPGA["long"] = station[Object.keys(Json)[index]]["Long"]
+                                        MAXPGA["loc"] = station[Object.keys(Json)[index]]["Loc"]
+                                    }
                                 }
                                 for (let index = 0; index < Object.keys(PGA).length; index++) {
                                     map.removeLayer(PGA[Object.keys(PGA)[index]])
@@ -200,14 +209,13 @@ if ("WebSocket" in window) {
     webSocket()
     async function webSocket() {
         var ws = new WebSocket("wss://exptech.mywire.org:1015")
-
         ws.onopen = async function () {
             ws.send(JSON.stringify({
                 "APIkey": "https://github.com/ExpTechTW",
                 "Function": "earthquakeService",
                 "Type": "subscription",
                 "FormatVersion": 1,
-                "UUID": "UUID"
+                "UUID": UUID
             }))
             console.log("UUID >> " + UUID)
         }
@@ -230,6 +238,10 @@ if ("WebSocket" in window) {
                     handler()
                 }
                 async function handler() {
+                    var roll = document.getElementById("rolllist")
+                    roll.style.height = "0%"
+                    var eew = document.getElementById("EEW")
+                    eew.style.height = "92%"
                     EEW = true
                     audioPlay("./audio/main/1/alert.wav")
                     let point = Math.sqrt(Math.pow(Math.abs(Lat + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(Long + (Number(json.EastLongitude) * -1)) * 101, 2))
@@ -325,15 +337,76 @@ if ("WebSocket" in window) {
                         iconSize: [30, 30],
                     })
                     let Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon })
-                    Cross.bindPopup(`經度: ${json["EastLongitude"]}<br>緯度: ${json["NorthLatitude"]}<br>深度: ${json["Depth"]}<br>規模: ${json["Scale"]}<br>時間: ${json["UTC+8"] ?? "測試模式"}`)
                     EarthquakeList[json.Time] = Cross
                     map.addLayer(Cross)
-                    Cross.openPopup()
                     map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 7.5)
                     var Pcircle = null
                     var Scircle = null
                     let Loom = 0
                     let Timer = setInterval(async () => {
+                        var Div = document.createElement("DIV")
+                        let Pvalue = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 6.5) / 6.5)
+                        if (value <= 0) value = "抵達"
+                        if (Pvalue <= 0) Pvalue = "抵達"
+                        Div.innerHTML = `
+                        <div>
+                        <font color="white" size="5">EEW 強震即時警報</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">時間: ${json["UTC+8"] ?? "測試模式"}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">經度: ${json["EastLongitude"]}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">緯度: ${json["NorthLatitude"]}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">深度: ${json["Depth"]}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">規模: ${json["Scale"]}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">S波 抵達剩餘秒數: ${value}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">P波 抵達剩餘秒數: ${Pvalue}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">預估震度: ${level}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">第 1 報</font>
+                        </div>
+                        <br>
+                        <div>
+                        <font color="white" size="5">最大值測站</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">測站: ${MAXPGA["station"]}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">位置: ${MAXPGA["loc"]}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">經度: ${MAXPGA["long"]}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">緯度: ${MAXPGA["lat"]}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">震度: ${MAXPGA["level"]}</font>
+                        </div>
+                        <div>
+                            <font color="white" size="4">MaxPGA: ${MAXPGA["pga"]}</font>
+                        </div>
+                        `
+                        eew.childNodes.forEach((childNodes) => {
+                            eew.removeChild(childNodes)
+                        })
+                        Div.style.padding = "1%"
+                        eew.appendChild(Div)
                         let T = json.Time
                         if (Pcircle != null) map.removeLayer(Pcircle)
                         Pcircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
@@ -356,6 +429,8 @@ if ("WebSocket" in window) {
                             map.removeLayer(EarthquakeList[T])
                             clearInterval(Timer)
                             map.setView([Lat, Long], 7.5)
+                            roll.style.height = "92%"
+                            eew.style.height = "0%"
                         }
                         if ((new Date().getTime() - json.Time) * 6.5 > 250000 && Loom < 250000) {
                             Loom = 250000
@@ -395,10 +470,10 @@ function Loc() {
 //#region 視窗大小刷新
 window.onresize = function () {
     map.invalidateSize()
-    var roll = document.getElementById("rolllist")
-    roll.style.height = window.innerHeight
     var MAP = document.getElementById("map")
     MAP.style.height = window.innerHeight
+    var info = document.getElementById("Info")
+    info.style.height = window.innerHeight
     map.setView([Lat, Long], 7.5)
 }
 //#endregion
@@ -458,14 +533,12 @@ function ReportGET() {
 //#region Report 點擊
 async function ReportClick(time) {
     if (ReportMarkID == time) {
-        map.removeLayer(ReportMark)
         ReportMarkID = null
         for (let index = 0; index < MarkList.length; index++) {
             map.removeLayer(MarkList[index])
         }
     } else {
         ReportMarkID = time
-        if (ReportMark != null) map.removeLayer(ReportMark)
         for (let index = 0; index < MarkList.length; index++) {
             map.removeLayer(MarkList[index])
         }
@@ -476,7 +549,7 @@ async function ReportClick(time) {
                     iconUrl: `./image/main/${data["stationIntensity"]}.png`,
                     iconSize: [10, 10],
                 })
-                ReportMark = L.marker([Number(data["stationLat"]), Number(data["stationLon"])], { icon: myIcon })
+                let ReportMark = L.marker([Number(data["stationLat"]), Number(data["stationLon"])], { icon: myIcon })
                 let Level = ""
                 if (data["stationIntensity"] == 5) {
                     Level = "5-"
@@ -501,10 +574,11 @@ async function ReportClick(time) {
             iconUrl: './image/main/star.png',
             iconSize: [30, 30],
         })
-        ReportMark = L.marker([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], { icon: myIcon })
+        let ReportMark = L.marker([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], { icon: myIcon })
         ReportMark.bindPopup(`編號: ${ReportCache[time]["earthquakeNo"]}<br>經度: ${ReportCache[time]["epicenterLon"]}<br>緯度: ${ReportCache[time]["epicenterLat"]}<br>深度: ${ReportCache[time]["depth"]}<br>規模: ${ReportCache[time]["magnitudeValue"]}<br>位置: ${ReportCache[time]["location"]}<br>時間: ${ReportCache[time]["originTime"]}`)
         map.addLayer(ReportMark)
         ReportMark.openPopup()
+        MarkList.push(ReportMark)
     }
 }
 //#endregion
@@ -515,9 +589,6 @@ async function ReportList(Data) {
         let DATA = Data["response"][index]
         var roll = document.getElementById("rolllist")
         var Div = document.createElement("DIV")
-        Div.style.height = "auto"
-        Div.style.overflow = "hidden"
-        Div.style.paddingRight = "3%"
         let Level = ""
         if (DATA["data"][0]["areaIntensity"] == 5) {
             Level = "5-"
@@ -590,6 +661,12 @@ async function ReportList(Data) {
         })
         roll.appendChild(Div)
     }
+}
+//#endregion
+
+//#region 設定
+function setting() {
+    window.location.href = './page/main/setting.html'
 }
 //#endregion
 
