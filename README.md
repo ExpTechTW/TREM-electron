@@ -29,7 +29,7 @@
 - [ ] P-Alert 測站顯示
 
 ## 發行
-- [網頁版](http://exptechtw.github.me/TREM/)
+- [網頁版](http://exptechtw.github.io/TREM/)
 - [Windows](https://github.com/ExpTechTW/TREM/releases)
 - [macOS](https://github.com/ExpTechTW/TREM/releases)
 - [Linux](https://github.com/ExpTechTW/TREM/releases)
