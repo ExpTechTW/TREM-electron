@@ -263,7 +263,7 @@ async function webSocket() {
                     "APIkey": "https://github.com/ExpTechTW",
                     "Function": "earthquake",
                     "Type": "test",
-                    "FormatVersion": 2,
+                    "FormatVersion": 1,
                     "UUID": localStorage["UUID"],
                 }
                 axios.post('https://exptech.mywire.org:1015', data)
