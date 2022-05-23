@@ -18,12 +18,32 @@
             <div style="width: 100%;">
                 <font color="white" size="5">設定</font>
             </div>
+            <button type="button" onclick="restart()">重播</button>
+            <button type="button" onclick="test()">測試</button>
             <button type="button">儲存</button>
-            <button type="button">取消</button>
+            <button type="button" onclick="back()">取消</button>
         </div>
-        <div class="list" id="list" style="display: inline-block;">
+        <div style="width: 10%; float:left;">
+            <table cellSpacing="0" cellPadding="0" border="0" style="width:100%;height:100%;max-height:100%;">
+                <tr>
+                    <td>
+                        <font color="white" size="5">音效</font>
+                    </td>
+                    <td>
+                        <font color="white" size="5">畫面</font>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="list" id="list">
             <div>
                 <font color="white" size="5">音效</font>
+            </div>
+            <div class="checkbox-example">
+                <input type="checkbox" value="1" id="checkboxOneInput" />
+                <label for="checkboxOneInput">
+                    <font color="white" size="5">未完成的頁面...</font>
+                </label>
             </div>
             <div>
                 <font color="white" size="5">畫面</font>
@@ -33,8 +53,20 @@
             </div>
         </div>
         <script>
-            var L = document.getElementById("list")
-            L.style.height = window.innerHeight
+            function test() {
+                localStorage["Test"] = true
+                window.location.href = '../../index.html'
+            }
+
+            function restart() {
+                localStorage["Test"] = true
+                localStorage["Restart"] = true
+                window.location.href = '../../index.html'
+            }
+
+            function back() {
+                window.location.href = '../../index.html'
+            }
         </script>
     </article>
 </body>

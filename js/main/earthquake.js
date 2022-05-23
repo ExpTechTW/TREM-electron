@@ -7,7 +7,6 @@ let ReportMarkID = null
 let MarkList = []
 let EarthquakeList = {}
 let Break = false
-let UUID = uuid()
 let marker = null
 let map
 let Station = {}
@@ -17,10 +16,19 @@ let PGAaudio = false
 let PGALock = 0
 let EEW = false
 let MAXPGA = { pga: 0, station: "NA", level: 0 }
+let testMode = 0
 
 //#region 初始化
-init()
-function init() {
+try {
+    if (localStorage["UUID"] == undefined) {
+        localStorage["UUID"] = uuid()
+    }
+    init()
+} catch (error) {
+    alert("請不要封鎖網站 Cookie")
+}
+
+async function init() {
     var info = document.getElementById("Info")
     info.style.height = window.innerHeight
     var MAP = document.getElementById("map")
@@ -61,6 +69,8 @@ function init() {
 
     Loc()
 
+    webSocket()
+
     ReportGET()
 
     fetch('https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json')
@@ -92,8 +102,9 @@ function init() {
                                     for (let Index = 0; Index < Sdata["MaxPGA"].length; Index++) {
                                         if (Number(Sdata["MaxPGA"][Index]) > amount) amount = Number(Sdata["MaxPGA"][Index])
                                     }
+                                    if (testMode > 0) amount = testMode
                                     let Intensity = 0
-                                    if (new Date().getTime() - Sdata["TimeStamp"] > 2000) {
+                                    if (new Date().getTime() - Sdata["TimeStamp"] > 3000) {
                                         Intensity = "NA"
                                     } else if (amount >= 800) {
                                         Intensity = 9
@@ -153,6 +164,7 @@ function init() {
                                         MAXPGA["lat"] = station[Object.keys(Json)[index]]["Lat"]
                                         MAXPGA["long"] = station[Object.keys(Json)[index]]["Long"]
                                         MAXPGA["loc"] = station[Object.keys(Json)[index]]["Loc"]
+                                        MAXPGA["ms"] = new Date().getTime() - Sdata["TimeStamp"]
                                     }
                                 }
                                 for (let index = 0; index < Object.keys(PGA).length; index++) {
@@ -205,9 +217,8 @@ function init() {
 //#endregion
 
 //#region 地震速報 連接 伺服器
-if ("WebSocket" in window) {
-    webSocket()
-    async function webSocket() {
+async function webSocket() {
+    if ("WebSocket" in window) {
         var ws = new WebSocket("wss://exptech.mywire.org:1015")
         ws.onopen = async function () {
             ws.send(JSON.stringify({
@@ -215,9 +226,30 @@ if ("WebSocket" in window) {
                 "Function": "earthquakeService",
                 "Type": "subscription",
                 "FormatVersion": 1,
-                "UUID": UUID
+                "UUID": localStorage["UUID"]
             }))
-            console.log("UUID >> " + UUID)
+            console.log("UUID >> " + localStorage["UUID"])
+            if (localStorage["Test"] != undefined) {
+                delete localStorage["Test"]
+                if (localStorage["Restart"] != undefined) {
+                    testMode = -1
+                    delete localStorage["Restart"]
+                }
+                let data = {
+                    "APIkey": "https://github.com/ExpTechTW",
+                    "Function": "earthquake",
+                    "Type": "test",
+                    "FormatVersion": 1,
+                    "UUID": localStorage["UUID"],
+                }
+                axios.post('https://exptech.mywire.org:1015', data)
+                    .then(function (response) {
+                        console.log(response.data["response"])
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                    })
+            }
         }
 
         ws.onmessage = async function (evt) {
@@ -346,8 +378,22 @@ if ("WebSocket" in window) {
                     let Timer = setInterval(async () => {
                         var Div = document.createElement("DIV")
                         let Pvalue = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 6.5) / 6.5)
-                        if (value <= 0) value = "抵達"
-                        if (Pvalue <= 0) Pvalue = "抵達"
+                        if (Pvalue <= 0) {
+                            Pvalue = "抵達"
+                            if (json["Test"] != undefined && testMode != -1) testMode = Math.floor(Math.random() * 100)
+                        }
+                        if (value <= 0) {
+                            value = "抵達"
+                            if (json["Test"] != undefined && testMode != -1) testMode = Math.floor(Math.random() * 800)
+                        }
+                        let test = ""
+                        if (json["Test"] != undefined) {
+                            if (testMode != -1) {
+                                test = "(測試模式)"
+                            } else {
+                                test = "(歷史重現中)"
+                            }
+                        }
                         Div.innerHTML = `
                         <div>
                         <font color="white" size="5">EEW 強震即時警報</font>
@@ -377,29 +423,29 @@ if ("WebSocket" in window) {
                             <font color="white" size="4">預估震度: ${level}</font>
                         </div>
                         <div>
-                            <font color="white" size="4">第 1 報</font>
+                            <font color="white" size="4">第 1 報 ${test}</font>
                         </div>
                         <br>
                         <div>
-                        <font color="white" size="5">最大值測站</font>
+                            <font color="white" size="3">測站: ${MAXPGA["station"] ?? "Loading..."}</font>
                         </div>
                         <div>
-                            <font color="white" size="4">測站: ${MAXPGA["station"]}</font>
+                            <font color="white" size="3">位置: ${MAXPGA["loc"] ?? "Loading..."}</font>
                         </div>
                         <div>
-                            <font color="white" size="4">位置: ${MAXPGA["loc"]}</font>
+                            <font color="white" size="3">經度: ${MAXPGA["long"] ?? "Loading..."}</font>
                         </div>
                         <div>
-                            <font color="white" size="4">經度: ${MAXPGA["long"]}</font>
+                            <font color="white" size="3">緯度: ${MAXPGA["lat"] ?? "Loading..."}</font>
                         </div>
                         <div>
-                            <font color="white" size="4">緯度: ${MAXPGA["lat"]}</font>
+                            <font color="white" size="3">震度: ${MAXPGA["level"] ?? "Loading..."}</font>
                         </div>
                         <div>
-                            <font color="white" size="4">震度: ${MAXPGA["level"]}</font>
+                            <font color="white" size="3">MaxPGA: ${MAXPGA["pga"] ?? "Loading..."}</font>
                         </div>
                         <div>
-                            <font color="white" size="4">MaxPGA: ${MAXPGA["pga"]}</font>
+                            <font color="white" size="3">延遲(ms): ${MAXPGA["ms"] ?? "Loading..."}</font>
                         </div>
                         `
                         eew.childNodes.forEach((childNodes) => {
@@ -431,6 +477,7 @@ if ("WebSocket" in window) {
                             map.setView([Lat, Long], 7.5)
                             roll.style.height = "92%"
                             eew.style.height = "0%"
+                            if (json["Test"] != undefined) testMode = 0
                         }
                         if ((new Date().getTime() - json.Time) * 6.5 > 250000 && Loom < 250000) {
                             Loom = 250000
@@ -452,9 +499,9 @@ if ("WebSocket" in window) {
                 webSocket()
             }, 1000)
         }
+    } else {
+        alert("你的瀏覽器不支援 WebSocket!")
     }
-} else {
-    alert("你的瀏覽器不支援 WebSocket!")
 }
 //#endregion
 
@@ -669,5 +716,3 @@ function setting() {
     window.location.href = './page/main/setting.html'
 }
 //#endregion
-
-//document.cookie = `${JSON.stringify()}; expires=Thu, 18 Dec 2043 12:00:00 GMT; path=/`
