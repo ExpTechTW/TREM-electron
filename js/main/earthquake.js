@@ -1,3 +1,4 @@
+//#region 變數
 let Lat = 25.0421407
 let Long = 121.5198716
 let audioList = []
@@ -17,6 +18,8 @@ let PGALock = 0
 let EEW = false
 let MAXPGA = { pga: 0, station: "NA", level: 0 }
 let testMode = 0
+let err = ""
+//#endregion
 
 //#region 初始化
 try {
@@ -27,6 +30,27 @@ try {
 } catch (error) {
     alert("請不要封鎖網站 Cookie")
 }
+
+var button = document.getElementById("button")
+
+setInterval(() => {
+    button.childNodes.forEach((childNodes) => {
+        button.removeChild(childNodes)
+    })
+    let test = document.createElement("div")
+    let now = new Date()
+    let Now = (now.getMonth() + 1) +
+        "/" + now.getDate() +
+        " " + now.getHours() +
+        ":" + now.getMinutes() +
+        ":" + now.getSeconds()
+    if (err != "") {
+        test.innerHTML = `<font color="red" size="4">${err}</font>`
+    } else {
+        test.innerHTML = `<font color="white" size="4">${Now}</font>`
+    }
+    button.appendChild(test)
+}, 1000)
 
 async function init() {
     var info = document.getElementById("Info")
@@ -254,6 +278,9 @@ async function webSocket() {
 
         ws.onmessage = async function (evt) {
             let json = JSON.parse(evt.data)
+            if (json.response = "You have successfully subscribed to earthquake information") {
+                err = ""
+            }
             if (json.Function == "report") {
                 ReportGET()
             } else if (json.Function == "earthquake") {
@@ -488,12 +515,14 @@ async function webSocket() {
             }
         }
         ws.onclose = function () {
+            err = "伺服器 斷線"
             setTimeout(async () => {
                 webSocket()
             }, 1000)
         }
 
         ws.onerror = function (err) {
+            err = "伺服器 錯誤"
             ws.close()
             setTimeout(async () => {
                 webSocket()
