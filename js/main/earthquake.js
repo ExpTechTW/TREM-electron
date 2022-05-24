@@ -38,6 +38,8 @@ try {
 }
 
 var button = document.getElementById("button")
+var title = document.getElementById("title")
+title.innerHTML = `TREM | 台灣實時地震監測 | ${process.env.Version}`
 
 setInterval(() => {
     button.childNodes.forEach((childNodes) => {
@@ -301,7 +303,7 @@ async function webSocket() {
                 new Notification("地震報告", { body: `地震列表已刷新`, icon: "TREM.ico" })
                 ReportGET()
                 audioPlay(`./audio/main/notify.wav`)
-            } else if (json.Function == "earthquake") {
+            } else if (json.Function == "earthquake" || json.Function == "JP_earthquake") {
                 win.restore()
                 win.show()
                 win.setAlwaysOnTop(true)
@@ -360,7 +362,7 @@ async function webSocket() {
                     } else {
                         audioPlay(`./audio/main/1/intensity.wav`)
                     }
-                    if (value > 0) {
+                    if (value > 0 && value < 100) {
                         if (value <= 10) {
                             audioPlay(`./audio/main/1/${value.toString()}.wav`)
                         } else if (value < 20) {
@@ -389,7 +391,7 @@ async function webSocket() {
                                     EEW = false
                                     clearInterval(t)
                                 }
-                            } else {
+                            } else if (value < 100) {
                                 if (value > 10) {
                                     if (value.toString().substring(1, 2) == "0") {
                                         audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
@@ -529,10 +531,12 @@ async function webSocket() {
                             map.removeLayer(Pcircle)
                             map.removeLayer(EarthquakeList[json.ID + "Cross"])
                             clearInterval(Timer)
+                            clearInterval(t)
                             map.setView([Lat, Long], 7.5)
                             roll.style.height = "92%"
                             eew.style.height = "0%"
                             err = ""
+                            audioList=[]
                             if (json["Test"] != undefined) testMode = 0
                             win.setAlwaysOnTop(false)
                         }
