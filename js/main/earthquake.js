@@ -19,6 +19,9 @@ let EEW = false
 let MAXPGA = { pga: 0, station: "NA", level: 0 }
 let testMode = 0
 let err = ""
+let Pcircle = null
+let Scircle = null
+let Timer = null
 //#endregion
 
 //#region 初始化
@@ -249,7 +252,7 @@ async function webSocket() {
                 "APIkey": "https://github.com/ExpTechTW",
                 "Function": "earthquakeService",
                 "Type": "subscription",
-                "FormatVersion": 1,
+                "FormatVersion": 2,
                 "UUID": localStorage["UUID"]
             }))
             console.log("UUID >> " + localStorage["UUID"])
@@ -263,7 +266,7 @@ async function webSocket() {
                     "APIkey": "https://github.com/ExpTechTW",
                     "Function": "earthquake",
                     "Type": "test",
-                    "FormatVersion": 1,
+                    "FormatVersion": 2,
                     "UUID": localStorage["UUID"],
                 }
                 axios.post('https://exptech.mywire.org:1015', data)
@@ -278,6 +281,7 @@ async function webSocket() {
 
         ws.onmessage = async function (evt) {
             let json = JSON.parse(evt.data)
+            console.log(json)
             if (json.response = "You have successfully subscribed to earthquake information") {
                 err = ""
             }
@@ -388,21 +392,28 @@ async function webSocket() {
                         }
                     }, 0)
                     if (ReportMarkID != null) {
-                        map.removeLayer(ReportMark)
                         ReportMarkID = null
+                        for (let index = 0; index < MarkList.length; index++) {
+                            map.removeLayer(MarkList[index])
+                        }
                     }
                     var myIcon = L.icon({
                         iconUrl: './image/main/cross.png',
                         iconSize: [30, 30],
                     })
                     let Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon })
-                    EarthquakeList[json.Time] = Cross
+                    if (EarthquakeList[json.ID + "Cross"] != undefined) {
+                        map.removeLayer(EarthquakeList[json.ID + "Cross"])
+                    }
+                    EarthquakeList[json.ID + "Cross"] = Cross
                     map.addLayer(Cross)
                     map.setView([Number(json.NorthLatitude), Number(json.EastLongitude)], 7.5)
-                    var Pcircle = null
-                    var Scircle = null
+
                     let Loom = 0
-                    let Timer = setInterval(async () => {
+                    if (Timer != null) clearInterval(Timer)
+                    if (Pcircle != null) map.removeLayer(Pcircle)
+                    if (Scircle != null) map.removeLayer(Scircle)
+                    Timer = setInterval(async () => {
                         var Div = document.createElement("DIV")
                         let Pvalue = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 6.5) / 6.5)
                         if (Pvalue <= 0) {
@@ -450,7 +461,7 @@ async function webSocket() {
                             <font color="white" size="4">預估震度: ${level}</font>
                         </div>
                         <div>
-                            <font color="white" size="4">第 1 報 ${test}</font>
+                            <font color="white" size="4">第 ${json["Version"]} 報 ${test}</font>
                         </div>
                         <br>
                         <div>
@@ -480,7 +491,6 @@ async function webSocket() {
                         })
                         Div.style.padding = "1%"
                         eew.appendChild(Div)
-                        let T = json.Time
                         if (Pcircle != null) map.removeLayer(Pcircle)
                         Pcircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
                             color: '#6FB7B7',
@@ -499,7 +509,7 @@ async function webSocket() {
                         if (new Date().getTime() - json.Time > 180000) {
                             map.removeLayer(Scircle)
                             map.removeLayer(Pcircle)
-                            map.removeLayer(EarthquakeList[T])
+                            map.removeLayer(EarthquakeList[json.ID + "Cross"])
                             clearInterval(Timer)
                             map.setView([Lat, Long], 7.5)
                             roll.style.height = "92%"
@@ -661,33 +671,47 @@ async function ReportClick(time) {
 
 //#region Report list
 async function ReportList(Data) {
-    for (let index = 0; index < Data["response"].length; index++) {
-        let DATA = Data["response"][index]
+    clear()
+    function clear() {
         var roll = document.getElementById("rolllist")
-        var Div = document.createElement("DIV")
-        let Level = ""
-        if (DATA["data"][0]["areaIntensity"] == 5) {
-            Level = "5-"
-        } else if (DATA["data"][0]["areaIntensity"] == 6) {
-            Level = "5+"
-        } else if (DATA["data"][0]["areaIntensity"] == 7) {
-            Level = "6-"
-        } else if (DATA["data"][0]["areaIntensity"] == 8) {
-            Level = "6+"
-        } else if (DATA["data"][0]["areaIntensity"] == 9) {
-            Level = "7"
+        if (roll.childNodes.length != 0) {
+            roll.childNodes.forEach((childNodes) => {
+                roll.removeChild(childNodes)
+            })
+            clear()
         } else {
-            Level = DATA["data"][0]["areaIntensity"] ?? "?"
+            add()
         }
-        let msg = ""
-        if (DATA["location"].includes("(")) {
-            msg = DATA["location"].substring(DATA["location"].indexOf("(") + 1, DATA["location"].indexOf(")")).replace("位於", "")
-        } else {
-            msg = DATA["location"]
-        }
-        if (index == 0) {
-            Div.innerHTML =
-                `<div class="background" style="display: flex; align-items:center; padding:2%;padding-right: 1vh;">
+    }
+
+    function add() {
+        var roll = document.getElementById("rolllist")
+        for (let index = 0; index < Data["response"].length; index++) {
+            let DATA = Data["response"][index]
+            var Div = document.createElement("DIV")
+            let Level = ""
+            if (DATA["data"][0]["areaIntensity"] == 5) {
+                Level = "5-"
+            } else if (DATA["data"][0]["areaIntensity"] == 6) {
+                Level = "5+"
+            } else if (DATA["data"][0]["areaIntensity"] == 7) {
+                Level = "6-"
+            } else if (DATA["data"][0]["areaIntensity"] == 8) {
+                Level = "6+"
+            } else if (DATA["data"][0]["areaIntensity"] == 9) {
+                Level = "7"
+            } else {
+                Level = DATA["data"][0]["areaIntensity"] ?? "?"
+            }
+            let msg = ""
+            if (DATA["location"].includes("(")) {
+                msg = DATA["location"].substring(DATA["location"].indexOf("(") + 1, DATA["location"].indexOf(")")).replace("位於", "")
+            } else {
+                msg = DATA["location"]
+            }
+            if (index == 0) {
+                Div.innerHTML =
+                    `<div class="background" style="display: flex; align-items:center; padding:2%;padding-right: 1vh;">
                 <div class="left" style="width:30%; text-align: center;">
                     <font color="white" size="3">最大震度</font><br><b><font color="white" size="7">${Level}</font></b>
                 </div>
@@ -697,9 +721,9 @@ async function ReportList(Data) {
                     <br><b><font color="white" size="6">M${DATA["magnitudeValue"]} </font></b><br><font color="white" size="2"> 深度: </font><b><font color="white" size="4">${DATA["depth"]}km</font></b>
                 </div>
             </div>`
-        } else {
-            Div.innerHTML =
-                `<div class="background" style="display: flex; align-items:center;padding-right: 1vh;">
+            } else {
+                Div.innerHTML =
+                    `<div class="background" style="display: flex; align-items:center;padding-right: 1vh;">
                 <div class="left" style="width:20%; text-align: center;">
                     <b><font color="white" size="6">${Level}</font></b>
                 </div>
@@ -711,31 +735,32 @@ async function ReportList(Data) {
                 <b><font color="white" size="5">M${DATA["magnitudeValue"]}</font></b>
                 </div>
             </div>`
+            }
+            if (DATA["data"][0]["areaIntensity"] == 1) {
+                Div.style.backgroundColor = "gray"
+            } else if (DATA["data"][0]["areaIntensity"] == 2) {
+                Div.style.backgroundColor = "#0066CC"
+            } else if (DATA["data"][0]["areaIntensity"] == 3) {
+                Div.style.backgroundColor = "#00BB00"
+            } else if (DATA["data"][0]["areaIntensity"] == 4) {
+                Div.style.backgroundColor = "#EAC100"
+            } else if (DATA["data"][0]["areaIntensity"] == 5) {
+                Div.style.backgroundColor = "#EA7500"
+            } else if (DATA["data"][0]["areaIntensity"] == 6) {
+                Div.style.backgroundColor = "#D94600"
+            } else if (DATA["data"][0]["areaIntensity"] == 7) {
+                Div.style.backgroundColor = "#A23400"
+            } else if (DATA["data"][0]["areaIntensity"] == 8) {
+                Div.style.backgroundColor = "#984B4B"
+            } else if (DATA["data"][0]["areaIntensity"] == 9) {
+                Div.style.backgroundColor = "#930093"
+            }
+            Div.addEventListener("click", function () {
+                ReportCache[DATA["originTime"]] = Data["response"][index]
+                ReportClick(DATA["originTime"])
+            })
+            roll.appendChild(Div)
         }
-        if (DATA["data"][0]["areaIntensity"] == 1) {
-            Div.style.backgroundColor = "gray"
-        } else if (DATA["data"][0]["areaIntensity"] == 2) {
-            Div.style.backgroundColor = "#0066CC"
-        } else if (DATA["data"][0]["areaIntensity"] == 3) {
-            Div.style.backgroundColor = "#00BB00"
-        } else if (DATA["data"][0]["areaIntensity"] == 4) {
-            Div.style.backgroundColor = "#EAC100"
-        } else if (DATA["data"][0]["areaIntensity"] == 5) {
-            Div.style.backgroundColor = "#EA7500"
-        } else if (DATA["data"][0]["areaIntensity"] == 6) {
-            Div.style.backgroundColor = "#D94600"
-        } else if (DATA["data"][0]["areaIntensity"] == 7) {
-            Div.style.backgroundColor = "#A23400"
-        } else if (DATA["data"][0]["areaIntensity"] == 8) {
-            Div.style.backgroundColor = "#984B4B"
-        } else if (DATA["data"][0]["areaIntensity"] == 9) {
-            Div.style.backgroundColor = "#930093"
-        }
-        Div.addEventListener("click", function () {
-            ReportCache[DATA["originTime"]] = Data["response"][index]
-            ReportClick(DATA["originTime"])
-        })
-        roll.appendChild(Div)
     }
 }
 //#endregion
