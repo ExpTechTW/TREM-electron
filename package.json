@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "台灣即時地震監測",
   "main": "main.js",
   "scripts": {
@@ -43,19 +43,14 @@
     }
   },
   "repository": "https://github.com/ExpTechTW/TREM",
-  "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
-  ],
+  "keywords": [],
   "author": "whes1015",
   "license": "AGPL-3.0",
   "devDependencies": {
     "electron": "^18.2.3"
   },
   "dependencies": {
-    "electron-builder-squirrel-windows": "^23.0.9"
+    "@electron/remote": "^2.0.8",
+    "ws": "^8.6.0"
   }
 }
