@@ -2,6 +2,7 @@ const { app, BrowserWindow, Menu } = require('electron')
 const path = require('path')
 
 let mainWindow = null
+process.env.Version = "1.5"
 
 app.disableHardwareAcceleration()
 
