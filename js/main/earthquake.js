@@ -53,7 +53,7 @@ setInterval(() => {
         test.innerHTML = `<font color="white" size="4">${Now}</font>`
     }
     button.appendChild(test)
-}, 1000)
+}, 500)
 
 async function init() {
     var info = document.getElementById("Info")
@@ -258,9 +258,11 @@ async function webSocket() {
             console.log("UUID >> " + localStorage["UUID"])
             if (localStorage["Test"] != undefined) {
                 delete localStorage["Test"]
+                err = "測試模式"
                 if (localStorage["Restart"] != undefined) {
                     testMode = -1
                     delete localStorage["Restart"]
+                    err = "歷史重現中"
                 }
                 let data = {
                     "APIkey": "https://github.com/ExpTechTW",
@@ -269,24 +271,27 @@ async function webSocket() {
                     "FormatVersion": 2,
                     "UUID": localStorage["UUID"],
                 }
-                axios.post('https://exptech.mywire.org:1015', data)
-                    .then(function (response) {
-                        console.log(response.data["response"])
-                    })
-                    .catch(function (error) {
-                        console.log(error)
-                    })
+                console.log(err)
+                setTimeout(() => {
+                    axios.post('https://exptech.mywire.org:1015', data)
+                        .then(function (response) {
+                            console.log(response.data["response"])
+                        })
+                        .catch(function (error) {
+                            console.log(error)
+                        })
+                }, 5000)
             }
         }
 
         ws.onmessage = async function (evt) {
             let json = JSON.parse(evt.data)
-            console.log(json)
-            if (json.response = "You have successfully subscribed to earthquake information") {
+            if (err.includes("伺服器")) {
                 err = ""
             }
             if (json.Function == "report") {
                 ReportGET()
+                audioPlay(`./audio/main/notify.wav`)
             } else if (json.Function == "earthquake") {
                 if (audioList.length != 0) {
                     Break = true
@@ -334,6 +339,7 @@ async function webSocket() {
                     } else {
                         level = "0"
                     }
+                    new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${value}秒後抵達`, icon: "TREM.ico" })
                     audioPlay(`./audio/main/1/${level.replace("+", "").replace("-", "")}.wav`)
                     if (level.includes("+")) {
                         audioPlay(`./audio/main/1/intensity-strong.wav`)
@@ -514,6 +520,7 @@ async function webSocket() {
                             map.setView([Lat, Long], 7.5)
                             roll.style.height = "92%"
                             eew.style.height = "0%"
+                            err = ""
                             if (json["Test"] != undefined) testMode = 0
                         }
                         if ((new Date().getTime() - json.Time) * 6.5 > 250000 && Loom < 250000) {
