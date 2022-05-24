@@ -300,6 +300,7 @@ async function webSocket() {
                 win.setAlwaysOnTop(false)
                 new Notification("地震報告", { body: `地震列表已刷新`, icon: "TREM.ico" })
                 ReportGET()
+                audioPlay(`./audio/main/notify.wav`)
             } else if (json.Function == "earthquake") {
                 win.restore()
                 win.show()

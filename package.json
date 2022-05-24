@@ -5,10 +5,11 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "pack": "grunt"
   },
   "build": {
-    "productName": "TREM",
+    "productName": "TREM 1.4",
     "appId": "ExpTech.tw",
     "dmg": {
       "contents": [
@@ -39,7 +40,7 @@
     },
     "directories": {
       "buildResources": "resources",
-      "output": "release"
+      "output": "dev"
     }
   },
   "repository": "https://github.com/ExpTechTW/TREM",
