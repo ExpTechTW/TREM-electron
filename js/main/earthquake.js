@@ -292,7 +292,7 @@ async function webSocket() {
             if (json.Function == "report") {
                 ReportGET()
                 audioPlay(`./audio/main/notify.wav`)
-            } else if (json.Function == "earthquake"|| json.Function == "JP_earthquake") {
+            } else if (json.Function == "earthquake" || json.Function == "JP_earthquake") {
                 if (audioList.length != 0) {
                     Break = true
                     audioList = []
