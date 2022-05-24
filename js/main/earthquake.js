@@ -25,6 +25,7 @@ let err = ""
 let Pcircle = null
 let Scircle = null
 let Timer = null
+let earthquakeID = null
 //#endregion
 
 //#region 初始化
@@ -304,12 +305,8 @@ async function webSocket() {
                 ReportGET()
                 audioPlay(`./audio/main/notify.wav`)
             } else if (json.Function == "earthquake" || json.Function == "JP_earthquake") {
-                win.restore()
-                win.show()
-                win.setAlwaysOnTop(true)
                 if (audioList.length != 0) {
                     Break = true
-                    audioList = []
                     let t = setInterval(() => {
                         if (Break == false) {
                             clearInterval(t)
@@ -320,16 +317,9 @@ async function webSocket() {
                     handler()
                 }
                 async function handler() {
-                    var roll = document.getElementById("rolllist")
-                    roll.style.height = "0%"
-                    var eew = document.getElementById("EEW")
-                    eew.style.height = "92%"
-                    EEW = true
-                    audioPlay("./audio/main/1/alert.wav")
                     let point = Math.sqrt(Math.pow(Math.abs(Lat + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(Long + (Number(json.EastLongitude) * -1)) * 101, 2))
                     let distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2))
                     let value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
-
                     let level = "0"
                     let PGA = (1.657 * Math.pow(Math.E, (1.533 * json.Scale)) * Math.pow(distance, -1.607)).toFixed(3)
                     if (PGA >= 800) {
@@ -353,64 +343,78 @@ async function webSocket() {
                     } else {
                         level = "0"
                     }
-                    new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${value}秒後抵達`, icon: "TREM.ico" })
-                    audioPlay(`./audio/main/1/${level.replace("+", "").replace("-", "")}.wav`)
-                    if (level.includes("+")) {
-                        audioPlay(`./audio/main/1/intensity-strong.wav`)
-                    } else if (level.includes("-")) {
-                        audioPlay(`./audio/main/1/intensity-weak.wav`)
-                    } else {
-                        audioPlay(`./audio/main/1/intensity.wav`)
-                    }
-                    if (value > 0 && value < 100) {
-                        if (value <= 10) {
-                            audioPlay(`./audio/main/1/${value.toString()}.wav`)
-                        } else if (value < 20) {
-                            audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
+                    var roll = document.getElementById("rolllist")
+                    roll.style.height = "0%"
+                    var eew = document.getElementById("EEW")
+                    eew.style.height = "92%"
+                    let t
+                    if (json.ID != earthquakeID) {
+                        win.show()
+                        win.restore()
+                        win.setAlwaysOnTop(true)
+                        new Notification(`EEW 強震即時警報`, { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${value}秒後抵達\n慎防強烈搖晃，就近避難\n[趴下、掩護、穩住]`, icon: "TREM.ico" })
+                        audioList = []
+                        earthquakeID = json.ID
+                        EEW = true
+                        audioPlay("./audio/main/1/alert.wav")
+                        audioPlay(`./audio/main/1/${level.replace("+", "").replace("-", "")}.wav`)
+                        if (level.includes("+")) {
+                            audioPlay(`./audio/main/1/intensity-strong.wav`)
+                        } else if (level.includes("-")) {
+                            audioPlay(`./audio/main/1/intensity-weak.wav`)
                         } else {
-                            audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
-                            audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
+                            audioPlay(`./audio/main/1/intensity.wav`)
                         }
-                        audioPlay(`./audio/main/1/second.wav`)
-                    }
-                    let time = -1
-                    let Stamp = 0
-                    let Ding = 0
-                    let t = setInterval(async () => {
-                        if (Break == true) {
-                            Break = false
-                            clearInterval(t)
+                        if (value > 0 && value < 100) {
+                            if (value <= 10) {
+                                audioPlay(`./audio/main/1/${value.toString()}.wav`)
+                            } else if (value < 20) {
+                                audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
+                            } else {
+                                audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
+                                audioPlay(`./audio/main/1/x${value.toString().substring(1, 2)}.wav`)
+                            }
+                            audioPlay(`./audio/main/1/second.wav`)
                         }
-                        value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
-                        if (Stamp != value) {
-                            Stamp = value
-                            if (time >= 0) {
-                                audioPlay(`./audio/main/1/ding.wav`)
-                                time++
-                                if (time >= 10) {
-                                    EEW = false
-                                    clearInterval(t)
-                                }
-                            } else if (value < 100) {
-                                if (value > 10) {
-                                    if (value.toString().substring(1, 2) == "0") {
-                                        audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
-                                        audioPlay(`./audio/main/1/x0.wav`)
-                                    } else {
-                                        if (Stamp <= Ding - 2 || Ding == 0) {
-                                            Ding = Stamp
-                                            audioPlay(`./audio/main/1/ding.wav`)
-                                        }
+                        let time = -1
+                        let Stamp = 0
+                        let Ding = 0
+                        t = setInterval(async () => {
+                            if (Break == true) {
+                                Break = false
+                                clearInterval(t)
+                            }
+                            value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
+                            if (Stamp != value) {
+                                Stamp = value
+                                if (time >= 0) {
+                                    audioPlay(`./audio/main/1/ding.wav`)
+                                    time++
+                                    if (time >= 10) {
+                                        EEW = false
+                                        clearInterval(t)
                                     }
-                                } else if (value > 0) {
-                                    audioPlay(`./audio/main/1/${value.toString()}.wav`)
-                                } else {
-                                    audioPlay(`./audio/main/1/arrive.wav`)
-                                    time = 0
+                                } else if (value < 100) {
+                                    if (value > 10) {
+                                        if (value.toString().substring(1, 2) == "0") {
+                                            audioPlay(`./audio/main/1/${value.toString().substring(0, 1)}x.wav`)
+                                            audioPlay(`./audio/main/1/x0.wav`)
+                                        } else {
+                                            if (Stamp <= Ding - 2 || Ding == 0) {
+                                                Ding = Stamp
+                                                audioPlay(`./audio/main/1/ding.wav`)
+                                            }
+                                        }
+                                    } else if (value > 0) {
+                                        audioPlay(`./audio/main/1/${value.toString()}.wav`)
+                                    } else {
+                                        audioPlay(`./audio/main/1/arrive.wav`)
+                                        time = 0
+                                    }
                                 }
                             }
-                        }
-                    }, 0)
+                        }, 0)
+                    }
                     if (ReportMarkID != null) {
                         ReportMarkID = null
                         for (let index = 0; index < MarkList.length; index++) {
@@ -536,7 +540,7 @@ async function webSocket() {
                             roll.style.height = "92%"
                             eew.style.height = "0%"
                             err = ""
-                            audioList=[]
+                            audioList = []
                             if (json["Test"] != undefined) testMode = 0
                             win.setAlwaysOnTop(false)
                         }
