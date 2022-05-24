@@ -1,5 +1,5 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron')
-const windowStateKeeper = require('electron-window-state');
+const windowStateKeeper = require('electron-window-state')
 const path = require('path')
 
 process.env.Version = "1.6"
@@ -19,7 +19,7 @@ function createWindow() {
   let mainWindowStateKeeper = windowStateKeeper({
     defaultWidth: 1000,
     defaultHeight: 800
-  });
+  })
   mainWindow = new BrowserWindow({
     title: 'main',
     x: mainWindowStateKeeper.x,

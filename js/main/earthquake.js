@@ -1,6 +1,5 @@
 const { BrowserWindow } = require('@electron/remote')
 
-
 //#region 變數
 let Lat = 25.0421407
 let Long = 121.5198716
@@ -26,6 +25,7 @@ let Pcircle = null
 let Scircle = null
 let Timer = null
 let earthquakeID = null
+let Max = false
 //#endregion
 
 //#region 初始化
@@ -37,7 +37,12 @@ try {
 } catch (error) {
     alert("請不要封鎖網站 Cookie")
 }
-
+let win = BrowserWindow.fromId(process.env.window * 1)
+win.setAlwaysOnTop(false)
+Max = win.isMaximized()
+win.on('maximize', function (e) {
+    Max = true
+})
 var button = document.getElementById("button")
 var title = document.getElementById("title")
 title.innerHTML = `TREM | 台灣實時地震監測 | ${process.env.Version}`
@@ -352,6 +357,10 @@ async function webSocket() {
                         win.show()
                         win.restore()
                         win.setAlwaysOnTop(true)
+                        console.log(Max)
+                        if (Max) {
+                            win.maximize()
+                        }
                         new Notification(`EEW 強震即時警報`, { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${value}秒後抵達\n慎防強烈搖晃，就近避難\n[趴下、掩護、穩住]`, icon: "TREM.ico" })
                         audioList = []
                         earthquakeID = json.ID
