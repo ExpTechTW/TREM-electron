@@ -2,7 +2,7 @@ const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron')
 const windowStateKeeper = require('electron-window-state')
 const path = require('path')
 
-process.env.Version = "1.7"
+process.env.Version = "1.8"
 
 let mainWindow = null
 let tray = null

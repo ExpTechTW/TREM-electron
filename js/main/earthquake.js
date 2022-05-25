@@ -379,6 +379,7 @@ async function webSocket() {
         ws.onmessage = async function (evt) {
             let win = BrowserWindow.fromId(process.env.window * 1)
             let json = JSON.parse(evt.data)
+            console.log(json)
             if (err.includes("伺服器")) {
                 err = ""
             }
@@ -679,6 +680,8 @@ window.onresize = function () {
     var info = document.getElementById("Info")
     info.style.height = window.innerHeight
     map.setView([Lat, Long], 7.5)
+    let win = BrowserWindow.fromId(process.env.window * 1)
+    Max = win.isMaximized()
 }
 //#endregion
 
