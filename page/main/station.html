@@ -1,0 +1,110 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>TREM | 波形圖</title>
+    <link href="../../css/main/draw.css" rel="stylesheet" type="text/css">
+    <script language="javascript" type="text/javascript" src="../../js/main/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="../../js/main/jquery.canvaswrapper.js"></script>
+    <script language="javascript" type="text/javascript" src="../../js/main/jquery.colorhelpers.js"></script>
+    <script language="javascript" type="text/javascript" src="../../js/main/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="../../js/main/jquery.flot.saturated.js"></script>
+    <script language="javascript" type="text/javascript" src="../../js/main/jquery.flot.browser.js"></script>
+    <script language="javascript" type="text/javascript" src="../../js/main/jquery.flot.drawSeries.js"></script>
+    <script language="javascript" type="text/javascript" src="../../js/main/jquery.flot.uiConstants.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+            let v = []
+            var data = [],
+                totalPoints = 0
+            var plot
+            let list = []
+            let Max = 0
+
+            function getRandomData() {
+                data = []
+                if (data.length > 0)
+                    data = data.slice(1)
+                for (let index = 0; index < totalPoints; index++) {
+                    data.push(list[index])
+                }
+                var res = []
+                for (var i = 0; i < data.length; ++i) {
+                    res.push([i, data[i]])
+                }
+                return res
+            }
+
+            function init() {
+                data.push(0)
+                for (let index = 0; index < totalPoints - 1; index++) {
+                    data.push(Max + 0.5)
+                }
+                var res = []
+                for (var i = 0; i < data.length; ++i) {
+                    res.push([i, data[i]])
+                }
+                return res
+            }
+
+            var updateInterval = ""
+            $("#updateInterval").val(updateInterval).change(async function () {
+                v = $(this).val()
+                v = v.split("[")
+                v.splice(0, 1)
+                totalPoints = v.length
+                list = []
+                Max = 0
+                for (let index = totalPoints - 1; index >= 0; index--) {
+                    let num = Number(v[index].split(" | ")[4].replace("MaxPGA >> ", ""))
+                    list.push(num)
+                    if (num > Max) Max = num
+                }
+                plot = $.plot("#placeholder", [init()], {
+                    series: {
+                        shadowSize: 0
+                    },
+                    yaxis: {
+                        min: 0,
+                        max: 1
+                    },
+                    xaxis: {
+                        show: false
+                    }
+                })
+                update()
+            })
+
+            async function update() {
+                await plot.setData([getRandomData()])
+                await plot.draw()
+                // var can = document.getElementsByTagName("canvas")
+                // var src = can[1].toDataURL("image/png")
+                //console.log(src.toString("base64").replace("data:image/png;base64,", ""))
+            }
+        })
+    </script>
+</head>
+
+<body>
+    <div id="header">
+        <h2>TREM | 波形圖</h2>
+    </div>
+    <div id="content">
+        <div class="demo-container">
+            <div id="placeholder" class="demo-placeholder"></div>
+        </div>
+        <p>原始數據: <input id="updateInterval" type="text" value="" style="text-align: right; width:5em"></p>
+    </div>
+    <div onclick="back()" class="button" style="width: 5%;text-align: center; ">
+        <font color="black" size="5">返回</font>
+    </div>
+    <script>
+        function back() {
+            window.location.href = '../../index.html'
+        }
+    </script>
+</body>
+
+</html>

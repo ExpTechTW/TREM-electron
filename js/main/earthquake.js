@@ -19,7 +19,7 @@ let PGAaudio = false
 let PGALock = 0
 let EEW = false
 let MAXPGA = { pga: 0, station: "NA", level: 0 }
-let testMode = 0
+let testMode = -1
 let err = ""
 let Pcircle = null
 let Scircle = null
@@ -132,11 +132,10 @@ async function init() {
                         axios.post('https://exptech.mywire.org:1015', data)
                             .then(function (response) {
                                 let Json = response.data["response"]
-                                pga = {}
                                 MAXPGA = { pga: 0, station: "NA", level: 0 }
                                 for (let index = 0; index < Object.keys(Json).length; index++) {
                                     Sdata = Json[Object.keys(Json)[index]]
-                                    let amount = 0;
+                                    let amount = 0
                                     for (let Index = 0; Index < Sdata["MaxPGA"].length; Index++) {
                                         if (Number(Sdata["MaxPGA"][Index]) > amount) amount = Number(Sdata["MaxPGA"][Index])
                                     }
@@ -192,9 +191,18 @@ async function init() {
                                     if (Station[Object.keys(Json)[index]] != undefined) map.removeLayer(Station[Object.keys(Json)[index]])
                                     ReportMark.bindPopup(`站名: ${Object.keys(Json)[index]}<br>位置: ${station[Object.keys(Json)[index]]["Loc"]}<br>經度: ${station[Object.keys(Json)[index]]["Long"]}<br>緯度: ${station[Object.keys(Json)[index]]["Lat"]}<br>震度: ${Level}<br>MaxPGA: ${amount}<br>時間: ${Now}`)
                                     map.addLayer(ReportMark)
-                                    //ReportMark.openPopup()
+                                    if ((pga[station[Object.keys(Json)[index]]["PGA"]] == undefined || pga[station[Object.keys(Json)[index]]["PGA"]] < amount) && Intensity != "NA") {
+                                        pga[station[Object.keys(Json)[index]]["PGA"]] = {
+                                            "Intensity": Intensity,
+                                            "Time": 0
+                                        }
+                                    }
+                                    pga[station[Object.keys(Json)[index]]["PGA"]]["Intensity"] = Intensity
+                                    if (amount >= 3.5) {
+                                        pga[station[Object.keys(Json)[index]]["PGA"]]["Time"] = new Date().getTime()
+                                        map.setView([station[Object.keys(Json)[index]]["Lat"], station[Object.keys(Json)[index]]["Long"]], 7.5)
+                                    }
                                     Station[Object.keys(Json)[index]] = ReportMark
-                                    if ((pga[station[Object.keys(Json)[index]]["PGA"]] == undefined || pga[station[Object.keys(Json)[index]]["PGA"]] < amount) && Intensity != "NA") pga[station[Object.keys(Json)[index]]["PGA"]] = Intensity
                                     if (MAXPGA["pga"] < amount) {
                                         MAXPGA["pga"] = amount
                                         MAXPGA["station"] = Object.keys(Json)[index]
@@ -210,10 +218,14 @@ async function init() {
                                     delete PGA[Object.keys(PGA)[index]]
                                 }
                                 for (let index = 0; index < Object.keys(pga).length; index++) {
-                                    let Intensity = pga[Object.keys(pga)[index]]
-                                    if (Intensity != 0) {
-                                        let color = ""
-                                        if (Intensity == 1) {
+                                    let Intensity = pga[Object.keys(pga)[index]]["Intensity"]
+                                    let color = ""
+                                    if (new Date().getTime() - pga[Object.keys(pga)[index]]["Time"] > 5000) {
+                                        delete pga[Object.keys(pga)[index]]
+                                    } else {
+                                        if (Intensity == 0) {
+                                            color = "white"
+                                        } else if (Intensity == 1) {
                                             color = "gray"
                                         } else if (Intensity == 2) {
                                             color = "#0066CC"
@@ -239,6 +251,75 @@ async function init() {
                                         PGAaudio = true
                                     }
                                 }
+                                var roll = document.getElementById("rolllist")
+                                var eew = document.getElementById("EEW")
+                                if (PGAaudio) {
+                                    roll.style.height = "0%"
+                                    eew.style.height = "92%"
+                                    var Div = document.createElement("DIV")
+                                    Div.innerHTML = `
+                                        <div>
+                                        <font color="white" size="5">EEW 強震即時警報</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="4">時間: 0</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="4">經度: 0</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="4">緯度: 0</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="4">深度: 0</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="4">規模: 0</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="4">S波 抵達剩餘秒數: 0</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="4">P波 抵達剩餘秒數: 0</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="4">預估震度: 0</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="4">第 0 報</font>
+                                        </div>
+                                        <br>
+                                        <div>
+                                            <font color="white" size="3">測站: ${MAXPGA["station"] ?? "Loading..."}</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="3">位置: ${MAXPGA["loc"] ?? "Loading..."}</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="3">經度: ${MAXPGA["long"] ?? "Loading..."}</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="3">緯度: ${MAXPGA["lat"] ?? "Loading..."}</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="3">震度: ${MAXPGA["level"] ?? "Loading..."}</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="3">MaxPGA: ${MAXPGA["pga"] ?? "Loading..."}</font>
+                                        </div>
+                                        <div>
+                                            <font color="white" size="3">延遲(ms): ${MAXPGA["ms"] ?? "Loading..."}</font>
+                                        </div>
+                                        `
+                                    eew.childNodes.forEach((childNodes) => {
+                                        eew.removeChild(childNodes)
+                                    })
+                                    Div.style.padding = "1%"
+                                    eew.appendChild(Div)
+                                } else {
+                                    roll.style.height = "92%"
+                                    eew.style.height = "0%"
+                                }
                                 if (PGAaudio && EEW == false && new Date().getTime() - PGALock > 2000) {
                                     audioPlay(`./audio/main/PGA1.wav`)
                                     PGAaudio = false
@@ -248,7 +329,7 @@ async function init() {
                             .catch(function (error) {
                                 console.log(error)
                             })
-                    }, 1000)
+                    }, 500)
                 })
         })
 }
@@ -269,11 +350,11 @@ async function webSocket() {
             console.log("UUID >> " + localStorage["UUID"])
             if (localStorage["Test"] != undefined) {
                 delete localStorage["Test"]
-                err = "測試模式"
-                if (localStorage["Restart"] != undefined) {
-                    testMode = -1
-                    delete localStorage["Restart"]
-                    err = "歷史重現中"
+                err = "歷史重現中"
+                if (localStorage["Testing"] != undefined) {
+                    testMode = 0
+                    delete localStorage["Testing"]
+                    err = "測試模式"
                 }
                 let data = {
                     "APIkey": "https://github.com/ExpTechTW",

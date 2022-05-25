@@ -24,6 +24,9 @@
             <div onclick="test()" class="button" style="width: 5%;text-align: center;">
                 <font color="white" size="5">測試</font>
             </div>
+            <div onclick="drawer()" class="button" style="width: 5%;text-align: center; ">
+                <font color="white" size="5">波形</font>
+            </div>
             <div onclick="back()" class="button" style="width: 5%;text-align: center; ">
                 <font color="white" size="5">取消</font>
             </div>
@@ -49,17 +52,21 @@
             title.innerHTML = `TREM | 設定 | ${process.env.Version}`
             function test() {
                 localStorage["Test"] = true
+                localStorage["Testing"] = true
                 window.location.href = '../../index.html'
             }
 
             function restart() {
                 localStorage["Test"] = true
-                localStorage["Restart"] = true
                 window.location.href = '../../index.html'
             }
 
             function back() {
                 window.location.href = '../../index.html'
+            }
+
+            function drawer() {
+                window.location.href = '../../page/main/station.html'
             }
         </script>
         <style type="text/css">
