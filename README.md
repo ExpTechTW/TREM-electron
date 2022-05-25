@@ -34,19 +34,6 @@
 - [macOS](https://github.com/ExpTechTW/TREM/releases)
 - [Linux](https://github.com/ExpTechTW/TREM/releases)
 
-## 貢獻者
-- whes1015 `程式開發` `文檔`
-- darian-YT `程式開發`
-- 蘋果#8113 `宣傳`
-
-## 截圖
-### 主頁面
-![image](https://user-images.githubusercontent.com/44525760/169459247-a9dca212-9c86-44db-afff-c64fdf31e3cf.png)
-### 同步地震顯示
-![image](https://user-images.githubusercontent.com/44525760/169459824-26852656-0161-40c8-8d3a-1fa564d4913d.png)
-### 地震報告顯示
-![image](https://user-images.githubusercontent.com/44525760/169460251-18616186-2a34-4b01-9c69-dac592896d2a.png)
-
 ------
 
 ## 發佈規則
