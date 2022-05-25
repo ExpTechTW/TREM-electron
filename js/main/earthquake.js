@@ -253,7 +253,7 @@ async function init() {
                                 }
                                 var roll = document.getElementById("rolllist")
                                 var eew = document.getElementById("EEW")
-                                if (PGAaudio) {
+                                if (PGAaudio && EEW == false) {
                                     roll.style.height = "0%"
                                     eew.style.height = "92%"
                                     var Div = document.createElement("DIV")
@@ -316,7 +316,7 @@ async function init() {
                                     })
                                     Div.style.padding = "1%"
                                     eew.appendChild(Div)
-                                } else {
+                                } else if (EEW == false) {
                                     roll.style.height = "92%"
                                     eew.style.height = "0%"
                                 }
