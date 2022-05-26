@@ -26,6 +26,7 @@ let Scircle = null
 let Timer = null
 let earthquakeID = null
 let Max = false
+let expected = []
 //#endregion
 
 //#region 初始化
@@ -134,7 +135,7 @@ async function init() {
                                 let Json = response.data["response"]
                                 MAXPGA = { pga: 0, station: "NA", level: 0 }
                                 for (let index = 0; index < Object.keys(Json).length; index++) {
-                                    Sdata = Json[Object.keys(Json)[index]]
+                                    let Sdata = Json[Object.keys(Json)[index]]
                                     let amount = 0
                                     for (let Index = 0; Index < Sdata["MaxPGA"].length; Index++) {
                                         if (Number(Sdata["MaxPGA"][Index]) > amount) amount = Number(Sdata["MaxPGA"][Index])
@@ -166,6 +167,7 @@ async function init() {
                                         iconUrl: `./image/main/${Intensity}.png`,
                                         iconSize: [10, 10],
                                     })
+                                    if (station[Object.keys(Json)[index]] == undefined || Intensity == "NA") continue
                                     ReportMark = L.marker([station[Object.keys(Json)[index]]["Lat"], station[Object.keys(Json)[index]]["Long"]], { icon: myIcon })
                                     let Level = ""
                                     if (Intensity == 5) {
@@ -388,7 +390,7 @@ async function webSocket() {
                 win.show()
                 win.setAlwaysOnTop(true)
                 win.setAlwaysOnTop(false)
-                new Notification("地震報告", { body: `地震列表已刷新`, icon: "TREM.ico" })
+                new Notification("地震報告", { body: `${json["UTC+8"]} 發生有感地震\n\n**東經**: ${json.EastLongitude} **度**\n**北緯**: ${json.NorthLatitude} **度**\n**深度**: ${json.Depth} **公里**\n**規模**: **芮氏** ${json.Scale}`, icon: "TREM.ico" })
                 ReportGET()
                 audioPlay(`./audio/main/notify.wav`)
             } else if (json.Function == "earthquake" || json.Function == "JP_earthquake") {
@@ -407,29 +409,40 @@ async function webSocket() {
                     let point = Math.sqrt(Math.pow(Math.abs(Lat + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(Long + (Number(json.EastLongitude) * -1)) * 101, 2))
                     let distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2))
                     let value = Math.round((distance - ((new Date().getTime() - json.Time) / 1000) * 3.5) / 3.5)
-                    let level = "0"
-                    let PGA = (1.657 * Math.pow(Math.E, (1.533 * json.Scale)) * Math.pow(distance, -1.607)).toFixed(3)
-                    if (PGA >= 800) {
-                        level = "7"
-                    } else if (800 >= PGA && 440 < PGA) {
-                        level = "6+"
-                    } else if (440 >= PGA && 250 < PGA) {
-                        level = "6-"
-                    } else if (250 >= PGA && 140 < PGA) {
-                        level = "5+"
-                    } else if (140 >= PGA && 80 < PGA) {
-                        level = "5-"
-                    } else if (80 >= PGA && 25 < PGA) {
-                        level = "4"
-                    } else if (25 >= PGA && 8 < PGA) {
-                        level = "3"
-                    } else if (8 >= PGA && 2.5 < PGA) {
-                        level = "2"
-                    } else if (2.5 >= PGA && 0.8 < PGA) {
-                        level = "1"
-                    } else {
-                        level = "0"
+                    let res = await fetch('https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json')
+                    let location = await res.json()
+                    for (let index = 0; index < Object.keys(location).length; index++) {
+                        let city = Object.keys(location)[index]
+                        for (let Index = 0; Index < Object.keys(location[city]).length; Index++) {
+                            let town = Object.keys(location[city])[Index]
+                            let point = Math.sqrt(Math.pow(Math.abs(location[city][town][1] + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(location[city][town][2] + (Number(json.EastLongitude) * -1)) * 101, 2))
+                            let distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2))
+                            let level = PGAcount(json.Scale, distance, location[city][town][3])
+                            let Intensity
+                            if (level == "5-") {
+                                Intensity = 5
+                            } else if (level == "5+") {
+                                Intensity = 6
+                            } else if (level == "6-") {
+                                Intensity = 7
+                            } else if (level == "6+") {
+                                Intensity = 8
+                            } else if (level == "7") {
+                                Intensity = 9
+                            } else {
+                                Intensity = Number(level)
+                            }
+                            if (Intensity == 0) continue
+                            var myIcon = L.icon({
+                                iconUrl: `./image/main/${Intensity}.png`,
+                                iconSize: [10, 10],
+                            })
+                            let ReportMark = L.marker([location[city][town][1], location[city][town][2]], { icon: myIcon })
+                            map.addLayer(ReportMark)
+                            expected.push(ReportMark)
+                        }
                     }
+                    let level = PGAcount(json.Scale, distance)
                     var roll = document.getElementById("rolllist")
                     roll.style.height = "0%"
                     var eew = document.getElementById("EEW")
@@ -439,7 +452,6 @@ async function webSocket() {
                         win.show()
                         win.restore()
                         win.setAlwaysOnTop(true)
-                        console.log(Max)
                         if (Max) {
                             win.maximize()
                         }
@@ -634,6 +646,10 @@ async function webSocket() {
                             audioList = []
                             if (json["Test"] != undefined) testMode = 0
                             win.setAlwaysOnTop(false)
+                            for (let index = 0; index < expected.length; index++) {
+                                map.removeLayer(expected[index])
+                            }
+                            expected = []
                         }
                         if ((new Date().getTime() - json.Time) * 6.5 > 250000 && Loom < 250000) {
                             Loom = 250000
@@ -882,6 +898,8 @@ async function ReportList(Data) {
             })
             roll.appendChild(Div)
         }
+        var load = document.getElementById("#load")
+        load.style.height = "0%"
     }
 }
 //#endregion
@@ -889,5 +907,35 @@ async function ReportList(Data) {
 //#region 設定
 function setting() {
     window.location.href = './page/main/setting.html'
+}
+//#endregion
+
+//#region PGA
+function PGAcount(Scale, distance, Si) {
+    let level
+    let S = Si ?? 1
+    let PGA = (1.657 * Math.pow(Math.E, (1.533 * Scale)) * Math.pow(distance, -1.607) * S).toFixed(3)
+    if (PGA >= 800) {
+        level = "7"
+    } else if (800 >= PGA && 440 < PGA) {
+        level = "6+"
+    } else if (440 >= PGA && 250 < PGA) {
+        level = "6-"
+    } else if (250 >= PGA && 140 < PGA) {
+        level = "5+"
+    } else if (140 >= PGA && 80 < PGA) {
+        level = "5-"
+    } else if (80 >= PGA && 25 < PGA) {
+        level = "4"
+    } else if (25 >= PGA && 8 < PGA) {
+        level = "3"
+    } else if (8 >= PGA && 2.5 < PGA) {
+        level = "2"
+    } else if (2.5 >= PGA && 0.8 < PGA) {
+        level = "1"
+    } else {
+        level = "0"
+    }
+    return level
 }
 //#endregion

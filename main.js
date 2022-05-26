@@ -2,18 +2,12 @@ const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron')
 const windowStateKeeper = require('electron-window-state')
 const path = require('path')
 
-process.env.Version = "1.8"
+process.env.Version = "1.9"
 
 let mainWindow = null
 let tray = null
 
 app.disableHardwareAcceleration()
-
-app.setLoginItemSettings({
-  openAtLogin: true,
-  openAsHidden: true,
-  args: ["--openAsHidden"],
-})
 
 function createWindow() {
   let mainWindowStateKeeper = windowStateKeeper({
@@ -52,6 +46,7 @@ function createWindow() {
     }
   })
 }
+
 let shouldQuit = app.requestSingleInstanceLock()
 if (!shouldQuit) {
   app.quit()
@@ -102,7 +97,5 @@ if (!shouldQuit) {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
-
-app.on('activate', () => { mainWindow.show() })
 
 app.on('before-quit', () => app.quitting = true)
