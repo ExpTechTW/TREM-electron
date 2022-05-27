@@ -82,7 +82,8 @@ async function init() {
         maxZoom: 14,
         id: 'mapbox/dark-v10',
         tileSize: 512,
-        zoomOffset: -1
+        zoomOffset: -1,
+        minZoom:2
     }).addTo(map)
 
 
@@ -434,8 +435,8 @@ async function webSocket() {
                             }
                             if (Intensity == 0) continue
                             var myIcon = L.icon({
-                                iconUrl: `./image/main/${Intensity}.png`,
-                                iconSize: [10, 10],
+                                iconUrl: `./image/main/Intensity/${Intensity}.png`,
+                                iconSize: [25, 25],
                             })
                             let ReportMark = L.marker([location[city][town][1], location[city][town][2]], { icon: myIcon })
                             map.addLayer(ReportMark)
