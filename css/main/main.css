@@ -146,7 +146,7 @@ input::-moz-focus-inner {
 	padding: 0;
 }
 
-input,
+/* input, 暫時移除input*/
 select,
 textarea {
 	-moz-appearance: none;
@@ -280,6 +280,97 @@ blockquote {
 	border-left: solid 0.5em rgba(124, 128, 129, 0.2);
 	font-style: italic;
 	padding: 1em 0 1em 2em;
+}
+
+/* Setting */
+input[type="checkbox"] {
+	background-color: #fff;
+	font: inherit;
+	width: 1.15em;
+	height: 1.15em;
+	border: 14em solid currentColor;
+	border-radius: 0.15em;
+	transform: translateY(-0.075em);
+	position: relative;
+	padding: 0;
+	margin: 0;
+	vertical-align: middle;
+	top: -3px;
+}
+
+#location_input {
+	position: absolute;
+	border-radius: 10px;
+	color:black;
+	box-shadow: rgba(0, 0, 0, 0.644) 5px 5px 7px;
+	width: 200px;
+	height: 50px;
+	left: 0%;
+	bottom: 0%;
+	background-color: rgb(157, 157, 157);
+	z-index: 1000;
+	padding: 1%;
+}
+
+#location_input input {
+	height: 20px;
+}
+
+@media screen and (max-width: 1680px) {
+	#setting_window {
+		position: absolute;
+		border-radius: 10px;
+		color:black;
+		box-shadow: rgba(0, 0, 0, 0.644) 5px 5px 7px;
+		width: 50%;
+		height: 80%;
+		left: 25%;
+		top: 10%;
+		background-color: rgb(157, 157, 157);
+		z-index: 1000;
+		padding: 1%;
+	}
+
+	#setting_window h1 {
+		font-size: 50px;
+		font-weight: 500;
+	}
+}
+
+@media screen and (max-width: 1280px) {
+	#setting_window {
+		width: 60%;
+		height: 80%;
+		left: 20%;
+		top: 10%;
+	}
+}
+
+@media screen and (max-width: 980px) {
+	#setting_window {
+		width: 70%;
+		height: 80%;
+		left: 15%;
+		top: 10%;
+	}
+}
+
+@media screen and (max-width: 840px) {
+	#setting_window {
+		width: 80%;
+		height: 80%;
+		left: 10%;
+		top: 10%;
+	}
+}
+
+@media screen and (max-width: 736px) {
+	#setting_window {
+		width: 90%;
+		height: 80%;
+		left: 5%;
+		top: 10%;
+	}
 }
 
 /* Container */
@@ -1894,7 +1985,7 @@ footer.major {
 
 /* Form */
 
-input[type="text"],
+/* input[type="text"], */
 input[type="password"],
 input[type="email"],
 textarea {
@@ -1917,14 +2008,14 @@ textarea {
 	outline: 0;
 }
 
-input[type="text"]:focus,
+/* input[type="text"]:focus, */
 input[type="password"]:focus,
 input[type="email"]:focus,
 textarea:focus {
 	border-color: #83d3c9;
 }
 
-input[type="text"],
+/* input[type="text"], */
 input[type="password"],
 input[type="email"] {
 	line-height: 1em;

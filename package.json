@@ -1,16 +1,16 @@
 {
   "name": "trem",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "台灣即時地震監測",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder",
-    "pack": "grunt"
+    "dist": "electron-builder"
   },
   "build": {
-    "productName": "TREM 1.4",
+    "productName": "TREM",
     "appId": "ExpTech.tw",
+    "asar": false,
     "dmg": {
       "contents": [
         {
@@ -52,6 +52,9 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.8",
-    "ws": "^8.6.0"
+    "bytenode": "^1.3.6",
+    "electron-common-ipc": "^15.0.3",
+    "electron-window-state": "^5.0.3",
+    "fs": "^0.0.1-security"
   }
 }

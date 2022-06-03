@@ -1,19 +1,17 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron')
 const windowStateKeeper = require('electron-window-state')
 const path = require('path')
+const fs = require('fs')
 
-process.env.Version = "1.8"
+process.env.Version = "22w23-rc2"
 
 let mainWindow = null
 let tray = null
 
-app.disableHardwareAcceleration()
-
-app.setLoginItemSettings({
-  openAtLogin: true,
-  openAsHidden: true,
-  args: ["--openAsHidden"],
-})
+if (fs.existsSync(__dirname.replace(`trem\\resources\\app`, "trem_data"))) {
+  let config = JSON.parse(fs.readFileSync(`${__dirname.replace(`trem\\resources\\app`, "trem_data")}/Data/config.json`).toString())
+  if (config["GPU.disable"]["Value"]) app.disableHardwareAcceleration()
+}
 
 function createWindow() {
   let mainWindowStateKeeper = windowStateKeeper({
@@ -52,6 +50,7 @@ function createWindow() {
     }
   })
 }
+
 let shouldQuit = app.requestSingleInstanceLock()
 if (!shouldQuit) {
   app.quit()
@@ -102,7 +101,5 @@ if (!shouldQuit) {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
 })
-
-app.on('activate', () => { mainWindow.show() })
 
 app.on('before-quit', () => app.quitting = true)
