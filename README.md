@@ -7,7 +7,6 @@
 
 ## 索引
 - [文檔](#文檔)
-- [功能](#功能)
 - [發行](#發行)
 - [貢獻者](#貢獻者)
 - [截圖](#截圖)
@@ -15,36 +14,61 @@
 - [合作](#合作)
 
 ## 文檔
-- `地震資訊卡(右方滾動欄)` 是可以點擊的
-- `地圖上的圖標` 點擊都會顯示對應的詳細資訊
+### 整個畫面
+![IMG_20220618_164017](https://user-images.githubusercontent.com/44525760/174438202-7722e4e3-dba9-49d4-9891-2259720f4eba.png)
 
-## 功能
-- [x] 同步地震顯示
-- [x] 自動縮放地圖
-- [x] EEW 地震速報 (中央氣象局)
-- [x] EEW 地震速報 (日本氣象廳)
-- [x] 地震報告
-- [x] P波 S波 顯示
-- [x] EEW 地震速報 音效播放
-- [ ] P-Alert 測站顯示
+### 速報資訊
+- 紅色部分顯示 `第幾報`
+- `最大預估` 為此地震 `全台灣` `最大震度預估值`
+- `即時震度` 為 TREM 所有全部 `即時測站` 測得最大震度值
+
+![IMG_20220618_180920](https://user-images.githubusercontent.com/44525760/174438300-174f9a7d-7b56-4c34-a8fb-e8f7b1b3b4e2.png)
+
+### 功能區塊
+- `設定` 功能入口
+- 顯示時間 `30s和伺服器同步一次` 若時間為紅色 則表示與伺服器斷開連接
+
+![IMG_20220618_180935](https://user-images.githubusercontent.com/44525760/174438493-ec568c99-98cf-4cce-a12a-86bb8a4768cc.png)
+
+### 即時資訊
+- 上方色塊為 TREM 所有全部 `即時測站` 震度不為 0 或 超時 的 `即時震度排行`
+- 下方為 自選任意觀測點 可在設定中自定義
+
+![IMG_20220618_181013](https://user-images.githubusercontent.com/44525760/174438591-c8a775d6-be4e-4ffc-88d2-b2a1c70a9d1a.png)
+
+### 地圖
+- 紅圈 為 `S波`
+- 藍圈 為 `P波`
+- 點 為 `即時測站`
+- 方框 為 該地區有 即時測站 被觸發
+
+![IMG_20220618_181027](https://user-images.githubusercontent.com/44525760/174438785-eb559fb1-ff58-4098-a489-837f512b3bda.png)
+
+### 震度圖
+- 用色塊表示此次地震對 `台灣` 的影響
+
+![IMG_20220618_181043](https://user-images.githubusercontent.com/44525760/174438872-27d2af5d-801b-4daa-adc5-ec1bd67317d9.png)
+
+### 地震報告
+- 顯示已發生的 `地震資訊`
+
+![IMG_20220618_181102](https://user-images.githubusercontent.com/44525760/174438908-38935c48-439e-4236-a632-4497eebdba81.png)
+
+### 震波資訊
+- 顯示 `P波 S波` 抵達時間
+
+![IMG_20220618_181116](https://user-images.githubusercontent.com/44525760/174438933-23519fbb-b71b-4c17-85f7-b001ab6c4419.png)
+
+### 即時測站
+- 設備: Esp32
+- 傳感器: MPU6050
+- 注意: 受噪聲影響 PGA>3.5 才視為一級地震
 
 ## 發行
-- [網頁版](http://exptechtw.github.io/TREM/)
 - [Windows](https://github.com/ExpTechTW/TREM/releases)
-- [macOS](https://github.com/ExpTechTW/TREM/releases)
-- [Linux](https://github.com/ExpTechTW/TREM/releases)
 
 ## 貢獻者
-- whes1015 `程式開發` `文檔`
-- 蘋果#8113 `宣傳`
-
-## 截圖
-### 主頁面
-![image](https://user-images.githubusercontent.com/44525760/169459247-a9dca212-9c86-44db-afff-c64fdf31e3cf.png)
-### 同步地震顯示
-![image](https://user-images.githubusercontent.com/44525760/169459824-26852656-0161-40c8-8d3a-1fa564d4913d.png)
-### 地震報告顯示
-![image](https://user-images.githubusercontent.com/44525760/169460251-18616186-2a34-4b01-9c69-dac592896d2a.png)
+- 請見程式內 `設定` >> `關於` 頁面
 
 ------
 
