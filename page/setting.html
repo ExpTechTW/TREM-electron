@@ -1,0 +1,325 @@
+<html lang="zh-Hant">
+
+<head>
+    <title id="title"></title>
+    <meta charset="utf-8" />
+    <meta content="TREM | 設定" property="og:title" />
+    <meta content="Taiwan Real-time Earthquake Monitoring" property="og:description" />
+    <meta content="https://exptechtw.github.io/" property="og:url" />
+    <meta content="https://raw.githubusercontent.com/ExpTechTW/ExpTechTW.github.io/Release/image/ExpTech.jpg"
+        property="og:image" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="../css/main.css" />
+</head>
+
+<body class="index is-preload" style="background-color: black;">
+    <article class="main" id="#main" style="height: 100%; width:100%;">
+        <div style="display: flex;height: 10%; align-items:center;">
+            <div style="width: 100%;padding-left: 1vh;">
+                <font color="white" size="6"><b>設定</b></font>
+            </div>
+            <div onclick="restart()" class="button" style="width: 5%;text-align: center;">
+                <font color="white" size="5">重播</font>
+            </div>
+        </div>
+        <div style="width: 15%;height: 90%; float:left;">
+            <div style="padding: 5%;" onclick="setList('EEW')">
+                <font color="white" size="5">強震即時警報</font>
+            </div>
+            <div style="padding: 5%;" onclick="setList('Screen')">
+                <font color="white" size="5">畫面</font>
+            </div>
+            <div style="padding: 5%;" onclick="setList('Audio')">
+                <font color="white" size="5">音效</font>
+            </div>
+            <div style="padding: 5%;" onclick="setList('Other')">
+                <font color="white" size="5">其他</font>
+            </div>
+            <div style="padding: 5%;" onclick="setList('About')">
+                <font color="white" size="5">關於</font>
+            </div>
+        </div>
+        <div class="list" id="list" style="width: 85%;height:90%; float: right;">
+            <div style="height: 100%;overflow: hidden;overflow-y:auto;" id="#EEW">
+                <b>
+                    <font color="white" size="5">強震即時警報</font>
+                </b>
+                <div>
+                    <br>
+                    <font color="white" size="5">所在地 選單</font><br>
+                    <font color="gray" size="3">設定所在地</font>
+                    <br>
+                    <select id="location.city" name="city" style="color: white; background-color: black;"
+                        onchange="SelectSave('location.city')">
+                    </select>
+                    <select id="location.town" name="town" style="color: white; background-color: black;"
+                        onchange="SelectSave('location.town')">
+                    </select>
+                    <br>
+                    <br>
+                    <div>
+                        <font color="white" size="5">接收震度</font><br>
+                        <font color="gray" size="3">所在地超過「接收震度」時觸發 強震即時警報</font>
+                        <br>
+                        <select id="eew.Intensity" name="city" style="color: white; background-color: black;"
+                            onchange="SelectSave('eew.Intensity')">
+                            <option value="0">0 級</option>
+                            <option value="1">1 級</option>
+                            <option value="2">2 級</option>
+                            <option value="3">3 級</option>
+                            <option value="4">4 級</option>
+                            <option value="5">5 弱</option>
+                            <option value="6">5 強</option>
+                            <option value="7">6 弱</option>
+                            <option value="8">6 強</option>
+                            <option value="9">7 級</option>
+                        </select><br><br>
+                    </div>
+                </div>
+                <div>
+                    <br>
+                    <font color="white" size="5"><b>接收參數</b></font>
+                    <br><br>
+                    <input type="checkbox" onclick="CheckSave('accept.eew.jp')" id="accept.eew.jp">
+                    <label for="vehicle1">
+                        <font color="white" size="5">接收 台灣以外的 地震速報</font><br>
+                        <font color="gray" size="3">日本 氣象廳 | 中國 成都高新減災研究所</font>
+                    </label><br>
+                    <br>
+                    <input type="checkbox" onclick="CheckSave('earthquake.siteEffect')" id="earthquake.siteEffect">
+                    <label for="vehicle1">
+                        <font color="white" size="5">計算場址效應</font><br>
+                        <font color="gray" size="3">一種影響地震震度的因素 | 僅適用於「各地預估震度」</font>
+                    </label><br>
+                    <br>
+                    <input type="checkbox" onclick="CheckSave('auto.waveSpeed')" id="auto.waveSpeed">
+                    <label for="vehicle1">
+                        <font color="white" size="5">自適應波速</font><br>
+                        <font color="gray" size="3">根據震中距計算 P波 S波 抵達時間</font>
+                    </label><br>
+                    <br>
+                    <input type="checkbox" onclick="CheckSave('earthquake.Real-time')" id="earthquake.Real-time">
+                    <label for="vehicle1">
+                        <font color="white" size="5">即時測站</font><br>
+                        <font color="gray" size="3">顯示 TREM 測站的即時數據</font>
+                    </label><br>
+                </div>
+            </div>
+            <div style="height: 0%;overflow: hidden;overflow-y:auto;" id="#Screen">
+                <b>
+                    <font color="white" size="5">畫面</font>
+                </b>
+                <div>
+                    <br>
+                    <font color="white" size="5"><b>強震即時警報</b></font>
+                    <br><br>
+                    <input type="checkbox" onclick="CheckSave('eew.show')" id="eew.show">
+                    <label for="vehicle1">
+                        <font color="white" size="5">顯示視窗</font><br>
+                        <font color="gray" size="3">自動開啟視窗</font>
+                    </label><br><br>
+                    <input type="checkbox" onclick="CheckSave('eew.cover')" id="eew.cover">
+                    <label for="vehicle1">
+                        <font color="white" size="5">視窗覆蓋</font><br>
+                        <font color="gray" size="3">將視窗顯示於最上層</font>
+                    </label><br><br>
+                    <input type="checkbox" onclick="CheckSave('shock.smoothing')" id="shock.smoothing">
+                    <label for="vehicle1">
+                        <font color="white" size="5">震波平滑</font><br>
+                        <font color="gray" size="3">以較短的間隔對畫面進行渲染</font>
+                    </label><br><br>
+                    <input type="checkbox" onclick="CheckSave('shock.p')" id="shock.p">
+                    <label for="vehicle1">
+                        <font color="white" size="5">顯示 P 波</font><br>
+                        <font color="gray" size="3">先到達的「表面波」</font>
+                    </label><br><br>
+                </div>
+                <div>
+                    <br>
+                    <font color="white" size="5"><b>地震報告</b></font>
+                    <br><br>
+                    <input type="checkbox" onclick="CheckSave('report.show')" id="report.show">
+                    <label for="vehicle1">
+                        <font color="white" size="5">顯示視窗</font><br>
+                        <font color="gray" size="3">自動開啟視窗</font>
+                    </label><br>
+                    <br>
+                    <input type="checkbox" onclick="CheckSave('report.cover')" id="report.cover">
+                    <label for="vehicle1">
+                        <font color="white" size="5">視窗覆蓋</font><br>
+                        <font color="gray" size="3">將視窗顯示於最上層</font>
+                    </label><br><br>
+                </div>
+                <div>
+                    <br>
+                    <font color="white" size="5"><b>即時測站</b></font>
+                    <br><br>
+                    <font color="white" size="5">顯示測站</font><br>
+                    <font color="gray" size="3">顯示在地圖上的 即時測站</font><br>
+                    <select id="Real-time.station" name="town" style="color: white; background-color: black;"
+                        onchange="SelectSave('Real-time.station')">
+                    </select><br><br>
+                    <input type="checkbox" onclick="CheckSave('Real-time.show')" id="Real-time.show">
+                    <label for="vehicle1">
+                        <font color="white" size="5">顯示視窗</font><br>
+                        <font color="gray" size="3">自動開啟視窗</font>
+                    </label><br><br>
+                    <input type="checkbox" onclick="CheckSave('Real-time.cover')" id="Real-time.cover">
+                    <label for="vehicle1">
+                        <font color="white" size="5">視窗覆蓋</font><br>
+                        <font color="gray" size="3">將視窗顯示於最上層</font>
+                    </label><br><br>
+                </div>
+                <div>
+                    <br>
+                    <font color="white" size="5"><b>地圖</b></font>
+                    <br><br>
+                    <input type="checkbox" onclick="CheckSave('map.autoZoom')" id="map.autoZoom">
+                    <label for="vehicle1">
+                        <font color="white" size="5">自動縮放</font><br>
+                        <font color="gray" size="3">讓程式自動縮放地圖</font>
+                    </label><br>
+                </div>
+            </div>
+            <div style="height: 0%;overflow: hidden;overflow-y:auto;" id="#Audio">
+                <b>
+                    <font color="white" size="5">音效</font>
+                </b>
+                <div>
+                    <br>
+                    <input type="checkbox" onclick="CheckSave('eew.audio')" id="eew.audio">
+                    <label for="vehicle1">
+                        <font color="white" size="5">播放 強震即時警報 音效</font><br>
+                        <font color="gray" size="3">在收到「強震即時警報」時播放音效</font>
+                    </label><br>
+                    <br>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" onclick="CheckSave('report.audio')" id="report.audio">
+                    <label for="vehicle1">
+                        <font color="white" size="5">播放 地震報告 音效</font><br>
+                        <font color="gray" size="3">在收到「地震報告」時播放音效</font>
+                    </label><br>
+                    <br>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" onclick="CheckSave('Real-time.audio')" id="Real-time.audio">
+                    <label for="vehicle1">
+                        <font color="white" size="5">播放 即時測站 音效</font><br>
+                        <font color="gray" size="3">在收到「即時測站」時播放音效</font>
+                    </label><br>
+                    <br>
+                </div>
+            </div>
+            <div style="height: 0%;overflow: hidden;overflow-y:auto;" id="#Other">
+                <b>
+                    <font color="white" size="5">其他</font>
+                </b>
+                <div>
+                    <br>
+                    <font color="white" size="5"><b>修復</b></font><br>
+                    <br>
+                    <input type="checkbox" onclick="CheckSave('GPU.disable')" id="GPU.disable">
+                    <label for="vehicle1">
+                        <font color="white" size="5">禁用 GPU 渲染</font><br>
+                        <font color="gray" size="3">開啟「可能」加快渲染速度 若渲染速度變慢請關閉 | 重啟程式生效</font>
+                    </label><br><br>
+                </div>
+                <div>
+                    <br>
+                    <font color="white" size="5"><b>Webhook</b></font><br>
+                    <br>
+                    <font color="white" size="5">Webhook URL</font><br>
+                    <font color="gray" size="3">填入 Discord Webhook URL 重播模式可以檢視發送訊息</font><br>
+                    <input id="webhook.url" type="text" style="color:white; background-color: black;width: 100%;"
+                        onchange="TextSave('webhook.url')">
+                    <br>
+                    <div onclick="webhook()" class="button" style="width: 1%;text-align: center; ">
+                        <font color="white" size="3">測試訊息</font>
+                    </div><br><br>
+                    <font color="white" size="5">Webhook 自定義</font><br>
+                    <font color="gray" size="3">更改 Webhook 發送內容<br>%Government% 發報單位<br>%NorthLatitude%
+                        北緯<br>%EastLongitude% 東經<br>%Depth%
+                        深度<br>%Scale% 規模<br>%Time% 發震時間</font><br>
+                    <input id="webhook.body" type="text" style="color:white; background-color: black;width: 100%;"
+                        onchange="TextSave('webhook.body')">
+                    <br><br>
+                </div>
+            </div>
+            <div style="height: 0%;overflow: hidden;overflow-y:auto;" id="#About">
+                <b>
+                    <font color="white" size="5">關於</font>
+                </b>
+                <div>
+                    <font color="white" size="5">
+                        <br><b>TREM</b>
+                        <br>
+                        <br><a href="https://github.com/ExpTechTW/TREM" target="_blank"
+                            rel="noopener noreferrer">GitHub</a><br>
+                        <br><b>歡迎至 GitHub 給星</b>
+                        <br>
+                        <br><b>• GitHub 貢獻者</b>
+                        <br> - whes1015
+                        <br> - M789
+                        <br>
+                        <br><b>• YouTube 合作夥伴</b>
+                        <br><a href="https://www.youtube.com/channel/UCJUeRIt6jKSE-4jP7QB70kw" target="_blank"
+                            rel="noopener noreferrer"> - 布丁Timyaya 地震記錄</a>
+                        <br>
+                        <br><b>• Discord 群組</b>
+                        <br><a href="https://discord.gg/5dbHqV8ees" target="_blank" rel="noopener noreferrer"> - ExpTech
+                            Studio</a>
+                        <br><a href="https://discord.gg/7sacMKp" target="_blank" rel="noopener noreferrer"> - 地牛記錄小組
+                            TWERG</a>
+                        <br>
+                        <br><b>• 協作夥伴</b>
+                        <br> - 冰川#2886
+                        <br> - OneFiresticks#2259
+                        <br> - 蘋果#8113
+                        <br> - Kuuchi#9999
+                    </font>
+                    <br>
+                    <br>
+                </div>
+                <div>
+                    <br>
+                    <font color="white" size="4">資訊</font>
+                    <br>
+                    <font id="ver" color="white" size="3"></font><br>
+                    <font id="uuid" color="white" size="3"></font><br>
+                    <font color="white" size="3">開源協議: AGPL-3.0</font><br>
+                </div>
+                <div onclick="dumpUpload()" class="button" style="width: 1%;text-align: center; ">
+                    <font color="white" size="3">DUMP</font>
+                </div>
+                <div onclick="reset()" class="button" style="width: 1%;text-align: center; ">
+                    <font color="white" size="3">重置設定</font>
+                </div>
+            </div>
+        </div>
+        <style type="text/css">
+            .button {
+                border-radius: 10px;
+                margin: 1vh;
+                transition: all .3s linear;
+                min-width: 10em;
+            }
+
+            .button:hover {
+                color: white;
+            }
+        </style>
+    </article>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const bytenode = require('bytenode')
+        const fs = require('fs')
+        bytenode.runBytecodeFile(localStorage["dirname"] + '/js/setting.jar')
+        bytenode.runBytecodeFile(localStorage["dirname"] + '/js/dump.jar')
+    </script>
+</body>
+
+</html>
