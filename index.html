@@ -1,35 +1,83 @@
 <html lang="zh-Hant">
 
 <head>
-    <title>TREM | 台灣實時地震監測 | 1.6</title>
+    <title id="title"></title>
     <meta charset="utf-8" />
     <meta content="TREM | 台灣實時地震監測" property="og:title" />
     <meta content="Taiwan Real-time Earthquake Monitoring" property="og:description" />
     <meta content="https://exptechtw.github.io/" property="og:url" />
-    <meta content="https://raw.githubusercontent.com/ExpTechTW/ExpTechTW.github.io/Release/image/main/ExpTech.jpg"
+    <meta content="https://raw.githubusercontent.com/ExpTechTW/ExpTechTW.github.io/Release/image/ExpTech.jpg"
         property="og:image" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" href="./css/main/main.css" />
+    <script>L_PREFER_CANVAS = true</script>
+    <link rel="stylesheet" href="./css/main.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
         integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
         crossorigin="" />
-    <link rel="icon" href="TREM.ico" type="image/x-icon">
 </head>
 
 <body class="index is-preload" style="background-color: black;overflow:hidden;">
-    <article class="main" id="#main" style="display: flex;">
+    <div id="#load" style="width: 100%;height:100%;display: flex;align-items:center;">
+        <font color="white" size="7" style="width: 100%; text-align:center;"><b>Powered by ExpTech</b></font>
+    </div>
+    <article class="main" id="#main">
         <div class="map">
-            <div id="map"></div>
+            <div class="box-1">
+                <div class="box-2">
+                    <div id="box-4" class="box-4"
+                        style="background-color: red; overflow: hidden;display: flex;height: 0%;width: 100%;padding-left: 3%;padding-right: 3%;">
+                        <div id="title-1" style="width: 75%;"></div>
+                        <div id="title-2"></div>
+                    </div>
+                    <div id="box-5" class="box-5"
+                        style="display: flex; overflow: hidden;height: 0%;width: 100%;align-items:center;padding-left: 3%;padding-right: 3%;">
+                        <div style="text-align: center;">
+                            <div>
+                                <font color="white" size="4"><b>最大預估</b></font>
+                            </div>
+                            <div id="intensity-1"></div>
+                        </div>
+                        <div style="padding-left: 3%;">
+                            <div id="location-1"></div>
+                            <div id="time-1"></div>
+                            <div id="info-1"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="box-3" class="box-3">
+                    <div id="intensity-2" style="height: 0%; overflow: hidden;">
+                        <font color="white" size="3"><b>即時震度</b></font>
+                    </div>
+                    <div id="intensity-3"></div>
+                </div>
+            </div>
+            <div id="map">
+                <div id="box-6" class="box-6"></div>
+                <div id="box-7" class="box-7"></div>
+                <div id="box-8" class="box-8">
+                    <input type="image" src="./image/setting.png" alt="Setting" onclick="setting()"
+                        style="width: 100%;height:100%;"></input>
+                </div>
+                <div class="box-9" id="time"></div>
+                <div class="box-10" id="box-10"></div>
+            </div>
         </div>
 
-        <div class="info" id="Info">
-            <div class="roll" id="rolllist" style="overflow-y:auto;height: 92%;"></div>
-            <div class="eew" id="EEW" style="overflow-y:auto;height: 0%;"></div>
-
-            <div>
-                <button type="button" id="button" onclick="setting()" style="height:8%; ">
-                    <font color="white" size="4">設定</font>
-                </button>
+        <div class="info" id="Info" style="width: 25%;float: right;">
+            <div id="map-1" style="height: 50%;">
+            </div>
+            <div class="roll" id="rolllist" style="overflow-y:auto;height: 100%;"></div>
+            <div id="PS"
+                style="border:4px red solid;height: 0%;text-align: center;padding: 3%;display: flex;align-items: center;justify-content: center;overflow: hidden;">
+                <font id="level" color="white" size="7" style="margin-right: 5%;"><b>7</b></font>
+                <div style="margin-right: 5%;">
+                    <font id="Ss" color="white" size="6"><b>30</b></font><br>
+                    <font color="white" size="4"><b>S波</b></font>
+                </div>
+                <div>
+                    <font id="Ps" color="white" size="6"><b>20</b></font><br>
+                    <font color="white" size="4"><b>P波</b></font>
+                </div>
             </div>
         </div>
     </article>
@@ -44,7 +92,18 @@
     <script src="https://unpkg.com/ipfs-api/dist/index.js"></script>
     <script src="https://exptechweb.mywire.org/DataBase/JavaScript/UUID/UUID-1.0.0.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="./js/main/earthquake.js"></script>
+    <script src="./js/GeoJson.js"></script>
+    <script>
+        const bytenode = require('bytenode')
+        const fs = require('fs')
+        localStorage["dirname"] = __dirname
+        localStorage["config"] = __dirname.replace(`trem\\resources\\app`, "trem_data")
+        if (!fs.existsSync(localStorage["config"])) {
+            fs.mkdirSync(localStorage["config"])
+        }
+        bytenode.runBytecodeFile(__dirname + '/js/dump.jar')
+        bytenode.runBytecodeFile(__dirname + '/js/earthquake.jar')
+    </script>
 </body>
 
 </html>
