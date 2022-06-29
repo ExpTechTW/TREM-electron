@@ -41,6 +41,7 @@
                             <div id="location-1"></div>
                             <div id="time-1"></div>
                             <div id="info-1"></div>
+                            <div id="info-2"></div>
                         </div>
                     </div>
                 </div>
@@ -82,6 +83,11 @@
         </div>
     </article>
 
+    <div class="alert" id="alert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        <div id="alert-body" style="padding: 3%;">強震即時警報 測試報</div>
+    </div>
+
     <audio id="audio-player">
         <source src="" type="audio/wav">
     </audio>
@@ -90,7 +96,6 @@
         integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
         crossorigin=""></script>
     <script src="https://unpkg.com/ipfs-api/dist/index.js"></script>
-    <script src="https://exptechweb.mywire.org/DataBase/JavaScript/UUID/UUID-1.0.0.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="./js/GeoJson.js"></script>
     <script>
