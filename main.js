@@ -1,8 +1,9 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const pushReceiver = require('electron-fcm-push-receiver')
 
-process.env.Version = "3.0"
+process.env.Version = "3.7.1"
 
 let mainWindow = null
 let tray = null
@@ -10,7 +11,7 @@ let Win = null
 
 if (fs.existsSync(__dirname.replace(`trem\\resources\\app`, "trem_data")) && fs.existsSync(`${__dirname.replace(`trem\\resources\\app`, "trem_data")}/Data/config.json`)) {
   let config = JSON.parse(fs.readFileSync(`${__dirname.replace(`trem\\resources\\app`, "trem_data")}/Data/config.json`).toString())
-  if (config["GPU.disable"]["Value"]) app.disableHardwareAcceleration()
+  if (config["GPU.disable"] != undefined && config["GPU.disable"]["Value"]) app.disableHardwareAcceleration()
 }
 
 app.setLoginItemSettings({
@@ -37,6 +38,7 @@ async function createWindow() {
   })
   require('@electron/remote/main').initialize()
   require('@electron/remote/main').enable(mainWindow.webContents)
+  pushReceiver.setup(mainWindow.webContents)
   process.env.window = mainWindow.id
   mainWindow.setMinimumSize(800, 600)
   mainWindow.setMaximumSize(1280, 720)
@@ -55,7 +57,8 @@ async function createWindow() {
   })
 }
 
-function createWindow1() {
+async function createWindow1() {
+  if (Win != null) await Win.close()
   Win = new BrowserWindow({
     title: 'TREM | 設定',
     height: 600,
@@ -63,6 +66,7 @@ function createWindow1() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      devTools: false
     },
     autoHideMenuBar: true,
   })
@@ -106,7 +110,7 @@ if (!shouldQuit) {
       {
         label: '強制關閉',
         type: 'normal',
-        click: () => app.quit()
+        click: () => app.exit(0)
       }
     ])
     tray.setToolTip('TREM | 台灣實時地震監測')
@@ -120,7 +124,6 @@ if (!shouldQuit) {
       }
     })
     await createWindow()
-    createWindow1()
   })
 }
 
@@ -130,10 +133,18 @@ app.on('window-all-closed', function () {
 
 app.on('before-quit', () => app.quitting = true)
 
+ipcMain.on("createChildWindow", async (event, arg) => {
+  createWindow1()
+})
+
 ipcMain.on("openChildWindow", async (event, arg) => {
   Win.show()
 })
 
 ipcMain.on("closeChildWindow", (event, arg) => {
   Win.hide()
+})
+
+ipcMain.on("reset", (event, arg) => {
+  app.exit(0)
 })

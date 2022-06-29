@@ -3097,8 +3097,8 @@ ul.pages li a:hover:not(.active) {
 	z-index: 9999;
 	overflow: hidden;
 	bottom: 0%;
-	width: 4%;
-	height: 5%;
+	width: 3%;
+	height: 4%;
 	margin: 0.5%;
 }
 
@@ -3106,16 +3106,15 @@ ul.pages li a:hover:not(.active) {
 	position: absolute;
 	z-index: 9999;
 	overflow: hidden;
-	left: 5%;
+	left: 4%;
 	bottom: 0%;
-	height: 5%;
-	padding-left: 2%;
+	text-align: center;
 }
 
 .box-1 {
 	position: absolute;
 	z-index: 9999;
-	height: 40%;
+	height: 45%;
 	width: 20%;
 	overflow: hidden;
 }
@@ -3161,4 +3160,33 @@ ul.pages li a:hover:not(.active) {
 	right: 0%;
 	top: 0%;
 	z-index: 9999;
+}
+
+.alert {
+	position: absolute;
+	z-index: 9999;
+	padding: 20px;
+	background-color: #f44336;
+	color: white;
+	top: 0%;
+	right: 0%;
+	display: none;
+	height: 10%;
+	width: 20%;
+	margin: 1%;
+}
+
+.closebtn {
+	margin-left: 15px;
+	color: white;
+	font-weight: bold;
+	float: right;
+	font-size: 22px;
+	line-height: 20px;
+	cursor: pointer;
+	transition: 0.3s;
+}
+
+.closebtn:hover {
+	color: black;
 }
