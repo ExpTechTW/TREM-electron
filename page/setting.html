@@ -14,16 +14,7 @@
 </head>
 
 <body class="index md3-dark">
-    <div id="modal-overlay">
-        <!--
-        <div class="dialog success">
-            <span class="material-symbols-rounded dialog-icon">check</span>
-            <span class="dialog-headline">Webhook 測試</span>
-            <span class="dialog-supportText">已成功發送 Webhook 測試訊息</span>
-            <button class="flat-button">OK</button>
-        </div>
-        -->
-    </div>
+    <div id="modal-overlay"></div>
     <div class="main" id="#main">
         <div class="titlebar">
             <span class="material-symbols-rounded headline-medium">settings</span>
@@ -62,11 +53,9 @@
                                     <span class="option-label-description">設定所在地</span>
                                 </div>
                                 <div class="control">
-                                    <select id="location.city" name="city"
-                                        onchange="SelectSave('location.city')">
+                                    <select id="location.city" name="city" onchange="SelectSave('location.city')">
                                     </select>
-                                    <select id="location.town" name="town"
-                                        onchange="SelectSave('location.town')">
+                                    <select id="location.town" name="town" onchange="SelectSave('location.town')">
                                     </select>
                                 </div>
                             </div>
@@ -76,8 +65,7 @@
                                     <span class="option-label-description">所在地超過「接收震度」時觸發 強震即時警報</span>
                                 </div>
                                 <div class="control">
-                                    <select id="eew.Intensity" name="city"
-                                        onchange="SelectSave('eew.Intensity')">
+                                    <select id="eew.Intensity" name="city" onchange="SelectSave('eew.Intensity')">
                                         <option value="0">0 級</option>
                                         <option value="1">1 級</option>
                                         <option value="2">2 級</option>
@@ -245,7 +233,9 @@
                                     <span class="option-label-description">顯示在地圖上的即時測站</span>
                                 </div>
                                 <div class="control">
-                                    <select id="Real-time.station" name="town" onchange="SelectSave('Real-time.station')"></select>
+                                    <select id="Real-time.station" name="town"
+                                        onchange="SelectSave('Real-time.station')">
+                                    </select>
                                 </div>
                             </div>
                             <div class="option-container">
@@ -307,7 +297,8 @@
                                 </span>
                             </label>
                         </div>
-                        <button class="filled-tonal-button" onclick="testAudio('Alert', this)" style="margin: 5px 0 16px 0;">
+                        <button class="filled-tonal-button" onclick="testAudio('Alert', this)"
+                            style="margin: 5px 0 16px 0;">
                             <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
                             <span class="filled-tonal-button-label">測試音效</span>
                         </button>
@@ -323,7 +314,8 @@
                                 </span>
                             </label>
                         </div>
-                        <button class="filled-tonal-button" onclick="testAudio('Notify', this)" style="margin: 5px 0 16px 0;">
+                        <button class="filled-tonal-button" onclick="testAudio('Notify', this)"
+                            style="margin: 5px 0 16px 0;">
                             <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
                             <span class="filled-tonal-button-label">測試音效</span>
                         </button>
@@ -339,7 +331,8 @@
                                 </span>
                             </label>
                         </div>
-                        <button class="filled-tonal-button" onclick="testAudio('PGA1', this)" style="margin: 5px 0 16px 0;">
+                        <button class="filled-tonal-button" onclick="testAudio('PGA1', this)"
+                            style="margin: 5px 0 16px 0;">
                             <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
                             <span class="filled-tonal-button-label">測試音效</span>
                         </button>
@@ -360,7 +353,8 @@
                                 </span>
                             </label>
                         </div>
-                        <button id="HAReloadButton" class="filled-tonal-button" onclick="restart()" style="display:none; margin-top: 4px;">
+                        <button id="HAReloadButton" class="filled-tonal-button" onclick="restart()"
+                            style="display:none; margin-top: 4px;">
                             <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
                             <span class="filled-tonal-button-label">重新啟動</span>
                         </button>
@@ -390,18 +384,21 @@
                             </div>
                             <input class="input-field" id="webhook.body" type="text"
                                 onchange="TextSave('webhook.body')" />
-                            <button class="filled-tonal-button" onclick="webhook()" style="margin-top: 16px;"><span class="filled-tonal-button-label">測試 Webhook</span></button>
+                            <button class="filled-tonal-button" onclick="webhook()" style="margin-top: 16px;"><span
+                                    class="filled-tonal-button-label">測試 Webhook</span></button>
                         </div>
                     </div>
                 </div>
                 <div class="list-container" id="About">
                     <div class="control-title">Taiwan Real-time Earthquake Monitoring</div>
-                    <div class="external-link" role="link" onclick="openURL('https:\/\/github.com/ExpTechTW/TREM')">GitHub<span class="material-icons">launch</span></div>
+                    <div class="external-link" role="link" onclick="openURL('https:\/\/github.com/ExpTechTW/TREM')">
+                        GitHub<span class="material-icons">launch</span></div>
                     <div>
                         <font color="white" size="5">
                             <br>
                             <br><b>• GitHub 貢獻者</b>
                             <br> - whes1015
+                            <br> - Kamiya
                             <br> - M789
                             <br>
                             <div class="control-title">YouTube 合作夥伴</div>
@@ -436,8 +433,12 @@
         </div>
     </div>
 
-    <script src="../js/dump.js"></script>
-    <script src="../js/setting.js"></script>
+    <script>
+        const bytenode = require('bytenode');
+        const fs = require('node:fs');
+        bytenode.runBytecodeFile(localStorage["dirname"] + '/js/setting.jar');
+        bytenode.runBytecodeFile(localStorage["dirname"] + '/js/dump.jar');
+    </script>
 </body>
 
 </html>
