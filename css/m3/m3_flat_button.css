@@ -1,0 +1,31 @@
+button.flat-button {
+    all: unset;
+    align-self: end;
+    width: fit-content;
+    height: 40px;
+    padding: 0 12px;
+    color: rgb(var(--md3-primary));
+    line-height: 40px;
+    font-size: 14px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 500;
+    border-radius: 20px;
+    text-transform: uppercase;
+    transition: background .1s ease-in-out;
+}
+
+button.flat-button:hover {
+    background-color: rgba(var(--md3-primary), .08);
+}
+
+button.flat-button:focus {
+    background-color: rgba(var(--md3-primary), .12);
+}
+
+button.flat-button:active {
+    background-color: rgba(var(--md3-primary), .12);
+}
+
+button.flat-button:focus-visible {
+    outline: 2px solid rgb(var(--md3-primary));
+}

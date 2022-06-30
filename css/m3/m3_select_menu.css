@@ -1,0 +1,26 @@
+select {
+    background-color: rgb(var(--md3-surface-variant));
+    border-radius: 6px 6px 0 0;
+    padding: 0 16px;
+    height: 50px;
+    color: rgb(var(--md3-on-surface));
+    font-size: 16px;
+    font-family: 'Noto Sans TC', sans-serif;
+    border: none;
+    border-bottom: 2px solid rgb(var(--md3-on-surface-variant));
+    outline: none;
+}
+
+select:hover {
+    background: linear-gradient(0deg, rgba(var(--md3-on-secondary-container), .08) 0%, rgba(var(--md3-on-secondary-container), .08) 100%),
+                rgb(var(--md3-surface-variant));
+
+}
+
+select:focus {
+    outline: none;
+}
+
+select:focus-visible {
+    outline: 2px solid rgb(var(--md3-primary));
+}
