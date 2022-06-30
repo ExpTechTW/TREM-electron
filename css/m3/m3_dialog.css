@@ -39,4 +39,5 @@
     font-size: 14px;
     font-family: 'Noto Sans TC', sans-serif;
     margin-bottom: 24px;
+    white-space: pre-line;
 }
