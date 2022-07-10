@@ -1,83 +1,49 @@
 # TREM
-<img alt="Discord" src="https://img.shields.io/discord/926545182407688273">
-
-------
-
-- Taiwan Real-time Earthquake Monitoring ( 台灣實時地震監測 )
-### [TREM Pocket 行動版](https://github.com/ExpTechTW/TREM-Pocket)
+[![Discord](https://img.shields.io/discord/926545182407688273?color=%237289DA&logo=discord&logoColor=white)](https://discord.gg/5dbHqV8ees)
+### **Taiwan Real-time Earthquake Monitoring**
+## **台灣實時地震監測**
 
 ## 索引
 - [文檔](#文檔)
-- [發行](#發行)
+- [聲明](#聲明)
+- [相關資料](#相關資料)
 - [貢獻者](#貢獻者)
-- [截圖](#截圖)
-- [發佈規則](#發佈規則)
-- [合作](#合作)
 
 ## 文檔
-### 整個畫面
-![IMG_20220618_164017](https://user-images.githubusercontent.com/44525760/174438202-7722e4e3-dba9-49d4-9891-2259720f4eba.png)
+- [TREM](https://hackmd.io/@n5w-HNYMQUmvhV6t1kor5g/Bkqtwduo9)
+- [TREM TSS](https://hackmd.io/@n5w-HNYMQUmvhV6t1kor5g/r1egEt_s5)
 
-### 速報資訊
-- 紅色部分顯示 `第幾報`
-- `最大預估` 為此地震 `全台灣` `最大震度預估值`
-- `即時震度` 為 TREM 所有全部 `即時測站` 測得最大震度值
+## 聲明
+#### 強震即時警報來源
+- 交通部中央氣象局
+- 中国福建省地震局
+- 日本気象庁
+- 防災科研
 
-![IMG_20220618_180920](https://user-images.githubusercontent.com/44525760/174438300-174f9a7d-7b56-4c34-a8fb-e8f7b1b3b4e2.png)
+#### 注意事項
+1. TREM 是一款地震速報軟體系統，能提供給您即時的地震資訊，利用自製的測站，顯示各地的即時震度，當地震發生，第一時間發布各管道的強震即時警報訊息
+2. 使用過程中，請務必謹慎閱讀提示和注意事項
+3. 使用過程中可能遇到無法理解的錯誤，但大部份不影響系統運作，如遇到錯誤請向開發人員回報
+4. TREM 目前並沒有與 `中央氣象局` 合作
+5. 即時測站資訊 `PGA` `震度` 僅供參考，實際以 `中央氣象局` 為主
+6. 此軟體僅供研究、學術及教育用途(不得營利)，若使用則需接受相關風險
+7. 任何不被官方所認可的行為均有可能遭到服務器拒絕服務，請務必遵守相關規範
+8. 此外，此應用為免費應用，作者不保證永久營運，請珍惜相處的時光
+9. 最後，如果覺得應用不錯，請分享給其他人，這是讓作者維護下去的動力
+10. 我們不斷對程式進行更新及優化，我們一直和使用者站在一起，為使用者的體驗而不斷努力
+11. 本程式內資源均由網際網路收集而來， 當權利人發現在本程式所提供的內容侵犯其著作權時，請聯繫客服並請權利人提供相關文件連結， 本站將依法採取措施移除相關內容或斷開相關鏈接
 
-### 功能區塊
-- `設定` 功能入口
-- 顯示時間 `30s和伺服器同步一次` 若時間為紅色 則表示與伺服器斷開連接
-
-![IMG_20220618_180935](https://user-images.githubusercontent.com/44525760/174438493-ec568c99-98cf-4cce-a12a-86bb8a4768cc.png)
-
-### 即時資訊
-- 上方色塊為 TREM 所有全部 `即時測站` 震度不為 0 或 超時 的 `即時震度排行`
-- 下方為 自選任意觀測點 可在設定中自定義
-
-![IMG_20220618_181013](https://user-images.githubusercontent.com/44525760/174438591-c8a775d6-be4e-4ffc-88d2-b2a1c70a9d1a.png)
-
-### 地圖
-- 紅圈 為 `S波`
-- 藍圈 為 `P波`
-- 點 為 `即時測站`
-- 方框 為 該地區有 即時測站 被觸發
-
-![IMG_20220618_181027](https://user-images.githubusercontent.com/44525760/174438785-eb559fb1-ff58-4098-a489-837f512b3bda.png)
-
-### 震度圖
-- 用色塊表示此次地震對 `台灣` 的影響
-
-![IMG_20220618_181043](https://user-images.githubusercontent.com/44525760/174438872-27d2af5d-801b-4daa-adc5-ec1bd67317d9.png)
-
-### 地震報告
-- 顯示已發生的 `地震資訊`
-
-![IMG_20220618_181102](https://user-images.githubusercontent.com/44525760/174438908-38935c48-439e-4236-a632-4497eebdba81.png)
-
-### 震波資訊
-- 顯示 `P波 S波` 抵達時間
-
-![IMG_20220618_181116](https://user-images.githubusercontent.com/44525760/174438933-23519fbb-b71b-4c17-85f7-b001ab6c4419.png)
-
-### 即時測站
-- 設備: Esp32
-- 傳感器: MPU6050
-- 注意: 受噪聲影響 PGA>3.5 才視為一級地震
-
-## 發行
-- [Windows](https://github.com/ExpTechTW/TREM/releases)
+## 相關資料
+- [交通部中央氣象局](https://www.cwb.gov.tw/V8/C/)
+- [P波警報器強震網](https://palert.earth.sinica.edu.tw/)
+- [防災科研](https://www.bosai.go.jp/)
+- [日本気象庁](https://www.jma.go.jp/jma/index.html)
+- [中国福建省地震局](http://www.fjdzj.gov.cn/)
+- [TREM GitHub](https://github.com/ExpTechTW/TREM)
+- [Discord](https://discord.gg/5dbHqV8ees)
 
 ## 貢獻者
-- 請見程式內 `設定` >> `關於` 頁面
+- whes1015 `程式開發` `文檔`
+- eggrollpvp `資料處理` `文檔`
 
-------
-
-## 發佈規則
-- 如果新版本中有錯誤，且尚未列出，請將錯誤資訊提交到 ```issue```
-- 如果您使用任何形式的辱罵性或貶義性語言給其他用戶，您將永遠被封禁！
-- 不要發送重複無意義內容至 ```issue```，否則您將永遠被封禁！
-- 若有任何問題或建議，歡迎提出
-
-## 合作
-- 若有任何可以改進的地方，歡迎使用 ```Pull requests``` 來提交
+#### 2022/07/11 初稿
