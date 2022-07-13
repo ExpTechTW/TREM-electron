@@ -11,7 +11,7 @@
 
 ## 文檔
 - [TREM](https://hackmd.io/@n5w-HNYMQUmvhV6t1kor5g/Bkqtwduo9)
-- [TREM TSS](https://hackmd.io/@n5w-HNYMQUmvhV6t1kor5g/r1egEt_s5)
+- [TREM TAS](https://hackmd.io/@n5w-HNYMQUmvhV6t1kor5g/r1egEt_s5)
 
 ## 聲明
 #### 強震即時警報來源
