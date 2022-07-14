@@ -1,7 +1,7 @@
 # TREM
 [![Discord](https://img.shields.io/discord/926545182407688273?color=%237289DA&logo=discord&logoColor=white)](https://discord.gg/5dbHqV8ees)
 ### **Taiwan Real-time Earthquake Monitoring**
-## **台灣實時地震監測**
+## **台灣即時地震監測**
 
 ## 索引
 - [文檔](#文檔)
