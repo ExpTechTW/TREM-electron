@@ -1,0 +1,27 @@
+name: TREM
+
+on:
+  push:
+    branches: [ "Release" ]
+  pull_request:
+    branches: [ "Release" ]
+
+jobs:
+  build_node:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: TREM
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Restore dependencies
+      run: npm ci
+    - name: Lint
+      run: npm run lint
+    - name: Build
+      run: npm run dist
