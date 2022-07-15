@@ -1,0 +1,494 @@
+<html lang="zh-Hant">
+
+<head>
+    <title id="title">TREM | 設定</title>
+    <meta charset="utf-8" />
+    <meta content="TREM | 設定" property="og:title" />
+    <meta content="Taiwan Real-time Earthquake Monitoring" property="og:description" />
+    <meta content="https://exptechtw.github.io/" property="og:url" />
+    <meta content="https://raw.githubusercontent.com/ExpTechTW/ExpTechTW.github.io/Release/image/ExpTech.jpg"
+        property="og:image" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="../css/setting.css" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+</head>
+
+<body class="index md3-dark">
+    <header id="titlebar">
+        <div id="drag-region">
+            <div id="window-title">
+                <span></span>
+            </div>
+            <div id="window-controls">
+                <div class="button" id="min-button">
+                    <span class="material-symbols-rounded">remove</span>
+                </div>
+
+                <div class="button" id="max-button">
+                    <span class="material-symbols-rounded">check_box_outline_blank</span>
+                </div>
+
+                <div class="button" id="restore-button">
+                    <span class="material-symbols-rounded">close_fullscreen</span>
+                </div>
+
+                <div class="button" id="close-button">
+                    <span class="material-symbols-rounded">close</span>
+                </div>
+
+            </div>
+        </div>
+    </header>
+    <div id="modal-overlay">
+        <!--
+        <div class="dialog success">
+            <span class="material-symbols-rounded dialog-icon">check</span>
+            <span class="dialog-headline">Webhook 測試</span>
+            <span class="dialog-supportText">已成功發送 Webhook 測試訊息</span>
+            <button class="flat-button">OK</button>
+        </div>
+        -->
+    </div>
+    <div class="main" id="main">
+        <div class="titlebar">
+            <span class="material-symbols-rounded headline-medium">settings</span>
+            <span class="headline-medium">設定</span>
+        </div>
+        <div class="setting-container">
+            <div class="nav">
+                <div class="active" onclick="setList('EEW', this)" id="#EEW" role="button" tabindex="0">
+                    <span>強震即時警報</span>
+                </div>
+                <div onclick="setList('Screen', this, event)" onkeydown="setList('Screen', this, event)" id="#Screen"
+                    role="button" tabindex="0">
+                    <span>畫面</span>
+                </div>
+                <div onclick="setList('Audio', this, event)" onkeydown="setList('Audio', this, event)" id="#Audio"
+                    role="button" tabindex="0">
+                    <span>音效</span>
+                </div>
+                <div onclick="setList('Other', this, event)" onkeydown="setList('Other', this, event)" id="#Other"
+                    role="button" tabindex="0">
+                    <span>其他</span>
+                </div>
+                <div onclick="setList('About', this, event)" onkeydown="setList('About', this, event)" id="#About"
+                    role="button" tabindex="0">
+                    <span>關於</span>
+                </div>
+                <div class="client-info-container">
+                    <div id="client-version"></div>
+                    <div id="client-os"></div>
+                    <div id="client-uuid">UUID</div>
+                    <div id="client-license">Licensed under AGPL-3.0</div>
+                </div>
+            </div>
+            <div class="list" id="list">
+                <div class="list-container show" id="EEW">
+                    <div class="control-title">強震即時警報</div>
+                    <div class="control-container">
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">所在地</span>
+                                <span class="option-label-description">設定所在地</span>
+                            </div>
+                            <div class="control">
+                                <select id="location.city" name="city" onchange="SelectSave('location.city')">
+                                </select>
+                                <select id="location.town" name="town" onchange="SelectSave('location.town')">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">接收震度</span>
+                                <span class="option-label-description">所在地超過「接收震度」時觸發 強震即時警報</span>
+                            </div>
+                            <div class="control">
+                                <select id="eew.Intensity" name="city" onchange="SelectSave('eew.Intensity')">
+                                    <option value="0">0 級</option>
+                                    <option value="1">1 級</option>
+                                    <option value="2">2 級</option>
+                                    <option value="3">3 級</option>
+                                    <option value="4">4 級</option>
+                                    <option value="5">5 弱</option>
+                                    <option value="6">5 強</option>
+                                    <option value="7">6 弱</option>
+                                    <option value="8">6 強</option>
+                                    <option value="9">7 級</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="filled-tonal-button" onclick="testEEW()" style="margin-top: 10px;">
+                            <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
+                            <span class="filled-tonal-button-label">測試警報</span>
+                        </button>
+                    </div>
+                    <div class="control-title">接收參數</div>
+                    <div class="control-container">
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">接收台灣以外的地震速報</span>
+                                <span class="option-label-description">日本 氣象廳 | 中國 福建省地震局</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="accept.eew.jp" onclick="CheckSave('accept.eew.jp')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">計算場址效應</span>
+                                <span class="option-label-description">一種影響地震震度的因素 | 僅適用於「各地預估震度」</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="earthquake.siteEffect"
+                                    onclick="CheckSave('earthquake.siteEffect')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">自適應波速</span>
+                                <span class="option-label-description">根據震中距計算 P波 S波 抵達時間</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="auto.waveSpeed" onclick="CheckSave('auto.waveSpeed')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">即時測站</span>
+                                <span class="option-label-description">顯示 TREM 測站的即時數據</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="earthquake.Real-time"
+                                    onclick="CheckSave('earthquake.Real-time')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-container" id="Screen">
+                    <div class="control-title">強震即時警報</div>
+                    <div class="control-container">
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">顯示視窗</span>
+                                <span class="option-label-description">在收到地震速報時自動開啟視窗</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="eew.show" onclick="CheckSave('eew.show')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">視窗覆蓋</span>
+                                <span class="option-label-description">將視窗顯示於最上層</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="eew.cover" onclick="CheckSave('eew.cover')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">震波平滑</span>
+                                <span class="option-label-description">以較短的間隔對畫面進行渲染</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="shock.smoothing" onclick="CheckSave('shock.smoothing')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">顯示 P 波</span>
+                                <span class="option-label-description">先到達的「地震波」</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="shock.p" onclick="CheckSave('shock.p')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-title">地震報告</div>
+                    <div class="control-container">
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">顯示視窗</span>
+                                <span class="option-label-description">在收到地震報告時自動開啟視窗</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="report.show" onclick="CheckSave('report.show')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">視窗覆蓋</span>
+                                <span class="option-label-description">將視窗顯示於最上層</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="report.cover" onclick="CheckSave('report.cover')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-title">即時測站</div>
+                    <div class="control-container">
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">顯示測站</span>
+                                <span class="option-label-description">顯示在地圖上的即時測站</span>
+                            </div>
+                            <div class="control">
+                                <select id="Real-time.station" name="town" onchange="SelectSave('Real-time.station')">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">顯示視窗</span>
+                                <span class="option-label-description">自動開啟視窗</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="Real-time.show" onclick="CheckSave('Real-time.show')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">視窗覆蓋</span>
+                                <span class="option-label-description">將視窗顯示於最上層</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="Real-time.cover" onclick="CheckSave('Real-time.cover')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-title">地圖</div>
+                    <div class="control-container">
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">自動縮放</span>
+                                <span class="option-label-description">讓程式自動縮放地圖</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="map.autoZoom" onclick="CheckSave('map.autoZoom')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-container" id="Audio">
+                    <div class="control-title">音效</div>
+                    <div class="control-container">
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">播放 強震即時警報 音效</span>
+                                <span class="option-label-description">在收到「強震即時警報」時播放音效</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="eew.audio" onclick="CheckSave('eew.audio')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <button class="filled-tonal-button" onclick="testAudio('EEW', this)"
+                            style="margin: 5px 0 16px 0;">
+                            <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                            <span class="filled-tonal-button-label">測試音效</span>
+                        </button>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">播放 地震報告 音效</span>
+                                <span class="option-label-description">在收到「地震報告」時播放音效</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="report.audio" onclick="CheckSave('report.audio')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <button class="filled-tonal-button" onclick="testAudio('Report', this)"
+                            style="margin: 5px 0 16px 0;">
+                            <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                            <span class="filled-tonal-button-label">測試音效</span>
+                        </button>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">播放 即時測站 音效</span>
+                                <span class="option-label-description">在收到「即時測站」時播放音效</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="Real-time.audio" onclick="CheckSave('Real-time.audio')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <button class="filled-tonal-button" onclick="testAudio('PGA1', this)"
+                            style="margin: 5px 0 16px 0;">
+                            <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                            <span class="filled-tonal-button-label">測試音效</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="list-container" id="Other">
+                    <div class="control-title">主題</div>
+                    <div class="control-container">
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">顏色</span>
+                                <span class="option-label-description">整個 UI 的配色</span>
+                            </div>
+                            <div class="control">
+                                <div id="theme-color" class="color-input-wrapper">
+                                    <input class="color-input" type="color" id="theme.color" name="color"
+                                        oninput="colorUpdate();" onchange="TextSave('theme.color');">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">深色模式</span>
+                                <span class="option-label-description">保護你的眼睛，降低耗電量</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="theme.dark" onclick="CheckSave('theme.dark')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="control-title">相容性</div>
+                    <div class="control-container">
+                        <div class="option-container">
+                            <div class="option-label">
+                                <span class="option-label-title">停用硬體加速</span>
+                                <span class="option-label-description">開啟「可能」加快渲染速度 若渲染速度變慢請關閉 | 重啟程式生效</span>
+                            </div>
+                            <label class="md3 switch">
+                                <input type="checkbox" id="GPU.disable" onclick="CheckSave('GPU.disable')">
+                                <span class="slider">
+                                    <span class="material-symbols-rounded icon">done</span>
+                                </span>
+                            </label>
+                        </div>
+                        <button id="HAReloadButton" class="filled-tonal-button" onclick="restart()"
+                            style="display:none; margin-top: 4px;">
+                            <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
+                            <span class="filled-tonal-button-label">重新啟動</span>
+                        </button>
+                    </div>
+                    <div class="control-title">Webhook</div>
+                    <div class="control-container">
+                        <div class="option-container input-field">
+                            <div class="option-label">
+                                <span class="option-label-title">Webhook 網址</span>
+                                <span class="option-label-description">填入 Discord Webhook URL 重播模式可以檢視發送訊息</span>
+                            </div>
+                            <input class="input-field" id="webhook.url" type="url" onchange="TextSave('webhook.url')"
+                                placeholder="https://discord.com/api/webhooks/..." />
+                        </div>
+                        <div class="option-container input-field">
+                            <div class="option-label">
+                                <span class="option-label-title">Webhook 自定義</span>
+                                <span class="option-label-description">
+                                    更改 Webhook 發送內容
+                                    發報單位 <code>%Provider%</code>
+                                    北緯　　 <code>%NorthLatitude%</code>
+                                    東經　　 <code>%EastLongitude%</code>
+                                    深度　　 <code>%Depth%</code>
+                                    規模　　 <code>%Scale%</code>
+                                    發震時間 <code>%Time%</code>
+                                </span>
+                            </div>
+                            <input class="input-field" id="webhook.body" type="text"
+                                onchange="TextSave('webhook.body')" />
+                            <button class="filled-tonal-button" onclick="webhook()" style="margin-top: 16px;"><span
+                                    class="filled-tonal-button-label">測試 Webhook</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-container" id="About">
+                    <div class="control-title">Taiwan Real-time Earthquake Monitoring</div>
+                    <div class="external-link" role="link" onclick="openURL('https:\/\/github.com/ExpTechTW/TREM')">
+                        GitHub<span class="material-icons">launch</span></div>
+                    <div>
+                        <ul>貢獻者
+                            <li>whes1015</li>
+                            <li>M789</li>
+                            <li>eggrollpvp</li>
+                            <li>布丁Timyaya</li>
+                            <li>Kamiya</li>
+                        </ul>
+                        <div class="control-title">YouTube 合作夥伴</div>
+                        <div class="external-link"
+                            onclick="openURL('https:\/\/www.youtube.com/channel/UCJUeRIt6jKSE-4jP7QB70kw')">
+                            布丁Timyaya 地震記錄<span class="material-icons">launch</span></div>
+
+                        <div class="control-title">Discord 群組</div>
+                        <div class="external-link" onclick="openURL('https:\/\/discord.gg/5dbHqV8ees')">ExpTech
+                            Studio<span class="material-icons">launch</span></div>
+                        <div class="external-link" onclick="openURL('https:\/\/discord.gg/7sacMKp')">地牛記錄小組
+                            TWERG<span class="material-icons">launch</span></div>
+                    </div>
+
+                    <button class="flat-button" onclick="dumpUpload()">DUMP</button>
+                    <button class="flat-button" onclick="reset()">重置設定</button>
+                    <button class="flat-button" onclick="openSettingFile()">開啟設定檔</button>
+                    <button class="flat-button" onclick="openLogFolder()">開啟日誌資料夾</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/theme.js"></script>
+    <script src="../js/globals.js"></script>
+    <!--
+    <script>
+        const bytenode = require('bytenode')
+        bytenode.runBytecodeFile(localStorage["dirname"] + '/js/setting.jar')
+        bytenode.runBytecodeFile(localStorage["dirname"] + '/js/dump.jar')
+    </script>
+    -->
+    <script src="../js/dump.js"></script>
+    <script src="../js/setting.js"></script>
+</body>
+
+</html>
