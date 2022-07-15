@@ -992,7 +992,7 @@ async function FCMdata(data) {
 		}
 
 		let Intensity = IntensityN(level);
-		if (Intensity < Number(CONFIG["eew.Intensity"])) {
+		if (Intensity < Number(CONFIG["eew.Intensity"]) && !json.Replay) {
 			TimerDesynced = false;
 			return;
 		}
@@ -1063,7 +1063,7 @@ async function FCMdata(data) {
 			audioPlay("./audio/Alert.wav");
 		}
 		let _time = -1;
-		let Stamp = 0;
+		let stamp = 0;
 		if (json.ID != Info.Alert) {
 			focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 7.5);
 			Info.Alert = json.ID;
@@ -1071,8 +1071,8 @@ async function FCMdata(data) {
 			if (t != null) clearInterval(t);
 			t = setInterval(() => {
 				value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
-				if (Stamp != value && !audioLock) {
-					Stamp = value;
+				if (stamp != value && !audioLock) {
+					stamp = value;
 					if (_time >= 0) {
 						audioPlay("./audio/1/ding.wav");
 						_time++;
