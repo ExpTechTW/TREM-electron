@@ -1,0 +1,42 @@
+body {
+    --md-sys-color-background: 255, 251, 254;
+    --md-sys-color-on-background: 28, 27, 31;
+    --md-sys-color-primary: 103, 81, 164;
+    --md-sys-color-primary-container: 234, 221, 255;
+    --md-sys-color-on-primary-container: 33, 0, 94;
+    --md-sys-color-on-primary: 255, 255, 255;
+    --md-sys-color-secondary: 98, 91, 113;
+    --md-sys-color-secondary-container: 232, 222, 248;
+    --md-sys-color-on-secondary-container: 30, 25, 43;
+    --md-sys-color-surface: 255, 251, 254;
+    --md-sys-color-on-surface: 28, 27, 31;
+    --md-sys-color-surface-variant: 231, 224, 236;
+    --md-sys-color-on-surface-variant: 73, 69, 78;
+    --md-sys-color-surface-tint: var(--md-sys-color-primary);
+    --md-sys-color-outline: 121, 116, 126;
+}
+body.md3-dark {
+    --md-sys-color-background: 28, 27, 31;
+    --md-sys-color-on-background: 230, 225, 229;
+    --md-sys-color-primary: 208, 188, 255;
+    --md-sys-color-primary-container: 79, 55, 139;
+    --md-sys-color-on-primary-container: 234, 221, 255;
+    --md-sys-color-on-primary: 55, 30, 115;
+    --md-sys-color-secondary: 204, 194, 220;
+    --md-sys-color-secondary-container: 74, 68, 88;
+    --md-sys-color-on-secondary-container: 232, 222, 248;
+    --md-sys-color-surface: 28, 27, 31;
+    --md-sys-color-on-surface: 230, 225, 229;
+    --md-sys-color-surface-variant: 73, 69, 79;
+    --md-sys-color-on-surface-variant: 202, 196, 208;
+    --md-sys-color-surfac-tint: var(--md-sys-color-primary);
+    --md-sys-color-outline: 147, 143, 153;
+}
+.material-symbols-rounded {
+  vertical-align: top;
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 48
+}

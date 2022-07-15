@@ -1,0 +1,42 @@
+.dialog {
+    z-index: 25566;
+    user-select: none;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(90deg, rgba(var(--md-sys-color-surfac-tint), .11) 0%, rgba(var(--md-sys-color-surfac-tint), .11) 100%) rgb(var(--md-sys-color-surface));
+    padding: 24px;
+    border-radius: 28px;
+}
+
+.dialog .dialog-icon {
+    align-self: center;
+    color: rgb(var(--md-sys-color-secondary));
+    font-size: 32px;
+}
+
+.dialog .dialog-headline {
+    align-self: center;
+    color: rgb(var(--md-sys-color-on-surface));
+    line-height: 32px;
+    font-size: 24px;
+    font-family: 'Noto Sans TC', sans-serif;
+    margin: 16px 0;
+}
+
+.dialog .dialog-button {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.dialog .dialog-supportText {
+    align-self: center;
+    color: rgb(var(--md-sys-color-on-surface-variant));
+    line-height: 20px;
+    font-size: 14px;
+    font-family: 'Noto Sans TC', sans-serif;
+    margin-bottom: 24px;
+}
