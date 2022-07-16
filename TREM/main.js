@@ -185,19 +185,25 @@ ipcMain.on("restart", () => {
 	app.quit();
 });
 
-ipcMain.on("screenshotEEW", () => {
-	screenshot("EEW.png");
+ipcMain.on("screenshotEEW", async (event, json) => {
+	const folder = path.join(app.getPath("userData"), "EEW");
+	if (!fs.existsSync(folder))
+		fs.mkdirSync(folder);
+	const list = fs.readdirSync(folder);
+	for (let index = 0; index < list.length; index++) {
+		const date = fs.statSync(`${folder}/${list[index]}`);
+		if (new Date().getTime() - date.ctimeMs > 86400000) fs.unlinkSync(`${folder}/${list[index]}`);
+	}
+	const filename = `${json.ID}-${json.Version}.png`;
+	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
 });
 
-ipcMain.on("screenshot", () => {
-	screenshot("screenshot" + Date.now() + ".png");
-	shell.showItemInFolder(path.join(folder, filename));
-});
-
-async function screenshot(filename) {
+ipcMain.on("screenshot", async () => {
 	const folder = path.join(app.getPath("userData"), "Screenshots");
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);
+	const filename = "screenshot" + Date.now() + ".png";
 	console.log(filename);
 	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
-}
+	shell.showItemInFolder(path.join(folder, filename));
+});

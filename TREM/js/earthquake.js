@@ -1323,7 +1323,7 @@ async function FCMdata(data) {
 			}
 		}, speed);
 		setTimeout(() => {
-			ipcRenderer.send("screenshotEEW");
+			ipcRenderer.send("screenshotEEW", json);
 			setTimeout(() => {
 				if (CONFIG["webhook.url"] != "") {
 					let Now = NOW.getFullYear() +
