@@ -111,7 +111,7 @@ const DEFAULT_CONFIG = {
 						"name": "TREM | 台灣實時地震監測",
 					},
 					"title"       : "",
-					"description" : "%Time% 左右發生顯著有感地震\n\n東經: %EastLongitude% 度\n北緯: %NorthLatitude% 度\n深度: %Depth% 公里\n規模: %Scale%\n\n發報單位: %Government%\n\n慎防強烈搖晃，就近避難 [趴下、掩護、穩住]",
+					"description" : "%Time% 左右發生顯著有感地震\n\n東經: %EastLongitude% 度\n北緯: %NorthLatitude% 度\n深度: %Depth% 公里\n規模: %Scale%\n\n發報單位: %Provider%\n\n慎防強烈搖晃，就近避難 [趴下、掩護、穩住]",
 					"color"       : 4629503,
 					"image"       : {
 						"url": "",
