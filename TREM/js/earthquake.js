@@ -44,6 +44,7 @@ let station = {};
 let PGAjson = {};
 let MainClock = null;
 let geojson = null;
+let Punix = 0;
 // #endregion
 
 // #region override Date.format()
@@ -320,7 +321,7 @@ function init() {
 						} else
 							delete Pga[Object.keys(Json)[index]];
 					}
-					if (PAlert.data != undefined)
+					if (PAlert.data != undefined) {
 						for (let index = 0; index < PAlert.data.length; index++) {
 							if (NOW.getTime() - PAlert.timestamp > 30000) break;
 							if (pga[PAlert.data[index].TREM] == undefined)
@@ -352,6 +353,16 @@ function init() {
 								MAXPGA.intensity = PAlert.data[index].intensity;
 							}
 						}
+						if (NOW.getTime() - PAlert.timestamp < 30000 && Punix != PAlert.unix) {
+							Punix = PAlert.unix;
+							setTimeout(() => {
+								ipcRenderer.send("screenshotEEW", {
+									"ID"      : new Date().getTime(),
+									"Version" : 0,
+								});
+							}, 5000);
+						}
+					}
 					for (let index = 0; index < Object.keys(PGA).length; index++) {
 						map.removeLayer(PGA[Object.keys(PGA)[index]]);
 						delete PGA[Object.keys(PGA)[index]];
@@ -981,6 +992,12 @@ async function FCMdata(data) {
 			report: true,
 		});
 		if (CONFIG["report.audio"]) audioPlay("./audio/Report.wav");
+		setTimeout(() => {
+			ipcRenderer.send("screenshotEEW", {
+				"ID"      : json.No,
+				"Version" : 0,
+			});
+		}, 5000);
 	} else if (json.Function == "earthquake" || ((json.Function == "JP_earthquake" || json.Function == "CN_earthquake") && CONFIG["accept.eew.jp"])) {
 		dump({ level: 0, message: "Got EEW", origin: "API" });
 		console.debug(json);
