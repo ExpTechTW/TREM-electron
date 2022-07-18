@@ -900,6 +900,48 @@ ipcMain.on("start", () => {
 		}, 0);
 		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer} | MD5 >> ${MD5Check}`, origin: "Initialization" });
 		init();
+		if (localStorage.Test != undefined)
+			setTimeout(() => {
+				if (localStorage.TestID != undefined) {
+					delete localStorage.Test;
+					let list = localStorage.TestID.split(",");
+					for (let index = 0; index < list.length; index++)
+						setTimeout(() => {
+							dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+							let data = {
+								"APIkey"        : "https://github.com/ExpTechTW",
+								"Function"      : "earthquake",
+								"Type"          : "test",
+								"FormatVersion" : 3,
+								"UUID"          : localStorage.UUID,
+								"ID"            : list[index],
+							};
+							dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+							axios.post(PostIP(), data)
+								.catch((error) => {
+									dump({ level: 2, message: error, origin: "Verbose" });
+								});
+						}, 1000);
+					delete localStorage.TestID;
+				} else {
+					delete localStorage.Test;
+					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+					let data = {
+						"APIkey"        : "https://github.com/ExpTechTW",
+						"Function"      : "earthquake",
+						"Type"          : "test",
+						"FormatVersion" : 3,
+						"UUID"          : localStorage.UUID,
+						"Addition"      : "TW",
+					};
+					if (CONFIG["accept.eew.jp"]) delete data["Addition"];
+					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+					axios.post(PostIP(), data)
+						.catch((error) => {
+							dump({ level: 2, message: error, origin: "Verbose" });
+						});
+				}
+			}, 1000);
 	} catch (error) {
 		showDialog("error", "發生錯誤", `初始化過程中發生錯誤，您可以繼續使用此應用程式，但無法保證所有功能皆能繼續正常運作。\n\n如果這是您第一次看到這個訊息，請嘗試重新啟動應用程式。\n如果這個錯誤持續出現，請到 TREM Discord 伺服器回報問題。\n\n錯誤訊息：${error}`);
 		$("#load").delay(1000).fadeOut(1000);
@@ -932,48 +974,6 @@ ipcMain.on("updateTheme", () => {
 		}).addTo(mapTW);
 	}
 });
-if (localStorage.Test != undefined)
-	setTimeout(() => {
-		if (localStorage.TestID != undefined) {
-			delete localStorage.Test;
-			let list = localStorage.TestID.split(",");
-			for (let index = 0; index < list.length; index++)
-				setTimeout(() => {
-					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-					let data = {
-						"APIkey"        : "https://github.com/ExpTechTW",
-						"Function"      : "earthquake",
-						"Type"          : "test",
-						"FormatVersion" : 3,
-						"UUID"          : localStorage.UUID,
-						"ID"            : list[index],
-					};
-					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-					axios.post(PostIP(), data)
-						.catch((error) => {
-							dump({ level: 2, message: error, origin: "Verbose" });
-						});
-				}, 1000);
-			delete localStorage.TestID;
-		} else {
-			delete localStorage.Test;
-			dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-			let data = {
-				"APIkey"        : "https://github.com/ExpTechTW",
-				"Function"      : "earthquake",
-				"Type"          : "test",
-				"FormatVersion" : 3,
-				"UUID"          : localStorage.UUID,
-				"Addition"      : "TW",
-			};
-			if (CONFIG["accept.eew.jp"]) delete data["Addition"];
-			dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-			axios.post(PostIP(), data)
-				.catch((error) => {
-					dump({ level: 2, message: error, origin: "Verbose" });
-				});
-		}
-	}, 1000);
 // #endregion
 
 // #region EEW
