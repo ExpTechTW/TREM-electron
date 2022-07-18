@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "4.0.0-pre.4",
+  "version": "4.0.0-pre.6",
   "description": "台灣即時地震監測",
   "main": "main.js",
   "scripts": {
@@ -64,6 +64,7 @@
     "electron-fcm-push-receiver": "^2.1.7",
     "fs": "^0.0.1-security",
     "jquery": "^3.6.0",
+    "lodash": "^4.17.21",
     "ws": "^8.8.0"
   }
 }

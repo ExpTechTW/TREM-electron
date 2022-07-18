@@ -69,6 +69,7 @@ function createSettingWindow() {
 		minHeight      : 600,
 		minWidth       : 800,
 		frame          : false,
+		transparent    : true,
 		show           : false,
 		webPreferences : {
 			nodeIntegration  : true,
@@ -79,7 +80,7 @@ function createSettingWindow() {
 	SettingWindow.loadFile("./page/setting.html");
 	SettingWindow.setMenu(null);
 	SettingWindow.on("ready-to-show", () => {
-		SettingWindow.show();
+		setTimeout(() => SettingWindow.show(), 500);
 	});
 	SettingWindow.on("close", () => {
 		SettingWindow = null;

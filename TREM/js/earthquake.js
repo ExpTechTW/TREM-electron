@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable prefer-const */
 const { BrowserWindow, shell } = require("@electron/remote");
+const _ = require("lodash");
 
 // #region 變數
 let Stamp = 0;
@@ -92,51 +93,39 @@ Date.prototype.format =
 // #endregion
 
 // #region 初始化
-try {
-	setInterval(() => {
-		if (DATAstamp != 0 && Stamp != DATAstamp) {
-			Stamp = DATAstamp;
-			FCMdata(DATA);
-		}
-	}, 0);
-	dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer} | MD5 >> ${MD5Check}`, origin: "Initialization" });
-	init();
-} catch (error) {
-	alert("錯誤!! 請到 TREM 官方 Discord 回報");
-	dump({ level: 2, message: error, origin: "Initialization" });
-}
 let win = BrowserWindow.fromId(process.env.window * 1);
 win.setAlwaysOnTop(false);
-const time = document.getElementById("time");
-
-setInterval(() => {
-	if (CONFIG["location.city"] != Check.city || CONFIG["location.town"] != Check.town) {
-		Check.city = CONFIG["location.city"];
-		Check.town = CONFIG["location.town"];
-		setUserLocationMarker();
-	}
-	if (TimerDesynced)
-		time.classList.add("desynced");
-	else {
-		if (time.classList.contains("desynced"))
-			time.classList.remove("desynced");
-		time.innerText = NOW.format("YYYY/MM/DD HH:mm:ss");
-	}
-	if (Object.keys(Tsunami).length != 0)
-		if (NOW.getTime() - Tsunami.Time > 240000) {
-			map.removeLayer(Tsunami.Cross);
-			delete Tsunami.Cross;
-			delete Tsunami.Time;
-			focus();
-		}
-
-	if (Report != 0 && NOW.getTime() - Report > 600000) {
-		Report = NOW.getTime();
-		ReportGET({});
-	}
-}, 200);
 
 function init() {
+	const time = document.getElementById("time");
+
+	setInterval(() => {
+		if (CONFIG["location.city"] != Check.city || CONFIG["location.town"] != Check.town) {
+			Check.city = CONFIG["location.city"];
+			Check.town = CONFIG["location.town"];
+			setUserLocationMarker();
+		}
+		if (TimerDesynced)
+			time.classList.add("desynced");
+		else {
+			if (time.classList.contains("desynced"))
+				time.classList.remove("desynced");
+			time.innerText = NOW.format("YYYY/MM/DD HH:mm:ss");
+		}
+		if (Object.keys(Tsunami).length != 0)
+			if (NOW.getTime() - Tsunami.Time > 240000) {
+				map.removeLayer(Tsunami.Cross);
+				delete Tsunami.Cross;
+				delete Tsunami.Time;
+				focus();
+			}
+
+		if (Report != 0 && NOW.getTime() - Report > 600000) {
+			Report = NOW.getTime();
+			ReportGET({});
+		}
+	}, 200);
+
 	map = L.map("map", {
 		attributionControl : false,
 		closePopupOnClick  : false,
@@ -229,8 +218,7 @@ function init() {
 				"Type"          : "TREM",
 				"FormatVersion" : 1,
 			};
-
-			axios.post("https://exptech.mywire.org:1015", data)
+			axios.post(PostIP(), data)
 				.then((response) => {
 					for (let index = 0; index < Object.keys(Station).length; index++) {
 						map.removeLayer(Station[Object.keys(Station)[index]]);
@@ -374,13 +362,10 @@ function init() {
 							delete pga[Object.keys(pga)[index]];
 							index--;
 						} else {
-							let Pmarker = L.polygon(PGAjson[Object.keys(pga)[index].toString()], {
+							PGA[Object.keys(pga)[index]] = L.polygon(PGAjson[Object.keys(pga)[index].toString()], {
 								color     : color(Intensity),
 								fillColor : "transparent",
-							});
-							map.addLayer(Pmarker);
-							Pmarker.setZIndexOffset(1000 + Intensity);
-							PGA[Object.keys(pga)[index]] = Pmarker;
+							}).addTo(map);
 							PGAaudio = true;
 						}
 					}
@@ -541,7 +526,7 @@ function playNextAudio() {
 // #endregion
 
 // #region Report Data
-function ReportGET(eew) {
+function ReportGET() {
 	let data = {
 		"APIkey"        : "https://github.com/ExpTechTW",
 		"Function"      : "data",
@@ -550,18 +535,35 @@ function ReportGET(eew) {
 		"Value"         : 100,
 	};
 
-	axios.post("https://exptech.mywire.org:1015", data)
+	axios.post(PostIP(), data)
 		.then((response) => {
 			dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 			if (response.data["state"] == "Warn")
 				setTimeout(() => {
-					ReportGET(eew);
+					ReportGET();
 				}, 2000);
-			ReportList(response.data, eew);
+			ReportList(response.data);
 		})
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "EQReportFetcher" });
+			console.error(error);
 		});
+}
+async function getReportByData(data) {
+	try {
+		const list = await axios.post(PostIP(), {
+			"APIkey"        : "https://github.com/ExpTechTW",
+			"Function"      : "data",
+			"Type"          : "earthquake",
+			"FormatVersion" : 1,
+			"Value"         : 100,
+		});
+		return _.find(list?.response?.data?.response, data);
+	} catch (error) {
+		dump({ level: 2, message: error, origin: "EQReportFetcher" });
+		console.error(error);
+	}
+
 }
 // #endregion
 
@@ -588,8 +590,9 @@ async function ReportClick(time) {
 			"Value"         : ReportCache[time].earthquakeNo,
 		};
 		if (
-			ReportCache[time].earthquakeNo.toString().substring(3, 6) == "000"
-			|| await axios.post("https://exptech.mywire.org:1015", body)
+			// 確認是否為無編號地震
+			ReportCache[time].earthquakeNo % 1000 == 0
+			|| await axios.post(PostIP(), body)
 				.then((response) => {
 					let json = response.data.response;
 					if (json == undefined)
@@ -692,117 +695,127 @@ let openURL = url => {
 
 // #region Report list
 let roll = document.getElementById("rolllist");
-function ReportList(Data, eew) {
-	clear();
-	function clear() {
-		if (roll.childNodes.length != 0) {
-			roll.childNodes.forEach((childNodes) => {
-				roll.removeChild(childNodes);
-			});
-			clear();
-		} else
-			add(eew);
-
-	}
-
-	function add() {
-		for (let index = 0; index < Data.response.length; index++) {
-			let DATA = Data.response[index];
-			let Div = document.createElement("DIV");
-			let Level = IntensityI(DATA.data[0].areaIntensity);
-			let msg = "";
-			if (DATA.location.includes("("))
-				msg = DATA.location.substring(DATA.location.indexOf("(") + 1, DATA.location.indexOf(")")).replace("位於", "");
-			else
-				msg = DATA.location;
-
-			let star = "";
-			if (DATA.ID.length != 0) star += "↺ ";
-			if (DATA.earthquakeNo.toString().substring(3, 6) != "000") star += "✩ ";
-			if (index == 0)
-				if (eew.Time != undefined && eew.report == undefined) {
-					Div.style.backgroundColor = color(eew.Max);
-					Div.innerHTML =
-						`<div class="background" style="display: flex; align-items:center; padding:5%;padding-right: 1vh;">
-                    <div class="left" style="width:30%; text-align: center">
-                        <font color="white" size="3">最大震度</font><br><b><font color="white" size="7">${IntensityI(eew.Max)}</font></b>
-                    </div>
-                    <div class="middle" style="width:60%;">
-                        <b><font color="white" size="5">震源 調查中</font></b>
-                        <br><font color="white" size="3">${eew.Time}</font>
-                    </div>
-                    </div>`;
-					roll.appendChild(Div);
-					Div = document.createElement("DIV");
-					Div.innerHTML =
-						`<div class="background" style="display: flex; align-items:center;padding-right: 1vh;">
-                    <div class="left" style="width:20%; text-align: center;">
-                        <b><font color="white" size="6">${Level}</font></b>
-                    </div>
-                    <div class="middle" style="width:60%;">
-                        <b><font color="white" size="4">${star}${msg}</font></b>
-                        <br><font color="white" size="3">${DATA.originTime}</font>
-                    </div>
-                    <div class="right">
-                    <b><font color="white" size="5">M${DATA.magnitudeValue}</font></b>
-                    </div>
-                    </div>`;
-				} else
-					Div.innerHTML =
-						`<div class="background" style="display: flex; align-items:center; padding:2%;padding-right: 1vh;">
-                    <div class="left" style="width:30%; text-align: center;">
-                        <font color="white" size="3">最大震度</font><br><b><font color="white" size="7">${Level}</font></b>
-                    </div>
-                    <div class="middle" style="width:60%;">
-                        <b><font color="white" size="4">${star}${msg}</font></b>
-                        <br><font color="white" size="2">${DATA.originTime}</font>
-                        <br><b><font color="white" size="6">M${DATA.magnitudeValue} </font></b><br><font color="white" size="2"> 深度: </font><b><font color="white" size="4">${DATA.depth}km</font></b>
-                    </div>
-                </div>`;
-
-			else
-				Div.innerHTML =
-					`<div class="background" style="display: flex; align-items:center;padding-right: 1vh;">
-                <div class="left" style="width:20%; text-align: center;">
-                    <b><font color="white" size="6">${Level}</font></b>
-                </div>
-                <div class="middle" style="width:60%;">
-                    <b><font color="white" size="4">${star}${msg}</font></b>
-                    <br><font color="white" size="3">${DATA.originTime}</font>
-                </div>
-                <div class="right">
-                <b><font color="white" size="5">M${DATA.magnitudeValue}</font></b>
-                </div>
-            </div>`;
-			Div.style.backgroundColor = color(DATA.data[0].areaIntensity);
-			ReportCache[DATA.originTime] = Data.response[index];
-			Div.addEventListener("click", (event) => {
-				if (event.detail == 2 && DATA.ID.length != 0) {
-					localStorage.Test = true;
-					localStorage.TestID = DATA.ID;
-					ipcRenderer.send("restart");
-				} else
-					setTimeout(() => {
-						ReportClick(DATA.originTime);
-					}, 100);
-			});
-			roll.appendChild(Div);
-		}
-		if (eew.report != undefined) {
-			ReportClick(Data.response[0].originTime);
-			setTimeout(() => {
-				if (ReportMarkID != null) {
-					ReportMarkID = null;
-					for (let index = 0; index < MarkList.length; index++)
-						map.removeLayer(MarkList[index]);
-
-					focus();
-				}
-			}, 30000);
-		}
-	}
-
+function ReportList(Data) {
+	roll.replaceChildren();
+	for (const report of Data.response)
+		addReport(report);
 }
+
+function addReport(report, prepend = false) {
+	let Level = IntensityI(report.data[0].areaIntensity);
+	let msg = "";
+	if (report.location.includes("("))
+		msg = report.location.substring(report.location.indexOf("(") + 1, report.location.indexOf(")")).replace("位於", "");
+	else
+		msg = report.location;
+
+	let star = "";
+	if (report.ID.length != 0) star += "↺ ";
+	if (report.earthquakeNo % 1000 != 0) star += "✩ ";
+
+	let Div = document.createElement("div");
+	if (report.Time != undefined && report.report == undefined) {
+		const report_container = document.createElement("div");
+		report_container.className = "report-container locating";
+
+		const report_intenisty_container = document.createElement("div");
+		report_intenisty_container.className = "report-intenisty-container";
+
+		const report_intenisty_title = document.createElement("span");
+		report_intenisty_title.className = "report-intenisty-title";
+		report_intenisty_title.innerText = "最大震度";
+		const report_intenisty_value = document.createElement("span");
+		report_intenisty_value.className = "report-intenisty-value";
+		report_intenisty_value.innerText = report.Max;
+		report_intenisty_container.append(report_intenisty_title, report_intenisty_value);
+
+
+		const report_detail_container = document.createElement("div");
+		report_detail_container.className = "report-detail-container";
+
+		const report_location = document.createElement("span");
+		report_location.className = "report-location";
+		report_location.innerText = "震源 調查中";
+		const report_time = document.createElement("span");
+		report_time.className = "report-time";
+		report_time.innerText = report.Time.replace(/-/g, "/");
+		report_detail_container.append(report_location, report_time);
+
+		report_container.append(report_intenisty_container, report_detail_container);
+		Div.append(report_container);
+		Div.style.backgroundColor = color(report.Max);
+	} else {
+		const report_container = document.createElement("div");
+		report_container.className = "report-container";
+
+		const report_intenisty_container = document.createElement("div");
+		report_intenisty_container.className = "report-intenisty-container";
+
+		const report_intenisty_title = document.createElement("span");
+		report_intenisty_title.className = "report-intenisty-title";
+		report_intenisty_title.innerText = "最大震度";
+		const report_intenisty_value = document.createElement("span");
+		report_intenisty_value.className = "report-intenisty-value";
+		report_intenisty_value.innerText = Level;
+		report_intenisty_container.append(report_intenisty_title, report_intenisty_value);
+
+
+		const report_detail_container = document.createElement("div");
+		report_detail_container.className = "report-detail-container";
+
+		const report_location = document.createElement("span");
+		report_location.className = "report-location";
+		report_location.innerText = `${star}${msg}`;
+		const report_time = document.createElement("span");
+		report_time.className = "report-time";
+		report_time.innerText = report.originTime.replace(/-/g, "/");
+		const report_magnitude = document.createElement("span");
+		report_magnitude.className = "report-magnitude";
+		report_magnitude.innerText = report.magnitudeValue.toFixed(1);
+		const report_depth = document.createElement("span");
+		report_depth.className = "report-depth";
+		report_depth.innerText = report.depth;
+		report_detail_container.append(report_location, report_time, report_magnitude, report_depth);
+
+		report_container.append(report_intenisty_container, report_detail_container);
+		Div.append(report_container);
+		Div.style.backgroundColor = color(report.data[0].areaIntensity);
+		ReportCache[report.originTime] = report;
+		Div.addEventListener("click", (event) => {
+			if (event.detail == 2 && report.ID.length != 0) {
+				localStorage.Test = true;
+				localStorage.TestID = report.ID;
+				ipcRenderer.send("restart");
+			} else
+				setTimeout(() => {
+					ReportClick(report.originTime);
+				}, 100);
+		});
+	}
+
+	if (prepend) {
+		const locating = document.querySelector(".report-detail-container.locating");
+		if (locating)
+			locating.replaceWith(Div.children[0]);
+		else
+			roll.prepend(Div);
+	} else
+		roll.append(Div);
+
+	if (report.report != undefined) {
+		ReportClick(Data.response[0].originTime);
+		setTimeout(() => {
+			if (ReportMarkID != null) {
+				ReportMarkID = null;
+				for (let index = 0; index < MarkList.length; index++)
+					map.removeLayer(MarkList[index]);
+
+				focus();
+			}
+		}, 30000);
+	}
+}
+
 // #endregion
 
 // #region 設定
@@ -877,6 +890,22 @@ function color(Intensity) {
 // #endregion
 
 // #region IPC
+ipcMain.on("start", () => {
+	try {
+		setInterval(() => {
+			if (DATAstamp != 0 && Stamp != DATAstamp) {
+				Stamp = DATAstamp;
+				FCMdata(DATA);
+			}
+		}, 0);
+		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer} | MD5 >> ${MD5Check}`, origin: "Initialization" });
+		init();
+	} catch (error) {
+		showDialog("error", "發生錯誤", `初始化過程中發生錯誤，您可以繼續使用此應用程式，但無法保證所有功能皆能繼續正常運作。\n\n如果這是您第一次看到這個訊息，請嘗試重新啟動應用程式。\n如果這個錯誤持續出現，請到 TREM Discord 伺服器回報問題。\n\n錯誤訊息：${error}`);
+		$("#load").delay(1000).fadeOut(1000);
+		dump({ level: 2, message: error, origin: "Initialization" });
+	}
+});
 ipcMain.on("testEEW", () => {
 	localStorage.Test = true;
 	ipcRenderer.send("restart");
@@ -884,23 +913,24 @@ ipcMain.on("testEEW", () => {
 ipcMain.on("updateTheme", () => {
 	console.log("updateTheme");
 	setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
-	map.removeLayer(mapLayer);
-	mapTW.removeLayer(mapLayerTW);
-	mapLayer = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw", {
-		maxZoom    : 14,
-		id         : CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10",
-		tileSize   : 512,
-		zoomOffset : -1,
-		minZoom    : 2,
-	}).addTo(map);
-	mapLayerTW = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw", {
-		maxZoom    : 14,
-		id         : CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10",
-		tileSize   : 512,
-		zoomOffset : -1,
-		minZoom    : 2,
-	}).addTo(mapTW);
-
+	if (mapLayer.options.id != (CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10")) {
+		map.removeLayer(mapLayer);
+		mapTW.removeLayer(mapLayerTW);
+		mapLayer = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw", {
+			maxZoom    : 14,
+			id         : CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10",
+			tileSize   : 512,
+			zoomOffset : -1,
+			minZoom    : 2,
+		}).addTo(map);
+		mapLayerTW = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw", {
+			maxZoom    : 14,
+			id         : CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10",
+			tileSize   : 512,
+			zoomOffset : -1,
+			minZoom    : 2,
+		}).addTo(mapTW);
+	}
 });
 if (localStorage.Test != undefined)
 	setTimeout(() => {
@@ -919,7 +949,7 @@ if (localStorage.Test != undefined)
 						"ID"            : list[index],
 					};
 					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-					axios.post("https://exptech.mywire.org:1015", data)
+					axios.post(PostIP(), data)
 						.catch((error) => {
 							dump({ level: 2, message: error, origin: "Verbose" });
 						});
@@ -938,7 +968,7 @@ if (localStorage.Test != undefined)
 			};
 			if (CONFIG["accept.eew.jp"]) delete data["Addition"];
 			dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-			axios.post("https://exptech.mywire.org:1015", data)
+			axios.post(PostIP(), data)
 				.catch((error) => {
 					dump({ level: 2, message: error, origin: "Verbose" });
 				});
@@ -988,9 +1018,9 @@ async function FCMdata(data) {
 			win.setAlwaysOnTop(false);
 		}
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
-		ReportGET({
-			report: true,
-		});
+		const report = await getReportByData({ earthquakeNo: json.ID, epicenterLon: json.EastLongitude, epicenterLat: json.NorthLatitude, depth: json.Depth, magnitudeValue: json.Scale });
+		addReport(report, true);
+
 		if (CONFIG["report.audio"]) audioPlay("./audio/Report.wav");
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {

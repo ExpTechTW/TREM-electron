@@ -5,7 +5,7 @@ input.input-field {
     height: 50px;
     color: rgb(var(--md-sys-color-on-surface));
     font-size: 16px;
-    font-family: 'Noto Sans TC', sans-serif;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     border: none;
     border-bottom: 2px solid rgb(var(--md-sys-color-on-surface-variant));
     outline: none;
@@ -14,7 +14,7 @@ input.input-field {
 input.input-field::placeholder {
     color: rgb(var(--md-sys-color-on-surface-variant));
     font-size: 16px;
-    font-family: 'Noto Sans TC', sans-serif;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
 }
 
 input.input-field:focus {

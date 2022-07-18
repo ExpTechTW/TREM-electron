@@ -1,3 +1,14 @@
+#modal-overlay {
+    display: none;
+    z-index: 25565;
+    background-color: rgba(0, 0, 0, .4);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
 .dialog {
     z-index: 25566;
     user-select: none;
@@ -23,7 +34,7 @@
     color: rgb(var(--md-sys-color-on-surface));
     line-height: 32px;
     font-size: 24px;
-    font-family: 'Noto Sans TC', sans-serif;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     margin: 16px 0;
 }
 
@@ -37,6 +48,7 @@
     color: rgb(var(--md-sys-color-on-surface-variant));
     line-height: 20px;
     font-size: 14px;
-    font-family: 'Noto Sans TC', sans-serif;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     margin-bottom: 24px;
+    white-space: pre-line;
 }

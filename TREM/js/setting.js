@@ -5,39 +5,36 @@ const os = require("node:os");
 let Loc;
 const win = getCurrentWindow();
 
-// When document has loaded, initialise
-document.onreadystatechange = (event) => {
+document.onreadystatechange = () => {
 	if (document.readyState == "complete")
 		handleWindowControls();
 
 };
 
-window.onbeforeunload = (event) => {
-	/* If window is reloaded, remove win event listeners
-    (DOM element listeners get auto garbage collected but not
-    Electron win listeners as the win is not dereferenced unless closed) */
+window.onbeforeunload = async () => {
+	await $(document.body).fadeOut(100).promise();
 	win.removeAllListeners();
+	win.destroy();
 };
 
 function handleWindowControls() {
 	// Make minimise/maximise/restore/close buttons work when they are clicked
-	document.getElementById("min-button").addEventListener("click", event => {
+	document.getElementById("min-button").addEventListener("click", () => {
 		win.minimize();
 	});
 
-	document.getElementById("max-button").addEventListener("click", event => {
+	document.getElementById("max-button").addEventListener("click", () => {
 		win.maximize();
 	});
 
-	document.getElementById("restore-button").addEventListener("click", event => {
+	document.getElementById("restore-button").addEventListener("click", () => {
 		win.unmaximize();
 	});
 
-	document.getElementById("close-button").addEventListener("click", event => {
+	document.getElementById("close-button").addEventListener("click", () => {
 		win.close();
 	});
 
-	// Toggle maximise/restore buttons when maximisation/unmaximisation occurs
 	toggleMaxRestoreButtons();
 	win.on("maximize", toggleMaxRestoreButtons);
 	win.on("unmaximize", toggleMaxRestoreButtons);
@@ -54,84 +51,6 @@ function handleWindowControls() {
 document.getElementById("client-version").innerText = `${app.getVersion()}`;
 document.getElementById("client-os").innerText = `${os.version()} (${os.release()})`;
 document.getElementById("client-uuid").title = `${localStorage["UUID"]}`;
-
-const lockScroll = state => {
-	if (state)
-		$(document).off("scroll", () => window.scrollTo(0, 0));
-	else
-		$(document).off("scroll");
-
-};
-
-const showDialog = (type, title, message, button = 0, customIcon, callback) => {
-	const container = document.getElementById("modal-overlay");
-	const icon = document.createElement("span");
-	icon.classList.add("material-symbols-rounded");
-	icon.classList.add("dialog-icon");
-	icon.textContent = customIcon != undefined ? customIcon : (type == "success" ? "check" : (type == "warn" ? "warning" : "error"));
-
-	const headline = document.createElement("span");
-	headline.classList.add("dialog-headline");
-	headline.textContent = title;
-
-	const supportingText = document.createElement("span");
-	supportingText.classList.add("dialog-supportText");
-	supportingText.innerHTML = message;
-
-	const dialog = document.createElement("div");
-	dialog.classList.add("dialog");
-
-	const closeDialog = event => {
-		if (!event.target.id.includes("dialog"))
-			if (event.target != container)
-				return;
-		lockScroll(false);
-		$("#modal-overlay").fadeOut({ duration: 100, complete: () => container.replaceChildren() }).delay(100).show();
-	};
-
-	const buttons = document.createElement("div");
-	buttons.classList.add("dialog-button");
-	if (button == 1) {
-		const Accept = document.createElement("button");
-		Accept.classList.add("flat-button");
-		Accept.id = "dialog-Accept";
-		Accept.textContent = "確定";
-		Accept.onclick = (...args) => {
-			closeDialog(...args);
-			callback();
-		};
-		buttons.appendChild(Accept);
-
-		const Cancel = document.createElement("button");
-		Cancel.classList.add("flat-button");
-		Cancel.id = "dialog-Cancel";
-		Cancel.textContent = "取消";
-		Cancel.onclick = closeDialog;
-		buttons.appendChild(Cancel);
-	} else {
-		const OK = document.createElement("button");
-		OK.classList.add("flat-button");
-		OK.id = "dialog-OK";
-		OK.textContent = "OK";
-		OK.onclick = closeDialog;
-		buttons.appendChild(OK);
-	}
-
-	dialog.appendChild(icon);
-	dialog.appendChild(headline);
-	dialog.appendChild(supportingText);
-	dialog.appendChild(buttons);
-	container.appendChild(dialog);
-	container.onclick = closeDialog;
-
-	$("#modal-overlay").fadeIn(50);
-
-	buttons.querySelector(":last-child").contentEditable = true;
-	buttons.querySelector(":last-child").focus();
-	buttons.querySelector(":last-child").contentEditable = false;
-	lockScroll(true);
-};
-
 
 const openURL = url => {
 	shell.openExternal(url);
@@ -299,7 +218,6 @@ function setList(args, el, event) {
 	currentnav.removeClass("active");
 	$(el).addClass("active");
 
-	currentel.fadeOut(100).removeClass("show").show();
 	changeel.children("div").each((i, e) => {
 		$(e).css("opacity", "0");
 		$(e).children().each((i2, e2) => {
@@ -307,22 +225,22 @@ function setList(args, el, event) {
 				$(e2).css("opacity", "0");
 		});
 	});
-	changeel.delay(100).hide().addClass("show").fadeIn(200);
-	$("#list")[0].scrollTo(0, 0);
+	changeel.hide().delay(100).addClass("show").fadeIn(200);
+	currentel.fadeOut(100).removeClass("show").show();
+	$("#list").delay(100)[0].scrollTo(0, 0);
+
 	const changeelchild = $(`#${args} > div`);
 
 	let delay = 0;
 	for (let i = 0; i < changeelchild.length; i++) {
 		$(changeelchild[i]).delay(delay + 40 * i).fadeTo(100, 1);
 		delay += 20;
-		console.log(delay, changeelchild[i].innerText);
 		const child = changeelchild[i].children;
 		if (child.length)
 			for (let j = 0; j < child.length; j++)
 				if (child[j].id != "HAReloadButton") {
 					$(child[j]).delay(delay).fadeTo(100, 1);
 					delay += 20;
-					console.log(delay, child[j].innerText);
 				}
 
 	}

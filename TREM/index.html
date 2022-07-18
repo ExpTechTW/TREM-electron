@@ -24,6 +24,16 @@
         <div id="loading">載入中...</div>
         <div id="footer">Powered by ExpTech</div>
     </div>
+    <div id="modal-overlay">
+        <!--
+    <div class="dialog success">
+        <span class="material-symbols-rounded dialog-icon">check</span>
+        <span class="dialog-headline">Webhook 測試</span>
+        <span class="dialog-supportText">已成功發送 Webhook 測試訊息</span>
+        <button class="flat-button">OK</button>
+    </div>
+    -->
+    </div>
     <button id="togglenav_btn" class="fab secondary elevate" onclick="toggleNav()">
         <span class="material-symbols-rounded">start</span>
     </button>
@@ -92,9 +102,6 @@
         </div>
     </div>
 
-    <audio id="audio-player">
-        <source src="" type="audio/wav">
-    </audio>
 
     <script src="./js/theme.js"></script>
     <script src="./js/globals.js"></script>
@@ -105,11 +112,7 @@
     <script src="./js/.GeoJson.js"></script>
     <script src="./js/ui.js"></script>
     <script src="./js/dump.js"></script>
-    <script>
-        const bytenode = require('bytenode')
-        localStorage["dirname"] = __dirname
-        bytenode.runBytecodeFile(__dirname + '/js/server.jar')
-    </script>
+    <script src="./js/server.js"></script>
     <script src="./js/earthquake.js"></script>
 </body>
 

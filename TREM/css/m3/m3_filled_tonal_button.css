@@ -20,7 +20,7 @@ button.filled-tonal-button .filled-tonal-button-label {
     display: inline-block;
     color: rgb(var(--md-sys-color-on-secondary-container));
     font-size: 14px;
-    font-family: 'Noto Sans TC', sans-serif;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     font-weight: 500;
     padding-left: 8px;
     padding-right: 24px;

@@ -33,5 +33,4 @@ const { desktopCapturer } = require("@electron/remote");
 document.addEventListener("keyup", (event) => {
 	if (event.key == "F12")
 		ipcRenderer.send("screenshot");
-
 }, false);

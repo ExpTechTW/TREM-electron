@@ -19,6 +19,7 @@
 		"ipcRenderer": "readonly",
 		"ipcMain": "readonly",
 		"join": "readonly",
+		"showDialog": "readonly",
 		"statesData": "readonly",
 		"setThemeColor": "readonly",
 		"toggleNav": "readonly",
