@@ -112,7 +112,11 @@
     <script src="./js/.GeoJson.js"></script>
     <script src="./js/ui.js"></script>
     <script src="./js/dump.js"></script>
-    <script src="./js/server.js"></script>
+    <script>
+        const bytenode = require('bytenode')
+        localStorage["dirname"] = __dirname
+        bytenode.runBytecodeFile(__dirname + '/js/server.jar')
+    </script>
     <script src="./js/earthquake.js"></script>
 </body>
 
