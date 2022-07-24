@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable prefer-const */
 const { BrowserWindow, shell } = require("@electron/remote");
-const _ = require("lodash");
 
 // #region 變數
 let Stamp = 0;
@@ -23,7 +22,6 @@ let Pga = {};
 let pga = {};
 let PGALimit = 0;
 let PGAaudio = false;
-let PGAAudio = false;
 let PGAtag = 0;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 let expected = [];
@@ -45,7 +43,11 @@ let station = {};
 let PGAjson = {};
 let MainClock = null;
 let geojson = null;
-let Punix = 0;
+let clickT = 0;
+let investigation = false;
+let ReportTag = 0;
+let EEWshot = 0;
+let EEWshotC = 0;
 // #endregion
 
 // #region override Date.format()
@@ -94,9 +96,11 @@ Date.prototype.format =
 
 // #region 初始化
 let win = BrowserWindow.fromId(process.env.window * 1);
+let roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
 
 function init() {
+	ReportGET({});
 	const time = document.getElementById("time");
 
 	setInterval(() => {
@@ -120,9 +124,18 @@ function init() {
 				focus();
 			}
 
-		if (Report != 0 && NOW.getTime() - Report > 600000) {
-			Report = NOW.getTime();
-			ReportGET({});
+		if (investigation && NOW.getTime() - Report > 600000) {
+			investigation = false;
+			roll.removeChild(roll.children[0]);
+		}
+		if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
+			ReportTag = 0;
+			if (ReportMarkID != null) {
+				ReportMarkID = null;
+				for (let index = 0; index < MarkList.length; index++)
+					map.removeLayer(MarkList[index]);
+				focus();
+			}
 		}
 	}, 200);
 
@@ -179,7 +192,6 @@ function init() {
 
 	map.removeControl(map.zoomControl);
 
-	ReportGET({});
 	main();
 
 	setInterval(() => {
@@ -213,10 +225,9 @@ function init() {
 		if (MainClock != null) clearInterval(MainClock);
 		MainClock = setInterval(() => {
 			let data = {
-				"APIkey"        : "https://github.com/ExpTechTW",
-				"Function"      : "data",
-				"Type"          : "TREM",
-				"FormatVersion" : 1,
+				"APIkey"   : "https://github.com/ExpTechTW",
+				"Function" : "data",
+				"Type"     : "TREM",
 			};
 			axios.post(PostIP(), data)
 				.then((response) => {
@@ -282,20 +293,16 @@ function init() {
 								"intensity" : Intensity,
 							});
 							if (Intensity > pga[station[Object.keys(Json)[index]].PGA].Intensity) pga[station[Object.keys(Json)[index]].PGA].Intensity = Intensity;
-							if (amount >= 4)
-								if (Pga[Object.keys(Json)[index]]) {
-									if (amount > 8 && PGALimit == 0) {
-										PGALimit = 1;
-										audioPlay("./audio/PGA1.wav");
-									} else if (amount > 250 && PGALimit != 2) {
-										PGALimit = 2;
-										audioPlay("./audio/PGA2.wav");
-									}
-									pga[station[Object.keys(Json)[index]].PGA].Time = NOW.getTime();
-								} else
-									Pga[Object.keys(Json)[index]] = true;
-
-
+							if (amount >= 5) {
+								if (amount > 8 && PGALimit == 0) {
+									PGALimit = 1;
+									audioPlay("./audio/PGA1.wav");
+								} else if (amount > 250 && PGALimit != 2) {
+									PGALimit = 2;
+									audioPlay("./audio/PGA2.wav");
+								}
+								pga[station[Object.keys(Json)[index]].PGA].Time = NOW.getTime();
+							}
 							if (MAXPGA.pga < amount && Level != "NA") {
 								MAXPGA.pga = amount;
 								MAXPGA.station = Object.keys(Json)[index];
@@ -306,10 +313,9 @@ function init() {
 								MAXPGA.intensity = Intensity;
 								MAXPGA.ms = NOW.getTime() - Sdata.TimeStamp;
 							}
-						} else
-							delete Pga[Object.keys(Json)[index]];
+						}
 					}
-					if (PAlert.data != undefined) {
+					if (PAlert.data != undefined)
 						for (let index = 0; index < PAlert.data.length; index++) {
 							if (NOW.getTime() - PAlert.timestamp > 30000) break;
 							if (pga[PAlert.data[index].TREM] == undefined)
@@ -341,16 +347,7 @@ function init() {
 								MAXPGA.intensity = PAlert.data[index].intensity;
 							}
 						}
-						if (NOW.getTime() - PAlert.timestamp < 30000 && Punix != PAlert.unix) {
-							Punix = PAlert.unix;
-							setTimeout(() => {
-								ipcRenderer.send("screenshotEEW", {
-									"ID"      : new Date().getTime(),
-									"Version" : 0,
-								});
-							}, 5000);
-						}
-					}
+
 					for (let index = 0; index < Object.keys(PGA).length; index++) {
 						map.removeLayer(PGA[Object.keys(PGA)[index]]);
 						delete PGA[Object.keys(PGA)[index]];
@@ -380,19 +377,8 @@ function init() {
 					if (Object.keys(PGA).length == 0) PGAaudio = false;
 
 					if (!PGAaudio) {
-						PGAAudio = false;
 						PGAtag = 0;
 						PGALimit = 0;
-					}
-					if (!PGAAudio && PGAaudio) {
-						if (!win.isVisible())
-							if (CONFIG["Real-time.show"]) {
-								win.show();
-								if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
-								win.setAlwaysOnTop(false);
-							}
-
-						PGAAudio = true;
 					}
 					for (let Index = 0; Index < All.length - 1; Index++)
 						for (let index = 0; index < All.length - 1; index++)
@@ -419,6 +405,18 @@ function init() {
 								Max  : All[0].intensity,
 								Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
 							});
+							setTimeout(() => {
+								ipcRenderer.send("screenshotEEW", {
+									"ID"      : NOW.getTime(),
+									"Version" : "P",
+								});
+							}, 5000);
+							if (!win.isVisible())
+								if (CONFIG["Real-time.show"]) {
+									win.show();
+									if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
+									win.setAlwaysOnTop(false);
+								}
 						}
 						PGAtag = All[0].intensity;
 					}
@@ -494,6 +492,7 @@ audioDOM.addEventListener("ended", () => {
 });
 
 function audioPlay(src) {
+	console.log(src);
 	audioList.push(src);
 	if (!AudioT)
 		AudioT = setInterval(() => {
@@ -526,39 +525,27 @@ function playNextAudio() {
 // #endregion
 
 // #region Report Data
-function ReportGET() {
-	let data = {
-		"APIkey"        : "https://github.com/ExpTechTW",
-		"Function"      : "data",
-		"Type"          : "earthquake",
-		"FormatVersion" : 1,
-		"Value"         : 100,
-	};
-
-	axios.post(PostIP(), data)
-		.then((response) => {
-			dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
-			if (response.data["state"] == "Warn")
-				setTimeout(() => {
-					ReportGET();
-				}, 2000);
-			ReportList(response.data);
-		})
-		.catch((error) => {
-			dump({ level: 2, message: error, origin: "EQReportFetcher" });
-			console.error(error);
-		});
+async function ReportGET(eew) {
+	const res = await getReportByData();
+	dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
+	if (res["state"] == "Warn") {
+		dump({ level: 2, message: res, origin: "EQReportFetcher" });
+		console.error(res);
+		setTimeout(() => {
+			ReportGET();
+		}, 2000);
+	} else
+		ReportList(res, eew);
 }
-async function getReportByData(data) {
+async function getReportByData() {
 	try {
 		const list = await axios.post(PostIP(), {
-			"APIkey"        : "https://github.com/ExpTechTW",
-			"Function"      : "data",
-			"Type"          : "earthquake",
-			"FormatVersion" : 1,
-			"Value"         : 100,
+			"APIkey"   : "https://github.com/ExpTechTW",
+			"Function" : "data",
+			"Type"     : "earthquake",
+			"Value"    : 100,
 		});
-		return _.find(list?.response?.data?.response, data);
+		return list.data;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
 		console.error(error);
@@ -583,11 +570,10 @@ async function ReportClick(time) {
 
 		let LIST = [];
 		let body = {
-			"APIkey"        : "https://github.com/ExpTechTW",
-			"Function"      : "data",
-			"Type"          : "report",
-			"FormatVersion" : 1,
-			"Value"         : ReportCache[time].earthquakeNo,
+			"APIkey"   : "https://github.com/ExpTechTW",
+			"Function" : "data",
+			"Type"     : "report",
+			"Value"    : ReportCache[time].earthquakeNo,
 		};
 		if (
 			// 確認是否為無編號地震
@@ -694,11 +680,15 @@ let openURL = url => {
 // #endregion
 
 // #region Report list
-let roll = document.getElementById("rolllist");
-function ReportList(Data) {
+function ReportList(Data, eew) {
 	roll.replaceChildren();
-	for (const report of Data.response)
-		addReport(report);
+	for (let index = 0; index < Data.response.length; index++) {
+		if (eew != undefined && index == Data.response.length - 1) {
+			Data.response[index].Max = eew.Max;
+			Data.response[index].Time = eew.Time;
+		}
+		addReport(Data.response[index]);
+	}
 }
 
 function addReport(report, prepend = false) {
@@ -726,7 +716,7 @@ function addReport(report, prepend = false) {
 		report_intenisty_title.innerText = "最大震度";
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
-		report_intenisty_value.innerText = report.Max;
+		report_intenisty_value.innerText = IntensityI(report.Max);
 		report_intenisty_container.append(report_intenisty_title, report_intenisty_value);
 
 
@@ -742,8 +732,10 @@ function addReport(report, prepend = false) {
 		report_detail_container.append(report_location, report_time);
 
 		report_container.append(report_intenisty_container, report_detail_container);
-		Div.append(report_container);
+		Div.prepend(report_container);
 		Div.style.backgroundColor = color(report.Max);
+		roll.prepend(Div);
+		investigation = true;
 	} else {
 		const report_container = document.createElement("div");
 		report_container.className = "report-container";
@@ -786,33 +778,32 @@ function addReport(report, prepend = false) {
 				localStorage.Test = true;
 				localStorage.TestID = report.ID;
 				ipcRenderer.send("restart");
-			} else
+			} else if (NOW.getTime() - clickT > 150)
 				setTimeout(() => {
+					clickT = NOW.getTime();
 					ReportClick(report.originTime);
 				}, 100);
 		});
-	}
-
-	if (prepend) {
-		const locating = document.querySelector(".report-detail-container.locating");
-		if (locating)
-			locating.replaceWith(Div.children[0]);
-		else
-			roll.prepend(Div);
-	} else
-		roll.append(Div);
-
-	if (report.report != undefined) {
-		ReportClick(Data.response[0].originTime);
-		setTimeout(() => {
+		if (prepend) {
+			const locating = document.querySelector(".report-detail-container.locating");
+			if (locating)
+				locating.replaceWith(Div.children[0]);
+			else {
+				if (investigation) {
+					investigation = false;
+					roll.removeChild(roll.children[0]);
+				}
+				roll.prepend(Div);
+			}
 			if (ReportMarkID != null) {
 				ReportMarkID = null;
 				for (let index = 0; index < MarkList.length; index++)
 					map.removeLayer(MarkList[index]);
-
-				focus();
 			}
-		}, 30000);
+			ReportClick(report.originTime);
+			ReportTag = NOW.getTime();
+		} else
+			roll.append(Div);
 	}
 }
 
@@ -1008,7 +999,7 @@ async function FCMdata(data) {
 			win.setAlwaysOnTop(false);
 		}
 		if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
-	} if (json.Function == "palert")
+	} else if (json.Function == "palert")
 		PAlert = json.Data;
 	else if (json.Function == "report") {
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
@@ -1018,14 +1009,13 @@ async function FCMdata(data) {
 			win.setAlwaysOnTop(false);
 		}
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
-		const report = await getReportByData({ earthquakeNo: json.ID, epicenterLon: json.EastLongitude, epicenterLat: json.NorthLatitude, depth: json.Depth, magnitudeValue: json.Scale });
-		addReport(report, true);
-
+		const report = await getReportByData();
+		addReport(report.response[0], true);
 		if (CONFIG["report.audio"]) audioPlay("./audio/Report.wav");
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
-				"ID"      : json.No,
-				"Version" : 0,
+				"ID"      : json.ID + "-" + NOW.getTime(),
+				"Version" : "R",
 			});
 		}, 5000);
 	} else if (json.Function == "earthquake" || ((json.Function == "JP_earthquake" || json.Function == "CN_earthquake") && CONFIG["accept.eew.jp"])) {
@@ -1261,7 +1251,8 @@ async function FCMdata(data) {
 				updateText();
 			}, 1000);
 
-
+		EEWshot =	NOW.getTime() - 3500;
+		EEWshotC = 0;
 		EarthquakeList[json.ID].Timer = setInterval(() => {
 			if (CONFIG["shock.p"]) {
 				if (EarthquakeList[json.ID].Pcircle != null)
@@ -1305,6 +1296,15 @@ async function FCMdata(data) {
 				});
 				map.addLayer(EarthquakeList[json.ID].Scircle);
 				mapTW.addLayer(EarthquakeList[json.ID].Scircle1);
+			}
+			if (NOW.getTime() - EEWshot > 60000)
+				EEWshotC = 0;
+
+			if (NOW.getTime() - EEWshot > 5000 && EEWshotC <= 1) {
+				EEWshotC++;
+				json.Version = json.Version + "-" + EEWshotC;
+				EEWshot = NOW.getTime();
+				ipcRenderer.send("screenshotEEW", json);
 			}
 			if (NOW.getTime() - json.TimeStamp > 240000 || json.Cancel && EarthquakeList[json.ID] != undefined) {
 				if (json.Cancel) {
@@ -1370,41 +1370,38 @@ async function FCMdata(data) {
 			}
 		}, speed);
 		setTimeout(() => {
-			ipcRenderer.send("screenshotEEW", json);
-			setTimeout(() => {
-				if (CONFIG["webhook.url"] != "") {
-					let Now = NOW.getFullYear() +
+			if (CONFIG["webhook.url"] != "") {
+				let Now = NOW.getFullYear() +
 						"/" + (NOW.getMonth() + 1) +
 						"/" + NOW.getDate() +
 						" " + NOW.getHours() +
 						":" + NOW.getMinutes() +
 						":" + NOW.getSeconds();
 
-					let msg = CONFIG["webhook.body"];
-					msg = msg.replace("%Depth%", json.Depth).replace("%NorthLatitude%", json.NorthLatitude).replace("%Time%", json["UTC+8"]).replace("%EastLongitude%", json.EastLongitude).replace("%Scale%", json.Scale);
-					if (json.Function == "earthquake")
-						msg = msg.replace("%Provider%", "中華民國交通部中央氣象局");
-					else if (json.Function == "JP_earthquake")
-						msg = msg.replace("%Provider%", "日本氣象廳");
-					else if (json.Function == "CN_earthquake")
-						msg = msg.replace("%Provider%", "福建省地震局");
+				let msg = CONFIG["webhook.body"];
+				msg = msg.replace("%Depth%", json.Depth).replace("%NorthLatitude%", json.NorthLatitude).replace("%Time%", json["UTC+8"]).replace("%EastLongitude%", json.EastLongitude).replace("%Scale%", json.Scale);
+				if (json.Function == "earthquake")
+					msg = msg.replace("%Provider%", "中華民國交通部中央氣象局");
+				else if (json.Function == "JP_earthquake")
+					msg = msg.replace("%Provider%", "日本氣象廳");
+				else if (json.Function == "CN_earthquake")
+					msg = msg.replace("%Provider%", "福建省地震局");
 
-					msg = JSON.parse(msg);
-					msg.username = "TREM | 台灣實時地震監測";
+				msg = JSON.parse(msg);
+				msg.username = "TREM | 台灣實時地震監測";
 
-					msg.embeds[0].image.url = "";
-					msg.embeds[0].footer = {
-						"text"     : `ExpTech Studio ${Now}`,
-						"icon_url" : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
-					};
-					dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
-					axios.post(CONFIG["webhook.url"], msg)
-						.catch((error) => {
-							dump({ level: 2, message: error, origin: "Webhook" });
-						});
-				}
-			}, 2000);
-		}, 1000);
+				msg.embeds[0].image.url = "";
+				msg.embeds[0].footer = {
+					"text"     : `ExpTech Studio ${Now}`,
+					"icon_url" : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
+				};
+				dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
+				axios.post(CONFIG["webhook.url"], msg)
+					.catch((error) => {
+						dump({ level: 2, message: error, origin: "Webhook" });
+					});
+			}
+		}, 2000);
 	}
 }
 // #endregion

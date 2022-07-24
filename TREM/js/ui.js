@@ -15,7 +15,7 @@ const changeView = (args, el, event) => {
 	if (event instanceof KeyboardEvent && event?.key !== "Enter" && event?.key !== " ")
 		return;
 
-	const currentel = $(".show");
+	const currentel = $(".view.show");
 	const changeel = $(`#${args}`);
 
 	if (changeel.attr("id") == currentel.attr("id")) return;
