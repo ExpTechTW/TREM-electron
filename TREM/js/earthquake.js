@@ -18,7 +18,6 @@ let map, mapTW;
 let mapLayer, mapLayerTW;
 let Station = {};
 let PGA = {};
-let Pga = {};
 let pga = {};
 let PGALimit = 0;
 let PGAaudio = false;
@@ -355,7 +354,7 @@ function init() {
 					}
 					for (let index = 0; index < Object.keys(pga).length; index++) {
 						let Intensity = pga[Object.keys(pga)[index]].Intensity;
-						if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 5000) {
+						if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 18000) {
 							delete pga[Object.keys(pga)[index]];
 							index--;
 						} else {
@@ -1008,10 +1007,10 @@ async function FCMdata(data) {
 			if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
+		if (CONFIG["report.audio"]) audioPlay("./audio/Report.wav");
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
 		const report = await getReportByData();
 		addReport(report.response[0], true);
-		if (CONFIG["report.audio"]) audioPlay("./audio/Report.wav");
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
 				"ID"      : json.ID + "-" + NOW.getTime(),
