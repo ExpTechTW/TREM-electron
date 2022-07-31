@@ -30,6 +30,7 @@ let PGAmark = false;
 let Check = {};
 let INFO = [];
 let TINFO = 0;
+let ticker = null;
 let ITimer = null;
 let Tsunami = {};
 let Report = 0;
@@ -1248,6 +1249,12 @@ async function FCMdata(data) {
 		if (ITimer == null)
 			ITimer = setInterval(() => {
 				updateText();
+				if (ticker == null)
+					ticker = setInterval(() => {
+						if (TINFO + 1 >= INFO.length)
+							TINFO = 0;
+						else TINFO++;
+					}, 5000);
 			}, 1000);
 
 		EEWshot =	NOW.getTime() - 3500;
@@ -1339,6 +1346,7 @@ async function FCMdata(data) {
 					// restore reports
 					$(roll).fadeIn(200);
 					ITimer = null;
+					ticker = null;
 					focus([Lat, Long], 7.5);
 					TimerDesynced = false;
 					audioList = [];
@@ -1408,7 +1416,7 @@ async function FCMdata(data) {
 function updateText() {
 	$("#alert-box")[0].className = `${INFO[TINFO].alert_type} ${IntensityToClassString(INFO[TINFO].alert_intensity)}`;
 	$("#alert-local")[0].className = `alert-item ${IntensityToClassString(INFO[TINFO].alert_local)}`;
-	$("#alert-provider").text(INFO[TINFO].alert_provider);
+	$("#alert-provider").text(`${INFO.length ? `${TINFO + 1} ` : ""}${INFO[TINFO].alert_provider}`);
 	$("#alert-number").text(`${INFO[TINFO].alert_number}`);
 	$("#alert-location").text(INFO[TINFO].alert_location);
 	$("#alert-time").text(INFO[TINFO].alert_time.format("YYYY/MM/DD HH:mm:ss"));
@@ -1429,9 +1437,4 @@ function updateText() {
 		Catch.innerHTML = `<font color="white" size="6"><b>震波到地表進度: ${Num}%</b></font>`;
 	else
 		Catch.innerHTML = "";
-
-	if (TINFO + 1 >= INFO.length)
-		TINFO = 0;
-	else
-		TINFO++;
 }
