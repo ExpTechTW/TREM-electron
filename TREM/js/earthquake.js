@@ -56,7 +56,6 @@ let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
 let EEWshotC = 0;
-const Alert = fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"));
 // #endregion
 
 // #region override Date.format()
@@ -302,7 +301,7 @@ function init() {
 								"intensity" : Intensity,
 							});
 							if (Intensity > pga[station[Object.keys(Json)[index]].PGA].Intensity) pga[station[Object.keys(Json)[index]].PGA].Intensity = Intensity;
-							if (Sdata.Alert || Alert) {
+							if (Sdata.Alert || fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"))) {
 								if (amount > 8 && PGALimit == 0) {
 									PGALimit = 1;
 									audioPlay("./audio/PGA1.wav");
@@ -378,7 +377,7 @@ function init() {
 					RMT++;
 					for (let index = 0; index < Object.keys(pga).length; index++) {
 						let Intensity = pga[Object.keys(pga)[index]].Intensity;
-						if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 15000) {
+						if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000) {
 							delete pga[Object.keys(pga)[index]];
 							index--;
 						} else {
@@ -390,7 +389,6 @@ function init() {
 							PGAaudio = true;
 						}
 					}
-					if (RMT >= 2) RMT = 0;
 					if (Object.keys(pga).length != 0 && !PGAmark) {
 						PGAmark = true;
 						focus([23.608428, 120.799168], 7, true);
@@ -413,7 +411,7 @@ function init() {
 								All[index + 1] = All[index];
 								All[index] = Temp;
 							}
-					if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
+					if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0 && RMT >= 2) {
 						if (CONFIG["Real-time.audio"])
 							if (All[0].intensity >= 5 && PGAtag < 5)
 								audioPlay("./audio/Shindo2.wav");
@@ -443,7 +441,7 @@ function init() {
 						}
 						PGAtag = All[0].intensity;
 					}
-
+					if (RMT >= 2) RMT = 0;
 					let list = [];
 					let count = 0;
 					for (let Index = 0; Index < All.length; Index++, count++) {
