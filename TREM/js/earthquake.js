@@ -413,7 +413,7 @@ function init() {
 								All[index + 1] = All[index];
 								All[index] = Temp;
 							}
-					if (All.length != 0 && All[0].intensity > PGAtag) {
+					if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 						if (CONFIG["Real-time.audio"])
 							if (All[0].intensity >= 5 && PGAtag < 5)
 								audioPlay("./audio/Shindo2.wav");
