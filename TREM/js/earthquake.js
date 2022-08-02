@@ -1,6 +1,8 @@
+/* eslint-disable no-shadow */
 /* eslint-disable no-undef */
 /* eslint-disable prefer-const */
 const { BrowserWindow, shell } = require("@electron/remote");
+const path = require("path");
 axios.defaults.timeout = 15000;
 
 // #region 變數
@@ -9,7 +11,9 @@ let t = null;
 let Lat = 25.0421407;
 let Long = 121.5198716;
 let audioList = [];
+let audioList1 = [];
 let audioLock = false;
+let audioLock1 = false;
 let ReportCache = {};
 let ReportMarkID = null;
 let MarkList = [];
@@ -20,7 +24,7 @@ let mapLayer, mapLayerTW;
 let Station = {};
 let PGA = {};
 let pga = {};
-let TREM = {};
+let RMT = 0;
 let PGALimit = 0;
 let PGAaudio = false;
 let PGAtag = 0;
@@ -52,6 +56,7 @@ let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
 let EEWshotC = 0;
+const Alert = fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"));
 // #endregion
 
 // #region override Date.format()
@@ -297,7 +302,7 @@ function init() {
 								"intensity" : Intensity,
 							});
 							if (Intensity > pga[station[Object.keys(Json)[index]].PGA].Intensity) pga[station[Object.keys(Json)[index]].PGA].Intensity = Intensity;
-							if (Sdata.Alert) {
+							if (Sdata.Alert || Alert) {
 								if (amount > 8 && PGALimit == 0) {
 									PGALimit = 1;
 									audioPlay("./audio/PGA1.wav");
@@ -355,27 +360,37 @@ function init() {
 								},
 							});
 							map.addLayer(Pgeojson);
+							focus([23.608428, 120.799168], 7, true);
+							setTimeout(() => {
+								ipcRenderer.send("screenshotEEW", {
+									"ID"      : NOW.getTime(),
+									"Version" : "P",
+								});
+							}, 5000);
 						}
 						if (Pgeojson != null) Pgeojson.setZIndexOffset(1000);
 					}
 					for (let index = 0; index < Object.keys(PGA).length; index++) {
-						map.removeLayer(PGA[Object.keys(PGA)[index]]);
+						if (RMT == 0) map.removeLayer(PGA[Object.keys(PGA)[index]]);
 						delete PGA[Object.keys(PGA)[index]];
 						index--;
 					}
+					RMT++;
 					for (let index = 0; index < Object.keys(pga).length; index++) {
 						let Intensity = pga[Object.keys(pga)[index]].Intensity;
-						if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 18000) {
+						if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 15000) {
 							delete pga[Object.keys(pga)[index]];
 							index--;
 						} else {
 							PGA[Object.keys(pga)[index]] = L.polygon(PGAjson[Object.keys(pga)[index].toString()], {
 								color     : color(Intensity),
 								fillColor : "transparent",
-							}).addTo(map);
+							});
+							if (RMT >= 2) map.addLayer(PGA[Object.keys(pga)[index]]);
 							PGAaudio = true;
 						}
 					}
+					if (RMT >= 2) RMT = 0;
 					if (Object.keys(pga).length != 0 && !PGAmark) {
 						PGAmark = true;
 						focus([23.608428, 120.799168], 7, true);
@@ -398,7 +413,7 @@ function init() {
 								All[index + 1] = All[index];
 								All[index] = Temp;
 							}
-					if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
+					if (All.length != 0 && All[0].intensity > PGAtag) {
 						if (CONFIG["Real-time.audio"])
 							if (All[0].intensity >= 5 && PGAtag < 5)
 								audioPlay("./audio/Shindo2.wav");
@@ -494,13 +509,17 @@ function focus(Loc, size, args) {
 
 // #region 音頻播放
 let AudioT;
+let AudioT1;
 let audioDOM = new Audio();
+let audioDOM1 = new Audio();
 audioDOM.addEventListener("ended", () => {
 	audioLock = false;
 });
+audioDOM1.addEventListener("ended", () => {
+	audioLock1 = false;
+});
 
 function audioPlay(src) {
-	console.log(src);
 	audioList.push(src);
 	if (!AudioT)
 		AudioT = setInterval(() => {
@@ -516,18 +535,44 @@ function audioPlay(src) {
 			}
 		}, 0);
 }
-
+function audioPlay1(src) {
+	audioList1.push(src);
+	if (!AudioT1)
+		AudioT1 = setInterval(() => {
+			if (!audioLock1) {
+				audioLock1 = true;
+				if (audioList1.length)
+					playNextAudio1();
+				else {
+					clearInterval(AudioT1);
+					audioLock1 = false;
+					AudioT1 = null;
+				}
+			}
+		}, 0);
+}
 function playNextAudio() {
 	audioLock = true;
 	const path = audioList.shift();
 	audioDOM.src = path;
-	audioDOM.playbackRate = 1.15;
 	if (path.startsWith("./audio/1/") && CONFIG["eew.audio"]) {
 		dump({ level: 0, message: `Playing Audio > ${path}`, origin: "Audio" });
 		audioDOM.play();
 	} else if (!path.startsWith("./audio/1/")) {
 		dump({ level: 0, message: `Playing Audio > ${path}`, origin: "Audio" });
 		audioDOM.play();
+	}
+}
+function playNextAudio1() {
+	audioLock1 = true;
+	const path = audioList1.shift();
+	audioDOM1.src = path;
+	if (path.startsWith("./audio/1/") && CONFIG["eew.audio"]) {
+		dump({ level: 0, message: `Playing Audio > ${path}`, origin: "Audio" });
+		audioDOM1.play();
+	} else if (!path.startsWith("./audio/1/")) {
+		dump({ level: 0, message: `Playing Audio > ${path}`, origin: "Audio" });
+		audioDOM1.play();
 	}
 }
 // #endregion
@@ -1116,27 +1161,26 @@ async function FCMdata(data) {
 				Nmsg = "已抵達 (預警盲區)";
 
 			new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${json.Scale} ${json.Location ?? "未知區域"}`, icon: "TREM.ico" });
-			audioList = [];
 			Info.Notify.push(json.ID);
 			if (CONFIG["eew.audio"]) audioPlay("./audio/EEW.wav");
-			audioPlay(`./audio/1/${level.replace("+", "").replace("-", "")}.wav`);
+			audioPlay1(`./audio/1/${level.replace("+", "").replace("-", "")}.wav`);
 			if (level.includes("+"))
-				audioPlay("./audio/1/intensity-strong.wav");
+				audioPlay1("./audio/1/intensity-strong.wav");
 			else if (level.includes("-"))
-				audioPlay("./audio/1/intensity-weak.wav");
+				audioPlay1("./audio/1/intensity-weak.wav");
 			else
-				audioPlay("./audio/1/intensity.wav");
+				audioPlay1("./audio/1/intensity.wav");
 
 			if (value > 0 && value < 100) {
 				if (value <= 10)
-					audioPlay(`./audio/1/${value.toString()}.wav`);
+					audioPlay1(`./audio/1/${value.toString()}.wav`);
 				else if (value < 20)
-					audioPlay(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
+					audioPlay1(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
 				else {
-					audioPlay(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
-					audioPlay(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
+					audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
+					audioPlay1(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
 				}
-				audioPlay("./audio/1/second.wav");
+				audioPlay1("./audio/1/second.wav");
 			}
 		}
 		if (json.ID != Info.Warn && json.Alert) {
@@ -1145,14 +1189,13 @@ async function FCMdata(data) {
 		}
 		let _time = -1;
 		let stamp = 0;
-		if (json.ID != Info.Alert) {
+		if (json.ID + json.Version != Info.Alert) {
 			focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 7.5);
-			Info.Alert = json.ID;
-			Info.AlertS = value;
+			Info.Alert = json.ID + json.Version;
 			if (t != null) clearInterval(t);
 			t = setInterval(() => {
 				value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
-				if (stamp != value && !audioLock) {
+				if (stamp != value && !audioLock1) {
 					stamp = value;
 					if (_time >= 0) {
 						audioPlay("./audio/1/ding.wav");
@@ -1163,15 +1206,15 @@ async function FCMdata(data) {
 					} else if (value < 100)
 						if (value > 10)
 							if (value.toString().substring(1, 2) == "0") {
-								audioPlay(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
-								audioPlay("./audio/1/x0.wav");
+								audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
+								audioPlay1("./audio/1/x0.wav");
 							} else
 								audioPlay("./audio/1/ding.wav");
 
 						else if (value > 0)
-							audioPlay(`./audio/1/${value.toString()}.wav`);
+							audioPlay1(`./audio/1/${value.toString()}.wav`);
 						else {
-							audioPlay("./audio/1/arrive.wav");
+							audioPlay1("./audio/1/arrive.wav");
 							_time = 0;
 						}
 
