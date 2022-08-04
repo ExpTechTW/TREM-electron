@@ -20,7 +20,28 @@ if (!fs.existsSync(CONFIG_PATH))
 let CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH).toString());
 
 const DEFAULT_CONFIG = {
-	"accept.eew.jp": {
+	"ver"            : 1,
+	"accept.eew.CWB" : {
+		"type"  : "CheckBox",
+		"value" : true,
+	},
+	"accept.eew.NIED": {
+		"type"  : "CheckBox",
+		"value" : true,
+	},
+	"accept.eew.JMA": {
+		"type"  : "CheckBox",
+		"value" : true,
+	},
+	"accept.eew.KMA": {
+		"type"  : "CheckBox",
+		"value" : true,
+	},
+	"accept.eew.ICL": {
+		"type"  : "CheckBox",
+		"value" : true,
+	},
+	"accept.eew.FJDZJ": {
 		"type"  : "CheckBox",
 		"value" : true,
 	},
@@ -35,6 +56,10 @@ const DEFAULT_CONFIG = {
 	"earthquake.Real-time": {
 		"type"  : "CheckBox",
 		"value" : true,
+	},
+	"earthquake.Real-time-forecast": {
+		"type"  : "CheckBox",
+		"value" : false,
 	},
 	"GPU.disable": {
 		"type"  : "CheckBox",
@@ -137,6 +162,11 @@ const DEFAULT_CONFIG = {
 		"value" : true,
 	},
 };
+
+if (CONFIG.ver != DEFAULT_CONFIG.ver) {
+	CONFIG.ver = DEFAULT_CONFIG.ver;
+	fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), "utf8");
+}
 
 // Synchronize config
 for (let i = 0, k = Object.keys(DEFAULT_CONFIG), n = k.length; i < n; i++)
