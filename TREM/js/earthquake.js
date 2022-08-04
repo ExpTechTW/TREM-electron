@@ -323,52 +323,68 @@ function init() {
 							}
 						}
 					}
-					if (PAlert.data != undefined) {
-						let PLoc = {};
-						for (let index = 0; index < PAlert.data.length; index++) {
-							if (NOW.getTime() - PAlert.timestamp > 30000) {
-								if (Pgeojson != null) map.removeLayer(Pgeojson);
-								break;
-							}
-							PLoc[PAlert.data[index].loc] = PAlert.data[index].intensity;
-						}
-						if (PalertT != PAlert.timestamp && Object.keys(PLoc).length != 0) {
-							PalertT = PAlert.timestamp;
-							if (Pgeojson == null) audioPlay("./audio/palert.wav");
+					if (PAlert.data != undefined)
+						if (NOW.getTime() - PAlert.timestamp > 30000) {
 							if (Pgeojson != null) map.removeLayer(Pgeojson);
-							Pgeojson = L.geoJson(statesData, {
-								style: (feature) => {
-									let name = feature.properties.COUNTY + " " + feature.properties.TOWN;
-									if (PLoc[name] == 0 || PLoc[name] == undefined)
+							Pgeojson = null;
+							focus();
+						} else {
+							let PLoc = {};
+							let MaxI = 0;
+							for (let index = 0; index < PAlert.data.length; index++) {
+								PLoc[PAlert.data[index].loc] = PAlert.data[index].intensity;
+								if (PAlert.data[index].intensity > MaxI) {
+									MaxI = PAlert.data[index].intensity;
+									Report = NOW.getTime();
+									ReportGET({
+										Max  : MaxI,
+										Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
+									});
+								}
+							}
+							if (PalertT != PAlert.timestamp && Object.keys(PLoc).length != 0) {
+								PalertT = PAlert.timestamp;
+								if (Pgeojson == null) {
+									if (CONFIG["Real-time.show"])
+										win.show();
+									if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
+									win.setAlwaysOnTop(false);
+									audioPlay("./audio/palert.wav");
+								}
+								if (Pgeojson != null) map.removeLayer(Pgeojson);
+								Pgeojson = L.geoJson(statesData, {
+									style: (feature) => {
+										let name = feature.properties.COUNTY + " " + feature.properties.TOWN;
+										if (PLoc[name] == 0 || PLoc[name] == undefined)
+											return {
+												weight      : 0,
+												opacity     : 0,
+												color       : "#8E8E8E",
+												dashArray   : "",
+												fillOpacity : 0,
+												fillColor   : "transparent",
+											};
 										return {
 											weight      : 0,
 											opacity     : 0,
 											color       : "#8E8E8E",
 											dashArray   : "",
-											fillOpacity : 0,
-											fillColor   : "transparent",
+											fillOpacity : 0.8,
+											fillColor   : color(PLoc[name]),
 										};
-									return {
-										weight      : 0,
-										opacity     : 0,
-										color       : "#8E8E8E",
-										dashArray   : "",
-										fillOpacity : 0.8,
-										fillColor   : color(PLoc[name]),
-									};
-								},
-							});
-							map.addLayer(Pgeojson);
-							focus([23.608428, 120.799168], 7, true);
-							setTimeout(() => {
-								ipcRenderer.send("screenshotEEW", {
-									"ID"      : NOW.getTime(),
-									"Version" : "P",
+									},
 								});
-							}, 5000);
+								map.addLayer(Pgeojson);
+								focus([23.608428, 120.799168], 7, true);
+								setTimeout(() => {
+									ipcRenderer.send("screenshotEEW", {
+										"ID"      : NOW.getTime(),
+										"Version" : "P",
+									});
+								}, 2000);
+							}
+							if (Pgeojson != null) Pgeojson.setZIndexOffset(1000);
 						}
-						if (Pgeojson != null) Pgeojson.setZIndexOffset(1000);
-					}
 					for (let index = 0; index < Object.keys(PGA).length; index++) {
 						if (RMT == 0) map.removeLayer(PGA[Object.keys(PGA)[index]]);
 						delete PGA[Object.keys(PGA)[index]];
@@ -431,13 +447,11 @@ function init() {
 									"ID"      : NOW.getTime(),
 									"Version" : "P",
 								});
-							}, 5000);
-							if (!win.isVisible())
-								if (CONFIG["Real-time.show"]) {
-									win.show();
-									if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
-									win.setAlwaysOnTop(false);
-								}
+							}, 500);
+							if (CONFIG["Real-time.show"])
+								win.show();
+							if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
+							win.setAlwaysOnTop(false);
 						}
 						PGAtag = All[0].intensity;
 					}
