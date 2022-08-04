@@ -24,7 +24,7 @@ let mapLayer, mapLayerTW;
 let Station = {};
 let PGA = {};
 let pga = {};
-let RMT = 0;
+let RMT = 1;
 let PGALimit = 0;
 let PGAaudio = false;
 let PGAtag = 0;
@@ -405,12 +405,14 @@ function init() {
 							PGAaudio = true;
 						}
 					}
+					if (RMT >= 2) RMT = 0;
 					if (Object.keys(pga).length != 0 && !PGAmark) {
 						PGAmark = true;
 						focus([23.608428, 120.799168], 7, true);
 					}
 					if (PGAmark && Object.keys(pga).length == 0) {
 						PGAmark = false;
+						RMT = 1;
 						focus();
 					}
 					if (Object.keys(PGA).length == 0) PGAaudio = false;
@@ -427,7 +429,7 @@ function init() {
 								All[index + 1] = All[index];
 								All[index] = Temp;
 							}
-					if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0 && RMT >= 2) {
+					if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 						if (CONFIG["Real-time.audio"])
 							if (All[0].intensity >= 5 && PGAtag < 5)
 								audioPlay("./audio/Shindo2.wav");
@@ -455,7 +457,6 @@ function init() {
 						}
 						PGAtag = All[0].intensity;
 					}
-					if (RMT >= 2) RMT = 0;
 					let list = [];
 					let count = 0;
 					for (let Index = 0; Index < All.length; Index++, count++) {
