@@ -104,6 +104,7 @@ fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/st
 function init() {
 	dump({ level: 0, message: "Initializing", origin: "Setting" });
 	Object.keys(CONFIG).forEach(id => {
+		if (id == "ver") return;
 		switch (DEFAULT_CONFIG[id].type) {
 			case "CheckBox": {
 				const element = document.getElementById(id);

@@ -1055,7 +1055,6 @@ async function FCMdata(data) {
 	Server.push(json.TimeStamp);
 	if (json.TimeStamp != undefined)
 		dump({ level: 0, message: `${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
-
 	if (json.Function == "tsunami") {
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
 		if (CONFIG["report.show"]) {
@@ -1101,7 +1100,7 @@ async function FCMdata(data) {
 				"Version" : "R",
 			});
 		}, 5000);
-	} else if (json.Function.includes("earthquake") || json.Replay || json.Test) {
+	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
 		if (!json.Replay && !json.Test) {
 			if (json.Function == "ICL_earthquake" && !CONFIG["accept.eew.ICL"]) return;
 			if (json.Function == "NIED_earthquake" && !CONFIG["accept.eew.NIED"]) return;

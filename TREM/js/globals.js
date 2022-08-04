@@ -5,23 +5,13 @@ const { ipcMain } = require("@electron/remote");
 const { ipcRenderer } = require("electron");
 const { join } = require("node:path");
 
-/**
- * 設定檔路徑
- * @type {string}
- */
-const CONFIG_PATH = join(app.getPath("userData"), "settings.json");
-if (!fs.existsSync(CONFIG_PATH))
-	fs.writeFileSync(CONFIG_PATH, "{}", "utf8");
+const ver = 100;
 
-/**
- * 設定
- * @type {string}
- */
-let CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH).toString());
+let CONFIG = {};
+CONFIG.ver = ver;
 
 const DEFAULT_CONFIG = {
-	"ver"            : 1,
-	"accept.eew.CWB" : {
+	"accept.eew.CWB": {
 		"type"  : "CheckBox",
 		"value" : true,
 	},
@@ -163,14 +153,31 @@ const DEFAULT_CONFIG = {
 	},
 };
 
-if (CONFIG.ver != DEFAULT_CONFIG.ver) {
-	CONFIG.ver = DEFAULT_CONFIG.ver;
+/**
+ * 設定檔路徑
+ * @type {string}
+ */
+const CONFIG_PATH = join(app.getPath("userData"), "settings.json");
+if (!fs.existsSync(CONFIG_PATH))
+	fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), "utf8");
+
+/**
+ * 設定
+ * @type {string}
+ */
+CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH).toString());
+
+if (CONFIG.ver != ver) {
+	CONFIG = {
+		ver: ver,
+	};
 	fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), "utf8");
 }
 
+console.log(CONFIG);
 // Synchronize config
 for (let i = 0, k = Object.keys(DEFAULT_CONFIG), n = k.length; i < n; i++)
-	if (typeof CONFIG[k[i]] != typeof DEFAULT_CONFIG[k[i]].value)
+	if (typeof CONFIG[k[i]] != typeof DEFAULT_CONFIG[k[i]].value && k[i] != "ver")
 		CONFIG[k[i]] = DEFAULT_CONFIG[k[i]].value;
 ipcRenderer.send("saveSetting", CONFIG);
 setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
