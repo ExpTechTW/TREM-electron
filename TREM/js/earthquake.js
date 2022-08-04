@@ -325,9 +325,11 @@ function init() {
 					}
 					if (PAlert.data != undefined)
 						if (NOW.getTime() - PAlert.timestamp > 30000) {
-							if (Pgeojson != null) map.removeLayer(Pgeojson);
-							Pgeojson = null;
-							focus();
+							if (Pgeojson != null) {
+								map.removeLayer(Pgeojson);
+								Pgeojson = null;
+								focus();
+							}
 						} else {
 							let PLoc = {};
 							let MaxI = 0;
