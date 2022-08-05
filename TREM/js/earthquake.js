@@ -11,6 +11,7 @@ let Stamp = 0;
 let t = null;
 let Lat = 25.0421407;
 let Long = 121.5198716;
+let All = [];
 let audioList = [];
 let audioList1 = [];
 let audioLock = false;
@@ -248,7 +249,6 @@ function init() {
 					}
 					if (response.data["state"] != "Success") return;
 					let Json = response.data.response;
-					let All = [];
 					MAXPGA = { pga: 0, station: "NA", level: 0 };
 					for (let index = 0; index < Object.keys(Json).length; index++) {
 						let Sdata = Json[Object.keys(Json)[index]];
@@ -298,10 +298,22 @@ function init() {
 								"Time"      : 0,
 							};
 						if (Intensity != "NA" && Intensity != 0) {
-							All.push({
-								"loc"       : station[Object.keys(Json)[index]].Loc,
-								"intensity" : Intensity,
-							});
+							let find = -1;
+							for (let Index = 0; Index < All.length; Index++)
+								if (All[Index].loc == station[Object.keys(Json)[index]].Loc) {
+									All[Index].intensity = Intensity;
+									All[Index].time = NOW.getTime();
+									All[Index].pga = amount;
+									find = 0;
+									break;
+								}
+							if (find == -1)
+								All.push({
+									"loc"       : station[Object.keys(Json)[index]].Loc,
+									"intensity" : Intensity,
+									"time"      : NOW.getTime(),
+									"pga"       : amount,
+								});
 							if (Intensity > pga[station[Object.keys(Json)[index]].PGA].Intensity) pga[station[Object.keys(Json)[index]].PGA].Intensity = Intensity;
 							if (Sdata.Alert || fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"))) {
 								if (CONFIG["earthquake.Real-time-forecast"])
@@ -428,10 +440,10 @@ function init() {
 						PGAmark = false;
 						RMT = 1;
 						RMTlimit = [];
+						All = [];
 						focus();
 					}
 					if (Object.keys(PGA).length == 0) PGAaudio = false;
-
 					if (!PGAaudio) {
 						if (Pgeojson != null) map.removeLayer(Pgeojson);
 						PGAtag = 0;
@@ -439,7 +451,7 @@ function init() {
 					}
 					for (let Index = 0; Index < All.length - 1; Index++)
 						for (let index = 0; index < All.length - 1; index++)
-							if (All[index].intensity < All[index + 1].intensity) {
+							if (All[index].amount < All[index + 1].amount) {
 								let Temp = All[index + 1];
 								All[index + 1] = All[index];
 								All[index] = Temp;
@@ -476,6 +488,7 @@ function init() {
 					let count = 0;
 					for (let Index = 0; Index < All.length; Index++, count++) {
 						if (!PGAaudio || count >= 10) break;
+						if (NOW.getTime() - All[Index].time > 30000) continue;
 						const container = document.createElement("DIV");
 						container.className = IntensityToClassString(All[Index].intensity);
 						const location = document.createElement("span");
