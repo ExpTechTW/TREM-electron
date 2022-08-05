@@ -1205,6 +1205,7 @@ async function FCMdata(data) {
 					win.show();
 					win.flashFrame(true);
 					if (CONFIG["eew.cover"]) win.setAlwaysOnTop(true);
+					win.setAlwaysOnTop(false);
 				}
 				let Nmsg = "";
 				if (value > 0)
@@ -1365,48 +1366,64 @@ async function FCMdata(data) {
 			EEWshot =	NOW.getTime() - 3500;
 			EEWshotC = 0;
 			EarthquakeList[json.ID].Timer = setInterval(() => {
-				if (CONFIG["shock.p"]) {
-					if (EarthquakeList[json.ID].Pcircle != null)
-						map.removeLayer(EarthquakeList[json.ID].Pcircle);
-					if (EarthquakeList[json.ID].Pcircle1 != null)
-						mapTW.removeLayer(EarthquakeList[json.ID].Pcircle1);
-					let km = Math.sqrt(Math.pow((NOW.getTime() - json.Time) * Pspeed, 2) - Math.pow(Number(json.Depth) * 1000, 2));
-					if (km > 0) {
-						EarthquakeList[json.ID].Pcircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
-							color     : "#6FB7B7",
-							fillColor : "transparent",
-							radius    : km,
-						});
-						EarthquakeList[json.ID].Pcircle1 = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
-							color     : "#6FB7B7",
-							fillColor : "transparent",
-							radius    : km,
-						});
-						map.addLayer(EarthquakeList[json.ID].Pcircle);
-						mapTW.addLayer(EarthquakeList[json.ID].Pcircle1);
+				if (EarthquakeList[json.ID].Cancel == undefined) {
+					if (CONFIG["shock.p"]) {
+						if (EarthquakeList[json.ID].Pcircle != null)
+							map.removeLayer(EarthquakeList[json.ID].Pcircle);
+						if (EarthquakeList[json.ID].Pcircle1 != null)
+							mapTW.removeLayer(EarthquakeList[json.ID].Pcircle1);
+						let km = Math.sqrt(Math.pow((NOW.getTime() - json.Time) * Pspeed, 2) - Math.pow(Number(json.Depth) * 1000, 2));
+						if (km > 0) {
+							EarthquakeList[json.ID].Pcircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
+								color     : "#6FB7B7",
+								fillColor : "transparent",
+								radius    : km,
+							});
+							EarthquakeList[json.ID].Pcircle1 = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
+								color     : "#6FB7B7",
+								fillColor : "transparent",
+								radius    : km,
+							});
+							map.addLayer(EarthquakeList[json.ID].Pcircle);
+							mapTW.addLayer(EarthquakeList[json.ID].Pcircle1);
+						}
 					}
-				}
-				if (EarthquakeList[json.ID].Scircle != null)
-					map.removeLayer(EarthquakeList[json.ID].Scircle);
-				if (EarthquakeList[json.ID].Scircle1 != null)
-					mapTW.removeLayer(EarthquakeList[json.ID].Scircle1);
-				let km = Math.pow((NOW.getTime() - json.Time) * Sspeed, 2) - Math.pow(Number(json.Depth) * 1000, 2);
-				if (km > 0) {
-					let KM = Math.sqrt(km);
-					EarthquakeList[json.ID].Scircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
-						color       : json.Alert ? "red" : "orange",
-						fillColor   : "#F8E7E7",
-						fillOpacity : 0.1,
-						radius      : KM,
-					});
-					EarthquakeList[json.ID].Scircle1 = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
-						color       : json.Alert ? "red" : "orange",
-						fillColor   : "#F8E7E7",
-						fillOpacity : 0.1,
-						radius      : KM,
-					});
-					map.addLayer(EarthquakeList[json.ID].Scircle);
-					mapTW.addLayer(EarthquakeList[json.ID].Scircle1);
+					if (EarthquakeList[json.ID].Scircle != null)
+						map.removeLayer(EarthquakeList[json.ID].Scircle);
+					if (EarthquakeList[json.ID].Scircle1 != null)
+						mapTW.removeLayer(EarthquakeList[json.ID].Scircle1);
+					let km = Math.pow((NOW.getTime() - json.Time) * Sspeed, 2) - Math.pow(Number(json.Depth) * 1000, 2);
+					if (km > 0) {
+						let KM = Math.sqrt(km);
+						EarthquakeList[json.ID].Scircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
+							color       : json.Alert ? "red" : "orange",
+							fillColor   : "#F8E7E7",
+							fillOpacity : 0.1,
+							radius      : KM,
+						});
+						EarthquakeList[json.ID].Scircle1 = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
+							color       : json.Alert ? "red" : "orange",
+							fillColor   : "#F8E7E7",
+							fillOpacity : 0.1,
+							radius      : KM,
+						});
+						map.addLayer(EarthquakeList[json.ID].Scircle);
+						mapTW.addLayer(EarthquakeList[json.ID].Scircle1);
+					}
+					if (CONFIG["map.autoZoom"]) {
+						if ((NOW.getTime() - json.Time) * Pspeed > 250000 && Loom < 250000) {
+							Loom = 250000;
+							focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 7);
+						}
+						if ((NOW.getTime() - json.Time) * Pspeed > 500000 && Loom < 500000) {
+							Loom = 500000;
+							focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 6.5);
+						}
+						if ((NOW.getTime() - json.Time) * Pspeed > 750000 && Loom < 750000) {
+							Loom = 750000;
+							focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 6);
+						}
+					}
 				}
 				if (NOW.getTime() - EEWshot > 60000)
 					EEWshotC = 0;
@@ -1417,18 +1434,22 @@ async function FCMdata(data) {
 					EEWshot = NOW.getTime();
 					ipcRenderer.send("screenshotEEW", json);
 				}
-				if (NOW.getTime() - json.TimeStamp > 240000 || json.Cancel && EarthquakeList[json.ID] != undefined) {
-					if (json.Cancel) {
-						document.getElementById("alert").style.display = "inline";
-						document.getElementById("alert-body").innerText = "強震即時警報 已取消";
-						setTimeout(() => {
-							document.getElementById("alert").style.display = "none";
-						}, 30000);
-					}
-					if (EarthquakeList[json.ID].Scircle != undefined) map.removeLayer(EarthquakeList[json.ID].Scircle);
-					if (EarthquakeList[json.ID].Pcircle != undefined) map.removeLayer(EarthquakeList[json.ID].Pcircle);
-					if (EarthquakeList[json.ID].Scircle1 != undefined) mapTW.removeLayer(EarthquakeList[json.ID].Scircle1);
-					if (EarthquakeList[json.ID].Pcircle1 != undefined) mapTW.removeLayer(EarthquakeList[json.ID].Pcircle1);
+				if (json.Cancel && EarthquakeList[json.ID].Cancel == undefined)
+					for (let index = 0; index < INFO.length; index++)
+						if (INFO[index].ID == json.ID) {
+							INFO[index].alert_provider += " (取消)";
+							clear(json.ID);
+							json.TimeStamp = NOW.getTime() - 210000;
+							EarthquakeList[json.ID].Cancel = true;
+							if (Object.keys(EarthquakeList).length == 1) {
+								clearInterval(t);
+								audioList = [];
+								audioList1 = [];
+							}
+							break;
+						}
+				if (NOW.getTime() - json.TimeStamp > 240000) {
+					clear(json.ID);
 					map.removeLayer(EarthquakeList[json.ID].Cross);
 					mapTW.removeLayer(EarthquakeList[json.ID].Cross1);
 					for (let index = 0; index < INFO.length; index++)
@@ -1437,48 +1458,32 @@ async function FCMdata(data) {
 							INFO.splice(index, 1);
 							break;
 						}
-
 					clearInterval(EarthquakeList[json.ID].Timer);
 					document.getElementById("box-10").innerHTML = "";
 					delete EarthquakeList[json.ID];
 					if (Object.keys(EarthquakeList).length == 0) {
 						clearInterval(t);
+						audioList = [];
+						audioList1 = [];
 						clearInterval(ITimer);
 						// hide eew alert
+						ITimer = null;
+						ticker = null;
+						focus([Lat, Long], 7.5);
+						TimerDesynced = false;
+						INFO = [];
+						map.removeLayer(geojson);
+						for (let index = 0; index < expected.length; index++)
+							map.removeLayer(expected[index]);
+
+						expected = [];
 						$("#alert-box").removeClass("show");
 						// hide minimap
 						$("#map-tw").removeClass("show");
 						// restore reports
 						$(roll).fadeIn(200);
-						ITimer = null;
-						ticker = null;
-						focus([Lat, Long], 7.5);
-						TimerDesynced = false;
-						audioList = [];
-						INFO = [];
-						map.removeLayer(geojson);
-						win.setAlwaysOnTop(false);
-						for (let index = 0; index < expected.length; index++)
-							map.removeLayer(expected[index]);
-
-						expected = [];
 					} else
 						focus();
-
-				}
-				if (CONFIG["map.autoZoom"]) {
-					if ((NOW.getTime() - json.Time) * Pspeed > 250000 && Loom < 250000) {
-						Loom = 250000;
-						focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 7);
-					}
-					if ((NOW.getTime() - json.Time) * Pspeed > 500000 && Loom < 500000) {
-						Loom = 500000;
-						focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 6.5);
-					}
-					if ((NOW.getTime() - json.Time) * Pspeed > 750000 && Loom < 750000) {
-						Loom = 750000;
-						focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 6);
-					}
 				}
 			}, speed);
 			setTimeout(() => {
@@ -1519,6 +1524,13 @@ async function FCMdata(data) {
 }
 // #endregion
 
+function clear(ID) {
+	if (EarthquakeList[ID].Scircle != undefined) map.removeLayer(EarthquakeList[ID].Scircle);
+	if (EarthquakeList[ID].Pcircle != undefined) map.removeLayer(EarthquakeList[ID].Pcircle);
+	if (EarthquakeList[ID].Scircle1 != undefined) mapTW.removeLayer(EarthquakeList[ID].Scircle1);
+	if (EarthquakeList[ID].Pcircle1 != undefined) mapTW.removeLayer(EarthquakeList[ID].Pcircle1);
+}
+
 function updateText() {
 	$("#alert-box")[0].className = `${INFO[TINFO].alert_type} ${IntensityToClassString(INFO[TINFO].alert_intensity)}`;
 	$("#alert-local")[0].className = `alert-item ${IntensityToClassString(INFO[TINFO].alert_local)}`;
@@ -1530,12 +1542,18 @@ function updateText() {
 	$("#alert-depth").text(INFO[TINFO].alert_depth);
 	$("#alert-box").addClass("show");
 
-	let num = Math.round((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Sspeed) / Sspeed);
-	if (num <= 0) num = "";
-	document.getElementById("alert-s").innerText = `${num}`;
-	num = Math.round((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Pspeed) / Pspeed);
-	if (num <= 0) num = "";
-	document.getElementById("alert-p").innerText = `${num}`;
+
+	if (EarthquakeList[INFO[TINFO].ID].Cancel != undefined) {
+		document.getElementById("alert-s").innerText = "X";
+		document.getElementById("alert-p").innerText = "X";
+	} else {
+		let num = Math.round((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Sspeed) / Sspeed);
+		if (num <= 0) num = "";
+		document.getElementById("alert-s").innerText = `${num}`;
+		num = Math.round((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Pspeed) / Pspeed);
+		if (num <= 0) num = "";
+		document.getElementById("alert-p").innerText = `${num}`;
+	}
 
 	let Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
 	let Catch = document.getElementById("box-10");
