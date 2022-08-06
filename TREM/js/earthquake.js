@@ -298,31 +298,31 @@ function init() {
 								"Time"      : 0,
 							};
 						if (Intensity != "NA" && Intensity != 0) {
-							let find = -1;
-							for (let Index = 0; Index < All.length; Index++)
-								if (All[Index].loc == station[Object.keys(Json)[index]].Loc) {
-									All[Index].intensity = Intensity;
-									All[Index].time = NOW.getTime();
-									All[Index].pga = amount;
-									find = 0;
-									break;
-								}
-							if (find == -1)
-								All.push({
-									"loc"       : station[Object.keys(Json)[index]].Loc,
-									"intensity" : Intensity,
-									"time"      : NOW.getTime(),
-									"pga"       : amount,
-								});
 							if (Intensity > pga[station[Object.keys(Json)[index]].PGA].Intensity) pga[station[Object.keys(Json)[index]].PGA].Intensity = Intensity;
 							if (Sdata.Alert || fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"))) {
-								if (CONFIG["earthquake.Real-time-forecast"])
-									limit();
-								else
-								if (RMTlimit.length < 2) {
-									if (!RMTlimit.includes(Object.keys(Json)[index])) RMTlimit.push(Object.keys(Json)[index]);
-								} else
-									limit();
+								let find = -1;
+								for (let Index = 0; Index < All.length; Index++)
+									if (All[Index].loc == station[Object.keys(Json)[index]].Loc) {
+										All[Index].intensity = Intensity;
+										All[Index].time = NOW.getTime();
+										All[Index].pga = amount;
+										find = 0;
+										break;
+									}
+								if (find == -1)
+									All.push({
+										"loc"       : station[Object.keys(Json)[index]].Loc,
+										"intensity" : Intensity,
+										"time"      : NOW.getTime(),
+										"pga"       : amount,
+									});
+								// if (CONFIG["earthquake.Real-time-forecast"])
+								limit();
+								// else
+								// if (RMTlimit.length < 2) {
+								// 	if (!RMTlimit.includes(Object.keys(Json)[index])) RMTlimit.push(Object.keys(Json)[index]);
+								// } else
+								// 	limit();
 
 								function limit() {
 									if (amount > 8 && PGALimit == 0) {
