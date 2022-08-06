@@ -12,6 +12,7 @@ let t = null;
 let Lat = 25.0421407;
 let Long = 121.5198716;
 let All = [];
+let arrive = [];
 let audioList = [];
 let audioList1 = [];
 let audioLock = false;
@@ -33,7 +34,7 @@ let PGAaudio = false;
 let PGAtag = 0;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 let expected = [];
-let Info = { Notify: [] };
+let Info = { Notify: [], Warn: [] };
 let Focus = [];
 let PGAmark = false;
 let Check = {};
@@ -316,13 +317,13 @@ function init() {
 										"time"      : NOW.getTime(),
 										"pga"       : amount,
 									});
-								// if (CONFIG["earthquake.Real-time-forecast"])
-								limit();
-								// else
-								// if (RMTlimit.length < 2) {
-								// 	if (!RMTlimit.includes(Object.keys(Json)[index])) RMTlimit.push(Object.keys(Json)[index]);
-								// } else
-								// 	limit();
+								if (CONFIG["earthquake.Real-time-forecast"])
+									limit();
+								else
+								if (RMTlimit.length < 2) {
+									if (!RMTlimit.includes(Object.keys(Json)[index])) RMTlimit.push(Object.keys(Json)[index]);
+								} else
+									limit();
 
 								function limit() {
 									if (amount > 8 && PGALimit == 0) {
@@ -535,16 +536,17 @@ async function setUserLocationMarker() {
 
 // #region 聚焦
 function focus(Loc, size, args) {
-	if (Loc != undefined && args == undefined) {
-		Focus[0] = Loc[0];
-		Focus[1] = Loc[1];
-		Focus[2] = size;
-		map.setView([Loc[0], Loc[1] + 0.9], size);
-	} else if (Loc != undefined)
-		map.setView([Loc[0], Loc[1] + 0.9], size);
-	else
-		map.setView([Focus[0], Focus[1] + 0.9], Focus[2]);
-
+	setTimeout(() => {
+		if (Loc != undefined && args == undefined) {
+			Focus[0] = Loc[0];
+			Focus[1] = Loc[1];
+			Focus[2] = size;
+			map.setView([Loc[0], Loc[1] + 0.9], size);
+		} else if (Loc != undefined)
+			map.setView([Loc[0], Loc[1] + 0.9], size);
+		else
+			map.setView([Focus[0], Focus[1] + 0.9], Focus[2]);
+	}, 100);
 }
 // #endregion
 
@@ -1236,10 +1238,13 @@ async function FCMdata(data) {
 					audioPlay1("./audio/1/second.wav");
 				}
 			}
-			if (json.ID != Info.Warn && json.Alert) {
-				Info.Warn = json.ID;
+			if (!Info.Warn.includes(json.ID) && MaxIntensity >= 5) {
+				Info.Warn.push(json.ID);
+				json.Alert = true;
 				audioPlay("./audio/Alert.wav");
-			}
+			} else
+				json.Alert = false;
+
 			let _time = -1;
 			let stamp = 0;
 			if (json.ID + json.Version != Info.Alert) {
@@ -1267,7 +1272,10 @@ async function FCMdata(data) {
 							else if (value > 0)
 								audioPlay1(`./audio/1/${value.toString()}.wav`);
 							else {
-								audioPlay1("./audio/1/arrive.wav");
+								if (!arrive.includes(json.ID)) {
+									arrive.push(json.ID);
+									audioPlay1("./audio/1/arrive.wav");
+								}
 								_time = 0;
 							}
 
