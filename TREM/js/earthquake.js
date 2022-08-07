@@ -34,7 +34,7 @@ let PGAaudio = false;
 let PGAtag = 0;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 let expected = [];
-let Info = { Notify: [], Warn: [] };
+let Info = { Notify: [], Warn: [], Focus: [] };
 let Focus = [];
 let PGAmark = false;
 let Check = {};
@@ -61,6 +61,8 @@ let ReportTag = 0;
 let EEWshot = 0;
 let EEWshotC = 0;
 let Response = {};
+let ErrorT = false;
+let ErrorT1 = 0;
 // #endregion
 
 // #region override Date.format()
@@ -245,16 +247,23 @@ function init() {
 				"Function" : "data",
 				"Type"     : "TREM",
 			};
-			axios.post(PostIP(), data)
-				.then((response) => {
-					Response = response.data;
-					handler(Response);
-				})
-				.catch((error) => {
-					dump({ level: 2, message: error, origin: "PGATimer" });
-					console.error(error);
-					handler(Response);
-				});
+			if (NOW.getTime() - ErrorT1 >= 3000)
+				axios.post(PostIP(), data)
+					.then((response) => {
+						ErrorT = false;
+						Response = response.data;
+						handler(Response);
+					})
+					.catch((error) => {
+						if (!ErrorT) {
+							ErrorT = true;
+							focus();
+						}
+						ErrorT1 = NOW.getTime();
+						dump({ level: 2, message: error, origin: "PGATimer" });
+						console.error(error);
+						handler(Response);
+					});
 		}, 1000);
 
 		function handler(response) {
@@ -1256,7 +1265,10 @@ async function FCMdata(data) {
 			let _time = -1;
 			let stamp = 0;
 			if (json.ID + json.Version != Info.Alert) {
-				focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 7.5);
+				if (!Info.Focus.includes(json.ID)) {
+					Info.Focus.push(json.ID);
+					focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 7.5);
+				}
 				Info.Alert = json.ID + json.Version;
 				if (t != null) clearInterval(t);
 				t = setInterval(() => {
