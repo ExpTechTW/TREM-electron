@@ -44,8 +44,19 @@
 
 ## 貢獻者
 - whes1015 `程式開發` `文檔`
-- Kamiya `介面設計`
+- Kamiya `程式開發` `介面設計`
 - eggrollpvp `資料處理` `文檔`
 - M789 `圖形設計`
+- JQuake `音效`
+- 地牛Wake Up! `音效`
+
+## 下載
+- [Windows (64bit)](https://github.com/ExpTechTW/TREM/releases)
+
+## 合作
+- [ExpTech Studio](https://www.youtube.com/embed/live_stream?channel=UCkCzTx8RfC-Chd_hY01R80Q) `YouTube 直播 (24小時)`
+- [布丁Timyaya 地震記錄](https://www.youtube.com/channel/UCJUeRIt6jKSE-4jP7QB70kw) `YouTube 錄播`
+- [TEEWLAB速報實驗室](https://www.youtube.com/embed/live_stream?channel=UC9ssJN3nzsA83ZOBiRNDABg) `YouTube 直播 (24小時)`
+- [Yoyo0901](https://www.youtube.com/embed/live_stream?channel=UCE74C-snUczeXrfOYp4hYQQ) `YouTube 直播 (24小時)`
 
 #### 2022/07/11 初稿
