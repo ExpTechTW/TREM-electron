@@ -262,7 +262,7 @@ function init() {
 			let cancel;
 			setTimeout(() => {
 				cancel();
-			}, 1000);
+			}, 3000);
 			axios({
 				method      : "post",
 				url         : PostIP(),
@@ -1050,16 +1050,14 @@ ipcMain.on("start", () => {
 						"Type"          : "test",
 						"FormatVersion" : 3,
 						"UUID"          : localStorage.UUID,
-						"Addition"      : "TW",
 					};
-					if (CONFIG["accept.eew.jp"]) delete data["Addition"];
 					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 					axios.post(PostIP(), data)
 						.catch((error) => {
 							dump({ level: 2, message: error, origin: "Verbose" });
 						});
 				}
-			}, 1000);
+			}, 3000);
 	} catch (error) {
 		showDialog("error", "發生錯誤", `初始化過程中發生錯誤，您可以繼續使用此應用程式，但無法保證所有功能皆能繼續正常運作。\n\n如果這是您第一次看到這個訊息，請嘗試重新啟動應用程式。\n如果這個錯誤持續出現，請到 TREM Discord 伺服器回報問題。\n\n錯誤訊息：${error}`);
 		$("#load").delay(1000).fadeOut(1000);
@@ -1129,7 +1127,10 @@ async function FCMdata(data) {
 		PAlert = json.Data;
 	else if (json.Function == "TREM_earthquake")
 		TREM = json;
-	else if (json.Function == "report") {
+	else if (json.Function == "Replay") {
+		replay = json.timestamp;
+		replayT = NOW.getTime();
+	} else if (json.Function == "report") {
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
 		if (CONFIG["report.show"]) {
 			win.show();
