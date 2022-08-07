@@ -138,6 +138,11 @@ body {
 	font-weight: 600;
 }
 
+#time.replay {
+	color: yellow;
+	font-weight: 600;
+}
+
 #app-version {
 	user-select: none;
 	pointer-events: none;

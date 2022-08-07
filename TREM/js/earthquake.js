@@ -61,8 +61,8 @@ let ReportTag = 0;
 let EEWshot = 0;
 let EEWshotC = 0;
 let Response = {};
-let ErrorT = false;
-let ErrorT1 = 0;
+let replay = 0;
+let replayT = 0;
 // #endregion
 
 // #region override Date.format()
@@ -132,7 +132,15 @@ function init() {
 		else {
 			if (time.classList.contains("desynced"))
 				time.classList.remove("desynced");
-			time.innerText = NOW.format("YYYY/MM/DD HH:mm:ss");
+			if (replay == 0) {
+				if (time.classList.contains("replay"))
+					time.classList.remove("replay");
+				time.innerText = NOW.format("YYYY/MM/DD HH:mm:ss");
+			} else {
+				if (!time.classList.contains("replay"))
+					time.classList.add("replay");
+				time.innerText = new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss");
+			}
 		}
 		if (Object.keys(Tsunami).length != 0)
 			if (NOW.getTime() - Tsunami.Time > 240000) {
@@ -242,28 +250,34 @@ function init() {
 		dump({ level: 0, message: "Start PGA Timer", origin: "PGATimer" });
 		if (MainClock != null) clearInterval(MainClock);
 		MainClock = setInterval(() => {
+			let R = 0;
+			if (replay != 0) R = replay + (NOW.getTime() - replayT);
 			let data = {
 				"APIkey"   : "https://github.com/ExpTechTW",
 				"Function" : "data",
 				"Type"     : "TREM",
+				"Value"    : R,
 			};
-			if (NOW.getTime() - ErrorT1 >= 3000)
-				axios.post(PostIP(), data)
-					.then((response) => {
-						ErrorT = false;
-						Response = response.data;
-						handler(Response);
-					})
-					.catch((error) => {
-						if (!ErrorT) {
-							ErrorT = true;
-							focus();
-						}
-						ErrorT1 = NOW.getTime();
-						dump({ level: 2, message: error, origin: "PGATimer" });
-						console.error(error);
-						handler(Response);
-					});
+			let CancelToken = axios.CancelToken;
+			let cancel;
+			setTimeout(() => {
+				cancel();
+			}, 1000);
+			axios({
+				method      : "post",
+				url         : PostIP(),
+				data        : data,
+				cancelToken : new CancelToken((c) => {
+					cancel = c;
+				}),
+			}).then((response) => {
+				Response = response.data;
+				handler(Response);
+			}).catch((err) => {
+				dump({ level: 2, message: err, origin: "PGATimer" });
+				console.error(err);
+				handler(Response);
+			});
 		}, 1000);
 
 		function handler(response) {
@@ -1259,6 +1273,10 @@ async function FCMdata(data) {
 				Info.Warn.push(json.ID);
 				json.Alert = true;
 				audioPlay("./audio/Alert.wav");
+				audioPlay("./audio/Alert.wav");
+				audioPlay("./audio/Alert.wav");
+				audioPlay("./audio/Alert.wav");
+				audioPlay("./audio/Alert.wav");
 			} else
 				json.Alert = false;
 
@@ -1332,9 +1350,11 @@ async function FCMdata(data) {
 
 			// AlertBox: 種類
 			let classString = "alert-box ";
-			if (json.Replay)
+			if (json.Replay) {
+				replay = json.timestamp;
+				replayT = NOW.getTime();
 				classString += "eew-history";
-			else if (json.Test)
+			} else if (json.Test)
 				classString += "eew-test";
 			else if (json.Alert)
 				classString += "eew-alert";
@@ -1497,6 +1517,7 @@ async function FCMdata(data) {
 						// hide eew alert
 						ITimer = null;
 						ticker = null;
+						replay = 0;
 						focus([Lat, Long], 7.5);
 						TimerDesynced = false;
 						INFO = [];
