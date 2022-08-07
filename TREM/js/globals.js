@@ -174,7 +174,6 @@ if (CONFIG.ver != ver) {
 	fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), "utf8");
 }
 
-console.log(CONFIG);
 // Synchronize config
 for (let i = 0, k = Object.keys(DEFAULT_CONFIG), n = k.length; i < n; i++)
 	if (typeof CONFIG[k[i]] != typeof DEFAULT_CONFIG[k[i]].value && k[i] != "ver")

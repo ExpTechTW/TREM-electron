@@ -4,7 +4,7 @@
 /* eslint-disable prefer-const */
 const { BrowserWindow, shell } = require("@electron/remote");
 const path = require("path");
-axios.defaults.timeout = 15000;
+axios.defaults.timeout = 5000;
 
 // #region 變數
 let Stamp = 0;
@@ -60,6 +60,7 @@ let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
 let EEWshotC = 0;
+let Response = {};
 // #endregion
 
 // #region override Date.format()
@@ -110,6 +111,9 @@ Date.prototype.format =
 let win = BrowserWindow.fromId(process.env.window * 1);
 let roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
+win.on("show", () => {
+	focus();
+});
 
 function init() {
 	ReportGET({});
@@ -243,268 +247,274 @@ function init() {
 			};
 			axios.post(PostIP(), data)
 				.then((response) => {
-					for (let index = 0; index < Object.keys(Station).length; index++) {
-						map.removeLayer(Station[Object.keys(Station)[index]]);
-						delete Station[Object.keys(Station)[index]];
-						index--;
-					}
-					if (response.data["state"] != "Success") return;
-					let Json = response.data.response;
-					MAXPGA = { pga: 0, station: "NA", level: 0 };
-					for (let index = 0; index < Object.keys(Json).length; index++) {
-						let Sdata = Json[Object.keys(Json)[index]];
-						let amount = 0;
-						if (Number(Sdata["MaxPGA"]) > amount) amount = Number(Sdata.MaxPGA);
-						if (station[Object.keys(Json)[index]] == undefined) continue;
-						let Intensity = (NOW.getTime() - Sdata.TimeStamp > 5000) ? "NA" :
-							(amount >= 800) ? 9 :
-								(amount >= 440) ? 8 :
-									(amount >= 250) ? 7 :
-										(amount >= 140) ? 6 :
-											(amount >= 80) ? 5 :
-												(amount >= 25) ? 4 :
-													(amount >= 8) ? 3 :
-														(amount >= 5) ? 2 :
-															(amount >= 3) ? 1 :
-																0;
-						let size = 15;
-						let Image = `./image/${Intensity}.png`;
-						if (Intensity == 0) {
-							size = 10;
-							Image = "./image/0-1.png";
-							if (amount > 2.5) Image = "./image/0-2.png";
-							if (amount > 2.8) Image = "./image/0-3.png";
-							if (amount > 3) Image = "./image/0-4.png";
-							if (amount > 3.5) Image = "./image/0-5.png";
-						}
-						let myIcon = L.icon({
-							iconUrl  : Image,
-							iconSize : [size, size],
-						});
-						let ReportMark = L.marker([station[Object.keys(Json)[index]].Lat, station[Object.keys(Json)[index]].Long], { icon: myIcon });
-						let Level = IntensityI(Intensity);
-						let now = new Date(Sdata.Time);
-						if (Object.keys(Json)[index] == CONFIG["Real-time.station"]) {
-							document.getElementById("rt-station-name").innerText = station[Object.keys(Json)[index]].Loc;
-							document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
-							document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity) ;
-							document.getElementById("rt-station-pga").innerText = amount;
-						}
-						map.addLayer(ReportMark);
-						ReportMark.setZIndexOffset(2000 + amount);
-						Station[Object.keys(Json)[index]] = ReportMark;
-						if (pga[station[Object.keys(Json)[index]].PGA] == undefined && Intensity != "NA")
-							pga[station[Object.keys(Json)[index]].PGA] = {
-								"Intensity" : Intensity,
-								"Time"      : 0,
-							};
-						if (Intensity != "NA" && Intensity != 0) {
-							if (Intensity > pga[station[Object.keys(Json)[index]].PGA].Intensity) pga[station[Object.keys(Json)[index]].PGA].Intensity = Intensity;
-							if (Sdata.Alert || fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"))) {
-								let find = -1;
-								for (let Index = 0; Index < All.length; Index++)
-									if (All[Index].loc == station[Object.keys(Json)[index]].Loc) {
-										All[Index].intensity = Intensity;
-										All[Index].time = NOW.getTime();
-										All[Index].pga = amount;
-										find = 0;
-										break;
-									}
-								if (find == -1)
-									All.push({
-										"loc"       : station[Object.keys(Json)[index]].Loc,
-										"intensity" : Intensity,
-										"time"      : NOW.getTime(),
-										"pga"       : amount,
-									});
-								if (CONFIG["earthquake.Real-time-forecast"])
-									limit();
-								else
-								if (RMTlimit.length < 2) {
-									if (!RMTlimit.includes(Object.keys(Json)[index])) RMTlimit.push(Object.keys(Json)[index]);
-								} else
-									limit();
-
-								function limit() {
-									if (amount > 8 && PGALimit == 0) {
-										PGALimit = 1;
-										audioPlay("./audio/PGA1.wav");
-									} else if (amount > 250 && PGALimit != 2) {
-										PGALimit = 2;
-										audioPlay("./audio/PGA2.wav");
-									}
-									pga[station[Object.keys(Json)[index]].PGA].Time = NOW.getTime();
-								}
-							}
-							if (MAXPGA.pga < amount && Level != "NA") {
-								MAXPGA.pga = amount;
-								MAXPGA.station = Object.keys(Json)[index];
-								MAXPGA.level = Level;
-								MAXPGA.lat = station[Object.keys(Json)[index]].Lat;
-								MAXPGA.long = station[Object.keys(Json)[index]].Long;
-								MAXPGA.loc = station[Object.keys(Json)[index]].Loc;
-								MAXPGA.intensity = Intensity;
-								MAXPGA.ms = NOW.getTime() - Sdata.TimeStamp;
-							}
-						}
-					}
-					if (PAlert.data != undefined)
-						if (NOW.getTime() - PAlert.timestamp > 30000) {
-							if (Pgeojson != null) {
-								map.removeLayer(Pgeojson);
-								Pgeojson = null;
-								focus();
-							}
-						} else {
-							let PLoc = {};
-							let MaxI = 0;
-							for (let index = 0; index < PAlert.data.length; index++) {
-								PLoc[PAlert.data[index].loc] = PAlert.data[index].intensity;
-								if (PAlert.data[index].intensity > MaxI) {
-									MaxI = PAlert.data[index].intensity;
-									Report = NOW.getTime();
-									ReportGET({
-										Max  : MaxI,
-										Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
-									});
-								}
-							}
-							if (PalertT != PAlert.timestamp && Object.keys(PLoc).length != 0) {
-								PalertT = PAlert.timestamp;
-								if (Pgeojson == null) {
-									if (CONFIG["Real-time.show"])
-										win.show();
-									if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
-									win.setAlwaysOnTop(false);
-									audioPlay("./audio/palert.wav");
-								}
-								if (Pgeojson != null) map.removeLayer(Pgeojson);
-								Pgeojson = L.geoJson(statesData, {
-									style: (feature) => {
-										let name = feature.properties.COUNTY + " " + feature.properties.TOWN;
-										if (PLoc[name] == 0 || PLoc[name] == undefined)
-											return {
-												weight      : 0,
-												opacity     : 0,
-												color       : "#8E8E8E",
-												dashArray   : "",
-												fillOpacity : 0,
-												fillColor   : "transparent",
-											};
-										return {
-											weight      : 0,
-											opacity     : 0,
-											color       : "#8E8E8E",
-											dashArray   : "",
-											fillOpacity : 0.8,
-											fillColor   : color(PLoc[name]),
-										};
-									},
-								});
-								map.addLayer(Pgeojson);
-								focus([23.608428, 120.799168], 7, true);
-								setTimeout(() => {
-									ipcRenderer.send("screenshotEEW", {
-										"ID"      : NOW.getTime(),
-										"Version" : "P",
-									});
-								}, 2000);
-							}
-							if (Pgeojson != null) Pgeojson.setZIndexOffset(1000);
-						}
-					for (let index = 0; index < Object.keys(PGA).length; index++) {
-						if (RMT == 0) map.removeLayer(PGA[Object.keys(PGA)[index]]);
-						delete PGA[Object.keys(PGA)[index]];
-						index--;
-					}
-					RMT++;
-					for (let index = 0; index < Object.keys(pga).length; index++) {
-						let Intensity = pga[Object.keys(pga)[index]].Intensity;
-						if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000) {
-							delete pga[Object.keys(pga)[index]];
-							index--;
-						} else {
-							PGA[Object.keys(pga)[index]] = L.polygon(PGAjson[Object.keys(pga)[index].toString()], {
-								color     : color(Intensity),
-								fillColor : "transparent",
-							});
-							if (RMT >= 2) map.addLayer(PGA[Object.keys(pga)[index]]);
-							PGAaudio = true;
-						}
-					}
-					if (RMT >= 2) RMT = 0;
-					if (Object.keys(pga).length != 0 && !PGAmark) {
-						PGAmark = true;
-						focus([23.608428, 120.799168], 7, true);
-					}
-					if (PGAmark && Object.keys(pga).length == 0) {
-						PGAmark = false;
-						RMT = 1;
-						RMTlimit = [];
-						All = [];
-						focus();
-					}
-					if (Object.keys(PGA).length == 0) PGAaudio = false;
-					if (!PGAaudio) {
-						if (Pgeojson != null) map.removeLayer(Pgeojson);
-						PGAtag = 0;
-						PGALimit = 0;
-					}
-					for (let Index = 0; Index < All.length - 1; Index++)
-						for (let index = 0; index < All.length - 1; index++)
-							if (All[index].amount < All[index + 1].amount) {
-								let Temp = All[index + 1];
-								All[index + 1] = All[index];
-								All[index] = Temp;
-							}
-					if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
-						if (CONFIG["Real-time.audio"])
-							if (All[0].intensity >= 5 && PGAtag < 5)
-								audioPlay("./audio/Shindo2.wav");
-							else if (All[0].intensity >= 2 && PGAtag < 2)
-								audioPlay("./audio/Shindo1.wav");
-							else if (PGAtag == 0)
-								audioPlay("./audio/Shindo0.wav");
-
-						if (All[0].intensity >= 2) {
-							Report = NOW.getTime();
-							ReportGET({
-								Max  : All[0].intensity,
-								Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
-							});
-							setTimeout(() => {
-								ipcRenderer.send("screenshotEEW", {
-									"ID"      : NOW.getTime(),
-									"Version" : "P",
-								});
-							}, 500);
-							if (CONFIG["Real-time.show"])
-								win.show();
-							if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
-							win.setAlwaysOnTop(false);
-						}
-						PGAtag = All[0].intensity;
-					}
-					let list = [];
-					let count = 0;
-					for (let Index = 0; Index < All.length; Index++, count++) {
-						if (!PGAaudio || count >= 10) break;
-						if (NOW.getTime() - All[Index].time > 30000) continue;
-						const container = document.createElement("DIV");
-						container.className = IntensityToClassString(All[Index].intensity);
-						const location = document.createElement("span");
-						location.innerText = All[Index].loc;
-						container.appendChild(document.createElement("span"));
-						container.appendChild(location);
-						list.push(container);
-					}
-					document.getElementById("rt-list").replaceChildren(...list);
+					Response = response.data;
+					handler(Response);
 				})
 				.catch((error) => {
 					dump({ level: 2, message: error, origin: "PGATimer" });
 					console.error(error);
+					handler(Response);
 				});
 		}, 1000);
+
+		function handler(response) {
+			for (let index = 0; index < Object.keys(Station).length; index++) {
+				map.removeLayer(Station[Object.keys(Station)[index]]);
+				delete Station[Object.keys(Station)[index]];
+				index--;
+			}
+			if (response["state"] != "Success") return;
+			let Json = response.response;
+			MAXPGA = { pga: 0, station: "NA", level: 0 };
+			for (let index = 0; index < Object.keys(Json).length; index++) {
+				let Sdata = Json[Object.keys(Json)[index]];
+				let amount = 0;
+				if (Number(Sdata["MaxPGA"]) > amount) amount = Number(Sdata.MaxPGA);
+				if (station[Object.keys(Json)[index]] == undefined) continue;
+				let Intensity = (NOW.getTime() - Sdata.TimeStamp > 5000) ? "NA" :
+					(amount >= 800) ? 9 :
+						(amount >= 440) ? 8 :
+							(amount >= 250) ? 7 :
+								(amount >= 140) ? 6 :
+									(amount >= 80) ? 5 :
+										(amount >= 25) ? 4 :
+											(amount >= 8) ? 3 :
+												(amount >= 5) ? 2 :
+													(amount >= 3) ? 1 :
+														0;
+				let size = 15;
+				let Image = `./image/${Intensity}.png`;
+				if (Intensity == 0) {
+					size = 10;
+					Image = "./image/0-1.png";
+					if (amount > 2.5) Image = "./image/0-2.png";
+					if (amount > 2.8) Image = "./image/0-3.png";
+					if (amount > 3) Image = "./image/0-4.png";
+					if (amount > 3.5) Image = "./image/0-5.png";
+				}
+				let myIcon = L.icon({
+					iconUrl  : Image,
+					iconSize : [size, size],
+				});
+				let ReportMark = L.marker([station[Object.keys(Json)[index]].Lat, station[Object.keys(Json)[index]].Long], { icon: myIcon });
+				let Level = IntensityI(Intensity);
+				let now = new Date(Sdata.Time);
+				if (Object.keys(Json)[index] == CONFIG["Real-time.station"]) {
+					document.getElementById("rt-station-name").innerText = station[Object.keys(Json)[index]].Loc;
+					document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
+					document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity) ;
+					document.getElementById("rt-station-pga").innerText = amount;
+				}
+				map.addLayer(ReportMark);
+				ReportMark.setZIndexOffset(2000 + amount);
+				Station[Object.keys(Json)[index]] = ReportMark;
+				if (pga[station[Object.keys(Json)[index]].PGA] == undefined && Intensity != "NA")
+					pga[station[Object.keys(Json)[index]].PGA] = {
+						"Intensity" : Intensity,
+						"Time"      : 0,
+					};
+				if (Intensity != "NA" && Intensity != 0) {
+					if (Intensity > pga[station[Object.keys(Json)[index]].PGA].Intensity) pga[station[Object.keys(Json)[index]].PGA].Intensity = Intensity;
+					if (Sdata.Alert || fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"))) {
+						let find = -1;
+						for (let Index = 0; Index < All.length; Index++)
+							if (All[Index].loc == station[Object.keys(Json)[index]].Loc) {
+								All[Index].intensity = Intensity;
+								All[Index].time = NOW.getTime();
+								All[Index].pga = amount;
+								find = 0;
+								break;
+							}
+						if (find == -1)
+							All.push({
+								"loc"       : station[Object.keys(Json)[index]].Loc,
+								"intensity" : Intensity,
+								"time"      : NOW.getTime(),
+								"pga"       : amount,
+							});
+						if (CONFIG["earthquake.Real-time-forecast"])
+							limit();
+						else
+						if (RMTlimit.length < 2) {
+							if (!RMTlimit.includes(Object.keys(Json)[index])) RMTlimit.push(Object.keys(Json)[index]);
+						} else
+							limit();
+
+						function limit() {
+							if (amount > 8 && PGALimit == 0) {
+								PGALimit = 1;
+								audioPlay("./audio/PGA1.wav");
+							} else if (amount > 250 && PGALimit != 2) {
+								PGALimit = 2;
+								audioPlay("./audio/PGA2.wav");
+							}
+							pga[station[Object.keys(Json)[index]].PGA].Time = NOW.getTime();
+						}
+					}
+					if (MAXPGA.pga < amount && Level != "NA") {
+						MAXPGA.pga = amount;
+						MAXPGA.station = Object.keys(Json)[index];
+						MAXPGA.level = Level;
+						MAXPGA.lat = station[Object.keys(Json)[index]].Lat;
+						MAXPGA.long = station[Object.keys(Json)[index]].Long;
+						MAXPGA.loc = station[Object.keys(Json)[index]].Loc;
+						MAXPGA.intensity = Intensity;
+						MAXPGA.ms = NOW.getTime() - Sdata.TimeStamp;
+					}
+				}
+			}
+			if (PAlert.data != undefined)
+				if (NOW.getTime() - PAlert.timestamp > 30000) {
+					if (Pgeojson != null) {
+						map.removeLayer(Pgeojson);
+						Pgeojson = null;
+						focus();
+					}
+				} else {
+					let PLoc = {};
+					let MaxI = 0;
+					for (let index = 0; index < PAlert.data.length; index++) {
+						PLoc[PAlert.data[index].loc] = PAlert.data[index].intensity;
+						if (PAlert.data[index].intensity > MaxI) {
+							MaxI = PAlert.data[index].intensity;
+							Report = NOW.getTime();
+							ReportGET({
+								Max  : MaxI,
+								Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
+							});
+						}
+					}
+					if (PalertT != PAlert.timestamp && Object.keys(PLoc).length != 0) {
+						PalertT = PAlert.timestamp;
+						if (Pgeojson == null) {
+							if (CONFIG["Real-time.show"])
+								win.show();
+							if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
+							win.setAlwaysOnTop(false);
+							audioPlay("./audio/palert.wav");
+						}
+						if (Pgeojson != null) map.removeLayer(Pgeojson);
+						Pgeojson = L.geoJson(statesData, {
+							style: (feature) => {
+								let name = feature.properties.COUNTY + " " + feature.properties.TOWN;
+								if (PLoc[name] == 0 || PLoc[name] == undefined)
+									return {
+										weight      : 0,
+										opacity     : 0,
+										color       : "#8E8E8E",
+										dashArray   : "",
+										fillOpacity : 0,
+										fillColor   : "transparent",
+									};
+								return {
+									weight      : 0,
+									opacity     : 0,
+									color       : "#8E8E8E",
+									dashArray   : "",
+									fillOpacity : 0.8,
+									fillColor   : color(PLoc[name]),
+								};
+							},
+						});
+						map.addLayer(Pgeojson);
+						focus([23.608428, 120.799168], 7, true);
+						setTimeout(() => {
+							ipcRenderer.send("screenshotEEW", {
+								"ID"      : NOW.getTime(),
+								"Version" : "P",
+							});
+						}, 2000);
+					}
+					if (Pgeojson != null) Pgeojson.setZIndexOffset(1000);
+				}
+			for (let index = 0; index < Object.keys(PGA).length; index++) {
+				if (RMT == 0) map.removeLayer(PGA[Object.keys(PGA)[index]]);
+				delete PGA[Object.keys(PGA)[index]];
+				index--;
+			}
+			RMT++;
+			for (let index = 0; index < Object.keys(pga).length; index++) {
+				let Intensity = pga[Object.keys(pga)[index]].Intensity;
+				if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000) {
+					delete pga[Object.keys(pga)[index]];
+					index--;
+				} else {
+					PGA[Object.keys(pga)[index]] = L.polygon(PGAjson[Object.keys(pga)[index].toString()], {
+						color     : color(Intensity),
+						fillColor : "transparent",
+					});
+					if (RMT >= 2) map.addLayer(PGA[Object.keys(pga)[index]]);
+					PGAaudio = true;
+				}
+			}
+			if (RMT >= 2) RMT = 0;
+			if (Object.keys(pga).length != 0 && !PGAmark) {
+				PGAmark = true;
+				focus([23.608428, 120.799168], 7, true);
+			}
+			if (PGAmark && Object.keys(pga).length == 0) {
+				focus();
+				PGAmark = false;
+				RMT = 1;
+				RMTlimit = [];
+				All = [];
+			}
+			if (Object.keys(PGA).length == 0) PGAaudio = false;
+			if (!PGAaudio) {
+				if (Pgeojson != null) map.removeLayer(Pgeojson);
+				PGAtag = 0;
+				PGALimit = 0;
+			}
+			for (let Index = 0; Index < All.length - 1; Index++)
+				for (let index = 0; index < All.length - 1; index++)
+					if (All[index].amount < All[index + 1].amount) {
+						let Temp = All[index + 1];
+						All[index + 1] = All[index];
+						All[index] = Temp;
+					}
+			if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
+				if (CONFIG["Real-time.audio"])
+					if (All[0].intensity >= 5 && PGAtag < 5)
+						audioPlay("./audio/Shindo2.wav");
+					else if (All[0].intensity >= 2 && PGAtag < 2)
+						audioPlay("./audio/Shindo1.wav");
+					else if (PGAtag == 0)
+						audioPlay("./audio/Shindo0.wav");
+
+				if (All[0].intensity >= 2) {
+					Report = NOW.getTime();
+					ReportGET({
+						Max  : All[0].intensity,
+						Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
+					});
+					setTimeout(() => {
+						ipcRenderer.send("screenshotEEW", {
+							"ID"      : NOW.getTime(),
+							"Version" : "P",
+						});
+					}, 500);
+					if (CONFIG["Real-time.show"])
+						win.show();
+					if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
+					win.setAlwaysOnTop(false);
+				}
+				PGAtag = All[0].intensity;
+			}
+			let list = [];
+			let count = 0;
+			for (let Index = 0; Index < All.length; Index++, count++) {
+				if (!PGAaudio || count >= 10) break;
+				if (NOW.getTime() - All[Index].time > 30000) continue;
+				const container = document.createElement("DIV");
+				container.className = IntensityToClassString(All[Index].intensity);
+				const location = document.createElement("span");
+				location.innerText = All[Index].loc;
+				container.appendChild(document.createElement("span"));
+				container.appendChild(location);
+				list.push(container);
+			}
+			document.getElementById("rt-list").replaceChildren(...list);
+		}
 	}
 	$("#app-version").text(app.getVersion());
 	$("#loading").text("歡迎");
@@ -536,17 +546,15 @@ async function setUserLocationMarker() {
 
 // #region 聚焦
 function focus(Loc, size, args) {
-	setTimeout(() => {
-		if (Loc != undefined && args == undefined) {
-			Focus[0] = Loc[0];
-			Focus[1] = Loc[1];
-			Focus[2] = size;
-			map.setView([Loc[0], Loc[1] + 0.9], size);
-		} else if (Loc != undefined)
-			map.setView([Loc[0], Loc[1] + 0.9], size);
-		else
-			map.setView([Focus[0], Focus[1] + 0.9], Focus[2]);
-	}, 100);
+	if (Loc != undefined && args == undefined) {
+		Focus[0] = Loc[0];
+		Focus[1] = Loc[1];
+		Focus[2] = size;
+		map.setView([Loc[0], Loc[1] + 0.9], size);
+	} else if (Loc != undefined)
+		map.setView([Loc[0], Loc[1] + 0.9], size);
+	else
+		map.setView([Focus[0], Focus[1] + 0.9], Focus[2]);
 }
 // #endregion
 
