@@ -63,6 +63,7 @@ let EEWshotC = 0;
 let Response = {};
 let replay = 0;
 let replayT = 0;
+let Second = -1;
 // #endregion
 
 // #region override Date.format()
@@ -1290,36 +1291,41 @@ async function FCMdata(data) {
 				}
 				Info.Alert = json.ID + json.Version;
 				if (t != null) clearInterval(t);
-				t = setInterval(() => {
-					value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
-					if (stamp != value && !audioLock1) {
-						stamp = value;
-						if (_time >= 0) {
-							audioPlay("./audio/1/ding.wav");
-							_time++;
-							if (_time >= 10)
-								clearInterval(t);
+				value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
+				if (Second == -1 || value < Second)
+					t = setInterval(() => {
+						value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
+						Second = value;
+						if (stamp != value && !audioLock1) {
+							stamp = value;
+							if (_time >= 0) {
+								audioPlay("./audio/1/ding.wav");
+								_time++;
+								if (_time >= 10)
+									clearInterval(t);
+							} else if (value < 100) {
+								if (arrive.includes(json.ID)) {
+									clearInterval(t);
+									return;
+								}
+								if (value > 10)
+									if (value.toString().substring(1, 2) == "0") {
+										audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
+										audioPlay1("./audio/1/x0.wav");
+									} else
+										audioPlay("./audio/1/ding.wav");
 
-						} else if (value < 100)
-							if (value > 10)
-								if (value.toString().substring(1, 2) == "0") {
-									audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
-									audioPlay1("./audio/1/x0.wav");
-								} else
-									audioPlay("./audio/1/ding.wav");
-
-							else if (value > 0)
-								audioPlay1(`./audio/1/${value.toString()}.wav`);
-							else {
-								if (!arrive.includes(json.ID)) {
+								else if (value > 0)
+									audioPlay1(`./audio/1/${value.toString()}.wav`);
+								else {
 									arrive.push(json.ID);
 									audioPlay1("./audio/1/arrive.wav");
+									_time = 0;
 								}
-								_time = 0;
 							}
+						}
+					}, 0);
 
-					}
-				}, 0);
 			}
 			if (ReportMarkID != null) {
 				ReportMarkID = null;
@@ -1327,21 +1333,6 @@ async function FCMdata(data) {
 					map.removeLayer(MarkList[index]);
 
 			}
-			let myIcon = L.icon({
-				iconUrl  : "./image/cross.png",
-				iconSize : [30, 30],
-			});
-			let Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
-			let Cross1 = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
-			if (EarthquakeList[json.ID].Cross != undefined)
-				map.removeLayer(EarthquakeList[json.ID].Cross);
-			EarthquakeList[json.ID].Cross = Cross;
-			map.addLayer(Cross);
-			if (EarthquakeList[json.ID].Cross1 != undefined)
-				mapTW.removeLayer(EarthquakeList[json.ID].Cross1);
-			EarthquakeList[json.ID].Cross1 = Cross1;
-			mapTW.addLayer(Cross1);
-			Cross.setZIndexOffset(6000);
 			let Loom = 0;
 			let speed = 500;
 			if (CONFIG["shock.smoothing"]) speed = 0;
@@ -1354,8 +1345,8 @@ async function FCMdata(data) {
 			if (json.Replay) {
 				replay = json.timestamp;
 				replayT = NOW.getTime();
-				classString += "eew-history";
-			} else if (json.Test)
+			}
+			if (json.Test)
 				classString += "eew-test";
 			else if (json.Alert)
 				classString += "eew-alert";
@@ -1411,9 +1402,11 @@ async function FCMdata(data) {
 							else TINFO++;
 						}, 5000);
 				}, 1000);
-
 			EEWshot =	NOW.getTime() - 3500;
 			EEWshotC = 0;
+			if (EarthquakeList[json.ID].Cross != undefined)map.removeLayer(EarthquakeList[json.ID].Cross);
+			if (EarthquakeList[json.ID].Cross1 != undefined) mapTW.removeLayer(EarthquakeList[json.ID].Cross1);
+			let S1 = 0;
 			EarthquakeList[json.ID].Timer = setInterval(() => {
 				if (EarthquakeList[json.ID].Cancel == undefined) {
 					if (CONFIG["shock.p"]) {
@@ -1473,6 +1466,52 @@ async function FCMdata(data) {
 							focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 6);
 						}
 					}
+					if (NOW.getMilliseconds() < 500 && S1 == 0) {
+						S1 = 1;
+						let myIcon;
+						let X = 0;
+						let Y = 0;
+						if (Object.keys(EarthquakeList).length != 1) {
+							let find = 1;
+							for (let index = 0; index < Object.keys(EarthquakeList).length; index++)
+								if (Object.keys(EarthquakeList)[index] == json.ID) {
+									find = index + 1;
+									break;
+								}
+							if (find <= 4) {
+								myIcon = L.icon({
+									iconUrl  : `./image/cross${find}.png`,
+									iconSize : [40, 40],
+								});
+								if (find == 1) Y = 0.03;
+								if (find == 2) X = 0.03;
+								if (find == 3) Y = -0.03;
+								if (find == 4) X = -0.03;
+							} else
+								myIcon = L.icon({
+									iconUrl  : "./image/cross.png",
+									iconSize : [30, 30],
+								});
+						} else
+							myIcon = L.icon({
+								iconUrl  : "./image/cross.png",
+								iconSize : [30, 30],
+							});
+
+						let Cross = L.marker([Number(json.NorthLatitude) + Y, Number(json.EastLongitude) + X], { icon: myIcon });
+						let Cross1 = L.marker([Number(json.NorthLatitude) + Y, Number(json.EastLongitude) + X], { icon: myIcon });
+						EarthquakeList[json.ID].Cross = Cross;
+						map.addLayer(Cross);
+						EarthquakeList[json.ID].Cross1 = Cross1;
+						mapTW.addLayer(Cross1);
+						Cross.setZIndexOffset(6000);
+					} else if (NOW.getMilliseconds() > 500 && S1 == 1) {
+						S1 = 0;
+						map.removeLayer(EarthquakeList[json.ID].Cross);
+						mapTW.removeLayer(EarthquakeList[json.ID].Cross1);
+						delete EarthquakeList[json.ID].Cross;
+						delete EarthquakeList[json.ID].Cross1;
+					}
 				}
 				if (NOW.getTime() - EEWshot > 60000)
 					EEWshotC = 0;
@@ -1514,6 +1553,7 @@ async function FCMdata(data) {
 						clearInterval(t);
 						audioList = [];
 						audioList1 = [];
+						Second = -1;
 						clearInterval(ITimer);
 						// hide eew alert
 						ITimer = null;
