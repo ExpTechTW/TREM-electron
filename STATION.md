@@ -1,6 +1,7 @@
 ## 測站列表
 | 測站代號 | 位置 | 狀態 | 即時資料 |
 | --- | --- | --- | --- |
+|L-110-13987576-2|臺北市 信義區|運作中|[即時資料](https://exptech.mywire.org/Station/index.html?L-110-13987576-2)
 |L-208-14312724-2|新北市 金山區|運作中|[即時資料](https://exptech.mywire.org/Station/index.html?L-208-14312724-2)
 |L-220-14252376-1|新北市 板橋區|運作中|[即時資料](https://exptech.mywire.org/Station/index.html?L-220-14252376-1)
 |L-270-14291852-5|宜蘭縣 蘇澳鎮|運作中|[即時資料](https://exptech.mywire.org/Station/index.html?L-270-14291852-5)
