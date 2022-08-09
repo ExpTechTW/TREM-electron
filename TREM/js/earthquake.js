@@ -67,6 +67,11 @@ let Response = {};
 let replay = 0;
 let replayT = 0;
 let Second = -1;
+let mapLock = false;
+let PAlertT = 0;
+let auto = false;
+let EEW = {};
+let EEWT = { id: 0, time: 0 };
 // #endregion
 
 // #region override Date.format()
@@ -152,12 +157,16 @@ function init() {
 				map.removeLayer(Tsunami.Cross);
 				delete Tsunami.Cross;
 				delete Tsunami.Time;
-				focus();
+				focus([23.608428, 120.799168], 7.5);
 			}
 
 		if (investigation && NOW.getTime() - Report > 600000) {
 			investigation = false;
 			roll.removeChild(roll.children[0]);
+			if (Pgeojson != null) {
+				map.removeLayer(Pgeojson);
+				Pgeojson = null;
+			}
 		}
 		if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
 			ReportTag = 0;
@@ -165,7 +174,7 @@ function init() {
 				ReportMarkID = null;
 				for (let index = 0; index < MarkList.length; index++)
 					map.removeLayer(MarkList[index]);
-				focus();
+				focus([23.608428, 120.799168], 7.5);
 			}
 		}
 	}, 200);
@@ -182,9 +191,14 @@ function init() {
 		preferCanvas       : true,
 	}).setView([23.608428, 120.799168], 7);
 
+	mapTW.on("zoom", () => {
+		mapTW.setView([23.608428, 120.799168], 7);
+	});
+
 	mapTW.dragging.disable();
 	mapTW.scrollWheelZoom.disable();
 	mapTW.doubleClickZoom.disable();
+	map.doubleClickZoom.disable();
 	mapTW.removeControl(mapTW.zoomControl);
 
 	L.geoJson(statesData, {
@@ -211,12 +225,21 @@ function init() {
 			for (let index = 0; index < MarkList.length; index++)
 				map.removeLayer(MarkList[index]);
 		}
+		mapLock = false;
 		focus();
+	});
+
+	map.on("drag", (e) => {
+		mapLock = true;
+	});
+
+	map.on("dblclick", (e) => {
+		mapLock = true;
 	});
 
 	map.removeControl(map.zoomControl);
 
-	main();
+	setTimeout(() => {main();}, 1500);
 
 	setInterval(() => {
 		main();
@@ -276,7 +299,7 @@ function init() {
 				console.error(err);
 				handler(Response);
 			});
-		}, 1000);
+		}, 500);
 
 		function handler(response) {
 			for (let index = 0; index < Object.keys(Station).length; index++) {
@@ -323,7 +346,7 @@ function init() {
 				if (Object.keys(Json)[index] == CONFIG["Real-time.station"]) {
 					document.getElementById("rt-station-name").innerText = station[Object.keys(Json)[index]].Loc;
 					document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
-					document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity) ;
+					document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity);
 					document.getElementById("rt-station-pga").innerText = amount;
 				}
 				map.addLayer(ReportMark);
@@ -385,13 +408,8 @@ function init() {
 				}
 			}
 			if (PAlert.data != undefined)
-				if (NOW.getTime() - PAlert.timestamp > 30000) {
-					if (Pgeojson != null) {
-						map.removeLayer(Pgeojson);
-						Pgeojson = null;
-						focus();
-					}
-				} else {
+				if (PAlert.timestamp != PAlertT) {
+					PAlertT = PAlert.timestamp;
 					let PLoc = {};
 					let MaxI = 0;
 					for (let index = 0; index < PAlert.data.length; index++) {
@@ -438,13 +456,12 @@ function init() {
 							},
 						});
 						map.addLayer(Pgeojson);
-						focus([23.608428, 120.799168], 7, true);
 						setTimeout(() => {
 							ipcRenderer.send("screenshotEEW", {
 								"ID"      : NOW.getTime(),
 								"Version" : "P",
 							});
-						}, 2000);
+						}, 1250);
 					}
 					if (Pgeojson != null) Pgeojson.setZIndexOffset(1000);
 				}
@@ -456,7 +473,7 @@ function init() {
 			RMT++;
 			for (let index = 0; index < Object.keys(pga).length; index++) {
 				let Intensity = pga[Object.keys(pga)[index]].Intensity;
-				if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000) {
+				if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 10000) {
 					delete pga[Object.keys(pga)[index]];
 					index--;
 				} else {
@@ -469,12 +486,9 @@ function init() {
 				}
 			}
 			if (RMT >= 2) RMT = 0;
-			if (Object.keys(pga).length != 0 && !PGAmark) {
+			if (Object.keys(pga).length != 0 && !PGAmark)
 				PGAmark = true;
-				focus([23.608428, 120.799168], 7, true);
-			}
 			if (PGAmark && Object.keys(pga).length == 0) {
-				focus();
 				PGAmark = false;
 				RMT = 1;
 				RMTlimit = [];
@@ -540,6 +554,66 @@ function init() {
 	$("#app-version").text(app.getVersion());
 	$("#loading").text({ en: "Welcome", ja: "ようこそ", "zh-TW": "歡迎" }[CONFIG["general.locale"]]);
 	$("#load").delay(1000).fadeOut(1000);
+	setInterval(() => {
+		if (mapLock) return;
+		if (Object.keys(EEW).length != 0) {
+			for (let index = 0; index < Object.keys(EEW).length; index++)
+				if (EEWT.id == 0 || EEWT.id == EEW[Object.keys(EEW)[index]].id || NOW.getTime() - EEW[Object.keys(EEW)[index]].time >= 10000) {
+					EEWT.id = EEW[Object.keys(EEW)[index]].id;
+					let Zoom = 9;
+					let X = 0.5;
+					let km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
+					if (km > 100000) {
+						Zoom = 8;
+						X = 0.4;
+					}
+					if (km > 150000) {
+						Zoom = 7.5;
+						X = 0.2;
+					}
+					if (km > 200000) {
+						Zoom = 7;
+						X = 0;
+					}
+					let num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
+					if (num >= 5)
+						focus([EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], 9.5);
+					else
+						focus([(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], Zoom);
+					EEW[Object.keys(EEW)[index]].time = NOW.getTime();
+				}
+			auto = true;
+		} else if (Object.keys(PGA).length >= 1) {
+			if (Object.keys(PGA).length == 1) {
+				let X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
+				let Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
+				focus([X1, Y1], 9.5);
+			} else if (Object.keys(PGA).length >= 2) {
+				let X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
+				let Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
+				let X2 = (PGAjson[Object.keys(pga)[1].toString()][0][0] + (PGAjson[Object.keys(pga)[1].toString()][2][0] - PGAjson[Object.keys(pga)[1].toString()][0][0]) / 2);
+				let Y2 = (PGAjson[Object.keys(pga)[1].toString()][0][1] + (PGAjson[Object.keys(pga)[1].toString()][1][1] - PGAjson[Object.keys(pga)[1].toString()][0][1]) / 2);
+				let Zoom = 9;
+				if (Object.keys(PGA).length == 2) {
+					let num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
+					if (num > 0.6) Zoom = 9;
+					if (num > 1) Zoom = 8.5;
+					if (num > 1.5) Zoom = 8;
+					if (num > 2.8) Zoom = 7;
+				} else {
+					if (Object.keys(PGA).length >= 4) Zoom = 8;
+					if (Object.keys(PGA).length >= 6) Zoom = 7.5;
+					if (Object.keys(PGA).length >= 8) Zoom = 7;
+				}
+				focus([(X1 + X2) / 2, (Y1 + Y2) / 2], Zoom);
+			}
+			auto = true;
+		} else
+		if (auto) {
+			auto = false;
+			focus([23.608428, 120.799168], 7.5);
+		}
+	}, 500);
 }
 // #endregion
 
@@ -549,7 +623,6 @@ async function setUserLocationMarker() {
 		Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
 		dump({ level: 0, message: "Get Location File", origin: "Location" });
 	}
-
 	Lat = Location[CONFIG["location.city"]][CONFIG["location.town"]][1];
 	Long = Location[CONFIG["location.city"]][CONFIG["location.town"]][2];
 	if (marker != null) map.removeLayer(marker);
@@ -560,22 +633,29 @@ async function setUserLocationMarker() {
 	marker = L.marker([Lat, Long], { icon: myIcon });
 	map.addLayer(marker);
 	marker.setZIndexOffset(1);
-	focus([Lat, Long], 7.5);
-
+	map.setView([23.608428, 121.699168], 7.5);
 }
 // #endregion
 
 // #region 聚焦
-function focus(Loc, size, args) {
-	if (Loc != undefined && args == undefined) {
-		Focus[0] = Loc[0];
-		Focus[1] = Loc[1];
+function focus(Loc, size) {
+	if (!CONFIG["map.autoZoom"]) return;
+	let X = 0;
+	if (size >= 7) X = 1.5;
+	if (size >= 7.5) X = 0.9;
+	if (size >= 8) X = 0.6;
+	if (size >= 8.5) X = 0.4;
+	if (size >= 9) X = 0.35;
+	if (size >= 9.5) X = 0.2;
+	if (Loc != undefined) {
+		Focus[0] = Loc[0] - 0.05;
+		Focus[1] = Loc[1] + X;
 		Focus[2] = size;
-		map.setView([Loc[0], Loc[1] + 0.9], size);
-	} else if (Loc != undefined)
-		map.setView([Loc[0], Loc[1] + 0.9], size);
-	else
-		map.setView([Focus[0], Focus[1] + 0.9], Focus[2]);
+		if (map.getBounds().getCenter().lat.toFixed(2) != Loc[0].toFixed(2) || map.getBounds().getCenter().lng.toFixed(2) != (Loc[1] + X).toFixed(2) || size != map.getZoom())
+			map.setView([Loc[0] - 0.05, Loc[1] + X], size);
+	} else if (Focus.length != 0)
+		if (map.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || map.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != map.getZoom())
+			map.setView([Focus[0], Focus[1]], Focus[2]);
 }
 // #endregion
 
@@ -686,8 +766,7 @@ async function ReportClick(time) {
 		ReportMarkID = null;
 		for (let index = 0; index < MarkList.length; index++)
 			map.removeLayer(MarkList[index]);
-
-		focus();
+		focus([23.608428, 120.799168], 7.5);
 	} else {
 		ReportMarkID = time;
 		for (let index = 0; index < MarkList.length; index++)
@@ -729,9 +808,7 @@ async function ReportClick(time) {
 								ReportMark.setZIndexOffset(1000 + index);
 								MarkList.push(ReportMark);
 							}
-
-
-						focus([Number(json.NorthLatitude), Number(json.EastLongitude)], 7.5, true);
+						focus([Number(json.NorthLatitude), Number(json.EastLongitude)], 7.5);
 						let myIcon = L.icon({
 							iconUrl  : "./image/star.png",
 							iconSize : [25, 25],
@@ -783,7 +860,7 @@ async function ReportClick(time) {
 				ReportMark.setZIndexOffset(1000 + index);
 				MarkList.push(ReportMark);
 			}
-			focus([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], 7.5, true);
+			focus([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], 7.5);
 			const icon = L.icon({
 				iconUrl  : "./image/star.png",
 				iconSize : [25, 25],
@@ -1138,7 +1215,7 @@ async function FCMdata(data) {
 			win.setAlwaysOnTop(false);
 		}
 		new Notification("海嘯警報", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "TREM.ico" });
-		focus([json.NorthLatitude, json.EastLongitude], 2.5, true);
+		focus([json.NorthLatitude, json.EastLongitude], 2.5);
 		let myIcon = L.icon({
 			iconUrl  : "./image/warn.png",
 			iconSize : [30, 30],
@@ -1162,6 +1239,10 @@ async function FCMdata(data) {
 		replay = json.timestamp;
 		replayT = NOW.getTime();
 	} else if (json.Function == "report") {
+		if (Pgeojson != null) {
+			map.removeLayer(Pgeojson);
+			Pgeojson = null;
+		}
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
 		if (CONFIG["report.show"]) {
 			win.show();
@@ -1280,6 +1361,7 @@ async function FCMdata(data) {
 
 				new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${json.Scale} ${json.Location ?? "未知區域"}`, icon: "TREM.ico" });
 				Info.Notify.push(json.ID);
+				EEWT.id = json.ID;
 				if (CONFIG["eew.audio"]) audioPlay("./audio/EEW.wav");
 				audioPlay1(`./audio/1/${level.replace("+", "").replace("-", "")}.wav`);
 				if (level.includes("+"))
@@ -1315,10 +1397,13 @@ async function FCMdata(data) {
 			let _time = -1;
 			let stamp = 0;
 			if (json.ID + json.Version != Info.Alert) {
-				if (!Info.Focus.includes(json.ID)) {
-					Info.Focus.push(json.ID);
-					focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 7.5);
-				}
+				EEW[json.ID] = {
+					lon  : Number(json.EastLongitude),
+					lat  : Number(json.NorthLatitude),
+					time : 0,
+					Time : json.Time,
+					id   : json.ID,
+				};
 				Info.Alert = json.ID + json.Version;
 				if (t != null) clearInterval(t);
 				value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
@@ -1363,7 +1448,6 @@ async function FCMdata(data) {
 					map.removeLayer(MarkList[index]);
 
 			}
-			let Loom = 0;
 			let speed = 500;
 			if (CONFIG["shock.smoothing"]) speed = 0;
 			if (EarthquakeList[json.ID].Timer != undefined) clearInterval(EarthquakeList[json.ID].Timer);
@@ -1432,9 +1516,9 @@ async function FCMdata(data) {
 							else TINFO++;
 						}, 5000);
 				}, 1000);
-			EEWshot =	NOW.getTime() - 3500;
+			EEWshot = NOW.getTime() - 4000;
 			EEWshotC = 0;
-			if (EarthquakeList[json.ID].Cross != undefined)map.removeLayer(EarthquakeList[json.ID].Cross);
+			if (EarthquakeList[json.ID].Cross != undefined) map.removeLayer(EarthquakeList[json.ID].Cross);
 			if (EarthquakeList[json.ID].Cross1 != undefined) mapTW.removeLayer(EarthquakeList[json.ID].Cross1);
 			let S1 = 0;
 			EarthquakeList[json.ID].Timer = setInterval(() => {
@@ -1465,6 +1549,7 @@ async function FCMdata(data) {
 					if (EarthquakeList[json.ID].Scircle1 != null)
 						mapTW.removeLayer(EarthquakeList[json.ID].Scircle1);
 					let km = Math.pow((NOW.getTime() - json.Time) * Sspeed, 2) - Math.pow(Number(json.Depth) * 1000, 2);
+					if (EarthquakeList[json.ID].Depth != null) map.removeLayer(EarthquakeList[json.ID].Depth);
 					if (km > 0) {
 						let KM = Math.sqrt(km);
 						EarthquakeList[json.ID].Scircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
@@ -1481,20 +1566,21 @@ async function FCMdata(data) {
 						});
 						map.addLayer(EarthquakeList[json.ID].Scircle);
 						mapTW.addLayer(EarthquakeList[json.ID].Scircle1);
-					}
-					if (CONFIG["map.autoZoom"]) {
-						if ((NOW.getTime() - json.Time) * Pspeed > 250000 && Loom < 250000) {
-							Loom = 250000;
-							focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 7);
-						}
-						if ((NOW.getTime() - json.Time) * Pspeed > 500000 && Loom < 500000) {
-							Loom = 500000;
-							focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 6.5);
-						}
-						if ((NOW.getTime() - json.Time) * Pspeed > 750000 && Loom < 750000) {
-							Loom = 750000;
-							focus([Number(json.NorthLatitude), Number(json.EastLongitude) - 0.9], 6);
-						}
+					} else {
+						let Progress = 0;
+						let num = Math.round(((NOW.getTime() - json.Time) * Sspeed / (json.Depth * 1000)) * 100);
+						if (num > 35) Progress = 1;
+						if (num > 55) Progress = 2;
+						if (num > 75) Progress = 3;
+						if (num > 98) Progress = 4;
+						let myIcon = L.icon({
+							iconUrl  : `./image/progress${Progress}.png`,
+							iconSize : [50, 50],
+						});
+						let DepthM = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude) + 0.15], { icon: myIcon });
+						EarthquakeList[json.ID].Depth = DepthM;
+						map.addLayer(DepthM);
+						DepthM.setZIndexOffset(6000);
 					}
 					if (NOW.getMilliseconds() < 500 && S1 == 0) {
 						S1 = 1;
@@ -1535,6 +1621,14 @@ async function FCMdata(data) {
 						EarthquakeList[json.ID].Cross1 = Cross1;
 						mapTW.addLayer(Cross1);
 						Cross.setZIndexOffset(6000);
+						if (NOW.getTime() - EEWshot > 60000)
+							EEWshotC = 0;
+						if (NOW.getTime() - EEWshot > 5000 && EEWshotC <= 1 && S1 == 1) {
+							EEWshotC++;
+							json.Version = json.Version + "-" + EEWshotC;
+							EEWshot = NOW.getTime();
+							setTimeout(() => {ipcRenderer.send("screenshotEEW", json);}, 500);
+						}
 					} else if (NOW.getMilliseconds() > 500 && S1 == 1) {
 						S1 = 0;
 						map.removeLayer(EarthquakeList[json.ID].Cross);
@@ -1542,15 +1636,6 @@ async function FCMdata(data) {
 						delete EarthquakeList[json.ID].Cross;
 						delete EarthquakeList[json.ID].Cross1;
 					}
-				}
-				if (NOW.getTime() - EEWshot > 60000)
-					EEWshotC = 0;
-
-				if (NOW.getTime() - EEWshot > 5000 && EEWshotC <= 1) {
-					EEWshotC++;
-					json.Version = json.Version + "-" + EEWshotC;
-					EEWshot = NOW.getTime();
-					ipcRenderer.send("screenshotEEW", json);
 				}
 				if (json.Cancel && EarthquakeList[json.ID].Cancel == undefined)
 					for (let index = 0; index < INFO.length; index++)
@@ -1579,6 +1664,7 @@ async function FCMdata(data) {
 					clearInterval(EarthquakeList[json.ID].Timer);
 					document.getElementById("box-10").innerHTML = "";
 					delete EarthquakeList[json.ID];
+					delete EEW[json.ID];
 					if (Object.keys(EarthquakeList).length == 0) {
 						clearInterval(t);
 						audioList = [];
@@ -1589,7 +1675,6 @@ async function FCMdata(data) {
 						ITimer = null;
 						ticker = null;
 						replay = 0;
-						focus([Lat, Long], 7.5);
 						TimerDesynced = false;
 						INFO = [];
 						map.removeLayer(geojson);
@@ -1602,8 +1687,7 @@ async function FCMdata(data) {
 						$("#map-tw").removeClass("show");
 						// restore reports
 						$(roll).fadeIn(200);
-					} else
-						focus();
+					}
 				}
 			}, speed);
 			setTimeout(() => {
