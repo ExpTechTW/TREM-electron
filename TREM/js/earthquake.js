@@ -435,8 +435,26 @@ function init() {
 						if (Pgeojson != null) map.removeLayer(Pgeojson);
 						Pgeojson = L.geoJson(statesData, {
 							style: (feature) => {
-								let name = feature.properties.COUNTY + " " + feature.properties.TOWN;
-								if (PLoc[name] == 0 || PLoc[name] == undefined)
+								if (feature.properties.COUNTY != undefined) {
+									let name = feature.properties.COUNTY + " " + feature.properties.TOWN;
+									if (PLoc[name] == 0 || PLoc[name] == undefined)
+										return {
+											weight      : 0,
+											opacity     : 0,
+											color       : "#8E8E8E",
+											dashArray   : "",
+											fillOpacity : 0,
+											fillColor   : "transparent",
+										};
+									return {
+										weight      : 0,
+										opacity     : 0,
+										color       : "#8E8E8E",
+										dashArray   : "",
+										fillOpacity : 0.8,
+										fillColor   : color(PLoc[name]),
+									};
+								} else
 									return {
 										weight      : 0,
 										opacity     : 0,
@@ -445,14 +463,6 @@ function init() {
 										fillOpacity : 0,
 										fillColor   : "transparent",
 									};
-								return {
-									weight      : 0,
-									opacity     : 0,
-									color       : "#8E8E8E",
-									dashArray   : "",
-									fillOpacity : 0.8,
-									fillColor   : color(PLoc[name]),
-								};
 							},
 						});
 						map.addLayer(Pgeojson);
@@ -463,7 +473,6 @@ function init() {
 							});
 						}, 1250);
 					}
-					if (Pgeojson != null) Pgeojson.setZIndexOffset(1000);
 				}
 			for (let index = 0; index < Object.keys(PGA).length; index++) {
 				if (RMT == 0) map.removeLayer(PGA[Object.keys(PGA)[index]]);
@@ -496,7 +505,6 @@ function init() {
 			}
 			if (Object.keys(PGA).length == 0) PGAaudio = false;
 			if (!PGAaudio) {
-				if (Pgeojson != null) map.removeLayer(Pgeojson);
 				PGAtag = 0;
 				PGALimit = 0;
 			}
@@ -517,11 +525,6 @@ function init() {
 						audioPlay("./audio/Shindo0.wav");
 
 				if (All[0].intensity >= 2) {
-					Report = NOW.getTime();
-					ReportGET({
-						Max  : All[0].intensity,
-						Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
-					});
 					setTimeout(() => {
 						ipcRenderer.send("screenshotEEW", {
 							"ID"      : NOW.getTime(),
@@ -1324,8 +1327,26 @@ async function FCMdata(data) {
 			if (geojson != null) mapTW.removeLayer(geojson);
 			geojson = L.geoJson(statesData, {
 				style: (feature) => {
-					let name = feature.properties.COUNTY + feature.properties.TOWN;
-					if (GC[name] == 0 || GC[name] == undefined)
+					if (feature.properties.COUNTY != undefined) {
+						let name = feature.properties.COUNTY + feature.properties.TOWN;
+						if (GC[name] == 0 || GC[name] == undefined)
+							return {
+								weight      : 1,
+								opacity     : 0.8,
+								color       : "#8E8E8E",
+								dashArray   : "",
+								fillOpacity : 0.8,
+								fillColor   : "transparent",
+							};
+						return {
+							weight      : 1,
+							opacity     : 0.8,
+							color       : "#8E8E8E",
+							dashArray   : "",
+							fillOpacity : 0.8,
+							fillColor   : color(GC[name]),
+						};
+					} else
 						return {
 							weight      : 1,
 							opacity     : 0.8,
@@ -1334,15 +1355,6 @@ async function FCMdata(data) {
 							fillOpacity : 0.8,
 							fillColor   : "transparent",
 						};
-
-					return {
-						weight      : 1,
-						opacity     : 0.8,
-						color       : "#8E8E8E",
-						dashArray   : "",
-						fillOpacity : 0.8,
-						fillColor   : color(GC[name]),
-					};
 				},
 			});
 			mapTW.addLayer(geojson);
