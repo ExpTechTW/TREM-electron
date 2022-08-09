@@ -1,5 +1,4 @@
 const { getCurrentWindow, shell } = require("@electron/remote");
-const ipc = require("electron").ipcRenderer;
 const os = require("node:os");
 
 let Loc;
@@ -8,7 +7,6 @@ const win = getCurrentWindow();
 document.onreadystatechange = () => {
 	if (document.readyState == "complete")
 		handleWindowControls();
-
 };
 
 window.onbeforeunload = async () => {
@@ -85,7 +83,7 @@ fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/st
 	.then(loc => {
 		if (loc[CONFIG["Real-time.station"]] == undefined) {
 			CONFIG["Real-time.station"] = "L-711-6732340-12";
-			ipcRenderer.send("saveSetting", CONFIG);
+			ipcRenderer.send("saveSetting", true);
 		}
 		for (let index = 0; index < Object.keys(loc).length; index++) {
 			if (Object.keys(loc)[index] == "List") continue;
@@ -103,20 +101,42 @@ fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/st
  */
 function init() {
 	dump({ level: 0, message: "Initializing", origin: "Setting" });
+	console.log(settingDisabled);
+
+	document.title = { en: "TREM | Settings", ja: "TREM | 設定", "zh-TW": "TREM | 設定" }[CONFIG["general.locale"]];
+
+	if (settingDisabled) {
+		win.flashFrame(true);
+		document.querySelectorAll(".setting-button").forEach((node) => node.disabled = true);
+		document.body.classList.add("settingDisabled");
+	} else {
+		win.flashFrame(false);
+		document.querySelectorAll(".setting-button").forEach((node) => node.disabled = false);
+		document.body.classList.remove("settingDisabled");
+	}
+
 	Object.keys(CONFIG).forEach(id => {
 		if (id == "ver") return;
+		if (!(id in DEFAULT_CONFIG)) return delete CONFIG[id];
+
 		switch (DEFAULT_CONFIG[id].type) {
 			case "CheckBox": {
 				const element = document.getElementById(id);
-				if (element)
+				if (element) {
 					element.checked = CONFIG[id];
+					if (settingDisabled) element.disabled = true;
+					else element.disabled = false;
+				}
 				break;
 			}
 
 			case "TextBox": {
 				const element = document.getElementById(id);
-				if (element)
+				if (element) {
 					element.value = CONFIG[id];
+					if (settingDisabled) element.disabled = true;
+					else element.disabled = false;
+				}
 				break;
 			}
 
@@ -125,10 +145,13 @@ function init() {
 				 * @type {HTMLSelectElement}
 				 */
 				const element = document.getElementById(id);
-				if (element)
+				if (element) {
 					for (let i = 0; i < element.options.length; i++)
 						if (element.options[i].value == CONFIG[id])
 							element.options[i].selected = true;
+					if (settingDisabled) element.disabled = true;
+					else element.disabled = false;
+				}
 				break;
 			}
 
@@ -137,10 +160,13 @@ function init() {
 				 * @type {HTMLSelectElement}
 				 */
 				const element = document.getElementById(id);
-				if (element)
+				if (element) {
 					element.value = CONFIG[id];
+					if (settingDisabled) element.disabled = true;
+					else element.disabled = false;
+				}
 				const wrapper = document.getElementById(id.replace(".", "-"));
-				if (element)
+				if (wrapper)
 					wrapper.style.backgroundColor = CONFIG[id];
 				break;
 			}
@@ -151,13 +177,12 @@ function init() {
 	});
 }
 
-
 function SelectSave(id) {
 	const select = document.getElementById(id);
 	const value = select.options[select.selectedIndex].value;
 	dump({ level: 0, message: `Value Changed ${id}: ${CONFIG[id]} -> ${value}`, origin: "Setting" });
 	CONFIG[id] = value;
-	ipcRenderer.send("saveSetting", CONFIG);
+	ipcRenderer.send("saveSetting", true);
 	if (id == "location.city") {
 		const town = document.getElementById("location.town");
 		town.replaceChildren();
@@ -170,31 +195,29 @@ function SelectSave(id) {
 		});
 
 		SelectSave("location.town");
-	}
+	} else if (id == "general.locale")
+		setLocale(CONFIG["general.locale"]);
+
 }
 
 function CheckSave(id) {
 	const value = document.getElementById(id).checked;
 	dump({ level: 0, message: `Value Changed ${id}: ${CONFIG[id]} -> ${value}`, origin: "Setting" });
 	CONFIG[id] = value;
-	ipcRenderer.send("saveSetting", CONFIG);
-	if (id == "GPU.disable")
+	ipcRenderer.send("saveSetting", true);
+	if (id == "compatibility.hwaccel")
 		$("#HAReloadButton").fadeIn(100);
-	else if (id == "theme.dark") {
-		setThemeColor(CONFIG["theme.color"], value);
-		ipc.send("updateTheme");
-	}
+	else if (id == "theme.dark")
+		setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
 }
 
 function TextSave(id) {
 	const value = document.getElementById(id).value;
 	dump({ level: 0, message: `Value Changed ${id}: ${CONFIG[id]} -> ${value}`, origin: "Setting" });
 	CONFIG[id] = value;
-	ipcRenderer.send("saveSetting", CONFIG);
-	if (id == "theme.color") {
-		setThemeColor(value, CONFIG["theme.dark"]);
-		ipc.send("updateTheme");
-	}
+	ipcRenderer.send("saveSetting", true);
+	if (id == "theme.color")
+		setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
 }
 
 
@@ -234,13 +257,22 @@ function setList(args, el, event) {
 
 	let delay = 0;
 	for (let i = 0; i < changeelchild.length; i++) {
-		$(changeelchild[i]).delay(delay + 40 * i).fadeTo(100, 1);
+		$(changeelchild[i]).delay(delay + 40 * i).fadeTo(100, settingDisabled ? 0.6 : 1).delay(100)
+			.queue(function(next) {
+				$(this).css("opacity", "");
+				next();
+			});
 		delay += 20;
 		const child = changeelchild[i].children;
 		if (child.length)
 			for (let j = 0; j < child.length; j++)
 				if (child[j].id != "HAReloadButton") {
-					$(child[j]).delay(delay).fadeTo(100, 1);
+					if (!child[j].lang || (child[j].lang == CONFIG["general.locale"]))
+						$(child[j]).delay(delay).fadeTo(100, settingDisabled ? 0.6 : 1).delay(100)
+							.queue(function(next) {
+								$(this).css("opacity", "");
+								next();
+							});
 					delay += 20;
 				}
 
@@ -248,16 +280,18 @@ function setList(args, el, event) {
 }
 
 function testEEW() {
-	ipc.send("testEEW");
-	ipc.send("closeChildWindow");
+	ipcRenderer.send("testEEW");
+	ipcRenderer.send("closeChildWindow");
 }
 
 function reset() {
-	showDialog("warn", "重置設定？", "您確定您真的要重置所有設定嗎\n這個動作將無法挽回", 1, "device_reset", () => {
-		CONFIG = {};
-		ipcRenderer.send("saveSetting", CONFIG);
-		restart();
-	});
+	showDialog("warn", { en: "Reset Settings?", ja: "設定をリセットする？", "zh-TW": "重置設定？" }[CONFIG["general.locale"]],
+		{ en: "Are you sure that you really want to reset all settings?\nThis action is irreversible.", ja: "本当にすべての設定をリセットしてもよろしいですか？\nこのアクションは元に戻せません。", "zh-TW": "您確定您真的要重置所有設定嗎\n這個動作將無法挽回" }[CONFIG["general.locale"]],
+		1, "device_reset", () => {
+			CONFIG = {};
+			ipcRenderer.send("saveSetting", true);
+			restart();
+		});
 }
 
 function openLogFolder() {
@@ -269,7 +303,7 @@ function openSettingFile() {
 }
 
 const restart = () => {
-	ipc.send("restart");
+	ipcRenderer.send("restart");
 };
 
 const testAudioState = {
@@ -354,3 +388,15 @@ const webhook = async () => {
 const colorUpdate = () => {
 	$("#theme-color")[0].style.backgroundColor = $("#theme\\.color")[0].value;
 };
+
+const showError = () => {
+	showDialog("error", { en: "Parse Error", ja: "解析エラー", "zh-TW": "設定檔錯誤" }[CONFIG["general.locale"]],
+		{
+			en      : `Cannot parse the config file, this may be that you have accidentally deleted some important symbols such as commas, colons or quotation marks while editing, or the configuration file may have corrupted.\n\nError: ${settingDisabled}`,
+			ja      : `設定ファイルを解析できません。編集中にコンマ、コロン、引用符などの重要な記号を誤って削除したか、設定ファイルが破損している可能性があります。\n\nエラー：${settingDisabled}`,
+			"zh-TW" : `無法解析設定檔，這可能是你在編輯時不小心刪掉了一些重要的符號，像是逗號、冒號或引號，或是設定檔損壞。\n\n錯誤：${settingDisabled}` }[CONFIG["general.locale"]]);
+
+};
+ipcMain.on("updateSetting", () => {
+	init();
+});

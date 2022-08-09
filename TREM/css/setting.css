@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&family=Roboto&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&family=Roboto&display=swap");
 @import url("../css/titlebar.css");
 @import url("../css/m3/m3_theme.css");
 @import url("../css/m3/m3_dialog.css");
@@ -7,7 +7,18 @@
 @import url("../css/m3/m3_input_field.css");
 @import url("../css/m3/m3_select_menu.css");
 @import url("../css/m3/m3_switch.css");
+@import url("../css/m3/m3_table.css");
 @import url("../css/disable_scrollbar.css");
+
+html:lang(en) {
+    font-family: "Google Sans",  "Noto Sans TC", "Noto Sans JP", "Arial", sans-serif;
+}
+html:lang(ja) {
+    font-family: "Google Sans", "Noto Sans JP", "Meiryo", "MS PGothic", sans-serif;
+}
+html:lang(zh-TW) {
+    font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Microsoft JhengHei", sans-serif;
+}
 
 body {
     position: absolute;
@@ -19,6 +30,10 @@ body {
     left: 0;
     margin: 0;
     border-radius: 16px;
+}
+
+:not(body):lang() {
+	display: none;
 }
 
 .body {
@@ -88,7 +103,6 @@ body {
 .nav > div:not(.client-info-container) span {
     margin: 0 20px;
     color: rgb(var(--md-sys-color-on-background));
-    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     font-weight: 300;
     white-space: nowrap;
 }
@@ -96,7 +110,6 @@ body {
 .client-info-container {
     margin: 8px 32px;
     color: rgba(var(--md-sys-color-on-surface-variant), .6);
-    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     font-size: 12px;
     font-weight: 300;
 }
@@ -114,16 +127,22 @@ body {
 .headline-medium {
     color: rgb(var(--md-sys-color-on-surface));
     font-size: 36px !important;
-    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     font-weight: 400;
     line-height: 34px;
     margin: 0 4px;
 }
 
+.right {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-right: 8px;
+}
+
 #list {
-    overflow-y: scroll;
+    overflow: hidden scroll;
     height: 100%;
-    margin: 0 12px;
+    margin: 0 8px;
     flex: 1;
     display: flex;
 }
@@ -147,10 +166,56 @@ body {
                 rgb(var(--md-sys-color-surface-variant));
 }
 
+.alert-disabled {
+    user-select: none;
+    display: none;
+    background-color: rgb(var(--md-sys-color-error-container));
+    border-radius: 16px;
+    color: rgb(var(--md-sys-color-on-error-container));
+    padding: 12px;
+    margin: 8px 16px;
+    font-weight: 600;
+}
+
+.alert-disabled .alert-moreinfo {
+    color: rgba(var(--md-sys-color-on-error-container), 1);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color .1s ease-in-out;
+}
+
+.alert-disabled .alert-moreinfo:hover {
+    color: rgba(var(--md-sys-color-on-error-container), .6);
+}
+
+.alert-warn {
+    user-select: none;
+    display: none;
+    background-color: rgba(252, 187, 74, .2);
+    border: 1px solid hsl(38, 90%, 55%);
+    border-radius: 16px;
+    color: hsl(38, 90%, 55%);
+    padding: 12px;
+    margin: 8px 16px;
+    font-weight: 500;
+}
+
+body.settingDisabled .alert-disabled {
+    display: revert;
+}
+
+.control-title, .option-label {
+    transition: opacity .1s ease-in-out;
+}
+
+body.settingDisabled .control-title, body.settingDisabled .option-label {
+    opacity: .6;
+}
+
 .list-container {
     display: none;
     width: 100%;
-    margin: 0 8px;
+    margin-right: 8px;
     height: max-content;
 }
 
@@ -171,7 +236,6 @@ body {
     user-select: none;
     margin: 10px 0;
     color: rgb(var(--md-sys-color-primary));
-    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     font-size: 24px;
     font-weight: 400;
 }
@@ -211,7 +275,6 @@ body {
 
 .option-label .option-label-title {
     color: rgb(var(--md-sys-color-on-background));
-    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     font-size: 20px;
     font-weight: 500;
 }
@@ -225,11 +288,13 @@ body {
 }
 
 .option-label .option-label-description {
-    color: rgba(var(--md-sys-color-on-background), .8);
-    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    color: rgba(var(--md-sys-color-on-surface-variant), .8);
     font-size: 14px;
     line-height: 20px;
     font-weight: 300;
+}
+
+.option-label .option-label-description > span {
     white-space: pre-line;
 }
 
@@ -263,8 +328,6 @@ code {
 
 .external-link:hover {
     color: rgb(var(--md-sys-color-on-secondary-container));
-    text-decoration: underline;
-    cursor: pointer;
 }
 
 .external-link .icon {

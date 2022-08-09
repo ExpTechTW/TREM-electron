@@ -5,12 +5,32 @@ const { ipcMain } = require("@electron/remote");
 const { ipcRenderer } = require("electron");
 const { join } = require("node:path");
 
-const ver = 100;
+/**
+ * 設定檔路徑
+ * @type {string}
+ */
+const CONFIG_PATH = join(app.getPath("userData"), "settings.json");
 
-let CONFIG = {};
-CONFIG.ver = ver;
+if (!fs.existsSync(CONFIG_PATH))
+	fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), "utf8");
+
+/**
+ * 設定
+ * @type {string}
+ */
+let CONFIG, settingDisabled = false;
+try {
+	CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, { encoding: "utf-8" }));
+} catch (err) {
+	CONFIG = {};
+	settingDisabled = err;
+}
 
 const DEFAULT_CONFIG = {
+	"general.locale": {
+		"type"  : "SelectBox",
+		"value" : "zh-TW",
+	},
 	"accept.eew.CWB": {
 		"type"  : "CheckBox",
 		"value" : true,
@@ -51,9 +71,9 @@ const DEFAULT_CONFIG = {
 		"type"  : "CheckBox",
 		"value" : false,
 	},
-	"GPU.disable": {
+	"compatibility.hwaccel": {
 		"type"  : "CheckBox",
-		"value" : false,
+		"value" : true,
 	},
 	"Real-time.show": {
 		"type"  : "CheckBox",
@@ -153,38 +173,43 @@ const DEFAULT_CONFIG = {
 	},
 };
 
-/**
- * 設定檔路徑
- * @type {string}
- */
-const CONFIG_PATH = join(app.getPath("userData"), "settings.json");
-if (!fs.existsSync(CONFIG_PATH))
-	fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), "utf8");
-
-/**
- * 設定
- * @type {string}
- */
-CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH).toString());
-
-if (CONFIG.ver != ver) {
-	CONFIG = {
-		ver: ver,
-	};
-	fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), "utf8");
-}
-
 // Synchronize config
 for (let i = 0, k = Object.keys(DEFAULT_CONFIG), n = k.length; i < n; i++)
 	if (typeof CONFIG[k[i]] != typeof DEFAULT_CONFIG[k[i]].value && k[i] != "ver")
 		CONFIG[k[i]] = DEFAULT_CONFIG[k[i]].value;
 ipcRenderer.send("saveSetting", CONFIG);
 setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
+setLocale(CONFIG["general.locale"]);
 
-ipcMain.on("saveSetting", (event, newSetting) => {
+fs.watch(CONFIG_PATH, () => {
+	try {
+		const newConfig = JSON.parse(fs.readFileSync(CONFIG_PATH, { encoding: "utf-8" }));
+		if (newConfig["theme.color"] != CONFIG["theme.color"] || newConfig["theme.dark"] != CONFIG["theme.dark"])
+			setThemeColor(newConfig["theme.color"], newConfig["theme.dark"]);
+		if (newConfig["general.locale"] != CONFIG["general.locale"]) {
+			setLocale(newConfig["general.locale"]);
+			ipcRenderer.send("updateTitle", newConfig["general.locale"]);
+		}
+		CONFIG = newConfig;
+		settingDisabled = false;
+		ipcRenderer.send("updateTheme");
+		if (document.getElementsByClassName("dialog").length)
+			closeDialog({ target: { id: "dialog" } });
+	} catch (err) {
+		settingDisabled = err;
+		showDialog("error", { en: "Parse Error", ja: "解析エラー", "zh-TW": "設定檔錯誤" }[CONFIG["general.locale"]],
+			{
+				en      : `Cannot parse the config file, this may be that you have accidentally deleted some important symbols such as commas, colons or quotation marks while editing, or the configuration file may have corrupted.\n\nError: ${err}`,
+				ja      : `設定ファイルを解析できません。編集中にコンマ、コロン、引用符などの重要な記号を誤って削除したか、設定ファイルが破損している可能性があります。\n\nエラー：${err}`,
+				"zh-TW" : `無法解析設定檔，這可能是你在編輯時不小心刪掉了一些重要的符號，像是逗號、冒號或引號，或是設定檔損壞。\n\n錯誤：${err}` }[CONFIG["general.locale"]]);
+	}
+	ipcRenderer.send("updateSetting");
+});
+
+ipcMain.on("saveSetting", (event, setting) => {
+	if (!setting || settingDisabled) return;
 	dump({ level: 0, message: "Saving user preference", origin: "Setting" });
 	try {
-		CONFIG = newSetting;
 		fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), "utf8");
 	} catch (error) {
 		dump({ level: 2, message: `Error saving user preference: ${error}`, origin: "Setting" });
@@ -199,6 +224,15 @@ const lockScroll = state => {
 		$(document).off("scroll");
 };
 
+const closeDialog = event => {
+	const container = document.getElementById("modal-overlay");
+	if (!event.target.id.includes("dialog"))
+		if (event.target != container)
+			return;
+	lockScroll(false);
+	$("#modal-overlay").fadeOut({ duration: 100, complete: () => container.replaceChildren() }).delay(100).show();
+};
+
 const showDialog =
 /**
  * Callback for dialogs
@@ -210,10 +244,10 @@ const showDialog =
  * @param {string} title The title of the dialog
  * @param {string} message The supporting text of the dialog
  * @param {0|1} button Button type of the dialog
- * @param {string} customIcon The icon of the dialog
- * @param {dialogCallback} callback The callback function to run when the user omitted the dialog
+ * @param {?string} customIcon The icon of the dialog
+ * @param {?dialogCallback} callback The callback function to run when the user omitted the dialog
  */
-(type, title, message, button = 0, customIcon, callback) => {
+(type, title, message, button = 0, customIcon, callback = () => void 0) => {
 	const container = document.getElementById("modal-overlay");
 	const icon = document.createElement("span");
 	icon.classList.add("material-symbols-rounded");
@@ -231,21 +265,13 @@ const showDialog =
 	const dialog = document.createElement("div");
 	dialog.classList.add("dialog");
 
-	const closeDialog = event => {
-		if (!event.target.id.includes("dialog"))
-			if (event.target != container)
-				return;
-		lockScroll(false);
-		$("#modal-overlay").fadeOut({ duration: 100, complete: () => container.replaceChildren() }).delay(100).show();
-	};
-
 	const buttons = document.createElement("div");
 	buttons.classList.add("dialog-button");
 	if (button == 1) {
 		const Accept = document.createElement("button");
 		Accept.classList.add("flat-button");
 		Accept.id = "dialog-Accept";
-		Accept.textContent = "確定";
+		Accept.textContent = { en: "Confirm", ja: "確認", "zh-TW": "確定" }[CONFIG["general.locale"]];
 		Accept.onclick = (...args) => {
 			closeDialog(...args);
 			callback();
@@ -255,7 +281,7 @@ const showDialog =
 		const Cancel = document.createElement("button");
 		Cancel.classList.add("flat-button");
 		Cancel.id = "dialog-Cancel";
-		Cancel.textContent = "取消";
+		Cancel.textContent = { en: "Cancel", ja: "キャンセル", "zh-TW": "取消" }[CONFIG["general.locale"]];
 		Cancel.onclick = closeDialog;
 		buttons.appendChild(Cancel);
 	} else {

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&family=Roboto&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&family=Roboto&display=swap");
 @import url("./m3/m3_theme.css");
 @import url("./m3/m3_dialog.css");
 @import url("./m3/m3_flat_button.css");
@@ -6,12 +6,26 @@
 @import url("./m3/m3_nav-rail.css");
 @import url("./disable_scrollbar.css");
 
+html:lang(en) {
+    font-family: "Google Sans",  "Noto Sans TC", "Noto Sans JP", "Arial", sans-serif;
+}
+html:lang(ja) {
+    font-family: "Google Sans", "Noto Sans JP", "Meiryo", "MS PGothic", sans-serif;
+}
+html:lang(zh-TW) {
+    font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Microsoft JhengHei", sans-serif;
+}
+
 body {
 	all: unset;
 	display: flex;
 	background-color: rgb(var(--md-sys-color-background));
 	overflow: hidden;
 	transition: background-color .1s ease-in-out;
+}
+
+:not(html)[lang] {
+	display: none;
 }
 
 #nav-rail {
@@ -101,7 +115,6 @@ body {
 	height: 100%;
 	width: 100%;
 	background-color: rgb(var(--md-sys-color-background));
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 	color: rgb(var(--md-sys-color-on-background));
 	user-select: none;
 }
@@ -125,7 +138,6 @@ body {
 	left: 90px;
 	bottom: 22px;
 	color: rgb(var(--md-sys-color-on-background));
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 	font-size: 16px;
 	font-weight: 400;
 	font-variant-numeric: tabular-nums;
@@ -150,8 +162,7 @@ body {
 	position: fixed;
 	left: 90px;
 	bottom: 45px;
-	color: rgba(var(--md-sys-color-on-background), .6);
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
+	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 	font-size: 14px;
 	font-weight: 400;
 	font-variant-numeric: tabular-nums;
@@ -216,7 +227,6 @@ body {
 	height: 100%;
 	align-items: center;
 	color: white;
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 	font-variant-numeric: tabular-nums;
 }
 #rolllist > div:first-child > .report-container {
@@ -235,7 +245,7 @@ body {
 > div
 > .report-container
 > .report-intenisty-container
-> .report-intenisty-title {
+> .report-intenisty-title-container {
 	display: none;
 	line-height: 20px;
 	font-size: 16px;
@@ -244,7 +254,7 @@ body {
 > div:first-child
 > .report-container
 > .report-intenisty-container
-> .report-intenisty-title {
+> .report-intenisty-title-container {
 	display: revert;
 }
 #rolllist
@@ -252,7 +262,7 @@ body {
 > .report-container
 > .report-intenisty-container
 > .report-intenisty-value {
-	line-height: 32px;
+	line-height: 48px;
 	font-size: 32px;
 	font-weight: 600;
 }
@@ -414,11 +424,9 @@ body {
 
 .alert-box .alert-box-body > * {
 	color: white;
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 	font-size: 16px;
 	font-weight: 500;
 	vertical-align: middle;
-	padding-bottom: 1%;
 	transition: color .1s ease-in-out,
 				width .1s ease-in-out;
 }
@@ -433,7 +441,6 @@ body {
 	border: 4px solid #FC3D38;
 	border-radius: 24px 24px 0 0;
 	color: white;
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 	font-size: 16px;
 	text-rendering: optimizeLegibility;
 	transition: background-color .1s ease-in-out,
@@ -471,6 +478,7 @@ body {
 	margin-left: 4px;
 }
 #alert-intensity {
+	position: relative;
 	margin: 0 10px;
 	font-weight: 600;
 	font-size: 48px;
@@ -513,7 +521,6 @@ body {
 #alert-local-intensity {
 	font-weight: 500;
 	font-size: 30px;
-	line-height: 30px;
 	font-variant-numeric: tabular-nums;
 }
 
@@ -525,7 +532,15 @@ body {
 	white-space: nowrap;
 }
 
-.alert-timer::after {
+html:lang(en) .alert-timer::after {
+	content: "s";
+	position: relative;
+	vertical-align: 2px;
+	font-weight: 500;
+	font-size: 16px;
+	margin-left: 2px;
+}
+html:lang(ja) .alert-timer::after, html:lang(zh-TW) .alert-timer::after {
 	content: "\79d2";
 	position: relative;
 	vertical-align: 2px;
@@ -534,7 +549,27 @@ body {
 	margin-left: 2px;
 }
 
-.alert-timer:empty:after {
+html:lang(en) .alert-timer:empty:after {
+	content: "Arrived";
+	margin-left: 4px;
+	font-weight: 600;
+	font-size: 20px;
+	height: 30px;
+	line-height: 30px;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+html:lang(ja) .alert-timer:empty:after {
+	content: "\5230\7740";
+	margin-left: 4px;
+	font-weight: 600;
+	font-size: 26px;
+	height: 30px;
+	line-height: 30px;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+html:lang(zh-TW) .alert-timer:empty:after {
 	content: "\62b5\9054";
 	margin-left: 4px;
 	font-weight: 600;
@@ -615,7 +650,6 @@ body {
 	width: 72px;
 	border-radius: 16px;
 	color: white;
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 	font-weight: 300;
 	pointer-events: none;
 	transition: background-color .1s ease-in-out,
@@ -664,7 +698,6 @@ body {
 }
 
 #rt-list div span {
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 	font-size: 17px;
 	font-weight: 400;
 }
@@ -673,7 +706,6 @@ body {
 	width: 28px;
 	line-height: 24px;
 	text-align: center;
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 	font-size: 22px;
 	font-weight: 500;
 	font-variant-numeric: tabular-nums;
@@ -815,16 +847,14 @@ body {
 .alert-box.six.strong .alert-box-body #alert-intensity::after {
 	content: "+";
 	position: absolute;
-	top: 4px;
-	left: 50px;
+	right: 0;
 	font-size: 32px;
 }
 .alert-box.five:not(.strong) .alert-box-body #alert-intensity::after,
 .alert-box.six:not(.strong) .alert-box-body #alert-intensity::after {
 	content: "-";
 	position: absolute;
-	top: -4px;
-	left: 52px;
+	right: 2px;
 	font-size: 38px;
 }
 #alert-local.five.strong #alert-local-intensity::after,
@@ -882,19 +912,49 @@ body {
 #alert-local.four {
 	color: black;
 }
-.alert-box.eew-alert .alert-notch #alert-type:empty:before {
+html:lang(en) .alert-box.eew-alert .alert-notch #alert-type:empty:before {
+	content: "EEW";
+}
+html:lang(ja) .alert-box.eew-alert .alert-notch #alert-type:empty:before {
+	content: "緊急地震速報";
+}
+html:lang(zh-TW) .alert-box.eew-alert .alert-notch #alert-type:empty:before {
 	content: "\8b66\5831";
 }
-.alert-box.eew-pred .alert-notch #alert-type:empty:before {
+html:lang(en) .alert-box.eew-pred .alert-notch #alert-type:empty:before {
+	content: "Forecast";
+}
+html:lang(ja) .alert-box.eew-pred .alert-notch #alert-type:empty:before {
+	content: "地震予報";
+}
+html:lang(zh-TW) .alert-box.eew-pred .alert-notch #alert-type:empty:before {
 	content: "\9810\5831";
 }
-.alert-box.eew-test .alert-notch #alert-type:empty:before {
+html:lang(en) .alert-box.eew-test .alert-notch #alert-type:empty:before {
+	content: "Test";
+}
+html:lang(ja) .alert-box.eew-test .alert-notch #alert-type:empty:before {
+	content: "テスト";
+}
+html:lang(zh-TW) .alert-box.eew-test .alert-notch #alert-type:empty:before {
 	content: "\6e2c\8a66\5831";
 }
-.alert-box.eew-cancel .alert-notch #alert-type:empty:before {
+html:lang(en) .alert-box.eew-cancel .alert-notch #alert-type:empty:before {
+	content: "Cancelled";
+}
+html:lang(ja) .alert-box.eew-cancel .alert-notch #alert-type:empty:before {
+	content: "キャンセル";
+}
+html:lang(zh-TW) .alert-box.eew-cancel .alert-notch #alert-type:empty:before {
 	content: "\5df2\53d6\6d88";
 }
-.alert-box.eew-history .alert-notch #alert-type:empty:before {
+html:lang(en) .alert-box.eew-history .alert-notch #alert-type:empty:before {
+	content: "History";
+}
+html:lang(ja) .alert-box.eew-history .alert-notch #alert-type:empty:before {
+	content: "歴史";
+}
+html:lang(zh-TW) .alert-box.eew-history .alert-notch #alert-type:empty:before {
 	content: "\6b77\53f2\91cd\64ad";
 }
 
@@ -912,7 +972,6 @@ body {
 	flex-direction: column;
 	border-radius: 16px;
 	opacity: .75;
-	font-family: "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 	font-size: 14px;
 	font-weight: 300;
 	font-variant-numeric: tabular-nums;
@@ -923,21 +982,36 @@ body {
 	font-weight: 500;
 }
 
-#rt-station-time::before {
+html:lang(en) #rt-station-time::before {
+	content: "Time";
+	font-weight: 400;
+	padding-right: 8px;
+}
+html:lang(ja) #rt-station-time::before {
+	content: "\6642\9593";
+	font-weight: 400;
+	padding-right: 8px;
+}
+html:lang(zh-TW) #rt-station-time::before {
 	content: "\6642\9593";
 	font-weight: 400;
 	padding-right: 8px;
 }
 
-#rt-station-intensity::before {
+html:lang(en) #rt-station-intensity::before {
+	content: "Int.";
+	font-weight: 400;
+	padding-right: 8px;
+}
+html:lang(ja) #rt-station-intensity::before {
 	content: "\9707\5ea6";
 	font-weight: 400;
 	padding-right: 8px;
 }
-
-#rt-station-intensity::after {
-	content: "\7d1a";
-	padding-left: 4px;
+html:lang(zh-TW) #rt-station-intensity::before {
+	content: "\9707\5ea6";
+	font-weight: 400;
+	padding-right: 8px;
 }
 
 #rt-station-pga::before {

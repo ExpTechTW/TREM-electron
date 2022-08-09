@@ -14,7 +14,7 @@ if (process.argv.includes("--dev")) _devMode = true;
 
 if (fs.existsSync(__dirname.replace("trem\\resources\\app", "trem_data")) && fs.existsSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`)) {
 	const config = JSON.parse(fs.readFileSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`).toString());
-	if (config["GPU.disable"] != undefined && config["GPU.disable"]["Value"]) app.disableHardwareAcceleration();
+	if (config["compatibility.hwaccel"] != undefined && !config["compatibility.hwaccel"]) app.disableHardwareAcceleration();
 }
 
 app.setLoginItemSettings({
@@ -24,7 +24,7 @@ app.setLoginItemSettings({
 
 function createWindow() {
 	MainWindow = new BrowserWindow({
-		title          : "TREM | 台灣即時地震監測",
+		title          : "TREM",
 		width          : 1280,
 		height         : 720,
 		resizable      : false,
@@ -41,7 +41,7 @@ function createWindow() {
 	require("@electron/remote/main").initialize();
 	require("@electron/remote/main").enable(MainWindow.webContents);
 	process.env.window = MainWindow.id;
-	MainWindow.loadFile("index.html");
+	MainWindow.loadFile("./index.html");
 	MainWindow.setMenu(null);
 	pushReceiver.setup(MainWindow.webContents);
 
@@ -63,7 +63,7 @@ function createWindow() {
 function createSettingWindow() {
 	if (SettingWindow) return SettingWindow.focus();
 	SettingWindow = new BrowserWindow({
-		title          : "TREM | 設定",
+		title          : "TREM",
 		height         : 600,
 		width          : 1000,
 		minHeight      : 600,

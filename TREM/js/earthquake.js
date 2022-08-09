@@ -6,6 +6,9 @@ const { BrowserWindow, shell } = require("@electron/remote");
 const path = require("path");
 axios.defaults.timeout = 5000;
 
+$("#loading").text({ en: "Loading...", ja: "ローディング中...", "zh-TW": "載入中..." }[CONFIG["general.locale"]]);
+document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台湾リアルタイム地震モニタリング", "zh-TW": "TREM 台灣即時地震監測" }[CONFIG["general.locale"]];
+
 // #region 變數
 let Stamp = 0;
 let t = null;
@@ -119,6 +122,7 @@ win.on("show", () => {
 });
 
 function init() {
+
 	ReportGET({});
 	const time = document.getElementById("time");
 
@@ -541,7 +545,7 @@ function init() {
 		}
 	}
 	$("#app-version").text(app.getVersion());
-	$("#loading").text("歡迎");
+	$("#loading").text({ en: "Welcome", ja: "ようこそ", "zh-TW": "歡迎" }[CONFIG["general.locale"]]);
 	$("#load").delay(1000).fadeOut(1000);
 }
 // #endregion
@@ -817,6 +821,7 @@ function ReportList(Data, eew) {
 		}
 		addReport(Data.response[index]);
 	}
+	setLocale(CONFIG["general.locale"]);
 }
 
 function addReport(report, prepend = false) {
@@ -839,13 +844,28 @@ function addReport(report, prepend = false) {
 		const report_intenisty_container = document.createElement("div");
 		report_intenisty_container.className = "report-intenisty-container";
 
-		const report_intenisty_title = document.createElement("span");
-		report_intenisty_title.className = "report-intenisty-title";
-		report_intenisty_title.innerText = "最大震度";
+		const report_intenisty_title_container = document.createElement("div");
+		report_intenisty_title_container.className = "report-intenisty-title-container";
+
+		const report_intenisty_title_en = document.createElement("span");
+		report_intenisty_title_en.lang = "en";
+		report_intenisty_title_en.className = "report-intenisty-title";
+		report_intenisty_title_en.innerText = "Max Int.";
+		const report_intenisty_title_ja = document.createElement("span");
+		report_intenisty_title_ja.lang = "ja";
+		report_intenisty_title_ja.className = "report-intenisty-title";
+		report_intenisty_title_ja.innerText = "最大震度";
+		const report_intenisty_title_zh_tw = document.createElement("span");
+		report_intenisty_title_zh_tw.lang = "zh-TW";
+		report_intenisty_title_zh_tw.className = "report-intenisty-title";
+		report_intenisty_title_zh_tw.innerText = "最大震度";
+
+		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_zh_tw);
+
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
 		report_intenisty_value.innerText = IntensityI(report.Max);
-		report_intenisty_container.append(report_intenisty_title, report_intenisty_value);
+		report_intenisty_container.append(report_intenisty_title_container, report_intenisty_value);
 
 
 		const report_detail_container = document.createElement("div");
@@ -861,7 +881,7 @@ function addReport(report, prepend = false) {
 
 		report_container.append(report_intenisty_container, report_detail_container);
 		Div.prepend(report_container);
-		Div.style.backgroundColor = color(report.Max);
+		Div.style.backgroundColor = `${color(report.Max)}cc`;
 		roll.prepend(Div);
 		investigation = true;
 	} else {
@@ -871,13 +891,28 @@ function addReport(report, prepend = false) {
 		const report_intenisty_container = document.createElement("div");
 		report_intenisty_container.className = "report-intenisty-container";
 
-		const report_intenisty_title = document.createElement("span");
-		report_intenisty_title.className = "report-intenisty-title";
-		report_intenisty_title.innerText = "最大震度";
+		const report_intenisty_title_container = document.createElement("div");
+		report_intenisty_title_container.className = "report-intenisty-title-container";
+
+		const report_intenisty_title_en = document.createElement("span");
+		report_intenisty_title_en.lang = "en";
+		report_intenisty_title_en.className = "report-intenisty-title";
+		report_intenisty_title_en.innerText = "Max Int.";
+		const report_intenisty_title_ja = document.createElement("span");
+		report_intenisty_title_ja.lang = "ja";
+		report_intenisty_title_ja.className = "report-intenisty-title";
+		report_intenisty_title_ja.innerText = "最大震度";
+		const report_intenisty_title_zh_tw = document.createElement("span");
+		report_intenisty_title_zh_tw.lang = "zh-TW";
+		report_intenisty_title_zh_tw.className = "report-intenisty-title";
+		report_intenisty_title_zh_tw.innerText = "最大震度";
+
+		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_zh_tw);
+
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
 		report_intenisty_value.innerText = Level;
-		report_intenisty_container.append(report_intenisty_title, report_intenisty_value);
+		report_intenisty_container.append(report_intenisty_title_container, report_intenisty_value);
 
 
 		const report_detail_container = document.createElement("div");
@@ -899,7 +934,7 @@ function addReport(report, prepend = false) {
 
 		report_container.append(report_intenisty_container, report_detail_container);
 		Div.append(report_container);
-		Div.style.backgroundColor = color(report.data[0].areaIntensity);
+		Div.style.backgroundColor = `${color(report.data[0].areaIntensity)}cc`;
 		ReportCache[report.originTime] = report;
 		Div.addEventListener("click", (event) => {
 			if (event.detail == 2 && report.ID.length != 0) {
@@ -1071,7 +1106,6 @@ ipcMain.on("testEEW", () => {
 });
 ipcMain.on("updateTheme", () => {
 	console.log("updateTheme");
-	setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
 	if (mapLayer.options.id != (CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10")) {
 		map.removeLayer(mapLayer);
 		mapTW.removeLayer(mapLayerTW);
@@ -1090,6 +1124,9 @@ ipcMain.on("updateTheme", () => {
 			minZoom    : 2,
 		}).addTo(mapTW);
 	}
+});
+ipcMain.on("updateTitle", (e, lang) => {
+	document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台湾リアルタイム地震モニタリング", "zh-TW": "TREM 台灣即時地震監測" }[lang];
 });
 // #endregion
 
@@ -1624,7 +1661,7 @@ function clear(ID) {
 function updateText() {
 	$("#alert-box")[0].className = `${INFO[TINFO].alert_type} ${IntensityToClassString(INFO[TINFO].alert_intensity)}`;
 	$("#alert-local")[0].className = `alert-item ${IntensityToClassString(INFO[TINFO].alert_local)}`;
-	$("#alert-provider").text(`${INFO.length ? `${TINFO + 1} ` : ""}${INFO[TINFO].alert_provider}`);
+	$("#alert-provider").text(`${INFO.length > 1 ? `${TINFO + 1} ` : ""}${INFO[TINFO].alert_provider}`);
 	$("#alert-number").text(`${INFO[TINFO].alert_number}`);
 	$("#alert-location").text(INFO[TINFO].alert_location);
 	$("#alert-time").text(INFO[TINFO].alert_time.format("YYYY/MM/DD HH:mm:ss"));

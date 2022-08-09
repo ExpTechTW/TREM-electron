@@ -26,12 +26,16 @@ button.filled-tonal-button .filled-tonal-button-label {
     padding-right: 24px;
 }
 
-button.filled-tonal-button:hover {
+button.filled-tonal-button:disabled {
+    opacity: .6;
+}
+
+button.filled-tonal-button:hover:not(:disabled) {
     background: linear-gradient(0deg, rgba(var(--md-sys-color-on-secondary-container), .08) 0%, rgba(var(--md-sys-color-on-secondary-container), .08) 100%),
                 rgb(var(--md-sys-color-secondary-container));
 }
 
-button.filled-tonal-button:focus-visible {
+button.filled-tonal-button:focus-visible:not(:disabled) {
     outline: 2px solid rgb(var(--md-sys-color-primary));
 }
 
