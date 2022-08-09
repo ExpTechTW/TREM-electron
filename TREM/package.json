@@ -1,7 +1,7 @@
 {
   "name": "trem",
   "version": "4.2.0-pre.3",
-  "description": "台灣即時地震監測",
+  "description": "臺灣即時地震監測",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
