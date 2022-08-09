@@ -1405,9 +1405,9 @@ async function FCMdata(data) {
 					id   : json.ID,
 				};
 				Info.Alert = json.ID + json.Version;
-				if (t != null) clearInterval(t);
 				value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
-				if (Second == -1 || value < Second)
+				if (Second == -1 || value < Second) {
+					if (t != null) clearInterval(t);
 					t = setInterval(() => {
 						value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
 						Second = value;
@@ -1440,7 +1440,7 @@ async function FCMdata(data) {
 							}
 						}
 					}, 0);
-
+				}
 			}
 			if (ReportMarkID != null) {
 				ReportMarkID = null;
