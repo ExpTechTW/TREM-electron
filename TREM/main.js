@@ -46,7 +46,7 @@ function createWindow() {
 	pushReceiver.setup(MainWindow.webContents);
 
 	if (process.platform === "win32")
-		app.setAppUserModelId("TREM | 台灣即時地震監測");
+		app.setAppUserModelId("TREM | 臺灣即時地震監測");
 
 	MainWindow.on("close", (event) => {
 		if (app.quitting)
@@ -133,7 +133,7 @@ else {
 				},
 			},
 		]);
-		tray.setToolTip("TREM | 台灣即時地震監測");
+		tray.setToolTip("TREM | 臺灣即時地震監測");
 		tray.setContextMenu(contextMenu);
 		tray.setIgnoreDoubleClickEvents(true);
 		tray.on("click", (e) => {
@@ -187,6 +187,7 @@ ipcMain.on("restart", () => {
 });
 
 ipcMain.on("screenshotEEW", async (event, json) => {
+	return
 	const folder = path.join(app.getPath("userData"), "EEW");
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);

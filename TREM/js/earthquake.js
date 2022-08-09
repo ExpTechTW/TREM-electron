@@ -196,6 +196,15 @@ function init() {
 		},
 	}).addTo(mapTW);
 
+	L.geoJson(statesData, {
+		style: {
+			weight    : 0.8,
+			opacity   : 0.8,
+			color     : "#8E8E8E",
+			fillColor : "transparent",
+		},
+	}).addTo(map);
+
 	map.on("click", (e) => {
 		if (ReportMarkID != null) {
 			ReportMarkID = null;
@@ -204,22 +213,6 @@ function init() {
 		}
 		focus();
 	});
-
-	mapLayer = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw", {
-		maxZoom    : 14,
-		id         : CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10",
-		tileSize   : 512,
-		zoomOffset : -1,
-		minZoom    : 2,
-	}).addTo(map);
-
-	mapLayerTW = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw", {
-		maxZoom    : 14,
-		id         : CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10",
-		tileSize   : 512,
-		zoomOffset : -1,
-		minZoom    : 2,
-	}).addTo(mapTW);
 
 	map.removeControl(map.zoomControl);
 
