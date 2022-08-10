@@ -202,7 +202,7 @@ function init() {
 	map.doubleClickZoom.disable();
 	mapTW.removeControl(mapTW.zoomControl);
 
-	L.geoJson(statesData, {
+	L.geoJson(Dmap, {
 		style: {
 			weight    : 0.8,
 			opacity   : 0.3,
@@ -211,7 +211,7 @@ function init() {
 		},
 	}).addTo(mapTW);
 
-	L.geoJson(statesData, {
+	L.geoJson(Dmap, {
 		style: {
 			weight    : 0.8,
 			opacity   : 0.8,
@@ -438,7 +438,7 @@ function init() {
 							audioPlay("./audio/palert.wav");
 						}
 						if (Pgeojson != null) map.removeLayer(Pgeojson);
-						Pgeojson = L.geoJson(statesData, {
+						Pgeojson = L.geoJson(DmapT, {
 							style: (feature) => {
 								if (feature.properties.COUNTY != undefined) {
 									let name = feature.properties.COUNTY + " " + feature.properties.TOWN;
@@ -583,9 +583,13 @@ function init() {
 						Zoom = 7;
 						X = 0;
 					}
+					if (km > 250000) {
+						Zoom = 6.5;
+						X = 0;
+					}
 					let num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
 					if (num >= 5)
-						focus([EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], 9.5);
+						focus([EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], Zoom);
 					else
 						focus([(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], Zoom);
 					EEW[Object.keys(EEW)[index]].time = NOW.getTime();
@@ -1428,7 +1432,7 @@ async function FCMdata(data) {
 			}
 
 			if (geojson != null) mapTW.removeLayer(geojson);
-			geojson = L.geoJson(statesData, {
+			geojson = L.geoJson(DmapT, {
 				style: (feature) => {
 					if (feature.properties.COUNTY != undefined) {
 						let name = feature.properties.COUNTY + feature.properties.TOWN;
