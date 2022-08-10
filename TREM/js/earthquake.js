@@ -4,7 +4,6 @@
 /* eslint-disable prefer-const */
 const { BrowserWindow, shell } = require("@electron/remote");
 const path = require("path");
-axios.defaults.timeout = 5000;
 
 $("#loading").text({ en: "Loading...", ja: "ローディング中...", "zh-TW": "載入中..." }[CONFIG["general.locale"]]);
 document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台湾リアルタイム地震モニタリング", "zh-TW": "TREM 臺灣即時地震監測" }[CONFIG["general.locale"]];
@@ -303,8 +302,6 @@ async function init() {
 				Response = response.data;
 				handler(Response);
 			}).catch((err) => {
-				dump({ level: 2, message: err, origin: "PGATimer" });
-				console.error(err);
 				handler(Response);
 			});
 		}, 500);
@@ -572,24 +569,19 @@ async function init() {
 				if (EEWT.id == 0 || EEWT.id == EEW[Object.keys(EEW)[index]].id || NOW.getTime() - EEW[Object.keys(EEW)[index]].time >= 10000) {
 					EEWT.id = EEW[Object.keys(EEW)[index]].id;
 					let Zoom = 9;
-					let X = 0.5;
+					let X = 0;
 					let km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
-					if (km > 100000) {
+					if (km > 100000)
 						Zoom = 8;
-						X = 0.4;
-					}
-					if (km > 150000) {
+					if (km > 150000)
 						Zoom = 7.5;
-						X = 0.2;
-					}
-					if (km > 200000) {
+					if (km > 200000)
 						Zoom = 7;
-						X = 0;
-					}
-					if (km > 250000) {
+					if (km > 250000)
 						Zoom = 6.5;
-						X = 0;
-					}
+					if (km > 300000)
+						Zoom = 6;
+					console.log(km);
 					let num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
 					if (num >= 5)
 						focus([EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], Zoom);
@@ -656,6 +648,8 @@ async function setUserLocationMarker() {
 function focus(Loc, size) {
 	if (!CONFIG["map.autoZoom"]) return;
 	let X = 0;
+	if (size >= 6) X = 2.5;
+	if (size >= 6.5) X = 1.6;
 	if (size >= 7) X = 1.5;
 	if (size >= 7.5) X = 0.9;
 	if (size >= 8) X = 0.6;
