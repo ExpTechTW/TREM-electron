@@ -58,6 +58,7 @@ let PalertT = 0;
 let MainClock = null;
 let geojson = null;
 let Pgeojson = null;
+let mapTW_geoJson, maW_geoJson;
 let clickT = 0;
 let investigation = false;
 let ReportTag = 0;
@@ -127,7 +128,7 @@ win.on("show", () => {
 	focus();
 });
 
-function init() {
+async function init() {
 
 	ReportGET({});
 	const time = document.getElementById("time");
@@ -202,21 +203,24 @@ function init() {
 	map.doubleClickZoom.disable();
 	mapTW.removeControl(mapTW.zoomControl);
 
-	L.geoJson(statesData, {
+	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
+	console.log(colors);
+
+	mapTW_geoJson = L.geoJson(statesData, {
 		style: {
 			weight    : 0.8,
 			opacity   : 0.3,
-			color     : "#8E8E8E",
-			fillColor : "transparent",
+			color     : colors.primary,
+			fillColor : colors.surfaceVariant,
 		},
 	}).addTo(mapTW);
 
-	L.geoJson(statesData, {
+	map_geoJson = L.geoJson(statesData, {
 		style: {
 			weight    : 0.8,
 			opacity   : 0.8,
-			color     : "#8E8E8E",
-			fillColor : "transparent",
+			color     : colors.primary,
+			fillColor : colors.surfaceVariant,
 		},
 	}).addTo(map);
 
@@ -1182,26 +1186,23 @@ ipcMain.on("testEEW", () => {
 	localStorage.Test = true;
 	ipcRenderer.send("restart");
 });
-ipcMain.on("updateTheme", () => {
+ipcMain.on("updateTheme", async () => {
+	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
+	console.log(colors);
+
+	mapTW_geoJson.setStyle({
+		weight    : 0.8,
+		opacity   : 0.3,
+		color     : colors.primary,
+		fillColor : colors.surfaceVariant,
+	});
+	map_geoJson.setStyle({
+		weight    : 0.8,
+		opacity   : 0.8,
+		color     : colors.primary,
+		fillColor : colors.surfaceVariant,
+	});
 	console.log("updateTheme");
-	if (mapLayer.options.id != (CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10")) {
-		map.removeLayer(mapLayer);
-		mapTW.removeLayer(mapLayerTW);
-		mapLayer = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw", {
-			maxZoom    : 14,
-			id         : CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10",
-			tileSize   : 512,
-			zoomOffset : -1,
-			minZoom    : 2,
-		}).addTo(map);
-		mapLayerTW = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw", {
-			maxZoom    : 14,
-			id         : CONFIG["theme.dark"] ? "mapbox/dark-v10" : "mapbox/light-v10",
-			tileSize   : 512,
-			zoomOffset : -1,
-			minZoom    : 2,
-		}).addTo(mapTW);
-	}
 });
 ipcMain.on("updateTitle", (e, lang) => {
 	document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台湾リアルタイム地震モニタリング", "zh-TW": "TREM 台灣即時地震監測" }[lang];
