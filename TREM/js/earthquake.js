@@ -204,7 +204,6 @@ async function init() {
 	mapTW.removeControl(mapTW.zoomControl);
 
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
-	console.log(colors);
 
 	mapTW_geoJson = L.geoJson(statesData, {
 		style: {
@@ -1188,7 +1187,6 @@ ipcMain.on("testEEW", () => {
 });
 ipcMain.on("updateTheme", async () => {
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
-	console.log(colors);
 
 	mapTW_geoJson.setStyle({
 		weight    : 0.8,
