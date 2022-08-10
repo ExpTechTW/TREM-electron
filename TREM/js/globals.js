@@ -5,28 +5,6 @@ const { ipcMain } = require("@electron/remote");
 const { ipcRenderer } = require("electron");
 const { join } = require("node:path");
 
-let CONFIG = {}, settingDisabled = false;
-
-/**
- * 設定檔路徑
- * @type {string}
- */
-const CONFIG_PATH = join(app.getPath("userData"), "settings.json");
-
-if (!fs.existsSync(CONFIG_PATH))
-	fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), "utf8");
-
-/**
- * 設定
- * @type {string}
- */
-try {
-	CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, { encoding: "utf-8" }));
-} catch (err) {
-	CONFIG = {};
-	settingDisabled = err;
-}
-
 const DEFAULT_CONFIG = {
 	"general.locale": {
 		"type"  : "SelectBox",
@@ -173,6 +151,30 @@ const DEFAULT_CONFIG = {
 		"value" : true,
 	},
 };
+
+/**
+ * 設定檔路徑
+ * @type {string}
+ */
+const CONFIG_PATH = join(app.getPath("userData"), "settings.json");
+
+if (!fs.existsSync(CONFIG_PATH))
+	fs.writeFileSync(CONFIG_PATH, JSON.stringify(Object.keys(DEFAULT_CONFIG).reduce((acc, key) => {
+		acc[key] = DEFAULT_CONFIG[key].value;
+		return acc;
+	}, {}), null, 2), "utf8");
+
+/**
+ * 設定
+ * @type {string}
+ */
+let CONFIG, settingDisabled = false;
+try {
+	CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, { encoding: "utf-8" }));
+} catch (err) {
+	CONFIG = {};
+	settingDisabled = err;
+}
 
 // Synchronize config
 for (let i = 0, k = Object.keys(DEFAULT_CONFIG), n = k.length; i < n; i++)
