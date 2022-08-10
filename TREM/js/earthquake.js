@@ -7,7 +7,7 @@ const path = require("path");
 axios.defaults.timeout = 5000;
 
 $("#loading").text({ en: "Loading...", ja: "ローディング中...", "zh-TW": "載入中..." }[CONFIG["general.locale"]]);
-document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台湾リアルタイム地震モニタリング", "zh-TW": "TREM 台灣即時地震監測" }[CONFIG["general.locale"]];
+document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台湾リアルタイム地震モニタリング", "zh-TW": "TREM 臺灣即時地震監測" }[CONFIG["general.locale"]];
 
 // #region 變數
 let Stamp = 0;
@@ -72,6 +72,7 @@ let PAlertT = 0;
 let auto = false;
 let EEW = {};
 let EEWT = { id: 0, time: 0 };
+let TSUNAMI = {};
 // #endregion
 
 // #region override Date.format()
@@ -229,12 +230,16 @@ function init() {
 		focus();
 	});
 
+	map.on("dblclick", (e) => {
+		focus();
+	});
+
 	map.on("drag", (e) => {
 		mapLock = true;
 	});
 
 	map.on("dblclick", (e) => {
-		mapLock = true;
+		focus([23.608428, 120.799168], 7.5);
 	});
 
 	map.removeControl(map.zoomControl);
@@ -482,7 +487,7 @@ function init() {
 			RMT++;
 			for (let index = 0; index < Object.keys(pga).length; index++) {
 				let Intensity = pga[Object.keys(pga)[index]].Intensity;
-				if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 10000) {
+				if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000) {
 					delete pga[Object.keys(pga)[index]];
 					index--;
 				} else {
@@ -636,7 +641,7 @@ async function setUserLocationMarker() {
 	marker = L.marker([Lat, Long], { icon: myIcon });
 	map.addLayer(marker);
 	marker.setZIndexOffset(1);
-	map.setView([23.608428, 121.699168], 7.5);
+	focus([23.608428, 120.799168], 7.5);
 }
 // #endregion
 
@@ -651,11 +656,11 @@ function focus(Loc, size) {
 	if (size >= 9) X = 0.35;
 	if (size >= 9.5) X = 0.2;
 	if (Loc != undefined) {
-		Focus[0] = Loc[0] - 0.05;
+		Focus[0] = Loc[0];
 		Focus[1] = Loc[1] + X;
 		Focus[2] = size;
 		if (map.getBounds().getCenter().lat.toFixed(2) != Loc[0].toFixed(2) || map.getBounds().getCenter().lng.toFixed(2) != (Loc[1] + X).toFixed(2) || size != map.getZoom())
-			map.setView([Loc[0] - 0.05, Loc[1] + X], size);
+			map.setView([Loc[0], Loc[1] + X], size);
 	} else if (Focus.length != 0)
 		if (map.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || map.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != map.getZoom())
 			map.setView([Focus[0], Focus[1]], Focus[2]);
@@ -1234,6 +1239,104 @@ async function FCMdata(data) {
 			win.setAlwaysOnTop(false);
 		}
 		if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
+	} else if (json.Function == "TSUNAMI") {
+		if (Number(json.Version) == 1) {
+			new Notification("海嘯警報", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "TREM.ico" });
+			if (CONFIG["report.show"]) {
+				win.show();
+				if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
+				win.setAlwaysOnTop(false);
+			}
+			if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
+			focus([23.608428, 120.799168], 7.5);
+			setTimeout(() => {ipcRenderer.send("screenshotEEW", json);}, 1500);
+		}
+		if (TSUNAMI["Timer"] != null) clearInterval(TSUNAMI["Timer"]);
+		TSUNAMI["Timer"] = setInterval(() => {
+			if (TSUNAMI["E"] != null || json.Cancel) {
+				map.removeLayer(TSUNAMI["E"]);
+				map.removeLayer(TSUNAMI["EN"]);
+				map.removeLayer(TSUNAMI["ES"]);
+				map.removeLayer(TSUNAMI["N"]);
+				map.removeLayer(TSUNAMI["WS"]);
+				map.removeLayer(TSUNAMI["W"]);
+				if (Tsunami.Cross != undefined) map.removeLayer(Tsunami.Cross);
+				TSUNAMI["E"] = null;
+				if (json.Cancel) {
+					TSUNAMI = {};
+					clearInterval(TSUNAMI["Timer"]);
+				}
+			} else {
+				let myIcon = L.icon({
+					iconUrl  : "./image/warn.png",
+					iconSize : [30, 30],
+				});
+				let Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
+				Tsunami.Cross = Cross;
+				Tsunami.Time = NOW.getTime();
+				map.addLayer(Cross);
+				TSUNAMI["E"] = L.geoJson(E, {
+					style: {
+						weight    : 10,
+						opacity   : 1,
+						color     : Tcolor(json.Addition[0].areaColor),
+						fillColor : "transparent",
+					},
+				});
+				TSUNAMI["EN"] = L.geoJson(EN, {
+					style: {
+						weight    : 10,
+						opacity   : 1,
+						color     : Tcolor(json.Addition[1].areaColor),
+						fillColor : "transparent",
+					},
+				});
+				TSUNAMI["ES"] = L.geoJson(ES, {
+					style: {
+						weight    : 10,
+						opacity   : 1,
+						color     : Tcolor(json.Addition[2].areaColor),
+						fillColor : "transparent",
+					},
+				});
+				TSUNAMI["N"] = L.geoJson(N, {
+					style: {
+						weight    : 10,
+						opacity   : 1,
+						color     : Tcolor(json.Addition[3].areaColor),
+						fillColor : "transparent",
+					},
+				});
+				TSUNAMI["WS"] = L.geoJson(WS, {
+					style: {
+						weight    : 10,
+						opacity   : 1,
+						color     : Tcolor(json.Addition[4].areaColor),
+						fillColor : "transparent",
+					},
+				});
+				TSUNAMI["W"] = L.geoJson(W, {
+					style: {
+						weight    : 10,
+						opacity   : 1,
+						color     : Tcolor(json.Addition[5].areaColor),
+						fillColor : "transparent",
+					},
+				});
+				map.addLayer(TSUNAMI["E"]);
+				map.addLayer(TSUNAMI["EN"]);
+				map.addLayer(TSUNAMI["ES"]);
+				map.addLayer(TSUNAMI["N"]);
+				map.addLayer(TSUNAMI["WS"]);
+				map.addLayer(TSUNAMI["W"]);
+			}
+		}, 1000);
+		function Tcolor(text) {
+			return (text == "黃色") ? "yellow" :
+				(text == "橙色") ? "red" :
+					(text == "綠色") ? "transparent" :
+						"purple";
+		}
 	} else if (json.Function == "palert")
 		PAlert = json.Data;
 	else if (json.Function == "TREM_earthquake")
