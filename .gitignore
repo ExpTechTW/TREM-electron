@@ -134,3 +134,4 @@ TREM/js/compiled
 
 # Settings files
 TREM/Data
+TREM/package-lock.json
