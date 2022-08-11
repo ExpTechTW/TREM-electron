@@ -132,7 +132,6 @@ async function init() {
 
 	// clock
 	setInterval(() => {
-		const currentTime = new Date();
 		if (TimeDesynced)
 			time.classList.add("desynced");
 		else {
@@ -141,11 +140,11 @@ async function init() {
 			if (replay == 0) {
 				if (time.classList.contains("replay"))
 					time.classList.remove("replay");
-				time.innerText = currentTime.format("YYYY/MM/DD HH:mm:ss");
+				time.innerText = NOW.format("YYYY/MM/DD HH:mm:ss");
 			} else {
 				if (!time.classList.contains("replay"))
 					time.classList.add("replay");
-				time.innerText = new Date(replay + (currentTime.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss");
+				time.innerText = new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss");
 			}
 		}
 	}, 500);
