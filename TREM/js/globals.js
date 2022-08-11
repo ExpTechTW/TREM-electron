@@ -187,15 +187,25 @@ setLocale(CONFIG["general.locale"]);
 fs.watch(CONFIG_PATH, () => {
 	try {
 		const newConfig = JSON.parse(fs.readFileSync(CONFIG_PATH, { encoding: "utf-8" }));
-		if (newConfig["theme.color"] != CONFIG["theme.color"] || newConfig["theme.dark"] != CONFIG["theme.dark"])
+
+		// 位置變更
+		if (newConfig["location.city"] != CONFIG["location.city"] || newConfig["location.town"] != CONFIG["location.town"])
+			ipcRenderer.send("updateLocation", { city: newConfig["location.city"], town: newConfig["location.town"] });
+
+		// 主題變更
+		if (newConfig["theme.color"] != CONFIG["theme.color"] || newConfig["theme.dark"] != CONFIG["theme.dark"]) {
 			setThemeColor(newConfig["theme.color"], newConfig["theme.dark"]);
+			ipcRenderer.send("updateTheme", { color: newConfig["theme.color"], dark: newConfig["theme.dark"] });
+		}
+
+		// 語言變更
 		if (newConfig["general.locale"] != CONFIG["general.locale"]) {
 			setLocale(newConfig["general.locale"]);
 			ipcRenderer.send("updateTitle", newConfig["general.locale"]);
 		}
+
 		CONFIG = newConfig;
 		settingDisabled = false;
-		ipcRenderer.send("updateTheme");
 		if (document.getElementsByClassName("dialog").length)
 			closeDialog({ target: { id: "dialog" } });
 	} catch (err) {

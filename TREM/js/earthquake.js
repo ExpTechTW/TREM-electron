@@ -1,7 +1,5 @@
 /* eslint-disable no-inner-declarations */
-/* eslint-disable no-shadow */
 /* eslint-disable no-undef */
-/* eslint-disable prefer-const */
 const { BrowserWindow, shell } = require("@electron/remote");
 const path = require("path");
 
@@ -11,24 +9,24 @@ document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台�
 // #region 變數
 let Stamp = 0;
 let t = null;
-let Lat = 25.0421407;
-let Long = 121.5198716;
+let UserLocationLat = 25.0421407;
+let UserLocationLon = 121.5198716;
 let All = [];
-let arrive = [];
+const arrive = [];
 let audioList = [];
 let audioList1 = [];
 let audioLock = false;
 let audioLock1 = false;
-let ReportCache = {};
+const ReportCache = {};
 let ReportMarkID = null;
-let MarkList = [];
-let EarthquakeList = {};
+const MarkList = [];
+const EarthquakeList = {};
 let marker = null;
 let map, mapTW;
 let mapLayer, mapLayerTW;
-let Station = {};
-let PGA = {};
-let pga = {};
+const Station = {};
+const PGA = {};
+const pga = {};
 let RMT = 1;
 let RMTlimit = [];
 let PGALimit = 0;
@@ -36,19 +34,18 @@ let PGAaudio = false;
 let PGAtag = 0;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 let expected = [];
-let Info = { Notify: [], Warn: [], Focus: [] };
-let Focus = [];
+const Info = { Notify: [], Warn: [], Focus: [] };
+const Focus = [];
 let PGAmark = false;
-let Check = {};
 let INFO = [];
 let TINFO = 0;
 let ticker = null;
 let ITimer = null;
-let Tsunami = {};
+const Tsunami = {};
 let Report = 0;
 let Sspeed = 4;
 let Pspeed = 7;
-let Server = [];
+const Server = [];
 let PAlert = {};
 let Location;
 let station = {};
@@ -57,7 +54,7 @@ let PalertT = 0;
 let MainClock = null;
 let geojson = null;
 let Pgeojson = null;
-let mapTW_geoJson, maW_geoJson;
+let mapTW_geoJson, map_geoJson;
 let clickT = 0;
 let investigation = false;
 let ReportTag = 0;
@@ -70,8 +67,8 @@ let Second = -1;
 let mapLock = false;
 let PAlertT = 0;
 let auto = false;
-let EEW = {};
-let EEWT = { id: 0, time: 0 };
+const EEW = {};
+const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
 // #endregion
 
@@ -86,10 +83,10 @@ Date.prototype.format =
 		/**
 		 * @type {Date}
 		 */
-		let me = this;
+		const me = this;
 		return format.replace(/a|A|Z|S(SS)?|ss?|mm?|HH?|hh?|D{1,2}|M{1,2}|YY(YY)?|'([^']|'')*'/g, (str) => {
 			let c1 = str.charAt(0);
-			let ret = str.charAt(0) == "'"
+			const ret = str.charAt(0) == "'"
 				? (c1 = 0) || str.slice(1, -1).replace(/''/g, "'")
 				: str == "a"
 					? (me.getHours() < 12 ? "am" : "pm")
@@ -120,25 +117,22 @@ Date.prototype.format =
 // #endregion
 
 // #region 初始化
-let win = BrowserWindow.fromId(process.env.window * 1);
-let roll = document.getElementById("rolllist");
+const win = BrowserWindow.fromId(process.env.window * 1);
+const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
 win.on("show", () => {
 	focus();
 });
 
+let TimeDesynced = false;
 async function init() {
-
 	ReportGET({});
 	const time = document.getElementById("time");
 
+	// clock
 	setInterval(() => {
-		if (CONFIG["location.city"] != Check.city || CONFIG["location.town"] != Check.town) {
-			Check.city = CONFIG["location.city"];
-			Check.town = CONFIG["location.town"];
-			setUserLocationMarker();
-		}
-		if (TimerDesynced)
+		const currentTime = new Date();
+		if (TimeDesynced)
 			time.classList.add("desynced");
 		else {
 			if (time.classList.contains("desynced"))
@@ -146,13 +140,16 @@ async function init() {
 			if (replay == 0) {
 				if (time.classList.contains("replay"))
 					time.classList.remove("replay");
-				time.innerText = NOW.format("YYYY/MM/DD HH:mm:ss");
+				time.innerText = currentTime.format("YYYY/MM/DD HH:mm:ss");
 			} else {
 				if (!time.classList.contains("replay"))
 					time.classList.add("replay");
-				time.innerText = new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss");
+				time.innerText = new Date(replay + (currentTime.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss");
 			}
 		}
+	}, 500);
+
+	setInterval(() => {
 		if (Object.keys(Tsunami).length != 0)
 			if (NOW.getTime() - Tsunami.Time > 240000) {
 				map.removeLayer(Tsunami.Cross);
@@ -202,9 +199,10 @@ async function init() {
 	map.doubleClickZoom.disable();
 	mapTW.removeControl(mapTW.zoomControl);
 
+	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
 
-	L.geoJson(Dmap, {
+	mapTW_geoJson = L.geoJson(Dmap, {
 		style: {
 			weight    : 0.8,
 			opacity   : 0.3,
@@ -213,7 +211,7 @@ async function init() {
 		},
 	}).addTo(mapTW);
 
-	L.geoJson(Dmap, {
+	map_geoJson = L.geoJson(Dmap, {
 		style: {
 			weight    : 0.8,
 			opacity   : 0.8,
@@ -280,13 +278,13 @@ async function init() {
 		MainClock = setInterval(() => {
 			let R = 0;
 			if (replay != 0) R = replay + (NOW.getTime() - replayT);
-			let data = {
+			const data = {
 				"APIkey"   : "https://github.com/ExpTechTW",
 				"Function" : "data",
 				"Type"     : "TREM",
 				"Value"    : R,
 			};
-			let CancelToken = axios.CancelToken;
+			const CancelToken = axios.CancelToken;
 			let cancel;
 			setTimeout(() => {
 				cancel();
@@ -307,20 +305,24 @@ async function init() {
 		}, 500);
 
 		function handler(response) {
+			/*
 			for (let index = 0; index < Object.keys(Station).length; index++) {
 				map.removeLayer(Station[Object.keys(Station)[index]]);
 				delete Station[Object.keys(Station)[index]];
 				index--;
 			}
-			if (response["state"] != "Success") return;
-			let Json = response.response;
+			*/
+			if (response.state != "Success") return;
+
+			const Json = response.response;
 			MAXPGA = { pga: 0, station: "NA", level: 0 };
+
 			for (let index = 0; index < Object.keys(Json).length; index++) {
-				let Sdata = Json[Object.keys(Json)[index]];
-				let amount = 0;
-				if (Number(Sdata["MaxPGA"]) > amount) amount = Number(Sdata.MaxPGA);
+				const Sdata = Json[Object.keys(Json)[index]];
+				const amount = Number(Sdata.MaxPGA);
 				if (station[Object.keys(Json)[index]] == undefined) continue;
-				let Intensity = (NOW.getTime() - Sdata.TimeStamp > 10000) ? "NA" :
+
+				const Intensity = (NOW.getTime() - Sdata.TimeStamp > 5000) ? "NA" :
 					(amount >= 800) ? 9 :
 						(amount >= 440) ? 8 :
 							(amount >= 250) ? 7 :
@@ -331,32 +333,35 @@ async function init() {
 												(amount >= 5) ? 2 :
 													(amount >= 3) ? 1 :
 														0;
-				let size = 15;
-				let Image = `./image/${Intensity}.png`;
-				if (Intensity == 0) {
-					size = 10;
-					Image = "./image/0-1.png";
-					if (amount > 2.5) Image = "./image/0-2.png";
-					if (amount > 2.8) Image = "./image/0-3.png";
-					if (amount > 3) Image = "./image/0-4.png";
-					if (amount > 3.5) Image = "./image/0-5.png";
-				}
-				let myIcon = L.icon({
+
+				const size = (Intensity == 0) ? 10 : 15;
+				const Image = (Intensity) ? `./image/${Intensity}.png` :
+					(amount > 3.5) ? "./image/0-5.png" :
+						(amount > 3) ? "./image/0-4.png" :
+							(amount > 2.8) ? "./image/0-3.png" :
+								(amount > 2.5) ? "./image/0-2.png" :
+									"./image/0-1.png";
+
+				const stationIcon = L.icon({
 					iconUrl  : Image,
 					iconSize : [size, size],
 				});
-				let ReportMark = L.marker([station[Object.keys(Json)[index]].Lat, station[Object.keys(Json)[index]].Long], { icon: myIcon });
-				let Level = IntensityI(Intensity);
-				let now = new Date(Sdata.Time);
+
+				if (!Station[Object.keys(Json)[index]])
+					Station[Object.keys(Json)[index]] = L.marker([station[Object.keys(Json)[index]].Lat, station[Object.keys(Json)[index]].Long], { keyboard: false })
+						.addTo(map);
+				Station[Object.keys(Json)[index]]
+					.setIcon(stationIcon)
+					.setZIndexOffset(2000 + amount);
+
+				const Level = IntensityI(Intensity);
+				const now = new Date(Sdata.Time);
 				if (Object.keys(Json)[index] == CONFIG["Real-time.station"]) {
 					document.getElementById("rt-station-name").innerText = station[Object.keys(Json)[index]].Loc;
 					document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
 					document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity);
 					document.getElementById("rt-station-pga").innerText = amount;
 				}
-				map.addLayer(ReportMark);
-				ReportMark.setZIndexOffset(2000 + amount);
-				Station[Object.keys(Json)[index]] = ReportMark;
 				if (pga[station[Object.keys(Json)[index]].PGA] == undefined && Intensity != "NA")
 					pga[station[Object.keys(Json)[index]].PGA] = {
 						"Intensity" : Intensity,
@@ -415,7 +420,7 @@ async function init() {
 			if (PAlert.data != undefined)
 				if (PAlert.timestamp != PAlertT) {
 					PAlertT = PAlert.timestamp;
-					let PLoc = {};
+					const PLoc = {};
 					let MaxI = 0;
 					for (let index = 0; index < PAlert.data.length; index++) {
 						PLoc[PAlert.data[index].loc] = PAlert.data[index].intensity;
@@ -441,7 +446,7 @@ async function init() {
 						Pgeojson = L.geoJson(DmapT, {
 							style: (feature) => {
 								if (feature.properties.COUNTY != undefined) {
-									let name = feature.properties.COUNTY + " " + feature.properties.TOWN;
+									const name = feature.properties.COUNTY + " " + feature.properties.TOWN;
 									if (PLoc[name] == 0 || PLoc[name] == undefined)
 										return {
 											weight      : 0,
@@ -486,7 +491,7 @@ async function init() {
 			}
 			RMT++;
 			for (let index = 0; index < Object.keys(pga).length; index++) {
-				let Intensity = pga[Object.keys(pga)[index]].Intensity;
+				const Intensity = pga[Object.keys(pga)[index]].Intensity;
 				if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000) {
 					delete pga[Object.keys(pga)[index]];
 					index--;
@@ -516,7 +521,7 @@ async function init() {
 			for (let Index = 0; Index < All.length - 1; Index++)
 				for (let index = 0; index < All.length - 1; index++)
 					if (All[index].amount < All[index + 1].amount) {
-						let Temp = All[index + 1];
+						const Temp = All[index + 1];
 						All[index + 1] = All[index];
 						All[index] = Temp;
 					}
@@ -543,7 +548,7 @@ async function init() {
 				}
 				PGAtag = All[0].intensity;
 			}
-			let list = [];
+			const list = [];
 			let count = 0;
 			for (let Index = 0; Index < All.length; Index++, count++) {
 				if (!PGAaudio || count >= 10) break;
@@ -569,8 +574,8 @@ async function init() {
 				if (EEWT.id == 0 || EEWT.id == EEW[Object.keys(EEW)[index]].id || NOW.getTime() - EEW[Object.keys(EEW)[index]].time >= 10000) {
 					EEWT.id = EEW[Object.keys(EEW)[index]].id;
 					let Zoom = 9;
-					let X = 0;
-					let km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
+					const X = 0;
+					const km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
 					if (km > 100000)
 						Zoom = 8;
 					if (km > 150000)
@@ -582,7 +587,7 @@ async function init() {
 					if (km > 300000)
 						Zoom = 6;
 					console.log(km);
-					let num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
+					const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
 					if (num >= 5)
 						focus([EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], Zoom);
 					else
@@ -592,17 +597,17 @@ async function init() {
 			auto = true;
 		} else if (Object.keys(PGA).length >= 1) {
 			if (Object.keys(PGA).length == 1) {
-				let X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
-				let Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
+				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
+				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
 				focus([X1, Y1], 9.5);
 			} else if (Object.keys(PGA).length >= 2) {
-				let X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
-				let Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
-				let X2 = (PGAjson[Object.keys(pga)[1].toString()][0][0] + (PGAjson[Object.keys(pga)[1].toString()][2][0] - PGAjson[Object.keys(pga)[1].toString()][0][0]) / 2);
-				let Y2 = (PGAjson[Object.keys(pga)[1].toString()][0][1] + (PGAjson[Object.keys(pga)[1].toString()][1][1] - PGAjson[Object.keys(pga)[1].toString()][0][1]) / 2);
+				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
+				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
+				const X2 = (PGAjson[Object.keys(pga)[1].toString()][0][0] + (PGAjson[Object.keys(pga)[1].toString()][2][0] - PGAjson[Object.keys(pga)[1].toString()][0][0]) / 2);
+				const Y2 = (PGAjson[Object.keys(pga)[1].toString()][0][1] + (PGAjson[Object.keys(pga)[1].toString()][1][1] - PGAjson[Object.keys(pga)[1].toString()][0][1]) / 2);
 				let Zoom = 9;
 				if (Object.keys(PGA).length == 2) {
-					let num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
+					const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
 					if (num > 0.6) Zoom = 9;
 					if (num > 1) Zoom = 8.5;
 					if (num > 1.5) Zoom = 8;
@@ -625,22 +630,25 @@ async function init() {
 // #endregion
 
 // #region 用戶所在位置
-async function setUserLocationMarker() {
+async function setUserLocationMarker(city, town) {
 	if (!Location) {
 		Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
 		dump({ level: 0, message: "Get Location File", origin: "Location" });
 	}
-	Lat = Location[CONFIG["location.city"]][CONFIG["location.town"]][1];
-	Long = Location[CONFIG["location.city"]][CONFIG["location.town"]][2];
-	if (marker != null) map.removeLayer(marker);
-	let myIcon = L.icon({
-		iconUrl  : "./image/here.png",
-		iconSize : [20, 20],
-	});
-	marker = L.marker([Lat, Long], { icon: myIcon });
-	map.addLayer(marker);
-	marker.setZIndexOffset(1);
-	focus([23.608428, 120.799168], 7.5);
+
+	[, UserLocationLat, UserLocationLon] = Location[city][town];
+
+	if (!marker) {
+		const icon = L.icon({
+			iconUrl  : "./image/here.png",
+			iconSize : [20, 20],
+		});
+		marker = L.marker([UserLocationLat, UserLocationLon], { icon: icon })
+			.setZIndexOffset(1)
+			.addTo(map);
+	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
+
+	dump({ level: 0, message: `User location set to ${city} ${town} (${UserLocationLat}, ${UserLocationLat})`, origin: "Location" });
 }
 // #endregion
 
@@ -671,8 +679,8 @@ function focus(Loc, size) {
 // #region 音頻播放
 let AudioT;
 let AudioT1;
-let audioDOM = new Audio();
-let audioDOM1 = new Audio();
+const audioDOM = new Audio();
+const audioDOM1 = new Audio();
 audioDOM.addEventListener("ended", () => {
 	audioLock = false;
 });
@@ -781,8 +789,8 @@ async function ReportClick(time) {
 		for (let index = 0; index < MarkList.length; index++)
 			map.removeLayer(MarkList[index]);
 
-		let LIST = [];
-		let body = {
+		const LIST = [];
+		const body = {
 			"APIkey"   : "https://github.com/ExpTechTW",
 			"Function" : "data",
 			"Type"     : "report",
@@ -793,22 +801,22 @@ async function ReportClick(time) {
 			ReportCache[time].earthquakeNo % 1000 == 0
 			|| await axios.post(PostIP(), body)
 				.then((response) => {
-					let json = response.data.response;
+					const json = response.data.response;
 					if (json == undefined)
 						return true;
 					else {
 						for (let Index = 0; Index < json.Intensity.length; Index++)
 							for (let index = 0; index < json.Intensity[Index].station.length; index++) {
 								// eslint-disable-next-line no-shadow
-								let Station = json.Intensity[Index].station[index];
+								const Station = json.Intensity[Index].station[index];
 								let Intensity = Station.stationIntensity.$t;
 								if (Station.stationIntensity.unit == "強") Intensity += "+";
 								if (Station.stationIntensity.unit == "弱") Intensity += "-";
-								let myIcon = L.icon({
+								const myIcon = L.icon({
 									iconUrl  : `./image/${IntensityI(Intensity)}.png`,
 									iconSize : [20, 20],
 								});
-								let ReportMark = L.marker([Station.stationLat.$t, Station.stationLon.$t], { icon: myIcon });
+								const ReportMark = L.marker([Station.stationLat.$t, Station.stationLon.$t], { icon: myIcon });
 								// eslint-disable-next-line no-shadow
 								let PGA = "";
 								if (Station.pga != undefined) PGA = `<br>PGA<br>垂直向: ${Station.pga.vComponent}<br>東西向: ${Station.pga.ewComponent}<br>南北向: ${Station.pga.nsComponent}<br><a onclick="openURL('${Station.waveImageURI}')">震波圖</a>`;
@@ -818,11 +826,11 @@ async function ReportClick(time) {
 								MarkList.push(ReportMark);
 							}
 						focus([Number(json.NorthLatitude), Number(json.EastLongitude)], 7.5);
-						let myIcon = L.icon({
+						const myIcon = L.icon({
 							iconUrl  : "./image/star.png",
 							iconSize : [25, 25],
 						});
-						let ReportMark = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
+						const ReportMark = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
 						ReportMark.bindPopup(`編號: ${json.No}<br>經度: ${json.EastLongitude}<br>緯度: ${json.NorthLatitude}<br>深度: ${json.Depth}<br>規模: ${json.Scale}<br>位置: ${json.Location}<br>時間: ${json["UTC+8"]}<br><br><a onclick="openURL('${json.Web}')">網頁</a><br><a onclick="openURL('${json.EventImage}')">地震報告</a><br><a onclick="openURL('${json.ShakeImage}')">震度分布</a>`);
 						map.addLayer(ReportMark);
 						ReportMark.setZIndexOffset(3000);
@@ -837,12 +845,12 @@ async function ReportClick(time) {
 		) {
 			for (let Index = 0; Index < ReportCache[time].data.length; Index++)
 				for (let index = 0; index < ReportCache[time].data[Index]["eqStation"].length; index++) {
-					let data = ReportCache[time].data[Index]["eqStation"][index];
+					const data = ReportCache[time].data[Index]["eqStation"][index];
 					const myIcon = L.icon({
 						iconUrl  : `./image/${data.stationIntensity}.png`,
 						iconSize : [20, 20],
 					});
-					let level = IntensityI(data.stationIntensity);
+					const level = IntensityI(data.stationIntensity);
 					LIST.push({
 						Lat       : Number(data.stationLat),
 						Long      : Number(data.stationLon),
@@ -856,14 +864,14 @@ async function ReportClick(time) {
 			for (let Index = 0; Index < LIST.length - 1; Index++)
 				for (let index = 0; index < LIST.length - 1; index++)
 					if (LIST[index].Intensity > LIST[index + 1].Intensity) {
-						let Temp = LIST[index];
+						const Temp = LIST[index];
 						LIST[index] = LIST[index + 1];
 						LIST[index + 1] = Temp;
 					}
 
 
 			for (let index = 0; index < LIST.length; index++) {
-				let ReportMark = L.marker([LIST[index].Lat, LIST[index].Long], { icon: LIST[index].Icon });
+				const ReportMark = L.marker([LIST[index].Lat, LIST[index].Long], { icon: LIST[index].Icon });
 				ReportMark.bindPopup(`站名: ${LIST[index].Name}<br>經度: ${LIST[index].Long}<br>緯度: ${LIST[index].Lat}<br>震度: ${LIST[index].Level}`);
 				map.addLayer(ReportMark);
 				ReportMark.setZIndexOffset(1000 + index);
@@ -874,7 +882,7 @@ async function ReportClick(time) {
 				iconUrl  : "./image/star.png",
 				iconSize : [25, 25],
 			});
-			let ReportMark = L.marker([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], { icon });
+			const ReportMark = L.marker([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], { icon });
 			let Num = "無";
 			if (ReportCache[time].earthquakeNo.toString().substring(3, 6) != "000") Num = ReportCache[time].earthquakeNo;
 			ReportMark.bindPopup(`編號: ${Num}<br>經度: ${ReportCache[time].epicenterLon}<br>緯度: ${ReportCache[time].epicenterLat}<br>深度: ${ReportCache[time].depth}<br>規模: ${ReportCache[time].magnitudeValue}<br>位置: ${ReportCache[time].location}<br>時間: ${ReportCache[time].originTime}`);
@@ -884,7 +892,7 @@ async function ReportClick(time) {
 		}
 	}
 }
-let openURL = url => {
+const openURL = url => {
 	shell.openExternal(url);
 	return;
 };
@@ -904,7 +912,7 @@ function ReportList(Data, eew) {
 }
 
 function addReport(report, prepend = false) {
-	let Level = IntensityI(report.data[0].areaIntensity);
+	const Level = IntensityI(report.data[0].areaIntensity);
 	let msg = "";
 	if (report.location.includes("("))
 		msg = report.location.substring(report.location.indexOf("(") + 1, report.location.indexOf(")")).replace("位於", "");
@@ -915,7 +923,7 @@ function addReport(report, prepend = false) {
 	if (report.ID.length != 0) star += "↺ ";
 	if (report.earthquakeNo % 1000 != 0) star += "✩ ";
 
-	let Div = document.createElement("div");
+	const Div = document.createElement("div");
 	if (report.Time != undefined && report.report == undefined) {
 		const report_container = document.createElement("div");
 		report_container.className = "report-container locating";
@@ -1063,7 +1071,7 @@ function PGAcount(Scale, distance, Si) {
 	let S = Si ?? 1;
 	if (!CONFIG["earthquake.siteEffect"]) S = 1;
 	// eslint-disable-next-line no-shadow
-	let PGA = (1.657 * Math.pow(Math.E, (1.533 * Scale)) * Math.pow(distance, -1.607) * S).toFixed(3);
+	const PGA = (1.657 * Math.pow(Math.E, (1.533 * Scale)) * Math.pow(distance, -1.607) * S).toFixed(3);
 	return PGA >= 800 ? "7" :
 		PGA <= 800 && PGA > 440 ? "6+" :
 			PGA <= 440 && PGA > 250 ? "6-" :
@@ -1116,7 +1124,7 @@ function IntensityToClassString(level) {
 
 // #region color
 function color(Intensity) {
-	let Carr = ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"];
+	const Carr = ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"];
 	if (Intensity == 0) return Carr[0];
 	return Carr[Intensity - 1];
 }
@@ -1137,11 +1145,11 @@ ipcMain.on("start", () => {
 			setTimeout(() => {
 				if (localStorage.TestID != undefined) {
 					delete localStorage.Test;
-					let list = localStorage.TestID.split(",");
+					const list = localStorage.TestID.split(",");
 					for (let index = 0; index < list.length; index++)
 						setTimeout(() => {
 							dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-							let data = {
+							const data = {
 								"APIkey"        : "https://github.com/ExpTechTW",
 								"Function"      : "earthquake",
 								"Type"          : "test",
@@ -1149,7 +1157,7 @@ ipcMain.on("start", () => {
 								"UUID"          : localStorage.UUID,
 								"ID"            : list[index],
 							};
-							dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+							dump({ level: 3, message: `Timer status: ${TimeDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 							axios.post(PostIP(), data)
 								.catch((error) => {
 									dump({ level: 2, message: error, origin: "Verbose" });
@@ -1159,14 +1167,14 @@ ipcMain.on("start", () => {
 				} else {
 					delete localStorage.Test;
 					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-					let data = {
+					const data = {
 						"APIkey"        : "https://github.com/ExpTechTW",
 						"Function"      : "earthquake",
 						"Type"          : "test",
 						"FormatVersion" : 3,
 						"UUID"          : localStorage.UUID,
 					};
-					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+					dump({ level: 3, message: `Timer status: ${TimeDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 					axios.post(PostIP(), data)
 						.catch((error) => {
 							dump({ level: 2, message: error, origin: "Verbose" });
@@ -1200,6 +1208,9 @@ ipcMain.on("updateTheme", async () => {
 	});
 	console.log("updateTheme");
 });
+ipcMain.on("updateLocation", (e, { city, town }) => {
+	setUserLocationMarker(city, town);
+});
 ipcMain.on("updateTitle", (e, lang) => {
 	document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台湾リアルタイム地震モニタリング", "zh-TW": "TREM 台灣即時地震監測" }[lang];
 });
@@ -1207,7 +1218,7 @@ ipcMain.on("updateTitle", (e, lang) => {
 
 // #region EEW
 async function FCMdata(data) {
-	let json = JSON.parse(data);
+	const json = JSON.parse(data);
 	if (Server.includes(json.TimeStamp)) return;
 	Server.push(json.TimeStamp);
 	if (json.TimeStamp != undefined)
@@ -1221,11 +1232,11 @@ async function FCMdata(data) {
 		}
 		new Notification("海嘯警報", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "TREM.ico" });
 		focus([json.NorthLatitude, json.EastLongitude], 2.5);
-		let myIcon = L.icon({
+		const myIcon = L.icon({
 			iconUrl  : "./image/warn.png",
 			iconSize : [30, 30],
 		});
-		let Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
+		const Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
 		if (Tsunami.Cross != undefined) map.removeLayer(Tsunami.Cross);
 		Tsunami.Cross = Cross;
 		Tsunami.Time = NOW.getTime();
@@ -1264,11 +1275,11 @@ async function FCMdata(data) {
 					clearInterval(TSUNAMI["Timer"]);
 				}
 			} else {
-				let myIcon = L.icon({
+				const myIcon = L.icon({
 					iconUrl  : "./image/warn.png",
 					iconSize : [30, 30],
 				});
-				let Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
+				const Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
 				Tsunami.Cross = Cross;
 				Tsunami.Time = NOW.getTime();
 				map.addLayer(Cross);
@@ -1385,9 +1396,9 @@ async function FCMdata(data) {
 			EarthquakeList[json.ID].ID = json.ID;
 			let value = 0;
 			let distance = 0;
-			let res = await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json");
-			let location = await res.json();
-			let GC = {};
+			const res = await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json");
+			const location = await res.json();
+			const GC = {};
 			let level;
 			let MaxIntensity = 0;
 			if (expected.length != 0)
@@ -1395,13 +1406,13 @@ async function FCMdata(data) {
 					map.removeLayer(expected[index]);
 
 			for (let index = 0; index < Object.keys(location).length; index++) {
-				let city = Object.keys(location)[index];
+				const city = Object.keys(location)[index];
 				for (let Index = 0; Index < Object.keys(location[city]).length; Index++) {
-					let town = Object.keys(location[city])[Index];
-					let point = Math.sqrt(Math.pow(Math.abs(location[city][town][1] + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(location[city][town][2] + (Number(json.EastLongitude) * -1)) * 101, 2));
-					let Distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2));
-					let Level = PGAcount(json.Scale, Distance, location[city][town][3]);
-					if (Lat == location[city][town][1] && Long == location[city][town][2]) {
+					const town = Object.keys(location[city])[Index];
+					const point = Math.sqrt(Math.pow(Math.abs(location[city][town][1] + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(location[city][town][2] + (Number(json.EastLongitude) * -1)) * 101, 2));
+					const Distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2));
+					const Level = PGAcount(json.Scale, Distance, location[city][town][3]);
+					if (UserLocationLat == location[city][town][1] && UserLocationLon == location[city][town][2]) {
 						if (CONFIG["auto.waveSpeed"])
 							if (Distance < 50) {
 								Pspeed = 6.5;
@@ -1412,15 +1423,15 @@ async function FCMdata(data) {
 						value = Math.round((Distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed) - 5;
 						distance = Distance;
 					}
-					let Intensity = IntensityN(Level);
+					const Intensity = IntensityN(Level);
 					if (Intensity > MaxIntensity) MaxIntensity = Intensity;
 					GC[city + town] = Intensity;
 				}
 			}
 
-			let Intensity = IntensityN(level);
+			const Intensity = IntensityN(level);
 			if (Intensity < Number(CONFIG["eew.Intensity"]) && !json.Replay) {
-				TimerDesynced = false;
+				TimeDesynced = false;
 				return;
 			}
 
@@ -1428,7 +1439,7 @@ async function FCMdata(data) {
 			geojson = L.geoJson(DmapT, {
 				style: (feature) => {
 					if (feature.properties.COUNTY != undefined) {
-						let name = feature.properties.COUNTY + feature.properties.TOWN;
+						const name = feature.properties.COUNTY + feature.properties.TOWN;
 						if (GC[name] == 0 || GC[name] == undefined)
 							return {
 								weight      : 1,
@@ -1640,7 +1651,7 @@ async function FCMdata(data) {
 							map.removeLayer(EarthquakeList[json.ID].Pcircle);
 						if (EarthquakeList[json.ID].Pcircle1 != null)
 							mapTW.removeLayer(EarthquakeList[json.ID].Pcircle1);
-						let km = Math.sqrt(Math.pow((NOW.getTime() - json.Time) * Pspeed, 2) - Math.pow(Number(json.Depth) * 1000, 2));
+						const km = Math.sqrt(Math.pow((NOW.getTime() - json.Time) * Pspeed, 2) - Math.pow(Number(json.Depth) * 1000, 2));
 						if (km > 0) {
 							EarthquakeList[json.ID].Pcircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
 								color     : "#6FB7B7",
@@ -1660,10 +1671,10 @@ async function FCMdata(data) {
 						map.removeLayer(EarthquakeList[json.ID].Scircle);
 					if (EarthquakeList[json.ID].Scircle1 != null)
 						mapTW.removeLayer(EarthquakeList[json.ID].Scircle1);
-					let km = Math.pow((NOW.getTime() - json.Time) * Sspeed, 2) - Math.pow(Number(json.Depth) * 1000, 2);
+					const km = Math.pow((NOW.getTime() - json.Time) * Sspeed, 2) - Math.pow(Number(json.Depth) * 1000, 2);
 					if (EarthquakeList[json.ID].Depth != null) map.removeLayer(EarthquakeList[json.ID].Depth);
 					if (km > 0) {
-						let KM = Math.sqrt(km);
+						const KM = Math.sqrt(km);
 						EarthquakeList[json.ID].Scircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
 							color       : json.Alert ? "red" : "orange",
 							fillColor   : "#F8E7E7",
@@ -1680,16 +1691,16 @@ async function FCMdata(data) {
 						mapTW.addLayer(EarthquakeList[json.ID].Scircle1);
 					} else {
 						let Progress = 0;
-						let num = Math.round(((NOW.getTime() - json.Time) * Sspeed / (json.Depth * 1000)) * 100);
+						const num = Math.round(((NOW.getTime() - json.Time) * Sspeed / (json.Depth * 1000)) * 100);
 						if (num > 35) Progress = 1;
 						if (num > 55) Progress = 2;
 						if (num > 75) Progress = 3;
 						if (num > 98) Progress = 4;
-						let myIcon = L.icon({
+						const myIcon = L.icon({
 							iconUrl  : `./image/progress${Progress}.png`,
 							iconSize : [50, 50],
 						});
-						let DepthM = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude) + 0.15], { icon: myIcon });
+						const DepthM = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude) + 0.15], { icon: myIcon });
 						EarthquakeList[json.ID].Depth = DepthM;
 						map.addLayer(DepthM);
 						DepthM.setZIndexOffset(6000);
@@ -1726,8 +1737,8 @@ async function FCMdata(data) {
 								iconSize : [30, 30],
 							});
 
-						let Cross = L.marker([Number(json.NorthLatitude) + Y, Number(json.EastLongitude) + X], { icon: myIcon });
-						let Cross1 = L.marker([Number(json.NorthLatitude) + Y, Number(json.EastLongitude) + X], { icon: myIcon });
+						const Cross = L.marker([Number(json.NorthLatitude) + Y, Number(json.EastLongitude) + X], { icon: myIcon });
+						const Cross1 = L.marker([Number(json.NorthLatitude) + Y, Number(json.EastLongitude) + X], { icon: myIcon });
 						EarthquakeList[json.ID].Cross = Cross;
 						map.addLayer(Cross);
 						EarthquakeList[json.ID].Cross1 = Cross1;
@@ -1787,7 +1798,7 @@ async function FCMdata(data) {
 						ITimer = null;
 						ticker = null;
 						replay = 0;
-						TimerDesynced = false;
+						TimeDesynced = false;
 						INFO = [];
 						map.removeLayer(geojson);
 						for (let index = 0; index < expected.length; index++)
@@ -1804,7 +1815,7 @@ async function FCMdata(data) {
 			}, speed);
 			setTimeout(() => {
 				if (CONFIG["webhook.url"] != "") {
-					let Now = NOW.getFullYear() +
+					const Now = NOW.getFullYear() +
 						"/" + (NOW.getMonth() + 1) +
 						"/" + NOW.getDate() +
 						" " + NOW.getHours() +
@@ -1871,8 +1882,8 @@ function updateText() {
 		document.getElementById("alert-p").innerText = `${num}`;
 	}
 
-	let Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
-	let Catch = document.getElementById("box-10");
+	const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
+	const Catch = document.getElementById("box-10");
 	if (Num <= 100)
 		Catch.innerHTML = `<font color="white" size="6"><b>震波到地表進度: ${Num}%</b></font>`;
 	else

@@ -13,8 +13,8 @@ fs.writeFileSync(latestLog, "", { encoding: "utf8", flag: "w" });
 function dump(dumpData) {
 	const now = new Date();
 	const nowTime = (new Date(now.getTime() - (now.getTimezoneOffset() * 60000))).toISOString().slice(0, -1);
-	const line = `[${nowTime}] ${dumpData.origin} >> ${dumpData.message}`;
-	console[["log", "warn", "error", "debug"][dumpData.level]](line);
+	const line = `${dumpData.origin} >> ${dumpData.message}`;
+	console[["log", "warn", "error", "debug"][dumpData.level]](`%c[${nowTime}]`, dumpData.level == 0 ? "color: rgba(255, 255, 255, .4)" : "", line);
 	fs.appendFileSync(latestLog, line + "\r\n", "utf8");
 }
 
