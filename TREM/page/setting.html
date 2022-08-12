@@ -42,6 +42,7 @@
                     <span class="headline-medium">
                         <span lang="en">Settings</span>
                         <span lang="ja">設定</span>
+                        <span lang="ru">Настройка</span>
                         <span lang="zh-TW">設定</span>
                     </span>
                 </div>
@@ -50,31 +51,40 @@
                         <div class="active" onclick="setList('EEW', this)" id="#EEW" role="button" tabindex="0">
                             <span lang="en">Earthquake Early Warning</span>
                             <span lang="ja">緊急地震速報</span>
+                            <span lang="ru">Система раннего предупреждения землетрясений</span>
                             <span lang="zh-TW">強震即時警報</span>
                         </div>
                         <div onclick="setList('Screen', this, event)" onkeydown="setList('Screen', this, event)" id="#Screen" role="button" tabindex="0">
                             <span lang="en">Display</span>
                             <span lang="ja">表示</span>
+                            <span lang="ru">Пользовательский интерфейс</span>
                             <span lang="zh-TW">畫面</span>
                         </div>
                         <div onclick="setList('Audio', this, event)" onkeydown="setList('Audio', this, event)" id="#Audio" role="button" tabindex="0">
                             <span lang="en">Sound</span>
                             <span lang="ja">音</span>
+                            <span lang="ru">звук
+                            
+                            
+                            </span>
                             <span lang="zh-TW">音效</span>
                         </div>
                         <div onclick="setList('Connection', this, event)" onkeydown="setList('Other', this, event)" id="#Other" role="button" tabindex="0">
                             <span lang="en">Connection</span>
                             <span lang="ja">接続</span>
+                            <span lang="ru">Соединения</span>
                             <span lang="zh-TW">連接</span>
                         </div>
                         <div onclick="setList('Other', this, event)" onkeydown="setList('Other', this, event)" id="#Other" role="button" tabindex="0">
                             <span lang="en">Miscellaneous</span>
                             <span lang="ja">その他</span>
+                            <span lang="ru">Другое</span>
                             <span lang="zh-TW">其他</span>
                         </div>
                         <div onclick="setList('About', this, event)" onkeydown="setList('About', this, event)" id="#About" role="button" tabindex="0">
                             <span lang="en">About</span>
                             <span lang="ja">TREM について</span>
+                            <span lang="ru">О ПО</span>
                             <span lang="zh-TW">關於</span>
                         </div>
                         <div class="client-info-container">
@@ -90,11 +100,13 @@
                             <span class="alert-description">
                                 <span lang="en">Settings Disabled</span>
                                 <span lang="ja">設定は無効です。</span>
+                                <span lang="ru">Настройка была деактивирована</span>
                                 <span lang="zh-TW">設定已停用</span>
                             </span>
                             <span class="alert-moreinfo" onclick="showError()">
                                 <span lang="en">Why?</span>
                                 <span lang="ja">なんで？</span>
+                                <span lang="ru">Узнать больше</span>
                                 <span lang="zh-TW">了解更多</span>
                             </span>
                         </div>
@@ -102,6 +114,12 @@
                             <span class="material-symbols-rounded alert-icon">warning</span>
                             <span class="alert-description">
                                 <span>Translation (English) is still work-in-progress and there might have some mistranslated / untranslated text.</span>
+                            </span>
+                        </div>
+                        <div class="alert-warn" lang="ru">
+                            <span class="material-symbols-rounded alert-icon">warning</span>
+                            <span class="alert-description">
+                                <span>Перевод еще не завершен, поэтому возможны некоторые ошибки в переводе или непереведенный текст</span>
                             </span>
                         </div>
                         <div class="alert-warn" lang="ja">
@@ -115,6 +133,7 @@
                                 <div class="control-title">
                                     <span lang="en">Earthquake Early Warning</span>
                                     <span lang="ja">緊急地震速報</span>
+                                    <span lang="ru">Система раннего предупреждения землетрясений</span>
                                     <span lang="zh-TW">強震即時警報</span>
                                 </div>
                                 <div class="control-container">
@@ -123,12 +142,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Location</span>
                                                 <span lang="ja">現在地</span>
+                                                <span lang="ru">Местонахождение</span>
                                                 <span lang="zh-TW">所在地</span>
                                                 <span class="option-label-id">location</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Set your current location</span>
                                                 <span lang="ja">所在地を設定する</span>
+                                                <span lang="ru">Установите свое местоположение</span>
                                                 <span lang="zh-TW">設定所在地</span>
                                             </span>
                                         </div>
@@ -144,12 +165,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Intensity Threshold</span>
                                                 <span lang="ja">受信震度閾値</span>
+                                                <span lang="ru">Сейсмическая интенсивность раннего предупреждения</span>
                                                 <span lang="zh-TW">接收震度</span>
                                                 <span class="option-label-id">eew.Intensity</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Minimum expected seismic intensity for EEW to be triggered</span>
                                                 <span lang="ja">緊急地震速報を受信する最小予測震度</span>
+                                                <span lang="ru">Срабатывает, когда местоположение превышает установленное значение сейсмической интенсивности Система раннего предупреждения землетрясений</span>
                                                 <span lang="zh-TW">所在地超過「接收震度」時觸發 強震即時警報</span>
                                             </span>
                                         </div>
@@ -173,6 +196,7 @@
                                         <span class="filled-tonal-button-label">
                                             <span lang="en">Test EEW</span>
                                             <span lang="ja">速報テスト</span>
+                                            <span lang="ru">Тест раннего предупреждения землетрясений</span>
                                             <span lang="zh-TW">測試警報</span>
                                         </span>
                                     </button>
@@ -180,6 +204,7 @@
                                 <div class="control-title">
                                     <span lang="en">Receiving</span>
                                     <span lang="ja">受信</span>
+                                    <span lang="ru">Получение</span>
                                     <span lang="zh-TW">接收參數</span>
                                 </div>
                                 <div class="control-container">
@@ -188,12 +213,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Central Weather Bureau</span>
                                                 <span lang="ja">中央気象局</span>
+                                                <span lang="ru">Центральное бюро погоды</span>
                                                 <span lang="zh-TW">中央氣象局</span>
                                                 <span class="option-label-id">accept.eew.CWB</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Receive EEW from Central Weather Bureau</span>
                                                 <span lang="ja">中央気象局 (CWB) から緊急地震速報を受け取る</span>
+                                                <span lang="ru">Получение Центрального бюро погоды (CWB) раннего предупреждения землетрясений</span>
                                                 <span lang="zh-TW">接收中央氣象局 (CWB) 強震即時警報</span>
                                             </span>
                                         </div>
@@ -209,12 +236,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">NIED</span>
                                                 <span lang="ja">防災科研</span>
+                                                <span lang="ru">NIED</span>
                                                 <span lang="zh-TW">日本防災科研</span>
                                                 <span class="option-label-id">accept.eew.NIED</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Receive EEW from NIED</span>
                                                 <span lang="ja">防災科研 (NIED) から緊急地震速報を受け取る</span>
+                                                <span lang="ru">Получение NIED раннего предупреждения землетрясений</span>
                                                 <span lang="zh-TW">接收防災科研 (NIED) 緊急地震速報</span>
                                             </span>
                                         </div>
@@ -230,12 +259,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Japan Meteorological Agency</span>
                                                 <span lang="ja">気象庁</span>
+                                                <span lang="ru">Японское метеорологическое агентство</span>
                                                 <span lang="zh-TW">日本氣象廳</span>
                                                 <span class="option-label-id">accept.eew.JMA</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Receive EEW from Japan Meteorological Agency</span>
                                                 <span lang="ja">気象庁 (JMA) から緊急地震速報を受け取る</span>
+                                                <span lang="ru">Получение Японское метеорологическое агентство (JMA) раннего предупреждения землетрясений</span>
                                                 <span lang="zh-TW">接收日本氣象廳 (JMA) 強震即時警報</span>
                                             </span>
                                         </div>
@@ -251,12 +282,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Korea Meteorological Administration</span>
                                                 <span lang="ja">大韓民国気象庁</span>
+                                                <span lang="ru">Корейская метеорологическая администрация</span>
                                                 <span lang="zh-TW">韓國氣象廳</span>
                                                 <span class="option-label-id">accept.eew.KMA</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Receive EEW from Korea Meteorological Administration</span>
                                                 <span lang="ja">大韓民国気象庁 (KMA) から緊急地震速報を受け取る</span>
+                                                <span lang="ru">Получение Корейская метеорологическая администрация (KMA) раннего предупреждения землетрясений</span>
                                                 <span lang="zh-TW">接收韓國氣象廳 (KMA) 強震即時警報</span>
                                             </span>
                                         </div>
@@ -272,12 +305,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Earthquake Administration of Fujian</span>
                                                 <span lang="ja">福建省地震局</span>
+                                                <span lang="ru">Управление по борьбе с землетрясениями Фуцзянь</span>
                                                 <span lang="zh-TW">中國福建省地震局</span>
                                                 <span class="option-label-id">accept.eew.FJDZJ</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Receive earthquake forecast from Earthquake Administration of Fujian</span>
                                                 <span lang="ja">福建省地震局 (FJDZJ) から地震預報を受け取る</span>
+                                                <span lang="ru">Получение Управление по борьбе с землетрясениями Фуцзянь (FJDZJ) раннего предупреждения землетрясений</span>
                                                 <span lang="zh-TW">接收中國福建省地震局 (FJDZJ) 地震預警</span>
                                             </span>
                                         </div>
@@ -293,12 +328,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Institute of Care-Life</span>
                                                 <span lang="ja">成都高新減災研究所</span>
+                                                <span lang="ru">Китай ICL</span>
                                                 <span lang="zh-TW">中國成都高新減災研究所</span>
                                                 <span class="option-label-id">accept.eew.ICL</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Receive earthquake forecast from Institute of Care-Life</span>
                                                 <span lang="ja">成都高新減災研究所 (ICL) から地震預報を受け取る</span>
+                                                <span lang="ru">Получение Китай ICL раннего предупреждения землетрясений</span>
                                                 <span lang="zh-TW">接收中國成都高新減災研究所 (ICL) 地震預警</span></span>
                                         </div>
                                         <label class="md3 switch">
@@ -313,6 +350,7 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Calculate site effect</span>
                                                 <span lang="ja">サイト・エフェクトを計算する</span>
+                                                <span lang="ru">Расчет топографических эффектов</span>
                                                 <span lang="zh-TW">計算場址效應</span>
                                                 <span class="option-label-id">earthquake.siteEffect</span>
                                             </span>
@@ -320,6 +358,7 @@
                                                 <span lang="en">A factor that affects the intensity of an earthquake
                                                     Applies only to expected intensity of earthquakes</span>
                                                 <span lang="ja">地震の予想震度に影響を与える要因 | 予想震度のみに適用</span>
+                                                <span lang="ru">Влияние на прогнозируемую интенсивность землетрясения | Применяется только к оценка интенсивности землетрясения</span>
                                                 <span lang="zh-TW"> 一種影響地震震度的因素 | 僅適用於「各地預估震度」</span>
                                             </span>
                                         </div>
@@ -335,12 +374,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Automated wave speed</span>
                                                 <span lang="ja">適応波速</span>
+                                                <span lang="ru">Автоматическая адаптация к скоростям волн</span>
                                                 <span lang="zh-TW">自適應波速</span>
                                                 <span class="option-label-id">auto.waveSpeed</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Calculate the arrival time of P and S waves according to the epicenter distance</span>
                                                 <span lang="ja">震源距離による、Ｐ波とＳ波の到達時間を計算する</span>
+                                                <span lang="ru">Расчет времени прихода P-волн и S-волн с использованием сейсмических глубин</span>
                                                 <span lang="zh-TW">根據震中距計算 P波 S波 抵達時間</span>
                                             </span>
                                         </div>
@@ -356,12 +397,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Real-time station</span>
                                                 <span lang="ja">リアルタイム観測所</span>
+                                                <span lang="ru">Сейсмограф реального времени</span>
                                                 <span lang="zh-TW">即時測站</span>
                                                 <span class="option-label-id">earthquake.Real-time</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Display live observation data from TREM stations</span>
                                                 <span lang="ja">TREM リアルタイム観測所のライブ観測データを表示する</span>
+                                                <span lang="ru">Отображение данных сейсмографа в реальном времени</span>
                                                 <span lang="zh-TW">顯示 TREM 測站的即時數據</span>
                                             </span>
                                         </div>
@@ -393,6 +436,7 @@
                                 <div class="control-title">
                                     <span lang="en">Earthquake Early Warning</span>
                                     <span lang="ja">緊急地震速報</span>
+                                    <span lang="ru">Система раннего предупреждения землетрясений</span>
                                     <span lang="zh-TW">強震即時警報</span>
                                 </div>
                                 <div class="control-container">
@@ -401,12 +445,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Show window</span>
                                                 <span lang="ja">ウィンドウを表示する</span>
+                                                <span lang="ru">Окно дисплея</span>
                                                 <span lang="zh-TW">顯示視窗</span>
                                                 <span class="option-label-id">eew.show</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Show the window whenever a real-time observation station is triggered</span>
                                                 <span lang="ja">リアルタイム観測所が引き起こされた時にウィンドウを表示する</span>
+                                                <span lang="ru">При срабатывании сейсмографа отображается окно</span>
                                                 <span lang="zh-TW">在收到地震速報時自動開啟視窗</span>
                                             </span>
                                         </div>
@@ -422,12 +468,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Always on top</span>
                                                 <span lang="ja">常に手前表示</span>
+                                                <span lang="ru">Всегда отображается на переднем плане</span>
                                                 <span lang="zh-TW">最上層顯示</span>
                                                 <span class="option-label-id">eew.cover</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Make window always on top</span>
                                                 <span lang="ja">ウィンドウを常に手前にする</span>
+                                                <span lang="ru">Всегда выносите окно на передний план</span>
                                                 <span lang="zh-TW">將視窗顯示於最上層</span>
                                             </span>
                                         </div>
@@ -443,6 +491,7 @@
                                             <span class="option-label-title">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Сглаживание сейсмических волн</span>
                                                 <span lang="zh-TW"></span>
                                                 震波平滑
                                                 <span class="option-label-id">shock.smoothing</span>
@@ -450,6 +499,7 @@
                                             <span class="option-label-description">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Рендеринг изображений за короткие промежутки времени</span>
                                                 <span lang="zh-TW"></span>
                                                 以較短的間隔對畫面進行渲染</span>
                                         </div>
@@ -465,6 +515,7 @@
                                             <span class="option-label-title">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Показать P-волну</span>
                                                 <span lang="zh-TW"></span>
                                                 顯示 P 波
                                                 <span class="option-label-id">shock.p</span>
@@ -472,6 +523,7 @@
                                             <span class="option-label-description">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Быстрые, но менее разрушительные сейсмические волны</span>
                                                 <span lang="zh-TW"></span>
                                                 先到達的「地震波」</span>
                                         </div>
@@ -486,6 +538,7 @@
                                 <div class="control-title">
                                     <span lang="en">Earthquake report</span>
                                     <span lang="ja">地震情報</span>
+                                    <span lang="ru">Отчет о землетрясении</span>
                                     <span lang="zh-TW">地震報告</span>
                                 </div>
                                 <div class="control-container">
@@ -494,12 +547,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Show window</span>
                                                 <span lang="ja">ウィンドウを表示する</span>
+                                                <span lang="ru">Окно дисплея</span>
                                                 <span lang="zh-TW">顯示視窗</span>
                                                 <span class="option-label-id">report.show</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Show the window whenever a earthquake report is received</span>
                                                 <span lang="ja">地震情報が受信時にウィンドウを表示する</span>
+                                                <span lang="ru">Автоматическое открытие окна при получении Отчет о землетрясении</span>
                                                 <span lang="zh-TW">在收到地震報告時自動開啟視窗</span>
                                             </span>
                                         </div>
@@ -515,12 +570,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Always on top</span>
                                                 <span lang="ja">常に手前表示</span>
+                                                <span lang="ru">Всегда отображается на переднем плане</span>
                                                 <span lang="zh-TW">最上層顯示</span>
                                                 <span class="option-label-id">report.cover</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Make window always on top</span>
                                                 <span lang="ja">ウィンドウを常に手前にする</span>
+                                                <span lang="ru">Всегда выносите окно на передний план</span>
                                                 <span lang="zh-TW">將視窗顯示於最上層</span>
                                             </span>
                                         </div>
@@ -535,6 +592,7 @@
                                 <div class="control-title">
                                     <span lang="en">Real-time observation station</span>
                                     <span lang="ja">リアルタイム観測所</span>
+                                    <span lang="ru">Сейсмограф реального времени</span>
                                     <span lang="zh-TW">即時測站</span>
                                 </div>
                                 <div class="control-container">
@@ -543,6 +601,7 @@
                                             <span class="option-label-title">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Показать сейсмограф</span>
                                                 <span lang="zh-TW"></span>
                                                 顯示測站
                                                 <span class="option-label-id">Real-time.station</span>
@@ -550,6 +609,7 @@
                                             <span class="option-label-description">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Показать сейсмограф на карте</span>
                                                 <span lang="zh-TW"></span>
                                                 顯示在地圖上的即時測站</span>
                                         </div>
@@ -563,12 +623,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Show window</span>
                                                 <span lang="ja">ウィンドウを表示する</span>
+                                                <span lang="ru">Показать окно</span>
                                                 <span lang="zh-TW">顯示視窗</span>
                                                 <span class="option-label-id">Real-time.show</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Show the window whenever a real-time observation station is triggered</span>
                                                 <span lang="ja">リアルタイム観測所が引き起こされた時にウィンドウを表示する</span>
+                                                <span lang="ru">При срабатывании сейсмографа отображается окно</span>
                                                 <span lang="zh-TW">自動開啟視窗</span>
                                             </span>
                                         </div>
@@ -584,12 +646,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Always on top</span>
                                                 <span lang="ja">常に手前表示</span>
+                                                <span lang="ru">Всегда отображается на переднем плане</span>
                                                 <span lang="zh-TW">最上層顯示</span>
                                                 <span class="option-label-id">Real-time.cover</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Make window always on top</span>
                                                 <span lang="ja">ウィンドウを常に手前にする</span>
+                                                <span lang="ru">Всегда выносите окно на передний план</span>
                                                 <span lang="zh-TW">將視窗顯示於最上層</span>
                                             </span>
                                         </div>
@@ -604,6 +668,7 @@
                                 <div class="control-title">
                                     <span lang="en">Map</span>
                                     <span lang="ja">地図</span>
+                                    <span lang="ru">Карта</span>
                                     <span lang="zh-TW">地圖</span>
                                 </div>
                                 <div class="control-container">
@@ -612,6 +677,7 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Auto map zooming</span>
                                                 <span lang="ja">自動地図ズーム</span>
+                                                <span lang="ru">Автоматическое масштабирование карты</span>
                                                 <span lang="zh-TW">自動縮放</span>
 
                                                 <span class="option-label-id">map.autoZoom</span>
@@ -619,6 +685,7 @@
                                             <span class="option-label-description">
                                                 <span lang="en">Make map automatically zoom itself</span>
                                                 <span lang="ja">地図を自動的にズームさせる</span>
+                                                <span lang="ru">Сделать карту автоматически масштабируемой</span>
                                                 <span lang="zh-TW">讓程式自動縮放地圖</span>
                                             </span>
                                         </div>
@@ -635,6 +702,7 @@
                                 <div class="control-title">
                                     <span lang="en">Sound</span>
                                     <span lang="ja">音</span>
+                                    <span lang="ru">звук</span>
                                     <span lang="zh-TW">音效</span>
                                 </div>
                                 <div class="control-container">
@@ -643,6 +711,7 @@
                                             <span class="option-label-title">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">звук раннего оповещения о землетрясении</span>
                                                 <span lang="zh-TW"></span>
                                                 播放 強震即時警報 音效
                                                 <span class="option-label-id">eew.audio</span>
@@ -650,6 +719,7 @@
                                             <span class="option-label-description">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Воспроизведение звукового эффекта при получении "Раннего предупреждения о землетрясении"</span>
                                                 <span lang="zh-TW"></span>
                                                 在收到「強震即時警報」時播放音效</span>
                                         </div>
@@ -665,6 +735,7 @@
                                         <span class="filled-tonal-button-label">
                                             <span lang="en">Test</span>
                                             <span lang="ja">音テスト</span>
+                                            <span lang="ru">тестовый звук</span>
                                             <span lang="zh-TW">測試音效</span>
                                         </span>
                                     </button>
@@ -673,6 +744,7 @@
                                             <span class="option-label-title">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Отчет о землетрясении Звуковые эффекты</span>
                                                 <span lang="zh-TW"></span>
                                                 播放 地震報告 音效
                                                 <span class="option-label-id">report.audio</span>
@@ -680,6 +752,7 @@
                                             <span class="option-label-description">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Воспроизведение звукового эффекта при получении "Сообщения о землетрясении"</span>
                                                 <span lang="zh-TW"></span>
                                                 在收到「地震報告」時播放音效</span>
                                         </div>
@@ -695,6 +768,7 @@
                                         <span class="filled-tonal-button-label">
                                             <span lang="en">Test</span>
                                             <span lang="ja">音テスト</span>
+                                            <span lang="ru">тестовый звук</span>
                                             <span lang="zh-TW">測試音效</span>
                                         </span>
                                     </button>
@@ -703,6 +777,7 @@
                                             <span class="option-label-title">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Сейсмограф Звук</span>
                                                 <span lang="zh-TW"></span>
                                                 播放 即時測站 音效
                                                 <span class="option-label-id">Real-time.audio</span>
@@ -710,6 +785,7 @@
                                             <span class="option-label-description">
                                                 <span lang="en"></span>
                                                 <span lang="ja"></span>
+                                                <span lang="ru">Воспроизведение звукового эффекта при получении "Сейсмограф"</span>
                                                 <span lang="zh-TW"></span>
                                                 在收到「即時測站」時播放音效</span>
                                         </div>
@@ -725,6 +801,7 @@
                                         <span class="filled-tonal-button-label">
                                             <span lang="en">Test</span>
                                             <span lang="ja">音テスト</span>
+                                            <span lang="ru">тестовый звук</span>
                                             <span lang="zh-TW">測試音效</span>
                                         </span>
                                     </button>
@@ -734,6 +811,7 @@
                                 <div class="control-title">
                                     <span lang="en">Webhook</span>
                                     <span lang="ja">ウェブフック</span>
+                                    <span lang="ru">Вебхук(Webhook)</span>
                                     <span lang="zh-TW">Webhook</span>
                                 </div>
                                 <div class="control-container">
@@ -742,12 +820,14 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Webhook URL</span>
                                                 <span lang="ja">ウェブフック URL</span>
+                                                <span lang="ru">Вебхук(Webhook) ссылка</span>
                                                 <span lang="zh-TW">Webhook 網址</span>
                                                 <span class="option-label-id">webhook.url</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Fill in the Webhook URL to send a message when an earthquake report is received.</span>
                                                 <span lang="ja">地震情報が受信時にメッセージを送信するウェブフック URL を入力してください</span>
+                                                <span lang="ru">Заполните Вебхук(Webhook) ссылка для отправки сообщения при получении отчета о землетрясении</span>
                                                 <span lang="zh-TW">填入 Discord Webhook URL
                                                     重播模式可以檢視發送訊息</span>
                                             </span>
@@ -759,7 +839,8 @@
                                             <span class="option-label-title">
                                                 <span lang="en">Webhook Customization</span>
                                                 <span lang="ja">カスタムウェブフック</span>
-                                                <span lang="zh-TW">Webhook 自定義</span>
+                                                <span lang="ru">Настройка Вебхук(Webhook)</span>
+                                                <span lang="zh-TW">>Webhook 自定義)</span>
                                                 <span class="option-label-id">webhook.body</span>
                                             </span>
                                             <span class="option-label-description">
@@ -831,6 +912,40 @@
                                                         </table>
                                                     </div>
                                                 </span>
+                                                <span lang="ru">Настройка содержимого Webhook
+                                                    <div class="table">
+                                                        <table>
+                                                            <tr>
+                                                                <th>Переменная</th>
+                                                                <th>Placeholder</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Поставщик отчетов</td>
+                                                                <td><code>%Provider%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Широта</td>
+                                                                <td><code>%NorthLatitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Долгота</td>
+                                                                <td><code>%EastLongitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Глубина</td>
+                                                                <td><code>%Depth%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Магнитуды</td>
+                                                                <td><code>%Scale%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Время</td>
+                                                                <td><code>%Time%</code></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </span>
                                                 <span lang="zh-TW">更改 Webhook 發送內容
                                                     <div class="table">
                                                         <table>
@@ -872,6 +987,7 @@
                                             <span class="filled-tonal-button-label">
                                                 <span lang="en">Test Webhook</span>
                                                 <span lang="ja">ウェブフックテスト</span>
+                                                <span lang="ru">Тестовый Webhook</span>
                                                 <span lang="zh-TW">測試 Webhook</span>
                                             </span>
                                         </button>
@@ -883,6 +999,7 @@
                                     <div>
                                         <span lang="en">General</span>
                                         <span lang="ja">言語</span>
+                                        <span lang="ru">Язык</span>
                                         <span lang="zh-TW">語言</span>
                                     </div>
                                 </div>
@@ -892,6 +1009,7 @@
                                             <div class="option-label-title">
                                                 <span lang="en">Display Language</span>
                                                 <span lang="ja">表示言語</span>
+                                                <span lang="ru">Язык дисплея</span>
                                                 <span lang="zh-TW">顯示語言</span>
                                                 <span class="option-label-id">general.locale</span>
                                             </div>
@@ -900,6 +1018,8 @@
                                                     Translation may not be 100% accurate.</span>
                                                 <span lang="ja">アプリケーションの言語
                                                     翻訳は100%正確ではない可能性があります</span>
+                                                <span lang="ru">Перевод языка пользовательского
+                                                    интерфейса приложения может быть не на 100% точным</span>
                                                 <span lang="zh-TW">整個程式的語言
                                                     翻譯未必 100% 精確</span>
                                             </div>
@@ -908,6 +1028,7 @@
                                             <select id="general.locale" name="locale" onchange="SelectSave('general.locale')">
                                                 <option value="en">English</option>
                                                 <option value="ja">日本語</option>
+                                                <option value="ru">Русский</option>
                                                 <option value="zh-TW">繁體中文</option>
                                             </select>
                                         </div>
@@ -917,6 +1038,7 @@
                                     <div>
                                         <span lang="en">Theme</span>
                                         <span lang="ja">テーマ</span>
+                                        <span lang="ru">Тема</span>
                                         <span lang="zh-TW">主題</span>
                                     </div>
                                 </div>
@@ -926,12 +1048,14 @@
                                             <div class="option-label-title">
                                                 <span lang="en">Color</span>
                                                 <span lang="ja">色</span>
+                                                <span lang="ru">Цвет</span>
                                                 <span lang="zh-TW">顏色</span>
                                                 <span class="option-label-id">theme.color</span>
                                             </div>
                                             <div class="option-label-description">
                                                 <span lang="en">Change the overall UI colors</span>
                                                 <span lang="ja">UI 全体の色を変更する</span>
+                                                <span lang="ru">Изменение общих цветов пользовательского интерфейса</span>
                                                 <span lang="zh-TW">整個 UI 的配色</span>
                                             </div>
                                         </div>
@@ -946,12 +1070,14 @@
                                             <div class="option-label-title">
                                                 <span lang="en">Dark Mode</span>
                                                 <span lang="ja">ダークモード</span>
+                                                <span lang="ru">Темный режим</span>
                                                 <span lang="zh-TW">深色模式</span>
                                                 <span class="option-label-id">theme.dark</span>
                                             </div>
                                             <div class="option-label-description">
                                                 <span lang="en">Live in the dark</span>
                                                 <span lang="ja">暗闇の中で住みましょう</span>
+                                                <span lang="ru">Защитите свои глаза</span>
                                                 <span lang="zh-TW">活在黑暗的世界中</span>
                                             </div>
                                         </div>
@@ -967,6 +1093,7 @@
                                     <div>
                                         <span lang="en">Compatibility</span>
                                         <span lang="ja">互換性</span>
+                                        <span lang="ru">Совместимость</span>
                                         <span lang="zh-TW">相容性</span>
                                     </div>
                                 </div>
@@ -976,6 +1103,7 @@
                                             <div class="option-label-title">
                                                 <span lang="en">Hardware Acceleration</span>
                                                 <span lang="ja">ハードウェア アクセラレーション</span>
+                                                <span lang="ru">Аппаратное ускорение</span>
                                                 <span lang="zh-TW">硬體加速</span>
                                                 <span class="option-label-id">compatibility.hwaccel</span>
                                             </div>
@@ -985,6 +1113,9 @@
                                                 </span>
                                                 <span lang="ja">TREM を快適にするために GPU を使用します。
                                                     フレームの低下か生じる場合は無効にしてください
+                                                </span>
+                                                <span lang="ru">Включает аппаратное ускорение, которое использует ваш GPU для повышения плавности работы TREM
+                                                    Выключите эту функцию, если у вас наблюдаются провалы кадров.
                                                 </span>
                                                 <span lang="zh-TW">啟用硬體加速，使用 GPU 讓 TREM 跑得更加順暢。
                                                     如果你遇到了卡頓、幀數下降的問題，請關閉此功能。</span>
@@ -1013,11 +1144,13 @@
                                 <button class="flat-button" onclick="reset()">
                                     <span lang="en">Reset settings</span>
                                     <span lang="ja">リセット</span>
+                                    <span lang="ru">Сброс настроек</span>
                                     <span lang="zh-TW">重置設定</span>
                                 </button>
                                 <button class="flat-button" onclick="openSettingFile()">
                                     <span lang="en">Open settings file</span>
                                     <span lang="ja">設定ファイルを開く</span>
+                                    <span lang="ru">Открыть файл настроек</span>
                                     <span lang="zh-TW">開啟設定檔</span>
                                 </button>
                                 <button class="flat-button" onclick="openLogFolder()">開啟日誌資料夾</button>
