@@ -15,7 +15,7 @@ function dump(dumpData) {
 	const nowTime = (new Date(now.getTime() - (now.getTimezoneOffset() * 60000))).toISOString().slice(0, -1);
 	const line = `${dumpData.origin} >> ${dumpData.message}`;
 	console[["log", "warn", "error", "debug"][dumpData.level]](`%c[${nowTime}]`, dumpData.level == 0 ? "color: rgba(255, 255, 255, .4)" : "", line);
-	fs.appendFileSync(latestLog, line + "\r\n", "utf8");
+	fs.appendFileSync(latestLog, `[${nowTime}]` + line + "\r\n", "utf8");
 }
 
 function dumpUpload() {
