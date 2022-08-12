@@ -1204,18 +1204,20 @@ ipcMain.on("testEEW", () => {
 ipcMain.on("updateTheme", async () => {
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
 
+	map_geoJson.options.style = {
+		weight    : 0.8,
+		color     : colors.primary,
+		fillColor : colors.surfaceVariant,
+	};
+	map_geoJson.redraw();
+	/*
 	mapTW_geoJson.setStyle({
 		weight    : 0.8,
 		opacity   : 0.3,
 		color     : colors.primary,
 		fillColor : colors.surfaceVariant,
 	});
-	map_geoJson.setStyle({
-		weight    : 0.8,
-		opacity   : 0.8,
-		color     : colors.primary,
-		fillColor : colors.surfaceVariant,
-	});
+	*/
 	console.log("updateTheme");
 });
 ipcMain.on("updateLocation", (e, { city, town }) => {
