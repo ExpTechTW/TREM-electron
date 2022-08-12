@@ -180,7 +180,11 @@ async function init() {
 	map = L.map("map", {
 		attributionControl : false,
 		closePopupOnClick  : false,
-		preferCanvas       : true,
+		maxBounds          : [
+			[60, 50],
+			[10, 180],
+		],
+		preferCanvas: true,
 	}).setView([23, 121], 7.5);
 
 	mapTW = L.map("map-tw", {
