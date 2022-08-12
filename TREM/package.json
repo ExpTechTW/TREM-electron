@@ -64,6 +64,7 @@
     "electron-fcm-push-receiver": "^2.1.7",
     "fs": "^0.0.1-security",
     "jquery": "^3.6.0",
+    "leaflet-geojson-vt": "^1.1.0",
     "lodash": "^4.17.21",
     "ws": "^8.8.0"
   }
