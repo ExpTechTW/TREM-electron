@@ -216,6 +216,7 @@ async function init() {
 	}).addTo(mapTW);
 */
 	map_geoJson = L.geoJson.vt(Dmap, {
+		minZoom   : 4,
 		maxZoom   : 12,
 		tolerance : 0.5,
 		buffer    : 256,
