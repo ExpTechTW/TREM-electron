@@ -12,6 +12,7 @@ html:lang(en) {
 html:lang(ja) {
     font-family: "Google Sans", "Noto Sans JP", "Meiryo", "MS PGothic", sans-serif;
 }
+html:lang(ru),
 html:lang(zh-TW) {
     font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Microsoft JhengHei", sans-serif;
 }
