@@ -1813,7 +1813,7 @@ async function FCMdata(data) {
 						replay = 0;
 						TimeDesynced = false;
 						INFO = [];
-						map.removeLayer(geojson);
+						mapTW.removeLayer(geojson);
 						for (let index = 0; index < expected.length; index++)
 							map.removeLayer(expected[index]);
 
