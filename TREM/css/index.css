@@ -1038,6 +1038,10 @@ html:lang(zh-TW) #rt-station-intensity::before {
 	display: none !important;
 }
 
+.rt-station-tooltip > div:first-child {
+	font-weight: 500;
+}
+
 .rt-station-tooltip > div:nth-child(2)::before {
 	content: "PGA";
 	font-weight: 400;
