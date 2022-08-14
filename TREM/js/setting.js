@@ -1,6 +1,5 @@
 const { getCurrentWindow, shell } = require("@electron/remote");
 const os = require("node:os");
-
 let Loc;
 const win = getCurrentWindow();
 
@@ -103,7 +102,7 @@ function init() {
 	dump({ level: 0, message: "Initializing", origin: "Setting" });
 	console.log(settingDisabled);
 
-	document.title = { en: "TREM | Settings", ja: "TREM | 設定", "zh-TW": "TREM | 設定" }[CONFIG["general.locale"]];
+	document.title = Localization[CONFIG["general.locale"]].Application_Title || Localization["zh-TW"].Application_Title;
 
 	if (settingDisabled) {
 		win.flashFrame(true);
@@ -285,8 +284,9 @@ function testEEW() {
 }
 
 function reset() {
-	showDialog("warn", { en: "Reset Settings?", ja: "設定をリセットする？", "zh-TW": "重置設定？" }[CONFIG["general.locale"]],
-		{ en: "Are you sure that you really want to reset all settings?\nThis action is irreversible.", ja: "本当にすべての設定をリセットしてもよろしいですか？\nこのアクションは元に戻せません。", "zh-TW": "您確定您真的要重置所有設定嗎\n這個動作將無法挽回" }[CONFIG["general.locale"]],
+	showDialog(
+		Localization[CONFIG["general.locale"]].Setting_Dialog_Reset_Title || Localization["zh-TW"].Setting_Dialog_Reset_Title,
+		Localization[CONFIG["general.locale"]].Setting_Dialog_Reset_Description || Localization["zh-TW"].Setting_Dialog_Reset_Description,
 		1, "device_reset", () => {
 			CONFIG = {};
 			ipcRenderer.send("saveSetting", true);
@@ -315,7 +315,7 @@ testAudioState.audio.addEventListener("ended", () => {
 	testAudioState.is_playing = false;
 	testAudioBtn.style.removeProperty("--progress");
 	testAudioBtn.childNodes[1].textContent = "play_arrow";
-	testAudioBtn.childNodes[3].textContent = "測試音效";
+	testAudioBtn.childNodes[3].textContent = Localization[CONFIG["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
 });
 testAudioState.audio.addEventListener("timeupdate", () => {
 	console.log(testAudioState.audio.currentTime);
@@ -333,7 +333,7 @@ const testAudio = (audioString, el) => {
 		testAudioState.is_playing = false;
 		testAudioBtn.style.removeProperty("--progress");
 		testAudioBtn.childNodes[1].textContent = "play_arrow";
-		testAudioBtn.childNodes[3].textContent = "測試音效";
+		testAudioBtn.childNodes[3].textContent = Localization[CONFIG["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
 	}
 	testAudioBtn = el;
 	if (!testAudioState.is_playing) {
@@ -343,20 +343,23 @@ const testAudio = (audioString, el) => {
 		testAudioState.audio.played;
 		testAudioState.is_playing = true;
 		el.childNodes[1].textContent = "pause";
-		el.childNodes[3].textContent = "停止測試";
+		el.childNodes[3].textContent = Localization[CONFIG["general.locale"]].Audio_TestStop || Localization["zh-TW"].Audio_TestStop;
 	} else {
 		testAudioState.audio.pause();
 		testAudioState.audio.currentTime = 0;
 		testAudioState.is_playing = false;
 		testAudioBtn.style.removeProperty("--progress");
 		el.childNodes[1].textContent = "play_arrow";
-		el.childNodes[3].textContent = "測試音效";
+		el.childNodes[3].textContent = Localization[CONFIG["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
 	}
 };
 
 const webhook = async () => {
 	if (CONFIG["webhook.url"].length == 0)
-		return showDialog("error", "Webhook 錯誤", "Webhook 連結為空，無法傳送測試訊息");
+		return showDialog("error",
+			Localization[CONFIG["general.locale"]].Webhook_Dialog_Error_Title || Localization["zh-TW"].Webhook_Dialog_Error_Title,
+			Localization[CONFIG["general.locale"]].Webhook_Dialog_Error_Empty || Localization["zh-TW"].Webhook_Dialog_Error_Empty,
+		);
 
 	const url = CONFIG["webhook.url"].match(
 		// eslint-disable-next-line no-useless-escape
@@ -364,7 +367,9 @@ const webhook = async () => {
 	);
 
 	if (!url || url.length <= 1)
-		return showDialog("error", "Webhook 測試", "無效的 Webhook 連結");
+		return showDialog("error",
+			Localization[CONFIG["general.locale"]].Webhook_Dialog_Error_Title || Localization["zh-TW"].Webhook_Dialog_Error_Title,
+			Localization[CONFIG["general.locale"]].Webhook_Dialog_Error_Invalid || Localization["zh-TW"].Webhook_Dialog_Error_Invalid);
 
 	const { MessageEmbed, WebhookClient } = require("discord.js");
 
@@ -379,7 +384,9 @@ const webhook = async () => {
 	await new WebhookClient({ url: CONFIG["webhook.url"] })
 		.send({ embeds, username: "TREM | 台灣實時地震監測", avatarURL: "https://cdn.discordapp.com/attachments/976452418114048051/976469802644291584/received_1354357138388018.webp" })
 		.then(m => {
-			showDialog("success", "Webhook 測試", `Webhook 發送測試訊息成功\n訊息ID：${m.id}\n頻道ID：${m.channel_id}`);
+			showDialog("success",
+				Localization[CONFIG["general.locale"]].Webhook_Dialog_Title || Localization["zh-TW"].Webhook_Dialog_Title,
+				(Localization[CONFIG["general.locale"]].Webhook_Dialog_Success || Localization["zh-TW"].Webhook_Dialog_Success).format(m.id, m.channel_id));
 		}).catch(error => {
 			showDialog("error", "Webhook 測試", `Webhook 發送測試訊息時發生錯誤\n${error}`);
 		});
@@ -390,12 +397,9 @@ const colorUpdate = () => {
 };
 
 const showError = () => {
-	showDialog("error", { en: "Parse Error", ja: "解析エラー", "zh-TW": "設定檔錯誤" }[CONFIG["general.locale"]],
-		{
-			en      : `Cannot parse the config file, this may be that you have accidentally deleted some important symbols such as commas, colons or quotation marks while editing, or the configuration file may have corrupted.\n\nError: ${settingDisabled}`,
-			ja      : `設定ファイルを解析できません。編集中にコンマ、コロン、引用符などの重要な記号を誤って削除したか、設定ファイルが破損している可能性があります。\n\nエラー：${settingDisabled}`,
-			"zh-TW" : `無法解析設定檔，這可能是你在編輯時不小心刪掉了一些重要的符號，像是逗號、冒號或引號，或是設定檔損壞。\n\n錯誤：${settingDisabled}` }[CONFIG["general.locale"]]);
-
+	showDialog("error",
+		Localization[CONFIG["general.locale"]].Setting_Dialog_Error_Title || Localization["zh-TW"].Setting_Dialog_Error_Title,
+		(Localization[CONFIG["general.locale"]].Setting_Dialog_Error_Description || Localization["zh-TW"].Setting_Dialog_Error_Description).format(settingDisabled));
 };
 ipcMain.on("updateSetting", () => {
 	init();

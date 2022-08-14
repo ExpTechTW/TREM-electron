@@ -320,3 +320,58 @@ const showDialog =
 	buttons.querySelector(":last-child").contentEditable = false;
 	lockScroll(true);
 };
+
+
+// #region override prototype
+if (!Date.prototype.format)
+	Date.prototype.format =
+	/**
+	 * Format DateTime into string with provided formatting string.
+	 * @param {string} format The formatting string to use.
+	 * @returns {string} The formatted string.
+	 */
+	function(format) {
+		/**
+		 * @type {Date}
+		 */
+		const me = this;
+		return format.replace(/a|A|Z|S(SS)?|ss?|mm?|HH?|hh?|D{1,2}|M{1,2}|YY(YY)?|'([^']|'')*'/g, (str) => {
+			let c1 = str.charAt(0);
+			const ret = str.charAt(0) == "'"
+				? (c1 = 0) || str.slice(1, -1).replace(/''/g, "'")
+				: str == "a"
+					? (me.getHours() < 12 ? "am" : "pm")
+					: str == "A"
+						? (me.getHours() < 12 ? "AM" : "PM")
+						: str == "Z"
+							? (("+" + -me.getTimezoneOffset() / 60).replace(/^\D?(\D)/, "$1").replace(/^(.)(.)$/, "$10$2") + "00")
+							: c1 == "S"
+								? me.getMilliseconds()
+								: c1 == "s"
+									? me.getSeconds()
+									: c1 == "H"
+										? me.getHours()
+										: c1 == "h"
+											? (me.getHours() % 12) || 12
+											: c1 == "D"
+												? me.getDate()
+												: c1 == "m"
+													? me.getMinutes()
+													: c1 == "M"
+														? me.getMonth() + 1
+														: ("" + me.getFullYear()).slice(-str.length);
+			return c1 && str.length < 4 && ("" + ret).length < str.length
+				? ("00" + ret).slice(-str.length)
+				: ret;
+		});
+	};
+
+if (!String.prototype.format)
+	String.prototype.format = function() {
+		const args = arguments;
+		return this.replace(/{(\d+)}/g, (match, number) => typeof args[number] != "undefined"
+			? args[number]
+			: match,
+		);
+	};
+// #endregion

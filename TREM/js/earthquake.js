@@ -3,8 +3,8 @@
 const { BrowserWindow, shell } = require("@electron/remote");
 const path = require("path");
 
-$("#loading").text({ en: "Loading...", ja: "ローディング中...", "zh-TW": "載入中..." }[CONFIG["general.locale"]]);
-document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台湾リアルタイム地震モニタリング", "zh-TW": "TREM 臺灣即時地震監測" }[CONFIG["general.locale"]];
+$("#loading").text(Localization[CONFIG["general.locale"]].Application_Loading || Localization["zh-TW"].Application_Loading);
+document.title = Localization[CONFIG["general.locale"]].Application_Title || Localization["zh-TW"].Application_Title;
 
 // #region 變數
 let Stamp = 0;
@@ -71,50 +71,6 @@ let auto = false;
 const EEW = {};
 const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
-// #endregion
-
-// #region override Date.format()
-Date.prototype.format =
-	/**
-	 * Format DateTime into string with provided formatting string.
-	 * @param {string} format The formatting string to use.
-	 * @returns {string} The formatted string.
-	 */
-	function(format) {
-		/**
-		 * @type {Date}
-		 */
-		const me = this;
-		return format.replace(/a|A|Z|S(SS)?|ss?|mm?|HH?|hh?|D{1,2}|M{1,2}|YY(YY)?|'([^']|'')*'/g, (str) => {
-			let c1 = str.charAt(0);
-			const ret = str.charAt(0) == "'"
-				? (c1 = 0) || str.slice(1, -1).replace(/''/g, "'")
-				: str == "a"
-					? (me.getHours() < 12 ? "am" : "pm")
-					: str == "A"
-						? (me.getHours() < 12 ? "AM" : "PM")
-						: str == "Z"
-							? (("+" + -me.getTimezoneOffset() / 60).replace(/^\D?(\D)/, "$1").replace(/^(.)(.)$/, "$10$2") + "00")
-							: c1 == "S"
-								? me.getMilliseconds()
-								: c1 == "s"
-									? me.getSeconds()
-									: c1 == "H"
-										? me.getHours()
-										: c1 == "h"
-											? (me.getHours() % 12) || 12
-											: c1 == "D"
-												? me.getDate()
-												: c1 == "m"
-													? me.getMinutes()
-													: c1 == "M"
-														? me.getMonth() + 1
-														: ("" + me.getFullYear()).slice(-str.length);
-			return c1 && str.length < 4 && ("" + ret).length < str.length
-				? ("00" + ret).slice(-str.length)
-				: ret;
-		});
-	};
 // #endregion
 
 // #region 初始化
@@ -616,7 +572,7 @@ async function init() {
 		MainLock = false;
 	}
 	$("#app-version").text(app.getVersion());
-	$("#loading").text({ en: "Welcome", ja: "ようこそ", "zh-TW": "歡迎" }[CONFIG["general.locale"]]);
+	$("#loading").text(Localization[CONFIG["general.locale"]].Application_Welcome || Localization["zh-TW"].Application_Welcome);
 	$("#load").delay(1000).fadeOut(1000);
 	setInterval(() => {
 		if (mapLock) return;
@@ -1265,7 +1221,7 @@ ipcMain.on("updateLocation", (e, { city, town }) => {
 	setUserLocationMarker(city, town);
 });
 ipcMain.on("updateTitle", (e, lang) => {
-	document.title = { en: "Taiwan Real-time Earthquake Monitoring", ja: "TREM 台湾リアルタイム地震モニタリング", "zh-TW": "TREM 台灣即時地震監測" }[lang];
+	document.title = Localization[lang].Application_Title || Localization["zh-TW"].Application_Title;
 });
 // #endregion
 

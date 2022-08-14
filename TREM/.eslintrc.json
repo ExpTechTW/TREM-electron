@@ -19,6 +19,7 @@
 		"ipcRenderer": "readonly",
 		"ipcMain": "readonly",
 		"join": "readonly",
+		"Localization": "readonly",
 		"setLocale": "readonly",
 		"settingDisabled": "writable",
 		"showDialog": "readonly",
