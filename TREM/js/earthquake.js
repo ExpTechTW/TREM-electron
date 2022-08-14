@@ -341,7 +341,7 @@ async function init() {
 				Station[keys[index]] = L.marker([station[keys[index]].Lat, station[keys[index]].Long], { keyboard: false })
 					.addTo(map).bindTooltip(station_tooltip, {
 						offset    : [8, 0],
-						permanent : true,
+						permanent : false,
 						className : "rt-station-tooltip",
 					});
 				Station[keys[index]].on("click", () => {
