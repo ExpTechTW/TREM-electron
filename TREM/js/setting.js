@@ -284,7 +284,7 @@ function testEEW() {
 }
 
 function reset() {
-	showDialog(
+	showDialog("warn",
 		Localization[CONFIG["general.locale"]].Setting_Dialog_Reset_Title || Localization["zh-TW"].Setting_Dialog_Reset_Title,
 		Localization[CONFIG["general.locale"]].Setting_Dialog_Reset_Description || Localization["zh-TW"].Setting_Dialog_Reset_Description,
 		1, "device_reset", () => {
