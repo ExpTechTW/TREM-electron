@@ -1025,3 +1025,35 @@ html:lang(zh-TW) #rt-station-intensity::before {
 	content: "gal";
 	padding-left: 4px;
 }
+
+.rt-station-tooltip {
+	background-color: rgb(var(--md-sys-color-surface-variant)) !important;
+	border: none !important;
+	border-radius: 8px !important;
+	color: rgb(var(--md-sys-color-on-surface-variant)) !important;
+	padding: 8px !important;
+}
+
+.rt-station-tooltip::before {
+	display: none !important;
+}
+
+.rt-station-tooltip > div:nth-child(2)::before {
+	content: "PGA";
+	font-weight: 400;
+	padding-right: 8px;
+}
+
+.rt-station-tooltip > div:last-child::before {
+	font-weight: 400;
+	padding-right: 8px;
+}
+html:lang(en) .rt-station-tooltip > div:last-child::before {
+	content: "Int.";
+}
+html:lang(ja) .rt-station-tooltip > div:last-child::before {
+	content: "\9707\5ea6";
+}
+html:lang(zh-TW) .rt-station-tooltip > div:last-child::before {
+	content: "\9707\5ea6";
+}

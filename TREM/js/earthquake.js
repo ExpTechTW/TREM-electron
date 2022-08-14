@@ -197,6 +197,8 @@ async function init() {
 		mapTW.setView([23.608428, 120.799168], 7);
 	});
 
+	Tooltip = new L.LayerGroup();
+
 	mapTW.dragging.disable();
 	mapTW.scrollWheelZoom.disable();
 	mapTW.doubleClickZoom.disable();
@@ -248,6 +250,28 @@ async function init() {
 
 	map.on("dblclick", (e) => {
 		focus([23.608428, 120.799168], 7.5);
+	});
+
+	map.on("zoomend", () => {
+		if (map.getZoom() > 10)
+			for (const key in Station) {
+				const tooltip = Station[key].getTooltip();
+				if (tooltip) {
+					Station[key].unbindTooltip();
+					tooltip.options.permanent = true;
+					Station[key].bindTooltip(tooltip);
+				}
+			}
+		else
+			for (const key in Station) {
+				const tooltip = Station[key].getTooltip();
+				if (tooltip && !Station[key].keepTooltipAlive) {
+					Station[key].unbindTooltip();
+					tooltip.options.permanent = false;
+					Station[key].bindTooltip(tooltip);
+				}
+			}
+
 	});
 
 	map.removeControl(map.zoomControl);
@@ -326,10 +350,10 @@ async function init() {
 		const Json = response.response;
 		MAXPGA = { pga: 0, station: "NA", level: 0 };
 
-		for (let index = 0; index < Object.keys(Json).length; index++) {
-			const Sdata = Json[Object.keys(Json)[index]];
+		for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
+			const Sdata = Json[keys[index]];
 			const amount = Number(Sdata.MaxPGA);
-			if (station[Object.keys(Json)[index]] == undefined) continue;
+			if (station[keys[index]] == undefined) continue;
 
 			const Intensity = (NOW.getTime() - Sdata.TimeStamp > 5000) ? "NA" :
 				(amount >= 800) ? 9 :
@@ -356,32 +380,50 @@ async function init() {
 				iconSize : [size, size],
 			});
 
-			if (!Station[Object.keys(Json)[index]])
-				Station[Object.keys(Json)[index]] = L.marker([station[Object.keys(Json)[index]].Lat, station[Object.keys(Json)[index]].Long], { keyboard: false })
-					.addTo(map);
-			Station[Object.keys(Json)[index]]
+			const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
+			if (!Station[keys[index]]) {
+				Station[keys[index]] = L.marker([station[keys[index]].Lat, station[keys[index]].Long], { keyboard: false })
+					.addTo(map).bindTooltip(station_tooltip, {
+						offset    : [8, 0],
+						permanent : true,
+						className : "rt-station-tooltip",
+					});
+				Station[keys[index]].on("click", () => {
+					Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
+					const tooltip = Station[keys[index]].getTooltip();
+					Station[keys[index]].unbindTooltip();
+					if (Station[keys[index]].keepTooltipAlive)
+						tooltip.options.permanent = true;
+					else
+						tooltip.options.permanent = false;
+					Station[keys[index]].bindTooltip(tooltip);
+				});
+			}
+
+			Station[keys[index]]
 				.setIcon(stationIcon)
-				.setZIndexOffset(2000 + amount);
+				.setZIndexOffset(2000 + amount)
+				.setTooltipContent(station_tooltip);
 
 			const Level = IntensityI(Intensity);
 			const now = new Date(Sdata.Time);
-			if (Object.keys(Json)[index] == CONFIG["Real-time.station"]) {
-				document.getElementById("rt-station-name").innerText = station[Object.keys(Json)[index]].Loc;
+			if (keys[index] == CONFIG["Real-time.station"]) {
+				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
 				document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
 				document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity);
 				document.getElementById("rt-station-pga").innerText = amount;
 			}
-			if (pga[station[Object.keys(Json)[index]].PGA] == undefined && Intensity != "NA")
-				pga[station[Object.keys(Json)[index]].PGA] = {
+			if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
+				pga[station[keys[index]].PGA] = {
 					"Intensity" : Intensity,
 					"Time"      : 0,
 				};
 			if (Intensity != "NA" && Intensity != 0) {
-				if (Intensity > pga[station[Object.keys(Json)[index]].PGA].Intensity) pga[station[Object.keys(Json)[index]].PGA].Intensity = Intensity;
+				if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
 				if (Sdata.Alert || fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"))) {
 					let find = -1;
 					for (let Index = 0; Index < All.length; Index++)
-						if (All[Index].loc == station[Object.keys(Json)[index]].Loc) {
+						if (All[Index].loc == station[keys[index]].Loc) {
 							All[Index].intensity = Intensity;
 							All[Index].time = NOW.getTime();
 							All[Index].pga = amount;
@@ -390,7 +432,7 @@ async function init() {
 						}
 					if (find == -1)
 						All.push({
-							"loc"       : station[Object.keys(Json)[index]].Loc,
+							"loc"       : station[keys[index]].Loc,
 							"intensity" : Intensity,
 							"time"      : NOW.getTime(),
 							"pga"       : amount,
@@ -399,7 +441,7 @@ async function init() {
 						limit();
 					else
 					if (RMTlimit.length < 2) {
-						if (!RMTlimit.includes(Object.keys(Json)[index])) RMTlimit.push(Object.keys(Json)[index]);
+						if (!RMTlimit.includes(keys[index])) RMTlimit.push(keys[index]);
 					} else
 						limit();
 
@@ -411,16 +453,16 @@ async function init() {
 							PGALimit = 2;
 							audioPlay("./audio/PGA2.wav");
 						}
-						pga[station[Object.keys(Json)[index]].PGA].Time = NOW.getTime();
+						pga[station[keys[index]].PGA].Time = NOW.getTime();
 					}
 				}
 				if (MAXPGA.pga < amount && Level != "NA") {
 					MAXPGA.pga = amount;
-					MAXPGA.station = Object.keys(Json)[index];
+					MAXPGA.station = keys[index];
 					MAXPGA.level = Level;
-					MAXPGA.lat = station[Object.keys(Json)[index]].Lat;
-					MAXPGA.long = station[Object.keys(Json)[index]].Long;
-					MAXPGA.loc = station[Object.keys(Json)[index]].Loc;
+					MAXPGA.lat = station[keys[index]].Lat;
+					MAXPGA.long = station[keys[index]].Long;
+					MAXPGA.loc = station[keys[index]].Loc;
 					MAXPGA.intensity = Intensity;
 					MAXPGA.ms = NOW.getTime() - Sdata.TimeStamp;
 				}
