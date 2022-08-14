@@ -298,12 +298,10 @@ async function init() {
 	function handler(response) {
 		if (response.state != "Success") return;
 		const Json = response.response;
-		console.log(Json);
 		MAXPGA = { pga: 0, station: "NA", level: 0 };
 
 
 		const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
-		console.log(removed);
 		for (const removedKey of removed) {
 			Station[removedKey].remove();
 			delete Station[removedKey];
