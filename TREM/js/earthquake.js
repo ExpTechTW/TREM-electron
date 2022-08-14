@@ -1759,7 +1759,7 @@ async function FCMdata(data) {
 						Cross.setZIndexOffset(6000);
 						if (NOW.getTime() - EEWshot > 60000)
 							EEWshotC = 0;
-						if (NOW.getTime() - EEWshot > 5000 && EEWshotC <= 1 && S1 == 1) {
+						if (NOW.getTime() - EEWshot > 30000 && EEWshotC <= 1 && S1 == 1) {
 							EEWshotC++;
 							json.Version = json.Version + "-" + EEWshotC;
 							EEWshot = NOW.getTime();
