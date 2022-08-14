@@ -297,9 +297,17 @@ async function init() {
 
 	function handler(response) {
 		if (response.state != "Success") return;
-
 		const Json = response.response;
+		console.log(Json);
 		MAXPGA = { pga: 0, station: "NA", level: 0 };
+
+
+		const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
+		console.log(removed);
+		for (const removedKey of removed) {
+			Station[removedKey].remove();
+			delete Station[removedKey];
+		}
 
 		for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 			const Sdata = Json[keys[index]];
@@ -341,13 +349,15 @@ async function init() {
 					});
 				Station[keys[index]].on("click", () => {
 					Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
-					const tooltip = Station[keys[index]].getTooltip();
-					Station[keys[index]].unbindTooltip();
-					if (Station[keys[index]].keepTooltipAlive)
-						tooltip.options.permanent = true;
-					else
-						tooltip.options.permanent = false;
-					Station[keys[index]].bindTooltip(tooltip);
+					if (map.getZoom() <= 10) {
+						const tooltip = Station[keys[index]].getTooltip();
+						Station[keys[index]].unbindTooltip();
+						if (Station[keys[index]].keepTooltipAlive)
+							tooltip.options.permanent = true;
+						else
+							tooltip.options.permanent = false;
+						Station[keys[index]].bindTooltip(tooltip);
+					}
 				});
 			}
 
