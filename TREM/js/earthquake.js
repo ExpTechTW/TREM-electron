@@ -296,11 +296,6 @@ async function init() {
 	}
 
 	function handler(response) {
-		for (let index = 0; index < Object.keys(Station).length; index++) {
-			map.removeLayer(Station[Object.keys(Station)[index]]);
-			delete Station[Object.keys(Station)[index]];
-			index--;
-		}
 		if (response.state != "Success") return;
 
 		const Json = response.response;
