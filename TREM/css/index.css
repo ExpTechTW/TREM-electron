@@ -1048,6 +1048,11 @@ html:lang(zh-TW) #rt-station-intensity::before {
 	padding-right: 8px;
 }
 
+.rt-station-tooltip > div:nth-child(2)::after {
+	content: "gal";
+	padding-left: 4px;
+}
+
 .rt-station-tooltip > div:last-child::before {
 	font-weight: 400;
 	padding-right: 8px;
