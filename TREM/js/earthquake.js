@@ -1233,6 +1233,18 @@ async function FCMdata(data) {
 	const json = JSON.parse(data);
 	if (Server.includes(json.TimeStamp)) return;
 	Server.push(json.TimeStamp);
+	if (json.response != "You have successfully subscribed to earthquake information") {
+		const folder = path.join(app.getPath("userData"), "data");
+		if (!fs.existsSync(folder))
+			fs.mkdirSync(folder);
+		const list = fs.readdirSync(folder);
+		for (let index = 0; index < list.length; index++) {
+			const date = fs.statSync(`${folder}/${list[index]}`);
+			if (new Date().getTime() - date.ctimeMs > 86400000) fs.unlinkSync(`${folder}/${list[index]}`);
+		}
+		const filename = `${NOW.getTime()}.json`;
+		fs.writeFileSync(path.join(folder, filename), JSON.stringify(json));
+	}
 	if (json.TimeStamp != undefined)
 		dump({ level: 0, message: `${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
 	if (json.Function == "tsunami") {
