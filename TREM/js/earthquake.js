@@ -1233,7 +1233,7 @@ async function FCMdata(data) {
 	const json = JSON.parse(data);
 	if (Server.includes(json.TimeStamp)) return;
 	Server.push(json.TimeStamp);
-	if (json.response != "You have successfully subscribed to earthquake information") {
+	if (json.response != "You have successfully subscribed to earthquake information" && json.FormatVersion == 1) {
 		const folder = path.join(app.getPath("userData"), "data");
 		if (!fs.existsSync(folder))
 			fs.mkdirSync(folder);
