@@ -176,7 +176,7 @@ async function init() {
 	map_geoJson = L.geoJson.vt(Dmap, {
 		minZoom   : 4,
 		maxZoom   : 12,
-		tolerance : 0.5,
+		tolerance : 10,
 		buffer    : 256,
 		debug     : 0,
 		style     : {
