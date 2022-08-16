@@ -1664,7 +1664,7 @@ async function FCMdata(data) {
 							else TINFO++;
 						}, 5000);
 				}, 1000);
-			EEWshot = NOW.getTime() - 4000;
+			EEWshot = NOW.getTime() - 28500;
 			EEWshotC = 0;
 			if (EarthquakeList[json.ID].Cross != undefined) map.removeLayer(EarthquakeList[json.ID].Cross);
 			if (EarthquakeList[json.ID].Cross1 != undefined) mapTW.removeLayer(EarthquakeList[json.ID].Cross1);
@@ -1775,7 +1775,7 @@ async function FCMdata(data) {
 							EEWshotC++;
 							json.Version = json.Version + "-" + EEWshotC;
 							EEWshot = NOW.getTime();
-							setTimeout(() => {ipcRenderer.send("screenshotEEW", json);}, 500);
+							setTimeout(() => {ipcRenderer.send("screenshotEEW", json);}, 300);
 						}
 					} else if (NOW.getMilliseconds() > 500 && S1 == 1) {
 						S1 = 0;
