@@ -1545,6 +1545,8 @@ async function FCMdata(data) {
 			let _time = -1;
 			let stamp = 0;
 			if (json.ID + json.Version != Info.Alert) {
+				if (EEW[json.ID] != undefined)
+					audioPlay("./audio/Update.wav");
 				EEW[json.ID] = {
 					lon  : Number(json.EastLongitude),
 					lat  : Number(json.NorthLatitude),
