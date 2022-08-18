@@ -172,6 +172,7 @@ body {
     user-select: none;
     display: none;
     background-color: rgb(var(--md-sys-color-error-container));
+    border: 1px solid rgb(var(--md-sys-color-error));
     border-radius: 16px;
     color: rgb(var(--md-sys-color-on-error-container));
     padding: 12px;
