@@ -649,7 +649,7 @@ async function setUserLocationMarker(city, town) {
 			.setZIndexOffset(1)
 			.addTo(map);
 	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
-	dump({ level: 0, message: `User location set to ${city} ${town} (${UserLocationLat}, ${UserLocationLat})`, origin: "Location" });
+	dump({ level: 0, message: `User location set to ${city} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
 	focus([23.608428, 120.799168], 7.5);
 }
 // #endregion
