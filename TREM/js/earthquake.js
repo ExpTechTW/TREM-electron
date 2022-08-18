@@ -163,16 +163,7 @@ async function init() {
 
 	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
-	/*
-	mapTW_geoJson = L.geoJson.vt(Dmap, {
-		style: {
-			weight    : 0.8,
-			opacity   : 0.3,
-			color     : colors.primary,
-			fillColor : colors.surfaceVariant,
-		},
-	}).addTo(mapTW);
-*/
+
 	map_geoJson = L.geoJson.vt(Dmap, {
 		minZoom   : 4,
 		maxZoom   : 12,
@@ -191,6 +182,7 @@ async function init() {
 			ReportMarkID = null;
 			for (let index = 0; index < MarkList.length; index++)
 				map.removeLayer(MarkList[index]);
+			focus([23.608428, 120.799168], 7.5);
 		}
 		mapLock = false;
 		focus();
