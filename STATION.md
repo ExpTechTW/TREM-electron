@@ -23,5 +23,5 @@
 |L-973-13992532-8|花蓮縣 吉安鄉|運作中
 
 ## 波形資料
-[即時測站](https://exptech.com.tw/get?Function=File&Path=/Station/index.html)
-[歷史資料庫](https://exptech.com.tw/get?Function=File&Path=/Station/download.html)
+- [即時測站](https://exptech.com.tw/get?Function=File&Path=/Station/index.html)
+- [歷史資料庫](https://exptech.com.tw/get?Function=File&Path=/Station/download.html)
