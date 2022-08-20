@@ -1663,7 +1663,11 @@ async function FCMdata(data) {
 			if (EarthquakeList[json.ID].Cross != undefined) map.removeLayer(EarthquakeList[json.ID].Cross);
 			if (EarthquakeList[json.ID].Cross1 != undefined) mapTW.removeLayer(EarthquakeList[json.ID].Cross1);
 			let S1 = 0;
+			main();
 			EarthquakeList[json.ID].Timer = setInterval(() => {
+				main();
+			}, speed);
+			function main() {
 				if (EarthquakeList[json.ID].Cancel == undefined) {
 					if (CONFIG["shock.p"]) {
 						if (EarthquakeList[json.ID].Pcircle != null)
@@ -1831,7 +1835,7 @@ async function FCMdata(data) {
 						$(roll).fadeIn(200);
 					}
 				}
-			}, speed);
+			}
 			setTimeout(() => {
 				if (CONFIG["webhook.url"] != "") {
 					const Now = NOW.getFullYear() +
