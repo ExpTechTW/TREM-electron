@@ -1,0 +1,1175 @@
+<html>
+
+    <head>
+        <title id="title">TREM</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="../css/setting.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+        <script src="../js/Localization.js"></script>
+    </head>
+
+    <body class="index md3-dark">
+        <div class="body">
+            <header id="titlebar">
+                <div id="drag-region">
+                    <div id="window-title">
+                        <span></span>
+                    </div>
+                    <div id="window-controls">
+                        <div class="button" id="min-button">
+                            <span class="material-symbols-rounded">remove</span>
+                        </div>
+
+                        <div class="button disabled" id="max-button">
+                            <span class="material-symbols-rounded">check_box_outline_blank</span>
+                        </div>
+
+                        <div class="button" id="restore-button">
+                            <span class="material-symbols-rounded">close_fullscreen</span>
+                        </div>
+
+                        <div class="button" id="close-button">
+                            <span class="material-symbols-rounded">close</span>
+                        </div>
+
+                    </div>
+                </div>
+            </header>
+            <div id="modal-overlay"></div>
+            <div class="main" id="main">
+                <div class="titlebar">
+                    <span class="material-symbols-rounded headline-medium">settings</span>
+                    <span class="headline-medium">
+                        <span lang="en">Settings</span>
+                        <span lang="ja">設定</span>
+                        <span lang="ru">Настройка</span>
+                        <span lang="zh-TW">設定</span>
+                    </span>
+                </div>
+                <div class="setting-container">
+                    <div class="nav">
+                        <div class="active" onclick="setList('EEW', this)" id="#EEW" role="button" tabindex="0">
+                            <span lang="en">Earthquake Early Warning</span>
+                            <span lang="ja">緊急地震速報</span>
+                            <span lang="ru">Система раннего предупреждения землетрясений</span>
+                            <span lang="zh-TW">強震即時警報</span>
+                        </div>
+                        <div onclick="setList('Screen', this, event)" onkeydown="setList('Screen', this, event)" id="#Screen" role="button" tabindex="0">
+                            <span lang="en">Display</span>
+                            <span lang="ja">表示</span>
+                            <span lang="ru">Пользовательский интерфейс</span>
+                            <span lang="zh-TW">畫面</span>
+                        </div>
+                        <div onclick="setList('Audio', this, event)" onkeydown="setList('Audio', this, event)" id="#Audio" role="button" tabindex="0">
+                            <span lang="en">Sound</span>
+                            <span lang="ja">音</span>
+                            <span lang="ru">Звук</span>
+                            <span lang="zh-TW">音效</span>
+                        </div>
+                        <div onclick="setList('Connection', this, event)" onkeydown="setList('Other', this, event)" id="#Other" role="button" tabindex="0">
+                            <span lang="en">Connection</span>
+                            <span lang="ja">接続</span>
+                            <span lang="ru">Соединения</span>
+                            <span lang="zh-TW">連接</span>
+                        </div>
+                        <div onclick="setList('Other', this, event)" onkeydown="setList('Other', this, event)" id="#Other" role="button" tabindex="0">
+                            <span lang="en">Miscellaneous</span>
+                            <span lang="ja">その他</span>
+                            <span lang="ru">Другое</span>
+                            <span lang="zh-TW">其他</span>
+                        </div>
+                        <div onclick="setList('About', this, event)" onkeydown="setList('About', this, event)" id="#About" role="button" tabindex="0">
+                            <span lang="en">About</span>
+                            <span lang="ja">TREM について</span>
+                            <span lang="ru">О ПО</span>
+                            <span lang="zh-TW">關於</span>
+                        </div>
+                        <div class="client-info-container">
+                            <div id="client-version"></div>
+                            <div id="client-os"></div>
+                            <div id="client-uuid">UUID</div>
+                            <div id="client-license">Licensed under AGPL-3.0</div>
+                        </div>
+                    </div>
+                    <div class="right">
+                        <div class="alert-disabled">
+                            <span class="material-symbols-rounded alert-icon">block</span>
+                            <span class="alert-description">
+                                <span lang="en">Settings Disabled</span>
+                                <span lang="ja">設定は無効です。</span>
+                                <span lang="ru">Настройка была деактивирована</span>
+                                <span lang="zh-TW">設定已停用</span>
+                            </span>
+                            <span class="alert-moreinfo" onclick="showError()">
+                                <span lang="en">Why?</span>
+                                <span lang="ja">なんで？</span>
+                                <span lang="ru">Узнать больше</span>
+                                <span lang="zh-TW">了解更多</span>
+                            </span>
+                        </div>
+                        <div class="alert-warn" lang="en">
+                            <span class="material-symbols-rounded alert-icon">warning</span>
+                            <span class="alert-description">
+                                <span>Translation (English) is still work-in-progress and there might have some mistranslated / untranslated text.</span>
+                            </span>
+                        </div>
+                        <div class="alert-warn" lang="ru">
+                            <span class="material-symbols-rounded alert-icon">warning</span>
+                            <span class="alert-description">
+                                <span>Перевод еще не завершен, поэтому возможны некоторые ошибки в переводе или непереведенный текст</span>
+                            </span>
+                        </div>
+                        <div class="alert-warn" lang="ja">
+                            <span class="material-symbols-rounded alert-icon">warning</span>
+                            <span class="alert-description">
+                                <span>翻訳（日本語）はまだ進展中の作業であり、誤訳または未翻訳のテキストがある可能性があります。</span>
+                            </span>
+                        </div>
+                        <div class="list" id="list">
+                            <div class="list-container show" id="EEW">
+                                <div class="control-title">
+                                    <span lang="en">Earthquake Early Warning</span>
+                                    <span lang="ja">緊急地震速報</span>
+                                    <span lang="ru">Система раннего предупреждения землетрясений</span>
+                                    <span lang="zh-TW">強震即時警報</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Location</span>
+                                                <span lang="ja">現在地</span>
+                                                <span lang="ru">Местонахождение</span>
+                                                <span lang="zh-TW">所在地</span>
+                                                <span class="option-label-id">location</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Set your current location</span>
+                                                <span lang="ja">所在地を設定する</span>
+                                                <span lang="ru">Установите свое местоположение</span>
+                                                <span lang="zh-TW">設定所在地</span>
+                                            </span>
+                                        </div>
+                                        <div class="control">
+                                            <select id="location.city" name="city" onchange="SelectSave('location.city')">
+                                            </select>
+                                            <select id="location.town" name="town" onchange="SelectSave('location.town')">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Intensity Threshold</span>
+                                                <span lang="ja">受信震度閾値</span>
+                                                <span lang="ru">Сейсмическая интенсивность раннего предупреждения</span>
+                                                <span lang="zh-TW">接收震度</span>
+                                                <span class="option-label-id">eew.Intensity</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Minimum expected seismic intensity for EEW to be triggered</span>
+                                                <span lang="ja">緊急地震速報を受信する最小予測震度</span>
+                                                <span lang="ru">Срабатывает, когда местоположение превышает установленное значение сейсмической интенсивности Система раннего предупреждения землетрясений</span>
+                                                <span lang="zh-TW">所在地超過「接收震度」時觸發 強震即時警報</span>
+                                            </span>
+                                        </div>
+                                        <div class="control">
+                                            <select id="eew.Intensity" name="city" onchange="SelectSave('eew.Intensity')">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5-</option>
+                                                <option value="6">5+</option>
+                                                <option value="7">6-</option>
+                                                <option value="8">6+</option>
+                                                <option value="9">7</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button class="filled-tonal-button setting-button" onclick="testEEW()" style="margin-top: 10px;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Test EEW</span>
+                                            <span lang="ja">速報テスト</span>
+                                            <span lang="ru">Тест раннего предупреждения землетрясений</span>
+                                            <span lang="zh-TW">測試警報</span>
+                                        </span>
+                                    </button>
+                                </div>
+                                <div class="control-title">
+                                    <span lang="en">Receiving</span>
+                                    <span lang="ja">受信</span>
+                                    <span lang="ru">Получение</span>
+                                    <span lang="zh-TW">接收參數</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Central Weather Bureau</span>
+                                                <span lang="ja">中央気象局</span>
+                                                <span lang="ru">Центральное бюро погоды</span>
+                                                <span lang="zh-TW">中央氣象局</span>
+                                                <span class="option-label-id">accept.eew.CWB</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive EEW from Central Weather Bureau</span>
+                                                <span lang="ja">中央気象局 (CWB) から緊急地震速報を受け取る</span>
+                                                <span lang="ru">Получение Центрального бюро погоды (CWB) раннего предупреждения землетрясений</span>
+                                                <span lang="zh-TW">接收中央氣象局 (CWB) 強震即時警報</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.CWB" onclick="CheckSave('accept.eew.CWB')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">NIED</span>
+                                                <span lang="ja">防災科研</span>
+                                                <span lang="ru">NIED</span>
+                                                <span lang="zh-TW">日本防災科研</span>
+                                                <span class="option-label-id">accept.eew.NIED</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive EEW from NIED</span>
+                                                <span lang="ja">防災科研 (NIED) から緊急地震速報を受け取る</span>
+                                                <span lang="ru">Получение NIED раннего предупреждения землетрясений</span>
+                                                <span lang="zh-TW">接收防災科研 (NIED) 緊急地震速報</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.NIED" onclick="CheckSave('accept.eew.NIED')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Japan Meteorological Agency</span>
+                                                <span lang="ja">気象庁</span>
+                                                <span lang="ru">Японское метеорологическое агентство</span>
+                                                <span lang="zh-TW">日本氣象廳</span>
+                                                <span class="option-label-id">accept.eew.JMA</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive EEW from Japan Meteorological Agency</span>
+                                                <span lang="ja">気象庁 (JMA) から緊急地震速報を受け取る</span>
+                                                <span lang="ru">Получение Японское метеорологическое агентство (JMA) раннего предупреждения землетрясений</span>
+                                                <span lang="zh-TW">接收日本氣象廳 (JMA) 強震即時警報</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.JMA" onclick="CheckSave('accept.eew.JMA')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Korea Meteorological Administration</span>
+                                                <span lang="ja">大韓民国気象庁</span>
+                                                <span lang="ru">Корейская метеорологическая администрация</span>
+                                                <span lang="zh-TW">韓國氣象廳</span>
+                                                <span class="option-label-id">accept.eew.KMA</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive EEW from Korea Meteorological Administration</span>
+                                                <span lang="ja">大韓民国気象庁 (KMA) から緊急地震速報を受け取る</span>
+                                                <span lang="ru">Получение Корейская метеорологическая администрация (KMA) раннего предупреждения землетрясений</span>
+                                                <span lang="zh-TW">接收韓國氣象廳 (KMA) 強震即時警報</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.KMA" onclick="CheckSave('accept.eew.KMA')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Earthquake Administration of Fujian</span>
+                                                <span lang="ja">福建省地震局</span>
+                                                <span lang="ru">Управление по борьбе с землетрясениями Фуцзянь</span>
+                                                <span lang="zh-TW">中國福建省地震局</span>
+                                                <span class="option-label-id">accept.eew.FJDZJ</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive earthquake forecast from Earthquake Administration of Fujian</span>
+                                                <span lang="ja">福建省地震局 (FJDZJ) から地震預報を受け取る</span>
+                                                <span lang="ru">Получение Управление по борьбе с землетрясениями Фуцзянь (FJDZJ) раннего предупреждения землетрясений</span>
+                                                <span lang="zh-TW">接收中國福建省地震局 (FJDZJ) 地震預警</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.FJDZJ" onclick="CheckSave('accept.eew.FJDZJ')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Institute of Care-Life</span>
+                                                <span lang="ja">成都高新減災研究所</span>
+                                                <span lang="ru">Китай ICL</span>
+                                                <span lang="zh-TW">中國成都高新減災研究所</span>
+                                                <span class="option-label-id">accept.eew.ICL</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive earthquake forecast from Institute of Care-Life</span>
+                                                <span lang="ja">成都高新減災研究所 (ICL) から地震預報を受け取る</span>
+                                                <span lang="ru">Получение Китай ICL раннего предупреждения землетрясений</span>
+                                                <span lang="zh-TW">接收中國成都高新減災研究所 (ICL) 地震預警</span></span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.ICL" onclick="CheckSave('accept.eew.ICL')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Calculate site effect</span>
+                                                <span lang="ja">サイト・エフェクトを計算する</span>
+                                                <span lang="ru">Расчет топографических эффектов</span>
+                                                <span lang="zh-TW">計算場址效應</span>
+                                                <span class="option-label-id">earthquake.siteEffect</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">A factor that affects the intensity of an earthquake
+                                                    Applies only to expected intensity of earthquakes</span>
+                                                <span lang="ja">地震の予想震度に影響を与える要因
+                                                    予想震度のみに適用</span>
+                                                <span lang="ru">Влияние на прогнозируемую интенсивность землетрясения
+                                                    Применяется только к оценка интенсивности землетрясения</span>
+                                                <span lang="zh-TW"> 一種影響地震震度的因素
+                                                    僅適用於「各地預估震度」</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="earthquake.siteEffect" onclick="CheckSave('earthquake.siteEffect')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Automated wave speed</span>
+                                                <span lang="ja">適応波速</span>
+                                                <span lang="ru">Автоматическая адаптация к скоростям волн</span>
+                                                <span lang="zh-TW">自適應波速</span>
+                                                <span class="option-label-id">auto.waveSpeed</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Calculate the arrival time of P and S waves according to the epicenter distance</span>
+                                                <span lang="ja">震源距離による、Ｐ波とＳ波の到達時間を計算する</span>
+                                                <span lang="ru">Расчет времени прихода P-волн и S-волн с использованием сейсмических глубин</span>
+                                                <span lang="zh-TW">根據震中距計算 P波 S波 抵達時間</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="auto.waveSpeed" onclick="CheckSave('auto.waveSpeed')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Real-time station</span>
+                                                <span lang="ja">リアルタイム観測所</span>
+                                                <span lang="ru">Сейсмограф реального времени</span>
+                                                <span lang="zh-TW">即時測站</span>
+                                                <span class="option-label-id">earthquake.Real-time</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Display live observation data from TREM stations</span>
+                                                <span lang="ja">TREM リアルタイム観測所のライブ観測データを表示する</span>
+                                                <span lang="ru">Отображение данных сейсмографа в реальном времени</span>
+                                                <span lang="zh-TW">顯示 TREM 測站的即時數據</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="earthquake.Real-time" onclick="CheckSave('earthquake.Real-time')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Real-time station forecast</span>
+                                                <span lang="ja">リアルタイム観測所予報</span>
+                                                <span lang="ru">Real-time station forecast</span>
+                                                <span lang="zh-TW">即時測站預報</span>
+                                                <span class="option-label-id">earthquake.Real-time-forecast</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive earthquake forecast from real-time stations</span>
+                                                <span lang="ja">リアルタイム観測所から地震預報を受け取る</span>
+                                                <span lang="ru">Receive earthquake forecast from real-time stations</span>
+                                                <span lang="zh-TW">接收 TREM 即時測站的預報</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="earthquake.Real-time-forecast" onclick="CheckSave('earthquake.Real-time-forecast')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-container" id="Screen">
+                                <div class="control-title">
+                                    <span lang="en">Earthquake Early Warning</span>
+                                    <span lang="ja">緊急地震速報</span>
+                                    <span lang="ru">Система раннего предупреждения землетрясений</span>
+                                    <span lang="zh-TW">強震即時警報</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Show window</span>
+                                                <span lang="ja">ウィンドウを表示する</span>
+                                                <span lang="ru">Окно дисплея</span>
+                                                <span lang="zh-TW">顯示視窗</span>
+                                                <span class="option-label-id">eew.show</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Show the window whenever a real-time station is triggered</span>
+                                                <span lang="ja">リアルタイム観測所が引き起こされた時にウィンドウを表示する</span>
+                                                <span lang="ru">При срабатывании сейсмографа отображается окно</span>
+                                                <span lang="zh-TW">在收到地震速報時自動開啟視窗</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="eew.show" onclick="CheckSave('eew.show')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Always on top</span>
+                                                <span lang="ja">常に手前表示</span>
+                                                <span lang="ru">Всегда отображается на переднем плане</span>
+                                                <span lang="zh-TW">最上層顯示</span>
+                                                <span class="option-label-id">eew.cover</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Make window always on top</span>
+                                                <span lang="ja">ウィンドウを常に手前にする</span>
+                                                <span lang="ru">Всегда выносите окно на передний план</span>
+                                                <span lang="zh-TW">將視窗顯示於最上層</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="eew.cover" onclick="CheckSave('eew.cover')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Seismic wave smoothing</span>
+                                                <span lang="ja">地震波の平滑化</span>
+                                                <span lang="ru">Сглаживание сейсмических волн</span>
+                                                <span lang="zh-TW">平滑震波</span>
+                                                <span class="option-label-id">shock.smoothing</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Render seismic waves at a higher frame rate.</span>
+                                                <span lang="ja">より高いフレームレートで地震波を表示する</span>
+                                                <span lang="ru">Рендеринг изображений за короткие промежутки времени</span>
+                                                <span lang="zh-TW">以較短的間隔對畫面進行渲染</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="shock.smoothing" onclick="CheckSave('shock.smoothing')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Show P-wave</span>
+                                                <span lang="ja">Ｐ波を表示</span>
+                                                <span lang="ru">Показать P-волну</span>
+                                                <span lang="zh-TW">顯示 P 波</span>
+                                                <span class="option-label-id">shock.p</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Earliest arriving seismic wave</span>
+                                                <span lang="ja">最も早く到達する地震波</span>
+                                                <span lang="ru">Быстрые, но менее разрушительные сейсмические волны</span>
+                                                <span lang="zh-TW">最早到達的波地震波</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="shock.p" onclick="CheckSave('shock.p')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="control-title">
+                                    <span lang="en">Earthquake report</span>
+                                    <span lang="ja">地震情報</span>
+                                    <span lang="ru">Отчет о землетрясении</span>
+                                    <span lang="zh-TW">地震報告</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Show window</span>
+                                                <span lang="ja">ウィンドウを表示する</span>
+                                                <span lang="ru">Окно дисплея</span>
+                                                <span lang="zh-TW">顯示視窗</span>
+                                                <span class="option-label-id">report.show</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Show the window whenever a earthquake report is received</span>
+                                                <span lang="ja">地震情報が受信時にウィンドウを表示する</span>
+                                                <span lang="ru">Автоматическое открытие окна при получении Отчет о землетрясении</span>
+                                                <span lang="zh-TW">在收到地震報告時自動開啟視窗</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="report.show" onclick="CheckSave('report.show')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Always on top</span>
+                                                <span lang="ja">常に手前表示</span>
+                                                <span lang="ru">Всегда отображается на переднем плане</span>
+                                                <span lang="zh-TW">最上層顯示</span>
+                                                <span class="option-label-id">report.cover</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Make window always on top</span>
+                                                <span lang="ja">ウィンドウを常に手前にする</span>
+                                                <span lang="ru">Всегда выносите окно на передний план</span>
+                                                <span lang="zh-TW">將視窗顯示於最上層</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="report.cover" onclick="CheckSave('report.cover')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="control-title">
+                                    <span lang="en">Real-time station</span>
+                                    <span lang="ja">リアルタイム観測所</span>
+                                    <span lang="ru">Сейсмограф реального времени</span>
+                                    <span lang="zh-TW">即時測站</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Real-time station</span>
+                                                <span lang="ja">リアルタイム観測所</span>
+                                                <span lang="ru">Показать сейсмограф</span>
+                                                <span lang="zh-TW">顯示測站</span>
+                                                <span class="option-label-id">Real-time.station</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">The real-time stations to display in the overlay</span>
+                                                <span lang="ja">オーバーレイに表示するリアルタイム観測所</span>
+                                                <span lang="ru">Показать сейсмограф на карте</span>
+                                                <span lang="zh-TW">顯示在地圖上的即時測站</span>
+                                            </span>
+                                        </div>
+                                        <div class="control">
+                                            <select id="Real-time.station" name="town" onchange="SelectSave('Real-time.station')">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Show window</span>
+                                                <span lang="ja">ウィンドウを表示する</span>
+                                                <span lang="ru">Показать окно</span>
+                                                <span lang="zh-TW">顯示視窗</span>
+                                                <span class="option-label-id">Real-time.show</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Show the window whenever a real-time station is triggered</span>
+                                                <span lang="ja">リアルタイム観測所が引き起こされた時にウィンドウを表示する</span>
+                                                <span lang="ru">При срабатывании сейсмографа отображается окно</span>
+                                                <span lang="zh-TW">自動開啟視窗</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="Real-time.show" onclick="CheckSave('Real-time.show')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Always on top</span>
+                                                <span lang="ja">常に手前表示</span>
+                                                <span lang="ru">Всегда отображается на переднем плане</span>
+                                                <span lang="zh-TW">最上層顯示</span>
+                                                <span class="option-label-id">Real-time.cover</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Make window always on top</span>
+                                                <span lang="ja">ウィンドウを常に手前にする</span>
+                                                <span lang="ru">Всегда выносите окно на передний план</span>
+                                                <span lang="zh-TW">將視窗顯示於最上層</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="Real-time.cover" onclick="CheckSave('Real-time.cover')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="control-title">
+                                    <span lang="en">Map</span>
+                                    <span lang="ja">地図</span>
+                                    <span lang="ru">Карта</span>
+                                    <span lang="zh-TW">地圖</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Auto map zooming</span>
+                                                <span lang="ja">自動地図ズーム</span>
+                                                <span lang="ru">Автоматическое масштабирование карты</span>
+                                                <span lang="zh-TW">自動縮放</span>
+
+                                                <span class="option-label-id">map.autoZoom</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Make map automatically zoom itself</span>
+                                                <span lang="ja">地図を自動的にズームさせる</span>
+                                                <span lang="ru">Сделать карту автоматически масштабируемой</span>
+                                                <span lang="zh-TW">讓程式自動縮放地圖</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="map.autoZoom" onclick="CheckSave('map.autoZoom')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-container" id="Audio">
+                                <div class="control-title">
+                                    <span lang="en">Sound</span>
+                                    <span lang="ja">音</span>
+                                    <span lang="ru">Звук</span>
+                                    <span lang="zh-TW">音效</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Earthquake Early Warning</span>
+                                                <span lang="ja">緊急地震速報</span>
+                                                <span lang="ru">Звук раннего оповещения о землетрясении</span>
+                                                <span lang="zh-TW">強震即時警報</span>
+                                                <span class="option-label-id">eew.audio</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Play sounds when receiving Earthquake Early Warnings</span>
+                                                <span lang="ja">緊急地震速報受信時に音を鳴らす</span>
+                                                <span lang="ru">Воспроизведение звукового эффекта при получении "Раннего предупреждения о землетрясении"</span>
+                                                <span lang="zh-TW">在收到「強震即時警報」時播放音效</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="eew.audio" onclick="CheckSave('eew.audio')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <button class="filled-tonal-button setting-button" onclick="testAudio('EEW', this)" style="margin: 5px 0 16px 0;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Test</span>
+                                            <span lang="ja">音テスト</span>
+                                            <span lang="ru">Тестовый звук</span>
+                                            <span lang="zh-TW">測試音效</span>
+                                        </span>
+                                    </button>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Earthquake Report</span>
+                                                <span lang="ja">地震情報</span>
+                                                <span lang="ru">Отчет о землетрясении Звуковые эффекты</span>
+                                                <span lang="zh-TW">地震報告</span>
+                                                <span class="option-label-id">report.audio</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Play sounds when receiving earthquake reports</span>
+                                                <span lang="ja">地震情報受信時に音を鳴らす</span>
+                                                <span lang="ru">Воспроизведение звукового эффекта при получении "Сообщения о землетрясении"</span>
+                                                <span lang="zh-TW">在收到「地震報告」時播放音效</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="report.audio" onclick="CheckSave('report.audio')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <button class="filled-tonal-button setting-button" onclick="testAudio('Report', this)" style="margin: 5px 0 16px 0;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Test</span>
+                                            <span lang="ja">音テスト</span>
+                                            <span lang="ru">Тестовый звук</span>
+                                            <span lang="zh-TW">測試音效</span>
+                                        </span>
+                                    </button>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Realtime Station</span>
+                                                <span lang="ja">リアルタイム観測所</span>
+                                                <span lang="ru">Сейсмограф Звук</span>
+                                                <span lang="zh-TW">即時測站</span>
+                                                <span class="option-label-id">Real-time.audio</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Play sounds when realtime station is triggered</span>
+                                                <span lang="ja">リアルタイム観測所が引き起こされた時に音を鳴らす</span>
+                                                <span lang="ru">Воспроизведение звукового эффекта при получении "Сейсмограф"</span>
+                                                <span lang="zh-TW">在收到「即時測站」時播放音效</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="Real-time.audio" onclick="CheckSave('Real-time.audio')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <button class="filled-tonal-button setting-button" onclick="testAudio('PGA1', this)" style="margin: 5px 0 16px 0;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Test</span>
+                                            <span lang="ja">音テスト</span>
+                                            <span lang="ru">Тестовый звук</span>
+                                            <span lang="zh-TW">測試音效</span>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="list-container" id="Connection">
+                                <div class="control-title">
+                                    <span lang="en">Webhook</span>
+                                    <span lang="ja">ウェブフック</span>
+                                    <span lang="ru">Вебхук(Webhook)</span>
+                                    <span lang="zh-TW">Webhook</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Webhook URL</span>
+                                                <span lang="ja">ウェブフック URL</span>
+                                                <span lang="ru">Вебхук(Webhook) ссылка</span>
+                                                <span lang="zh-TW">Webhook 網址</span>
+                                                <span class="option-label-id">webhook.url</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Fill in the Webhook URL to send a message when an earthquake report is received.</span>
+                                                <span lang="ja">地震情報が受信時にメッセージを送信するウェブフック URL を入力してください</span>
+                                                <span lang="ru">Заполните Вебхук(Webhook) ссылка для отправки сообщения при получении отчета о землетрясении</span>
+                                                <span lang="zh-TW">填入 Discord Webhook URL
+                                                    重播模式可以檢視發送訊息</span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="webhook.url" type="url" onchange="TextSave('webhook.url')" placeholder="https://discord.com/api/webhooks/..." />
+                                    </div>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Webhook Customization</span>
+                                                <span lang="ja">カスタムウェブフック</span>
+                                                <span lang="ru">Настройка Вебхук(Webhook)</span>
+                                                <span lang="zh-TW">Webhook 自定義</span>
+                                                <span class="option-label-id">webhook.body</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Customize Webhook content
+                                                    <div class="table">
+                                                        <table>
+                                                            <tr>
+                                                                <th>Variable</th>
+                                                                <th>Placeholder</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Report Provider</td>
+                                                                <td><code>%Provider%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Latitude</td>
+                                                                <td><code>%NorthLatitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Longitude</td>
+                                                                <td><code>%EastLongitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Depth</td>
+                                                                <td><code>%Depth%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Magnitude</td>
+                                                                <td><code>%Scale%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Time</td>
+                                                                <td><code>%Time%</code></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </span>
+                                                <span lang="ja">ウェブフックの送信內容をカストマイズする
+                                                    <div class="table">
+                                                        <table>
+                                                            <tr>
+                                                                <th>変数</th>
+                                                                <th>トークン</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>報告送信機関</td>
+                                                                <td><code>%Provider%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>緯度</td>
+                                                                <td><code>%NorthLatitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>経度</td>
+                                                                <td><code>%EastLongitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>深さ</td>
+                                                                <td><code>%Depth%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>マグニチュード</td>
+                                                                <td><code>%Scale%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>発生時刻</td>
+                                                                <td><code>%Time%</code></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </span>
+                                                <span lang="ru">Настройка содержимого Webhook
+                                                    <div class="table">
+                                                        <table>
+                                                            <tr>
+                                                                <th>Переменная</th>
+                                                                <th>Заполнитель</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Поставщик отчетов</td>
+                                                                <td><code>%Provider%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Широта</td>
+                                                                <td><code>%NorthLatitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Долгота</td>
+                                                                <td><code>%EastLongitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Глубина</td>
+                                                                <td><code>%Depth%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Магнитуды</td>
+                                                                <td><code>%Scale%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Время</td>
+                                                                <td><code>%Time%</code></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </span>
+                                                <span lang="zh-TW">更改 Webhook 發送內容
+                                                    <div class="table">
+                                                        <table>
+                                                            <tr>
+                                                                <th>變數</th>
+                                                                <th>佔位符</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>發報單位</td>
+                                                                <td><code>%Provider%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>緯度</td>
+                                                                <td><code>%NorthLatitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>經度</td>
+                                                                <td><code>%EastLongitude%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>深度</td>
+                                                                <td><code>%Depth%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>芮氏規模</td>
+                                                                <td><code>%Scale%</code></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>發震時間</td>
+                                                                <td><code>%Time%</code></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="webhook.body" type="text" onchange="TextSave('webhook.body')" />
+                                        <button class="filled-tonal-button setting-button" onclick="webhook()" style="margin-top: 16px;">
+                                            <span class="filled-tonal-button-label">
+                                                <span lang="en">Test Webhook</span>
+                                                <span lang="ja">ウェブフックテスト</span>
+                                                <span lang="ru">Тестовый Webhook</span>
+                                                <span lang="zh-TW">測試 Webhook</span>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-container" id="Other">
+                                <div class="control-title">
+                                    <div>
+                                        <span lang="en">General</span>
+                                        <span lang="ja">言語</span>
+                                        <span lang="ru">Язык</span>
+                                        <span lang="zh-TW">語言</span>
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">Display Language</span>
+                                                <span lang="ja">表示言語</span>
+                                                <span lang="ru">Язык дисплея</span>
+                                                <span lang="zh-TW">顯示語言</span>
+                                                <span class="option-label-id">general.locale</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">Application UI language
+                                                    Translation may not be 100% accurate.</span>
+                                                <span lang="ja">アプリケーションの言語
+                                                    翻訳は100%正確ではない可能性があります</span>
+                                                <span lang="ru">Перевод языка пользовательского
+                                                    интерфейса приложения может быть не на 100% точным</span>
+                                                <span lang="zh-TW">整個程式的語言
+                                                    翻譯未必 100% 精確</span>
+                                            </div>
+                                        </div>
+                                        <div class="control">
+                                            <select id="general.locale" name="locale" onchange="SelectSave('general.locale')">
+                                                <option value="en">English</option>
+                                                <option value="ja">日本語</option>
+                                                <option value="ru">Русский</option>
+                                                <option value="zh-TW">繁體中文</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-title">
+                                    <div>
+                                        <span lang="en">Theme</span>
+                                        <span lang="ja">テーマ</span>
+                                        <span lang="ru">Тема</span>
+                                        <span lang="zh-TW">主題</span>
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">Color</span>
+                                                <span lang="ja">色</span>
+                                                <span lang="ru">Цвет</span>
+                                                <span lang="zh-TW">顏色</span>
+                                                <span class="option-label-id">theme.color</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">Change the overall UI colors</span>
+                                                <span lang="ja">UI 全体の色を変更する</span>
+                                                <span lang="ru">Изменение общих цветов пользовательского интерфейса</span>
+                                                <span lang="zh-TW">整個 UI 的配色</span>
+                                            </div>
+                                        </div>
+                                        <div class="control">
+                                            <div id="theme-color" class="color-input-wrapper">
+                                                <input class="color-input" type="color" id="theme.color" name="color" oninput="colorUpdate();" onchange="TextSave('theme.color');">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">Dark Mode</span>
+                                                <span lang="ja">ダークモード</span>
+                                                <span lang="ru">Темный режим</span>
+                                                <span lang="zh-TW">深色模式</span>
+                                                <span class="option-label-id">theme.dark</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">Live in the dark</span>
+                                                <span lang="ja">暗闇の中で住みましょう</span>
+                                                <span lang="ru">Защитите свои глаза</span>
+                                                <span lang="zh-TW">活在黑暗的世界中</span>
+                                            </div>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="theme.dark" onclick="CheckSave('theme.dark')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="control-title">
+                                    <div>
+                                        <span lang="en">Compatibility</span>
+                                        <span lang="ja">互換性</span>
+                                        <span lang="ru">Совместимость</span>
+                                        <span lang="zh-TW">相容性</span>
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">Hardware Acceleration</span>
+                                                <span lang="ja">ハードウェア アクセラレーション</span>
+                                                <span lang="ru">Аппаратное ускорение</span>
+                                                <span lang="zh-TW">硬體加速</span>
+                                                <span class="option-label-id">compatibility.hwaccel</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">Turns on Hardware Acceleration, which uses your GPU to make TREM smoother.
+                                                    Turn this off if you are experiencing frame drops.
+                                                </span>
+                                                <span lang="ja">TREM を快適にするために GPU を使用します。
+                                                    フレームの低下か生じる場合は無効にしてください
+                                                </span>
+                                                <span lang="ru">Включает аппаратное ускорение, которое использует ваш GPU для повышения плавности работы TREM
+                                                    Выключите эту функцию, если у вас наблюдаются провалы кадров.
+                                                </span>
+                                                <span lang="zh-TW">啟用硬體加速，使用 GPU 讓 TREM 跑得更加順暢。
+                                                    如果你遇到了卡頓、幀數下降的問題，請關閉此功能。</span>
+                                            </div>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="compatibility.hwaccel" onclick="CheckSave('compatibility.hwaccel')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <button id="HAReloadButton" class="filled-tonal-button setting-button" onclick="restart()" style="display:none; margin-top: 4px;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
+                                        <span class="filled-tonal-button-label">重新啟動</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="list-container" id="About">
+                                <div class="control-title">Taiwan Real-time Earthquake Monitoring</div>
+                                <div class="external-link" role="link" onclick="openURL('https:\/\/github.com/ExpTechTW/TREM')">
+                                    GitHub<span class="material-symbols-rounded">open_in_new</span></div>
+                                <div class="control-title">更多資訊請見 GitHub 頁面</div>
+
+                                <button class="flat-button" onclick="dumpUpload()">DUMP</button>
+                                <button class="flat-button" onclick="reset()">
+                                    <span lang="en">Reset settings</span>
+                                    <span lang="ja">リセット</span>
+                                    <span lang="ru">Сброс настроек</span>
+                                    <span lang="zh-TW">重置設定</span>
+                                </button>
+                                <button class="flat-button" onclick="openSettingFile()">
+                                    <span lang="en">Open settings file</span>
+                                    <span lang="ja">設定ファイルを開く</span>
+                                    <span lang="ru">Открыть файл настроек</span>
+                                    <span lang="zh-TW">開啟設定檔</span>
+                                </button>
+                                <button class="flat-button" onclick="openLogFolder()">開啟日誌資料夾</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="../js/theme.js"></script>
+        <script src="../js/locale.js"></script>
+        <script src="../js/globals.js"></script>
+        <script src="../js/dump.js"></script>
+        <script src="../js/setting.js"></script>
+    </body>
+
+</html>

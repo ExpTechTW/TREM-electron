@@ -1,0 +1,21 @@
+.fab {
+    all: unset;
+    background-color: rgb(var(--md-sys-color-primary-container));
+    width: 24px;
+    height: 24px;
+    padding: 16px;
+    margin: 16px;
+    border-radius: 16px;
+}
+.fab span {
+    color: rgb(var(--md-sys-color-on-primary-container));
+}
+.fab.secondary {
+    background-color: rgb(var(--md-sys-color-secondary-container));
+}
+.fab.secondary span {
+    color: rgb(var(--md-sys-color-on-secondary-container));
+}
+.fab.elevate {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
