@@ -368,7 +368,7 @@ async function init() {
 					"Intensity" : Intensity,
 					"Time"      : 0,
 				};
-			if ((Intensity != "NA" && Intensity != 0) || Sdata.Alert) {
+			if (Intensity != "NA" && (Intensity != 0 || Sdata.Alert)) {
 				if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
 				if (Sdata.Alert || fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"))) {
 					let find = -1;
