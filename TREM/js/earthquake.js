@@ -32,7 +32,7 @@ let RMT = 1;
 let RMTlimit = [];
 let PGALimit = 0;
 let PGAaudio = false;
-let PGAtag = 0;
+let PGAtag = -1;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 let expected = [];
 const Info = { Notify: [], Warn: [], Focus: [] };
@@ -315,7 +315,6 @@ async function init() {
 											(amount >= 5) ? 2 :
 												(amount >= 3) ? 1 :
 													0;
-
 			const size = (Intensity == 0 || Intensity == "NA") ? 10 : 15;
 			const Image = (Intensity) ? `./image/${Intensity}.png` :
 				(amount > 3.5) ? "./image/0-5.png" :
@@ -369,7 +368,7 @@ async function init() {
 					"Intensity" : Intensity,
 					"Time"      : 0,
 				};
-			if (Intensity != "NA" && Intensity != 0) {
+			if ((Intensity != "NA" && Intensity != 0) || Sdata.Alert) {
 				if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
 				if (Sdata.Alert || fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"))) {
 					let find = -1;
@@ -517,7 +516,7 @@ async function init() {
 		}
 		if (Object.keys(PGA).length == 0) PGAaudio = false;
 		if (!PGAaudio) {
-			PGAtag = 0;
+			PGAtag = -1;
 			PGALimit = 0;
 		}
 		for (let Index = 0; Index < All.length - 1; Index++)
@@ -533,7 +532,7 @@ async function init() {
 					audioPlay("./audio/Shindo2.wav");
 				else if (All[0].intensity >= 2 && PGAtag < 2)
 					audioPlay("./audio/Shindo1.wav");
-				else if (PGAtag == 0)
+				else if (PGAtag == -1)
 					audioPlay("./audio/Shindo0.wav");
 
 			if (All[0].intensity >= 2) {
