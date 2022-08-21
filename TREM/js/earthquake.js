@@ -304,7 +304,7 @@ async function init() {
 			const amount = Number(Sdata.MaxPGA);
 			if (station[keys[index]] == undefined) continue;
 
-			const Intensity = (NOW.getTime() - Sdata.TimeStamp > 60000) ? "NA" :
+			const Intensity = (NOW.getTime() - Sdata.TimeStamp > 180000) ? "NA" :
 				(amount >= 800) ? 9 :
 					(amount >= 440) ? 8 :
 						(amount >= 250) ? 7 :
