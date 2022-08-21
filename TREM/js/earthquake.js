@@ -304,7 +304,7 @@ async function init() {
 			const amount = Number(Sdata.MaxPGA);
 			if (station[keys[index]] == undefined) continue;
 
-			const Intensity = (NOW.getTime() - Sdata.TimeStamp > 5000) ? "NA" :
+			const Intensity = (NOW.getTime() - Sdata.TimeStamp > 60000) ? "NA" :
 				(amount >= 800) ? 9 :
 					(amount >= 440) ? 8 :
 						(amount >= 250) ? 7 :
@@ -316,7 +316,7 @@ async function init() {
 												(amount >= 3) ? 1 :
 													0;
 
-			const size = (Intensity == 0) ? 10 : 15;
+			const size = (Intensity == 0 || Intensity == "NA") ? 10 : 15;
 			const Image = (Intensity) ? `./image/${Intensity}.png` :
 				(amount > 3.5) ? "./image/0-5.png" :
 					(amount > 3) ? "./image/0-4.png" :
