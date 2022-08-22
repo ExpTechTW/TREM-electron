@@ -139,33 +139,37 @@ async function init() {
 		}
 	}, 200);
 
-	map = L.map("map", {
-		attributionControl : false,
-		closePopupOnClick  : false,
-		maxBounds          : [
-			[60, 50],
-			[10, 180],
-		],
-		preferCanvas: true,
-	}).setView([23, 121], 7.5);
+	if (!map) {
+		map = L.map("map", {
+			attributionControl : false,
+			closePopupOnClick  : false,
+			maxBounds          : [
+				[60, 50],
+				[10, 180],
+			],
+			preferCanvas: true,
+		}).setView([23, 121], 7.5);
+		map.doubleClickZoom.disable();
+	}
 
-	mapTW = L.map("map-tw", {
-		attributionControl : false,
-		closePopupOnClick  : false,
-		preferCanvas       : true,
-	}).setView([23.608428, 120.799168], 7);
+	if (!mapTW) {
+		mapTW = L.map("map-tw", {
+			attributionControl : false,
+			closePopupOnClick  : false,
+			preferCanvas       : true,
+		}).setView([23.608428, 120.799168], 7);
 
-	mapTW.on("zoom", () => {
-		mapTW.setView([23.608428, 120.799168], 7);
-	});
+		mapTW.on("zoom", () => {
+			mapTW.setView([23.608428, 120.799168], 7);
+		});
 
-	Tooltip = new L.LayerGroup();
+		Tooltip = new L.LayerGroup();
 
-	mapTW.dragging.disable();
-	mapTW.scrollWheelZoom.disable();
-	mapTW.doubleClickZoom.disable();
-	map.doubleClickZoom.disable();
-	mapTW.removeControl(mapTW.zoomControl);
+		mapTW.dragging.disable();
+		mapTW.scrollWheelZoom.disable();
+		mapTW.doubleClickZoom.disable();
+		mapTW.removeControl(mapTW.zoomControl);
+	}
 	progressbar.value = (1 / progressStep) * 2;
 
 	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
@@ -816,20 +820,22 @@ function playNextAudio1() {
 // #region Report Data
 async function ReportGET(eew) {
 	try {
-		const res = await getReportByData();
-		if (res == null) setTimeout(() => {ReportGET(eew);}, 1000);
+		const res = await getReportData();
+		if (res == null) return setTimeout(ReportGET, 1000, eew);
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 		if (res["state"] == "Warn") {
 			dump({ level: 2, message: res, origin: "EQReportFetcher" });
 			console.error(res);
-			setTimeout(() => {ReportGET(eew);}, 1000);
+			return setTimeout(ReportGET, 1000, eew);
 		} else
 			ReportList(res, eew);
 	} catch (error) {
-		setTimeout(() => {ReportGET(eew);}, 1000);
+		dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
+		dump({ level: 2, message: error, origin: "EQReportFetcher" });
+		return setTimeout(ReportGET, 5000, eew);
 	}
 }
-async function getReportByData() {
+async function getReportData() {
 	try {
 		const list = await axios.post(PostIP(), {
 			"APIkey"   : "https://github.com/ExpTechTW",
@@ -1012,12 +1018,17 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_ja.lang = "ja";
 		report_intenisty_title_ja.className = "report-intenisty-title";
 		report_intenisty_title_ja.innerText = "最大震度";
+		const report_intenisty_title_ru = document.createElement("span");
+		report_intenisty_title_ru.lang = "ru";
+		report_intenisty_title_ru.className = "report-intenisty-title";
+		report_intenisty_title_ru.innerText = "Макс интенси";
+		report_intenisty_title_ru.style = "font-size: 14px;line-height: 14px";
 		const report_intenisty_title_zh_tw = document.createElement("span");
 		report_intenisty_title_zh_tw.lang = "zh-TW";
 		report_intenisty_title_zh_tw.className = "report-intenisty-title";
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
-		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_zh_tw);
+		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
 
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
@@ -1059,12 +1070,17 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_ja.lang = "ja";
 		report_intenisty_title_ja.className = "report-intenisty-title";
 		report_intenisty_title_ja.innerText = "最大震度";
+		const report_intenisty_title_ru = document.createElement("span");
+		report_intenisty_title_ru.lang = "ru";
+		report_intenisty_title_ru.className = "report-intenisty-title";
+		report_intenisty_title_ru.innerText = "Макс интенси";
+		report_intenisty_title_ru.style = "font-size: 14px;line-height: 14px";
 		const report_intenisty_title_zh_tw = document.createElement("span");
 		report_intenisty_title_zh_tw.lang = "zh-TW";
 		report_intenisty_title_zh_tw.className = "report-intenisty-title";
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
-		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_zh_tw);
+		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
 
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
@@ -1441,7 +1457,7 @@ async function FCMdata(data) {
 		}
 		if (CONFIG["report.audio"]) audioPlay("./audio/Report.wav");
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
-		const report = await getReportByData();
+		const report = await getReportData();
 		addReport(report.response[0], true);
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
