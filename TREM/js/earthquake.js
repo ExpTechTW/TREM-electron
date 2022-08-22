@@ -168,8 +168,8 @@ async function init() {
 	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
 
-	MapData.Dmap = require("./geojson/map.json");
-	MapData.DmapT = require("./geojson/maptw.json");
+	MapData.Dmap = require("./js/geojson/map.json");
+	MapData.DmapT = require("./js/geojson/maptw.json");
 
 	map_geoJson = L.geoJson.vt(MapData.Dmap, {
 		minZoom   : 4,
