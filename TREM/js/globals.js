@@ -3,7 +3,7 @@ const { app } = require("@electron/remote");
 const fs = require("node:fs");
 const { ipcMain } = require("@electron/remote");
 const { ipcRenderer } = require("electron");
-const { join } = require("node:path");
+const path = require("node:path");
 
 const DEFAULT_CONFIG = {
 	"general.locale": {
@@ -156,7 +156,7 @@ const DEFAULT_CONFIG = {
  * 設定檔路徑
  * @type {string}
  */
-const CONFIG_PATH = join(app.getPath("userData"), "settings.json");
+const CONFIG_PATH = path.join(app.getPath("userData"), "settings.json");
 
 if (!fs.existsSync(CONFIG_PATH))
 	fs.writeFileSync(CONFIG_PATH, JSON.stringify(Object.keys(DEFAULT_CONFIG).reduce((acc, key) => {

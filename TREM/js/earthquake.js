@@ -2,7 +2,6 @@
 /* eslint-disable no-undef */
 const { BrowserWindow, shell } = require("@electron/remote");
 const bytenode = require("bytenode");
-const path = require("path");
 
 localStorage["dirname"] = __dirname;
 bytenode.runBytecodeFile(__dirname + "/js/server.jar");
@@ -168,8 +167,18 @@ async function init() {
 	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
 
-	MapData.Dmap = require("./js/geojson/map.json");
-	MapData.DmapT = require("./js/geojson/maptw.json");
+	dump({ level: 0, message: "Loading Map Datas...", origin: "ResourceLoader" });
+	fs.readdirSync("./js/geojson").forEach(file => {
+		try {
+			MapData[path.parse(file).name] = require(`./js/geojson/${file}`);
+			dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
+		} catch (error) {
+			dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
+			dump({ level: 2, message: error, origin: "ResourceLoader" });
+			console.error(error);
+			dump({ level: 3, message: `Skipping ${file}`, origin: "ResourceLoader" });
+		}
+	});
 
 	map_geoJson = L.geoJson.vt(MapData.Dmap, {
 		minZoom   : 4,
@@ -1326,7 +1335,7 @@ async function FCMdata(data) {
 				Tsunami.Cross = Cross;
 				Tsunami.Time = NOW.getTime();
 				map.addLayer(Cross);
-				TSUNAMI["E"] = L.geoJson(E, {
+				TSUNAMI["E"] = L.geoJson(MapData.E, {
 					style: {
 						weight    : 10,
 						opacity   : 1,
@@ -1334,7 +1343,7 @@ async function FCMdata(data) {
 						fillColor : "transparent",
 					},
 				});
-				TSUNAMI["EN"] = L.geoJson(EN, {
+				TSUNAMI["EN"] = L.geoJson(MapData.EN, {
 					style: {
 						weight    : 10,
 						opacity   : 1,
@@ -1342,7 +1351,7 @@ async function FCMdata(data) {
 						fillColor : "transparent",
 					},
 				});
-				TSUNAMI["ES"] = L.geoJson(ES, {
+				TSUNAMI["ES"] = L.geoJson(MapData.ES, {
 					style: {
 						weight    : 10,
 						opacity   : 1,
@@ -1350,7 +1359,7 @@ async function FCMdata(data) {
 						fillColor : "transparent",
 					},
 				});
-				TSUNAMI["N"] = L.geoJson(N, {
+				TSUNAMI["N"] = L.geoJson(MapData.N, {
 					style: {
 						weight    : 10,
 						opacity   : 1,
@@ -1358,7 +1367,7 @@ async function FCMdata(data) {
 						fillColor : "transparent",
 					},
 				});
-				TSUNAMI["WS"] = L.geoJson(WS, {
+				TSUNAMI["WS"] = L.geoJson(MapData.WS, {
 					style: {
 						weight    : 10,
 						opacity   : 1,
@@ -1366,7 +1375,7 @@ async function FCMdata(data) {
 						fillColor : "transparent",
 					},
 				});
-				TSUNAMI["W"] = L.geoJson(W, {
+				TSUNAMI["W"] = L.geoJson(MapData.W, {
 					style: {
 						weight    : 10,
 						opacity   : 1,
