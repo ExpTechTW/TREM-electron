@@ -131,10 +131,10 @@ dist
 
 # Compiled Script files
 TREM/js/compiled
+TREM/node_modules
 
 # Settings files
 TREM/Data
 TREM/package-lock.json
 TREM/js/server.js
-TREM/package-lock.json
-TREM/package-lock.json
+TREM/node_modules/
