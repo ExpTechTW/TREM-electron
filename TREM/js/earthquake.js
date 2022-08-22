@@ -814,20 +814,22 @@ function playNextAudio1() {
 // #region Report Data
 async function ReportGET(eew) {
 	try {
-		const res = await getReportByData();
-		if (res == null) setTimeout(() => {ReportGET(eew);}, 1000);
+		const res = await getReportData();
+		if (res == null) return setTimeout(ReportGET, 1000, eew);
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 		if (res["state"] == "Warn") {
 			dump({ level: 2, message: res, origin: "EQReportFetcher" });
 			console.error(res);
-			setTimeout(() => {ReportGET(eew);}, 1000);
+			return setTimeout(ReportGET, 1000, eew);
 		} else
 			ReportList(res, eew);
 	} catch (error) {
-		setTimeout(() => {ReportGET(eew);}, 1000);
+		dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
+		dump({ level: 2, message: error, origin: "EQReportFetcher" });
+		return setTimeout(ReportGET, 5000, eew);
 	}
 }
-async function getReportByData() {
+async function getReportData() {
 	try {
 		const list = await axios.post(PostIP(), {
 			"APIkey"   : "https://github.com/ExpTechTW",
@@ -1450,7 +1452,7 @@ async function FCMdata(data) {
 		}
 		if (CONFIG["report.audio"]) audioPlay("./audio/Report.wav");
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
-		const report = await getReportByData();
+		const report = await getReportData();
 		addReport(report.response[0], true);
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
