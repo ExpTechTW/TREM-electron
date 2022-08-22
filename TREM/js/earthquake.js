@@ -299,9 +299,11 @@ async function init() {
 					cancel = c;
 				}),
 			}).then((response) => {
+				MainLock = false;
 				Response = response.data;
 				handler(Response);
 			}).catch((err) => {
+				MainLock = false;
 				handler(Response);
 			});
 		}, 1000);
@@ -611,7 +613,6 @@ async function init() {
 			}
 		}
 		document.getElementById("rt-list").replaceChildren(...list);
-		MainLock = false;
 	}
 	$("#app-version").text(app.getVersion());
 	$("#loading").text(Localization[CONFIG["general.locale"]].Application_Welcome || Localization["zh-TW"].Application_Welcome);
@@ -797,15 +798,19 @@ function playNextAudio1() {
 
 // #region Report Data
 async function ReportGET(eew) {
-	const res = await getReportByData();
-	if (res == null) setTimeout(() => {ReportGET(eew);}, 1000);
-	dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
-	if (res["state"] == "Warn") {
-		dump({ level: 2, message: res, origin: "EQReportFetcher" });
-		console.error(res);
+	try {
+		const res = await getReportByData();
+		if (res == null) setTimeout(() => {ReportGET(eew);}, 1000);
+		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
+		if (res["state"] == "Warn") {
+			dump({ level: 2, message: res, origin: "EQReportFetcher" });
+			console.error(res);
+			setTimeout(() => {ReportGET(eew);}, 1000);
+		} else
+			ReportList(res, eew);
+	} catch (error) {
 		setTimeout(() => {ReportGET(eew);}, 1000);
-	} else
-		ReportList(res, eew);
+	}
 }
 async function getReportByData() {
 	try {
@@ -821,7 +826,6 @@ async function getReportByData() {
 		console.error(error);
 		return null;
 	}
-
 }
 // #endregion
 
@@ -1775,8 +1779,8 @@ async function FCMdata(data) {
 						let Y = 0;
 						if (Object.keys(EarthquakeList).length != 1) {
 							let cursor = 1;
-							for (let index = 0, keys = Object.keys(EarthquakeList), n = keys.length; index < n; index++)
-								if (keys[index] == json.ID) {
+							for (let index = 0; index < Object.keys(INFO).length; index++)
+								if (INFO[Object.keys(INFO)[index]].ID == json.ID) {
 									cursor = index + 1;
 									break;
 								}
