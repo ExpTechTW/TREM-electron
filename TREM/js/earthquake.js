@@ -139,33 +139,37 @@ async function init() {
 		}
 	}, 200);
 
-	map = L.map("map", {
-		attributionControl : false,
-		closePopupOnClick  : false,
-		maxBounds          : [
-			[60, 50],
-			[10, 180],
-		],
-		preferCanvas: true,
-	}).setView([23, 121], 7.5);
+	if (!map) {
+		map = L.map("map", {
+			attributionControl : false,
+			closePopupOnClick  : false,
+			maxBounds          : [
+				[60, 50],
+				[10, 180],
+			],
+			preferCanvas: true,
+		}).setView([23, 121], 7.5);
+		map.doubleClickZoom.disable();
+	}
 
-	mapTW = L.map("map-tw", {
-		attributionControl : false,
-		closePopupOnClick  : false,
-		preferCanvas       : true,
-	}).setView([23.608428, 120.799168], 7);
+	if (!mapTW) {
+		mapTW = L.map("map-tw", {
+			attributionControl : false,
+			closePopupOnClick  : false,
+			preferCanvas       : true,
+		}).setView([23.608428, 120.799168], 7);
 
-	mapTW.on("zoom", () => {
-		mapTW.setView([23.608428, 120.799168], 7);
-	});
+		mapTW.on("zoom", () => {
+			mapTW.setView([23.608428, 120.799168], 7);
+		});
 
-	Tooltip = new L.LayerGroup();
+		Tooltip = new L.LayerGroup();
 
-	mapTW.dragging.disable();
-	mapTW.scrollWheelZoom.disable();
-	mapTW.doubleClickZoom.disable();
-	map.doubleClickZoom.disable();
-	mapTW.removeControl(mapTW.zoomControl);
+		mapTW.dragging.disable();
+		mapTW.scrollWheelZoom.disable();
+		mapTW.doubleClickZoom.disable();
+		mapTW.removeControl(mapTW.zoomControl);
+	}
 	progressbar.value = (1 / progressStep) * 2;
 
 	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
@@ -1006,12 +1010,17 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_ja.lang = "ja";
 		report_intenisty_title_ja.className = "report-intenisty-title";
 		report_intenisty_title_ja.innerText = "最大震度";
+		const report_intenisty_title_ru = document.createElement("span");
+		report_intenisty_title_ru.lang = "ru";
+		report_intenisty_title_ru.className = "report-intenisty-title";
+		report_intenisty_title_ru.innerText = "Макс интенси";
+		report_intenisty_title_ru.style = "font-size: 14px;line-height: 14px";
 		const report_intenisty_title_zh_tw = document.createElement("span");
 		report_intenisty_title_zh_tw.lang = "zh-TW";
 		report_intenisty_title_zh_tw.className = "report-intenisty-title";
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
-		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_zh_tw);
+		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
 
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
@@ -1053,12 +1062,17 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_ja.lang = "ja";
 		report_intenisty_title_ja.className = "report-intenisty-title";
 		report_intenisty_title_ja.innerText = "最大震度";
+		const report_intenisty_title_ru = document.createElement("span");
+		report_intenisty_title_ru.lang = "ru";
+		report_intenisty_title_ru.className = "report-intenisty-title";
+		report_intenisty_title_ru.innerText = "Макс интенси";
+		report_intenisty_title_ru.style = "font-size: 14px;line-height: 14px";
 		const report_intenisty_title_zh_tw = document.createElement("span");
 		report_intenisty_title_zh_tw.lang = "zh-TW";
 		report_intenisty_title_zh_tw.className = "report-intenisty-title";
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
-		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_zh_tw);
+		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
 
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
