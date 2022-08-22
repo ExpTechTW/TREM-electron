@@ -170,9 +170,9 @@ async function init() {
 	dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
 	dump({ level: 3, message: "Starting timer...", origin: "Timer" });
 	let perf_GEOJSON_LOAD = process.hrtime();
-	fs.readdirSync("./js/geojson").forEach(file => {
+	fs.readdirSync(path.join(__dirname, "/js/geojson")).forEach(file => {
 		try {
-			MapData[path.parse(file).name] = require(`./js/geojson/${file}`);
+			MapData[path.parse(file).name] = require(path.join(__dirname, "js/geojson", file));
 			dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
 		} catch (error) {
 			dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
