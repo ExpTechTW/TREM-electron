@@ -1,12 +1,17 @@
 /* eslint-disable no-inner-declarations */
 /* eslint-disable no-undef */
 const { BrowserWindow, shell } = require("@electron/remote");
+const bytenode = require("bytenode");
 const path = require("path");
+
+localStorage["dirname"] = __dirname;
+bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
 $("#loading").text(Localization[CONFIG["general.locale"]].Application_Loading || Localization["zh-TW"].Application_Loading);
 document.title = Localization[CONFIG["general.locale"]].Application_Title || Localization["zh-TW"].Application_Title;
 
 // #region 變數
+const MapData = {};
 let Stamp = 0;
 let t = null;
 let UserLocationLat = 25.0421407;
@@ -23,7 +28,6 @@ const MarkList = [];
 const EarthquakeList = {};
 let marker = null;
 let map, mapTW;
-let mapLayer, mapLayerTW;
 let MainLock = false;
 const Station = {};
 const PGA = {};
@@ -55,7 +59,7 @@ let PalertT = 0;
 let MainClock = null;
 let geojson = null;
 let Pgeojson = null;
-let mapTW_geoJson, map_geoJson;
+let map_geoJson;
 let clickT = 0;
 let investigation = false;
 let ReportTag = 0;
@@ -164,7 +168,10 @@ async function init() {
 	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
 
-	map_geoJson = L.geoJson.vt(Dmap, {
+	MapData.Dmap = require("./geojson/map.json");
+	MapData.DmapT = require("./geojson/maptw.json");
+
+	map_geoJson = L.geoJson.vt(MapData.Dmap, {
 		minZoom   : 4,
 		maxZoom   : 12,
 		tolerance : 10,
@@ -452,7 +459,7 @@ async function init() {
 						audioPlay("./audio/palert.wav");
 					}
 					if (Pgeojson != null) map.removeLayer(Pgeojson);
-					Pgeojson = L.geoJson(DmapT, {
+					Pgeojson = L.geoJson(MapData.DmapT, {
 						style: (feature) => {
 							if (feature.properties.COUNTY != undefined) {
 								const name = feature.properties.COUNTY + " " + feature.properties.TOWN;
@@ -1232,14 +1239,7 @@ ipcMain.on("updateTheme", async () => {
 		fillColor : colors.surfaceVariant,
 	};
 	map_geoJson.redraw();
-	/*
-	mapTW_geoJson.setStyle({
-		weight    : 0.8,
-		opacity   : 0.3,
-		color     : colors.primary,
-		fillColor : colors.surfaceVariant,
-	});
-	*/
+
 	console.log("updateTheme");
 });
 ipcMain.on("updateLocation", (e, { city, town }) => {
@@ -1483,7 +1483,7 @@ async function FCMdata(data) {
 
 			if (geojson != null) mapTW.removeLayer(geojson);
 			const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
-			geojson = L.geoJson(DmapT, {
+			geojson = L.geoJson(MapData.DmapT, {
 				style: (feature) => {
 					if (feature.properties.COUNTY != undefined) {
 						const name = feature.properties.COUNTY + feature.properties.TOWN;
