@@ -570,7 +570,7 @@ async function init() {
 					"ID"      : NOW.getTime(),
 					"Version" : "P",
 				});
-			}, 500);
+			}, 1500);
 			if (CONFIG["Real-time.show"])
 				win.show();
 			if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
