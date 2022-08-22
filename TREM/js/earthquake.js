@@ -86,8 +86,11 @@ win.on("show", () => {
 
 let TimeDesynced = false;
 async function init() {
-	ReportGET({});
 	const time = document.getElementById("time");
+	const progressbar = document.getElementById("loading_progress");
+	const progressStep = 5;
+	await ReportGET({});
+	progressbar.value = (1 / progressStep) * 1;
 
 	// clock
 	setInterval(() => {
@@ -163,17 +166,21 @@ async function init() {
 	mapTW.doubleClickZoom.disable();
 	map.doubleClickZoom.disable();
 	mapTW.removeControl(mapTW.zoomControl);
+	progressbar.value = (1 / progressStep) * 2;
 
 	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
+	progressbar.value = (1 / progressStep) * 3;
+
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
 
 	dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
 	dump({ level: 3, message: "Starting timer...", origin: "Timer" });
 	let perf_GEOJSON_LOAD = process.hrtime();
-	fs.readdirSync(path.join(__dirname, "/js/geojson")).forEach(file => {
+	fs.readdirSync(path.join(__dirname, "/js/geojson")).forEach((file, i, arr) => {
 		try {
 			MapData[path.parse(file).name] = require(path.join(__dirname, "js/geojson", file));
 			dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
+			progressbar.value = (1 / progressStep) * 3 + (((1 / progressStep) / arr.length) * (i + 1));
 		} catch (error) {
 			dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
 			dump({ level: 2, message: error, origin: "ResourceLoader" });
@@ -243,6 +250,7 @@ async function init() {
 	});
 
 	map.removeControl(map.zoomControl);
+	progressbar.value = (1 / progressStep) * 4;
 
 	setTimeout(() => {main();}, 1500);
 
@@ -614,6 +622,8 @@ async function init() {
 		}
 		document.getElementById("rt-list").replaceChildren(...list);
 	}
+
+	progressbar.value = 1;
 	$("#app-version").text(app.getVersion());
 	$("#loading").text(Localization[CONFIG["general.locale"]].Application_Welcome || Localization["zh-TW"].Application_Welcome);
 	$("#load").delay(1000).fadeOut(1000);
