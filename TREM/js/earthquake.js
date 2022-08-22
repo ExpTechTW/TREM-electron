@@ -798,13 +798,12 @@ function playNextAudio1() {
 // #region Report Data
 async function ReportGET(eew) {
 	const res = await getReportByData();
+	if (res == null) setTimeout(() => {ReportGET(eew);}, 1000);
 	dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 	if (res["state"] == "Warn") {
 		dump({ level: 2, message: res, origin: "EQReportFetcher" });
 		console.error(res);
-		setTimeout(() => {
-			ReportGET();
-		}, 2000);
+		setTimeout(() => {ReportGET(eew);}, 1000);
 	} else
 		ReportList(res, eew);
 }
@@ -820,6 +819,7 @@ async function getReportByData() {
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
 		console.error(error);
+		return null;
 	}
 
 }
