@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as utils from '../utils/color_utils';
+import * as utils from '../utils/color_utils.js';
 /**
  * Quantizes an image into a map, with keys of ARGB colors, and values of the
  * number of times that color appears in the image.
