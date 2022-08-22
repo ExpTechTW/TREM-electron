@@ -535,19 +535,16 @@ async function init() {
 					audioPlay("./audio/Shindo1.wav");
 				else if (PGAtag == -1)
 					audioPlay("./audio/Shindo0.wav");
-
-			if (All[0].intensity >= 2) {
-				setTimeout(() => {
-					ipcRenderer.send("screenshotEEW", {
-						"ID"      : NOW.getTime(),
-						"Version" : "P",
-					});
-				}, 500);
-				if (CONFIG["Real-time.show"])
-					win.show();
-				if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
-				win.setAlwaysOnTop(false);
-			}
+			setTimeout(() => {
+				ipcRenderer.send("screenshotEEW", {
+					"ID"      : NOW.getTime(),
+					"Version" : "P",
+				});
+			}, 500);
+			if (CONFIG["Real-time.show"])
+				win.show();
+			if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
+			win.setAlwaysOnTop(false);
 			PGAtag = All[0].intensity;
 		}
 		const list = [];
