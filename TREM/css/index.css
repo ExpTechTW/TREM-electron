@@ -4,6 +4,7 @@
 @import url("./m3/m3_flat_button.css");
 @import url("./m3/m3_fab.css");
 @import url("./m3/m3_nav-rail.css");
+@import url("./m3/m3_progress.css");
 @import url("./disable_scrollbar.css");
 
 html:lang(en), html:lang(en) .leaflet-tooltip {

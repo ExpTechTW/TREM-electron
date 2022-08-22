@@ -1,0 +1,18 @@
+progress.progressbar {
+    border: none;
+    margin: 4px 0;
+    height: 6px;
+    width: 200px;
+    display: block;
+    appearance: none;
+    border-radius: 3px;
+}
+progress.progressbar::-webkit-progress-bar  {
+    border-radius: 3px;
+    background-color: rgb(var(--md-sys-color-primary-container));
+}
+progress.progressbar::-webkit-progress-value {
+    border-radius: 3px;
+    background-color: rgb(var(--md-sys-color-primary));
+    transition: width .1s ease-out;
+}
