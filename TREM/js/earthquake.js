@@ -303,7 +303,6 @@ async function init() {
 			const Sdata = Json[keys[index]];
 			const amount = Number(Sdata.MaxPGA);
 			if (station[keys[index]] == undefined) continue;
-
 			const Intensity = (NOW.getTime() - Sdata.TimeStamp > 180000) ? "NA" :
 				(amount >= 800) ? 9 :
 					(amount >= 440) ? 8 :
@@ -374,10 +373,12 @@ async function init() {
 					let find = -1;
 					for (let Index = 0; Index < All.length; Index++)
 						if (All[Index].loc == station[keys[index]].Loc) {
-							All[Index].intensity = Intensity;
 							All[Index].time = NOW.getTime();
-							All[Index].pga = amount;
 							find = 0;
+							if (All[Index].pga < amount) {
+								All[Index].intensity = Intensity;
+								All[Index].pga = amount;
+							}
 							break;
 						}
 					if (find == -1)
@@ -418,6 +419,13 @@ async function init() {
 				}
 			}
 		}
+		for (let Index = 0; Index < All.length - 1; Index++)
+			for (let index = 0; index < All.length - 1; index++)
+				if (All[index].pga < All[index + 1].pga) {
+					const Temp = All[index + 1];
+					All[index + 1] = All[index];
+					All[index] = Temp;
+				}
 		if (PAlert.data != undefined)
 			if (PAlert.timestamp != PAlertT) {
 				PAlertT = PAlert.timestamp;
@@ -519,13 +527,6 @@ async function init() {
 			PGAtag = -1;
 			PGALimit = 0;
 		}
-		for (let Index = 0; Index < All.length - 1; Index++)
-			for (let index = 0; index < All.length - 1; index++)
-				if (All[index].amount < All[index + 1].amount) {
-					const Temp = All[index + 1];
-					All[index + 1] = All[index];
-					All[index] = Temp;
-				}
 		if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 			if (CONFIG["Real-time.audio"])
 				if (All[0].intensity >= 5 && PGAtag < 5)

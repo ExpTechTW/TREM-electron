@@ -120,22 +120,6 @@
         <script src="./js/dump.js"></script>
         <script>
             const bytenode = require('bytenode')
-    
-            const vm = require('vm')
-            const v8 = require('v8')
-            v8.setFlagsFromString('--no-lazy')
-    
-            async function compileFile(filePath) {
-                const code = fs.readFileSync(filePath, 'utf-8')
-                const script = new vm.Script(code)
-                const bytecode = script.createCachedData()
-                fs.writeFileSync(filePath.replace(/\.js$/i, '.jar'), bytecode)
-            }
-    
-            compileFile("./js/server.js")
-        </script>
-        <script>
-            //const bytenode = require('bytenode')
             localStorage["dirname"] = __dirname
             bytenode.runBytecodeFile(__dirname + '/js/server.jar')
         </script>
