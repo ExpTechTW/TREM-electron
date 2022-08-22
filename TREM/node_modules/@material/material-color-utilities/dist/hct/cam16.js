@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as utils from '../utils/color_utils';
-import * as math from '../utils/math_utils';
-import { ViewingConditions } from './viewing_conditions';
+import * as utils from '../utils/color_utils.js';
+import * as math from '../utils/math_utils.js';
+import { ViewingConditions } from './viewing_conditions.js';
 /**
  * CAM16, a color appearance model. Colors are not just defined by their hex
  * code, but rather, a hex code and viewing conditions.

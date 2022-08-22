@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Hct } from '../hct/hct';
-import { TonalPalette } from './tonal_palette';
+import { Hct } from '../hct/hct.js';
+import { TonalPalette } from './tonal_palette.js';
 /**
  * An intermediate concept between the key color for a UI theme, and a full
  * color scheme. 5 sets of tones are generated, all except one use the same hue

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Hct } from '../hct/hct';
+import { Hct } from '../hct/hct.js';
 /**
  *  A convenience class for retrieving colors that are constant in hue and
  *  chroma, but vary in tone.
