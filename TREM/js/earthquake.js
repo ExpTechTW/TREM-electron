@@ -373,11 +373,11 @@ async function init() {
 					let find = -1;
 					for (let Index = 0; Index < All.length; Index++)
 						if (All[Index].loc == station[keys[index]].Loc) {
-							All[Index].time = NOW.getTime();
 							find = 0;
 							if (All[Index].pga < amount) {
 								All[Index].intensity = Intensity;
 								All[Index].pga = amount;
+								All[Index].time = NOW.getTime();
 							}
 							break;
 						}
@@ -552,16 +552,46 @@ async function init() {
 		}
 		const list = [];
 		let count = 0;
-		for (let Index = 0; Index < All.length; Index++, count++) {
-			if (!PGAaudio || count >= 10) break;
-			if (NOW.getTime() - All[Index].time > 30000) continue;
-			const container = document.createElement("DIV");
-			container.className = IntensityToClassString(All[Index].intensity);
-			const location = document.createElement("span");
-			location.innerText = All[Index].loc;
-			container.appendChild(document.createElement("span"));
-			container.appendChild(location);
-			list.push(container);
+		if (All.length <= 8)
+			for (let Index = 0; Index < All.length; Index++, count++) {
+				if (!PGAaudio || count >= 8) break;
+				if (NOW.getTime() - All[Index].time > 30000) {
+					All.splice(Index, 1);
+					continue;
+				}
+				const container = document.createElement("DIV");
+				container.className = IntensityToClassString(All[Index].intensity);
+				const location = document.createElement("span");
+				location.innerText = `${All[Index].loc}\n${All[Index].pga} gal`;
+				container.appendChild(document.createElement("span"));
+				container.appendChild(location);
+				list.push(container);
+			}
+		else {
+			const Idata = {};
+			for (let Index = 0; Index < All.length; Index++, count++) {
+				if (!PGAaudio || count >= 8) break;
+				if (NOW.getTime() - All[Index].time > 30000) {
+					All.splice(Index, 1);
+					continue;
+				}
+				const city = All[Index].loc.split(" ")[0];
+				const CPGA = (Idata[city] == undefined) ? 0 : Idata[city];
+				if (All[Index].pga > CPGA) {
+					if (Idata[city] == undefined)Idata[city] = {};
+					Idata[city].pga = All[Index].pga;
+					Idata[city].intensity = All[Index].intensity;
+				}
+			}
+			for (let index = 0; index < Object.keys(Idata).length; index++) {
+				const container = document.createElement("DIV");
+				container.className = IntensityToClassString(Idata[Object.keys(Idata)[index]].intensity);
+				const location = document.createElement("span");
+				location.innerText = `${Object.keys(Idata)[index]}\n${Idata[Object.keys(Idata)[index]].pga} gal`;
+				container.appendChild(document.createElement("span"));
+				container.appendChild(location);
+				list.push(container);
+			}
 		}
 		document.getElementById("rt-list").replaceChildren(...list);
 		MainLock = false;
