@@ -167,7 +167,9 @@ async function init() {
 	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
 
-	dump({ level: 0, message: "Loading Map Datas...", origin: "ResourceLoader" });
+	dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
+	dump({ level: 3, message: "Starting timer...", origin: "Timer" });
+	let perf_GEOJSON_LOAD = process.hrtime();
 	fs.readdirSync("./js/geojson").forEach(file => {
 		try {
 			MapData[path.parse(file).name] = require(`./js/geojson/${file}`);
@@ -179,6 +181,8 @@ async function init() {
 			dump({ level: 3, message: `Skipping ${file}`, origin: "ResourceLoader" });
 		}
 	});
+	perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
+	dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
 	map_geoJson = L.geoJson.vt(MapData.Dmap, {
 		minZoom   : 4,
