@@ -724,25 +724,25 @@ function audioPlay1(src) {
 }
 function playNextAudio() {
 	audioLock = true;
-	const path = audioList.shift();
-	audioDOM.src = path;
-	if (path.startsWith("./audio/1/") && CONFIG["eew.audio"]) {
-		dump({ level: 0, message: `Playing Audio > ${path}`, origin: "Audio" });
+	const nextAudioPath = audioList.shift();
+	audioDOM.src = nextAudioPath;
+	if (nextAudioPath.startsWith("./audio/1/") && CONFIG["eew.audio"]) {
+		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM.play();
-	} else if (!path.startsWith("./audio/1/")) {
-		dump({ level: 0, message: `Playing Audio > ${path}`, origin: "Audio" });
+	} else if (!nextAudioPath.startsWith("./audio/1/")) {
+		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM.play();
 	}
 }
 function playNextAudio1() {
 	audioLock1 = true;
-	const path = audioList1.shift();
-	audioDOM1.src = path;
-	if (path.startsWith("./audio/1/") && CONFIG["eew.audio"]) {
-		dump({ level: 0, message: `Playing Audio > ${path}`, origin: "Audio" });
+	const nextAudioPath = audioList1.shift();
+	audioDOM1.src = nextAudioPath;
+	if (nextAudioPath.startsWith("./audio/1/") && CONFIG["eew.audio"]) {
+		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
-	} else if (!path.startsWith("./audio/1/")) {
-		dump({ level: 0, message: `Playing Audio > ${path}`, origin: "Audio" });
+	} else if (!nextAudioPath.startsWith("./audio/1/")) {
+		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
 	}
 }
@@ -1734,21 +1734,21 @@ async function FCMdata(data) {
 						let X = 0;
 						let Y = 0;
 						if (Object.keys(EarthquakeList).length != 1) {
-							let find = 1;
-							for (let index = 0; index < Object.keys(EarthquakeList).length; index++)
-								if (Object.keys(EarthquakeList)[index] == json.ID) {
-									find = index + 1;
+							let cursor = 1;
+							for (let index = 0, keys = Object.keys(EarthquakeList), n = keys.length; index < n; index++)
+								if (keys[index] == json.ID) {
+									cursor = index + 1;
 									break;
 								}
-							if (find <= 4) {
+							if (cursor <= 4) {
 								myIcon = L.icon({
-									iconUrl  : `./image/cross${find}.png`,
+									iconUrl  : `./image/cross${cursor}.png`,
 									iconSize : [40, 40],
 								});
-								if (find == 1) Y = 0.03;
-								if (find == 2) X = 0.03;
-								if (find == 3) Y = -0.03;
-								if (find == 4) X = -0.03;
+								if (cursor == 1) Y = 0.03;
+								if (cursor == 2) X = 0.03;
+								if (cursor == 3) Y = -0.03;
+								if (cursor == 4) X = -0.03;
 							} else
 								myIcon = L.icon({
 									iconUrl  : "./image/cross.png",
