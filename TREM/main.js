@@ -195,7 +195,7 @@ ipcMain.on("screenshotEEW", async (event, json) => {
 		const date = fs.statSync(`${folder}/${list[index]}`);
 		if (new Date().getTime() - date.ctimeMs > 86400000) fs.unlinkSync(`${folder}/${list[index]}`);
 	}
-	const filename = `${json.ID}-${json.Version}.png`;
+	const filename = `${json.Function}_${json.ID}_${json.Version}_${json.Time}_${json.Shot}.png`;
 	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
 });
 

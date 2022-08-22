@@ -517,8 +517,11 @@ async function init() {
 					map.addLayer(Pgeojson);
 					setTimeout(() => {
 						ipcRenderer.send("screenshotEEW", {
-							"ID"      : NOW.getTime(),
-							"Version" : "P",
+							Function : "palert",
+							ID       : 1,
+							Version  : 1,
+							Time     : NOW.getTime(),
+							Shot     : 1,
 						});
 					}, 1250);
 				}
@@ -567,8 +570,11 @@ async function init() {
 					audioPlay("./audio/Shindo0.wav");
 			setTimeout(() => {
 				ipcRenderer.send("screenshotEEW", {
-					"ID"      : NOW.getTime(),
-					"Version" : "P",
+					Function : "station",
+					ID       : 1,
+					Version  : 1,
+					Time     : NOW.getTime(),
+					Shot     : 1,
 				});
 			}, 1500);
 			if (CONFIG["Real-time.show"])
@@ -1328,7 +1334,6 @@ async function FCMdata(data) {
 			}
 			if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
 			focus([23.608428, 120.799168], 7.5);
-			setTimeout(() => {ipcRenderer.send("screenshotEEW", json);}, 1500);
 		}
 		if (TSUNAMI["Timer"] != null) clearInterval(TSUNAMI["Timer"]);
 		TSUNAMI["Timer"] = setInterval(() => {
@@ -1440,8 +1445,11 @@ async function FCMdata(data) {
 		addReport(report.response[0], true);
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
-				"ID"      : json.ID + "-" + NOW.getTime(),
-				"Version" : "R",
+				Function : "report",
+				ID       : json.ID,
+				Version  : 1,
+				Time     : NOW.getTime(),
+				Shot     : 1,
 			});
 		}, 5000);
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
@@ -1578,7 +1586,7 @@ async function FCMdata(data) {
 					audioPlay1("./audio/1/second.wav");
 				}
 			}
-			if (!Info.Warn.includes(json.ID) && MaxIntensity >= 5) {
+			if (!Info.Warn.includes(json.ID) && MaxIntensity >= 4) {
 				Info.Warn.push(json.ID);
 				json.Alert = true;
 				audioPlay("./audio/Alert.wav");
@@ -1714,7 +1722,7 @@ async function FCMdata(data) {
 						}, 5000);
 				}, 1000);
 			EEWshot = NOW.getTime() - 28500;
-			EEWshotC = 0;
+			EEWshotC = 1;
 			if (EarthquakeList[json.ID].Cross != undefined) map.removeLayer(EarthquakeList[json.ID].Cross);
 			if (EarthquakeList[json.ID].Cross1 != undefined) mapTW.removeLayer(EarthquakeList[json.ID].Cross1);
 			let S1 = 0;
@@ -1823,12 +1831,19 @@ async function FCMdata(data) {
 						mapTW.addLayer(Cross1);
 						Cross.setZIndexOffset(6000);
 						if (NOW.getTime() - EEWshot > 60000)
-							EEWshotC = 0;
-						if (NOW.getTime() - EEWshot > 30000 && EEWshotC <= 1 && S1 == 1) {
+							EEWshotC = 1;
+						if (NOW.getTime() - EEWshot > 30000 && EEWshotC <= 2 && S1 == 1) {
 							EEWshotC++;
-							json.Version = json.Version + "-" + EEWshotC;
 							EEWshot = NOW.getTime();
-							setTimeout(() => {ipcRenderer.send("screenshotEEW", json);}, 300);
+							setTimeout(() => {
+								ipcRenderer.send("screenshotEEW", {
+									Function : json.Function,
+									ID       : json.ID,
+									Version  : json.Version,
+									Time     : NOW.getTime(),
+									Shot     : EEWshotC,
+								});
+							}, 300);
 						}
 					} else if (NOW.getMilliseconds() > 500 && S1 == 1) {
 						S1 = 0;
