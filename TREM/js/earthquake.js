@@ -302,7 +302,7 @@ async function init() {
 			let cancel;
 			setTimeout(() => {
 				cancel();
-			}, 3000);
+			}, 1500);
 			axios({
 				method      : "post",
 				url         : PostIP(),
