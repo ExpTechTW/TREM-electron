@@ -796,6 +796,7 @@ function playNextAudio1() {
 	audioLock1 = true;
 	const nextAudioPath = audioList1.shift();
 	audioDOM1.src = nextAudioPath;
+	audioDOM1.playbackRate = 1.1;
 	if (nextAudioPath.startsWith("./audio/1/") && CONFIG["eew.audio"]) {
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
@@ -1277,7 +1278,7 @@ ipcMain.on("updateTitle", (e, lang) => {
 // #region EEW
 async function FCMdata(data) {
 	const json = JSON.parse(data);
-	if (Server.includes(json.TimeStamp)) return;
+	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 240000) return;
 	Server.push(json.TimeStamp);
 	if (json.response != "You have successfully subscribed to earthquake information" && json.FormatVersion == 1) {
 		const folder = path.join(app.getPath("userData"), "data");
@@ -1605,7 +1606,7 @@ async function FCMdata(data) {
 				if (Second == -1 || value < Second) {
 					if (t != null) clearInterval(t);
 					t = setInterval(() => {
-						value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
+						value = Math.floor((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
 						Second = value;
 						if (stamp != value && !audioLock1) {
 							stamp = value;
@@ -1951,10 +1952,10 @@ function updateText() {
 		document.getElementById("alert-s").innerText = "X";
 		document.getElementById("alert-p").innerText = "X";
 	} else {
-		let num = Math.round((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Sspeed) / Sspeed);
+		let num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Sspeed) / Sspeed);
 		if (num <= 0) num = "";
 		document.getElementById("alert-s").innerText = `${num}`;
-		num = Math.round((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Pspeed) / Pspeed);
+		num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Pspeed) / Pspeed);
 		if (num <= 0) num = "";
 		document.getElementById("alert-p").innerText = `${num}`;
 	}
