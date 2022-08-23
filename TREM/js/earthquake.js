@@ -341,10 +341,12 @@ function PGAMain() {
 			}),
 		}).then((response) => {
 			PGAMainLock = false;
+			TimeDesynced = false;
 			Response = response.data;
 			handler(Response);
 		}).catch((err) => {
 			PGAMainLock = false;
+			TimeDesynced = true;
 			handler(Response);
 		});
 	}, 1000);
