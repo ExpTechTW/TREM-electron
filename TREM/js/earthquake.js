@@ -239,9 +239,10 @@ async function init() {
 			buffer    : 256,
 			debug     : 0,
 			style     : {
-				weight    : 0.8,
-				color     : colors.primary,
-				fillColor : colors.surfaceVariant,
+				weight      : 0.8,
+				color       : colors.primary,
+				fillColor   : colors.surfaceVariant,
+				fillOpacity : 0.6,
 			},
 		}).addTo(map);
 	progressbar.value = (1 / progressStep) * 4;
@@ -1260,9 +1261,10 @@ ipcMain.on("updateTheme", async () => {
 	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
 
 	map_geoJson.options.style = {
-		weight    : 0.8,
-		color     : colors.primary,
-		fillColor : colors.surfaceVariant,
+		weight      : 0.8,
+		color       : colors.primary,
+		fillColor   : colors.surfaceVariant,
+		fillOpacity : 0.6,
 	};
 	map_geoJson.redraw();
 
@@ -1521,8 +1523,8 @@ async function FCMdata(data) {
 								opacity     : 0.8,
 								color       : "#8E8E8E",
 								dashArray   : "",
-								fillOpacity : 0.8,
 								fillColor   : colors.surfaceVariant,
+								fillOpacity : 0.6,
 							};
 						return {
 							weight      : 1,
@@ -1538,8 +1540,8 @@ async function FCMdata(data) {
 							opacity     : 0.8,
 							color       : "#8E8E8E",
 							dashArray   : "",
-							fillOpacity : 0.8,
 							fillColor   : colors.surfaceVariant,
+							fillOpacity : 0.6,
 						};
 				},
 			});
