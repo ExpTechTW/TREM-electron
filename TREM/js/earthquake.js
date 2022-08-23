@@ -1217,7 +1217,7 @@ function color(Intensity) {
 // #endregion
 
 // #region IPC
-ipcMain.on("start", () => {
+ipcMain.once("start", () => {
 	try {
 		setInterval(() => {
 			if (DATAstamp != 0 && Stamp != DATAstamp) {
