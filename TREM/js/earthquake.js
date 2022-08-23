@@ -75,6 +75,7 @@ let auto = false;
 const EEW = {};
 const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
+let Ping = 9999;
 // #endregion
 
 // #region 初始化
@@ -105,13 +106,13 @@ async function init() {
 			} else if (replay) {
 				if (!time.classList.contains("replay"))
 					time.classList.add("replay");
-				time.innerText = new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss");
+				time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")} ${Ping}ms`;
 			} else {
 				if (time.classList.contains("replay"))
 					time.classList.remove("replay");
 				if (time.classList.contains("desynced"))
 					time.classList.remove("desynced");
-				time.innerText = NOW.format("YYYY/MM/DD HH:mm:ss");
+				time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")} ${Ping}ms`;
 			}
 		}, 500);
 
@@ -335,6 +336,7 @@ function PGAMain() {
 		setTimeout(() => {
 			cancel();
 		}, 1500);
+		const _Ping = Date.now();
 		axios({
 			method      : "post",
 			url         : PostIP(),
@@ -343,6 +345,7 @@ function PGAMain() {
 				cancel = c;
 			}),
 		}).then((response) => {
+			Ping = Date.now() - _Ping;
 			PGAMainLock = false;
 			TimeDesynced = false;
 			Response = response.data;
