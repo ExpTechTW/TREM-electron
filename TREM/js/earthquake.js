@@ -6,7 +6,7 @@ const bytenode = require("bytenode");
 localStorage["dirname"] = __dirname;
 bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
-$("#loading").text(Localization[CONFIG["general.locale"]].Application_Loading || Localization["zh-TW"].Application_Loading);
+$("#loading").text(Localization[CONFIG["general.locale"]].Application_Connecting || Localization["zh-TW"].Application_Connecting);
 document.title = Localization[CONFIG["general.locale"]].Application_Title || Localization["zh-TW"].Application_Title;
 
 // #region 變數
@@ -87,9 +87,11 @@ win.on("show", () => {
 
 let TimeDesynced = false;
 async function init() {
+	$("#loading").text(Localization[CONFIG["general.locale"]].Application_Loading || Localization["zh-TW"].Application_Loading);
 	const time = document.getElementById("time");
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
+	dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
 	await ReportGET({});
 	progressbar.value = (1 / progressStep) * 1;
 

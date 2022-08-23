@@ -1,6 +1,8 @@
+/* eslint-disable no-inline-comments */
 const Localization =
 {
 	"en": {
+		Application_Connecting           : "Connecting to the server",
 		Application_Loading              : "Loading",
 		Application_Title                : "Taiwan Real-time Earthquake Monitoring",
 		Application_Welcome              : "Welcome",
@@ -18,6 +20,7 @@ const Localization =
 		Webhook_Dialog_Success           : "Test message successfully sent.\nMessage ID：{0}\nChannel ID：{1}",
 	},
 	"ja": {
+		Application_Connecting           : "サーバ接続中...",
 		Application_Loading              : "ローディング中...",
 		Application_Title                : "TREM 台湾リアルタイム地震モニタリング",
 		Application_Welcome              : "ようこそ",
@@ -35,6 +38,7 @@ const Localization =
 		Webhook_Dialog_Success           : "テストメッセージが正常に送信されました。\nメッセージ ID：{0}\nチャンネル ID：{1}",
 	},
 	"ru": {
+		Application_Connecting           : null, // Loading Screen
 		Application_Loading              : "Загрузка",
 		Application_Title                : "TREM Мониторинг землетрясений на Тайване в режиме реального времени",
 		Application_Welcome              : "Добро пожаловать",
@@ -52,6 +56,7 @@ const Localization =
 		Webhook_Dialog_Success           : "Тестовое сообщение успешно отправлено.\nИдентификатор сообщения：{0}\nИдентификатор канала：{1}",
 	},
 	"zh-TW": {
+		Application_Connecting           : "連線中...",
 		Application_Loading              : "載入中...",
 		Application_Title                : "TREM 台灣即時地震監測",
 		Application_Welcome              : "歡迎",
