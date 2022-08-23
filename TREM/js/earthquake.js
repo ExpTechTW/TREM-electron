@@ -150,6 +150,41 @@ async function init() {
 			preferCanvas: true,
 		}).setView([23, 121], 7.5);
 		map.doubleClickZoom.disable();
+		map.removeControl(map.zoomControl);
+		map.on("click", () => {
+			if (ReportMarkID != null) {
+				ReportMarkID = null;
+				for (let index = 0; index < MarkList.length; index++)
+					map.removeLayer(MarkList[index]);
+				focus([23.608428, 120.799168], 7.5);
+			}
+			mapLock = false;
+			focus();
+		});
+		map.on("dblclick", focus);
+		map.on("drag", () => mapLock = true);
+		map.on("dblclick", () => focus([23.608428, 120.799168], 7.5));
+		map.on("zoomend", () => {
+			if (map.getZoom() > 10)
+				for (const key in Station) {
+					const tooltip = Station[key].getTooltip();
+					if (tooltip) {
+						Station[key].unbindTooltip();
+						tooltip.options.permanent = true;
+						Station[key].bindTooltip(tooltip);
+					}
+				}
+			else
+				for (const key in Station) {
+					const tooltip = Station[key].getTooltip();
+					if (tooltip && !Station[key].keepTooltipAlive) {
+						Station[key].unbindTooltip();
+						tooltip.options.permanent = false;
+						Station[key].bindTooltip(tooltip);
+					}
+				}
+
+		});
 	}
 
 	if (!mapTW) {
@@ -159,17 +194,17 @@ async function init() {
 			preferCanvas       : true,
 		}).setView([23.608428, 120.799168], 7);
 
-		mapTW.on("zoom", () => {
-			mapTW.setView([23.608428, 120.799168], 7);
-		});
-
-		Tooltip = new L.LayerGroup();
+		mapTW.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
 
 		mapTW.dragging.disable();
 		mapTW.scrollWheelZoom.disable();
 		mapTW.doubleClickZoom.disable();
 		mapTW.removeControl(mapTW.zoomControl);
 	}
+
+	if (!Tooltip)
+		Tooltip = new L.LayerGroup();
+
 	progressbar.value = (1 / progressStep) * 2;
 
 	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
@@ -195,65 +230,21 @@ async function init() {
 	perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
 	dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
-	map_geoJson = L.geoJson.vt(MapData.Dmap, {
-		minZoom   : 4,
-		maxZoom   : 12,
-		tolerance : 10,
-		buffer    : 256,
-		debug     : 0,
-		style     : {
-			weight    : 0.8,
-			color     : colors.primary,
-			fillColor : colors.surfaceVariant,
-		},
-	}).addTo(map);
+	if (!map_geoJson)
+		map_geoJson = L.geoJson.vt(MapData.Dmap, {
+			minZoom   : 4,
+			maxZoom   : 12,
+			tolerance : 10,
+			buffer    : 256,
+			debug     : 0,
+			style     : {
+				weight    : 0.8,
+				color     : colors.primary,
+				fillColor : colors.surfaceVariant,
+			},
+		}).addTo(map);
 
-	map.on("click", (e) => {
-		if (ReportMarkID != null) {
-			ReportMarkID = null;
-			for (let index = 0; index < MarkList.length; index++)
-				map.removeLayer(MarkList[index]);
-			focus([23.608428, 120.799168], 7.5);
-		}
-		mapLock = false;
-		focus();
-	});
 
-	map.on("dblclick", (e) => {
-		focus();
-	});
-
-	map.on("drag", (e) => {
-		mapLock = true;
-	});
-
-	map.on("dblclick", (e) => {
-		focus([23.608428, 120.799168], 7.5);
-	});
-
-	map.on("zoomend", () => {
-		if (map.getZoom() > 10)
-			for (const key in Station) {
-				const tooltip = Station[key].getTooltip();
-				if (tooltip) {
-					Station[key].unbindTooltip();
-					tooltip.options.permanent = true;
-					Station[key].bindTooltip(tooltip);
-				}
-			}
-		else
-			for (const key in Station) {
-				const tooltip = Station[key].getTooltip();
-				if (tooltip && !Station[key].keepTooltipAlive) {
-					Station[key].unbindTooltip();
-					tooltip.options.permanent = false;
-					Station[key].bindTooltip(tooltip);
-				}
-			}
-
-	});
-
-	map.removeControl(map.zoomControl);
 	progressbar.value = (1 / progressStep) * 4;
 
 	setTimeout(() => {main();}, 1500);
