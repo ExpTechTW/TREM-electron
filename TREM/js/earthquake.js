@@ -618,7 +618,7 @@ function handler(response) {
 				Time     : NOW.getTime(),
 				Shot     : 1,
 			});
-		}, 1500);
+		}, 5500);
 		if (CONFIG["Real-time.show"])
 			win.show();
 		if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
