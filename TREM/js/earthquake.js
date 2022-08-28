@@ -1295,7 +1295,7 @@ async function FCMdata(data) {
 		fs.writeFileSync(path.join(folder, filename), JSON.stringify(json));
 	}
 	if (json.TimeStamp != undefined)
-		dump({ level: 0, message: `${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
+		dump({ level: 0, message: `Latency: ${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
 	if (json.Function == "tsunami") {
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
 		if (CONFIG["report.show"]) {
