@@ -10,6 +10,7 @@ $("#loading").text(Localization[CONFIG["general.locale"]].Application_Connecting
 document.title = Localization[CONFIG["general.locale"]].Application_Title || Localization["zh-TW"].Application_Title;
 
 // #region 變數
+const PostAddressIP = "https://exptech.com.tw/post";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -326,7 +327,6 @@ function PGAMain() {
 		let R = 0;
 		if (replay) R = replay + (NOW.getTime() - replayT);
 		const data = {
-			"APIkey"   : "https://github.com/ExpTechTW",
 			"Function" : "data",
 			"Type"     : "TREM",
 			"Value"    : R,
@@ -339,7 +339,7 @@ function PGAMain() {
 		const _Ping = Date.now();
 		axios({
 			method      : "post",
-			url         : PostIP(),
+			url         : PostAddressIP,
 			data        : data,
 			cancelToken : new CancelToken((c) => {
 				cancel = c;
@@ -820,8 +820,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
-		const list = await axios.post(PostIP(), {
-			"APIkey"   : "https://github.com/ExpTechTW",
+		const list = await axios.post(PostAddressIP, {
 			"Function" : "data",
 			"Type"     : "earthquake",
 			"Value"    : 100,
@@ -850,7 +849,6 @@ async function ReportClick(time) {
 
 		const LIST = [];
 		const body = {
-			"APIkey"   : "https://github.com/ExpTechTW",
 			"Function" : "data",
 			"Type"     : "report",
 			"Value"    : ReportCache[time].earthquakeNo,
@@ -858,7 +856,7 @@ async function ReportClick(time) {
 		if (
 			// 確認是否為無編號地震
 			ReportCache[time].earthquakeNo % 1000 == 0
-			|| await axios.post(PostIP(), body)
+			|| await axios.post(PostAddressIP, body)
 				.then((response) => {
 					const json = response.data.response;
 					if (json == undefined)
@@ -1219,7 +1217,6 @@ ipcMain.once("start", () => {
 						setTimeout(() => {
 							dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 							const data = {
-								"APIkey"        : "https://github.com/ExpTechTW",
 								"Function"      : "earthquake",
 								"Type"          : "test",
 								"FormatVersion" : 3,
@@ -1227,7 +1224,7 @@ ipcMain.once("start", () => {
 								"ID"            : list[index],
 							};
 							dump({ level: 3, message: `Timer status: ${TimeDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-							axios.post(PostIP(), data)
+							axios.post(PostAddressIP, data)
 								.catch((error) => {
 									dump({ level: 2, message: error, origin: "Verbose" });
 								});
@@ -1237,14 +1234,13 @@ ipcMain.once("start", () => {
 					delete localStorage.Test;
 					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 					const data = {
-						"APIkey"        : "https://github.com/ExpTechTW",
 						"Function"      : "earthquake",
 						"Type"          : "test",
 						"FormatVersion" : 3,
 						"UUID"          : localStorage.UUID,
 					};
 					dump({ level: 3, message: `Timer status: ${TimeDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-					axios.post(PostIP(), data)
+					axios.post(PostAddressIP, data)
 						.catch((error) => {
 							dump({ level: 2, message: error, origin: "Verbose" });
 						});
