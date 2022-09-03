@@ -1,7 +1,10 @@
 /* eslint-disable no-inner-declarations */
 /* eslint-disable no-undef */
 const { BrowserWindow, shell } = require("@electron/remote");
+const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const bytenode = require("bytenode");
+
+const ExpTechAPI = new ExpTech();
 
 localStorage["dirname"] = __dirname;
 bytenode.runBytecodeFile(__dirname + "/js/server.jar");
@@ -804,14 +807,9 @@ function playNextAudio1() {
 async function ReportGET(eew) {
 	try {
 		const res = await getReportData();
-		if (res == null) return setTimeout(ReportGET, 1000, eew);
+		if (!res) return setTimeout(ReportGET, 1000, eew);
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
-		if (res["state"] == "Warn") {
-			dump({ level: 2, message: res, origin: "EQReportFetcher" });
-			console.error(res);
-			return setTimeout(ReportGET, 1000, eew);
-		} else
-			ReportList(res, eew);
+		ReportList(res, eew);
 	} catch (error) {
 		dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
@@ -820,16 +818,11 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
-		const list = await axios.post(PostAddressIP, {
-			"Function" : "data",
-			"Type"     : "earthquake",
-			"Value"    : 100,
-		});
-		return list.data;
+		const list = await ExpTechAPI.v1.data.getEarthquakeReports(100);
+		return list;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
 		console.error(error);
-		return null;
 	}
 }
 // #endregion
@@ -951,19 +944,19 @@ async function ReportClick(time) {
 }
 const openURL = url => {
 	shell.openExternal(url);
-	return;
+
 };
 // #endregion
 
 // #region Report list
-function ReportList(Data, eew) {
+function ReportList(earthquakeReportArr, eew) {
 	roll.replaceChildren();
-	for (let index = 0; index < Data.response.length; index++) {
-		if (eew != undefined && index == Data.response.length - 1) {
-			Data.response[index].Max = eew.Max;
-			Data.response[index].Time = eew.Time;
+	for (let index = 0; index < earthquakeReportArr.length; index++) {
+		if (eew != undefined && index == earthquakeReportArr.length - 1) {
+			earthquakeReportArr[index].Max = eew.Max;
+			earthquakeReportArr[index].Time = eew.Time;
 		}
-		addReport(Data.response[index]);
+		addReport(earthquakeReportArr[index]);
 	}
 	setLocale(CONFIG["general.locale"]);
 }
@@ -1191,9 +1184,7 @@ function IntensityToClassString(level) {
 
 // #region color
 function color(Intensity) {
-	const Carr = ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"];
-	if (Intensity == 0) return Carr[0];
-	return Carr[Intensity - 1];
+	return ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"][Intensity ? Intensity - 1 : Intensity];
 }
 // #endregion
 

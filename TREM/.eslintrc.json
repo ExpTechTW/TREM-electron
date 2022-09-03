@@ -67,6 +67,7 @@
 		"no-shadow": ["error", { "allow": ["err", "resolve", "reject"] }],
 		"no-trailing-spaces": ["warn"],
 		"no-unused-vars": ["off"],
+		"no-useless-return": "warn",
 		"no-var": "error",
 		"object-curly-spacing": ["warn", "always"],
 		"prefer-const": "error",

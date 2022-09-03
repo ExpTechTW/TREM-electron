@@ -451,6 +451,11 @@ body {
 				border .1s ease-in-out;
 }
 
+.alert-notch > * {
+	height: min-content;
+    line-height: 30px;
+}
+
 #alert-type {
 	font-weight: 600;
 	font-size: 20px;
@@ -459,9 +464,7 @@ body {
 
 #alert-provider {
 	flex: 1;
-	height: min-content;
 	font-weight: 500;
-	line-height: 30px;
 	font-size: 20px;
 }
 
