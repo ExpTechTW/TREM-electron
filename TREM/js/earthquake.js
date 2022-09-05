@@ -473,13 +473,14 @@ function handler(response) {
 					limit();
 
 				function limit() {
-					if (amount > 8 && PGALimit == 0) {
-						PGALimit = 1;
-						audioPlay("./audio/PGA1.wav");
-					} else if (amount > 250 && PGALimit != 2) {
-						PGALimit = 2;
-						audioPlay("./audio/PGA2.wav");
-					}
+					if (CONFIG["Real-time.audio"])
+						if (amount > 8 && PGALimit == 0) {
+							PGALimit = 1;
+							audioPlay("./audio/PGA1.wav");
+						} else if (amount > 250 && PGALimit != 2) {
+							PGALimit = 2;
+							audioPlay("./audio/PGA2.wav");
+						}
 					pga[station[keys[index]].PGA].Time = NOW.getTime();
 				}
 			}
@@ -525,7 +526,7 @@ function handler(response) {
 						win.show();
 					if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
 					win.setAlwaysOnTop(false);
-					audioPlay("./audio/palert.wav");
+					if (CONFIG["Real-time.audio"]) audioPlay("./audio/palert.wav");
 				}
 				if (Pgeojson != null) map.removeLayer(Pgeojson);
 				Pgeojson = L.geoJson(MapData.DmapT, {
@@ -1518,35 +1519,39 @@ async function FCMdata(data) {
 				new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${json.Scale} ${json.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - json.TimeStamp}ms`, icon: "TREM.ico" });
 				Info.Notify.push(json.ID);
 				EEWT.id = json.ID;
-				if (CONFIG["eew.audio"]) audioPlay("./audio/EEW.wav");
-				audioPlay1(`./audio/1/${level.replace("+", "").replace("-", "")}.wav`);
-				if (level.includes("+"))
-					audioPlay1("./audio/1/intensity-strong.wav");
-				else if (level.includes("-"))
-					audioPlay1("./audio/1/intensity-weak.wav");
-				else
-					audioPlay1("./audio/1/intensity.wav");
+				if (CONFIG["eew.audio"]) {
+					audioPlay("./audio/EEW.wav");
+					audioPlay1(`./audio/1/${level.replace("+", "").replace("-", "")}.wav`);
+					if (level.includes("+"))
+						audioPlay1("./audio/1/intensity-strong.wav");
+					else if (level.includes("-"))
+						audioPlay1("./audio/1/intensity-weak.wav");
+					else
+						audioPlay1("./audio/1/intensity.wav");
 
-				if (value > 0 && value < 100) {
-					if (value <= 10)
-						audioPlay1(`./audio/1/${value.toString()}.wav`);
-					else if (value < 20)
-						audioPlay1(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
-					else {
-						audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
-						audioPlay1(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
+					if (value > 0 && value < 100) {
+						if (value <= 10)
+							audioPlay1(`./audio/1/${value.toString()}.wav`);
+						else if (value < 20)
+							audioPlay1(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
+						else {
+							audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
+							audioPlay1(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
+						}
+						audioPlay1("./audio/1/second.wav");
 					}
-					audioPlay1("./audio/1/second.wav");
 				}
 			}
 			if (!Info.Warn.includes(json.ID) && MaxIntensity >= 4) {
 				Info.Warn.push(json.ID);
 				json.Alert = true;
-				audioPlay("./audio/Alert.wav");
-				audioPlay("./audio/Alert.wav");
-				audioPlay("./audio/Alert.wav");
-				audioPlay("./audio/Alert.wav");
-				audioPlay("./audio/Alert.wav");
+				if (CONFIG["eew.audio"]) {
+					audioPlay("./audio/Alert.wav");
+					audioPlay("./audio/Alert.wav");
+					audioPlay("./audio/Alert.wav");
+					audioPlay("./audio/Alert.wav");
+					audioPlay("./audio/Alert.wav");
+				}
 			} else
 				json.Alert = false;
 
@@ -1554,7 +1559,7 @@ async function FCMdata(data) {
 			let stamp = 0;
 			if (json.ID + json.Version != Info.Alert) {
 				if (EEW[json.ID] != undefined)
-					audioPlay("./audio/Update.wav");
+					if (CONFIG["eew.audio"]) audioPlay("./audio/Update.wav");
 				EEW[json.ID] = {
 					lon  : Number(json.EastLongitude),
 					lat  : Number(json.NorthLatitude),
@@ -1564,41 +1569,43 @@ async function FCMdata(data) {
 				};
 				Info.Alert = json.ID + json.Version;
 				value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
-				if (Second == -1 || value < Second) {
-					if (t != null) clearInterval(t);
-					t = setInterval(() => {
-						value = Math.floor((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
-						Second = value;
-						if (stamp != value && !audioLock1) {
-							stamp = value;
-							if (_time >= 0) {
-								audioPlay("./audio/1/ding.wav");
-								_time++;
-								if (_time >= 10)
-									clearInterval(t);
-							} else if (value < 100) {
-								if (arrive.includes(json.ID)) {
-									clearInterval(t);
-									return;
-								}
-								if (value > 10)
-									if (value.toString().substring(1, 2) == "0") {
-										audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
-										audioPlay1("./audio/1/x0.wav");
-									} else
-										audioPlay("./audio/1/ding.wav");
+				if (Second == -1 || value < Second)
+					if (CONFIG["eew.audio"]) {
+						if (t != null) clearInterval(t);
+						t = setInterval(() => {
+							value = Math.floor((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
+							Second = value;
+							if (stamp != value && !audioLock1) {
+								stamp = value;
+								if (_time >= 0) {
+									audioPlay("./audio/1/ding.wav");
+									_time++;
+									if (_time >= 10)
+										clearInterval(t);
+								} else if (value < 100) {
+									if (arrive.includes(json.ID)) {
+										clearInterval(t);
+										return;
+									}
+									if (value > 10)
+										if (value.toString().substring(1, 2) == "0") {
+											audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
+											audioPlay1("./audio/1/x0.wav");
+										} else
+											audioPlay("./audio/1/ding.wav");
 
-								else if (value > 0)
-									audioPlay1(`./audio/1/${value.toString()}.wav`);
-								else {
-									arrive.push(json.ID);
-									audioPlay1("./audio/1/arrive.wav");
-									_time = 0;
+									else if (value > 0)
+										audioPlay1(`./audio/1/${value.toString()}.wav`);
+									else {
+										arrive.push(json.ID);
+										audioPlay1("./audio/1/arrive.wav");
+										_time = 0;
+									}
 								}
 							}
-						}
-					}, 0);
-				}
+						}, 0);
+					}
+
 			}
 			if (ReportMarkID != null) {
 				ReportMarkID = null;
