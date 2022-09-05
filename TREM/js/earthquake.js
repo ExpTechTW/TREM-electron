@@ -24,6 +24,7 @@ let All = [];
 const arrive = [];
 let audioList = [];
 let audioList1 = [];
+let locationEEW = {};
 let audioLock = false;
 let audioLock1 = false;
 const ReportCache = {};
@@ -675,12 +676,14 @@ function handler(response) {
 }
 
 async function fetchFiles() {
-	Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/locations.json")).json();
+	Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
 	dump({ level: 0, message: "Get Location File", origin: "Location" });
 	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
 	dump({ level: 0, message: "Get Station File", origin: "Location" });
 	PGAjson = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
 	dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
+	locationEEW = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+	dump({ level: 0, message: "Get LocationEEW File", origin: "Location" });
 	if (CONFIG["earthquake.Real-time"])
 		PGAMain();
 }
@@ -1462,8 +1465,7 @@ async function FCMdata(data) {
 			EarthquakeList[json.ID].ID = json.ID;
 			let value = 0;
 			let distance = 0;
-			const res = await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json");
-			const location = await res.json();
+
 			const GC = {};
 			let level;
 			let MaxIntensity = 0;
@@ -1471,14 +1473,14 @@ async function FCMdata(data) {
 				for (let index = 0; index < expected.length; index++)
 					map.removeLayer(expected[index]);
 
-			for (let index = 0; index < Object.keys(location).length; index++) {
-				const city = Object.keys(location)[index];
-				for (let Index = 0; Index < Object.keys(location[city]).length; Index++) {
-					const town = Object.keys(location[city])[Index];
-					const point = Math.sqrt(Math.pow(Math.abs(location[city][town][1] + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(location[city][town][2] + (Number(json.EastLongitude) * -1)) * 101, 2));
+			for (let index = 0; index < Object.keys(locationEEW).length; index++) {
+				const city = Object.keys(locationEEW)[index];
+				for (let Index = 0; Index < Object.keys(locationEEW[city]).length; Index++) {
+					const town = Object.keys(locationEEW[city])[Index];
+					const point = Math.sqrt(Math.pow(Math.abs(locationEEW[city][town][1] + (Number(json.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(locationEEW[city][town][2] + (Number(json.EastLongitude) * -1)) * 101, 2));
 					const Distance = Math.sqrt(Math.pow(Number(json.Depth), 2) + Math.pow(point, 2));
-					const Level = PGAcount(json.Scale, Distance, location[city][town][3]);
-					if (UserLocationLat == location[city][town][1] && UserLocationLon == location[city][town][2]) {
+					const Level = PGAcount(json.Scale, Distance, locationEEW[city][town][3]);
+					if (UserLocationLat == locationEEW[city][town][1] && UserLocationLon == locationEEW[city][town][2]) {
 						if (CONFIG["auto.waveSpeed"])
 							if (Distance < 50) {
 								Pspeed = 6.5;
@@ -1500,42 +1502,6 @@ async function FCMdata(data) {
 				TimeDesynced = false;
 				return;
 			}
-
-			if (geojson != null) mapTW.removeLayer(geojson);
-			const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
-			geojson = L.geoJson(MapData.DmapT, {
-				style: (feature) => {
-					if (feature.properties.COUNTY != undefined) {
-						const name = feature.properties.COUNTY + feature.properties.TOWN;
-						if (GC[name] == 0 || GC[name] == undefined)
-							return {
-								weight      : 1,
-								opacity     : 0.8,
-								color       : "#8E8E8E",
-								dashArray   : "",
-								fillColor   : colors.surfaceVariant,
-								fillOpacity : 0.6,
-							};
-						return {
-							weight      : 1,
-							opacity     : 0.8,
-							color       : "#8E8E8E",
-							dashArray   : "",
-							fillOpacity : 0.8,
-							fillColor   : color(GC[name]),
-						};
-					} else
-						return {
-							weight      : 1,
-							opacity     : 0.8,
-							color       : "#8E8E8E",
-							dashArray   : "",
-							fillColor   : colors.surfaceVariant,
-							fillOpacity : 0.6,
-						};
-				},
-			});
-			mapTW.addLayer(geojson);
 			if (!Info.Notify.includes(json.ID)) {
 				if (CONFIG["eew.show"]) {
 					win.show();
@@ -1549,7 +1515,7 @@ async function FCMdata(data) {
 				else
 					Nmsg = "已抵達 (預警盲區)";
 
-				new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${json.Scale} ${json.Location ?? "未知區域"}`, icon: "TREM.ico" });
+				new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${json.Scale} ${json.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - json.TimeStamp}ms`, icon: "TREM.ico" });
 				Info.Notify.push(json.ID);
 				EEWT.id = json.ID;
 				if (CONFIG["eew.audio"]) audioPlay("./audio/EEW.wav");
@@ -1717,6 +1683,41 @@ async function FCMdata(data) {
 			EarthquakeList[json.ID].Timer = setInterval(() => {
 				main();
 			}, speed);
+			if (geojson != null) mapTW.removeLayer(geojson);
+			const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
+			geojson = L.geoJson(MapData.DmapT, {
+				style: (feature) => {
+					if (feature.properties.COUNTY != undefined) {
+						const name = feature.properties.COUNTY + feature.properties.TOWN;
+						if (GC[name] == 0 || GC[name] == undefined)
+							return {
+								weight      : 1,
+								opacity     : 0.8,
+								color       : "#8E8E8E",
+								dashArray   : "",
+								fillColor   : colors.surfaceVariant,
+								fillOpacity : 0.6,
+							};
+						return {
+							weight      : 1,
+							opacity     : 0.8,
+							color       : "#8E8E8E",
+							dashArray   : "",
+							fillOpacity : 0.8,
+							fillColor   : color(GC[name]),
+						};
+					} else
+						return {
+							weight      : 1,
+							opacity     : 0.8,
+							color       : "#8E8E8E",
+							dashArray   : "",
+							fillColor   : colors.surfaceVariant,
+							fillOpacity : 0.6,
+						};
+				},
+			});
+			mapTW.addLayer(geojson);
 			function main() {
 				if (EarthquakeList[json.ID].Cancel == undefined) {
 					if (CONFIG["shock.p"]) {
