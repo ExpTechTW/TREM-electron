@@ -18,6 +18,7 @@ const MapData = {};
 const Timers = {};
 let Stamp = 0;
 let t = null;
+let EEWLock = false;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let All = [];
@@ -1726,6 +1727,8 @@ async function FCMdata(data) {
 			});
 			mapTW.addLayer(geojson);
 			function main() {
+				if (EEWLock) return;
+				EEWLock = true;
 				if (EarthquakeList[json.ID].Cancel == undefined) {
 					if (CONFIG["shock.p"]) {
 						if (EarthquakeList[json.ID].Pcircle != null)
@@ -1900,6 +1903,7 @@ async function FCMdata(data) {
 						$(roll).fadeIn(200);
 					}
 				}
+				EEWLock = false;
 			}
 			setTimeout(() => {
 				if (CONFIG["webhook.url"] != "") {
