@@ -1434,7 +1434,7 @@ async function FCMdata(data) {
 		if (CONFIG["report.audio"]) audioPlay("./audio/Report.wav");
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
 		const report = await getReportData();
-		addReport(report.response[0], true);
+		addReport(report[0], true);
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
 				Function : "report",
@@ -1924,7 +1924,7 @@ async function FCMdata(data) {
 						msg = msg.replace("%Provider%", "福建省地震局");
 
 					msg = JSON.parse(msg);
-					msg.username = "TREM | 台灣實時地震監測";
+					msg.username = "TREM | 臺灣即時地震監測";
 
 					msg.embeds[0].image.url = "";
 					msg.embeds[0].footer = {

@@ -51,7 +51,6 @@ document.getElementById("client-uuid").title = `${localStorage["UUID"]}`;
 
 const openURL = url => {
 	shell.openExternal(url);
-	return;
 };
 
 // #region 選單
@@ -382,7 +381,7 @@ const webhook = async () => {
 	];
 
 	await new WebhookClient({ url: CONFIG["webhook.url"] })
-		.send({ embeds, username: "TREM | 台灣實時地震監測", avatarURL: "https://cdn.discordapp.com/attachments/976452418114048051/976469802644291584/received_1354357138388018.webp" })
+		.send({ embeds, username: "TREM | 臺灣即時地震監測", avatarURL: "https://cdn.discordapp.com/attachments/976452418114048051/976469802644291584/received_1354357138388018.webp" })
 		.then(m => {
 			showDialog("success",
 				Localization[CONFIG["general.locale"]].Webhook_Dialog_Title || Localization["zh-TW"].Webhook_Dialog_Title,

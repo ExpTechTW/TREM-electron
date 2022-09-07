@@ -58,7 +58,7 @@ const Localization =
 	"zh-TW": {
 		Application_Connecting           : "連線中...",
 		Application_Loading              : "載入中...",
-		Application_Title                : "TREM 台灣即時地震監測",
+		Application_Title                : "TREM 臺灣即時地震監測",
 		Application_Welcome              : "歡迎",
 		Audio_Test                       : "測試音效",
 		Audio_TestStop                   : "停止測試",
