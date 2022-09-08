@@ -403,6 +403,7 @@ function handler(response) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.MaxPGA);
 		if (station[keys[index]] == undefined) continue;
+		const Alert = Date.now() - (AL[keys[index]] ?? 0) < 10000;
 		const Intensity = (NOW.getTime() - Sdata.TimeStamp > 180000) ? "NA" :
 			(amount >= 800) ? 9 :
 				(amount >= 440) ? 8 :
@@ -412,22 +413,19 @@ function handler(response) {
 								(amount >= 25) ? 4 :
 									(amount >= 8) ? 3 :
 										(amount >= 5) ? 2 :
-											(amount >= 3) ? 1 :
+											(amount >= 2.2) ? 1 :
 												0;
-
-		const size = (Intensity == 0 || Intensity == "NA") ? 10 : 15;
-		const Image = (Intensity) ? `./image/${Intensity}.png` :
+		const size = (Intensity == 0 || Intensity == "NA" || !Alert) ? 10 : 15;
+		const Image = (Intensity != 0 && Alert) ? `./image/${Intensity}.png` :
 			(amount > 3.5) ? "./image/0-5.png" :
 				(amount > 3) ? "./image/0-4.png" :
-					(amount > 2.8) ? "./image/0-3.png" :
-						(amount > 2.5) ? "./image/0-2.png" :
+					(amount > 2.5) ? "./image/0-3.png" :
+						(amount > 2) ? "./image/0-2.png" :
 							"./image/0-1.png";
-
 		const stationIcon = L.icon({
 			iconUrl  : Image,
 			iconSize : [size, size],
 		});
-
 		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 		if (!Station[keys[index]]) {
 			Station[keys[index]] = L.marker([station[keys[index]].Lat, station[keys[index]].Long], { keyboard: false })
@@ -467,7 +465,6 @@ function handler(response) {
 				"Intensity" : Intensity,
 				"Time"      : 0,
 			};
-		const Alert = Date.now() - (AL[keys[index]] ?? 0) < 10000;
 		if (Intensity != "NA" && (Intensity != 0 || Alert)) {
 			if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
 			if (ALERT || Unlock)
