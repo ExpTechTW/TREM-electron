@@ -379,11 +379,12 @@ function handler(response) {
 	let A = 0;
 	for (let index = 0; index < Object.keys(Json).length; index++)
 		if (Date.now() - (Json[Object.keys(Json)[index]].alert ?? 0) < 10000)
-			AL[Object.keys(Json)[index]] = Date.now();
+			if (AL[Object.keys(Json)[index]] == undefined || Date.now() - (AL[Object.keys(AL)[index]] ?? 0) >= 10000)
+				AL[Object.keys(Json)[index]] = Date.now();
 	for (let index = 0; index < Object.keys(AL).length; index++)
 		if (Date.now() - (AL[Object.keys(AL)[index]] ?? 0) < 10000) A++;
-	if (A >= 2) ALERT = true;
-	console.log(A);
+	if (A >= 2)
+		ALERT = true;
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.MaxPGA);
@@ -453,10 +454,10 @@ function handler(response) {
 				"Intensity" : Intensity,
 				"Time"      : 0,
 			};
-		if (Intensity != "NA" && (Intensity != 0 || Date.now() - (Sdata.alert ?? 0) < 10000)) {
+		if (Intensity != "NA" && (Intensity != 0 || Date.now() - (AL[keys[index]] ?? 0) < 10000)) {
 			if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
 			if (ALERT || Unlock)
-				if (Date.now() - (Sdata.alert ?? 0) < 10000) {
+				if (Date.now() - (AL[keys[index]] ?? 0) < 10000) {
 					let find = -1;
 					for (let Index = 0; Index < All.length; Index++)
 						if (All[Index].loc == station[keys[index]].Loc) {
