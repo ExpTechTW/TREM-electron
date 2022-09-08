@@ -83,6 +83,7 @@ const EEW = {};
 const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
 let Ping = 9999;
+let ALL = [];
 // #endregion
 
 // #region 初始化
@@ -382,9 +383,22 @@ function handler(response) {
 			if (AL[Object.keys(Json)[index]] == undefined || Date.now() - (AL[Object.keys(AL)[index]] ?? 0) >= 10000)
 				AL[Object.keys(Json)[index]] = Date.now();
 	for (let index = 0; index < Object.keys(AL).length; index++)
-		if (Date.now() - (AL[Object.keys(AL)[index]] ?? 0) < 10000) A++;
-	if (A >= 3)
+		if (Date.now() - (AL[Object.keys(AL)[index]] ?? 0) < 10000)
+			if (ALL.length == 0) {
+				ALL.push(Number(Object.keys(AL)[index].split("-")[3]));
+				A++;
+			} else if (ALL.includes(Number(Object.keys(AL)[index].split("-")[3])))
+				A++;
+			else
+				for (let Index = 0; Index < ALL.length; Index++)
+					if (Math.abs(Number(Object.keys(AL)[index].split("-")[3]) - ALL[Index]) <= 3) {
+						if (!ALL.includes(Number(Object.keys(AL)[index].split("-")[3]))) ALL.push(Number(Object.keys(AL)[index].split("-")[3]));
+						A++;
+					}
+	if (A >= 2)
 		ALERT = true;
+	else if (A == 0)
+		ALL = [];
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.MaxPGA);
@@ -435,7 +449,6 @@ function handler(response) {
 				}
 			});
 		}
-
 		Station[keys[index]]
 			.setIcon(stationIcon)
 			.setZIndexOffset(2000 + amount)
@@ -454,10 +467,11 @@ function handler(response) {
 				"Intensity" : Intensity,
 				"Time"      : 0,
 			};
-		if (Intensity != "NA" && (Intensity != 0 || Date.now() - (AL[keys[index]] ?? 0) < 10000)) {
+		const Alert = Date.now() - (AL[keys[index]] ?? 0) < 10000;
+		if (Intensity != "NA" && (Intensity != 0 || Alert)) {
 			if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
 			if (ALERT || Unlock)
-				if (Date.now() - (AL[keys[index]] ?? 0) < 10000) {
+				if (Alert) {
 					let find = -1;
 					for (let Index = 0; Index < All.length; Index++)
 						if (All[Index].loc == station[keys[index]].Loc) {
