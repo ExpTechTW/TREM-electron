@@ -24,6 +24,7 @@ let UserLocationLon = 121.5198716;
 let All = [];
 const arrive = [];
 let audioList = [];
+const Unlock = fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"));
 let audioList1 = [];
 let locationEEW = {};
 let audioLock = false;
@@ -39,7 +40,7 @@ const Station = {};
 const PGA = {};
 const pga = {};
 let RMT = 1;
-let RMTlimit = [];
+const AL = [];
 let PGALimit = 0;
 let PGAaudio = false;
 let PGAtag = -1;
@@ -374,7 +375,15 @@ function handler(response) {
 		Station[removedKey].remove();
 		delete Station[removedKey];
 	}
-
+	let ALERT = false;
+	let A = 0;
+	for (let index = 0; index < Object.keys(Json).length; index++)
+		if (Date.now() - (Json[Object.keys(Json)[index]].alert ?? 0) < 10000)
+			AL[Object.keys(Json)[index]] = Date.now();
+	for (let index = 0; index < Object.keys(AL).length; index++)
+		if (Date.now() - (AL[Object.keys(AL)[index]] ?? 0) < 10000) A++;
+	if (A >= 2) ALERT = true;
+	console.log(A);
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.MaxPGA);
@@ -444,36 +453,28 @@ function handler(response) {
 				"Intensity" : Intensity,
 				"Time"      : 0,
 			};
-		if (Intensity != "NA" && (Intensity != 0 || Sdata.Alert)) {
+		if (Intensity != "NA" && (Intensity != 0 || Date.now() - (Sdata.alert ?? 0) < 10000)) {
 			if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
-			if (Sdata.Alert || fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"))) {
-				let find = -1;
-				for (let Index = 0; Index < All.length; Index++)
-					if (All[Index].loc == station[keys[index]].Loc) {
-						find = 0;
-						if (All[Index].pga < amount) {
-							All[Index].intensity = Intensity;
-							All[Index].pga = amount;
-							All[Index].time = NOW.getTime();
+			if (ALERT || Unlock)
+				if (Date.now() - (Sdata.alert ?? 0) < 10000) {
+					let find = -1;
+					for (let Index = 0; Index < All.length; Index++)
+						if (All[Index].loc == station[keys[index]].Loc) {
+							find = 0;
+							if (All[Index].pga < amount) {
+								All[Index].intensity = Intensity;
+								All[Index].pga = amount;
+								All[Index].time = NOW.getTime();
+							}
+							break;
 						}
-						break;
-					}
-				if (find == -1)
-					All.push({
-						"loc"       : station[keys[index]].Loc,
-						"intensity" : Intensity,
-						"time"      : NOW.getTime(),
-						"pga"       : amount,
-					});
-				if (CONFIG["earthquake.Real-time-forecast"])
-					limit();
-				else
-				if (RMTlimit.length < 2) {
-					if (!RMTlimit.includes(keys[index])) RMTlimit.push(keys[index]);
-				} else
-					limit();
-
-				function limit() {
+					if (find == -1)
+						All.push({
+							"loc"       : station[keys[index]].Loc,
+							"intensity" : Intensity,
+							"time"      : NOW.getTime(),
+							"pga"       : amount,
+						});
 					if (CONFIG["Real-time.audio"])
 						if (amount > 8 && PGALimit == 0) {
 							PGALimit = 1;
@@ -484,7 +485,7 @@ function handler(response) {
 						}
 					pga[station[keys[index]].PGA].Time = NOW.getTime();
 				}
-			}
+
 			if (MAXPGA.pga < amount && Level != "NA") {
 				MAXPGA.pga = amount;
 				MAXPGA.station = keys[index];
@@ -686,8 +687,7 @@ async function fetchFiles() {
 	dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
 	locationEEW = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
 	dump({ level: 0, message: "Get LocationEEW File", origin: "Location" });
-	if (CONFIG["earthquake.Real-time"])
-		PGAMain();
+	PGAMain();
 }
 
 // #region 用戶所在位置

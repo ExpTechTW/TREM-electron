@@ -42,14 +42,6 @@ const DEFAULT_CONFIG = {
 		"type"  : "CheckBox",
 		"value" : true,
 	},
-	"earthquake.Real-time": {
-		"type"  : "CheckBox",
-		"value" : true,
-	},
-	"earthquake.Real-time-forecast": {
-		"type"  : "CheckBox",
-		"value" : false,
-	},
 	"compatibility.hwaccel": {
 		"type"  : "CheckBox",
 		"value" : true,
@@ -227,7 +219,7 @@ ipcMain.on("saveSetting", (event, setting) => {
 	} catch (error) {
 		dump({ level: 2, message: `Error saving user preference: ${error}`, origin: "Setting" });
 	}
-	return;
+
 });
 
 const lockScroll = state => {
