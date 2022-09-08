@@ -383,7 +383,7 @@ function handler(response) {
 				AL[Object.keys(Json)[index]] = Date.now();
 	for (let index = 0; index < Object.keys(AL).length; index++)
 		if (Date.now() - (AL[Object.keys(AL)[index]] ?? 0) < 10000) A++;
-	if (A >= 2)
+	if (A >= 3)
 		ALERT = true;
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
