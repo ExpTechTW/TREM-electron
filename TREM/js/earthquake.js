@@ -18,7 +18,6 @@ const MapData = {};
 const Timers = {};
 let Stamp = 0;
 let t = null;
-let EEWLock = false;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let All = [];
@@ -1627,7 +1626,7 @@ async function FCMdata(data) {
 
 			}
 			let speed = 500;
-			if (CONFIG["shock.smoothing"]) speed = 0;
+			if (CONFIG["shock.smoothing"]) speed = 15;
 			if (EarthquakeList[json.ID].Timer != undefined) clearInterval(EarthquakeList[json.ID].Timer);
 			if (EarthquakeList.ITimer != undefined) clearInterval(EarthquakeList.ITimer);
 
@@ -1739,8 +1738,6 @@ async function FCMdata(data) {
 			});
 			mapTW.addLayer(geojson);
 			function main() {
-				if (EEWLock) return;
-				EEWLock = true;
 				if (EarthquakeList[json.ID].Cancel == undefined) {
 					if (CONFIG["shock.p"]) {
 						if (EarthquakeList[json.ID].Pcircle != null)
@@ -1906,7 +1903,6 @@ async function FCMdata(data) {
 						mapTW.removeLayer(geojson);
 						for (let index = 0; index < expected.length; index++)
 							map.removeLayer(expected[index]);
-
 						expected = [];
 						$("#alert-box").removeClass("show");
 						// hide minimap
@@ -1915,7 +1911,6 @@ async function FCMdata(data) {
 						$(roll).fadeIn(200);
 					}
 				}
-				EEWLock = false;
 			}
 			setTimeout(() => {
 				if (CONFIG["webhook.url"] != "") {
