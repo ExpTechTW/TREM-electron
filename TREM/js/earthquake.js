@@ -21,9 +21,9 @@ let t = null;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let All = [];
+let AllT = 0;
 const arrive = [];
 let audioList = [];
-const Unlock = fs.existsSync(path.join(app.getPath("userData"), "./unlockAlert.tmp"));
 let audioList1 = [];
 let locationEEW = {};
 let audioLock = false;
@@ -465,26 +465,25 @@ function handler(response) {
 			};
 		if (Intensity != "NA" && (Intensity != 0 || Alert)) {
 			if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
-			if (ALERT || Unlock)
-				if (Alert) {
-					let find = -1;
-					for (let Index = 0; Index < All.length; Index++)
-						if (All[Index].loc == station[keys[index]].Loc) {
-							find = 0;
-							if (All[Index].pga < amount) {
-								All[Index].intensity = Intensity;
-								All[Index].pga = amount;
-								All[Index].time = NOW.getTime();
-							}
-							break;
+			if (Alert) {
+				let find = -1;
+				for (let Index = 0; Index < All.length; Index++)
+					if (All[Index].loc == station[keys[index]].Loc) {
+						find = 0;
+						if (All[Index].pga < amount) {
+							All[Index].intensity = Intensity;
+							All[Index].pga = amount;
 						}
-					if (find == -1)
-						All.push({
-							"loc"       : station[keys[index]].Loc,
-							"intensity" : Intensity,
-							"time"      : NOW.getTime(),
-							"pga"       : amount,
-						});
+						break;
+					}
+				if (find == -1)
+					All.push({
+						"loc"       : station[keys[index]].Loc,
+						"intensity" : Intensity,
+						"pga"       : amount,
+					});
+				AllT = Date.now();
+				if (ALERT) {
 					if (CONFIG["Real-time.audio"])
 						if (amount > 8 && PGALimit == 0) {
 							PGALimit = 1;
@@ -495,6 +494,7 @@ function handler(response) {
 						}
 					pga[station[keys[index]].PGA].Time = NOW.getTime();
 				}
+			}
 
 			if (MAXPGA.pga < amount && Level != "NA") {
 				MAXPGA.pga = amount;
@@ -608,7 +608,6 @@ function handler(response) {
 					for (let i = 0; i < 4; i++) {
 						const dis = Math.sqrt(Math.pow((PGAjson[Object.keys(pga)[index].toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((PGAjson[Object.keys(pga)[index].toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
 						if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
-						console.log(dis + " " + EEW[Object.keys(EEW)[Index]].km / 1000);
 					}
 					if (SKIP >= 4) {
 						skip = true;
@@ -627,8 +626,8 @@ function handler(response) {
 		PGAmark = false;
 		RMT = 1;
 		RMTlimit = [];
-		All = [];
 	}
+	if (Date.now() - AllT >= 240000) All = [];
 	if (Object.keys(PGA).length == 0) PGAaudio = false;
 	if (!PGAaudio) {
 		PGAtag = -1;
@@ -650,7 +649,7 @@ function handler(response) {
 				Time     : NOW.getTime(),
 				Shot     : 1,
 			});
-		}, 5500);
+		}, 2250);
 		if (CONFIG["Real-time.show"])
 			win.show();
 		if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
@@ -661,11 +660,7 @@ function handler(response) {
 	let count = 0;
 	if (All.length <= 8)
 		for (let Index = 0; Index < All.length; Index++, count++) {
-			if (!PGAaudio || count >= 8) break;
-			if (NOW.getTime() - All[Index].time > 30000) {
-				All.splice(Index, 1);
-				continue;
-			}
+			if (count >= 8) break;
 			const container = document.createElement("DIV");
 			container.className = IntensityToClassString(All[Index].intensity);
 			const location = document.createElement("span");
@@ -677,11 +672,7 @@ function handler(response) {
 	else {
 		const Idata = {};
 		for (let Index = 0; Index < All.length; Index++, count++) {
-			if (!PGAaudio || count >= 8) break;
-			if (NOW.getTime() - All[Index].time > 30000) {
-				All.splice(Index, 1);
-				continue;
-			}
+			if (count >= 8) break;
 			const city = All[Index].loc.split(" ")[0];
 			const CPGA = (Idata[city] == undefined) ? 0 : Idata[city];
 			if (All[Index].pga > CPGA) {
@@ -1915,6 +1906,7 @@ async function FCMdata(data) {
 						replay = 0;
 						TimeDesynced = false;
 						INFO = [];
+						All = [];
 						mapTW.removeLayer(geojson);
 						for (let index = 0; index < expected.length; index++)
 							map.removeLayer(expected[index]);
