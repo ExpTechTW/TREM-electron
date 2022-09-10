@@ -113,14 +113,15 @@ async function init() {
 			} else if (replay) {
 				if (!time.classList.contains("replay"))
 					time.classList.add("replay");
-				time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")} ${Ping}ms`;
+				time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 			} else {
 				if (time.classList.contains("replay"))
 					time.classList.remove("replay");
 				if (time.classList.contains("desynced"))
 					time.classList.remove("desynced");
-				time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")} ${Ping}ms`;
+				time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 			}
+			$("#app-version").text(`${app.getVersion()} ${Ping}ms`);
 		}, 500);
 
 	if (!Timers.tsunami)
@@ -260,7 +261,6 @@ async function init() {
 		Timers.fetchFiles = setInterval(fetchFiles, 10 * 60 * 1000);
 	progressbar.value = 1;
 
-	$("#app-version").text(app.getVersion());
 	$("#loading").text(Localization[CONFIG["general.locale"]].Application_Welcome || Localization["zh-TW"].Application_Welcome);
 	$("#load").delay(1000).fadeOut(1000);
 	setInterval(() => {
@@ -282,7 +282,6 @@ async function init() {
 						Zoom = 6.5;
 					if (km > 300000)
 						Zoom = 6;
-
 					const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
 					if (num >= 5)
 						focus([EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], Zoom);
@@ -602,6 +601,21 @@ function handler(response) {
 				color     : color(Intensity),
 				fillColor : "transparent",
 			});
+			let skip = false;
+			if (Object.keys(EEW).length != 0)
+				for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
+					let SKIP = 0;
+					for (let i = 0; i < 4; i++) {
+						const dis = Math.sqrt(Math.pow((PGAjson[Object.keys(pga)[index].toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((PGAjson[Object.keys(pga)[index].toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
+						if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
+						console.log(dis + " " + EEW[Object.keys(EEW)[Index]].km / 1000);
+					}
+					if (SKIP >= 4) {
+						skip = true;
+						break;
+					}
+				}
+			if (skip) continue;
 			if (RMT >= 2) map.addLayer(PGA[Object.keys(pga)[index]]);
 			PGAaudio = true;
 		}
@@ -1499,7 +1513,6 @@ async function FCMdata(data) {
 								Pspeed = 6.5;
 								Sspeed = 3.5;
 							}
-
 						level = Level;
 						value = Math.round((Distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed) - 5;
 						distance = Distance;
@@ -1578,6 +1591,7 @@ async function FCMdata(data) {
 					time : 0,
 					Time : json.Time,
 					id   : json.ID,
+					km   : 0,
 				};
 				Info.Alert = json.ID + json.Version;
 				value = Math.round((distance - ((NOW.getTime() - json.Time) / 1000) * Sspeed) / Sspeed);
@@ -1768,6 +1782,7 @@ async function FCMdata(data) {
 					if (EarthquakeList[json.ID].Depth != null) map.removeLayer(EarthquakeList[json.ID].Depth);
 					if (km > 0) {
 						const KM = Math.sqrt(km);
+						EEW[json.ID].km = KM;
 						EarthquakeList[json.ID].Scircle = L.circle([Number(json.NorthLatitude), Number(json.EastLongitude)], {
 							color       : json.Alert ? "red" : "orange",
 							fillColor   : "#F8E7E7",
