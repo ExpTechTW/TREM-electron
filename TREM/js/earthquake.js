@@ -633,7 +633,7 @@ function handler(response) {
 		PGAtag = -1;
 		PGALimit = 0;
 	}
-	if (All.length != 0 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
+	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 		if (CONFIG["Real-time.audio"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
 				audioPlay("./audio/Shindo2.wav");
