@@ -1791,10 +1791,15 @@ async function FCMdata(data) {
 					} else {
 						let Progress = 0;
 						const num = Math.round(((NOW.getTime() - json.Time) * Sspeed / (json.Depth * 1000)) * 100);
-						if (num > 35) Progress = 1;
-						if (num > 55) Progress = 2;
-						if (num > 75) Progress = 3;
-						if (num > 98) Progress = 4;
+						if (num > 15) Progress = 1;
+						if (num > 25) Progress = 2;
+						if (num > 35) Progress = 3;
+						if (num > 45) Progress = 4;
+						if (num > 55) Progress = 5;
+						if (num > 65) Progress = 6;
+						if (num > 75) Progress = 7;
+						if (num > 85) Progress = 8;
+						if (num > 98) Progress = 9;
 						const myIcon = L.icon({
 							iconUrl  : `./image/progress${Progress}.png`,
 							iconSize : [50, 50],
