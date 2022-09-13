@@ -1620,7 +1620,7 @@ async function FCMdata(data) {
 									}
 								}
 							}
-						}, 0);
+						}, 50);
 					}
 
 			}
