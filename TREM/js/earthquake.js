@@ -356,6 +356,7 @@ function PGAMain() {
 			Response = response.data;
 			handler(Response);
 		}).catch((err) => {
+			Ping = 999;
 			PGAMainLock = false;
 			TimeDesynced = true;
 			handler(Response);
