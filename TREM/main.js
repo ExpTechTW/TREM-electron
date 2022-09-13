@@ -1,4 +1,5 @@
 const { BrowserWindow, Menu, Tray, app, globalShortcut, ipcMain, nativeImage, shell } = require("electron");
+const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 const pushReceiver = require("electron-fcm-push-receiver");
@@ -23,6 +24,13 @@ app.setLoginItemSettings({
 });
 
 function createWindow() {
+	fetch("https://exptech.com.tw/get?Function=EEW").catch(() => {
+		setInterval(() => {
+			fetch("https://exptech.com.tw/get?Function=EEW").then(() => {
+				restart();
+			});
+		}, 5000);
+	});
 	MainWindow = new BrowserWindow({
 		title          : "TREM",
 		width          : 1280,
@@ -92,7 +100,7 @@ if (!shouldQuit)
 	app.quit();
 else {
 	app.on("second-instance", (event, argv, cwd) => {
-		MainWindow.show();
+		if (MainWindow != null) MainWindow.show();
 	});
 	app.whenReady().then(() => {
 		const iconPath = path.join(__dirname, "TREM.ico");
@@ -137,10 +145,11 @@ else {
 		tray.setContextMenu(contextMenu);
 		tray.setIgnoreDoubleClickEvents(true);
 		tray.on("click", (e) => {
-			if (MainWindow.isVisible())
-				MainWindow.hide();
-			else
-				MainWindow.show();
+			if (MainWindow != null)
+				if (MainWindow.isVisible())
+					MainWindow.hide();
+				else
+					MainWindow.show();
 		});
 		createWindow();
 	});
@@ -181,10 +190,14 @@ ipcMain.on("reset", (event, arg) => {
 });
 
 ipcMain.on("restart", () => {
+	restart();
+});
+
+function restart() {
 	app.relaunch();
 	if (SettingWindow != null) SettingWindow.close();
 	app.quit();
-});
+}
 
 ipcMain.on("screenshotEEW", async (event, json) => {
 	const folder = path.join(app.getPath("userData"), "EEW");
