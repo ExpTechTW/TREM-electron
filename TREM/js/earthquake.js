@@ -44,7 +44,6 @@ let PGALimit = 0;
 let PGAaudio = false;
 let PGAtag = -1;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
-let expected = [];
 const Info = { Notify: [], Warn: [], Focus: [] };
 const Focus = [];
 let PGAmark = false;
@@ -63,7 +62,6 @@ let station = {};
 let PGAjson = {};
 let PalertT = 0;
 let PGAMainClock = null;
-let geojson = null;
 let Pgeojson = null;
 let map_geoJson;
 let clickT = 0;
@@ -83,6 +81,8 @@ const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
 let Ping = 9999;
 let ALL = [];
+let GeoJson = null;
+let GeoJsonID = 0;
 // #endregion
 
 // #region 初始化
@@ -93,7 +93,6 @@ win.on("show", () => {
 	focus();
 });
 
-let TimeDesynced = false;
 async function init() {
 	$("#loading").text(Localization[CONFIG["general.locale"]].Application_Loading || Localization["zh-TW"].Application_Loading);
 	const time = document.getElementById("time");
@@ -107,7 +106,7 @@ async function init() {
 	dump({ level: 3, message: "Initializing clock", origin: "Clock" });
 	if (!Timers.clock)
 		Timers.clock = setInterval(() => {
-			if (TimeDesynced) {
+			if (TimerDesynced) {
 				if (!time.classList.contains("desynced"))
 					time.classList.add("desynced");
 			} else if (replay) {
@@ -352,13 +351,13 @@ function PGAMain() {
 		}).then((response) => {
 			Ping = Date.now() - _Ping;
 			PGAMainLock = false;
-			TimeDesynced = false;
+			TimerDesynced = false;
 			Response = response.data;
 			handler(Response);
 		}).catch((err) => {
 			Ping = 999;
 			PGAMainLock = false;
-			TimeDesynced = true;
+			TimerDesynced = true;
 			handler(Response);
 		});
 	}, 1000);
@@ -1236,7 +1235,7 @@ ipcMain.once("start", () => {
 								"UUID"          : localStorage.UUID,
 								"ID"            : list[index],
 							};
-							dump({ level: 3, message: `Timer status: ${TimeDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+							dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 							axios.post(PostAddressIP, data)
 								.catch((error) => {
 									dump({ level: 2, message: error, origin: "Verbose" });
@@ -1252,7 +1251,7 @@ ipcMain.once("start", () => {
 						"FormatVersion" : 3,
 						"UUID"          : localStorage.UUID,
 					};
-					dump({ level: 3, message: `Timer status: ${TimeDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 					axios.post(PostAddressIP, data)
 						.catch((error) => {
 							dump({ level: 2, message: error, origin: "Verbose" });
@@ -1488,10 +1487,6 @@ async function FCMdata(data) {
 			const GC = {};
 			let level;
 			let MaxIntensity = 0;
-			if (expected.length != 0)
-				for (let index = 0; index < expected.length; index++)
-					map.removeLayer(expected[index]);
-
 			for (let index = 0; index < Object.keys(locationEEW).length; index++) {
 				const city = Object.keys(locationEEW)[index];
 				for (let Index = 0; Index < Object.keys(locationEEW[city]).length; Index++) {
@@ -1516,10 +1511,8 @@ async function FCMdata(data) {
 			}
 
 			const Intensity = IntensityN(level);
-			if (Intensity < Number(CONFIG["eew.Intensity"]) && !json.Replay) {
-				TimeDesynced = false;
+			if (Intensity < Number(CONFIG["eew.Intensity"]) && !json.Replay)
 				return;
-			}
 			if (!Info.Notify.includes(json.ID)) {
 				if (CONFIG["eew.show"]) {
 					win.show();
@@ -1708,9 +1701,8 @@ async function FCMdata(data) {
 			EarthquakeList[json.ID].Timer = setInterval(() => {
 				main();
 			}, speed);
-			if (geojson != null) mapTW.removeLayer(geojson);
 			const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
-			geojson = L.geoJson(MapData.DmapT, {
+			EarthquakeList[json.ID].geojson = L.geoJson(MapData.DmapT, {
 				style: (feature) => {
 					if (feature.properties.COUNTY != undefined) {
 						const name = feature.properties.COUNTY + feature.properties.TOWN;
@@ -1742,7 +1734,7 @@ async function FCMdata(data) {
 						};
 				},
 			});
-			mapTW.addLayer(geojson);
+			mapTW.addLayer(EarthquakeList[json.ID].geojson);
 			function main() {
 				if (EarthquakeList[json.ID].Cancel == undefined) {
 					if (CONFIG["shock.p"]) {
@@ -1901,27 +1893,23 @@ async function FCMdata(data) {
 					delete EarthquakeList[json.ID];
 					delete EEW[json.ID];
 					if (Object.keys(EarthquakeList).length == 0) {
+						if (GeoJson != null) mapTW.removeLayer(GeoJson);
+						GeoJson = null;
 						clearInterval(t);
 						audioList = [];
 						audioList1 = [];
 						Second = -1;
-						clearInterval(ITimer);
 						// hide eew alert
-						ITimer = null;
 						ticker = null;
 						replay = 0;
-						TimeDesynced = false;
 						INFO = [];
 						All = [];
-						mapTW.removeLayer(geojson);
-						for (let index = 0; index < expected.length; index++)
-							map.removeLayer(expected[index]);
-						expected = [];
 						$("#alert-box").removeClass("show");
 						// hide minimap
 						$("#map-tw").removeClass("show");
 						// restore reports
 						$(roll).fadeIn(200);
+						clearInterval(ITimer);
 					}
 				}
 			}
@@ -1980,7 +1968,14 @@ function updateText() {
 	$("#alert-magnitude").text(INFO[TINFO].alert_magnitude);
 	$("#alert-depth").text(INFO[TINFO].alert_depth);
 	$("#alert-box").addClass("show");
-
+	if (GeoJsonID != INFO[TINFO].ID) {
+		if (GeoJson != null) mapTW.removeLayer(GeoJson);
+		if (EarthquakeList[INFO[TINFO].ID].geojson != undefined) {
+			GeoJson = EarthquakeList[INFO[TINFO].ID].geojson;
+			mapTW.addLayer(GeoJson);
+			GeoJsonID = INFO[TINFO].ID;
+		}
+	}
 
 	if (EarthquakeList[INFO[TINFO].ID].Cancel != undefined) {
 		document.getElementById("alert-s").innerText = "X";
