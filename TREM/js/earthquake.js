@@ -79,7 +79,7 @@ let auto = false;
 const EEW = {};
 const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
-let Ping = 9999;
+let Ping = 0;
 let ALL = [];
 let GeoJson = null;
 let GeoJsonID = 0;
@@ -120,7 +120,8 @@ async function init() {
 					time.classList.remove("desynced");
 				time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 			}
-			$("#app-version").text(`${app.getVersion()} ${Ping}ms`);
+			const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
+			$("#app-version").text(`${app.getVersion()} ${Delay}ms`);
 		}, 500);
 
 	if (!Timers.tsunami)
@@ -340,7 +341,6 @@ function PGAMain() {
 		setTimeout(() => {
 			cancel();
 		}, 1500);
-		const _Ping = Date.now();
 		axios({
 			method      : "post",
 			url         : PostAddressIP,
@@ -349,18 +349,17 @@ function PGAMain() {
 				cancel = c;
 			}),
 		}).then((response) => {
-			Ping = Date.now() - _Ping;
+			Ping = Date.now();
 			PGAMainLock = false;
 			TimerDesynced = false;
 			Response = response.data;
 			handler(Response);
 		}).catch((err) => {
-			Ping = 999;
 			PGAMainLock = false;
 			TimerDesynced = true;
 			handler(Response);
 		});
-	}, 1000);
+	}, 500);
 }
 
 function handler(response) {
