@@ -1566,13 +1566,9 @@ async function FCMdata(data) {
 			if (!Info.Warn.includes(json.ID) && MaxIntensity >= 4) {
 				Info.Warn.push(json.ID);
 				json.Alert = true;
-				if (CONFIG["eew.audio"]) {
-					audioPlay("./audio/Alert.wav");
-					audioPlay("./audio/Alert.wav");
-					audioPlay("./audio/Alert.wav");
-					audioPlay("./audio/Alert.wav");
-					audioPlay("./audio/Alert.wav");
-				}
+				if (CONFIG["eew.audio"])
+					for (let index = 0; index < 5; index++)
+						audioPlay("./audio/Alert.wav");
 			} else
 				json.Alert = false;
 
