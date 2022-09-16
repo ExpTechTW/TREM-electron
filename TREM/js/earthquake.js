@@ -64,7 +64,7 @@ let PalertT = 0;
 let PGAMainClock = null;
 let Pgeojson = null;
 let map_geoJson;
-let clickT = 0;
+const clickT = 0;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -1114,15 +1114,19 @@ function addReport(report, prepend = false) {
 		Div.style.backgroundColor = `${color(report.data[0].areaIntensity)}cc`;
 		ReportCache[report.originTime] = report;
 		Div.addEventListener("click", (event) => {
-			if (event.detail == 2 && report.ID.length != 0) {
+			ReportClick(report.originTime);
+		});
+		Div.addEventListener("contextmenu", (event) => {
+			if (replay != 0) return;
+			if (report.ID.length != 0) {
 				localStorage.Test = true;
 				localStorage.TestID = report.ID;
 				ipcRenderer.send("restart");
-			} else if (NOW.getTime() - clickT > 150)
-				setTimeout(() => {
-					clickT = NOW.getTime();
-					ReportClick(report.originTime);
-				}, 100);
+			} else {
+				replay = new Date(report.originTime).getTime() - 25000;
+				replayT = NOW.getTime();
+				setTimeout(() => {replay = 0;}, 240000);
+			}
 		});
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
@@ -1640,7 +1644,9 @@ async function FCMdata(data) {
 			if (json.Replay) {
 				replay = json.timestamp;
 				replayT = NOW.getTime();
-			}
+			} else
+				replay = 0;
+
 			if (json.Test)
 				classString += "eew-test";
 			else if (json.Alert)

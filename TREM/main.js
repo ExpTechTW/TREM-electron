@@ -14,8 +14,8 @@ if (process.argv.includes("--start")) _hide = true;
 if (process.argv.includes("--dev")) _devMode = true;
 
 const latestLog = path.join(app.getPath("logs"), "latest.log");
-const filetime = fs.statSync(latestLog).mtime;
 if (fs.existsSync(latestLog)) {
+	const filetime = fs.statSync(latestLog).mtime;
 	console.log(filetime);
 	const filename = (new Date(filetime.getTime() - (filetime.getTimezoneOffset() * 60000))).toISOString().slice(0, -1).replace(/:+|\.+/g, "-");
 	fs.renameSync(path.join(app.getPath("logs"), "latest.log"), path.join(app.getPath("logs"), `${filename}.log`));
