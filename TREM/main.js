@@ -52,10 +52,8 @@ function createWindow() {
 	MainWindow.loadFile("./index.html");
 	MainWindow.setMenu(null);
 	pushReceiver.setup(MainWindow.webContents);
-
 	if (process.platform === "win32")
 		app.setAppUserModelId("TREM | 臺灣即時地震監測");
-
 	MainWindow.on("close", (event) => {
 		if (app.quitting)
 			MainWindow = null;
@@ -66,6 +64,10 @@ function createWindow() {
 				SettingWindow.close();
 		}
 	});
+	setTimeout(() => {
+		if (!fs.existsSync(path.join(app.getPath("userData"), "Session Storage")))
+			restart();
+	}, 5000);
 }
 
 function createSettingWindow() {
