@@ -1,6 +1,15 @@
-const latestLog = path.join(app.getPath("logs"), "latest.log");
-console.log(latestLog);
-fs.writeFileSync(latestLog, "", { encoding: "utf8", flag: "w" });
+/* eslint-disable no-empty-function */
+const Now = new Date();
+const latestLog = path.join(app.getPath("logs"), `${Now.getFullYear()}_${Now.getMonth() + 1}_${Now.getDate()}.log`);
+if (fs.existsSync(path.join(app.getPath("logs"), latestLog)))
+	fs.writeFileSync(latestLog, "", { encoding: "utf8", flag: "w" });
+
+fs.readdir(app.getPath("logs"), (err, list) => {
+	for (let index = 0; index < list.length; index++)
+		fs.stat(path.join(app.getPath("logs"), list[index]), (err, date) => {
+			if (Date.now() - date.ctimeMs > 86400000 * 3) fs.unlink(path.join(app.getPath("logs"), list[index]), () => {});
+		});
+});
 
 /**
  * Dump a message.
