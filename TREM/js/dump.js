@@ -1,5 +1,4 @@
 const latestLog = path.join(app.getPath("logs"), "latest.log");
-console.log(latestLog);
 fs.writeFileSync(latestLog, "", { encoding: "utf8", flag: "w" });
 
 /**

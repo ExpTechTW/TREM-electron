@@ -13,6 +13,14 @@ let _devMode = false;
 if (process.argv.includes("--start")) _hide = true;
 if (process.argv.includes("--dev")) _devMode = true;
 
+const latestLog = path.join(app.getPath("logs"), "latest.log");
+const filetime = fs.statSync(latestLog).mtime;
+if (fs.existsSync(latestLog)) {
+	console.log(filetime);
+	const filename = (new Date(filetime.getTime() - (filetime.getTimezoneOffset() * 60000))).toISOString().slice(0, -1).replace(/:+|\.+/g, "-");
+	fs.renameSync(path.join(app.getPath("logs"), "latest.log"), path.join(app.getPath("logs"), `${filename}.log`));
+}
+
 if (fs.existsSync(__dirname.replace("trem\\resources\\app", "trem_data")) && fs.existsSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`)) {
 	const config = JSON.parse(fs.readFileSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`).toString());
 	if (config["compatibility.hwaccel"] != undefined && !config["compatibility.hwaccel"]) app.disableHardwareAcceleration();
@@ -135,10 +143,6 @@ else {
 				label : "強制關閉",
 				type  : "normal",
 				click : () => {
-					const now = new Date();
-					const nowTime = (new Date(now.getTime() - (now.getTimezoneOffset() * 60000))).toISOString().slice(0, -1).replace(/:+|\.+/g, "-");
-					if (fs.existsSync(path.join(app.getPath("logs"), "latest.log")))
-						fs.renameSync(path.join(app.getPath("logs"), "latest.log"), path.join(app.getPath("logs"), `${nowTime}.log`));
 					app.exit(0);
 				},
 			},
@@ -173,8 +177,7 @@ app.on("window-all-closed", () => {
 });
 
 app.on("before-quit", () => {
-	app.quitting = true;
-	if (tray)
+	app.quitting = true;if (tray)
 		tray.destroy();
 });
 
