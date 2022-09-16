@@ -695,12 +695,15 @@ function handler(response) {
 }
 
 async function fetchFiles() {
-	const update = await (await fetch("https://api.github.com/repos/ExpTechTW/TREM/releases")).json();
-	if (update[0]["tag_name"] != app.getVersion())
-		if (!Update) {
-			Update = true;
-			new Notification(`發現新版本! ${update[0]["tag_name"]}`, { body: "請至下方連結下載新版本\nhttps://exptech.com.tw/f?v=trem", icon: "TREM.ico" });
-		}
+	if (!Update) {
+		const update = await (await fetch("https://api.github.com/repos/ExpTechTW/TREM/releases")).json();
+		if (update[0]["tag_name"] != app.getVersion())
+			for (let index = 0; index < update.length; index++)
+				if (update[index]["tag_name"] == app.getVersion()) {
+					Update = true;
+					new Notification(`發現新版本! ${update[0]["tag_name"]}`, { body: "請至下方連結下載新版本\nhttps://exptech.com.tw/f?v=trem", icon: "TREM.ico" });
+				}
+	}
 	Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
 	dump({ level: 0, message: "Get Location File", origin: "Location" });
 	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
