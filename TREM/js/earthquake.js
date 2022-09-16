@@ -114,6 +114,7 @@ async function init() {
 				if (!time.classList.contains("replay"))
 					time.classList.add("replay");
 				time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
+				if (NOW.getTime() - replayT > 240000) replay = 0;
 			} else {
 				if (time.classList.contains("replay"))
 					time.classList.remove("replay");
@@ -1125,7 +1126,6 @@ function addReport(report, prepend = false) {
 			} else {
 				replay = new Date(report.originTime).getTime() - 25000;
 				replayT = NOW.getTime();
-				setTimeout(() => {replay = 0;}, 240000);
 			}
 		});
 		if (prepend) {
