@@ -1,8 +1,8 @@
 ---
 name: "\U0001F6A7問題回報"
 about: 請詳細描述你遇到的問題協助我們排除問題
-title: "[問題回報] "
-labels: 錯誤
+title: ""
+labels: 
 assignees: ''
 ---
 
