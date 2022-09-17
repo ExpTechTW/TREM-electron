@@ -64,7 +64,6 @@ let PalertT = 0;
 let PGAMainClock = null;
 let Pgeojson = null;
 let map_geoJson;
-const clickT = 0;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
