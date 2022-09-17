@@ -894,7 +894,7 @@ async function ReportClick(time) {
 								if (Station.stationIntensity.unit == "強") Intensity += "+";
 								if (Station.stationIntensity.unit == "弱") Intensity += "-";
 								const myIcon = L.icon({
-									iconUrl  : `./image/${IntensityI(Intensity)}.png`,
+									iconUrl  : `./image/${IntensityN(Intensity)}.png`,
 									iconSize : [20, 20],
 								});
 								const ReportMark = L.marker([Station.stationLat.$t, Station.stationLon.$t], { icon: myIcon });
