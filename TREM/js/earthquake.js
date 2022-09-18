@@ -1476,7 +1476,7 @@ async function FCMdata(data) {
 		}, 5000);
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
 		if (!json.Replay && !json.Test) {
-			if (json.Function == "ICL_earthquake" && !CONFIG["accept.eew.ICL"]) return;
+			if (json.Function == "SCDZJ_earthquake" && !CONFIG["accept.eew.SCDZJ"]) return;
 			if (json.Function == "NIED_earthquake" && !CONFIG["accept.eew.NIED"]) return;
 			if (json.Function == "JMA_earthquake" && !CONFIG["accept.eew.JMA"]) return;
 			if (json.Function == "KMA_earthquake" && !CONFIG["accept.eew.KMA"]) return;
@@ -1940,11 +1940,17 @@ async function FCMdata(data) {
 					let msg = CONFIG["webhook.body"];
 					msg = msg.replace("%Depth%", json.Depth).replace("%NorthLatitude%", json.NorthLatitude).replace("%Time%", json["UTC+8"]).replace("%EastLongitude%", json.EastLongitude).replace("%Scale%", json.Scale);
 					if (json.Function == "earthquake")
-						msg = msg.replace("%Provider%", "中華民國交通部中央氣象局");
-					else if (json.Function == "JP_earthquake")
-						msg = msg.replace("%Provider%", "日本氣象廳");
-					else if (json.Function == "CN_earthquake")
+						msg = msg.replace("%Provider%", "交通部中央氣象局");
+					else if (json.Function == "SCDZJ_earthquake")
+						msg = msg.replace("%Provider%", "四川省地震局");
+					else if (json.Function == "FJDZJ_earthquake")
 						msg = msg.replace("%Provider%", "福建省地震局");
+					else if (json.Function == "NIED_earthquake")
+						msg = msg.replace("%Provider%", "防災科学技術研究所");
+					else if (json.Function == "JMA_earthquake")
+						msg = msg.replace("%Provider%", "気象庁");
+					else if (json.Function == "KMA_earthquake")
+						msg = msg.replace("%Provider%", "기상청氣象廳");
 
 					msg = JSON.parse(msg);
 					msg.username = "TREM | 臺灣即時地震監測";
