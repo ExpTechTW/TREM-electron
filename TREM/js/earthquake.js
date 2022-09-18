@@ -631,8 +631,6 @@ async function handler(response) {
 		PGAtag = -1;
 		PGALimit = 0;
 	}
-	console.log(All[0].intensity);
-	console.log(PGAtag);
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 		if (CONFIG["Real-time.audio"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
@@ -1564,7 +1562,7 @@ async function FCMdata(data) {
 					}
 				}
 			}
-			if (!Info.Warn.includes(json.ID) && MaxIntensity >= 4) {
+			if (EEW[json.ID] == undefined && !Info.Warn.includes(json.ID) && MaxIntensity >= 4) {
 				Info.Warn.push(json.ID);
 				json.Alert = true;
 				if (CONFIG["eew.audio"])
