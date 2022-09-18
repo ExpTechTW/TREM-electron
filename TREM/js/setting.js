@@ -89,6 +89,7 @@ fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/st
 			const option = document.createElement("option");
 			option.text = `${loc[Object.keys(loc)[index]].Loc} ${Object.keys(loc)[index]}`;
 			option.value = Object.keys(loc)[index];
+			if (Object.keys(loc)[index] == CONFIG["Real-time.station"]) option.selected = true;
 			select.appendChild(option);
 		}
 	});
