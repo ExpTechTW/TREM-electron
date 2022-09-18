@@ -559,8 +559,7 @@ async function handler(response) {
 								};
 							return {
 								color       : colors.secondary,
-								weight      : 0.4,
-								opacity     : 0,
+								weight      : 0.8,
 								fillColor   : color(PLoc[name]),
 								fillOpacity : 1,
 							};
