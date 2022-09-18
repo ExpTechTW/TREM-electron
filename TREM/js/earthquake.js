@@ -1031,6 +1031,7 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
 		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
+		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == CONFIG["general.locale"] ? "unset" : "none");
 
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
@@ -1083,6 +1084,7 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
 		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
+		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == CONFIG["general.locale"] ? "unset" : "none");
 
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
