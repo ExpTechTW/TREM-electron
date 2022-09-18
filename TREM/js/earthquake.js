@@ -33,6 +33,7 @@ const MarkList = [];
 const EarthquakeList = {};
 let marker = null;
 let map, mapTW;
+const ALERTtime = 0;
 let PGAMainLock = false;
 const Station = {};
 const PGA = {};
@@ -397,9 +398,10 @@ async function handler(response) {
 		ALL = [];
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
-		const amount = Number(Sdata.MaxPGA);
+		let amount = Number(Sdata.MaxPGA);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = Date.now() - (AL[keys[index]] ?? 0) < 10000;
+		const Alert = Date.now() - (AL[keys[index]] ?? 0) < 60000;
+		if (Alert && ALERT) amount = Sdata.PeriodPGA;
 		const Intensity = (NOW.getTime() - Sdata.TimeStamp > 180000) ? "NA" :
 			(amount >= 800) ? 9 :
 				(amount >= 440) ? 8 :
