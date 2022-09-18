@@ -339,7 +339,7 @@ function PGAMain() {
 		let cancel;
 		setTimeout(() => {
 			cancel();
-		}, 1500);
+		}, 2500);
 		axios({
 			method      : "post",
 			url         : PostAddressIP,
