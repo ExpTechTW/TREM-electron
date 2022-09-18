@@ -26,7 +26,7 @@ const DEFAULT_CONFIG = {
 		"type"  : "CheckBox",
 		"value" : true,
 	},
-	"accept.eew.ICL": {
+	"accept.eew.SCDZJ": {
 		"type"  : "CheckBox",
 		"value" : true,
 	},
