@@ -363,7 +363,7 @@ function PGAMain() {
 	}, 500);
 }
 
-function handler(response) {
+async function handler(response) {
 	if (response.state != "Success") return;
 	const Json = response.response;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
@@ -534,42 +534,44 @@ function handler(response) {
 			if (PalertT != PAlert.timestamp && Object.keys(PLoc).length != 0) {
 				PalertT = PAlert.timestamp;
 				if (Pgeojson == null) {
-					if (CONFIG["Real-time.show"])
-						win.show();
+					if (CONFIG["Real-time.show"]) win.show();
 					if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
 					win.setAlwaysOnTop(false);
 					if (CONFIG["Real-time.audio"]) audioPlay("./audio/palert.wav");
 				}
 				if (Pgeojson != null) map.removeLayer(Pgeojson);
-				Pgeojson = L.geoJson(MapData.DmapT, {
-					style: (feature) => {
-						if (feature.properties.COUNTY != undefined) {
-							const name = feature.properties.COUNTY + " " + feature.properties.TOWN;
+				const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
+				Pgeojson = L.geoJson.vt(MapData.DmapT, {
+					minZoom   : 4,
+					maxZoom   : 12,
+					tolerance : 10,
+					buffer    : 256,
+					debug     : 0,
+					style     : (properties) => {
+						if (properties.COUNTY != undefined) {
+							const name = properties.COUNTY + " " + properties.TOWN;
 							if (PLoc[name] == 0 || PLoc[name] == undefined)
 								return {
+									color       : "transparent",
 									weight      : 0,
 									opacity     : 0,
-									color       : "#8E8E8E",
-									dashArray   : "",
-									fillOpacity : 0,
 									fillColor   : "transparent",
+									fillOpacity : 0,
 								};
 							return {
-								weight      : 0,
+								color       : colors.secondary,
+								weight      : 0.4,
 								opacity     : 0,
-								color       : "#8E8E8E",
-								dashArray   : "",
-								fillOpacity : 0.8,
 								fillColor   : color(PLoc[name]),
+								fillOpacity : 1,
 							};
 						} else
 							return {
+								color       : "transparent",
 								weight      : 0,
 								opacity     : 0,
-								color       : "#8E8E8E",
-								dashArray   : "",
-								fillOpacity : 0,
 								fillColor   : "transparent",
+								fillOpacity : 0,
 							};
 					},
 				});
@@ -1379,52 +1381,52 @@ async function FCMdata(data) {
 				Tsunami.Cross = Cross;
 				Tsunami.Time = NOW.getTime();
 				map.addLayer(Cross);
-				TSUNAMI["E"] = L.geoJson(MapData.E, {
+				TSUNAMI["E"] = L.geoJson.vt(MapData.E, {
 					style: {
-						weight    : 10,
-						opacity   : 1,
-						color     : Tcolor(json.Addition[0].areaColor),
-						fillColor : "transparent",
+						weight  : 10,
+						opacity : 1,
+						color   : Tcolor(json.Addition[0].areaColor),
+						fill    : false,
 					},
 				});
-				TSUNAMI["EN"] = L.geoJson(MapData.EN, {
+				TSUNAMI["EN"] = L.geoJson.vt(MapData.EN, {
 					style: {
-						weight    : 10,
-						opacity   : 1,
-						color     : Tcolor(json.Addition[1].areaColor),
-						fillColor : "transparent",
+						weight  : 10,
+						opacity : 1,
+						color   : Tcolor(json.Addition[1].areaColor),
+						fill    : false,
 					},
 				});
-				TSUNAMI["ES"] = L.geoJson(MapData.ES, {
+				TSUNAMI["ES"] = L.geoJson.vt(MapData.ES, {
 					style: {
-						weight    : 10,
-						opacity   : 1,
-						color     : Tcolor(json.Addition[2].areaColor),
-						fillColor : "transparent",
+						weight  : 10,
+						opacity : 1,
+						color   : Tcolor.vt(json.Addition[2].areaColor),
+						fill    : false,
 					},
 				});
-				TSUNAMI["N"] = L.geoJson(MapData.N, {
+				TSUNAMI["N"] = L.geoJson.vt(MapData.N, {
 					style: {
-						weight    : 10,
-						opacity   : 1,
-						color     : Tcolor(json.Addition[3].areaColor),
-						fillColor : "transparent",
+						weight  : 10,
+						opacity : 1,
+						color   : Tcolor.vt(json.Addition[3].areaColor),
+						fill    : false,
 					},
 				});
-				TSUNAMI["WS"] = L.geoJson(MapData.WS, {
+				TSUNAMI["WS"] = L.geoJson.vt(MapData.WS, {
 					style: {
-						weight    : 10,
-						opacity   : 1,
-						color     : Tcolor(json.Addition[4].areaColor),
-						fillColor : "transparent",
+						weight  : 10,
+						opacity : 1,
+						color   : Tcolor(json.Addition[4].areaColor),
+						fill    : false,
 					},
 				});
-				TSUNAMI["W"] = L.geoJson(MapData.W, {
+				TSUNAMI["W"] = L.geoJson.vt(MapData.W, {
 					style: {
-						weight    : 10,
-						opacity   : 1,
-						color     : Tcolor(json.Addition[5].areaColor),
-						fillColor : "transparent",
+						weight  : 10,
+						opacity : 1,
+						color   : Tcolor(json.Addition[5].areaColor),
+						fill    : false,
 					},
 				});
 				map.addLayer(TSUNAMI["E"]);
@@ -1712,33 +1714,35 @@ async function FCMdata(data) {
 				main();
 			}, speed);
 			const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
-			EarthquakeList[json.ID].geojson = L.geoJson(MapData.DmapT, {
-				style: (feature) => {
-					if (feature.properties.COUNTY != undefined) {
-						const name = feature.properties.COUNTY + feature.properties.TOWN;
+			EarthquakeList[json.ID].geojson = L.geoJson.vt(MapData.DmapT, {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				style     : (properties) => {
+					if (properties.COUNTY != undefined) {
+						const name = properties.COUNTY + properties.TOWN;
 						if (GC[name] == 0 || GC[name] == undefined)
 							return {
-								weight      : 1,
+								color       : colors.primary,
+								weight      : 0.4,
 								opacity     : 0.8,
-								color       : "#8E8E8E",
-								dashArray   : "",
 								fillColor   : colors.surfaceVariant,
 								fillOpacity : 0.6,
 							};
 						return {
-							weight      : 1,
+							color       : colors.primary,
+							weight      : 0.6,
 							opacity     : 0.8,
-							color       : "#8E8E8E",
-							dashArray   : "",
-							fillOpacity : 0.8,
 							fillColor   : color(GC[name]),
+							fillOpacity : 0.8,
 						};
 					} else
 						return {
-							weight      : 1,
+							weight      : 0.6,
 							opacity     : 0.8,
-							color       : "#8E8E8E",
-							dashArray   : "",
+							color       : colors.primary,
 							fillColor   : colors.surfaceVariant,
 							fillOpacity : 0.6,
 						};
