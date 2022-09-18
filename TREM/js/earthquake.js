@@ -33,7 +33,6 @@ const MarkList = [];
 const EarthquakeList = {};
 let marker = null;
 let map, mapTW;
-const ALERTtime = 0;
 let PGAMainLock = false;
 const Station = {};
 const PGA = {};

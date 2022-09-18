@@ -8,7 +8,6 @@ const toggleNav = state => {
 		$("#nav-rail").addClass("hide");
 
 	$("#togglenav_btn span").text(state ? "first_page" : "start");
-	return;
 };
 
 const changeView = (args, el, event) => {
