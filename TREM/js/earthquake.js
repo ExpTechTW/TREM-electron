@@ -1920,6 +1920,7 @@ async function FCMdata(data) {
 						// restore reports
 						$(roll).fadeIn(200);
 						clearInterval(ITimer);
+						ITimer = null;
 					}
 				}
 			}
