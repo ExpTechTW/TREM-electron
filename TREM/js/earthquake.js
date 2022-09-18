@@ -41,7 +41,6 @@ const pga = {};
 let RMT = 1;
 const AL = [];
 let PGALimit = 0;
-let PGAaudio = false;
 let PGAtag = -1;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 const Info = { Notify: [], Warn: [], Focus: [] };
@@ -618,7 +617,6 @@ async function handler(response) {
 				}
 			if (skip) continue;
 			if (RMT >= 2) map.addLayer(PGA[Object.keys(pga)[index]]);
-			PGAaudio = true;
 		}
 	}
 	if (RMT >= 2) RMT = 0;
@@ -630,11 +628,12 @@ async function handler(response) {
 		RMTlimit = [];
 	}
 	if (Date.now() - AllT >= 240000) All = [];
-	if (Object.keys(PGA).length == 0) PGAaudio = false;
-	if (!PGAaudio) {
+	if (Object.keys(PGA).length == 0) {
 		PGAtag = -1;
 		PGALimit = 0;
 	}
+	console.log(All[0].intensity);
+	console.log(PGAtag);
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 		if (CONFIG["Real-time.audio"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
