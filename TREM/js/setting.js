@@ -47,7 +47,7 @@ function handleWindowControls() {
 
 document.getElementById("client-version").innerText = `${app.getVersion()}`;
 document.getElementById("client-os").innerText = `${os.version()} (${os.release()})`;
-document.getElementById("client-uuid").title = `${localStorage["UUID"]}`;
+document.getElementById("client-uuid").title = `${localStorage.UUID}`;
 
 const openURL = url => {
 	shell.openExternal(url);
@@ -87,7 +87,7 @@ fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/st
 			if (Object.keys(loc)[index] == "List") continue;
 			const select = document.getElementById("Real-time.station");
 			const option = document.createElement("option");
-			option.text = `${loc[Object.keys(loc)[index]]["Loc"]} ${Object.keys(loc)[index]}`;
+			option.text = `${loc[Object.keys(loc)[index]].Loc} ${Object.keys(loc)[index]}`;
 			option.value = Object.keys(loc)[index];
 			select.appendChild(option);
 		}

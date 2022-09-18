@@ -40,6 +40,7 @@
 		"comma-style": "error",
 		"curly": ["error", "multi"],
 		"dot-location": ["error", "property"],
+		"dot-notation": "error",
 		"handle-callback-err": "off",
 		"indent": ["warn", "tab", { "SwitchCase": 1}],
 		"key-spacing": ["warn", {

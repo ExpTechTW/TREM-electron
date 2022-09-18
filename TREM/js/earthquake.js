@@ -2,11 +2,10 @@
 /* eslint-disable no-undef */
 const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
+const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 
-const ExpTechAPI = new ExpTech();
-
-localStorage["dirname"] = __dirname;
+localStorage.dirname = __dirname;
 bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
 $("#loading").text(Localization[CONFIG["general.locale"]].Application_Connecting || Localization["zh-TW"].Application_Connecting);
@@ -81,7 +80,7 @@ let Ping = 0;
 let ALL = [];
 let GeoJson = null;
 let GeoJsonID = 0;
-let Update = false;
+let should_check_update = true;
 // #endregion
 
 // #region 初始化
@@ -693,14 +692,16 @@ async function handler(response) {
 }
 
 async function fetchFiles() {
-	if (!Update) {
+	if (should_check_update) {
 		const update = await (await fetch("https://api.github.com/repos/ExpTechTW/TREM/releases")).json();
-		if (update[0]["tag_name"] != app.getVersion())
-			for (let index = 0; index < update.length; index++)
-				if (update[index]["tag_name"] == app.getVersion()) {
-					Update = true;
-					new Notification(`發現新版本! ${update[0]["tag_name"]}`, { body: "請至下方連結下載新版本\nhttps://exptech.com.tw/f?v=trem", icon: "TREM.ico" });
-				}
+		const latest = update[0].tag_name.split(".");
+		const current = app.getVersion().split(".");
+		if ((current[0] * 100 + current[1] * 10 + current[2]) < (latest[0] * 100 + latest[1] * 10 + latest[2])) {
+			should_check_update = false;
+			dump({ level: 0, message: `New version available: ${update[0].tag_name}`, origin: "VersionChecker" });
+			new Notification(`發現新版本：v${update[0].tag_name}`, { body: `v${app.getVersion()} → v${update[0].tag_name}\n點擊來下載最新版本`, icon: "TREM.ico" })
+				.onclick = () => shell.openExternal(update[0].html_url);
+		}
 	}
 	Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
 	dump({ level: 0, message: "Get Location File", origin: "Location" });
@@ -898,7 +899,7 @@ async function ReportClick(time) {
 								// eslint-disable-next-line no-shadow
 								let PGA = "";
 								if (Station.pga != undefined) PGA = `<br>PGA<br>垂直向: ${Station.pga.vComponent}<br>東西向: ${Station.pga.ewComponent}<br>南北向: ${Station.pga.nsComponent}<br><a onclick="openURL('${Station.waveImageURI}')">震波圖</a>`;
-								ReportMark.bindPopup(`站名: ${Station.stationName}<br>代號: ${Station.stationCode}<br>經度: ${Station.stationLon.$t}<br>緯度: ${Station.stationLat.$t}<br>震央距: ${Station["distance"].$t}<br>方位角: ${Station["azimuth"].$t}<br>震度: ${Intensity}<br>${PGA}`);
+								ReportMark.bindPopup(`站名: ${Station.stationName}<br>代號: ${Station.stationCode}<br>經度: ${Station.stationLon.$t}<br>緯度: ${Station.stationLat.$t}<br>震央距: ${Station.distance.$t}<br>方位角: ${Station.azimuth.$t}<br>震度: ${Intensity}<br>${PGA}`);
 								map.addLayer(ReportMark);
 								ReportMark.setZIndexOffset(1000 + index);
 								MarkList.push(ReportMark);
@@ -922,8 +923,8 @@ async function ReportClick(time) {
 				})
 		) {
 			for (let Index = 0; Index < ReportCache[time].data.length; Index++)
-				for (let index = 0; index < ReportCache[time].data[Index]["eqStation"].length; index++) {
-					const data = ReportCache[time].data[Index]["eqStation"][index];
+				for (let index = 0; index < ReportCache[time].data[Index].eqStation.length; index++) {
+					const data = ReportCache[time].data[Index].eqStation[index];
 					const myIcon = L.icon({
 						iconUrl  : `./image/${data.stationIntensity}.png`,
 						iconSize : [20, 20],
@@ -935,7 +936,7 @@ async function ReportClick(time) {
 						Icon      : myIcon,
 						Level     : level,
 						Intensity : Number(data.stationIntensity),
-						Name      : `${ReportCache[time].data[Index]["areaName"]} ${data["stationName"]}`,
+						Name      : `${ReportCache[time].data[Index].areaName} ${data.stationName}`,
 					});
 				}
 
@@ -1355,20 +1356,20 @@ async function FCMdata(data) {
 			if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
 			focus([23.608428, 120.799168], 7.5);
 		}
-		if (TSUNAMI["Timer"] != null) clearInterval(TSUNAMI["Timer"]);
-		TSUNAMI["Timer"] = setInterval(() => {
-			if (TSUNAMI["E"] != null || json.Cancel) {
-				map.removeLayer(TSUNAMI["E"]);
-				map.removeLayer(TSUNAMI["EN"]);
-				map.removeLayer(TSUNAMI["ES"]);
-				map.removeLayer(TSUNAMI["N"]);
-				map.removeLayer(TSUNAMI["WS"]);
-				map.removeLayer(TSUNAMI["W"]);
+		if (TSUNAMI.Timer != null) clearInterval(TSUNAMI.Timer);
+		TSUNAMI.Timer = setInterval(() => {
+			if (TSUNAMI.E != null || json.Cancel) {
+				map.removeLayer(TSUNAMI.E);
+				map.removeLayer(TSUNAMI.EN);
+				map.removeLayer(TSUNAMI.ES);
+				map.removeLayer(TSUNAMI.N);
+				map.removeLayer(TSUNAMI.WS);
+				map.removeLayer(TSUNAMI.W);
 				if (Tsunami.Cross != undefined) map.removeLayer(Tsunami.Cross);
-				TSUNAMI["E"] = null;
+				TSUNAMI.E = null;
 				if (json.Cancel) {
 					TSUNAMI = {};
-					clearInterval(TSUNAMI["Timer"]);
+					clearInterval(TSUNAMI.Timer);
 				}
 			} else {
 				const myIcon = L.icon({
@@ -1379,7 +1380,7 @@ async function FCMdata(data) {
 				Tsunami.Cross = Cross;
 				Tsunami.Time = NOW.getTime();
 				map.addLayer(Cross);
-				TSUNAMI["E"] = L.geoJson.vt(MapData.E, {
+				TSUNAMI.E = L.geoJson.vt(MapData.E, {
 					style: {
 						weight  : 10,
 						opacity : 1,
@@ -1387,7 +1388,7 @@ async function FCMdata(data) {
 						fill    : false,
 					},
 				});
-				TSUNAMI["EN"] = L.geoJson.vt(MapData.EN, {
+				TSUNAMI.EN = L.geoJson.vt(MapData.EN, {
 					style: {
 						weight  : 10,
 						opacity : 1,
@@ -1395,7 +1396,7 @@ async function FCMdata(data) {
 						fill    : false,
 					},
 				});
-				TSUNAMI["ES"] = L.geoJson.vt(MapData.ES, {
+				TSUNAMI.ES = L.geoJson.vt(MapData.ES, {
 					style: {
 						weight  : 10,
 						opacity : 1,
@@ -1403,7 +1404,7 @@ async function FCMdata(data) {
 						fill    : false,
 					},
 				});
-				TSUNAMI["N"] = L.geoJson.vt(MapData.N, {
+				TSUNAMI.N = L.geoJson.vt(MapData.N, {
 					style: {
 						weight  : 10,
 						opacity : 1,
@@ -1411,7 +1412,7 @@ async function FCMdata(data) {
 						fill    : false,
 					},
 				});
-				TSUNAMI["WS"] = L.geoJson.vt(MapData.WS, {
+				TSUNAMI.WS = L.geoJson.vt(MapData.WS, {
 					style: {
 						weight  : 10,
 						opacity : 1,
@@ -1419,7 +1420,7 @@ async function FCMdata(data) {
 						fill    : false,
 					},
 				});
-				TSUNAMI["W"] = L.geoJson.vt(MapData.W, {
+				TSUNAMI.W = L.geoJson.vt(MapData.W, {
 					style: {
 						weight  : 10,
 						opacity : 1,
@@ -1427,12 +1428,12 @@ async function FCMdata(data) {
 						fill    : false,
 					},
 				});
-				map.addLayer(TSUNAMI["E"]);
-				map.addLayer(TSUNAMI["EN"]);
-				map.addLayer(TSUNAMI["ES"]);
-				map.addLayer(TSUNAMI["N"]);
-				map.addLayer(TSUNAMI["WS"]);
-				map.addLayer(TSUNAMI["W"]);
+				map.addLayer(TSUNAMI.E);
+				map.addLayer(TSUNAMI.EN);
+				map.addLayer(TSUNAMI.ES);
+				map.addLayer(TSUNAMI.N);
+				map.addLayer(TSUNAMI.WS);
+				map.addLayer(TSUNAMI.W);
 			}
 		}, 1000);
 		function Tcolor(text) {
