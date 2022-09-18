@@ -72,10 +72,6 @@ function createWindow() {
 				SettingWindow.close();
 		}
 	});
-	setTimeout(() => {
-		if (!fs.existsSync(path.join(app.getPath("userData"), "Session Storage")))
-			restart();
-	}, 5000);
 }
 
 function createSettingWindow() {
