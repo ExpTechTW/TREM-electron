@@ -701,6 +701,7 @@ html:lang(zh-TW) .alert-timer:empty:after {
 
 #rt-list div {
 	display: flex;
+	align-items: center;
 	position: relative;
 	margin: 4px 0;
 	padding: 4px;
@@ -934,7 +935,7 @@ html:lang(ru) .alert-box.eew-alert .alert-notch #alert-type:empty:before {
 	content: "\041f\0440\0435\0434\0443\043f\0440\0435\0436\0434\0435\043d\0438\0435";
 }
 html:lang(zh-TW) .alert-box.eew-alert .alert-notch #alert-type:empty:before {
-	content: "\8b66\5831";
+	content: "\5f37\9707\5373\6642\8b66\5831";
 }
 html:lang(en) .alert-box.eew-pred .alert-notch #alert-type:empty:before {
 	content: "Forecast";
