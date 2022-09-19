@@ -2013,15 +2013,16 @@ function updateText() {
 	}
 
 	if (EarthquakeList[INFO[TINFO].ID].Cancel != undefined) {
-		document.getElementById("alert-s").innerText = "X";
-		document.getElementById("alert-p").innerText = "X";
+		$("#alert-p").text("X");
+		$("#alert-s").text("X");
 	} else {
 		let num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Sspeed) / Sspeed);
 		if (num <= 0) num = "";
-		document.getElementById("alert-s").innerText = `${num}`;
+		$("#alert-s").text(num);
+
 		num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Pspeed) / Pspeed);
 		if (num <= 0) num = "";
-		document.getElementById("alert-p").innerText = `${num}`;
+		$("#alert-p").text(num);
 	}
 
 	const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
