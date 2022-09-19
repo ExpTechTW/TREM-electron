@@ -113,21 +113,21 @@ else {
 		tray = new Tray(nativeImage.createFromPath(iconPath));
 		const contextMenu = Menu.buildFromTemplate([
 			{
-				label : "開啟",
+				label : "開啟 | Show",
 				type  : "normal",
 				click : () => {
 					MainWindow.show();
 				},
 			},
 			{
-				label : "隱藏",
+				label : "隱藏 | Hide",
 				type  : "normal",
 				click : () => {
 					MainWindow.hide();
 				},
 			},
 			{
-				label : "重新啟動",
+				label : "重新啟動 | Restart",
 				type  : "normal",
 				click : () => {
 					app.relaunch();
@@ -136,7 +136,7 @@ else {
 				},
 			},
 			{
-				label : "強制關閉",
+				label : "強制關閉 | Exit",
 				type  : "normal",
 				click : () => {
 					app.exit(0);
