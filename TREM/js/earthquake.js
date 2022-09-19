@@ -111,7 +111,10 @@ async function init() {
 				if (!time.classList.contains("replay"))
 					time.classList.add("replay");
 				time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
-				if (NOW.getTime() - replayT > 240000) replay = 0;
+				if (NOW.getTime() - replayT > 240000) {
+					replay = 0;
+					ReportGET();
+				}
 			} else {
 				if (time.classList.contains("replay"))
 					time.classList.remove("replay");
@@ -514,7 +517,7 @@ async function handler(response) {
 				All[index + 1] = All[index];
 				All[index] = Temp;
 			}
-	if (PAlert.data != undefined)
+	if (PAlert.data != undefined && replay != 0)
 		if (PAlert.timestamp != PAlertT) {
 			PAlertT = PAlert.timestamp;
 			const PLoc = {};
@@ -992,6 +995,7 @@ function ReportList(earthquakeReportArr, eew) {
 }
 
 function addReport(report, prepend = false) {
+	if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
 	const Level = IntensityI(report.data[0].areaIntensity);
 	let msg = "";
 	if (report.location.includes("("))
@@ -1450,6 +1454,7 @@ async function FCMdata(data) {
 	else if (json.Function == "Replay") {
 		replay = json.timestamp;
 		replayT = NOW.getTime();
+		ReportGET();
 	} else if (json.Function == "report") {
 		if (Pgeojson != null) {
 			map.removeLayer(Pgeojson);
@@ -1475,6 +1480,7 @@ async function FCMdata(data) {
 			});
 		}, 5000);
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
+		if (replay != 0 && !json.Replay) return;
 		if (!json.Replay && !json.Test) {
 			if (json.Function == "SCDZJ_earthquake" && !CONFIG["accept.eew.SCDZJ"]) return;
 			if (json.Function == "NIED_earthquake" && !CONFIG["accept.eew.NIED"]) return;
@@ -1915,7 +1921,10 @@ async function FCMdata(data) {
 						Second = -1;
 						// hide eew alert
 						ticker = null;
-						replay = 0;
+						if (replay != 0) {
+							replay = 0;
+							ReportGET();
+						}
 						INFO = [];
 						All = [];
 						$("#alert-box").removeClass("show");
