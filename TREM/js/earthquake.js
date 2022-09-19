@@ -1,3 +1,5 @@
+"strict mode";
+
 require("leaflet");
 require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
@@ -113,7 +115,7 @@ async function init() {
 				if (!time.classList.contains("replay"))
 					time.classList.add("replay");
 				time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
-				if (NOW.getTime() - replayT > 240000) {
+				if (NOW.getTime() - replayT > 180_000) {
 					replay = 0;
 					ReportGET();
 				}
@@ -744,7 +746,7 @@ async function setUserLocationMarker(city, town) {
 // #endregion
 
 // #region 聚焦
-TREM.on("focus", ({ center, size }, force = false) => {
+TREM.on("focus", ({ center, size } = {}, force = false) => {
 	if (!CONFIG["map.autoZoom"] || force) return;
 	let X = 0;
 	if (size >= 6) X = 2.5;
@@ -755,7 +757,7 @@ TREM.on("focus", ({ center, size }, force = false) => {
 	if (size >= 8.5) X = 0.4;
 	if (size >= 9) X = 0.35;
 	if (size >= 9.5) X = 0.2;
-	if (center != undefined) {
+	if (center) {
 		Focus[0] = center[0];
 		Focus[1] = center[1] + X;
 		Focus[2] = size;
@@ -953,7 +955,6 @@ async function ReportClick(time) {
 						LIST[index] = LIST[index + 1];
 						LIST[index + 1] = Temp;
 					}
-
 
 			for (let index = 0; index < LIST.length; index++) {
 				const ReportMark = L.marker([LIST[index].Lat, LIST[index].Long], { icon: LIST[index].Icon });
@@ -1866,45 +1867,45 @@ function main(data, S1) {
 			DepthM.setZIndexOffset(6000);
 		}
 
+
 		// #region Epicenter Cross Icon
-		let myIcon;
-		let X = 0;
-		let Y = 0;
-		if (Object.keys(EarthquakeList).length != 1) {
-			let cursor = 1;
-			for (let index = 0; index < Object.keys(INFO).length; index++)
-				if (INFO[Object.keys(INFO)[index]].ID == data.ID) {
-					cursor = index + 1;
-					break;
-				}
-			if (cursor <= 4) {
-				myIcon = L.icon({
-					iconUrl  : `./image/cross${cursor}.png`,
-					iconSize : [40, 40],
-				});
-				if (cursor == 1) Y = 0.03;
-				if (cursor == 2) X = 0.03;
-				if (cursor == 3) Y = -0.03;
-				if (cursor == 4) X = -0.03;
-			} else
-				myIcon = L.icon({
-					iconUrl  : "./image/cross.png",
-					iconSize : [30, 30],
-				});
+
+		let epicenterIcon;
+		let offsetX = 0;
+		let offsetY = 0;
+
+		const cursor = INFO.findIndex((v) => v.ID == data.ID) + 1;
+		if (cursor <= 4 && INFO.length > 1) {
+			epicenterIcon = L.icon({
+				iconUrl   : `./image/cross${cursor}.png`,
+				iconSize  : [40, 40],
+				className : "epicenterIcon",
+			});
+			if (cursor == 1) offsetY = 0.03;
+			if (cursor == 2) offsetX = 0.03;
+			if (cursor == 3) offsetY = -0.03;
+			if (cursor == 4) offsetX = -0.03;
 		} else
-			myIcon = L.icon({
-				iconUrl  : "./image/cross.png",
-				iconSize : [30, 30],
+			epicenterIcon = L.icon({
+				iconUrl   : "./image/cross.png",
+				iconSize  : [30, 30],
+				className : "epicenterIcon",
 			});
 
-		const Cross = L.marker([Number(data.NorthLatitude) + Y, Number(data.EastLongitude) + X], { icon: myIcon });
-		const Cross1 = L.marker([Number(data.NorthLatitude) + Y, Number(data.EastLongitude) + X], { icon: myIcon });
-		EarthquakeList[data.ID].Cross = Cross;
-		map.addLayer(Cross);
-		EarthquakeList[data.ID].Cross1 = Cross1;
-		mapTW.addLayer(Cross1);
-		Cross.setZIndexOffset(6000);
-		// #endregion
+		// main map
+		if (!EarthquakeList[data.ID].epicenterIcon)
+			EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon, zIndexOffset: 6000 }).addTo(map);
+		else
+			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]).setIcon(epicenterIcon);
+
+		// mini map
+		if (!EarthquakeList[data.ID].epicenterIconTW)
+			EarthquakeList[data.ID].epicenterIconTW = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon }).addTo(mapTW);
+		else
+			EarthquakeList[data.ID].epicenterIconTW.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]).setIcon(epicenterIcon);
+
+		// #endregion <- Epicenter Cross Icon
+
 
 		if (NOW.getTime() - EEWshot > 60000)
 			EEWshotC = 1;
@@ -1936,10 +1937,12 @@ function main(data, S1) {
 				}
 				break;
 			}
-	if (NOW.getTime() - data.TimeStamp > 240000) {
+	if (NOW.getTime() - data.TimeStamp > 180_000) {
 		clear(data.ID);
-		map.removeLayer(EarthquakeList[data.ID].Cross);
-		mapTW.removeLayer(EarthquakeList[data.ID].Cross1);
+		// remove epicenter cross icons
+		EarthquakeList[data.ID].epicenterIcon.remove();
+		EarthquakeList[data.ID].epicenterIconTW.remove();
+
 		for (let index = 0; index < INFO.length; index++)
 			if (INFO[index].ID == data.ID) {
 				TINFO = 0;
@@ -1974,7 +1977,6 @@ function main(data, S1) {
 			ITimer = null;
 		}
 	}
-	console.log("S1", S1);
 }
 
 function Tcolor(text) {

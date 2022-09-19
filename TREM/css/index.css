@@ -100,6 +100,17 @@ body {
 	opacity: 1;
 }
 
+.epicenterIcon {
+	animation: blink 1s ease-in-out infinite alternate;
+}
+
+@keyframes blink {
+	0% { opacity: 1; }
+	50% { opacity: 1; }
+	60% { opacity: 0; }
+	100% { opacity: 0; }
+}
+
 #nav-rail > button {
 	align-self: flex-end;
 }
