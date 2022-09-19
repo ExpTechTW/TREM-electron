@@ -25,7 +25,7 @@ function dumpUpload() {
 		"Type"          : "TREM-Dump",
 		"FormatVersion" : 1,
 		"Value"         : fs.readFileSync(latestLog).toString(),
-		"UUID"          : localStorage["UUID"],
+		"UUID"          : localStorage.UUID,
 	};
 	axios.post("https://exptech.mywire.org:1015", msg)
 		.then((response) => {
