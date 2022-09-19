@@ -918,8 +918,8 @@ html:lang(zh-TW) .alert-timer:empty:after {
 #rt-list div.six.strong span:first-child::after {
 	content: "+";
 	position: absolute;
-	top: 1px;
-	left: 20px;
+	top: -4px;
+	left: 16px;
 	font-size: 16px;
 }
 #rt-list div.five:not(.strong) span:first-child::after,
