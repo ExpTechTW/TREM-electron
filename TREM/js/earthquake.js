@@ -1566,7 +1566,7 @@ async function FCMdata(data) {
 					}
 				}
 			}
-			if (EEW[json.ID] == undefined && !Info.Warn.includes(json.ID) && MaxIntensity >= 4) {
+			if (EEW[json.ID] == undefined && !Info.Warn.includes(json.ID) && MaxIntensity >= 5) {
 				Info.Warn.push(json.ID);
 				json.Alert = true;
 				if (CONFIG["eew.audio"])
