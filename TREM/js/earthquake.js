@@ -1,5 +1,3 @@
-"strict mode";
-
 require("leaflet");
 require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");

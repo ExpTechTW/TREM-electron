@@ -401,6 +401,7 @@ const showError = () => {
 		Localization[CONFIG["general.locale"]].Setting_Dialog_Error_Title || Localization["zh-TW"].Setting_Dialog_Error_Title,
 		(Localization[CONFIG["general.locale"]].Setting_Dialog_Error_Description || Localization["zh-TW"].Setting_Dialog_Error_Description).format(settingDisabled));
 };
+
 ipcMain.on("updateSetting", () => {
 	init();
 });
