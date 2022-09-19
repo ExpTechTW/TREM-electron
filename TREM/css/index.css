@@ -716,6 +716,7 @@ html:lang(zh-TW) .alert-timer:empty:after {
 }
 
 #rt-list div span:first-child {
+	position: relative;
 	width: 28px;
 	line-height: 24px;
 	text-align: center;

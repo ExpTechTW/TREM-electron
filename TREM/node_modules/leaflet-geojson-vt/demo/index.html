@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- leaflet css link  -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+
+    <title>leaflet-geojson-vt demo</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+  </body>
+</html>
+
+<!-- leaflet js link  -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<!-- geojson vt  -->
+<script src="../libs/geojson-vt.js"></script>
+<script src="../src/leaflet-geojson-vt.js"></script>
+
+<!-- js data link  -->
+<script src="./nepal-districts.js"></script>
+
+
+<script>
+  var map = L.map("map").setView([28.3949, 84.1240], 7);
+
+  var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  });
+
+  osm.addTo(map);
+
+  var geojsonStyle = {
+    fillColor:"#ff0000",
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.7,
+  };
+
+var options = {
+    maxZoom: 20,
+    tolerance: 3,
+    debug: 0,
+    style: geojsonStyle
+};
+var canvasLayer = L.geoJson.vt(data, options).addTo(map);
+
+console.log(canvasLayer)
+
+</script>
+
+
+<!-- function getColor(d) {
+  return d > 0.73  ? '#800026' :
+         d > 0.55  ? '#BD0026' :
+         d > 0.5   ? '#E31A1C' :
+         d > 0.3   ? '#FC4E2A' :
+         d > 0.2   ? '#FD8D3C' :
+         d > 0.08  ? '#FEB24C' :
+         d > 0.01  ? '#FED976' :
+                    '#FFEDA0';
+}
+
+function style(feature) {
+  return {
+  fillColor: getColor(feature.properties.Shape_Area),
+  color: "#000",
+  weight: 1,
+  opacity: 1,
+  fillOpacity: 0.5,
+  }
+} -->
