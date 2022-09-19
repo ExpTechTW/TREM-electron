@@ -1548,6 +1548,15 @@ TREM.on("eew", async (data) => {
 		else
 			Nmsg = "已抵達 (預警盲區)";
 
+		// show latest eew
+		TINFO = INFO.length;
+		clearInterval(ticker);
+		ticker = setInterval(() => {
+			if (TINFO + 1 >= INFO.length)
+				TINFO = 0;
+			else TINFO++;
+		}, 5000);
+
 		new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`, icon: "TREM.ico" });
 		Info.Notify.push(data.ID);
 		EEWT.id = data.ID;
@@ -1662,13 +1671,7 @@ TREM.on("eew", async (data) => {
 	else
 		classString += "eew-pred";
 
-	let find = -1;
-	for (let index = 0; index < INFO.length; index++)
-		if (INFO[index].ID == data.ID) {
-			find = index;
-			break;
-		}
-
+	let find = INFO.findIndex(v => v.ID == data.ID);
 	if (find == -1) find = INFO.length;
 	INFO[find] = {
 		"ID"            : data.ID,
@@ -1685,7 +1688,7 @@ TREM.on("eew", async (data) => {
 		"intensity-1"   : `<font color="white" size="7"><b>${IntensityI(MaxIntensity)}</b></font>`,
 		"time-1"        : `<font color="white" size="2"><b>${data["UTC+8"]}</b></font>`,
 		"info-1"        : `<font color="white" size="4"><b>M ${data.Scale} </b></font><font color="white" size="3"><b> 深度: ${data.Depth} km</b></font>`,
-		"distance"      : distance,
+		distance,
 	};
 
 	// switch to main view
@@ -1711,6 +1714,7 @@ TREM.on("eew", async (data) => {
 					else TINFO++;
 				}, 5000);
 		}, 1000);
+
 	EEWshot = NOW.getTime() - 28500;
 	EEWshotC = 1;
 	if (EarthquakeList[data.ID].Cross != undefined) map.removeLayer(EarthquakeList[data.ID].Cross);
