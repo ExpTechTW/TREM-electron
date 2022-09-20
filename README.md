@@ -8,9 +8,12 @@
 &nbsp;
 
 <div style="display: grid; grid-template-columns: 1fr 1fr;">
-<img alt="TREM主畫面" src="https://user-images.githubusercontent.com/58339640/183971375-1c827fb6-3289-4def-9ac9-915fdf4abe52.png" style="width: 49%; height: auto;" />
-<img alt="地震速報畫面" src="https://user-images.githubusercontent.com/58339640/183978716-3ffe1e70-ee91-4f8a-8ec1-e69143d47c9d.png" style="width: 49%; height: auto;" />
+<img alt="地震速報畫面" src="https://user-images.githubusercontent.com/44525760/191330841-9afb3279-5e65-499c-bcc7-da3862727cc1.png" style="width: 49%; height: auto;" />
+<img alt="地震速報畫面" src="https://user-images.githubusercontent.com/44525760/191330857-b484198a-cc4b-4e0c-95a7-24cb41a3e7fe.png" style="width: 49%; height: auto;" />
+<img alt="地震速報畫面" src="https://user-images.githubusercontent.com/44525760/191330870-37beb6df-30e2-446e-a55c-93a75de90171.png" style="width: 49%; height: auto;" />
+<img alt="地震速報畫面" src="https://user-images.githubusercontent.com/44525760/191331295-1b0f9ccb-1a90-4521-a71d-e5372c74f219.png" style="width: 49%; height: auto;" />
 </div>
+即時測站效果 https://youtu.be/gcaStCv-be8
 
 ## 關於 TREM
 
