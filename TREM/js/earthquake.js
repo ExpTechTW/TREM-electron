@@ -406,19 +406,20 @@ async function handler(response) {
 		if (station[keys[index]] == undefined) continue;
 		const Alert = Date.now() - (AL[keys[index]] ?? 0) < 60000;
 		if (Alert && ALERT) amount = Sdata.PeriodPGA;
-		const Intensity = (NOW.getTime() - Sdata.TimeStamp > 180000) ? "NA" :
-			(amount >= 800) ? 9 :
-				(amount >= 440) ? 8 :
-					(amount >= 250) ? 7 :
-						(amount >= 140) ? 6 :
-							(amount >= 80) ? 5 :
-								(amount >= 25) ? 4 :
-									(amount >= 8) ? 3 :
-										(amount >= 5) ? 2 :
-											(amount >= 2.2) ? 1 :
-												0;
-		const size = (Intensity == 0 || Intensity == "NA" || !Alert) ? 10 : 15;
-		const Image = (Intensity != 0 && Alert) ? `./image/${Intensity}.png` :
+		const Intensity = (!Alert) ? 0 :
+			(NOW.getTime() - Sdata.TimeStamp > 180000) ? "NA" :
+				(amount >= 800) ? 9 :
+					(amount >= 440) ? 8 :
+						(amount >= 250) ? 7 :
+							(amount >= 140) ? 6 :
+								(amount >= 80) ? 5 :
+									(amount >= 25) ? 4 :
+										(amount >= 8) ? 3 :
+											(amount >= 5) ? 2 :
+												(amount >= 2.2) ? 1 :
+													0;
+		const size = (Intensity == 0 || Intensity == "NA") ? 10 : 15;
+		const Image = (Intensity != 0) ? `./image/${Intensity}.png` :
 			(amount > 3.5) ? "./image/0-5.png" :
 				(amount > 3) ? "./image/0-4.png" :
 					(amount > 2.5) ? "./image/0-3.png" :
@@ -1439,22 +1440,16 @@ TREM.on("eew", async (data) => {
 		}
 	}
 
-	const Intensity = IntensityN(level);
-	if (Intensity < Number(CONFIG["eew.Intensity"]) && !data.Replay)
-		return;
 	if (!Info.Notify.includes(data.ID)) {
-		if (CONFIG["eew.show"]) {
-			win.show();
-			win.flashFrame(true);
-			if (CONFIG["eew.cover"]) win.setAlwaysOnTop(true);
-			win.setAlwaysOnTop(false);
-		}
 		let Nmsg = "";
 		if (value > 0)
 			Nmsg = `${value}秒後抵達`;
 		else
 			Nmsg = "已抵達 (預警盲區)";
-
+		new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`, icon: "TREM.ico" });
+		Info.Notify.push(data.ID);
+		if (IntensityN(level) < Number(CONFIG["eew.Intensity"]) && !data.Replay)
+			return;
 		// show latest eew
 		TINFO = INFO.length;
 		clearInterval(ticker);
@@ -1463,9 +1458,12 @@ TREM.on("eew", async (data) => {
 				TINFO = 0;
 			else TINFO++;
 		}, 5000);
-
-		new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`, icon: "TREM.ico" });
-		Info.Notify.push(data.ID);
+		if (CONFIG["eew.show"]) {
+			win.show();
+			win.flashFrame(true);
+			if (CONFIG["eew.cover"]) win.setAlwaysOnTop(true);
+			win.setAlwaysOnTop(false);
+		}
 		EEWT.id = data.ID;
 		if (CONFIG["eew.audio"]) {
 			audioPlay("./audio/EEW.wav");
