@@ -407,7 +407,7 @@ async function handler(response) {
 		const Alert = Date.now() - (AL[keys[index]] ?? 0) < 60000;
 		if (Alert && ALERT) amount = Sdata.PeriodPGA;
 		const Intensity = (!Alert) ? 0 :
-			(NOW.getTime() - Sdata.TimeStamp > 180000) ? "NA" :
+			(NOW.getTime() - Sdata.TimeStamp > 15000) ? "NA" :
 				(amount >= 800) ? 9 :
 					(amount >= 440) ? 8 :
 						(amount >= 250) ? 7 :
