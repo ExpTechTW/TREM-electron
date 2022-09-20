@@ -1351,98 +1351,9 @@ async function FCMdata(data) {
 			win.setAlwaysOnTop(false);
 		}
 		if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
-	} else if (json.Function == "TSUNAMI") {
-		if (Number(json.Version) == 1) {
-			new Notification("海嘯警報", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "TREM.ico" });
-			if (CONFIG["report.show"]) {
-				win.show();
-				if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
-				win.setAlwaysOnTop(false);
-			}
-			if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
-			TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
-		}
-		if (TSUNAMI.Timer != null) clearInterval(TSUNAMI.Timer);
-		TSUNAMI.Timer = setInterval(() => {
-			if (TSUNAMI.E != null || json.Cancel) {
-				map.removeLayer(TSUNAMI.E);
-				map.removeLayer(TSUNAMI.EN);
-				map.removeLayer(TSUNAMI.ES);
-				map.removeLayer(TSUNAMI.N);
-				map.removeLayer(TSUNAMI.WS);
-				map.removeLayer(TSUNAMI.W);
-				if (Tsunami.Cross != undefined) map.removeLayer(Tsunami.Cross);
-				TSUNAMI.E = null;
-				if (json.Cancel) {
-					TSUNAMI = {};
-					clearInterval(TSUNAMI.Timer);
-				}
-			} else {
-				const myIcon = L.icon({
-					iconUrl  : "./image/warn.png",
-					iconSize : [30, 30],
-				});
-				const Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
-				Tsunami.Cross = Cross;
-				Tsunami.Time = NOW.getTime();
-				map.addLayer(Cross);
-				TSUNAMI.E = L.geoJson.vt(MapData.E, {
-					style: {
-						weight  : 10,
-						opacity : 1,
-						color   : Tcolor(json.Addition[0].areaColor),
-						fill    : false,
-					},
-				});
-				TSUNAMI.EN = L.geoJson.vt(MapData.EN, {
-					style: {
-						weight  : 10,
-						opacity : 1,
-						color   : Tcolor(json.Addition[1].areaColor),
-						fill    : false,
-					},
-				});
-				TSUNAMI.ES = L.geoJson.vt(MapData.ES, {
-					style: {
-						weight  : 10,
-						opacity : 1,
-						color   : Tcolor.vt(json.Addition[2].areaColor),
-						fill    : false,
-					},
-				});
-				TSUNAMI.N = L.geoJson.vt(MapData.N, {
-					style: {
-						weight  : 10,
-						opacity : 1,
-						color   : Tcolor.vt(json.Addition[3].areaColor),
-						fill    : false,
-					},
-				});
-				TSUNAMI.WS = L.geoJson.vt(MapData.WS, {
-					style: {
-						weight  : 10,
-						opacity : 1,
-						color   : Tcolor(json.Addition[4].areaColor),
-						fill    : false,
-					},
-				});
-				TSUNAMI.W = L.geoJson.vt(MapData.W, {
-					style: {
-						weight  : 10,
-						opacity : 1,
-						color   : Tcolor(json.Addition[5].areaColor),
-						fill    : false,
-					},
-				});
-				map.addLayer(TSUNAMI.E);
-				map.addLayer(TSUNAMI.EN);
-				map.addLayer(TSUNAMI.ES);
-				map.addLayer(TSUNAMI.N);
-				map.addLayer(TSUNAMI.WS);
-				map.addLayer(TSUNAMI.W);
-			}
-		}, 1000);
-	} else if (json.Function == "palert")
+	} else if (json.Function == "TSUNAMI")
+		TREM.emit("tsunami", json);
+	else if (json.Function == "palert")
 		PAlert = json.Data;
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
@@ -1486,8 +1397,6 @@ async function FCMdata(data) {
 			TREM.emit("eew", json);
 		} else
 			TREM.emit("eew", json);
-
-
 	}
 }
 // #endregion
@@ -1715,8 +1624,6 @@ TREM.on("eew", async (data) => {
 
 	EEWshot = NOW.getTime() - 28500;
 	EEWshotC = 1;
-	if (EarthquakeList[data.ID].Cross != undefined) map.removeLayer(EarthquakeList[data.ID].Cross);
-	if (EarthquakeList[data.ID].Cross1 != undefined) mapTW.removeLayer(EarthquakeList[data.ID].Cross1);
 	const S1 = 0;
 	main(data, S1);
 	EarthquakeList[data.ID].Timer = setInterval(() => {
@@ -1799,6 +1706,147 @@ TREM.on("eew", async (data) => {
 				});
 		}
 	}, 2000);
+});
+
+TREM.on("tsunami", (data) => {
+	if (data.Version == 1) {
+		new Notification("海嘯警報", { body: `${data["UTC+8"]} 發生 ${data.Scale} 地震\n\n東經: ${data.EastLongitude} 度\n北緯: ${data.NorthLatitude} 度`, icon: "TREM.ico" });
+		if (CONFIG["report.show"]) {
+			win.show();
+			if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
+			win.setAlwaysOnTop(false);
+		}
+		if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
+		TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+	}
+	if (data.Cancel) {
+		if (TSUNAMI.E)
+			TSUNAMI.E.remove();
+		if (TSUNAMI.EN)
+			TSUNAMI.EN.remove();
+		if (TSUNAMI.ES)
+			TSUNAMI.ES.remove();
+		if (TSUNAMI.N)
+			TSUNAMI.N.remove();
+		if (TSUNAMI.WS)
+			TSUNAMI.WS.remove();
+		if (TSUNAMI.W)
+			TSUNAMI.W.remove();
+		if (TSUNAMI.warnIcon)
+			TSUNAMI.warnIcon.remove();
+		TSUNAMI = {};
+	} else {
+		if (!TSUNAMI.warnIcon) {
+			const warnIcon = L.icon({
+				iconUrl   : "./image/warn.png",
+				iconSize  : [30, 30],
+				className : "tsunami",
+			});
+			TSUNAMI.warnIcon = L.marker([+data.NorthLatitude, +data.EastLongitude], { icon: warnIcon }).addTo(map);
+		} else TSUNAMI.warnIcon.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+		if (!TSUNAMI.E) {
+			TSUNAMI.E = L.geoJson.vt(MapData.E, {
+				style: {
+					weight  : 10,
+					opacity : 1,
+					color   : Tcolor(data.Addition[0].areaColor),
+					fill    : false,
+				},
+			}).addTo(map);
+			L.DomUtil.addClass(TSUNAMI.E._container, "tsunami");
+		} else TSUNAMI.E.setStyle({
+			weight  : 10,
+			opacity : 1,
+			color   : Tcolor(data.Addition[0].areaColor),
+			fill    : false,
+		});
+
+		if (!TSUNAMI.EN) {
+			TSUNAMI.EN = L.geoJson.vt(MapData.EN, {
+				style: {
+					weight  : 10,
+					opacity : 1,
+					color   : Tcolor(data.Addition[1].areaColor),
+					fill    : false,
+				},
+			}).addTo(map);
+			L.DomUtil.addClass(TSUNAMI.EN._container, "tsunami");
+		} else TSUNAMI.EN.setStyle({
+			weight  : 10,
+			opacity : 1,
+			color   : Tcolor(data.Addition[1].areaColor),
+			fill    : false,
+		});
+
+		if (!TSUNAMI.ES) {
+			TSUNAMI.ES = L.geoJson.vt(MapData.ES, {
+				style: {
+					weight  : 10,
+					opacity : 1,
+					color   : Tcolor.vt(data.Addition[2].areaColor),
+					fill    : false,
+				},
+			}).addTo(map);
+			L.DomUtil.addClass(TSUNAMI.ES._container, "tsunami");
+		} else TSUNAMI.ES.setStyle({
+			weight  : 10,
+			opacity : 1,
+			color   : Tcolor(data.Addition[2].areaColor),
+			fill    : false,
+		});
+
+		if (!TSUNAMI.N) {
+			TSUNAMI.N = L.geoJson.vt(MapData.N, {
+				style: {
+					weight  : 10,
+					opacity : 1,
+					color   : Tcolor.vt(data.Addition[3].areaColor),
+					fill    : false,
+				},
+			}).addTo(map);
+			L.DomUtil.addClass(TSUNAMI.N._container, "tsunami");
+		} else TSUNAMI.N.setStyle({
+			weight  : 10,
+			opacity : 1,
+			color   : Tcolor(data.Addition[3].areaColor),
+			fill    : false,
+		});
+
+		if (!TSUNAMI.WS) {
+			TSUNAMI.WS = L.geoJson.vt(MapData.WS, {
+				style: {
+					weight  : 10,
+					opacity : 1,
+					color   : Tcolor(data.Addition[4].areaColor),
+					fill    : false,
+				},
+			}).addTo(map);
+			L.DomUtil.addClass(TSUNAMI.WS._container, "tsunami");
+		} else TSUNAMI.WS.setStyle({
+			weight  : 10,
+			opacity : 1,
+			color   : Tcolor(data.Addition[4].areaColor),
+			fill    : false,
+		});
+
+		if (!TSUNAMI.W) {
+			TSUNAMI.W = L.geoJson.vt(MapData.W, {
+				style: {
+					weight  : 10,
+					opacity : 1,
+					color   : Tcolor(data.Addition[5].areaColor),
+					fill    : false,
+				},
+			}).addTo(map);
+			L.DomUtil.addClass(TSUNAMI.W._container, "tsunami");
+		} else TSUNAMI.W.setStyle({
+			weight  : 10,
+			opacity : 1,
+			color   : Tcolor(data.Addition[5].areaColor),
+			fill    : false,
+		});
+	}
 });
 
 function main(data, S1) {
