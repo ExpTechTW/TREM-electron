@@ -1755,7 +1755,12 @@ TREM.on("tsunami", (data) => {
 
 		if (!TSUNAMI.E) {
 			TSUNAMI.E = L.geoJson.vt(MapData.E, {
-				style: {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				style     : {
 					weight  : 10,
 					opacity : 1,
 					color   : Tcolor(data.Addition[0].areaColor),
@@ -1772,7 +1777,12 @@ TREM.on("tsunami", (data) => {
 
 		if (!TSUNAMI.EN) {
 			TSUNAMI.EN = L.geoJson.vt(MapData.EN, {
-				style: {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				style     : {
 					weight  : 10,
 					opacity : 1,
 					color   : Tcolor(data.Addition[1].areaColor),
@@ -1789,10 +1799,15 @@ TREM.on("tsunami", (data) => {
 
 		if (!TSUNAMI.ES) {
 			TSUNAMI.ES = L.geoJson.vt(MapData.ES, {
-				style: {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				style     : {
 					weight  : 10,
 					opacity : 1,
-					color   : Tcolor.vt(data.Addition[2].areaColor),
+					color   : Tcolor(data.Addition[2].areaColor),
 					fill    : false,
 				},
 			}).addTo(map);
@@ -1806,7 +1821,12 @@ TREM.on("tsunami", (data) => {
 
 		if (!TSUNAMI.N) {
 			TSUNAMI.N = L.geoJson.vt(MapData.N, {
-				style: {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				style     : {
 					weight  : 10,
 					opacity : 1,
 					color   : Tcolor.vt(data.Addition[3].areaColor),
@@ -1823,7 +1843,12 @@ TREM.on("tsunami", (data) => {
 
 		if (!TSUNAMI.WS) {
 			TSUNAMI.WS = L.geoJson.vt(MapData.WS, {
-				style: {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				style     : {
 					weight  : 10,
 					opacity : 1,
 					color   : Tcolor(data.Addition[4].areaColor),
@@ -1840,7 +1865,12 @@ TREM.on("tsunami", (data) => {
 
 		if (!TSUNAMI.W) {
 			TSUNAMI.W = L.geoJson.vt(MapData.W, {
-				style: {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				style     : {
 					weight  : 10,
 					opacity : 1,
 					color   : Tcolor(data.Addition[5].areaColor),
