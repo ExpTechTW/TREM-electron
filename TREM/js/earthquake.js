@@ -84,6 +84,7 @@ let GeoJson = null;
 let GeoJsonID = 0;
 let should_check_update = true;
 let EEWAlert = false;
+let GetData = false;
 // #endregion
 
 // #region 初始化
@@ -125,8 +126,13 @@ async function init() {
 					time.classList.remove("desynced");
 				time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 			}
+			let GetDataState = "";
+			if (GetData) {
+				GetData = false;
+				GetDataState = "✉";
+			}
 			const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
-			$("#app-version").text(`${app.getVersion()} ${Delay}ms`);
+			$("#app-version").text(`${app.getVersion()} ${Delay}ms ${GetDataState}`);
 		}, 500);
 
 	if (!Timers.tsunami)
@@ -1315,6 +1321,7 @@ async function FCMdata(data) {
 	const json = JSON.parse(data);
 	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 240000) return;
 	Server.push(json.TimeStamp);
+	GetData = true;
 	if (json.response != "You have successfully subscribed to earthquake information" && json.FormatVersion == 1) {
 		const folder = path.join(app.getPath("userData"), "data");
 		if (!fs.existsSync(folder))
@@ -1440,7 +1447,8 @@ TREM.on("eew", async (data) => {
 			GC[city + town] = Intensity;
 		}
 	}
-
+	let Alert = true;
+	if (IntensityN(level) < Number(CONFIG["eew.Intensity"]) && !data.Replay) Alert = false;
 	if (!Info.Notify.includes(data.ID)) {
 		let Nmsg = "";
 		if (value > 0)
@@ -1449,8 +1457,6 @@ TREM.on("eew", async (data) => {
 			Nmsg = "已抵達 (預警盲區)";
 		new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`, icon: "TREM.ico" });
 		Info.Notify.push(data.ID);
-		if (IntensityN(level) < Number(CONFIG["eew.Intensity"]) && !data.Replay)
-			return;
 		// show latest eew
 		TINFO = INFO.length;
 		clearInterval(ticker);
@@ -1459,14 +1465,14 @@ TREM.on("eew", async (data) => {
 				TINFO = 0;
 			else TINFO++;
 		}, 5000);
-		if (CONFIG["eew.show"]) {
+		if (CONFIG["eew.show"] && Alert) {
 			win.show();
 			win.flashFrame(true);
 			if (CONFIG["eew.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
 		EEWT.id = data.ID;
-		if (CONFIG["eew.audio"]) {
+		if (CONFIG["eew.audio"] && Alert) {
 			audioPlay("./audio/EEW.wav");
 			audioPlay1(`./audio/1/${level.replace("+", "").replace("-", "")}.wav`);
 			if (level.includes("+"))
@@ -1494,7 +1500,7 @@ TREM.on("eew", async (data) => {
 		data.Alert = true;
 		if (!EEWAlert) {
 			EEWAlert = true;
-			if (CONFIG["eew.audio"])
+			if (CONFIG["eew.audio"] && Alert)
 				for (let index = 0; index < 5; index++)
 					audioPlay("./audio/Alert.wav");
 		}
@@ -1505,7 +1511,7 @@ TREM.on("eew", async (data) => {
 	let stamp = 0;
 	if (data.ID + data.Version != Info.Alert) {
 		if (EEW[data.ID] != undefined)
-			if (CONFIG["eew.audio"]) audioPlay("./audio/Update.wav");
+			if (CONFIG["eew.audio"] && Alert) audioPlay("./audio/Update.wav");
 		EEW[data.ID] = {
 			lon  : Number(data.EastLongitude),
 			lat  : Number(data.NorthLatitude),
@@ -1517,7 +1523,7 @@ TREM.on("eew", async (data) => {
 		Info.Alert = data.ID + data.Version;
 		value = Math.round((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
 		if (Second == -1 || value < Second)
-			if (CONFIG["eew.audio"]) {
+			if (CONFIG["eew.audio"] && Alert) {
 				if (t != null) clearInterval(t);
 				t = setInterval(() => {
 					value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
