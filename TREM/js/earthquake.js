@@ -528,7 +528,7 @@ async function handler(response) {
 				All[index + 1] = All[index];
 				All[index] = Temp;
 			}
-	if (PAlert.data != undefined && replay != 0)
+	if (PAlert.data != undefined && replay == 0)
 		if (PAlert.timestamp != PAlertT) {
 			PAlertT = PAlert.timestamp;
 			const PLoc = {};
