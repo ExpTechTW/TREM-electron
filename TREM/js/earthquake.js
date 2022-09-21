@@ -8,6 +8,7 @@ const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 const TREM = new EventEmitter();
 localStorage.dirname = __dirname;
+
 bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
 $("#loading").text(Localization[CONFIG["general.locale"]].Application_Connecting || Localization["zh-TW"].Application_Connecting);
@@ -84,7 +85,6 @@ let GeoJson = null;
 let GeoJsonID = 0;
 let should_check_update = true;
 let EEWAlert = false;
-let GetData = false;
 // #endregion
 
 // #region 初始化
@@ -132,7 +132,8 @@ async function init() {
 				GetDataState = "✉";
 			}
 			const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
-			$("#app-version").text(`${app.getVersion()} ${Delay}ms ${GetDataState}`);
+			const warn = (Warn) ? "⚠️" : "";
+			$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
 		}, 500);
 
 	if (!Timers.tsunami)
@@ -1242,6 +1243,7 @@ function color(Intensity) {
 // #region IPC
 ipcMain.once("start", () => {
 	try {
+		console.log(1);
 		setInterval(() => {
 			if (DATAstamp != 0 && Stamp != DATAstamp) {
 				Stamp = DATAstamp;
