@@ -496,7 +496,7 @@ async function handler(response) {
 					});
 				AllT = Date.now();
 				if (ALERT) {
-					if (CONFIG["Real-time.audio"])
+					if (CONFIG["audio.realtime"])
 						if (amount > 8 && PGALimit == 0) {
 							PGALimit = 1;
 							audioPlay("./audio/PGA1.wav");
@@ -549,7 +549,7 @@ async function handler(response) {
 					if (CONFIG["Real-time.show"]) win.show();
 					if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
 					win.setAlwaysOnTop(false);
-					if (CONFIG["Real-time.audio"]) audioPlay("./audio/palert.wav");
+					if (CONFIG["audio.realtime"]) audioPlay("./audio/palert.wav");
 				}
 				if (Pgeojson != null) map.removeLayer(Pgeojson);
 				const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
@@ -645,7 +645,7 @@ async function handler(response) {
 		PGALimit = 0;
 	}
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
-		if (CONFIG["Real-time.audio"])
+		if (CONFIG["audio.realtime"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
 				audioPlay("./audio/Shindo2.wav");
 			else if (All[0].intensity >= 2 && PGAtag < 2)
@@ -823,7 +823,7 @@ function playNextAudio() {
 	audioLock = true;
 	const nextAudioPath = audioList.shift();
 	audioDOM.src = nextAudioPath;
-	if (nextAudioPath.startsWith("./audio/1/") && CONFIG["eew.audio"]) {
+	if (nextAudioPath.startsWith("./audio/1/") && CONFIG["audio.eew"]) {
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM.play();
 	} else if (!nextAudioPath.startsWith("./audio/1/")) {
@@ -836,7 +836,7 @@ function playNextAudio1() {
 	const nextAudioPath = audioList1.shift();
 	audioDOM1.src = nextAudioPath;
 	audioDOM1.playbackRate = 1.1;
-	if (nextAudioPath.startsWith("./audio/1/") && CONFIG["eew.audio"]) {
+	if (nextAudioPath.startsWith("./audio/1/") && CONFIG["audio.eew"]) {
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
 	} else if (!nextAudioPath.startsWith("./audio/1/")) {
@@ -1362,7 +1362,7 @@ async function FCMdata(data) {
 			if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
-		if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
+		if (CONFIG["audio.report"]) audioPlay("./audio/Water.wav");
 	} else if (json.Function == "TSUNAMI")
 		TREM.emit("tsunami", json);
 	else if (json.Function == "palert")
@@ -1384,7 +1384,7 @@ async function FCMdata(data) {
 			if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
-		if (CONFIG["report.audio"]) audioPlay("./audio/Report.wav");
+		if (CONFIG["audio.report"]) audioPlay("./audio/Report.wav");
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
 		const report = await getReportData();
 		addReport(report[0], true);
@@ -1475,7 +1475,7 @@ TREM.on("eew", async (data) => {
 			win.setAlwaysOnTop(false);
 		}
 		EEWT.id = data.ID;
-		if (CONFIG["eew.audio"] && Alert) {
+		if (CONFIG["audio.eew"] && Alert) {
 			audioPlay("./audio/EEW.wav");
 			audioPlay1(`./audio/1/${level.replace("+", "").replace("-", "")}.wav`);
 			if (level.includes("+"))
@@ -1503,7 +1503,7 @@ TREM.on("eew", async (data) => {
 		data.Alert = true;
 		if (!EEWAlert) {
 			EEWAlert = true;
-			if (CONFIG["eew.audio"] && Alert)
+			if (CONFIG["audio.eew"] && Alert)
 				for (let index = 0; index < 5; index++)
 					audioPlay("./audio/Alert.wav");
 		}
@@ -1514,7 +1514,7 @@ TREM.on("eew", async (data) => {
 	let stamp = 0;
 	if (data.ID + data.Version != Info.Alert) {
 		if (EEW[data.ID] != undefined)
-			if (CONFIG["eew.audio"] && Alert) audioPlay("./audio/Update.wav");
+			if (CONFIG["audio.eew"] && Alert) audioPlay("./audio/Update.wav");
 		EEW[data.ID] = {
 			lon  : Number(data.EastLongitude),
 			lat  : Number(data.NorthLatitude),
@@ -1526,7 +1526,7 @@ TREM.on("eew", async (data) => {
 		Info.Alert = data.ID + data.Version;
 		value = Math.round((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
 		if (Second == -1 || value < Second)
-			if (CONFIG["eew.audio"] && Alert) {
+			if (CONFIG["audio.eew"] && Alert) {
 				if (t != null) clearInterval(t);
 				t = setInterval(() => {
 					value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
@@ -1727,7 +1727,7 @@ TREM.on("tsunami", (data) => {
 			if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
-		if (CONFIG["report.audio"]) audioPlay("./audio/Water.wav");
+		if (CONFIG["audio.report"]) audioPlay("./audio/Water.wav");
 		TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 	}
 	if (data.Cancel) {

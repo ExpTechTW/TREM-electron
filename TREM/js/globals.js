@@ -62,17 +62,29 @@ const DEFAULT_CONFIG = {
 		"type"  : "CheckBox",
 		"value" : true,
 	},
-	"eew.audio": {
+	"audio.eew": {
 		"type"  : "CheckBox",
 		"value" : true,
 	},
-	"report.audio": {
+	"audio.eew.volume": {
+		"type"  : "Range",
+		"value" : 1,
+	},
+	"audio.report": {
 		"type"  : "CheckBox",
 		"value" : true,
 	},
-	"Real-time.audio": {
+	"audio.report.volume": {
+		"type"  : "Range",
+		"value" : 1,
+	},
+	"audio.realtime": {
 		"type"  : "CheckBox",
 		"value" : true,
+	},
+	"audio.realtime.volume": {
+		"type"  : "Range",
+		"value" : 1,
 	},
 	"Real-time.station": {
 		"type"  : "SelectBox",

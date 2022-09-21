@@ -674,7 +674,7 @@
                                                 <span lang="ja">緊急地震速報</span>
                                                 <span lang="ru">Звук раннего оповещения о землетрясении</span>
                                                 <span lang="zh-TW">強震即時警報</span>
-                                                <span class="option-label-id">eew.audio</span>
+                                                <span class="option-label-id">audio.eew</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Play sounds when receiving Earthquake Early Warnings</span>
@@ -684,7 +684,7 @@
                                             </span>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="eew.audio" onclick="CheckSave('eew.audio')">
+                                            <input type="checkbox" id="audio.eew" onclick="CheckSave('audio.eew')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -692,7 +692,7 @@
                                     </div>
                                     <label class="slider">
                                         <span class="material-symbols-rounded slider-icon">volume_up</span>
-                                        <input type="range" min="0" max="100">
+                                        <input type="range" id="audio.eew.volume" min="0" max="1" step="0.01" onchange="RangeSave('audio.eew.volume')">
                                     </label>
                                     <button class="filled-tonal-button setting-button md3-ripple" onclick="testAudio('EEW', this)" style="margin: 5px 0 16px 0;">
                                         <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
@@ -710,7 +710,7 @@
                                                 <span lang="ja">地震情報</span>
                                                 <span lang="ru">Отчет о землетрясении Звуковые эффекты</span>
                                                 <span lang="zh-TW">地震報告</span>
-                                                <span class="option-label-id">report.audio</span>
+                                                <span class="option-label-id">audio.report</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Play sounds when receiving earthquake reports</span>
@@ -720,7 +720,7 @@
                                             </span>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="report.audio" onclick="CheckSave('report.audio')">
+                                            <input type="checkbox" id="audio.report" onclick="CheckSave('audio.report')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -728,7 +728,7 @@
                                     </div>
                                     <label class="slider">
                                         <span class="material-symbols-rounded slider-icon">volume_up</span>
-                                        <input type="range" min="0" max="100">
+                                        <input type="range" id="audio.report.volume" min="0" max="1" step="0.01" onchange="RangeSave('audio.report.volume')">
                                     </label>
                                     <button class="filled-tonal-button setting-button md3-ripple" onclick="testAudio('Report', this)" style="margin: 5px 0 16px 0;">
                                         <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
@@ -746,7 +746,7 @@
                                                 <span lang="ja">リアルタイム観測所</span>
                                                 <span lang="ru">Сейсмограф Звук</span>
                                                 <span lang="zh-TW">即時測站</span>
-                                                <span class="option-label-id">Real-time.audio</span>
+                                                <span class="option-label-id">audio.realtime</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">Play sounds when realtime station is triggered</span>
@@ -756,7 +756,7 @@
                                             </span>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="Real-time.audio" onclick="CheckSave('Real-time.audio')">
+                                            <input type="checkbox" id="audio.realtime" onclick="CheckSave('audio.realtime')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -764,7 +764,7 @@
                                     </div>
                                     <label class="slider">
                                         <span class="material-symbols-rounded slider-icon">volume_up</span>
-                                        <input type="range" min="0" max="100">
+                                        <input type="range" id="audio.realtime.volume" min="0" max="1" step="0.01" onchange="RangeSave('audio.realtime.volume')">
                                     </label>
                                     <button class="filled-tonal-button setting-button md3-ripple" onclick="testAudio('PGA1', this)" style="margin: 5px 0 16px 0;">
                                         <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>

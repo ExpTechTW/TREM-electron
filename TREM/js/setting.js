@@ -170,6 +170,16 @@ function init() {
 				break;
 			}
 
+			case "Range": {
+				const element = document.getElementById(id);
+				if (element) {
+					element.value = CONFIG[id];
+					if (settingDisabled) element.disabled = true;
+					else element.disabled = false;
+				}
+				break;
+			}
+
 			default:
 				break;
 		}
@@ -217,6 +227,13 @@ function TextSave(id) {
 	ipcRenderer.send("saveSetting", true);
 	if (id == "theme.color")
 		setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
+}
+
+function RangeSave(id) {
+	const value = document.getElementById(id).value;
+	dump({ level: 0, message: `Value Changed ${id}: ${CONFIG[id]} -> ${value}`, origin: "Setting" });
+	CONFIG[id] = +value;
+	ipcRenderer.send("saveSetting", true);
 }
 
 
