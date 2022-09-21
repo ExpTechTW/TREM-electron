@@ -1319,7 +1319,7 @@ ipcMain.on("updateTitle", (e, lang) => {
 // #region EEW
 async function FCMdata(data) {
 	const json = JSON.parse(data);
-	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 240000) return;
+	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	Server.push(json.TimeStamp);
 	GetData = true;
 	if (json.response != "You have successfully subscribed to earthquake information" && json.FormatVersion == 1) {
