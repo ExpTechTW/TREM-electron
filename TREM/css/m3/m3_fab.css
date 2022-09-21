@@ -1,5 +1,6 @@
 .fab {
     all: unset;
+    position: relative;
     background-color: rgb(var(--md-sys-color-primary-container));
     width: 24px;
     height: 24px;

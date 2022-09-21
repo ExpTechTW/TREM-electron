@@ -1,5 +1,6 @@
 button.flat-button {
     all: unset;
+    position: relative;
     align-self: end;
     width: fit-content;
     height: 40px;

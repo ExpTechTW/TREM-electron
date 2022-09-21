@@ -24,17 +24,17 @@
         </div>
         <div id="modal-overlay">
         </div>
-        <button id="togglenav_btn" class="fab secondary elevate" onclick="toggleNav()">
+        <button id="togglenav_btn" class="fab secondary elevate md3-ripple" onclick="toggleNav()">
             <span class="material-symbols-rounded">start</span>
         </button>
         <div id="nav-rail" class="nav-rail hide">
-            <button id="mainView_btn" class="nav-rail-button" onclick="changeView('main', this, event)">
+            <button id="mainView_btn" class="nav-rail-button md3-ripple" onclick="changeView('main', this, event)">
                 <span class="material-symbols-rounded">map</span>
             </button>
-            <!-- <button class="nav-rail-button" onclick="changeView('report', this, event)">
+            <!-- <button class="nav-rail-button md3-ripple" onclick="changeView('report', this, event)">
                 <span class="material-symbols-rounded">info</span>
             </button> -->
-            <button id="setting_btn" class="nav-rail-button" onclick="setting()">
+            <button id="setting_btn" class="nav-rail-button md3-ripple" onclick="setting()">
                 <span class="material-symbols-rounded">settings</span>
             </button>
         </div>
@@ -108,6 +108,7 @@
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <script src="./js/ui.js"></script>
         <script src="./js/dump.js"></script>
+        <script src="./js/ripple.js"></script>
         <script src="./js/earthquake.js"></script>
     </body>
 

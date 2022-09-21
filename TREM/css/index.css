@@ -5,6 +5,7 @@
 @import url("./m3/m3_fab.css");
 @import url("./m3/m3_nav-rail.css");
 @import url("./m3/m3_progress.css");
+@import url("./m3/m3_ripple.css");
 @import url("./disable_scrollbar.css");
 
 html:lang(en), html:lang(en) .leaflet-tooltip {
@@ -221,6 +222,7 @@ body {
 }
 
 #rolllist:hover > div {
+	position: relative;
 	opacity: 0.4 !important;
 }
 

@@ -26,6 +26,7 @@
 		"Localization": "readonly",
 		"NOW": "readonly",
 		"path": "readonly",
+		"ripple": "readonly",
 		"setLocale": "readonly",
 		"setThemeColor": "readonly",
 		"settingDisabled": "writable",

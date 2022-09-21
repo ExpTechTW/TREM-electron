@@ -1017,6 +1017,7 @@ function addReport(report, prepend = false) {
 	if (report.earthquakeNo % 1000 != 0) star += "✩ ";
 
 	const Div = document.createElement("div");
+	Div.className = "md3-ripple";
 	if (report.Time != undefined && report.report == undefined) {
 		const report_container = document.createElement("div");
 		report_container.className = "report-container locating";
@@ -1068,6 +1069,7 @@ function addReport(report, prepend = false) {
 		report_container.append(report_intenisty_container, report_detail_container);
 		Div.prepend(report_container);
 		Div.style.backgroundColor = `${color(report.Max)}cc`;
+		ripple(Div);
 		roll.prepend(Div);
 		investigation = true;
 	} else {
@@ -1125,6 +1127,7 @@ function addReport(report, prepend = false) {
 		report_detail_container.append(report_location, report_time, report_magnitude, report_depth);
 
 		report_container.append(report_intenisty_container, report_detail_container);
+		ripple(Div);
 		Div.append(report_container);
 		Div.style.backgroundColor = `${color(report.data[0].areaIntensity)}cc`;
 		ReportCache[report.originTime] = report;
@@ -2027,6 +2030,7 @@ function main(data, S1) {
 			}
 	if (NOW.getTime() - data.TimeStamp > 180_000) {
 		clear(data.ID);
+
 		// remove epicenter cross icons
 		EarthquakeList[data.ID].epicenterIcon.remove();
 		EarthquakeList[data.ID].epicenterIconTW.remove();
