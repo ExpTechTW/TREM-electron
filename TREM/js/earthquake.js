@@ -83,6 +83,7 @@ let ALL = [];
 let GeoJson = null;
 let GeoJsonID = 0;
 let should_check_update = true;
+let EEWAlert = false;
 // #endregion
 
 // #region 初始化
@@ -1491,9 +1492,12 @@ TREM.on("eew", async (data) => {
 	if (EEW[data.ID] == undefined && !Info.Warn.includes(data.ID) && MaxIntensity >= 5) {
 		Info.Warn.push(data.ID);
 		data.Alert = true;
-		if (CONFIG["eew.audio"])
-			for (let index = 0; index < 5; index++)
-				audioPlay("./audio/Alert.wav");
+		if (!EEWAlert) {
+			EEWAlert = true;
+			if (CONFIG["eew.audio"])
+				for (let index = 0; index < 5; index++)
+					audioPlay("./audio/Alert.wav");
+		}
 	} else
 		data.Alert = false;
 
@@ -2008,6 +2012,7 @@ function main(data, S1) {
 			audioList = [];
 			audioList1 = [];
 			Second = -1;
+			EEWAlert = false;
 			// hide eew alert
 			ticker = null;
 			if (replay != 0) {
