@@ -229,7 +229,6 @@ ipcMain.on("saveSetting", (event, setting) => {
 	if (!setting || settingDisabled) return;
 	dump({ level: 0, message: "Saving user preference", origin: "Setting" });
 	try {
-		fs.rmSync(CONFIG_PATH);
 		fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), { encoding: "utf-8", flag: "w" });
 	} catch (error) {
 		dump({ level: 2, message: `Error saving user preference: ${error}`, origin: "Setting" });
