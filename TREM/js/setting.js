@@ -174,6 +174,7 @@ function init() {
 				const element = document.getElementById(id);
 				if (element) {
 					element.value = CONFIG[id];
+					$(element).siblings("span.slider-value").text(() => ~~(CONFIG[id] * 100));
 					if (settingDisabled) element.disabled = true;
 					else element.disabled = false;
 				}
@@ -232,7 +233,7 @@ function TextSave(id) {
 function RangeSave(id) {
 	const value = document.getElementById(id).value;
 	dump({ level: 0, message: `Value Changed ${id}: ${CONFIG[id]} -> ${value}`, origin: "Setting" });
-	CONFIG[id] = +value;
+	CONFIG[id] = ~~(+value);
 	ipcRenderer.send("saveSetting", true);
 }
 
@@ -422,3 +423,23 @@ const showError = () => {
 ipcMain.on("updateSetting", () => {
 	init();
 });
+
+$("input[type=range]").on("input", function() {
+	const value = this.value;
+	$(this).siblings("span.slider-value").text(function() {return this.className.includes("percentage") ? ~~(value * 100) : value;});
+})
+	.on("mousedown", () => window.getSelection().removeAllRanges());
+
+const stepLockRange = (e) => {
+	if (e.shiftKey)
+		$("input[type=range]")[0].step = 0.1;
+};
+
+const stepUnlockRange = (e) => {
+	if (!e.shiftKey)
+		$("input[type=range]")[0].step = 0.01;
+};
+
+// register the handler
+document.addEventListener("keydown", stepLockRange, false);
+document.addEventListener("keyup", stepUnlockRange, false);

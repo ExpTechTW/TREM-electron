@@ -22,14 +22,14 @@
 }
 
 .md3-ripple__container.is-active .md3-ripple__circle {
-    animation: md3-ripple .6s;
+    animation: md3-ripple .6s ease-out;
 }
 
 @keyframes md3-ripple {
     0% {
       opacity: 0;
     }
-    25% {
+    20% {
       opacity: 1;
     }
     100% {
