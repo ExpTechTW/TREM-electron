@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 require("leaflet");
 require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
