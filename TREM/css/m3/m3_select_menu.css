@@ -1,3 +1,14 @@
+:lang(en) select {
+    font-family: "Google Sans",  "Noto Sans TC", "Noto Sans JP", "Arial", sans-serif;
+}
+:lang(ja) select {
+    font-family: "Google Sans", "Noto Sans JP", "Meiryo", "MS PGothic", sans-serif;
+}
+:lang(ru) select,
+:lang(zh-TW) select {
+    font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Microsoft JhengHei", sans-serif;
+}
+
 select {
     user-select: none;
     background-color: rgb(var(--md-sys-color-surface-variant));
