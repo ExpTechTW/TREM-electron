@@ -227,8 +227,7 @@ function TextSave(id) {
 function RangeSave(id) {
 	const value = document.getElementById(id).value;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
-	setting[id] = ~~(+value);
-	ipcRenderer.send("config:value", id, value);
+	ipcRenderer.send("config:value", id, ~~(+value));
 }
 
 
