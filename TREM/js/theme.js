@@ -1,6 +1,6 @@
 let accent, is_dark;
 const setThemeColor = (color, dark) => {
-	if (color?.startsWith("#")) accent = color;
+	if (typeof color == "string") accent = color;
 	if (dark != undefined) is_dark = dark;
 	import("../node_modules/@material/material-color-utilities/dist/index.js").then(m => {
 		// Get the theme from a hex color
