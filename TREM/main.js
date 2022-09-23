@@ -1,11 +1,10 @@
-const { BrowserWindow, Menu, Tray, app, globalShortcut, ipcMain, nativeImage, shell } = require("electron");
+const { BrowserWindow, Menu, app: TREM, Tray, globalShortcut, ipcMain, nativeImage, shell } = require("electron");
+const Configuration = require("./TREM.Configuration/Configuration");
 const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 const pushReceiver = require("electron-fcm-push-receiver");
 
-let MainWindow = null;
-let SettingWindow = null;
 let tray = null;
 let _hide = false;
 let _devMode = false;
@@ -13,20 +12,29 @@ let _devMode = false;
 if (process.argv.includes("--start")) _hide = true;
 if (process.argv.includes("--dev")) _devMode = true;
 
-const latestLog = path.join(app.getPath("logs"), "latest.log");
+const latestLog = path.join(TREM.getPath("logs"), "latest.log");
 if (fs.existsSync(latestLog)) {
 	const filetime = fs.statSync(latestLog).mtime;
 	console.log(filetime);
 	const filename = (new Date(filetime.getTime() - (filetime.getTimezoneOffset() * 60000))).toISOString().slice(0, -1).replace(/:+|\.+/g, "-");
-	fs.renameSync(path.join(app.getPath("logs"), "latest.log"), path.join(app.getPath("logs"), `${filename}.log`));
+	fs.renameSync(path.join(TREM.getPath("logs"), "latest.log"), path.join(TREM.getPath("logs"), `${filename}.log`));
 }
 
 if (fs.existsSync(__dirname.replace("trem\\resources\\app", "trem_data")) && fs.existsSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`)) {
 	const config = JSON.parse(fs.readFileSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`).toString());
-	if (config["compatibility.hwaccel"] != undefined && !config["compatibility.hwaccel"]) app.disableHardwareAcceleration();
+	if (config["compatibility.hwaccel"] != undefined && !config["compatibility.hwaccel"]) TREM.disableHardwareAcceleration();
 }
 
-app.setLoginItemSettings({
+TREM.Configuration = new Configuration(TREM);
+TREM.Window = new Map();
+
+let MainWindow = TREM.Window.get("main");
+/**
+ * @type {BrowserWindow}
+ */
+let SettingWindow = TREM.Window.get("setting");
+
+TREM.setLoginItemSettings({
 	openAtLogin : true,
 	args        : ["--start"],
 });
@@ -39,7 +47,7 @@ function createWindow() {
 			});
 		}, 5000);
 	});
-	MainWindow = new BrowserWindow({
+	MainWindow = TREM.Window.set("main", new BrowserWindow({
 		title          : "TREM",
 		width          : 1280,
 		height         : 720,
@@ -53,7 +61,7 @@ function createWindow() {
 			backgroundThrottling : false,
 			nativeWindowOpen     : true,
 		},
-	});
+	})).get("main");
 	require("@electron/remote/main").initialize();
 	require("@electron/remote/main").enable(MainWindow.webContents);
 	process.env.window = MainWindow.id;
@@ -61,9 +69,9 @@ function createWindow() {
 	MainWindow.setMenu(null);
 	pushReceiver.setup(MainWindow.webContents);
 	if (process.platform === "win32")
-		app.setAppUserModelId("TREM | 臺灣即時地震監測");
+		TREM.setAppUserModelId("TREM | 臺灣即時地震監測");
 	MainWindow.on("close", (event) => {
-		if (app.quitting)
+		if (TREM.quitting)
 			MainWindow = null;
 		else {
 			event.preventDefault();
@@ -75,8 +83,8 @@ function createWindow() {
 }
 
 function createSettingWindow() {
-	if (SettingWindow) return SettingWindow.focus();
-	SettingWindow = new BrowserWindow({
+	if (SettingWindow instanceof BrowserWindow) return SettingWindow.focus();
+	SettingWindow = TREM.Window.set("setting", new BrowserWindow({
 		title          : "TREM",
 		height         : 600,
 		width          : 1000,
@@ -89,11 +97,12 @@ function createSettingWindow() {
 			nodeIntegration  : true,
 			contextIsolation : false,
 		},
-	});
+	})).get("setting");
 	require("@electron/remote/main").enable(SettingWindow.webContents);
 	SettingWindow.loadFile("./page/setting.html");
 	SettingWindow.setMenu(null);
-	SettingWindow.on("ready-to-show", () => {
+	SettingWindow.webContents.on("did-finish-load", () => {
+		SettingWindow.webContents.send("setting", TREM.Configuration._data);
 		setTimeout(() => SettingWindow.show(), 500);
 	});
 	SettingWindow.on("close", () => {
@@ -101,14 +110,14 @@ function createSettingWindow() {
 	});
 }
 
-const shouldQuit = app.requestSingleInstanceLock();
+const shouldQuit = TREM.requestSingleInstanceLock();
 if (!shouldQuit)
-	app.quit();
+	TREM.quit();
 else {
-	app.on("second-instance", (event, argv, cwd) => {
+	TREM.on("second-instance", (event, argv, cwd) => {
 		if (MainWindow != null) MainWindow.show();
 	});
-	app.whenReady().then(() => {
+	TREM.whenReady().then(() => {
 		const iconPath = path.join(__dirname, "TREM.ico");
 		tray = new Tray(nativeImage.createFromPath(iconPath));
 		const contextMenu = Menu.buildFromTemplate([
@@ -130,16 +139,16 @@ else {
 				label : "重新啟動 | Restart",
 				type  : "normal",
 				click : () => {
-					app.relaunch();
+					TREM.relaunch();
 					if (SettingWindow != null) SettingWindow.close();
-					app.quit();
+					TREM.quit();
 				},
 			},
 			{
 				label : "強制關閉 | Exit",
 				type  : "normal",
 				click : () => {
-					app.exit(0);
+					TREM.exit(0);
 				},
 			},
 		]);
@@ -157,23 +166,22 @@ else {
 	});
 }
 
-app.on("ready", () => {
+TREM.on("ready", () => {
 	globalShortcut.register("Ctrl+Shift+I", () => {
 		if (_devMode) {
 			const currentWindow = BrowserWindow.getFocusedWindow();
 			if (currentWindow)
 				currentWindow.webContents.openDevTools({ mode: "detach" });
 		}
-
 	});
 });
 
-app.on("window-all-closed", () => {
-	if (process.platform !== "darwin") app.quit();
+TREM.on("window-all-closed", () => {
+	if (process.platform !== "darwin") TREM.quit();
 });
 
-app.on("before-quit", () => {
-	app.quitting = true;if (tray)
+TREM.on("before-quit", () => {
+	TREM.quitting = true;if (tray)
 		tray.destroy();
 });
 
@@ -187,21 +195,53 @@ ipcMain.on("closeChildWindow", (event, arg) => {
 });
 
 ipcMain.on("reset", (event, arg) => {
-	app.exit(0);
+	TREM.exit(0);
 });
 
 ipcMain.on("restart", () => {
 	restart();
 });
 
+ipcMain.on("config:value", (event, key, value) => {
+	switch (key) {
+		case "theme.color": {
+			emitAllWindow("config:theme", value);
+			break;
+		}
+
+		case "theme.dark": {
+			emitAllWindow("config:dark", value);
+			break;
+		}
+
+		case "general.locale": {
+			emitAllWindow("config:locale", value);
+			break;
+		}
+
+		default:
+			break;
+	}
+	TREM.Configuration.data[key] = value;
+});
+
+TREM.Configuration.on("update", (data) => {
+	console.log("settings update");
+	emitAllWindow("setting", TREM.Configuration._data);
+});
+
+ipcMain.on("config:open", () => {
+	shell.openPath(TREM.Configuration.path);
+});
+
 function restart() {
-	app.relaunch();
+	TREM.relaunch();
 	if (SettingWindow != null) SettingWindow.close();
-	app.quit();
+	TREM.quit();
 }
 
 ipcMain.on("screenshotEEW", async (event, json) => {
-	const folder = path.join(app.getPath("userData"), "EEW");
+	const folder = path.join(TREM.getPath("userData"), "EEW");
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);
 	const list = fs.readdirSync(folder);
@@ -214,7 +254,7 @@ ipcMain.on("screenshotEEW", async (event, json) => {
 });
 
 ipcMain.on("screenshot", async () => {
-	const folder = path.join(app.getPath("userData"), "Screenshots");
+	const folder = path.join(TREM.getPath("userData"), "Screenshots");
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);
 	const filename = "screenshot" + Date.now() + ".png";
@@ -222,3 +262,9 @@ ipcMain.on("screenshot", async () => {
 	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
 	shell.showItemInFolder(path.join(folder, filename));
 });
+
+function emitAllWindow(channel, ...args) {
+	for (const [key, win] of TREM.Window[Symbol.iterator]())
+		if (win instanceof BrowserWindow)
+			win.webContents.send(channel, ...args);
+}

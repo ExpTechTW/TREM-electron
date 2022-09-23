@@ -20,12 +20,12 @@ function dump(dumpData) {
 
 function dumpUpload() {
 	const msg = {
-		"APIkey"        : "https://github.com/ExpTechTW",
-		"Function"      : "data",
-		"Type"          : "TREM-Dump",
-		"FormatVersion" : 1,
-		"Value"         : fs.readFileSync(latestLog).toString(),
-		"UUID"          : localStorage.UUID,
+		APIkey        : "https://github.com/ExpTechTW",
+		Function      : "data",
+		Type          : "TREM-Dump",
+		FormatVersion : 1,
+		Value         : fs.readFileSync(latestLog).toString(),
+		UUID          : localStorage.UUID,
 	};
 	axios.post("https://exptech.mywire.org:1015", msg)
 		.then((response) => {

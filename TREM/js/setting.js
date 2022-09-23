@@ -1,6 +1,6 @@
 const { getCurrentWindow, shell } = require("@electron/remote");
 const os = require("node:os");
-let Loc;
+let loc;
 const win = getCurrentWindow();
 
 document.onreadystatechange = () => {
@@ -53,46 +53,55 @@ const openURL = url => {
 	shell.openExternal(url);
 };
 
+let setting, is_setting_disabled;
+
+ipcRenderer.on("setting", (event, data) => {
+	setting = data;
+	console.log(setting);
+	init();
+});
+
+ipcRenderer.on("settingError", (event, error) => {
+	is_setting_disabled = error;
+	init();
+});
+
+ipcRenderer.on("config:theme", (event, value) => {
+	setThemeColor(value);
+});
+
+ipcRenderer.on("config:dark", (event, value) => {
+	setThemeColor(value);
+});
+
+ipcRenderer.on("config:locale", (event, value) => {
+	setLocale(value);
+});
+
+let region, station;
+
 // #region 選單
-fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")
-	.then(async res => await res.json())
-	.then(loc => {
-		Loc = loc;
-		for (let i = 0; i < Object.keys(Loc).length; i++) {
-			const city = document.getElementById("location.city");
-			const option = document.createElement("option");
-			option.text = Object.keys(Loc)[i];
-			option.value = Object.keys(Loc)[i];
-			city.appendChild(option);
-		}
-		for (let i = 0; i < Object.keys(Loc[CONFIG["location.city"]]).length; i++) {
-			const town = document.getElementById("location.town");
-			const option = document.createElement("option");
-			option.text = Object.keys(Loc[CONFIG["location.city"]])[i];
-			option.value = Object.keys(Loc[CONFIG["location.city"]])[i];
-			town.appendChild(option);
-		}
+(async () => {
+	region = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+	const el = document.getElementById("location.city");
+	for (const key of Object.keys(region)) {
+		const option = document.createElement("option");
+		option.text = key;
+		option.value = key;
+		el.appendChild(option);
+	}
+})();
 
-		init();
-	});
-
-fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")
-	.then(async res => await res.json())
-	.then(loc => {
-		if (loc[CONFIG["Real-time.station"]] == undefined) {
-			CONFIG["Real-time.station"] = "L-711-6732340-12";
-			ipcRenderer.send("saveSetting", true);
-		}
-		for (let index = 0; index < Object.keys(loc).length; index++) {
-			if (Object.keys(loc)[index] == "List") continue;
-			const select = document.getElementById("Real-time.station");
-			const option = document.createElement("option");
-			option.text = `${loc[Object.keys(loc)[index]].Loc} ${Object.keys(loc)[index]}`;
-			option.value = Object.keys(loc)[index];
-			if (Object.keys(loc)[index] == CONFIG["Real-time.station"]) option.selected = true;
-			select.appendChild(option);
-		}
-	});
+(async () => {
+	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+	const el = document.getElementById("Real-time.station");
+	for (const key of Object.keys(station)) {
+		const option = document.createElement("option");
+		option.text = `${station[key].Loc} ${key}`;
+		option.value = key;
+		el.appendChild(option);
+	}
+})();
 // #endregion
 
 /**
@@ -100,11 +109,10 @@ fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/st
  */
 function init() {
 	dump({ level: 0, message: "Initializing", origin: "Setting" });
-	console.log(settingDisabled);
 
-	document.title = Localization[CONFIG["general.locale"]].Application_Title || Localization["zh-TW"].Application_Title;
+	document.title = Localization[setting?.["general.locale"]]?.Application_Title || Localization["zh-TW"].Application_Title;
 
-	if (settingDisabled) {
+	if (is_setting_disabled) {
 		win.flashFrame(true);
 		document.querySelectorAll(".setting-button").forEach((node) => node.disabled = true);
 		document.body.classList.add("settingDisabled");
@@ -114,68 +122,76 @@ function init() {
 		document.body.classList.remove("settingDisabled");
 	}
 
-	Object.keys(CONFIG).forEach(id => {
-		if (id == "ver") return;
-		if (!(id in DEFAULT_CONFIG)) return delete CONFIG[id];
-
-		switch (DEFAULT_CONFIG[id].type) {
-			case "CheckBox": {
+	Object.keys(setting).forEach(id => {
+		switch (TREM.Constants.Default_Configurations[id].type) {
+			case "toggle": {
 				const element = document.getElementById(id);
 				if (element) {
-					element.checked = CONFIG[id];
-					if (settingDisabled) element.disabled = true;
+					element.checked = setting[id];
+					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
 				break;
 			}
 
-			case "TextBox": {
+			case "input": {
 				const element = document.getElementById(id);
 				if (element) {
-					element.value = CONFIG[id];
-					if (settingDisabled) element.disabled = true;
+					element.value = setting[id];
+					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
 				break;
 			}
 
-			case "SelectBox": {
+			case "select": {
 				/**
 				 * @type {HTMLSelectElement}
 				 */
 				const element = document.getElementById(id);
 				if (element) {
+					if (id == "location.town") {
+						const town = document.getElementById("location.town");
+						town.replaceChildren();
+						for (const key of Object.keys(region[setting["location.city"]])) {
+							const option = document.createElement("option");
+							option.text = key;
+							option.value = key;
+							town.appendChild(option);
+						}
+					}
+
 					for (let i = 0; i < element.options.length; i++)
-						if (element.options[i].value == CONFIG[id])
+						if (element.options[i].value == setting[id])
 							element.options[i].selected = true;
-					if (settingDisabled) element.disabled = true;
+					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
 				break;
 			}
 
-			case "ColorBox": {
+			case "color": {
 				/**
 				 * @type {HTMLSelectElement}
 				 */
 				const element = document.getElementById(id);
 				if (element) {
-					element.value = CONFIG[id];
-					if (settingDisabled) element.disabled = true;
+					element.value = setting[id];
+					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
 				const wrapper = document.getElementById(id.replace(".", "-"));
 				if (wrapper)
-					wrapper.style.backgroundColor = CONFIG[id];
+					wrapper.style.backgroundColor = setting[id];
 				break;
 			}
 
-			case "Range": {
+			case "range": {
 				const element = document.getElementById(id);
 				if (element) {
-					element.value = CONFIG[id];
-					$(element).siblings("span.slider-value").text(() => ~~(CONFIG[id] * 100));
-					if (settingDisabled) element.disabled = true;
+					element.value = setting[id];
+					$(element).siblings("span.slider-value").text(() => ~~(setting[id] * 100));
+					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
 				break;
@@ -190,51 +206,29 @@ function init() {
 function SelectSave(id) {
 	const select = document.getElementById(id);
 	const value = select.options[select.selectedIndex].value;
-	dump({ level: 0, message: `Value Changed ${id}: ${CONFIG[id]} -> ${value}`, origin: "Setting" });
-	CONFIG[id] = value;
-	ipcRenderer.send("saveSetting", true);
-	if (id == "location.city") {
-		const town = document.getElementById("location.town");
-		town.replaceChildren();
-
-		Object.keys(Loc[value]).forEach(key => {
-			const option = document.createElement("option");
-			option.text = key;
-			option.value = key;
-			town.appendChild(option);
-		});
-
-		SelectSave("location.town");
-	} else if (id == "general.locale")
-		setLocale(CONFIG["general.locale"]);
-
+	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+	ipcRenderer.send("config:value", id, value);
 }
 
 function CheckSave(id) {
 	const value = document.getElementById(id).checked;
-	dump({ level: 0, message: `Value Changed ${id}: ${CONFIG[id]} -> ${value}`, origin: "Setting" });
-	CONFIG[id] = value;
-	ipcRenderer.send("saveSetting", true);
+	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+	ipcRenderer.send("config:value", id, value);
 	if (id == "compatibility.hwaccel")
 		$("#HAReloadButton").fadeIn(100);
-	else if (id == "theme.dark")
-		setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
 }
 
 function TextSave(id) {
 	const value = document.getElementById(id).value;
-	dump({ level: 0, message: `Value Changed ${id}: ${CONFIG[id]} -> ${value}`, origin: "Setting" });
-	CONFIG[id] = value;
-	ipcRenderer.send("saveSetting", true);
-	if (id == "theme.color")
-		setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
+	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+	ipcRenderer.send("config:value", id, value);
 }
 
 function RangeSave(id) {
 	const value = document.getElementById(id).value;
-	dump({ level: 0, message: `Value Changed ${id}: ${CONFIG[id]} -> ${value}`, origin: "Setting" });
-	CONFIG[id] = ~~(+value);
-	ipcRenderer.send("saveSetting", true);
+	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+	setting[id] = ~~(+value);
+	ipcRenderer.send("config:value", id, value);
 }
 
 
@@ -274,7 +268,7 @@ function setList(args, el, event) {
 
 	let delay = 0;
 	for (let i = 0; i < changeelchild.length; i++) {
-		$(changeelchild[i]).delay(delay + 40 * i).fadeTo(100, settingDisabled ? 0.6 : 1).delay(100)
+		$(changeelchild[i]).delay(delay + 40 * i).fadeTo(100, is_setting_disabled ? 0.6 : 1).delay(100)
 			.queue(function(next) {
 				$(this).css("opacity", "");
 				next();
@@ -284,8 +278,8 @@ function setList(args, el, event) {
 		if (child.length)
 			for (let j = 0; j < child.length; j++)
 				if (child[j].id != "HAReloadButton") {
-					if (!child[j].lang || (child[j].lang == CONFIG["general.locale"]))
-						$(child[j]).delay(delay).fadeTo(100, settingDisabled ? 0.6 : 1).delay(100)
+					if (!child[j].lang || (child[j].lang == setting["general.locale"]))
+						$(child[j]).delay(delay).fadeTo(100, is_setting_disabled ? 0.6 : 1).delay(100)
 							.queue(function(next) {
 								$(this).css("opacity", "");
 								next();
@@ -303,10 +297,10 @@ function testEEW() {
 
 function reset() {
 	showDialog("warn",
-		Localization[CONFIG["general.locale"]].Setting_Dialog_Reset_Title || Localization["zh-TW"].Setting_Dialog_Reset_Title,
-		Localization[CONFIG["general.locale"]].Setting_Dialog_Reset_Description || Localization["zh-TW"].Setting_Dialog_Reset_Description,
+		Localization[setting["general.locale"]].Setting_Dialog_Reset_Title || Localization["zh-TW"].Setting_Dialog_Reset_Title,
+		Localization[setting["general.locale"]].Setting_Dialog_Reset_Description || Localization["zh-TW"].Setting_Dialog_Reset_Description,
 		1, "device_reset", () => {
-			CONFIG = {};
+			setting = {};
 			ipcRenderer.send("saveSetting", true);
 			restart();
 		});
@@ -317,7 +311,7 @@ function openLogFolder() {
 }
 
 function openSettingFile() {
-	shell.openPath(CONFIG_PATH);
+	ipcRenderer.send("config:open");
 }
 
 const restart = () => {
@@ -333,7 +327,7 @@ testAudioState.audio.addEventListener("ended", () => {
 	testAudioState.is_playing = false;
 	testAudioBtn.style.removeProperty("--progress");
 	testAudioBtn.childNodes[1].textContent = "play_arrow";
-	testAudioBtn.childNodes[3].textContent = Localization[CONFIG["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
+	testAudioBtn.childNodes[3].textContent = Localization[setting["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
 });
 testAudioState.audio.addEventListener("timeupdate", () => {
 	console.log(testAudioState.audio.currentTime);
@@ -351,7 +345,7 @@ const testAudio = (audioString, el) => {
 		testAudioState.is_playing = false;
 		testAudioBtn.style.removeProperty("--progress");
 		testAudioBtn.childNodes[1].textContent = "play_arrow";
-		testAudioBtn.childNodes[3].textContent = Localization[CONFIG["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
+		testAudioBtn.childNodes[3].textContent = Localization[setting["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
 	}
 	testAudioBtn = el;
 	if (!testAudioState.is_playing) {
@@ -361,33 +355,33 @@ const testAudio = (audioString, el) => {
 		testAudioState.audio.played;
 		testAudioState.is_playing = true;
 		el.childNodes[1].textContent = "pause";
-		el.childNodes[3].textContent = Localization[CONFIG["general.locale"]].Audio_TestStop || Localization["zh-TW"].Audio_TestStop;
+		el.childNodes[3].textContent = Localization[setting["general.locale"]].Audio_TestStop || Localization["zh-TW"].Audio_TestStop;
 	} else {
 		testAudioState.audio.pause();
 		testAudioState.audio.currentTime = 0;
 		testAudioState.is_playing = false;
 		testAudioBtn.style.removeProperty("--progress");
 		el.childNodes[1].textContent = "play_arrow";
-		el.childNodes[3].textContent = Localization[CONFIG["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
+		el.childNodes[3].textContent = Localization[setting["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
 	}
 };
 
 const webhook = async () => {
-	if (CONFIG["webhook.url"].length == 0)
+	if (setting["webhook.url"].length == 0)
 		return showDialog("error",
-			Localization[CONFIG["general.locale"]].Webhook_Dialog_Error_Title || Localization["zh-TW"].Webhook_Dialog_Error_Title,
-			Localization[CONFIG["general.locale"]].Webhook_Dialog_Error_Empty || Localization["zh-TW"].Webhook_Dialog_Error_Empty,
+			Localization[setting["general.locale"]].Webhook_Dialog_Error_Title || Localization["zh-TW"].Webhook_Dialog_Error_Title,
+			Localization[setting["general.locale"]].Webhook_Dialog_Error_Empty || Localization["zh-TW"].Webhook_Dialog_Error_Empty,
 		);
 
-	const url = CONFIG["webhook.url"].match(
+	const url = setting["webhook.url"].match(
 		// eslint-disable-next-line no-useless-escape
 		/^https?:\/\/(?:canary|ptb)?\.?discord\.com\/api\/webhooks(?:\/v[0-9]\d*)?\/([^\/]+)\/([^\/]+)/i,
 	);
 
 	if (!url || url.length <= 1)
 		return showDialog("error",
-			Localization[CONFIG["general.locale"]].Webhook_Dialog_Error_Title || Localization["zh-TW"].Webhook_Dialog_Error_Title,
-			Localization[CONFIG["general.locale"]].Webhook_Dialog_Error_Invalid || Localization["zh-TW"].Webhook_Dialog_Error_Invalid);
+			Localization[setting["general.locale"]].Webhook_Dialog_Error_Title || Localization["zh-TW"].Webhook_Dialog_Error_Title,
+			Localization[setting["general.locale"]].Webhook_Dialog_Error_Invalid || Localization["zh-TW"].Webhook_Dialog_Error_Invalid);
 
 	const { MessageEmbed, WebhookClient } = require("discord.js");
 
@@ -399,12 +393,12 @@ const webhook = async () => {
 			.setTimestamp(),
 	];
 
-	await new WebhookClient({ url: CONFIG["webhook.url"] })
+	await new WebhookClient({ url: setting["webhook.url"] })
 		.send({ embeds, username: "TREM | 臺灣即時地震監測", avatarURL: "https://cdn.discordapp.com/attachments/976452418114048051/976469802644291584/received_1354357138388018.webp" })
 		.then(m => {
 			showDialog("success",
-				Localization[CONFIG["general.locale"]].Webhook_Dialog_Title || Localization["zh-TW"].Webhook_Dialog_Title,
-				(Localization[CONFIG["general.locale"]].Webhook_Dialog_Success || Localization["zh-TW"].Webhook_Dialog_Success).format(m.id, m.channel_id));
+				Localization[setting["general.locale"]].Webhook_Dialog_Title || Localization["zh-TW"].Webhook_Dialog_Title,
+				(Localization[setting["general.locale"]].Webhook_Dialog_Success || Localization["zh-TW"].Webhook_Dialog_Success).format(m.id, m.channel_id));
 		}).catch(error => {
 			showDialog("error", "Webhook 測試", `Webhook 發送測試訊息時發生錯誤\n${error}`);
 		});
@@ -416,13 +410,9 @@ const colorUpdate = () => {
 
 const showError = () => {
 	showDialog("error",
-		Localization[CONFIG["general.locale"]].Setting_Dialog_Error_Title || Localization["zh-TW"].Setting_Dialog_Error_Title,
-		(Localization[CONFIG["general.locale"]].Setting_Dialog_Error_Description || Localization["zh-TW"].Setting_Dialog_Error_Description).format(settingDisabled));
+		Localization[setting["general.locale"]].Setting_Dialog_Error_Title || Localization["zh-TW"].Setting_Dialog_Error_Title,
+		(Localization[setting["general.locale"]].Setting_Dialog_Error_Description || Localization["zh-TW"].Setting_Dialog_Error_Description).format(is_setting_disabled));
 };
-
-ipcMain.on("updateSetting", () => {
-	init();
-});
 
 $("input[type=range]").on("input", function() {
 	const value = this.value;

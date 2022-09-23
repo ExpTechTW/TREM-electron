@@ -52,7 +52,7 @@
   "devDependencies": {
     "electron": "^18.2.3",
     "electron-builder": "^23.0.3",
-    "eslint": "^8.19.0",
+    "eslint": "^8.23.1",
     "eslint-plugin-require-sort": "^1.2.2"
   },
   "dependencies": {
@@ -60,6 +60,7 @@
     "@kamiya4047/exptech-api-wrapper": "^1.0.4",
     "@material/material-color-utilities": "^0.1.2",
     "bytenode": "^1.3.6",
+    "chokidar": "^3.5.3",
     "discord.js": "^13.8.1",
     "electron-common-ipc": "^15.0.3",
     "electron-fcm-push-receiver": "^2.1.7",

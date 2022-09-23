@@ -13,9 +13,6 @@
 		"$": "readonly",
 		"app": "readonly",
 		"axios": "readonly",
-		"CONFIG": "writable",
-		"CONFIG_PATH": "readonly",
-		"DEFAULT_CONFIG": "readonly",
 		"dump": "readonly",
 		"fs": "readonly",
 		"getThemeColors": "readonly",
@@ -29,10 +26,10 @@
 		"ripple": "readonly",
 		"setLocale": "readonly",
 		"setThemeColor": "readonly",
-		"settingDisabled": "writable",
 		"showDialog": "readonly",
 		"TimerDesynced": "writable",
-		"toggleNav": "readonly"
+		"toggleNav": "readonly",
+		"TREM": "readonly"
 	},
 	"rules": {
 		"require-sort/require-sort": "warn",
@@ -78,6 +75,7 @@
 		"prefer-const": "error",
 		"prefer-arrow-callback": "error",
 		"quotes": ["warn", "double"],
+		"quote-props": ["warn", "as-needed"],
 		"require-await": "error",
 		"semi": ["error", "always"],
 		"space-before-blocks": "error",

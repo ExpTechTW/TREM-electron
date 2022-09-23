@@ -7,7 +7,7 @@ const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const EventEmitter = require("node:events");
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
-const TREM = new EventEmitter();
+TREM.Earthquake = new EventEmitter();
 localStorage.dirname = __dirname;
 
 bytenode.runBytecodeFile(__dirname + "/js/server.jar");
@@ -93,7 +93,7 @@ const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
 win.on("show", () => {
-	TREM.emit("focus");
+	TREM.Earthquake.emit("focus");
 });
 
 async function init() {
@@ -144,7 +144,7 @@ async function init() {
 					map.removeLayer(Tsunami.Cross);
 					delete Tsunami.Cross;
 					delete Tsunami.Time;
-					TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 				}
 
 			if (investigation && NOW.getTime() - Report > 600000) {
@@ -161,7 +161,7 @@ async function init() {
 					ReportMarkID = null;
 					for (let index = 0; index < MarkList.length; index++)
 						map.removeLayer(MarkList[index]);
-					TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 				}
 			}
 		}, 250);
@@ -184,13 +184,13 @@ async function init() {
 				ReportMarkID = null;
 				for (let index = 0; index < MarkList.length; index++)
 					map.removeLayer(MarkList[index]);
-				TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+				TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 			}
 			mapLock = false;
-			TREM.emit("focus");
+			TREM.Earthquake.emit("focus");
 		});
 		map.on("drag", () => mapLock = true);
-		map.on("dblclick", () => TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 }));
+		map.on("dblclick", () => TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 }));
 		map.on("zoomend", () => {
 			if (map.getZoom() > 10)
 				for (const key in Station) {
@@ -297,9 +297,9 @@ async function init() {
 						Zoom = 6;
 					const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
 					if (num >= 5)
-						TREM.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
+						TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
 					else
-						TREM.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], size: Zoom });
+						TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], size: Zoom });
 					EEW[Object.keys(EEW)[index]].time = NOW.getTime();
 				}
 			auto = true;
@@ -307,7 +307,7 @@ async function init() {
 			if (Object.keys(PGA).length == 1) {
 				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
 				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
-				TREM.emit("focus", { center: [X1, Y1], size: 9.5 });
+				TREM.Earthquake.emit("focus", { center: [X1, Y1], size: 9.5 });
 			} else if (Object.keys(PGA).length >= 2) {
 				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
 				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
@@ -325,13 +325,13 @@ async function init() {
 					if (Object.keys(PGA).length >= 6) focusScale = 7.5;
 					if (Object.keys(PGA).length >= 8) focusScale = 7;
 				}
-				TREM.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
+				TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
 			}
 			auto = true;
 		} else
 		if (auto) {
 			auto = false;
-			TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+			TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 		}
 	}, 500);
 }
@@ -345,9 +345,9 @@ function PGAMain() {
 		let R = 0;
 		if (replay) R = replay + (NOW.getTime() - replayT);
 		const data = {
-			"Function" : "data",
-			"Type"     : "TREM",
-			"Value"    : R,
+			Function : "data",
+			Type     : "TREM",
+			Value    : R,
 		};
 		const CancelToken = axios.CancelToken;
 		let cancel;
@@ -474,8 +474,8 @@ async function handler(response) {
 		}
 		if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
 			pga[station[keys[index]].PGA] = {
-				"Intensity" : Intensity,
-				"Time"      : 0,
+				Intensity : Intensity,
+				Time      : 0,
 			};
 		if (Intensity != "NA" && (Intensity != 0 || Alert)) {
 			if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
@@ -492,9 +492,9 @@ async function handler(response) {
 					}
 				if (find == -1)
 					All.push({
-						"loc"       : station[keys[index]].Loc,
-						"intensity" : Intensity,
-						"pga"       : amount,
+						loc       : station[keys[index]].Loc,
+						intensity : Intensity,
+						pga       : amount,
 					});
 				AllT = Date.now();
 				if (ALERT) {
@@ -749,12 +749,12 @@ async function setUserLocationMarker(city, town) {
 			.addTo(map);
 	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
 	dump({ level: 0, message: `User location set to ${city} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
-	TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+	TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 }
 // #endregion
 
 // #region 聚焦
-TREM.on("focus", ({ center, size } = {}, force = false) => {
+TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
 	if (!CONFIG["map.autoZoom"] || force) return;
 	let X = 0;
 	if (size >= 6) X = 2.5;
@@ -879,7 +879,7 @@ async function ReportClick(time) {
 		ReportMarkID = null;
 		for (let index = 0; index < MarkList.length; index++)
 			map.removeLayer(MarkList[index]);
-		TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 	} else {
 		ReportMarkID = time;
 		for (let index = 0; index < MarkList.length; index++)
@@ -887,9 +887,9 @@ async function ReportClick(time) {
 
 		const LIST = [];
 		const body = {
-			"Function" : "data",
-			"Type"     : "report",
-			"Value"    : ReportCache[time].earthquakeNo,
+			Function : "data",
+			Type     : "report",
+			Value    : ReportCache[time].earthquakeNo,
 		};
 		if (
 			// 確認是否為無編號地震
@@ -920,7 +920,7 @@ async function ReportClick(time) {
 								ReportMark.setZIndexOffset(1000 + index);
 								MarkList.push(ReportMark);
 							}
-						TREM.emit("focus", { center: [+json.NorthLatitude, +json.EastLongitude], size: 7.5 });
+						TREM.Earthquake.emit("focus", { center: [+json.NorthLatitude, +json.EastLongitude], size: 7.5 });
 						const myIcon = L.icon({
 							iconUrl  : "./image/star.png",
 							iconSize : [25, 25],
@@ -971,7 +971,7 @@ async function ReportClick(time) {
 				ReportMark.setZIndexOffset(1000 + index);
 				MarkList.push(ReportMark);
 			}
-			TREM.emit("focus", { center: [ReportCache[time].epicenterLat, +ReportCache[time].epicenterLon], size: 7.5 });
+			TREM.Earthquake.emit("focus", { center: [ReportCache[time].epicenterLat, +ReportCache[time].epicenterLon], size: 7.5 });
 			const icon = L.icon({
 				iconUrl  : "./image/star.png",
 				iconSize : [25, 25],
@@ -1262,11 +1262,11 @@ ipcMain.once("start", () => {
 						setTimeout(() => {
 							dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 							const data = {
-								"Function"      : "earthquake",
-								"Type"          : "test",
-								"FormatVersion" : 3,
-								"UUID"          : localStorage.UUID,
-								"ID"            : list[index],
+								Function      : "earthquake",
+								Type          : "test",
+								FormatVersion : 3,
+								UUID          : localStorage.UUID,
+								ID            : list[index],
 							};
 							dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 							axios.post(PostAddressIP, data)
@@ -1279,10 +1279,10 @@ ipcMain.once("start", () => {
 					delete localStorage.Test;
 					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 					const data = {
-						"Function"      : "earthquake",
-						"Type"          : "test",
-						"FormatVersion" : 3,
-						"UUID"          : localStorage.UUID,
+						Function      : "earthquake",
+						Type          : "test",
+						FormatVersion : 3,
+						UUID          : localStorage.UUID,
 					};
 					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 					axios.post(PostAddressIP, data)
@@ -1350,7 +1350,7 @@ async function FCMdata(data) {
 			win.setAlwaysOnTop(false);
 		}
 		new Notification("海嘯警報", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "TREM.ico" });
-		TREM.emit("focus", { center: [json.NorthLatitude, json.EastLongitude], size: 2.5 });
+		TREM.Earthquake.emit("focus", { center: [json.NorthLatitude, json.EastLongitude], size: 2.5 });
 		const myIcon = L.icon({
 			iconUrl  : "./image/warn.png",
 			iconSize : [30, 30],
@@ -1367,7 +1367,7 @@ async function FCMdata(data) {
 		}
 		if (CONFIG["audio.report"]) audioPlay("./audio/Water.wav");
 	} else if (json.Function == "TSUNAMI")
-		TREM.emit("tsunami", json);
+		TREM.Earthquake.emit("tsunami", json);
 	else if (json.Function == "palert")
 		PAlert = json.Data;
 	else if (json.Function == "TREM_earthquake")
@@ -1409,14 +1409,14 @@ async function FCMdata(data) {
 			if (json.Function == "KMA_earthquake" && !CONFIG["accept.eew.KMA"]) return;
 			if (json.Function == "earthquake" && !CONFIG["accept.eew.CWB"]) return;
 			if (json.Function == "FJDZJ_earthquake" && !CONFIG["accept.eew.FJDZJ"]) return;
-			TREM.emit("eew", json);
+			TREM.Earthquake.emit("eew", json);
 		} else
-			TREM.emit("eew", json);
+			TREM.Earthquake.emit("eew", json);
 	}
 }
 // #endregion
 
-TREM.on("eew", async (data) => {
+TREM.Earthquake.on("eew", async (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.debug(data);
 
@@ -1595,7 +1595,7 @@ TREM.on("eew", async (data) => {
 	let find = INFO.findIndex(v => v.ID == data.ID);
 	if (find == -1) find = INFO.length;
 	INFO[find] = {
-		"ID"            : data.ID,
+		ID              : data.ID,
 		alert_number    : data.Version,
 		alert_intensity : MaxIntensity,
 		alert_location  : data.Location ?? "未知區域",
@@ -1710,8 +1710,8 @@ TREM.on("eew", async (data) => {
 
 			msg.embeds[0].image.url = "";
 			msg.embeds[0].footer = {
-				"text"     : `ExpTech Studio ${Now}`,
-				"icon_url" : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
+				text     : `ExpTech Studio ${Now}`,
+				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 			};
 			dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
 			axios.post(CONFIG["webhook.url"], msg)
@@ -1722,7 +1722,7 @@ TREM.on("eew", async (data) => {
 	}, 2000);
 });
 
-TREM.on("tsunami", (data) => {
+TREM.Earthquake.on("tsunami", (data) => {
 	if (data.Version == 1) {
 		new Notification("海嘯警報", { body: `${data["UTC+8"]} 發生 ${data.Scale} 地震\n\n東經: ${data.EastLongitude} 度\n北緯: ${data.NorthLatitude} 度`, icon: "TREM.ico" });
 		if (CONFIG["report.show"]) {
@@ -1731,7 +1731,7 @@ TREM.on("tsunami", (data) => {
 			win.setAlwaysOnTop(false);
 		}
 		if (CONFIG["audio.report"]) audioPlay("./audio/Water.wav");
-		TREM.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 	}
 	if (data.Cancel) {
 		if (TSUNAMI.E)
