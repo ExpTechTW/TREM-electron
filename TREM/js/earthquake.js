@@ -11,30 +11,6 @@ TREM.Constants = require(path.resolve(__dirname, "./TREM.Constants/Constants.js"
 TREM.Earthquake = new EventEmitter();
 localStorage.dirname = __dirname;
 
-let setting, is_setting_disabled;
-
-ipcRenderer.on("setting", (event, data) => {
-	setting = data;
-	console.log(setting);
-	init();
-});
-
-ipcRenderer.on("settingError", (event, error) => {
-	is_setting_disabled = error;
-});
-
-ipcRenderer.on("config:theme", (event, value) => {
-	setThemeColor(value);
-});
-
-ipcRenderer.on("config:dark", (event, value) => {
-	setThemeColor(value);
-});
-
-ipcRenderer.on("config:locale", (event, value) => {
-	setLocale(value);
-});
-
 bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
 // #region 變數
@@ -254,7 +230,7 @@ async function init() {
 	})();
 
 	(() => {
-		setUserLocationMarker(setting["location.city"], setting["location.town"]);
+		setUserLocationMarker(setting["location.town"]);
 		progressbar.value = (1 / progressStep) * 3;
 	})();
 
@@ -761,13 +737,17 @@ async function fetchFiles() {
 }
 
 // #region 用戶所在位置
-async function setUserLocationMarker(city, town) {
+/**
+ * 設定用戶所在位置
+ * @param {string} town 鄉鎮
+ */
+async function setUserLocationMarker(town) {
 	if (!Location) {
 		Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
 		dump({ level: 0, message: "Get Location File", origin: "Location" });
 	}
 
-	[, UserLocationLat, UserLocationLon] = Location[city][town];
+	[, UserLocationLat, UserLocationLon] = Location[setting["location.city"]][town];
 
 	if (!marker) {
 		const icon = L.icon({
@@ -778,7 +758,7 @@ async function setUserLocationMarker(city, town) {
 			.setZIndexOffset(1)
 			.addTo(map);
 	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
-	dump({ level: 0, message: `User location set to ${city} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
+	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
 	TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 }
 // #endregion
@@ -1330,8 +1310,19 @@ ipcMain.on("testEEW", () => {
 	localStorage.Test = true;
 	ipcRenderer.send("restart");
 });
-ipcMain.on("updateTheme", async () => {
-	const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
+ipcRenderer.on("settingError", (event, error) => {
+	is_setting_disabled = error;
+});
+const updateMapColors = async (event, value) => {
+	let accent, dark;
+	if (typeof value == "boolean") {
+		accent = setting["theme.color"];
+		dark = value;
+	} else {
+		accent = value;
+		dark = setting["theme.dark"];
+	}
+	const colors = await getThemeColors(accent, value);
 
 	map_geoJson.options.style = {
 		weight      : 0.8,
@@ -1340,11 +1331,11 @@ ipcMain.on("updateTheme", async () => {
 		fillOpacity : 0.6,
 	};
 	map_geoJson.redraw();
-
-	console.log("updateTheme");
-});
-ipcMain.on("updateLocation", (e, { city, town }) => {
-	setUserLocationMarker(city, town);
+};
+ipcRenderer.on("config:theme", updateMapColors);
+ipcRenderer.on("config:dark", updateMapColors);
+ipcRenderer.on("config:location", (event, value) => {
+	setUserLocationMarker(value);
 });
 ipcMain.on("updateTitle", (e, lang) => {
 	document.title = Localization[lang].Application_Title || Localization["zh-TW"].Application_Title;

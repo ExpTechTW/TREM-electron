@@ -5,216 +5,29 @@ const { ipcMain } = require("@electron/remote");
 const { ipcRenderer } = require("electron");
 const path = require("node:path");
 
-const DEFAULT_CONFIG = {
-	"general.locale": {
-		type  : "SelectBox",
-		value : "zh-TW",
-	},
-	"accept.eew.CWB": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"accept.eew.NIED": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"accept.eew.JMA": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"accept.eew.KMA": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"accept.eew.SCDZJ": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"accept.eew.FJDZJ": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"shock.smoothing": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"auto.waveSpeed": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"compatibility.hwaccel": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"Real-time.show": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"Real-time.cover": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"eew.show": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"eew.cover": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"audio.eew": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"audio.eew.volume": {
-		type  : "Range",
-		value : 1,
-	},
-	"audio.report": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"audio.report.volume": {
-		type  : "Range",
-		value : 1,
-	},
-	"audio.realtime": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"audio.realtime.volume": {
-		type  : "Range",
-		value : 1,
-	},
-	"Real-time.station": {
-		type  : "SelectBox",
-		value : "L-711-6732340-12",
-	},
-	"report.cover": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"eew.Intensity": {
-		type  : "SelectBox",
-		value : "0",
-	},
-	"map.autoZoom": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"report.show": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"earthquake.siteEffect": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"shock.p": {
-		type  : "CheckBox",
-		value : true,
-	},
-	"webhook.url": {
-		type  : "TextBox",
-		value : "",
-	},
-	"webhook.body": {
-		type  : "TextBox",
-		value : JSON.stringify({
-			username   : "TREM | 臺灣即時地震監測",
-			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-			embeds     : [
-				{
-					author: {
-						name: "TREM | 臺灣即時地震監測",
-					},
-					title       : "",
-					description : "%Time% 左右發生顯著有感地震\n\n東經: %EastLongitude% 度\n北緯: %NorthLatitude% 度\n深度: %Depth% 公里\n規模: %Scale%\n\n發報單位: %Provider%\n\n慎防強烈搖晃，就近避難 [趴下、掩護、穩住]",
-					color       : 4629503,
-					image       : {
-						url: "",
-					},
-				},
-			],
-		}),
-	},
-	"location.city": {
-		type  : "SelectBox",
-		value : "臺南市",
-	},
-	"location.town": {
-		type  : "SelectBox",
-		value : "歸仁區",
-	},
-	"theme.color": {
-		type  : "ColorBox",
-		value : "#6750A4",
-	},
-	"theme.dark": {
-		type  : "CheckBox",
-		value : true,
-	},
-};
+let setting, is_setting_disabled;
 
-/**
- * 設定檔路徑
- * @type {string}
- */
-const CONFIG_PATH = path.join(app.getPath("userData"), "settings.json");
+ipcRenderer.on("setting", (event, data) => {
+	setting = data;
+	is_setting_disabled = false;
+});
 
-if (!fs.existsSync(CONFIG_PATH))
-	fs.writeFileSync(CONFIG_PATH, JSON.stringify(Object.keys(DEFAULT_CONFIG).reduce((acc, key) => {
-		acc[key] = DEFAULT_CONFIG[key].value;
-		return acc;
-	}, {}), null, 2), "utf8");
+ipcRenderer.once("setting", (event, data) => {
+	init();
+	setThemeColor(data["theme.color"], data["theme.dark"]);
+	setLocale(data["general.locale"]);
+});
 
-/**
- * 設定
- * @type {string}
- */
-let CONFIG, settingDisabled = false;
-try {
-	CONFIG = JSON.parse(fs.readFileSync(CONFIG_PATH, { encoding: "utf-8" }));
-} catch (err) {
-	CONFIG = {};
-	settingDisabled = err;
-}
+ipcRenderer.on("config:theme", (event, value) => {
+	setThemeColor(value);
+});
 
-// Synchronize config
-for (let i = 0, k = Object.keys(DEFAULT_CONFIG), n = k.length; i < n; i++)
-	if (typeof CONFIG[k[i]] != typeof DEFAULT_CONFIG[k[i]].value && k[i] != "ver")
-		CONFIG[k[i]] = DEFAULT_CONFIG[k[i]].value;
-ipcRenderer.send("saveSetting", CONFIG);
-setThemeColor(CONFIG["theme.color"], CONFIG["theme.dark"]);
-setLocale(CONFIG["general.locale"]);
+ipcRenderer.on("config:dark", (event, value) => {
+	setThemeColor(value);
+});
 
-fs.watch(CONFIG_PATH, () => {
-	try {
-		const data = fs.readFileSync(CONFIG_PATH, { encoding: "utf-8" });
-		if (data == JSON.stringify(CONFIG, null, 2)) return;
-		const newConfig = JSON.parse(data);
-
-		// 位置變更
-		if (newConfig["location.city"] != CONFIG["location.city"] || newConfig["location.town"] != CONFIG["location.town"])
-			ipcRenderer.send("updateLocation", { city: newConfig["location.city"], town: newConfig["location.town"] });
-
-		// 主題變更
-		if (newConfig["theme.color"] != CONFIG["theme.color"] || newConfig["theme.dark"] != CONFIG["theme.dark"]) {
-			setThemeColor(newConfig["theme.color"], newConfig["theme.dark"]);
-			ipcRenderer.send("updateTheme", { color: newConfig["theme.color"], dark: newConfig["theme.dark"] });
-		}
-
-		// 語言變更
-		if (newConfig["general.locale"] != CONFIG["general.locale"]) {
-			setLocale(newConfig["general.locale"]);
-			ipcRenderer.send("updateTitle", newConfig["general.locale"]);
-		}
-
-		CONFIG = newConfig;
-	} catch (err) {
-		settingDisabled = err;
-
-	}
+ipcRenderer.on("config:locale", (event, value) => {
+	setLocale(value);
 });
 
 const lockScroll = state => {
@@ -271,7 +84,7 @@ const showDialog =
 		const Accept = document.createElement("button");
 		Accept.classList.add("flat-button");
 		Accept.id = "dialog-Accept";
-		Accept.textContent = { en: "Confirm", ja: "確認", "zh-TW": "確定" }[CONFIG["general.locale"]];
+		Accept.textContent = { en: "Confirm", ja: "確認", "zh-TW": "確定" }[setting["general.locale"]];
 		Accept.onclick = (...args) => {
 			closeDialog(...args);
 			callback();
@@ -281,7 +94,7 @@ const showDialog =
 		const Cancel = document.createElement("button");
 		Cancel.classList.add("flat-button");
 		Cancel.id = "dialog-Cancel";
-		Cancel.textContent = { en: "Cancel", ja: "キャンセル", "zh-TW": "取消" }[CONFIG["general.locale"]];
+		Cancel.textContent = { en: "Cancel", ja: "キャンセル", "zh-TW": "取消" }[setting["general.locale"]];
 		Cancel.onclick = closeDialog;
 		buttons.appendChild(Cancel);
 	} else {

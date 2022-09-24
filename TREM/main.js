@@ -206,6 +206,16 @@ ipcMain.on("restart", () => {
 	restart();
 });
 
+TREM.Configuration.on("update", (data) => {
+	console.log("TREM.Configuration update");
+	emitAllWindow("setting", TREM.Configuration._data);
+});
+
+TREM.Configuration.on("error", (error) => {
+	console.log("settings update");
+	emitAllWindow("settingError", error);
+});
+
 ipcMain.on("config:value", (event, key, value) => {
 	switch (key) {
 		case "theme.color": {
@@ -223,20 +233,16 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
+		case "location.town": {
+			emitAllWindow("config:location", value);
+			break;
+		}
+
 		default:
 			break;
 	}
 	TREM.Configuration.data[key] = value;
-});
-
-TREM.Configuration.on("update", (data) => {
-	console.log("settings update");
 	emitAllWindow("setting", TREM.Configuration._data);
-});
-
-TREM.Configuration.on("error", (error) => {
-	console.log("settings update");
-	emitAllWindow("settingError", error);
 });
 
 ipcMain.on("config:open", () => {

@@ -3,6 +3,7 @@ const os = require("node:os");
 let loc;
 const win = getCurrentWindow();
 TREM.Constants = require(path.resolve(__dirname, "../TREM.Constants/Constants.js"));
+TREM.Resources = require(path.resolve(__dirname, "../TREM.Resources/Resources.js"));
 
 document.onreadystatechange = () => {
 	if (document.readyState == "complete")
@@ -54,13 +55,7 @@ const openURL = url => {
 	shell.openExternal(url);
 };
 
-let setting, is_setting_disabled;
-
 ipcRenderer.on("setting", (event, data) => {
-	setting = data;
-	console.log(setting);
-	init();
-	is_setting_disabled = false;
 	if (document.getElementsByClassName("dialog").length)
 		closeDialog({ target: { id: "dialog" } });
 });
@@ -75,25 +70,12 @@ ipcRenderer.on("settingError", (event, error) => {
 	init();
 });
 
-ipcRenderer.on("config:theme", (event, value) => {
-	setThemeColor(value);
-});
-
-ipcRenderer.on("config:dark", (event, value) => {
-	setThemeColor(value);
-});
-
-ipcRenderer.on("config:locale", (event, value) => {
-	setLocale(value);
-});
-
-let region, station;
+let station;
 
 // #region 選單
-(async () => {
-	region = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+(() => {
 	const el = document.getElementById("location.city");
-	for (const key of Object.keys(region)) {
+	for (const key of Object.keys(TREM.Resources.region)) {
 		const option = document.createElement("option");
 		option.text = key;
 		option.value = key;
@@ -162,7 +144,7 @@ function init() {
 					if (id == "location.town") {
 						const town = document.getElementById("location.town");
 						town.replaceChildren();
-						for (const key of Object.keys(region[setting["location.city"]])) {
+						for (const key of Object.keys(TREM.Resources.region[setting["location.city"]])) {
 							const option = document.createElement("option");
 							option.text = key;
 							option.value = key;
@@ -217,6 +199,19 @@ function SelectSave(id) {
 	const value = select.options[select.selectedIndex].value;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
+
+	if (id == "location.city") {
+		const town = document.getElementById("location.town");
+		town.replaceChildren();
+
+		for (const key of Object.keys(TREM.Resources.region[value])) {
+			const option = document.createElement("option");
+			option.text = key;
+			option.value = key;
+			town.appendChild(option);
+		}
+		ipcRenderer.send("config:value", "location.town", town.options[town.selectedIndex].value);
+	}
 }
 
 function CheckSave(id) {
@@ -236,7 +231,7 @@ function TextSave(id) {
 function RangeSave(id) {
 	const value = document.getElementById(id).value;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
-	ipcRenderer.send("config:value", id, ~~(+value));
+	ipcRenderer.send("config:value", id, +value);
 }
 
 
