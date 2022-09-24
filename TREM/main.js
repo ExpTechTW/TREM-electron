@@ -57,6 +57,7 @@ function createWindow() {
 		minHeight      : 720,
 		resizable      : true,
 		show           : false,
+		icon           : "TREM.ico",
 		webPreferences : {
 			preload              : path.join(__dirname, "preload.js"),
 			nodeIntegration      : true,
@@ -105,6 +106,7 @@ function createSettingWindow() {
 		frame          : false,
 		transparent    : true,
 		show           : false,
+		icon           : "TREM.ico",
 		webPreferences : {
 			nodeIntegration  : true,
 			contextIsolation : false,
