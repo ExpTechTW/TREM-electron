@@ -258,12 +258,13 @@ async function init() {
 
 		if (!map_geoJson)
 			map_geoJson = L.geoJson.vt(MapData.Dmap, {
-				minZoom   : 4,
-				maxZoom   : 12,
-				tolerance : 10,
-				buffer    : 256,
-				debug     : 0,
-				style     : {
+				edgeBufferTiles : 2,
+				minZoom         : 4,
+				maxZoom         : 12,
+				tolerance       : 10,
+				buffer          : 256,
+				debug           : 0,
+				style           : {
 					weight      : 0.8,
 					color       : colors.primary,
 					fillColor   : colors.surfaceVariant,
