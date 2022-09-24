@@ -41,6 +41,8 @@ TREM.setLoginItemSettings({
 	args        : ["--start"],
 });
 
+TREM.commandLine.appendSwitch("disable-frame-rate-limit");
+
 function createWindow() {
 	fetch("https://exptech.com.tw/get?Function=EEW").catch(() => {
 		setInterval(() => {
@@ -75,6 +77,7 @@ function createWindow() {
 	MainWindow.setMenu(null);
 	MainWindow.webContents.on("did-finish-load", () => {
 		MainWindow.webContents.send("setting", TREM.Configuration._data);
+		if (process.argv.includes("--showfps")) MainWindow.webContents.send("perf");
 		if (!_hide) setTimeout(() => MainWindow.show(), 500);
 	});
 	pushReceiver.setup(MainWindow.webContents);
