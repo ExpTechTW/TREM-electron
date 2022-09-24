@@ -52,7 +52,7 @@ function createWindow() {
 		width          : 1280,
 		height         : 720,
 		resizable      : false,
-		show           : !_hide,
+		show           : false,
 		webPreferences : {
 			preload              : path.join(__dirname, "preload.js"),
 			nodeIntegration      : true,
@@ -67,6 +67,10 @@ function createWindow() {
 	process.env.window = MainWindow.id;
 	MainWindow.loadFile("./index.html");
 	MainWindow.setMenu(null);
+	MainWindow.webContents.on("did-finish-load", () => {
+		MainWindow.webContents.send("setting", TREM.Configuration._data);
+		if (!_hide) setTimeout(() => MainWindow.show(), 500);
+	});
 	pushReceiver.setup(MainWindow.webContents);
 	if (process.platform === "win32")
 		TREM.setAppUserModelId("TREM | 臺灣即時地震監測");
@@ -228,6 +232,11 @@ ipcMain.on("config:value", (event, key, value) => {
 TREM.Configuration.on("update", (data) => {
 	console.log("settings update");
 	emitAllWindow("setting", TREM.Configuration._data);
+});
+
+TREM.Configuration.on("error", (error) => {
+	console.log("settings update");
+	emitAllWindow("settingError", error);
 });
 
 ipcMain.on("config:open", () => {

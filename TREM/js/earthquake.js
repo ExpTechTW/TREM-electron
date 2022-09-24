@@ -7,13 +7,35 @@ const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const EventEmitter = require("node:events");
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
+TREM.Constants = require(path.resolve(__dirname, "./TREM.Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 localStorage.dirname = __dirname;
 
-bytenode.runBytecodeFile(__dirname + "/js/server.jar");
+let setting, is_setting_disabled;
 
-$("#loading").text(Localization[CONFIG["general.locale"]].Application_Connecting || Localization["zh-TW"].Application_Connecting);
-document.title = Localization[CONFIG["general.locale"]].Application_Title || Localization["zh-TW"].Application_Title;
+ipcRenderer.on("setting", (event, data) => {
+	setting = data;
+	console.log(setting);
+	init();
+});
+
+ipcRenderer.on("settingError", (event, error) => {
+	is_setting_disabled = error;
+});
+
+ipcRenderer.on("config:theme", (event, value) => {
+	setThemeColor(value);
+});
+
+ipcRenderer.on("config:dark", (event, value) => {
+	setThemeColor(value);
+});
+
+ipcRenderer.on("config:locale", (event, value) => {
+	setLocale(value);
+});
+
+bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
 // #region 變數
 const PostAddressIP = "https://exptech.com.tw/post";
@@ -96,185 +118,202 @@ win.on("show", () => {
 	TREM.Earthquake.emit("focus");
 });
 
+
 async function init() {
-	$("#loading").text(Localization[CONFIG["general.locale"]].Application_Loading || Localization["zh-TW"].Application_Loading);
-	const time = document.getElementById("time");
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
-	dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
-	await ReportGET({});
-	progressbar.value = (1 / progressStep) * 1;
+	document.title = Localization[setting["general.locale"]].Application_Title || Localization["zh-TW"].Application_Title;
 
-	// clock
-	dump({ level: 3, message: "Initializing clock", origin: "Clock" });
-	if (!Timers.clock)
-		Timers.clock = setInterval(() => {
-			if (TimerDesynced) {
-				if (!time.classList.contains("desynced"))
-					time.classList.add("desynced");
-			} else if (replay) {
-				if (!time.classList.contains("replay"))
-					time.classList.add("replay");
-				time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
-				if (NOW.getTime() - replayT > 180_000) {
-					replay = 0;
-					ReportGET();
-				}
-			} else {
-				if (time.classList.contains("replay"))
-					time.classList.remove("replay");
-				if (time.classList.contains("desynced"))
-					time.classList.remove("desynced");
-				time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
-			}
-			let GetDataState = "";
-			if (GetData) {
-				GetData = false;
-				GetDataState = "✉";
-			}
-			const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
-			const warn = (Warn) ? "⚠️" : "";
-			$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
-		}, 500);
+	// Connect to server
+	await (async () => {
+		$("#loading").text(Localization[setting["general.locale"]].Application_Connecting || Localization["zh-TW"].Application_Connecting);
+		dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
+		await ReportGET({});
+		progressbar.value = (1 / progressStep) * 1;
+	})().catch(e => dump({ level: 2, message: e }));
 
-	if (!Timers.tsunami)
-		Timers.tsunami = setInterval(() => {
-			if (Object.keys(Tsunami).length)
-				if (NOW.getTime() - Tsunami.Time > 240000) {
-					map.removeLayer(Tsunami.Cross);
-					delete Tsunami.Cross;
-					delete Tsunami.Time;
-					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
-				}
+	(() => {
+		$("#loading").text(Localization[setting["general.locale"]].Application_Loading || Localization["zh-TW"].Application_Loading);
+		const time = document.getElementById("time");
 
-			if (investigation && NOW.getTime() - Report > 600000) {
-				investigation = false;
-				roll.removeChild(roll.children[0]);
-				if (Pgeojson != null) {
-					map.removeLayer(Pgeojson);
-					Pgeojson = null;
+		// clock
+		dump({ level: 3, message: "Initializing clock", origin: "Clock" });
+		if (!Timers.clock)
+			Timers.clock = setInterval(() => {
+				if (TimerDesynced) {
+					if (!time.classList.contains("desynced"))
+						time.classList.add("desynced");
+				} else if (replay) {
+					if (!time.classList.contains("replay"))
+						time.classList.add("replay");
+					time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
+					if (NOW.getTime() - replayT > 180_000) {
+						replay = 0;
+						ReportGET();
+					}
+				} else {
+					if (time.classList.contains("replay"))
+						time.classList.remove("replay");
+					if (time.classList.contains("desynced"))
+						time.classList.remove("desynced");
+					time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 				}
-			}
-			if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
-				ReportTag = 0;
+				let GetDataState = "";
+				if (GetData) {
+					GetData = false;
+					GetDataState = "✉";
+				}
+				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
+				const warn = (Warn) ? "⚠️" : "";
+				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
+			}, 500);
+
+		if (!Timers.tsunami)
+			Timers.tsunami = setInterval(() => {
+				if (Object.keys(Tsunami).length)
+					if (NOW.getTime() - Tsunami.Time > 240000) {
+						map.removeLayer(Tsunami.Cross);
+						delete Tsunami.Cross;
+						delete Tsunami.Time;
+						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+					}
+
+				if (investigation && NOW.getTime() - Report > 600000) {
+					investigation = false;
+					roll.removeChild(roll.children[0]);
+					if (Pgeojson != null) {
+						map.removeLayer(Pgeojson);
+						Pgeojson = null;
+					}
+				}
+				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
+					ReportTag = 0;
+					if (ReportMarkID != null) {
+						ReportMarkID = null;
+						for (let index = 0; index < MarkList.length; index++)
+							map.removeLayer(MarkList[index]);
+						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+					}
+				}
+			}, 250);
+
+		dump({ level: 3, message: "Initializing map", origin: "Map" });
+		if (!map) {
+			map = L.map("map", {
+				attributionControl : false,
+				closePopupOnClick  : false,
+				maxBounds          : [
+					[60, 50],
+					[10, 180],
+				],
+				preferCanvas: true,
+			}).setView([23, 121], 7.5);
+			map.doubleClickZoom.disable();
+			map.removeControl(map.zoomControl);
+			map.on("click", () => {
 				if (ReportMarkID != null) {
 					ReportMarkID = null;
 					for (let index = 0; index < MarkList.length; index++)
 						map.removeLayer(MarkList[index]);
 					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 				}
-			}
-		}, 250);
-
-	dump({ level: 3, message: "Initializing map", origin: "Map" });
-	if (!map) {
-		map = L.map("map", {
-			attributionControl : false,
-			closePopupOnClick  : false,
-			maxBounds          : [
-				[60, 50],
-				[10, 180],
-			],
-			preferCanvas: true,
-		}).setView([23, 121], 7.5);
-		map.doubleClickZoom.disable();
-		map.removeControl(map.zoomControl);
-		map.on("click", () => {
-			if (ReportMarkID != null) {
-				ReportMarkID = null;
-				for (let index = 0; index < MarkList.length; index++)
-					map.removeLayer(MarkList[index]);
-				TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
-			}
-			mapLock = false;
-			TREM.Earthquake.emit("focus");
-		});
-		map.on("drag", () => mapLock = true);
-		map.on("dblclick", () => TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 }));
-		map.on("zoomend", () => {
-			if (map.getZoom() > 10)
-				for (const key in Station) {
-					const tooltip = Station[key].getTooltip();
-					if (tooltip) {
-						Station[key].unbindTooltip();
-						tooltip.options.permanent = true;
-						Station[key].bindTooltip(tooltip);
+				mapLock = false;
+				TREM.Earthquake.emit("focus");
+			});
+			map.on("drag", () => mapLock = true);
+			map.on("dblclick", () => TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 }));
+			map.on("zoomend", () => {
+				if (map.getZoom() > 10)
+					for (const key in Station) {
+						const tooltip = Station[key].getTooltip();
+						if (tooltip) {
+							Station[key].unbindTooltip();
+							tooltip.options.permanent = true;
+							Station[key].bindTooltip(tooltip);
+						}
 					}
-				}
-			else
-				for (const key in Station) {
-					const tooltip = Station[key].getTooltip();
-					if (tooltip && !Station[key].keepTooltipAlive) {
-						Station[key].unbindTooltip();
-						tooltip.options.permanent = false;
-						Station[key].bindTooltip(tooltip);
+				else
+					for (const key in Station) {
+						const tooltip = Station[key].getTooltip();
+						if (tooltip && !Station[key].keepTooltipAlive) {
+							Station[key].unbindTooltip();
+							tooltip.options.permanent = false;
+							Station[key].bindTooltip(tooltip);
+						}
 					}
-				}
-		});
-	}
-
-	if (!mapTW) {
-		mapTW = L.map("map-tw", {
-			attributionControl : false,
-			closePopupOnClick  : false,
-			preferCanvas       : true,
-		}).setView([23.608428, 120.799168], 7);
-
-		mapTW.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
-
-		mapTW.dragging.disable();
-		mapTW.scrollWheelZoom.disable();
-		mapTW.doubleClickZoom.disable();
-		mapTW.removeControl(mapTW.zoomControl);
-	}
-
-	progressbar.value = (1 / progressStep) * 2;
-
-	setUserLocationMarker(CONFIG["location.city"], CONFIG["location.town"]);
-	progressbar.value = (1 / progressStep) * 3;
-
-	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
-
-	dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
-	dump({ level: 3, message: "Starting timer...", origin: "Timer" });
-	let perf_GEOJSON_LOAD = process.hrtime();
-	fs.readdirSync(path.join(__dirname, "/js/geojson")).forEach((file, i, arr) => {
-		try {
-			MapData[path.parse(file).name] = require(path.join(__dirname, "js/geojson", file));
-			dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
-			progressbar.value = (1 / progressStep) * 3 + (((1 / progressStep) / arr.length) * (i + 1));
-		} catch (error) {
-			dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
-			dump({ level: 2, message: error, origin: "ResourceLoader" });
-			console.error(error);
-			dump({ level: 3, message: `Skipping ${file}`, origin: "ResourceLoader" });
+			});
 		}
-	});
-	perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
-	dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
-	if (!map_geoJson)
-		map_geoJson = L.geoJson.vt(MapData.Dmap, {
-			minZoom   : 4,
-			maxZoom   : 12,
-			tolerance : 10,
-			buffer    : 256,
-			debug     : 0,
-			style     : {
-				weight      : 0.8,
-				color       : colors.primary,
-				fillColor   : colors.surfaceVariant,
-				fillOpacity : 0.6,
-			},
-		}).addTo(map);
-	progressbar.value = (1 / progressStep) * 4;
+		if (!mapTW) {
+			mapTW = L.map("map-tw", {
+				attributionControl : false,
+				closePopupOnClick  : false,
+				preferCanvas       : true,
+			}).setView([23.608428, 120.799168], 7);
 
-	await fetchFiles();
-	if (!Timers.fetchFiles)
-		Timers.fetchFiles = setInterval(fetchFiles, 10 * 60 * 1000);
-	progressbar.value = 1;
+			mapTW.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
 
-	$("#loading").text(Localization[CONFIG["general.locale"]].Application_Welcome || Localization["zh-TW"].Application_Welcome);
+			mapTW.dragging.disable();
+			mapTW.scrollWheelZoom.disable();
+			mapTW.doubleClickZoom.disable();
+			mapTW.removeControl(mapTW.zoomControl);
+		}
+
+		progressbar.value = (1 / progressStep) * 2;
+	})();
+
+	(() => {
+		setUserLocationMarker(setting["location.city"], setting["location.town"]);
+		progressbar.value = (1 / progressStep) * 3;
+	})();
+
+
+	await (async () => {
+		const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
+
+		dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
+		dump({ level: 3, message: "Starting timer...", origin: "Timer" });
+		let perf_GEOJSON_LOAD = process.hrtime();
+		fs.readdirSync(path.join(__dirname, "/js/geojson")).forEach((file, i, arr) => {
+			try {
+				MapData[path.parse(file).name] = require(path.join(__dirname, "js/geojson", file));
+				dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
+				progressbar.value = (1 / progressStep) * 3 + (((1 / progressStep) / arr.length) * (i + 1));
+			} catch (error) {
+				dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
+				dump({ level: 2, message: error, origin: "ResourceLoader" });
+				console.error(error);
+				dump({ level: 3, message: `Skipping ${file}`, origin: "ResourceLoader" });
+			}
+		});
+		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
+		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
+
+		if (!map_geoJson)
+			map_geoJson = L.geoJson.vt(MapData.Dmap, {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				style     : {
+					weight      : 0.8,
+					color       : colors.primary,
+					fillColor   : colors.surfaceVariant,
+					fillOpacity : 0.6,
+				},
+			}).addTo(map);
+		progressbar.value = (1 / progressStep) * 4;
+	})().catch(e => dump({ level: 2, message: e }));
+
+	await (async () => {
+		await fetchFiles();
+		if (!Timers.fetchFiles)
+			Timers.fetchFiles = setInterval(fetchFiles, 10 * 60 * 1000);
+		progressbar.value = 1;
+	})().catch(e => dump({ level: 2, message: e }));
+
+	$("#loading").text(Localization[setting["general.locale"]].Application_Welcome || Localization["zh-TW"].Application_Welcome);
 	$("#load").delay(1000).fadeOut(1000);
 	setInterval(() => {
 		if (mapLock) return;
@@ -466,7 +505,7 @@ async function handler(response) {
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(Sdata.Time);
-		if (keys[index] == CONFIG["Real-time.station"]) {
+		if (keys[index] == setting["Real-time.station"]) {
 			document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
 			document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
 			document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity);
@@ -498,7 +537,7 @@ async function handler(response) {
 					});
 				AllT = Date.now();
 				if (ALERT) {
-					if (CONFIG["audio.realtime"])
+					if (setting["audio.realtime"])
 						if (amount > 8 && PGALimit == 0) {
 							PGALimit = 1;
 							audioPlay("./audio/PGA1.wav");
@@ -548,13 +587,13 @@ async function handler(response) {
 			if (PalertT != PAlert.timestamp && Object.keys(PLoc).length != 0) {
 				PalertT = PAlert.timestamp;
 				if (Pgeojson == null) {
-					if (CONFIG["Real-time.show"]) win.show();
-					if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
+					if (setting["Real-time.show"]) win.show();
+					if (setting["Real-time.cover"]) win.setAlwaysOnTop(true);
 					win.setAlwaysOnTop(false);
-					if (CONFIG["audio.realtime"]) audioPlay("./audio/palert.wav");
+					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
 				}
 				if (Pgeojson != null) map.removeLayer(Pgeojson);
-				const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
+				const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
 				Pgeojson = L.geoJson.vt(MapData.DmapT, {
 					minZoom   : 4,
 					maxZoom   : 12,
@@ -647,7 +686,7 @@ async function handler(response) {
 		PGALimit = 0;
 	}
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
-		if (CONFIG["audio.realtime"])
+		if (setting["audio.realtime"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
 				audioPlay("./audio/Shindo2.wav");
 			else if (All[0].intensity >= 2 && PGAtag < 2)
@@ -663,9 +702,9 @@ async function handler(response) {
 				Shot     : 1,
 			});
 		}, 2250);
-		if (CONFIG["Real-time.show"])
+		if (setting["Real-time.show"])
 			win.show();
-		if (CONFIG["Real-time.cover"]) win.setAlwaysOnTop(true);
+		if (setting["Real-time.cover"]) win.setAlwaysOnTop(true);
 		win.setAlwaysOnTop(false);
 		PGAtag = All[0].intensity;
 	}
@@ -755,7 +794,7 @@ async function setUserLocationMarker(city, town) {
 
 // #region 聚焦
 TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
-	if (!CONFIG["map.autoZoom"] || force) return;
+	if (!setting["map.autoZoom"] || force) return;
 	let X = 0;
 	if (size >= 6) X = 2.5;
 	if (size >= 6.5) X = 1.6;
@@ -825,7 +864,7 @@ function playNextAudio() {
 	audioLock = true;
 	const nextAudioPath = audioList.shift();
 	audioDOM.src = nextAudioPath;
-	if (nextAudioPath.startsWith("./audio/1/") && CONFIG["audio.eew"]) {
+	if (nextAudioPath.startsWith("./audio/1/") && setting["audio.eew"]) {
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM.play();
 	} else if (!nextAudioPath.startsWith("./audio/1/")) {
@@ -838,7 +877,7 @@ function playNextAudio1() {
 	const nextAudioPath = audioList1.shift();
 	audioDOM1.src = nextAudioPath;
 	audioDOM1.playbackRate = 1.1;
-	if (nextAudioPath.startsWith("./audio/1/") && CONFIG["audio.eew"]) {
+	if (nextAudioPath.startsWith("./audio/1/") && setting["audio.eew"]) {
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
 	} else if (!nextAudioPath.startsWith("./audio/1/")) {
@@ -1002,7 +1041,7 @@ function ReportList(earthquakeReportArr, eew) {
 		}
 		addReport(earthquakeReportArr[index]);
 	}
-	setLocale(CONFIG["general.locale"]);
+	setLocale(setting["general.locale"]);
 }
 
 function addReport(report, prepend = false) {
@@ -1049,7 +1088,7 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
 		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
-		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == CONFIG["general.locale"] ? "unset" : "none");
+		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
 
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
@@ -1103,7 +1142,7 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
 		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
-		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == CONFIG["general.locale"] ? "unset" : "none");
+		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
 
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
@@ -1173,7 +1212,7 @@ function addReport(report, prepend = false) {
 // #endregion
 
 // #region 設定
-function setting() {
+function openSettingWindow() {
 	win.setAlwaysOnTop(false);
 	ipcRenderer.send("openChildWindow");
 }
@@ -1182,7 +1221,7 @@ function setting() {
 // #region PGA
 function PGAcount(Scale, distance, Si) {
 	let S = Si ?? 1;
-	if (!CONFIG["earthquake.siteEffect"]) S = 1;
+	if (!setting["earthquake.siteEffect"]) S = 1;
 	// eslint-disable-next-line no-shadow
 	const PGA = (1.657 * Math.pow(Math.E, (1.533 * Scale)) * Math.pow(distance, -1.607) * S).toFixed(3);
 	return PGA >= 800 ? "7" :
@@ -1252,7 +1291,6 @@ ipcMain.once("start", () => {
 			}
 		}, 0);
 		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer} | MD5 >> ${MD5Check}`, origin: "Initialization" });
-		init();
 		if (localStorage.Test != undefined)
 			setTimeout(() => {
 				if (localStorage.TestID != undefined) {
@@ -1302,7 +1340,7 @@ ipcMain.on("testEEW", () => {
 	ipcRenderer.send("restart");
 });
 ipcMain.on("updateTheme", async () => {
-	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
+	const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
 
 	map_geoJson.options.style = {
 		weight      : 0.8,
@@ -1344,9 +1382,9 @@ async function FCMdata(data) {
 		dump({ level: 0, message: `Latency: ${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
 	if (json.Function == "tsunami") {
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-		if (CONFIG["report.show"]) {
+		if (setting["report.show"]) {
 			win.show();
-			if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
+			if (setting["report.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
 		new Notification("海嘯警報", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "TREM.ico" });
@@ -1360,12 +1398,12 @@ async function FCMdata(data) {
 		Tsunami.Cross = Cross;
 		Tsunami.Time = NOW.getTime();
 		map.addLayer(Cross);
-		if (CONFIG["report.show"]) {
+		if (setting["report.show"]) {
 			win.show();
-			if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
+			if (setting["report.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
-		if (CONFIG["audio.report"]) audioPlay("./audio/Water.wav");
+		if (setting["audio.report"]) audioPlay("./audio/Water.wav");
 	} else if (json.Function == "TSUNAMI")
 		TREM.Earthquake.emit("tsunami", json);
 	else if (json.Function == "palert")
@@ -1382,12 +1420,12 @@ async function FCMdata(data) {
 			Pgeojson = null;
 		}
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
-		if (CONFIG["report.show"]) {
+		if (setting["report.show"]) {
 			win.show();
-			if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
+			if (setting["report.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
-		if (CONFIG["audio.report"]) audioPlay("./audio/Report.wav");
+		if (setting["audio.report"]) audioPlay("./audio/Report.wav");
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
 		const report = await getReportData();
 		addReport(report[0], true);
@@ -1403,12 +1441,12 @@ async function FCMdata(data) {
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
 		if (replay != 0 && !json.Replay) return;
 		if (!json.Replay && !json.Test) {
-			if (json.Function == "SCDZJ_earthquake" && !CONFIG["accept.eew.SCDZJ"]) return;
-			if (json.Function == "NIED_earthquake" && !CONFIG["accept.eew.NIED"]) return;
-			if (json.Function == "JMA_earthquake" && !CONFIG["accept.eew.JMA"]) return;
-			if (json.Function == "KMA_earthquake" && !CONFIG["accept.eew.KMA"]) return;
-			if (json.Function == "earthquake" && !CONFIG["accept.eew.CWB"]) return;
-			if (json.Function == "FJDZJ_earthquake" && !CONFIG["accept.eew.FJDZJ"]) return;
+			if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
+			if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
+			if (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"]) return;
+			if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
+			if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
+			if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
 			TREM.Earthquake.emit("eew", json);
 		} else
 			TREM.Earthquake.emit("eew", json);
@@ -1439,7 +1477,7 @@ TREM.Earthquake.on("eew", async (data) => {
 			const Distance = Math.sqrt(Math.pow(Number(data.Depth), 2) + Math.pow(point, 2));
 			const Level = PGAcount(data.Scale, Distance, locationEEW[city][town][3]);
 			if (UserLocationLat == locationEEW[city][town][1] && UserLocationLon == locationEEW[city][town][2]) {
-				if (CONFIG["auto.waveSpeed"])
+				if (setting["auto.waveSpeed"])
 					if (Distance < 50) {
 						Pspeed = 6.5;
 						Sspeed = 3.5;
@@ -1454,7 +1492,7 @@ TREM.Earthquake.on("eew", async (data) => {
 		}
 	}
 	let Alert = true;
-	if (IntensityN(level) < Number(CONFIG["eew.Intensity"]) && !data.Replay) Alert = false;
+	if (IntensityN(level) < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
 	if (!Info.Notify.includes(data.ID)) {
 		let Nmsg = "";
 		if (value > 0)
@@ -1471,14 +1509,14 @@ TREM.Earthquake.on("eew", async (data) => {
 				TINFO = 0;
 			else TINFO++;
 		}, 5000);
-		if (CONFIG["eew.show"] && Alert) {
+		if (setting["eew.show"] && Alert) {
 			win.show();
 			win.flashFrame(true);
-			if (CONFIG["eew.cover"]) win.setAlwaysOnTop(true);
+			if (setting["eew.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
 		EEWT.id = data.ID;
-		if (CONFIG["audio.eew"] && Alert) {
+		if (setting["audio.eew"] && Alert) {
 			audioPlay("./audio/EEW.wav");
 			audioPlay1(`./audio/1/${level.replace("+", "").replace("-", "")}.wav`);
 			if (level.includes("+"))
@@ -1506,7 +1544,7 @@ TREM.Earthquake.on("eew", async (data) => {
 		data.Alert = true;
 		if (!EEWAlert) {
 			EEWAlert = true;
-			if (CONFIG["audio.eew"] && Alert)
+			if (setting["audio.eew"] && Alert)
 				for (let index = 0; index < 5; index++)
 					audioPlay("./audio/Alert.wav");
 		}
@@ -1517,7 +1555,7 @@ TREM.Earthquake.on("eew", async (data) => {
 	let stamp = 0;
 	if (data.ID + data.Version != Info.Alert) {
 		if (EEW[data.ID] != undefined)
-			if (CONFIG["audio.eew"] && Alert) audioPlay("./audio/Update.wav");
+			if (setting["audio.eew"] && Alert) audioPlay("./audio/Update.wav");
 		EEW[data.ID] = {
 			lon  : Number(data.EastLongitude),
 			lat  : Number(data.NorthLatitude),
@@ -1529,7 +1567,7 @@ TREM.Earthquake.on("eew", async (data) => {
 		Info.Alert = data.ID + data.Version;
 		value = Math.round((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
 		if (Second == -1 || value < Second)
-			if (CONFIG["audio.eew"] && Alert) {
+			if (setting["audio.eew"] && Alert) {
 				if (t != null) clearInterval(t);
 				t = setInterval(() => {
 					value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
@@ -1573,7 +1611,7 @@ TREM.Earthquake.on("eew", async (data) => {
 
 	}
 	let speed = 500;
-	if (CONFIG["shock.smoothing"]) speed = 15;
+	if (setting["shock.smoothing"]) speed = 15;
 	if (EarthquakeList[data.ID].Timer != undefined) clearInterval(EarthquakeList[data.ID].Timer);
 	if (EarthquakeList.ITimer != undefined) clearInterval(EarthquakeList.ITimer);
 
@@ -1644,7 +1682,7 @@ TREM.Earthquake.on("eew", async (data) => {
 		main(data, S1);
 	}, speed);
 
-	const colors = await getThemeColors(CONFIG["theme.color"], CONFIG["theme.dark"]);
+	const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
 	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.DmapT, {
 		minZoom   : 4,
 		maxZoom   : 12,
@@ -1682,7 +1720,7 @@ TREM.Earthquake.on("eew", async (data) => {
 	mapTW.addLayer(EarthquakeList[data.ID].geojson);
 
 	setTimeout(() => {
-		if (CONFIG["webhook.url"] != "") {
+		if (setting["webhook.url"] != "") {
 			const Now = NOW.getFullYear() +
 				"/" + (NOW.getMonth() + 1) +
 				"/" + NOW.getDate() +
@@ -1690,7 +1728,7 @@ TREM.Earthquake.on("eew", async (data) => {
 				":" + NOW.getMinutes() +
 				":" + NOW.getSeconds();
 
-			let msg = CONFIG["webhook.body"];
+			let msg = setting["webhook.body"];
 			msg = msg.replace("%Depth%", data.Depth).replace("%NorthLatitude%", data.NorthLatitude).replace("%Time%", data["UTC+8"]).replace("%EastLongitude%", data.EastLongitude).replace("%Scale%", data.Scale);
 			if (data.Function == "earthquake")
 				msg = msg.replace("%Provider%", "交通部中央氣象局");
@@ -1714,7 +1752,7 @@ TREM.Earthquake.on("eew", async (data) => {
 				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 			};
 			dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
-			axios.post(CONFIG["webhook.url"], msg)
+			axios.post(setting["webhook.url"], msg)
 				.catch((error) => {
 					dump({ level: 2, message: error, origin: "Webhook" });
 				});
@@ -1725,12 +1763,12 @@ TREM.Earthquake.on("eew", async (data) => {
 TREM.Earthquake.on("tsunami", (data) => {
 	if (data.Version == 1) {
 		new Notification("海嘯警報", { body: `${data["UTC+8"]} 發生 ${data.Scale} 地震\n\n東經: ${data.EastLongitude} 度\n北緯: ${data.NorthLatitude} 度`, icon: "TREM.ico" });
-		if (CONFIG["report.show"]) {
+		if (setting["report.show"]) {
 			win.show();
-			if (CONFIG["report.cover"]) win.setAlwaysOnTop(true);
+			if (setting["report.cover"]) win.setAlwaysOnTop(true);
 			win.setAlwaysOnTop(false);
 		}
-		if (CONFIG["audio.report"]) audioPlay("./audio/Water.wav");
+		if (setting["audio.report"]) audioPlay("./audio/Water.wav");
 		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
 	}
 	if (data.Cancel) {
@@ -1895,7 +1933,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 
 function main(data, S1) {
 	if (EarthquakeList[data.ID].Cancel == undefined) {
-		if (CONFIG["shock.p"]) {
+		if (setting["shock.p"]) {
 			if (EarthquakeList[data.ID].Pcircle != null)
 				map.removeLayer(EarthquakeList[data.ID].Pcircle);
 			if (EarthquakeList[data.ID].Pcircle1 != null)

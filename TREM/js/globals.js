@@ -211,28 +211,10 @@ fs.watch(CONFIG_PATH, () => {
 		}
 
 		CONFIG = newConfig;
-		settingDisabled = false;
-		if (document.getElementsByClassName("dialog").length)
-			closeDialog({ target: { id: "dialog" } });
 	} catch (err) {
 		settingDisabled = err;
-		showDialog("error", { en: "Parse Error", ja: "解析エラー", "zh-TW": "設定檔錯誤" }[CONFIG["general.locale"]],
-			{
-				en      : `Cannot parse the config file, this may be that you have accidentally deleted some important symbols such as commas, colons or quotation marks while editing, or the configuration file may have corrupted.\n\nError: ${err}`,
-				ja      : `設定ファイルを解析できません。編集中にコンマ、コロン、引用符などの重要な記号を誤って削除したか、設定ファイルが破損している可能性があります。\n\nエラー：${err}`,
-				"zh-TW" : `無法解析設定檔，這可能是你在編輯時不小心刪掉了一些重要的符號，像是逗號、冒號或引號，或是設定檔損壞。\n\n錯誤：${err}` }[CONFIG["general.locale"]]);
-	}
-});
 
-ipcMain.on("saveSetting", (event, setting) => {
-	if (!setting || settingDisabled) return;
-	dump({ level: 0, message: "Saving user preference", origin: "Setting" });
-	try {
-		fs.writeFileSync(CONFIG_PATH, JSON.stringify(CONFIG, null, 2), { encoding: "utf-8", flag: "w" });
-	} catch (error) {
-		dump({ level: 2, message: `Error saving user preference: ${error}`, origin: "Setting" });
 	}
-
 });
 
 const lockScroll = state => {
@@ -382,4 +364,3 @@ if (!String.prototype.format)
 // #endregion
 
 const TREM = {};
-TREM.Constants = require(path.resolve(__dirname, "../TREM.Constants/Constants.js"));

@@ -2,6 +2,7 @@ const { getCurrentWindow, shell } = require("@electron/remote");
 const os = require("node:os");
 let loc;
 const win = getCurrentWindow();
+TREM.Constants = require(path.resolve(__dirname, "../TREM.Constants/Constants.js"));
 
 document.onreadystatechange = () => {
 	if (document.readyState == "complete")
@@ -59,10 +60,18 @@ ipcRenderer.on("setting", (event, data) => {
 	setting = data;
 	console.log(setting);
 	init();
+	is_setting_disabled = false;
+	if (document.getElementsByClassName("dialog").length)
+		closeDialog({ target: { id: "dialog" } });
 });
 
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
+	showDialog(
+		"error",
+		Localization[setting["general.locale"]]?.Setting_Dialog_Error_Title || Localization["zh-TW"].Setting_Dialog_Error_Title,
+		(Localization[setting["general.locale"]]?.Setting_Dialog_Error_Description || Localization["zh-TW"].Setting_Dialog_Error_Description).format(error),
+	);
 	init();
 });
 
@@ -134,7 +143,7 @@ function init() {
 				break;
 			}
 
-			case "input": {
+			case "string": {
 				const element = document.getElementById(id);
 				if (element) {
 					element.value = setting[id];

@@ -41,10 +41,14 @@ class Configuration extends EventEmitter {
 				},
 			});
 			this._watcher = chokidar.watch(this._path).on("change", () => {
-				const _newData = fs.readFileSync(this._path, { encoding: "utf-8" });
-				if (JSON.stringify(this._data, null, 2) == _newData) return;
-				this._data = _newData;
-				this.emit("update", this._data);
+				try {
+					const _newData = fs.readFileSync(this._path, { encoding: "utf-8" });
+					if (JSON.stringify(this._data, null, 2) == _newData) return;
+					this._data = JSON.parse(_newData);
+					this.emit("update", this._data);
+				} catch (error) {
+					this.emit("error", error);
+				}
 			});
 		} catch (error) {
 			console.error(error);
