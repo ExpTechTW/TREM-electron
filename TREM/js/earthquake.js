@@ -1940,7 +1940,12 @@ function main(data, S1) {
 				EarthquakeList[data.ID].CircleS
 					.setLatLng([+data.NorthLatitude, +data.EastLongitude])
 					.setRadius(KM)
-					.setStyle({ fillColor: `url(#${data.Alert ? "alert" : "pred"}-gradient)` });
+					.setStyle(
+						{
+							color     : data.Alert ? "red" : "orange",
+							fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+						},
+					);
 
 			if (!EarthquakeList[data.ID].CircleSTW)
 				EarthquakeList[data.ID].CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
@@ -1954,7 +1959,12 @@ function main(data, S1) {
 				EarthquakeList[data.ID].CircleSTW
 					.setLatLng([+data.NorthLatitude, +data.EastLongitude])
 					.setRadius(KM)
-					.setStyle({ fillColor: `url(#${data.Alert ? "alert" : "pred"}-gradient)` });
+					.setStyle(
+						{
+							color     : data.Alert ? "red" : "orange",
+							fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+						},
+					);
 		} else {
 			let Progress = 0;
 			const num = Math.round(((NOW.getTime() - data.Time) * Sspeed / (data.Depth * 1000)) * 100);
