@@ -188,6 +188,10 @@ TREM.on("ready", () => {
 				currentWindow.webContents.openDevTools({ mode: "detach" });
 		}
 	});
+	globalShortcut.register("F11", () => {
+		if (MainWindow)
+			MainWindow.setFullScreen(!MainWindow.fullScreen);
+	});
 });
 
 TREM.on("window-all-closed", () => {
