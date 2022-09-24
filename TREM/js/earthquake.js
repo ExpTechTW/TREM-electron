@@ -657,7 +657,7 @@ async function handler(response) {
 		RMT = 1;
 		RMTlimit = [];
 	}
-	if (Date.now() - AllT >= 240000) All = [];
+	if (Date.now() - AllT >= 180000) All = [];
 	if (Object.keys(PGA).length == 0) {
 		PGAtag = -1;
 		PGALimit = 0;
