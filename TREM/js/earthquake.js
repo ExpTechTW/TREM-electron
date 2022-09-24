@@ -1903,43 +1903,62 @@ function main(data, S1) {
 				mapTW.removeLayer(EarthquakeList[data.ID].Pcircle1);
 			const km = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
 			if (km > 0) {
-				EarthquakeList[data.ID].Pcircle = L.circle([Number(data.NorthLatitude), Number(data.EastLongitude)], {
-					color     : "#6FB7B7",
-					fillColor : "transparent",
-					radius    : km,
-				});
-				EarthquakeList[data.ID].Pcircle1 = L.circle([Number(data.NorthLatitude), Number(data.EastLongitude)], {
-					color     : "#6FB7B7",
-					fillColor : "transparent",
-					radius    : km,
-				});
-				map.addLayer(EarthquakeList[data.ID].Pcircle);
-				mapTW.addLayer(EarthquakeList[data.ID].Pcircle1);
+				if (!EarthquakeList[data.ID].Pcircle)
+					EarthquakeList[data.ID].Pcircle = L.circle([+data.NorthLatitude, +data.EastLongitude], {
+						color     : "#6FB7B7",
+						fillColor : "transparent",
+						radius    : km,
+					}).addTo(map);
+				else
+					EarthquakeList[data.ID].Pcircle
+						.setLatLng([+data.NorthLatitude, +data.EastLongitude])
+						.setRadius(km);
+
+				if (!EarthquakeList[data.ID].Pcircle1)
+					EarthquakeList[data.ID].Pcircle1 = L.circle([data.NorthLatitude, data.EastLongitude], {
+						color     : "#6FB7B7",
+						fillColor : "transparent",
+						radius    : km,
+					}).addTo(mapTW);
+				else
+					EarthquakeList[data.ID].Pcircle1
+						.setLatLng([+data.NorthLatitude, +data.EastLongitude])
+						.setRadius(km);
 			}
 		}
-		if (EarthquakeList[data.ID].Scircle != null)
-			map.removeLayer(EarthquakeList[data.ID].Scircle);
-		if (EarthquakeList[data.ID].Scircle1 != null)
-			mapTW.removeLayer(EarthquakeList[data.ID].Scircle1);
 		const km = Math.pow((NOW.getTime() - data.Time) * Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
 		if (EarthquakeList[data.ID].Depth != null) map.removeLayer(EarthquakeList[data.ID].Depth);
 		if (km > 0) {
 			const KM = Math.sqrt(km);
 			EEW[data.ID].km = KM;
-			EarthquakeList[data.ID].Scircle = L.circle([Number(data.NorthLatitude), Number(data.EastLongitude)], {
-				color       : data.Alert ? "red" : "orange",
-				fillColor   : "#F8E7E7",
-				fillOpacity : 0.1,
-				radius      : KM,
-			});
-			EarthquakeList[data.ID].Scircle1 = L.circle([Number(data.NorthLatitude), Number(data.EastLongitude)], {
-				color       : data.Alert ? "red" : "orange",
-				fillColor   : "#F8E7E7",
-				fillOpacity : 0.1,
-				radius      : KM,
-			});
-			map.addLayer(EarthquakeList[data.ID].Scircle);
-			mapTW.addLayer(EarthquakeList[data.ID].Scircle1);
+			if (!EarthquakeList[data.ID].CircleS)
+				EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
+					color       : data.Alert ? "red" : "orange",
+					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+					fillOpacity : 1,
+					radius      : KM,
+					renderer    : L.svg(),
+					className   : "s-wave-inner",
+				}).addTo(map);
+			else
+				EarthquakeList[data.ID].CircleS
+					.setLatLng([+data.NorthLatitude, +data.EastLongitude])
+					.setRadius(KM)
+					.setStyle({ fillColor: `url(#${data.Alert ? "alert" : "pred"}-gradient)` });
+
+			if (!EarthquakeList[data.ID].CircleSTW)
+				EarthquakeList[data.ID].CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
+					color       : data.Alert ? "red" : "orange",
+					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+					fillOpacity : 1,
+					radius      : KM,
+					renderer    : L.svg(),
+				}).addTo(mapTW);
+			else
+				EarthquakeList[data.ID].CircleSTW
+					.setLatLng([+data.NorthLatitude, +data.EastLongitude])
+					.setRadius(KM)
+					.setStyle({ fillColor: `url(#${data.Alert ? "alert" : "pred"}-gradient)` });
 		} else {
 			let Progress = 0;
 			const num = Math.round(((NOW.getTime() - data.Time) * Sspeed / (data.Depth * 1000)) * 100);
@@ -2084,9 +2103,9 @@ function Tcolor(text) {
 }
 
 function clear(ID) {
-	if (EarthquakeList[ID].Scircle != undefined) map.removeLayer(EarthquakeList[ID].Scircle);
+	if (EarthquakeList[ID].CircleS != undefined) map.removeLayer(EarthquakeList[ID].CircleS);
 	if (EarthquakeList[ID].Pcircle != undefined) map.removeLayer(EarthquakeList[ID].Pcircle);
-	if (EarthquakeList[ID].Scircle1 != undefined) mapTW.removeLayer(EarthquakeList[ID].Scircle1);
+	if (EarthquakeList[ID].CircleSTW != undefined) mapTW.removeLayer(EarthquakeList[ID].CircleSTW);
 	if (EarthquakeList[ID].Pcircle1 != undefined) mapTW.removeLayer(EarthquakeList[ID].Pcircle1);
 }
 

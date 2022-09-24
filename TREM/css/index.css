@@ -777,6 +777,7 @@ html:lang(zh-TW) .alert-timer:empty:after {
 #alert-local.four,
 #rt-list div.four {
 	background-color: #FBDF00;
+	color: black;
 }
 .alert-box.five .alert-box-body,
 .rt-intensity-container.five,
@@ -928,9 +929,9 @@ html:lang(zh-TW) .alert-timer:empty:after {
 #rt-list div.six:not(.strong) span:first-child::after {
 	content: "-";
 	position: absolute;
-	top: -1px;
-	left: 21px;
-	font-size: 20px;
+	top: -4px;
+	left: 16px;
+	font-size: 18px;
 }
 .alert-box.four > .alert-box-body > * {
 	color: black;
@@ -1115,4 +1116,36 @@ html:lang(ja) .rt-station-tooltip > div:last-child::before {
 }
 html:lang(zh-TW) .rt-station-tooltip > div:last-child::before {
 	content: "\9707\5ea6";
+}
+
+svg#svg-defs {
+	position: absolute;
+	visibility: hidden;
+	height: 0;
+	width: 0;
+	pointer-events: none;
+}
+
+stop.alert-start {
+	stop-color: rgba(255, 0, 0, 0.1);
+}
+
+stop.alert-mid {
+	stop-color: rgba(255, 0, 0, 0.15);
+}
+
+stop.alert-stop {
+	stop-color: rgba(255, 0, 0, 0.25);
+}
+
+stop.pred-start {
+	stop-color: rgba(255, 165, 0, 0.1);
+}
+
+stop.pred-mid {
+	stop-color: rgba(255, 165, 0, 0.15);
+}
+
+stop.pred-stop {
+	stop-color: rgba(255, 165, 0, 0.25);
 }
