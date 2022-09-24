@@ -9,14 +9,14 @@
 @import url("./disable_scrollbar.css");
 
 html:lang(en), html:lang(en) .leaflet-tooltip {
-    font-family: "Google Sans",  "Noto Sans TC", "Noto Sans JP", "Arial", sans-serif;
+    font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Arial", sans-serif;
 }
 html:lang(ja), html:lang(ja) .leaflet-tooltip {
-    font-family: "Google Sans", "Noto Sans JP", "Meiryo", "MS PGothic", sans-serif;
+    font-family: "Google Sans", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", "Meiryo", "MS PGothic", sans-serif;
 }
 html:lang(ru), html:lang(ru) .leaflet-tooltip,
 html:lang(zh-TW), html:lang(zh-TW) .leaflet-tooltip {
-    font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Microsoft JhengHei", sans-serif;
+    font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", "Microsoft JhengHei", sans-serif;
 }
 
 body {
