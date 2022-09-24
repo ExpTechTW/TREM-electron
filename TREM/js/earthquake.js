@@ -93,6 +93,20 @@ win.on("show", () => {
 	TREM.Earthquake.emit("focus");
 });
 
+let fullscreenTipTimeout;
+win.on("enter-full-screen", () => {
+	$("#fullscreen-notice").addClass("show");
+	if (fullscreenTipTimeout)
+		clearTimeout(fullscreenTipTimeout);
+
+	fullscreenTipTimeout = setTimeout(() => {
+		$("#fullscreen-notice").removeClass("show");
+	}, 3_000);
+});
+win.on("leave-full-screen", () => {
+	$("#fullscreen-notice").removeClass("show");
+	if (fullscreenTipTimeout) clearTimeout(fullscreenTipTimeout);
+});
 
 async function init() {
 	const progressbar = document.getElementById("loading_progress");
