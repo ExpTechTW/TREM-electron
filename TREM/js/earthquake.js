@@ -1897,31 +1897,27 @@ TREM.Earthquake.on("tsunami", (data) => {
 function main(data, S1) {
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (setting["shock.p"]) {
-			if (EarthquakeList[data.ID].Pcircle != null)
-				map.removeLayer(EarthquakeList[data.ID].Pcircle);
-			if (EarthquakeList[data.ID].Pcircle1 != null)
-				mapTW.removeLayer(EarthquakeList[data.ID].Pcircle1);
 			const km = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
 			if (km > 0) {
-				if (!EarthquakeList[data.ID].Pcircle)
-					EarthquakeList[data.ID].Pcircle = L.circle([+data.NorthLatitude, +data.EastLongitude], {
+				if (!EarthquakeList[data.ID].CircleP)
+					EarthquakeList[data.ID].CircleP = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 						color     : "#6FB7B7",
 						fillColor : "transparent",
 						radius    : km,
 					}).addTo(map);
 				else
-					EarthquakeList[data.ID].Pcircle
+					EarthquakeList[data.ID].CircleP
 						.setLatLng([+data.NorthLatitude, +data.EastLongitude])
 						.setRadius(km);
 
-				if (!EarthquakeList[data.ID].Pcircle1)
-					EarthquakeList[data.ID].Pcircle1 = L.circle([data.NorthLatitude, data.EastLongitude], {
+				if (!EarthquakeList[data.ID].CirclePTW)
+					EarthquakeList[data.ID].CirclePTW = L.circle([data.NorthLatitude, data.EastLongitude], {
 						color     : "#6FB7B7",
 						fillColor : "transparent",
 						radius    : km,
 					}).addTo(mapTW);
 				else
-					EarthquakeList[data.ID].Pcircle1
+					EarthquakeList[data.ID].CirclePTW
 						.setLatLng([+data.NorthLatitude, +data.EastLongitude])
 						.setRadius(km);
 			}
@@ -2104,9 +2100,9 @@ function Tcolor(text) {
 
 function clear(ID) {
 	if (EarthquakeList[ID].CircleS != undefined) map.removeLayer(EarthquakeList[ID].CircleS);
-	if (EarthquakeList[ID].Pcircle != undefined) map.removeLayer(EarthquakeList[ID].Pcircle);
+	if (EarthquakeList[ID].CircleP != undefined) map.removeLayer(EarthquakeList[ID].CircleP);
 	if (EarthquakeList[ID].CircleSTW != undefined) mapTW.removeLayer(EarthquakeList[ID].CircleSTW);
-	if (EarthquakeList[ID].Pcircle1 != undefined) mapTW.removeLayer(EarthquakeList[ID].Pcircle1);
+	if (EarthquakeList[ID].CirclePTW != undefined) mapTW.removeLayer(EarthquakeList[ID].CirclePTW);
 }
 
 function updateText() {
@@ -2140,6 +2136,12 @@ function updateText() {
 		if (num <= 0) num = "";
 		$("#alert-p").text(num);
 	}
+
+	// bring waves to front
+	if (EarthquakeList[INFO[TINFO].ID].CircleP) EarthquakeList[INFO[TINFO].ID].CircleP.bringToFront();
+	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.bringToFront();
+	if (EarthquakeList[INFO[TINFO].ID].CircleS) EarthquakeList[INFO[TINFO].ID].CircleS.bringToFront();
+	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.bringToFront();
 
 	const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
 	const Catch = document.getElementById("box-10");
