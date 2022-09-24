@@ -467,6 +467,7 @@ async function handler(response) {
 				}
 			});
 		}
+
 		Station[keys[index]]
 			.setIcon(stationIcon)
 			.setZIndexOffset(2000 + amount)
@@ -474,17 +475,24 @@ async function handler(response) {
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(Sdata.Time);
-		if (keys[index] == setting["Real-time.station"]) {
-			document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
-			document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
-			document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity);
-			document.getElementById("rt-station-pga").innerText = amount;
-		}
+		if (keys.includes(setting["Real-time.station"])) {
+			if (document.getElementById("rt-station").classList.contains("hide"))
+				document.getElementById("rt-station").classList.remove("hide");
+			if (keys[index] == setting["Real-time.station"]) {
+				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
+				document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
+				document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity);
+				document.getElementById("rt-station-pga").innerText = amount;
+			}
+		} else if (!document.getElementById("rt-station").classList.contains("hide"))
+			document.getElementById("rt-station").classList.add("hide");
+
 		if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
 			pga[station[keys[index]].PGA] = {
 				Intensity : Intensity,
 				Time      : 0,
 			};
+
 		if (Intensity != "NA" && (Intensity != 0 || Alert)) {
 			if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
 			if (Alert) {

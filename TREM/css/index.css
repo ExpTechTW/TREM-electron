@@ -696,7 +696,7 @@ html:lang(zh-TW) .alert-timer:empty:after {
 #rt-list {
 	z-index: 1000;
 	position: absolute;
-	top: 104px;
+	top: 98px;
 	margin: 8px;
 	padding: 4px 8px;
 	width: 148px;
@@ -706,6 +706,10 @@ html:lang(zh-TW) .alert-timer:empty:after {
 	background-color: rgba(var(--md-sys-color-surface), .75);
 	border-radius: 16px;
 	pointer-events: none;
+}
+
+#rt-station.hide + #rt-list {
+	top: 0;
 }
 
 #rt-list:empty {
@@ -1025,22 +1029,31 @@ html:lang(zh-TW) .alert-box.eew-history .alert-notch #alert-type:empty:before {
 	white-space: nowrap;
 }
 
+#rt-station.hide {
+	display: none;
+}
+
 #rt-station-name {
 	font-weight: 500;
 }
+
 #rt-station-time::before {
 	font-weight: 400;
 	padding-right: 8px;
 }
+
 html:lang(en) #rt-station-time::before {
 	content: "Time";
 }
+
 html:lang(ja) #rt-station-time::before {
 	content: "\6642\9593";
 }
+
 html:lang(ru) #rt-station-time::before {
 	content: "\0412\0440\0435\043c\044f";
 }
+
 html:lang(zh-TW) #rt-station-time::before {
 	content: "\6642\9593";
 }
