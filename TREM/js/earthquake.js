@@ -11,9 +11,6 @@ TREM.Constants = require(path.resolve(__dirname, "./TREM.Constants/Constants.js"
 TREM.Earthquake = new EventEmitter();
 localStorage.dirname = __dirname;
 
-/**
- * @type {Settings}
- */
 let setting, is_setting_disabled;
 
 ipcRenderer.on("setting", (event, data) => {
@@ -2139,40 +2136,3 @@ function updateText() {
 	else
 		Catch.innerHTML = "";
 }
-
-/**
- * @typedef {object} Settings
- * @property {string} general.locale
- * @property {boolean} accept.eew.CWB
- * @property {boolean} accept.eew.NIED
- * @property {boolean} accept.eew.JMA
- * @property {boolean} accept.eew.KMA
- * @property {boolean} accept.eew.FJDZJ
- * @property {boolean} shock.smoothing
- * @property {boolean} auto.waveSpeed
- * @property {boolean} compatibility.hwaccel
- * @property {boolean} Real-time.show
- * @property {boolean} Real-time.cover
- * @property {boolean} eew.show
- * @property {boolean} eew.cover
- * @property {string} Real-time.station
- * @property {boolean} report.cover
- * @property {string} eew.Intensity
- * @property {boolean} map.autoZoom
- * @property {boolean} report.show
- * @property {boolean} earthquake.siteEffect
- * @property {boolean} shock.p
- * @property {string} webhook.url
- * @property {string} webhook.body
- * @property {string} location.city
- * @property {string} location.town
- * @property {string} theme.color
- * @property {boolean} theme.dark
- * @property {boolean} accept.eew.SCDZJ
- * @property {boolean} audio.eew
- * @property {number} audio.eew.volume
- * @property {boolean} audio.report
- * @property {number} audio.report.volume
- * @property {boolean} audio.realtime
- * @property {number} audio.realtime.volume
- */
