@@ -75,7 +75,6 @@ let INFO = [];
 let TINFO = 0;
 let ticker = null;
 let ITimer = null;
-const Tsunami = {};
 let Report = 0;
 let Sspeed = 4;
 let Pspeed = 7;
@@ -170,14 +169,6 @@ async function init() {
 
 		if (!Timers.tsunami)
 			Timers.tsunami = setInterval(() => {
-				if (Object.keys(Tsunami).length)
-					if (NOW.getTime() - Tsunami.Time > 240000) {
-						map.removeLayer(Tsunami.Cross);
-						delete Tsunami.Cross;
-						delete Tsunami.Time;
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
-					}
-
 				if (investigation && NOW.getTime() - Report > 600000) {
 					investigation = false;
 					roll.removeChild(roll.children[0]);
@@ -1382,28 +1373,7 @@ async function FCMdata(data) {
 		dump({ level: 0, message: `Latency: ${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
 	if (json.Function == "tsunami") {
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-		if (setting["report.show"]) {
-			win.show();
-			if (setting["report.cover"]) win.setAlwaysOnTop(true);
-			win.setAlwaysOnTop(false);
-		}
-		new Notification("海嘯警報", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "TREM.ico" });
-		TREM.Earthquake.emit("focus", { center: [json.NorthLatitude, json.EastLongitude], size: 2.5 });
-		const myIcon = L.icon({
-			iconUrl  : "./image/warn.png",
-			iconSize : [30, 30],
-		});
-		const Cross = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
-		if (Tsunami.Cross != undefined) map.removeLayer(Tsunami.Cross);
-		Tsunami.Cross = Cross;
-		Tsunami.Time = NOW.getTime();
-		map.addLayer(Cross);
-		if (setting["report.show"]) {
-			win.show();
-			if (setting["report.cover"]) win.setAlwaysOnTop(true);
-			win.setAlwaysOnTop(false);
-		}
-		if (setting["audio.report"]) audioPlay("./audio/Water.wav");
+		new Notification("海嘯資訊", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "TREM.ico" });
 	} else if (json.Function == "TSUNAMI")
 		TREM.Earthquake.emit("tsunami", json);
 	else if (json.Function == "palert")
