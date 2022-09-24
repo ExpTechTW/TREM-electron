@@ -701,7 +701,7 @@ async function handler(response) {
 	else {
 		const Idata = {};
 		for (let Index = 0; Index < All.length; Index++, count++) {
-			if (count >= 8) break;
+			if (Object.keys(Idata).length >= 8) break;
 			const city = All[Index].loc.split(" ")[0];
 			const CPGA = (Idata[city] == undefined) ? 0 : Idata[city];
 			if (All[Index].pga > CPGA) {
