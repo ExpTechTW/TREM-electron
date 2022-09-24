@@ -1659,22 +1659,22 @@ TREM.Earthquake.on("eew", async (data) => {
 					return {
 						color       : colors.primary,
 						weight      : 0.4,
-						opacity     : 0.8,
+						opacity     : 1,
 						fillColor   : colors.surfaceVariant,
 						fillOpacity : 0.6,
 					};
 				return {
 					color       : colors.primary,
-					weight      : 0.6,
-					opacity     : 0.8,
+					weight      : 0.4,
+					opacity     : 1,
 					fillColor   : color(GC[name]),
-					fillOpacity : 0.8,
+					fillOpacity : 1,
 				};
 			} else
 				return {
-					weight      : 0.6,
-					opacity     : 0.8,
 					color       : colors.primary,
+					weight      : 0.4,
+					opacity     : 1,
 					fillColor   : colors.surfaceVariant,
 					fillOpacity : 0.6,
 				};
