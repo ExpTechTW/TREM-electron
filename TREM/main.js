@@ -15,7 +15,6 @@ if (process.argv.includes("--dev")) _devMode = true;
 const latestLog = path.join(TREM.getPath("logs"), "latest.log");
 if (fs.existsSync(latestLog)) {
 	const filetime = fs.statSync(latestLog).mtime;
-	console.log(filetime);
 	const filename = (new Date(filetime.getTime() - (filetime.getTimezoneOffset() * 60000))).toISOString().slice(0, -1).replace(/:+|\.+/g, "-");
 	fs.renameSync(path.join(TREM.getPath("logs"), "latest.log"), path.join(TREM.getPath("logs"), `${filename}.log`));
 }
@@ -28,6 +27,9 @@ if (fs.existsSync(__dirname.replace("trem\\resources\\app", "trem_data")) && fs.
 TREM.Configuration = new Configuration(TREM);
 TREM.Window = new Map();
 
+/**
+ * @type {BrowserWindow}
+ */
 let MainWindow = TREM.Window.get("main");
 /**
  * @type {BrowserWindow}
@@ -50,8 +52,10 @@ function createWindow() {
 	MainWindow = TREM.Window.set("main", new BrowserWindow({
 		title          : "TREM",
 		width          : 1280,
+		minWidth       : 1280,
 		height         : 720,
-		resizable      : false,
+		minHeight      : 720,
+		resizable      : true,
 		show           : false,
 		webPreferences : {
 			preload              : path.join(__dirname, "preload.js"),
@@ -66,6 +70,7 @@ function createWindow() {
 	require("@electron/remote/main").enable(MainWindow.webContents);
 	process.env.window = MainWindow.id;
 	MainWindow.loadFile("./index.html");
+	MainWindow.setAspectRatio(16 / 9);
 	MainWindow.setMenu(null);
 	MainWindow.webContents.on("did-finish-load", () => {
 		MainWindow.webContents.send("setting", TREM.Configuration._data);
@@ -74,6 +79,9 @@ function createWindow() {
 	pushReceiver.setup(MainWindow.webContents);
 	if (process.platform === "win32")
 		TREM.setAppUserModelId("TREM | 臺灣即時地震監測");
+	MainWindow.on("resize", () => {
+		MainWindow.webContents.invalidate();
+	});
 	MainWindow.on("close", (event) => {
 		if (TREM.quitting)
 			MainWindow = null;
@@ -207,12 +215,10 @@ ipcMain.on("restart", () => {
 });
 
 TREM.Configuration.on("update", (data) => {
-	console.log("TREM.Configuration update");
 	emitAllWindow("setting", TREM.Configuration._data);
 });
 
 TREM.Configuration.on("error", (error) => {
-	console.log("settings update");
 	emitAllWindow("settingError", error);
 });
 
@@ -273,7 +279,6 @@ ipcMain.on("screenshot", async () => {
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);
 	const filename = "screenshot" + Date.now() + ".png";
-	console.log(filename);
 	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
 	shell.showItemInFolder(path.join(folder, filename));
 });

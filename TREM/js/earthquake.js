@@ -388,12 +388,12 @@ async function handler(response) {
 	const Json = response.response;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
-
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
 	for (const removedKey of removed) {
 		Station[removedKey].remove();
 		delete Station[removedKey];
 	}
+
 	let ALERT = false;
 	let A = 0;
 	for (let index = 0; index < Object.keys(Json).length; index++)
