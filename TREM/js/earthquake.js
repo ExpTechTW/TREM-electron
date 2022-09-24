@@ -435,7 +435,7 @@ async function handler(response) {
 											(amount >= 5) ? 2 :
 												(amount >= 2.2) ? 1 :
 													0;
-		const size = (Intensity == 0 || Intensity == "NA") ? 10 : 15;
+		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
 		const Image = (Intensity != 0) ? `./image/${Intensity}.png` :
 			(amount > 3.5) ? "./image/0-5.png" :
 				(amount > 3) ? "./image/0-4.png" :
