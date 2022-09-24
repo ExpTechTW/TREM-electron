@@ -216,6 +216,7 @@ async function init() {
 				attributionControl : false,
 				closePopupOnClick  : false,
 				preferCanvas       : true,
+				fadeAnimation      : false,
 			}).setView([23.608428, 120.799168], 7);
 
 			mapTW.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
@@ -268,7 +269,7 @@ async function init() {
 					weight      : 0.8,
 					color       : colors.primary,
 					fillColor   : colors.surfaceVariant,
-					fillOpacity : 0.6,
+					fillOpacity : 1,
 				},
 			}).addTo(map);
 		progressbar.value = (1 / progressStep) * 4;
@@ -1329,7 +1330,7 @@ const updateMapColors = async (event, value) => {
 		weight      : 0.8,
 		color       : colors.primary,
 		fillColor   : colors.surfaceVariant,
-		fillOpacity : 0.6,
+		fillOpacity : 1,
 	};
 	map_geoJson.redraw();
 };
