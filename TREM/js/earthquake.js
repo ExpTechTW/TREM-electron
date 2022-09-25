@@ -81,6 +81,8 @@ let GeoJson = null;
 let GeoJsonID = 0;
 let should_check_update = true;
 let EEWAlert = false;
+let Cancel = false;
+let PGACancel = false;
 // #endregion
 
 // #region 初始化
@@ -465,7 +467,7 @@ async function handler(response) {
 			.setTooltipContent(station_tooltip);
 
 		const Level = IntensityI(Intensity);
-		const now = new Date(Sdata.T);
+		const now = new Date(Sdata.T * 1000);
 		if (keys.includes(setting["Real-time.station"])) {
 			if (document.getElementById("rt-station").classList.contains("hide"))
 				document.getElementById("rt-station").classList.remove("hide");
@@ -615,7 +617,7 @@ async function handler(response) {
 	RMT++;
 	for (let index = 0; index < Object.keys(pga).length; index++) {
 		const Intensity = pga[Object.keys(pga)[index]].Intensity;
-		if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000) {
+		if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000 || PGACancel) {
 			delete pga[Object.keys(pga)[index]];
 			index--;
 		} else {
@@ -647,6 +649,7 @@ async function handler(response) {
 		PGAmark = false;
 		RMT = 1;
 		RMTlimit = [];
+		PGACancel = false;
 	}
 	if (Date.now() - AllT >= 180000) All = [];
 	if (Object.keys(PGA).length == 0) {
@@ -1268,6 +1271,27 @@ ipcMain.once("start", () => {
 		dump({ level: 2, message: error, origin: "Initialization" });
 	}
 });
+
+const TEST = function() {
+	Cancel = true;
+	All = [];
+	PGACancel = true;
+	if (replay != 0) {
+		replay = 0;
+		ReportGET();
+	}
+	const data = {
+		Function      : "earthquake",
+		Type          : "cancel",
+		FormatVersion : 3,
+		UUID          : localStorage.UUID,
+	};
+	axios.post(PostAddressIP, data)
+		.catch((error) => {
+			dump({ level: 2, message: error, origin: "Verbose" });
+		});
+};
+
 ipcMain.on("testEEW", () => {
 	Server = [];
 	if (localStorage.TestID != undefined) {
@@ -2046,7 +2070,7 @@ function main(data, S1) {
 				}
 				break;
 			}
-	if (NOW.getTime() - data.TimeStamp > 180_000) {
+	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
 		clear(data.ID);
 
 		// remove epicenter cross icons
@@ -2073,6 +2097,7 @@ function main(data, S1) {
 			EEWAlert = false;
 			// hide eew alert
 			ticker = null;
+			Cancel = false;
 			if (replay != 0) {
 				replay = 0;
 				ReportGET();
