@@ -1196,34 +1196,3 @@ stop.pred-mid {
 stop.pred-stop {
 	stop-color: rgba(255, 165, 0, 0.25);
 }
-
-#performance-detail {
-	position: fixed;
-	display: none;
-	margin: 8px;
-	padding: 8px;
-	background-color: rgba(0, 0, 0, .45);
-	z-index: 65536;
-	pointer-events: none;
-}
-#performance-detail > div {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	height: 80px;
-	width: 120px;
-	background-color: rgba(0, 0, 0, .5);
-}
-#performance-detail > div * {
-	text-align: center;
-}
-#performance-detail > div :first-child {
-	color: #aaa;
-	font-size: 16px;
-}
-#performance-detail > div :last-child {
-	color: white;
-	font-size: 24px;
-	margin: 10px;
-}
