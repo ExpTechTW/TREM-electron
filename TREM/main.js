@@ -206,11 +206,6 @@ ipcMain.on("openChildWindow", async (event, arg) => {
 	await createSettingWindow();
 });
 
-ipcMain.on("closeChildWindow", (event, arg) => {
-	if (SettingWindow)
-		SettingWindow.close();
-});
-
 ipcMain.on("reset", (event, arg) => {
 	TREM.exit(0);
 });
