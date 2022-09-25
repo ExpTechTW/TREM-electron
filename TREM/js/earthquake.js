@@ -2082,6 +2082,7 @@ function main(data, S1) {
 			INFO = [];
 			All = [];
 			$("#alert-box").removeClass("show");
+			$("#map-legends").removeClass("show");
 			// hide minimap
 			$("#map-tw").removeClass("show");
 			// restore reports
@@ -2116,6 +2117,7 @@ function updateText() {
 	$("#alert-magnitude").text(INFO[TINFO].alert_magnitude);
 	$("#alert-depth").text(INFO[TINFO].alert_depth);
 	$("#alert-box").addClass("show");
+	$("#map-legends").addClass("show");
 	if (GeoJsonID != INFO[TINFO].ID) {
 		if (GeoJson != null) mapTW.removeLayer(GeoJson);
 		if (EarthquakeList[INFO[TINFO].ID].geojson != undefined) {
