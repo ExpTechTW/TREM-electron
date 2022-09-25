@@ -108,19 +108,21 @@ win.on("leave-full-screen", () => {
 });
 
 async function init() {
+	TREM.Localization = new (require(path.resolve(__dirname, "./TREM.Localization/Localization.js")))(setting["general.locale"], window.navigator.language);
+
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
 
 	// Connect to server
 	await (async () => {
-		$("#loading").text(Localization[setting["general.locale"]].Application_Connecting || Localization["zh-TW"].Application_Connecting);
+		$("#loading").text(TREM.Localization.getString("Application_Connecting"));
 		dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
 		await ReportGET({});
 		progressbar.value = (1 / progressStep) * 1;
 	})().catch(e => dump({ level: 2, message: e }));
 
 	(() => {
-		$("#loading").text(Localization[setting["general.locale"]].Application_Loading || Localization["zh-TW"].Application_Loading);
+		$("#loading").text(TREM.Localization.getString("Application_Loading"));
 		const time = document.getElementById("time");
 
 		// clock
@@ -185,8 +187,10 @@ async function init() {
 					[60, 50],
 					[10, 180],
 				],
-				preferCanvas: true,
-			}).setView([23, 121], 7.5);
+				preferCanvas : true,
+				zoomSnap     : 0.25,
+				zoomDelta    : 0.5,
+			}).setView([23, 121], 7.75);
 			map.doubleClickZoom.disable();
 			map.removeControl(map.zoomControl);
 			map.on("click", () => {
@@ -194,7 +198,7 @@ async function init() {
 					ReportMarkID = null;
 					for (let index = 0; index < MarkList.length; index++)
 						map.removeLayer(MarkList[index]);
-					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 				}
 				mapLock = false;
 				TREM.Earthquake.emit("focus");
@@ -294,7 +298,7 @@ async function init() {
 		progressbar.value = 1;
 	})().catch(e => dump({ level: 2, message: e }));
 
-	$("#loading").text(Localization[setting["general.locale"]].Application_Welcome || Localization["zh-TW"].Application_Welcome);
+	$("#loading").text(TREM.Localization.getString("Application_Welcome"));
 	$("#load").delay(1000).fadeOut(1000);
 	setInterval(() => {
 		if (mapLock) return;
@@ -430,10 +434,6 @@ async function handler(response) {
 					(amount > 2.5) ? "./image/0-3.png" :
 						(amount > 2) ? "./image/0-2.png" :
 							"./image/0-1.png";
-		const stationIcon = L.icon({
-			iconUrl  : Image,
-			iconSize : [size, size],
-		});
 		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 		if (!Station[keys[index]]) {
 			Station[keys[index]] = L.marker([station[keys[index]].Lat, station[keys[index]].Long], { keyboard: false })
@@ -456,8 +456,13 @@ async function handler(response) {
 			});
 		}
 
+		if (Station[keys[index]].getIcon()?.options?.iconUrl != Image)
+			Station[keys[index]].setIcon(L.icon({
+				iconUrl  : Image,
+				iconSize : [size, size],
+			}));
+
 		Station[keys[index]]
-			.setIcon(stationIcon)
 			.setZIndexOffset(2000 + amount)
 			.setTooltipContent(station_tooltip);
 
@@ -758,13 +763,13 @@ async function setUserLocationMarker(town) {
 			.addTo(map);
 	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
 	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
-	TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+	TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 }
 // #endregion
 
 // #region 聚焦
 TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
-	if (!setting["map.autoZoom"] || force) return;
+	if (!setting["map.autoZoom"] && !force) return;
 	let X = 0;
 	if (size >= 6) X = 2.5;
 	if (size >= 6.5) X = 1.6;
@@ -1335,9 +1340,6 @@ ipcRenderer.on("config:dark", updateMapColors);
 ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
 });
-ipcMain.on("updateTitle", (e, lang) => {
-	document.title = Localization[lang].Application_Title || Localization["zh-TW"].Application_Title;
-});
 // #endregion
 
 // #region EEW
@@ -1570,7 +1572,7 @@ TREM.Earthquake.on("eew", async (data) => {
 
 	}
 	let speed = 500;
-	if (setting["shock.smoothing"]) speed = 15;
+	if (setting["shock.smoothing"]) speed = 100;
 	if (EarthquakeList[data.ID].Timer != undefined) clearInterval(EarthquakeList[data.ID].Timer);
 	if (EarthquakeList.ITimer != undefined) clearInterval(EarthquakeList.ITimer);
 

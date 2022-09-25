@@ -10,11 +10,13 @@ class Configuration extends EventEmitter {
 		try {
 			this._folder = path.join(app.getPath("userData"));
 			this._path = path.join(app.getPath("userData"), "settings.json");
-			if (!fs.existsSync(this._path))
+			if (!fs.existsSync(this._path)) {
 				fs.writeFileSync(this._path, JSON.stringify(Object.keys(Constants.Default_Configurations).reduce((acc, key) => {
 					acc[key] = Constants.Default_Configurations[key].value;
 					return acc;
 				}, {}), null, 2), { encoding: "utf-8" });
+				this.emit("detect-locale");
+			}
 
 			this._data = JSON.parse(fs.readFileSync(this._path, { encoding: "utf-8" }));
 

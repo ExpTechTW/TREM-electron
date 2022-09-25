@@ -86,11 +86,21 @@ let station;
 (async () => {
 	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
 	const el = document.getElementById("Real-time.station");
+	const stations = {};
 	for (const key of Object.keys(station)) {
-		const option = document.createElement("option");
-		option.text = `${station[key].Loc} ${key}`;
-		option.value = key;
-		el.appendChild(option);
+		if (!stations[station[key].Loc.split(" ")[0]]) stations[station[key].Loc.split(" ")[0]] = {};
+		stations[station[key].Loc.split(" ")[0]][key] = station[key].Loc;
+	}
+	for (const city of Object.keys(stations)) {
+		const optgroup = document.createElement("optgroup");
+		optgroup.label = city;
+		for (const stationKey of Object.keys(stations[city])) {
+			const option = document.createElement("option");
+			option.text = `${stations[city][stationKey]} ${stationKey}`;
+			option.value = stationKey;
+			optgroup.appendChild(option);
+		}
+		el.appendChild(optgroup);
 	}
 })();
 // #endregion
@@ -100,6 +110,7 @@ let station;
  */
 function init() {
 	dump({ level: 0, message: "Initializing", origin: "Setting" });
+	TREM.Localization = new (require(path.resolve(__dirname, "../TREM.Localization/Localization.js")))(setting["general.locale"], window.navigator.language);
 
 	if (is_setting_disabled) {
 		win.flashFrame(true);
@@ -298,8 +309,8 @@ function testEEW() {
 
 function reset() {
 	showDialog("warn",
-		Localization[setting["general.locale"]].Setting_Dialog_Reset_Title || Localization["zh-TW"].Setting_Dialog_Reset_Title,
-		Localization[setting["general.locale"]].Setting_Dialog_Reset_Description || Localization["zh-TW"].Setting_Dialog_Reset_Description,
+		TREM.Localization.getString("Setting_Dialog_Reset_Title"),
+		TREM.Localization.getString("Setting_Dialog_Reset_Description"),
 		1, "device_reset", () => {
 			setting = {};
 			ipcRenderer.send("saveSetting", true);
@@ -328,7 +339,7 @@ testAudioState.audio.addEventListener("ended", () => {
 	testAudioState.is_playing = false;
 	testAudioBtn.style.removeProperty("--progress");
 	testAudioBtn.childNodes[1].textContent = "play_arrow";
-	testAudioBtn.childNodes[3].textContent = Localization[setting["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
+	testAudioBtn.childNodes[3].textContent = TREM.Localization.getString("Audio_Test");
 });
 testAudioState.audio.addEventListener("timeupdate", () => {
 	console.log(testAudioState.audio.currentTime);
@@ -346,7 +357,7 @@ const testAudio = (audioString, el) => {
 		testAudioState.is_playing = false;
 		testAudioBtn.style.removeProperty("--progress");
 		testAudioBtn.childNodes[1].textContent = "play_arrow";
-		testAudioBtn.childNodes[3].textContent = Localization[setting["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
+		testAudioBtn.childNodes[3].textContent = TREM.Localization.getString("Audio_Test");
 	}
 	testAudioBtn = el;
 	if (!testAudioState.is_playing) {
@@ -356,22 +367,22 @@ const testAudio = (audioString, el) => {
 		testAudioState.audio.played;
 		testAudioState.is_playing = true;
 		el.childNodes[1].textContent = "pause";
-		el.childNodes[3].textContent = Localization[setting["general.locale"]].Audio_TestStop || Localization["zh-TW"].Audio_TestStop;
+		el.childNodes[3].textContent = TREM.Localization.getString("Audio_TestStop");
 	} else {
 		testAudioState.audio.pause();
 		testAudioState.audio.currentTime = 0;
 		testAudioState.is_playing = false;
 		testAudioBtn.style.removeProperty("--progress");
 		el.childNodes[1].textContent = "play_arrow";
-		el.childNodes[3].textContent = Localization[setting["general.locale"]].Audio_Test || Localization["zh-TW"].Audio_Test;
+		el.childNodes[3].textContent = TREM.Localization.getString("Audio_Test");
 	}
 };
 
 const webhook = async () => {
 	if (setting["webhook.url"].length == 0)
 		return showDialog("error",
-			Localization[setting["general.locale"]].Webhook_Dialog_Error_Title || Localization["zh-TW"].Webhook_Dialog_Error_Title,
-			Localization[setting["general.locale"]].Webhook_Dialog_Error_Empty || Localization["zh-TW"].Webhook_Dialog_Error_Empty,
+			TREM.Localization.getString("Webhook_Dialog_Error_Title"),
+			TREM.Localization.getString("Webhook_Dialog_Error_Empty"),
 		);
 
 	const url = setting["webhook.url"].match(
@@ -381,8 +392,8 @@ const webhook = async () => {
 
 	if (!url || url.length <= 1)
 		return showDialog("error",
-			Localization[setting["general.locale"]].Webhook_Dialog_Error_Title || Localization["zh-TW"].Webhook_Dialog_Error_Title,
-			Localization[setting["general.locale"]].Webhook_Dialog_Error_Invalid || Localization["zh-TW"].Webhook_Dialog_Error_Invalid);
+			TREM.Localization.getString("Webhook_Dialog_Error_Title"),
+			TREM.Localization.getString("Webhook_Dialog_Error_Invalid"));
 
 	const { MessageEmbed, WebhookClient } = require("discord.js");
 
@@ -398,8 +409,8 @@ const webhook = async () => {
 		.send({ embeds, username: "TREM | 臺灣即時地震監測", avatarURL: "https://cdn.discordapp.com/attachments/976452418114048051/976469802644291584/received_1354357138388018.webp" })
 		.then(m => {
 			showDialog("success",
-				Localization[setting["general.locale"]].Webhook_Dialog_Title || Localization["zh-TW"].Webhook_Dialog_Title,
-				(Localization[setting["general.locale"]].Webhook_Dialog_Success || Localization["zh-TW"].Webhook_Dialog_Success).format(m.id, m.channel_id));
+				TREM.Localization.getString("Webhook_Dialog_Title"),
+				TREM.Localization.getString("Webhook_Dialog_Success").format(m.id, m.channel_id));
 		}).catch(error => {
 			showDialog("error", "Webhook 測試", `Webhook 發送測試訊息時發生錯誤\n${error}`);
 		});
@@ -411,8 +422,8 @@ const colorUpdate = () => {
 
 const showError = () => {
 	showDialog("error",
-		Localization[setting["general.locale"]].Setting_Dialog_Error_Title || Localization["zh-TW"].Setting_Dialog_Error_Title,
-		(Localization[setting["general.locale"]].Setting_Dialog_Error_Description || Localization["zh-TW"].Setting_Dialog_Error_Description).format(is_setting_disabled));
+		TREM.Localization.getString("Setting_Dialog_Error_Title"),
+		TREM.Localization.getString("Setting_Dialog_Error_Description").format(is_setting_disabled));
 };
 
 $("input[type=range]").on("input", function() {

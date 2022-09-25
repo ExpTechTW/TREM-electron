@@ -27,6 +27,7 @@ ipcRenderer.on("config:dark", (event, value) => {
 });
 
 ipcRenderer.on("config:locale", (event, value) => {
+	TREM.Localization.setLocale(value);
 	setLocale(value);
 });
 
