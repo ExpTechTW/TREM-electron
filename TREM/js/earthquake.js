@@ -109,19 +109,21 @@ win.on("leave-full-screen", () => {
 });
 
 async function init() {
+	TREM.Localization = new (require(path.resolve(__dirname, "./TREM.Localization/Localization.js")))(setting["general.locale"], window.navigator.language);
+
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
 
 	// Connect to server
 	await (async () => {
-		$("#loading").text(Localization[setting["general.locale"]].Application_Connecting || Localization["zh-TW"].Application_Connecting);
+		$("#loading").text(TREM.Localization.getString("Application_Connecting"));
 		dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
 		await ReportGET({});
 		progressbar.value = (1 / progressStep) * 1;
 	})().catch(e => dump({ level: 2, message: e }));
 
 	(() => {
-		$("#loading").text(Localization[setting["general.locale"]].Application_Loading || Localization["zh-TW"].Application_Loading);
+		$("#loading").text(TREM.Localization.getString("Application_Loading"));
 		const time = document.getElementById("time");
 
 		// clock
@@ -295,7 +297,7 @@ async function init() {
 		progressbar.value = 1;
 	})().catch(e => dump({ level: 2, message: e }));
 
-	$("#loading").text(Localization[setting["general.locale"]].Application_Welcome || Localization["zh-TW"].Application_Welcome);
+	$("#loading").text(TREM.Localization.getString("Application_Welcome"));
 	$("#load").delay(1000).fadeOut(1000);
 	setInterval(() => {
 		if (mapLock) return;
@@ -1359,9 +1361,6 @@ ipcRenderer.on("config:theme", updateMapColors);
 ipcRenderer.on("config:dark", updateMapColors);
 ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
-});
-ipcMain.on("updateTitle", (e, lang) => {
-	document.title = Localization[lang].Application_Title || Localization["zh-TW"].Application_Title;
 });
 // #endregion
 

@@ -196,9 +196,10 @@ ipcMain.on("config:value", (event, key, value) => {
 		}
 
 		case "general.locale": {
-			if (MainWindow) MainWindow.setTitle(TREM.Localization.getString("Application_Title", value));
-			if (SettingWindow) SettingWindow.setTitle(TREM.Localization.getString("Setting_Title", value));
-			trayIcon(value);
+			TREM.Localization.setLocale(value);
+			if (MainWindow) MainWindow.setTitle(TREM.Localization.getString("Application_Title"));
+			if (SettingWindow) SettingWindow.setTitle(TREM.Localization.getString("Setting_Title"));
+			trayIcon();
 			emitAllWindow("config:locale", value);
 			break;
 		}
@@ -270,7 +271,7 @@ function emitAllWindow(channel, ...args) {
 			win.webContents.send(channel, ...args);
 }
 
-function trayIcon(locale) {
+function trayIcon() {
 	if (tray) {
 		tray.destroy();
 		tray = null;
@@ -297,34 +298,34 @@ function trayIcon(locale) {
 			type: "separator",
 		},
 		{
-			label : TREM.Localization.getString("Tray_Show", locale),
+			label : TREM.Localization.getString("Tray_Show"),
 			type  : "normal",
 			click : () => {
 				MainWindow.show();
 			},
 		},
 		{
-			label : TREM.Localization.getString("Tray_Hide", locale),
+			label : TREM.Localization.getString("Tray_Hide"),
 			type  : "normal",
 			click : () => {
 				MainWindow.hide();
 			},
 		},
 		{
-			label : TREM.Localization.getString("Tray_Restart", locale),
+			label : TREM.Localization.getString("Tray_Restart"),
 			type  : "normal",
 			click : () => {
 				restart();
 			},
 		},
 		{
-			label : TREM.Localization.getString("Tray_Exit", locale),
+			label : TREM.Localization.getString("Tray_Exit"),
 			type  : "normal",
 			click : () => {
 				TREM.exit(0);
 			},
 		},
 	]);
-	tray.setToolTip(TREM.Localization.getString("Application_Title", locale));
+	tray.setToolTip(TREM.Localization.getString("Application_Title"));
 	tray.setContextMenu(contextMenu);
 }
