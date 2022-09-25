@@ -411,7 +411,7 @@ async function handler(response) {
 		const Sdata = Json[keys[index]];
 		let amount = Number(Sdata.PGA);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = NOW.getTime() - (Sdata.alert ?? 0) < 60000;
+		const Alert = NOW.getTime() - (Sdata.alert * 1000 ?? 0) < 60000;
 		if (Alert && Json.Alert) amount = Sdata.pga;
 		const Intensity = (NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
 			(!Alert) ? 0 :
@@ -676,42 +676,42 @@ async function handler(response) {
 		win.setAlwaysOnTop(false);
 		PGAtag = All[0].intensity;
 	}
-	let list = [];
+	const list = [];
 	let count = 0;
-	if (All.length <= 8)
-		for (let Index = 0; Index < All.length; Index++, count++) {
-			if (count >= 8) break;
-			const container = document.createElement("DIV");
-			container.className = IntensityToClassString(All[Index].intensity);
-			const location = document.createElement("span");
-			location.innerText = `${All[Index].loc}\n${All[Index].pga} gal`;
-			container.appendChild(document.createElement("span"));
-			container.appendChild(location);
-			list.push(container);
-		}
-	else {
-		const Idata = {};
-		for (let Index = 0; Index < All.length; Index++, count++) {
-			if (Object.keys(Idata).length >= 8) break;
-			const city = All[Index].loc.split(" ")[0];
-			const CPGA = (Idata[city] == undefined) ? 0 : Idata[city];
-			if (All[Index].pga > CPGA) {
-				if (Idata[city] == undefined)Idata[city] = {};
-				Idata[city].pga = All[Index].pga;
-				Idata[city].intensity = All[Index].intensity;
+	if (All.length >= 2)
+		if (All.length <= 8)
+			for (let Index = 0; Index < All.length; Index++, count++) {
+				if (count >= 8) break;
+				const container = document.createElement("DIV");
+				container.className = IntensityToClassString(All[Index].intensity);
+				const location = document.createElement("span");
+				location.innerText = `${All[Index].loc}\n${All[Index].pga} gal`;
+				container.appendChild(document.createElement("span"));
+				container.appendChild(location);
+				list.push(container);
+			}
+		else {
+			const Idata = {};
+			for (let Index = 0; Index < All.length; Index++, count++) {
+				if (Object.keys(Idata).length >= 8) break;
+				const city = All[Index].loc.split(" ")[0];
+				const CPGA = (Idata[city] == undefined) ? 0 : Idata[city];
+				if (All[Index].pga > CPGA) {
+					if (Idata[city] == undefined)Idata[city] = {};
+					Idata[city].pga = All[Index].pga;
+					Idata[city].intensity = All[Index].intensity;
+				}
+			}
+			for (let index = 0; index < Object.keys(Idata).length; index++) {
+				const container = document.createElement("DIV");
+				container.className = IntensityToClassString(Idata[Object.keys(Idata)[index]].intensity);
+				const location = document.createElement("span");
+				location.innerText = `${Object.keys(Idata)[index]}\n${Idata[Object.keys(Idata)[index]].pga} gal`;
+				container.appendChild(document.createElement("span"));
+				container.appendChild(location);
+				list.push(container);
 			}
 		}
-		for (let index = 0; index < Object.keys(Idata).length; index++) {
-			const container = document.createElement("DIV");
-			container.className = IntensityToClassString(Idata[Object.keys(Idata)[index]].intensity);
-			const location = document.createElement("span");
-			location.innerText = `${Object.keys(Idata)[index]}\n${Idata[Object.keys(Idata)[index]].pga} gal`;
-			container.appendChild(document.createElement("span"));
-			container.appendChild(location);
-			list.push(container);
-		}
-	}
-	if (Json.Alert) list = [];
 	document.getElementById("rt-list").replaceChildren(...list);
 }
 
@@ -1270,41 +1270,39 @@ ipcMain.once("start", () => {
 });
 ipcMain.on("testEEW", () => {
 	Server = [];
-	setTimeout(() => {
-		if (localStorage.TestID != undefined) {
-			const list = localStorage.TestID.split(",");
-			for (let index = 0; index < list.length; index++)
-				setTimeout(() => {
-					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-					const data = {
-						Function      : "earthquake",
-						Type          : "test",
-						FormatVersion : 3,
-						UUID          : localStorage.UUID,
-						ID            : list[index],
-					};
-					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-					axios.post(PostAddressIP, data)
-						.catch((error) => {
-							dump({ level: 2, message: error, origin: "Verbose" });
-						});
-				}, 1000);
-			delete localStorage.TestID;
-		} else {
-			dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-			const data = {
-				Function      : "earthquake",
-				Type          : "test",
-				FormatVersion : 3,
-				UUID          : localStorage.UUID,
-			};
-			dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-			axios.post(PostAddressIP, data)
-				.catch((error) => {
-					dump({ level: 2, message: error, origin: "Verbose" });
-				});
-		}
-	}, 3000);
+	if (localStorage.TestID != undefined) {
+		const list = localStorage.TestID.split(",");
+		for (let index = 0; index < list.length; index++)
+			setTimeout(() => {
+				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+				const data = {
+					Function      : "earthquake",
+					Type          : "test",
+					FormatVersion : 3,
+					UUID          : localStorage.UUID,
+					ID            : list[index],
+				};
+				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+				axios.post(PostAddressIP, data)
+					.catch((error) => {
+						dump({ level: 2, message: error, origin: "Verbose" });
+					});
+			}, 100);
+		delete localStorage.TestID;
+	} else {
+		dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+		const data = {
+			Function      : "earthquake",
+			Type          : "test",
+			FormatVersion : 3,
+			UUID          : localStorage.UUID,
+		};
+		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+		axios.post(PostAddressIP, data)
+			.catch((error) => {
+				dump({ level: 2, message: error, origin: "Verbose" });
+			});
+	}
 });
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
