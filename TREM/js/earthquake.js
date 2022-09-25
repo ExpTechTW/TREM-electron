@@ -459,10 +459,6 @@ async function handler(response) {
 					(amount > 2.5) ? "./image/0-3.png" :
 						(amount > 2) ? "./image/0-2.png" :
 							"./image/0-1.png";
-		const stationIcon = L.icon({
-			iconUrl  : Image,
-			iconSize : [size, size],
-		});
 		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 		if (!Station[keys[index]]) {
 			Station[keys[index]] = L.marker([station[keys[index]].Lat, station[keys[index]].Long], { keyboard: false })
@@ -485,9 +481,13 @@ async function handler(response) {
 			});
 		}
 
-		Station[keys[index]]
-			.setIcon(stationIcon)
-			.setZIndexOffset(2000 + amount)
+		if (Station[keys[index]].getIcon()?.options?.iconUrl != Image)
+			Station[keys[index]].setIcon(L.icon({
+				iconUrl  : Image,
+				iconSize : [size, size],
+			}));
+
+		Station[keys[index]].setZIndexOffset(2000 + amount)
 			.setTooltipContent(station_tooltip);
 
 		const Level = IntensityI(Intensity);
