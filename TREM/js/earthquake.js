@@ -172,7 +172,7 @@ async function init() {
 						ReportMarkID = null;
 						for (let index = 0; index < MarkList.length; index++)
 							map.removeLayer(MarkList[index]);
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 					}
 				}
 			}, 250);
@@ -203,9 +203,8 @@ async function init() {
 				TREM.Earthquake.emit("focus");
 			});
 			map.on("drag", () => mapLock = true);
-			map.on("dblclick", () => TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 }));
 			map.on("zoomend", () => {
-				if (map.getZoom() > 10)
+				if (map.getZoom() >= 11)
 					for (const key in Station) {
 						const tooltip = Station[key].getTooltip();
 						if (tooltip) {
@@ -354,7 +353,7 @@ async function init() {
 		} else
 		if (auto) {
 			auto = false;
-			TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+			TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 		}
 	}, 500);
 }
@@ -443,7 +442,7 @@ async function handler(response) {
 				});
 			Station[keys[index]].on("click", () => {
 				Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
-				if (map.getZoom() <= 10) {
+				if (map.getZoom() < 11) {
 					const tooltip = Station[keys[index]].getTooltip();
 					Station[keys[index]].unbindTooltip();
 					if (Station[keys[index]].keepTooltipAlive)
@@ -892,7 +891,7 @@ async function ReportClick(time) {
 		ReportMarkID = null;
 		for (let index = 0; index < MarkList.length; index++)
 			map.removeLayer(MarkList[index]);
-		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 	} else {
 		ReportMarkID = time;
 		for (let index = 0; index < MarkList.length; index++)
@@ -933,7 +932,7 @@ async function ReportClick(time) {
 								ReportMark.setZIndexOffset(1000 + index);
 								MarkList.push(ReportMark);
 							}
-						TREM.Earthquake.emit("focus", { center: [+json.NorthLatitude, +json.EastLongitude], size: 7.5 });
+						TREM.Earthquake.emit("focus", { center: [+json.NorthLatitude, +json.EastLongitude], size: 7.75 });
 						const myIcon = L.icon({
 							iconUrl  : "./image/star.png",
 							iconSize : [25, 25],
@@ -984,7 +983,7 @@ async function ReportClick(time) {
 				ReportMark.setZIndexOffset(1000 + index);
 				MarkList.push(ReportMark);
 			}
-			TREM.Earthquake.emit("focus", { center: [ReportCache[time].epicenterLat, +ReportCache[time].epicenterLon], size: 7.5 });
+			TREM.Earthquake.emit("focus", { center: [ReportCache[time].epicenterLat, +ReportCache[time].epicenterLon], size: 7.75 });
 			const icon = L.icon({
 				iconUrl  : "./image/star.png",
 				iconSize : [25, 25],
@@ -1724,7 +1723,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 			win.setAlwaysOnTop(false);
 		}
 		if (setting["audio.report"]) audioPlay("./audio/Water.wav");
-		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 	}
 	if (data.Cancel) {
 		if (TSUNAMI.E)
