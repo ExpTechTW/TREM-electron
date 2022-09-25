@@ -1281,7 +1281,7 @@ ipcMain.once("start", () => {
 });
 
 const stopReplay = function() {
-	Cancel = true;
+	if (Object.keys(EarthquakeList).length != 0) Cancel = true;
 	All = [];
 	PGACancel = true;
 	if (replay != 0) {
