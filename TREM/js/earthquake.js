@@ -1277,7 +1277,6 @@ function color(Intensity) {
 // #region IPC
 ipcMain.once("start", () => {
 	try {
-		console.log(1);
 		setInterval(() => {
 			if (DATAstamp != 0 && Stamp != DATAstamp) {
 				Stamp = DATAstamp;
