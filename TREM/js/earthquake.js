@@ -90,7 +90,7 @@ const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
 win.on("show", () => {
-	TREM.Earthquake.emit("focus");
+	TREM.Earthquake.emit("focus", {}, true);
 });
 
 let fullscreenTipTimeout;
@@ -202,7 +202,7 @@ async function init() {
 					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 				}
 				mapLock = false;
-				TREM.Earthquake.emit("focus");
+				TREM.Earthquake.emit("focus", {}, true);
 			});
 			map.on("drag", () => mapLock = true);
 			map.on("zoomend", () => {
@@ -770,7 +770,12 @@ async function setUserLocationMarker(town) {
 
 // #region 聚焦
 TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
-	if (!setting["map.autoZoom"] && !force) return;
+	if (!setting["map.autoZoom"])
+		if (force) {
+			center = [23.608428, 120.799168];
+			size = 7.75;
+		} else
+			return;
 	let X = 0;
 	if (size >= 6) X = 2.5;
 	if (size >= 6.5) X = 1.6;
