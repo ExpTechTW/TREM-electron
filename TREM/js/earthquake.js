@@ -414,7 +414,7 @@ async function handler(response) {
 		let amount = Number(Sdata.PGA);
 		if (station[keys[index]] == undefined) continue;
 		const Alert = NOW.getTime() - (Sdata.alert ?? 0) < 60000;
-		if (Alert && Json.Alert) amount = Sdata.MaxPGA;
+		if (Alert && Json.Alert) amount = Sdata.pga;
 		const Intensity = (NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
 			(!Alert) ? 0 :
 				(amount >= 800) ? 9 :
@@ -1355,7 +1355,7 @@ async function FCMdata(data) {
 		const list = fs.readdirSync(folder);
 		for (let index = 0; index < list.length; index++) {
 			const date = fs.statSync(`${folder}/${list[index]}`);
-			if (new Date().getTime() - date.ctimeMs > 86400000) fs.unlinkSync(`${folder}/${list[index]}`);
+			if (new Date().getTime() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
 		}
 		const filename = `${NOW.getTime()}.json`;
 		fs.writeFileSync(path.join(folder, filename), JSON.stringify(json));
