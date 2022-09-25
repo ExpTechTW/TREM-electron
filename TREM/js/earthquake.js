@@ -188,7 +188,8 @@ async function init() {
 					[60, 50],
 					[10, 180],
 				],
-				preferCanvas: true,
+				preferCanvas : true,
+				zoomSnap     : 0.5,
 			}).setView([23, 121], 7.5);
 			map.doubleClickZoom.disable();
 			map.removeControl(map.zoomControl);
@@ -791,7 +792,7 @@ async function setUserLocationMarker(town) {
 
 // #region 聚焦
 TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
-	if (!setting["map.autoZoom"] || force) return;
+	if (!setting["map.autoZoom"] && !force) return;
 	let X = 0;
 	if (size >= 6) X = 2.5;
 	if (size >= 6.5) X = 1.6;
