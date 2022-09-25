@@ -1282,12 +1282,12 @@ ipcMain.once("start", () => {
 
 const stopReplay = function() {
 	if (Object.keys(EarthquakeList).length != 0) Cancel = true;
-	All = [];
-	PGACancel = true;
+	if (Object.keys(pga).length != 0)PGACancel = true;
 	if (replay != 0) {
 		replay = 0;
 		ReportGET();
 	}
+	All = [];
 	const data = {
 		Function      : "earthquake",
 		Type          : "cancel",
