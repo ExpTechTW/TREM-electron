@@ -40,7 +40,6 @@ const Station = {};
 const PGA = {};
 const pga = {};
 let RMT = 1;
-const AL = [];
 let PGALimit = 0;
 let PGAtag = -1;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
@@ -54,7 +53,7 @@ let ITimer = null;
 let Report = 0;
 let Sspeed = 4;
 let Pspeed = 7;
-const Server = [];
+let Server = [];
 let PAlert = {};
 let Location;
 let station = {};
@@ -1153,9 +1152,8 @@ function addReport(report, prepend = false) {
 		Div.addEventListener("contextmenu", (event) => {
 			if (replay != 0) return;
 			if (report.ID.length != 0) {
-				localStorage.Test = true;
 				localStorage.TestID = report.ID;
-				ipcRenderer.send("restart");
+				ipcRenderer.send("testEEW");
 			} else {
 				replay = new Date(report.originTime).getTime() - 25000;
 				replayT = NOW.getTime();
@@ -1265,44 +1263,6 @@ ipcMain.once("start", () => {
 			}
 		}, 0);
 		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer} | MD5 >> ${MD5Check}`, origin: "Initialization" });
-		if (localStorage.Test != undefined)
-			setTimeout(() => {
-				if (localStorage.TestID != undefined) {
-					delete localStorage.Test;
-					const list = localStorage.TestID.split(",");
-					for (let index = 0; index < list.length; index++)
-						setTimeout(() => {
-							dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-							const data = {
-								Function      : "earthquake",
-								Type          : "test",
-								FormatVersion : 3,
-								UUID          : localStorage.UUID,
-								ID            : list[index],
-							};
-							dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-							axios.post(PostAddressIP, data)
-								.catch((error) => {
-									dump({ level: 2, message: error, origin: "Verbose" });
-								});
-						}, 1000);
-					delete localStorage.TestID;
-				} else {
-					delete localStorage.Test;
-					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-					const data = {
-						Function      : "earthquake",
-						Type          : "test",
-						FormatVersion : 3,
-						UUID          : localStorage.UUID,
-					};
-					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-					axios.post(PostAddressIP, data)
-						.catch((error) => {
-							dump({ level: 2, message: error, origin: "Verbose" });
-						});
-				}
-			}, 3000);
 	} catch (error) {
 		showDialog("error", "發生錯誤", `初始化過程中發生錯誤，您可以繼續使用此應用程式，但無法保證所有功能皆能繼續正常運作。\n\n如果這是您第一次看到這個訊息，請嘗試重新啟動應用程式。\n如果這個錯誤持續出現，請到 TREM Discord 伺服器回報問題。\n\n錯誤訊息：${error}`);
 		$("#load").delay(1000).fadeOut(1000);
@@ -1310,8 +1270,42 @@ ipcMain.once("start", () => {
 	}
 });
 ipcMain.on("testEEW", () => {
-	localStorage.Test = true;
-	ipcRenderer.send("restart");
+	Server = [];
+	setTimeout(() => {
+		if (localStorage.TestID != undefined) {
+			const list = localStorage.TestID.split(",");
+			for (let index = 0; index < list.length; index++)
+				setTimeout(() => {
+					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+					const data = {
+						Function      : "earthquake",
+						Type          : "test",
+						FormatVersion : 3,
+						UUID          : localStorage.UUID,
+						ID            : list[index],
+					};
+					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+					axios.post(PostAddressIP, data)
+						.catch((error) => {
+							dump({ level: 2, message: error, origin: "Verbose" });
+						});
+				}, 1000);
+			delete localStorage.TestID;
+		} else {
+			dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+			const data = {
+				Function      : "earthquake",
+				Type          : "test",
+				FormatVersion : 3,
+				UUID          : localStorage.UUID,
+			};
+			dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+			axios.post(PostAddressIP, data)
+				.catch((error) => {
+					dump({ level: 2, message: error, origin: "Verbose" });
+				});
+		}
+	}, 3000);
 });
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
