@@ -79,10 +79,14 @@ kbd {
 #nav-rail.hide + #view .view #map {
 	border-radius: 0;
 }
-#togglenav_btn {
+#togglenav_btn, #stopReplay {
 	z-index: 1000;
 	position: absolute;
 	bottom: 0;
+}
+
+#togglenav_btn.hide, #stopReplay.hide {
+display: none;
 }
 
 #view {
