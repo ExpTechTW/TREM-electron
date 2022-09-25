@@ -78,7 +78,6 @@ const EEW = {};
 const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
 let Ping = 0;
-let ALL = [];
 let GeoJson = null;
 let GeoJsonID = 0;
 let should_check_update = true;
@@ -406,36 +405,12 @@ async function handler(response) {
 		Station[removedKey].remove();
 		delete Station[removedKey];
 	}
-
-	let ALERT = false;
-	let A = 0;
-	for (let index = 0; index < Object.keys(Json).length; index++)
-		if (Date.now() - (Json[Object.keys(Json)[index]].alert ?? 0) < 10000)
-			if (AL[Object.keys(Json)[index]] == undefined || Date.now() - (AL[Object.keys(AL)[index]] ?? 0) >= 10000)
-				AL[Object.keys(Json)[index]] = Date.now();
-	for (let index = 0; index < Object.keys(AL).length; index++)
-		if (Date.now() - (AL[Object.keys(AL)[index]] ?? 0) < 10000)
-			if (ALL.length == 0) {
-				ALL.push(Number(Object.keys(AL)[index].split("-")[3]));
-				A++;
-			} else if (ALL.includes(Number(Object.keys(AL)[index].split("-")[3])))
-				A++;
-			else
-				for (let Index = 0; Index < ALL.length; Index++)
-					if (Math.abs(Number(Object.keys(AL)[index].split("-")[3]) - ALL[Index]) <= 3) {
-						if (!ALL.includes(Number(Object.keys(AL)[index].split("-")[3]))) ALL.push(Number(Object.keys(AL)[index].split("-")[3]));
-						A++;
-					}
-	if (A >= 2)
-		ALERT = true;
-	else if (A == 0)
-		ALL = [];
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
 		let amount = Number(Sdata.MaxPGA);
 		if (station[keys[index]] == undefined) continue;
 		const Alert = Date.now() - (AL[keys[index]] ?? 0) < 60000;
-		if (Alert && ALERT) amount = Sdata.PeriodPGA;
+		if (Alert && Json.Alert) amount = Sdata.PeriodPGA;
 		const Intensity = (NOW.getTime() - Sdata.TimeStamp > 15000) ? "NA" :
 			(!Alert) ? 0 :
 				(amount >= 800) ? 9 :
@@ -526,7 +501,7 @@ async function handler(response) {
 						pga       : amount,
 					});
 				AllT = Date.now();
-				if (ALERT) {
+				if (Json.Alert) {
 					if (setting["audio.realtime"])
 						if (amount > 8 && PGALimit == 0) {
 							PGALimit = 1;
@@ -733,7 +708,7 @@ async function handler(response) {
 			list.push(container);
 		}
 	}
-	if (ALERT) list = [];
+	if (Json.Alert) list = [];
 	document.getElementById("rt-list").replaceChildren(...list);
 }
 
