@@ -101,8 +101,6 @@ let station;
 function init() {
 	dump({ level: 0, message: "Initializing", origin: "Setting" });
 
-	document.title = Localization[setting?.["general.locale"]]?.Setting_Title || Localization["zh-TW"].Setting_Title;
-
 	if (is_setting_disabled) {
 		win.flashFrame(true);
 		document.querySelectorAll(".setting-button").forEach((node) => node.disabled = true);

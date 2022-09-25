@@ -6,8 +6,12 @@ const path = require("path");
 const pushReceiver = require("electron-fcm-push-receiver");
 
 TREM.Configuration = new Configuration(TREM);
+TREM.Localization = new (require("./TREM.Localization/Localization"))(TREM.Configuration.data["general.locale"], TREM.getLocale());
 TREM.Window = new Map();
 
+/**
+ * @type {Tray}
+ */
 let tray = null;
 let _hide = TREM.Configuration.data["windows.minimize"];
 let _devMode = false;
@@ -54,7 +58,7 @@ function createWindow() {
 		}, 5000);
 	});
 	MainWindow = TREM.Window.set("main", new BrowserWindow({
-		title          : "TREM",
+		title          : TREM.Localization.getString("Application_Title"),
 		width          : 1280,
 		minWidth       : 1280,
 		height         : 720,
@@ -101,7 +105,7 @@ function createWindow() {
 function createSettingWindow() {
 	if (SettingWindow instanceof BrowserWindow) return SettingWindow.focus();
 	SettingWindow = TREM.Window.set("setting", new BrowserWindow({
-		title          : "TREM",
+		title          : TREM.Localization.getString("Setting_Title"),
 		height         : 600,
 		width          : 1000,
 		minHeight      : 600,
@@ -135,48 +139,7 @@ else {
 		if (MainWindow != null) MainWindow.show();
 	});
 	TREM.whenReady().then(() => {
-		const iconPath = path.join(__dirname, "TREM.ico");
-		tray = new Tray(nativeImage.createFromPath(iconPath));
-		const contextMenu = Menu.buildFromTemplate([
-			{
-				label : "開啟 | Show",
-				type  : "normal",
-				click : () => {
-					MainWindow.show();
-				},
-			},
-			{
-				label : "隱藏 | Hide",
-				type  : "normal",
-				click : () => {
-					MainWindow.hide();
-				},
-			},
-			{
-				label : "重新啟動 | Restart",
-				type  : "normal",
-				click : () => {
-					restart();
-				},
-			},
-			{
-				label : "強制關閉 | Exit",
-				type  : "normal",
-				click : () => {
-					TREM.exit(0);
-				},
-			},
-		]);
-		tray.setToolTip("TREM | 臺灣即時地震監測");
-		tray.setContextMenu(contextMenu);
-		tray.setIgnoreDoubleClickEvents(true);
-		tray.on("click", (e) => {
-			if (MainWindow != null)
-				if (MainWindow.isVisible())
-					MainWindow.hide();
-				else
-					MainWindow.show();
-		});
+		trayIcon();
 		createWindow();
 	});
 }
@@ -233,6 +196,9 @@ ipcMain.on("config:value", (event, key, value) => {
 		}
 
 		case "general.locale": {
+			if (MainWindow) MainWindow.setTitle(TREM.Localization.getString("Application_Title", value));
+			if (SettingWindow) SettingWindow.setTitle(TREM.Localization.getString("Setting_Title", value));
+			trayIcon(value);
 			emitAllWindow("config:locale", value);
 			break;
 		}
@@ -302,4 +268,63 @@ function emitAllWindow(channel, ...args) {
 	for (const [key, win] of TREM.Window[Symbol.iterator]())
 		if (win instanceof BrowserWindow)
 			win.webContents.send(channel, ...args);
+}
+
+function trayIcon(locale) {
+	if (tray) {
+		tray.destroy();
+		tray = null;
+	}
+	const iconPath = path.join(__dirname, "TREM.ico");
+	tray = new Tray(nativeImage.createFromPath(iconPath));
+	tray.setIgnoreDoubleClickEvents(true);
+	tray.on("click", (e) => {
+		if (MainWindow != null)
+			if (MainWindow.isVisible())
+				MainWindow.hide();
+			else
+				MainWindow.show();
+	});
+	const contextMenu = Menu.buildFromTemplate([
+		{
+			label : `TREM v${TREM.getVersion()}`,
+			type  : "normal",
+			click : () => {
+				shell.openExternal("https://github.com/ExpTechTW/TREM");
+			},
+		},
+		{
+			type: "separator",
+		},
+		{
+			label : TREM.Localization.getString("Tray_Show", locale),
+			type  : "normal",
+			click : () => {
+				MainWindow.show();
+			},
+		},
+		{
+			label : TREM.Localization.getString("Tray_Hide", locale),
+			type  : "normal",
+			click : () => {
+				MainWindow.hide();
+			},
+		},
+		{
+			label : TREM.Localization.getString("Tray_Restart", locale),
+			type  : "normal",
+			click : () => {
+				restart();
+			},
+		},
+		{
+			label : TREM.Localization.getString("Tray_Exit", locale),
+			type  : "normal",
+			click : () => {
+				TREM.exit(0);
+			},
+		},
+	]);
+	tray.setToolTip(TREM.Localization.getString("Application_Title", locale));
+	tray.setContextMenu(contextMenu);
 }

@@ -111,7 +111,6 @@ win.on("leave-full-screen", () => {
 async function init() {
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
-	document.title = Localization[setting["general.locale"]].Application_Title || Localization["zh-TW"].Application_Title;
 
 	// Connect to server
 	await (async () => {
