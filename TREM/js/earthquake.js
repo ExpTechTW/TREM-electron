@@ -189,9 +189,9 @@ async function init() {
 					[10, 180],
 				],
 				preferCanvas : true,
-				zoomSnap     : 0.5,
+				zoomSnap     : 0.25,
 				zoomDelta    : 0.5,
-			}).setView([23, 121], 7.5);
+			}).setView([23, 121], 7.75);
 			map.doubleClickZoom.disable();
 			map.removeControl(map.zoomControl);
 			map.on("click", () => {
@@ -787,7 +787,7 @@ async function setUserLocationMarker(town) {
 			.addTo(map);
 	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
 	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
-	TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+	TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 }
 // #endregion
 
@@ -1596,7 +1596,7 @@ TREM.Earthquake.on("eew", async (data) => {
 
 	}
 	let speed = 500;
-	if (setting["shock.smoothing"]) speed = 15;
+	if (setting["shock.smoothing"]) speed = 100;
 	if (EarthquakeList[data.ID].Timer != undefined) clearInterval(EarthquakeList[data.ID].Timer);
 	if (EarthquakeList.ITimer != undefined) clearInterval(EarthquakeList.ITimer);
 
