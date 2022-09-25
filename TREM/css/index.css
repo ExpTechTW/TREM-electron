@@ -795,56 +795,65 @@ html:lang(zh-TW) .alert-timer:empty:after {
 .alert-box.one .alert-box-body,
 .rt-intensity-container.one,
 #alert-local.one,
-#rt-list div.one {
+#rt-list div.one,
+.intensity-item.one::before {
 	background-color: #666;
 }
 .alert-box.two .alert-box-body, .alert-box.eew-test .alert-notch,
 .rt-intensity-container.two,
 #alert-local.two,
-#rt-list div.two {
+#rt-list div.two,
+.intensity-item.two::before {
 	background-color: #0165CC;
 }
 .alert-box.three .alert-box-body,
 .rt-intensity-container.three,
 #alert-local.three,
-#rt-list div.three {
+#rt-list div.three,
+.intensity-item.three::before {
 	background-color: #01BB02;
 }
 .alert-box.four .alert-box-body,
 .rt-intensity-container.four,
 #alert-local.four,
-#rt-list div.four {
+#rt-list div.four,
+.intensity-item.four::before {
 	background-color: #FBDF00;
 	color: black;
 }
 .alert-box.five .alert-box-body,
 .rt-intensity-container.five,
 #alert-local.five,
-#rt-list div.five {
+#rt-list div.five,
+.intensity-item.five::before {
 	background-color: #FF8400;
 }
 .alert-box.five.strong .alert-box-body, .alert-box.eew-pred .alert-notch,
 .rt-intensity-container.five.strong,
 #alert-local.five.strong,
-#rt-list div.five.strong {
+#rt-list div.five.strong,
+.intensity-item.five.strong::before {
 	background-color: #E06300;
 }
 .alert-box.six .alert-box-body,
 .rt-intensity-container.six,
 #alert-local.six,
-#rt-list div.six {
+#rt-list div.six,
+.intensity-item.six::before {
 	background-color: #FF0000;
 }
 .alert-box.six.strong .alert-box-body, .alert-box.eew-alert .alert-notch,
 .rt-intensity-container.six.strong,
 #alert-local.six.strong,
-#rt-list div.six.strong {
+#rt-list div.six.strong,
+.intensity-item.six.strong::before {
 	background-color: #B50000;
 }
 .alert-box.seven .alert-box-body,
 .rt-intensity-container.seven,
 #alert-local.seven,
-#rt-list div.seven {
+#rt-list div.seven,
+.intensity-item.seven::before {
 	background-color: #68009E;
 }
 .alert-box.zero .alert-box-body #alert-intensity::before,
@@ -1195,4 +1204,69 @@ stop.pred-mid {
 
 stop.pred-stop {
 	stop-color: rgba(255, 165, 0, 0.25);
+}
+
+#map-legends {
+	position: fixed;
+	display: flex;
+	bottom: 0;
+	right: -150px;
+	opacity: 0;
+	margin: 8px;
+	padding: 8px;
+	border-radius: 8px;
+	background-color: rgb(var(--md-sys-color-surface));
+	color: rgb(var(--md-sys-color-on-surface));
+	user-select: none;
+	z-index: 1000;
+	transition: bottom .2s ease-in-out,
+				opacity .2s ease-in-out;
+}
+#map-legends.show {
+	right: 0px;
+	opacity: 1;
+}
+
+.map-legends-column {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	margin-right: 4px;
+}
+
+.map-legends-column:last-child {
+	margin-right: 0;
+}
+
+.intensity-bar > .intensity-item {
+	margin: 0;
+	padding: 0;
+	line-height: 20px;
+}
+
+.intensity-bar > .intensity-item::before {
+	content: "";
+    display: inline-block;
+	width: 10px;
+	height: 20px;
+	margin-right: 4px;
+	vertical-align: bottom;
+}
+
+.map-legends-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 4px;
+}
+
+.map-legends-item:last-child {
+	margin-bottom: 0;
+}
+
+.map-legends-item-icon {
+	display: flex;
+	justify-content: center;
+	height: 36px;
+	width: 48px;
 }
