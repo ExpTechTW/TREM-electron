@@ -1165,6 +1165,9 @@ function addReport(report, prepend = false) {
 				replay = new Date(report.originTime).getTime() - 25000;
 				replayT = NOW.getTime();
 			}
+			toggleNav(false);
+			document.getElementById("togglenav_btn").classList.add("hide");
+			document.getElementById("stopReplay").classList.remove("hide");
 		});
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
@@ -1335,9 +1338,6 @@ ipcMain.on("testEEW", () => {
 				dump({ level: 2, message: error, origin: "Verbose" });
 			});
 	}
-	toggleNav(false);
-	document.getElementById("togglenav_btn").classList.add("hide");
-	document.getElementById("stopReplay").classList.remove("hide");
 });
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
