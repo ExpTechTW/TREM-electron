@@ -190,6 +190,7 @@ async function init() {
 				],
 				preferCanvas : true,
 				zoomSnap     : 0.5,
+				zoomDelta    : 0.5,
 			}).setView([23, 121], 7.5);
 			map.doubleClickZoom.disable();
 			map.removeControl(map.zoomControl);
