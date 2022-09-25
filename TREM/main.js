@@ -156,9 +156,7 @@ else {
 				label : "重新啟動 | Restart",
 				type  : "normal",
 				click : () => {
-					TREM.relaunch();
-					if (SettingWindow != null) SettingWindow.close();
-					TREM.quit();
+					restart();
 				},
 			},
 			{
@@ -275,8 +273,7 @@ ipcMain.on("config:open", () => {
 
 function restart() {
 	TREM.relaunch();
-	if (SettingWindow != null) SettingWindow.close();
-	TREM.quit();
+	TREM.exit(0);
 }
 
 ipcMain.on("screenshotEEW", async (event, json) => {
