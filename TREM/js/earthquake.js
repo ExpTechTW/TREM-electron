@@ -698,7 +698,7 @@ async function handler(response) {
 		win.setAlwaysOnTop(false);
 		PGAtag = All[0].intensity;
 	}
-	const list = [];
+	let list = [];
 	let count = 0;
 	if (All.length <= 8)
 		for (let Index = 0; Index < All.length; Index++, count++) {
@@ -733,6 +733,7 @@ async function handler(response) {
 			list.push(container);
 		}
 	}
+	if (ALERT) list = [];
 	document.getElementById("rt-list").replaceChildren(...list);
 }
 
