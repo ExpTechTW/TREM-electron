@@ -1277,7 +1277,7 @@ ipcMain.once("start", () => {
 	}
 });
 
-const TEST = function() {
+const stopReplay = function() {
 	Cancel = true;
 	All = [];
 	PGACancel = true;
@@ -1295,6 +1295,9 @@ const TEST = function() {
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
+
+	document.getElementById("togglenav_btn").classList.remove("hide");
+	document.getElementById("stopReplay").classList.add("hide");
 };
 
 ipcMain.on("testEEW", () => {
@@ -1332,6 +1335,9 @@ ipcMain.on("testEEW", () => {
 				dump({ level: 2, message: error, origin: "Verbose" });
 			});
 	}
+	toggleNav(false);
+	document.getElementById("togglenav_btn").classList.add("hide");
+	document.getElementById("stopReplay").classList.remove("hide");
 });
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
@@ -2117,6 +2123,8 @@ function main(data, S1) {
 			$(roll).fadeIn(200);
 			clearInterval(ITimer);
 			ITimer = null;
+			document.getElementById("togglenav_btn").classList.remove("hide");
+			document.getElementById("stopReplay").classList.add("hide");
 		}
 	}
 }
