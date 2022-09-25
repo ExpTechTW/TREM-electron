@@ -411,11 +411,11 @@ async function handler(response) {
 	}
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
-		let amount = Number(Sdata.MaxPGA);
+		let amount = Number(Sdata.PGA);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = Date.now() - (AL[keys[index]] ?? 0) < 60000;
-		if (Alert && Json.Alert) amount = Sdata.PeriodPGA;
-		const Intensity = (NOW.getTime() - Sdata.TimeStamp > 15000) ? "NA" :
+		const Alert = NOW.getTime() - (Sdata.alert ?? 0) < 60000;
+		if (Alert && Json.Alert) amount = Sdata.MaxPGA;
+		const Intensity = (NOW.getTime() - Sdata.TS > 15000) ? "NA" :
 			(!Alert) ? 0 :
 				(amount >= 800) ? 9 :
 					(amount >= 440) ? 8 :
@@ -467,7 +467,7 @@ async function handler(response) {
 			.setTooltipContent(station_tooltip);
 
 		const Level = IntensityI(Intensity);
-		const now = new Date(Sdata.Time);
+		const now = new Date(Sdata.T);
 		if (keys.includes(setting["Real-time.station"])) {
 			if (document.getElementById("rt-station").classList.contains("hide"))
 				document.getElementById("rt-station").classList.remove("hide");
@@ -527,7 +527,7 @@ async function handler(response) {
 				MAXPGA.long = station[keys[index]].Long;
 				MAXPGA.loc = station[keys[index]].Loc;
 				MAXPGA.intensity = Intensity;
-				MAXPGA.ms = NOW.getTime() - Sdata.TimeStamp;
+				MAXPGA.ms = NOW.getTime() - Sdata.TS;
 			}
 		}
 	}
