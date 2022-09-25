@@ -11,7 +11,7 @@
   },
   "build": {
     "productName": "TREM",
-    "appId": "ExpTech.tw",
+    "appId": "tw.exptech.trem",
     "asar": false,
     "dmg": {
       "contents": [
