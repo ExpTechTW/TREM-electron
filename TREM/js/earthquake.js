@@ -1325,7 +1325,7 @@ const updateMapColors = async (event, value) => {
 		accent = value;
 		dark = setting["theme.dark"];
 	}
-	const colors = await getThemeColors(accent, value);
+	const colors = await getThemeColors(accent, dark);
 
 	map_geoJson.options.style = {
 		weight      : 0.8,
