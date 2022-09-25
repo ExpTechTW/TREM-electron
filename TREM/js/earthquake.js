@@ -199,7 +199,7 @@ async function init() {
 					ReportMarkID = null;
 					for (let index = 0; index < MarkList.length; index++)
 						map.removeLayer(MarkList[index]);
-					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.5 });
+					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 				}
 				mapLock = false;
 				TREM.Earthquake.emit("focus");
@@ -487,7 +487,8 @@ async function handler(response) {
 				iconSize : [size, size],
 			}));
 
-		Station[keys[index]].setZIndexOffset(2000 + amount)
+		Station[keys[index]]
+			.setZIndexOffset(2000 + amount)
 			.setTooltipContent(station_tooltip);
 
 		const Level = IntensityI(Intensity);
