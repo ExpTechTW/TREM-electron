@@ -14,6 +14,14 @@ class Localization {
 
 	static availableLocales = ["en", "ja", "ru", "zh-TW"];
 
+	matchLocale(value) {
+		value = Localization.availableLocales.includes(value) ? value
+			: Localization.availableLocales.includes(value.slice(0, 2)) ? value.slice(0, 2)
+				: value.startsWith("zh") ? "zh-TW"
+					: "en";
+		return value;
+	}
+
 	setLocale(locale) {
 		this.defaultLocale = locale;
 	}

@@ -176,7 +176,12 @@ ipcMain.on("restart", () => {
 });
 
 TREM.Configuration.on("update", (data) => {
-	emitAllWindow("setting", TREM.Configuration._data);
+	emitAllWindow("setting", data);
+});
+
+TREM.Configuration.on("detect-locale", (data) => {
+	const detectedLocale = TREM.Localization.matchLocale(TREM.getLocale());
+	ipcMain.emit("config:value", "general.locale", detectedLocale);
 });
 
 TREM.Configuration.on("error", (error) => {
