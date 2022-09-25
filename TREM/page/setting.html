@@ -50,7 +50,7 @@
                 </div>
                 <div class="setting-container">
                     <div class="nav">
-                        <div class="active md3-ripple" onclick="setList('EEW', this)" id="#EEW" role="button" tabindex="0">
+                        <div class="active md3-ripple" onclick="setList('EEW', this, event)" onkeydown="setList('EEW', this, event)" id="#EEW" role="button" tabindex="0">
                             <span lang="en">Earthquake Early Warning</span>
                             <span lang="ja">緊急地震速報</span>
                             <span lang="ru">Система раннего предупреждения землетрясений</span>
@@ -68,11 +68,17 @@
                             <span lang="ru">Звук</span>
                             <span lang="zh-TW">音效</span>
                         </div>
-                        <div class="md3-ripple" onclick="setList('Connection', this, event)" onkeydown="setList('Other', this, event)" id="#Other" role="button" tabindex="0">
+                        <div class="md3-ripple" onclick="setList('Connection', this, event)" onkeydown="setList('Connection', this, event)" id="#Other" role="button" tabindex="0">
                             <span lang="en">Connection</span>
                             <span lang="ja">接続</span>
                             <span lang="ru">Соединения</span>
                             <span lang="zh-TW">連接</span>
+                        </div>
+                        <div class="md3-ripple" onclick="setList('Windows', this, event)" onkeydown="setList('Windows', this, event)" id="#Windows" role="button" tabindex="0">
+                            <span lang="en">Windows</span>
+                            <span lang="ja">Windows 設定</span>
+                            <span lang="ru">Настройки Windows</span>
+                            <span lang="zh-TW">Windows 設定</span>
                         </div>
                         <div class="md3-ripple" onclick="setList('Other', this, event)" onkeydown="setList('Other', this, event)" id="#Other" role="button" tabindex="0">
                             <span lang="en">Miscellaneous</span>
@@ -1105,6 +1111,87 @@
                                         <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
                                         <span class="filled-tonal-button-label">重新啟動</span>
                                     </button>
+                                </div>
+                            </div>
+                            <div class="list-container" id="Windows">
+                                <div class="control-title">
+                                    <div>
+                                        <span lang="en">Windows Settings</span>
+                                        <span lang="ja">Windows 設定</span>
+                                        <span lang="ru">Настройки Windows</span>
+                                        <span lang="zh-TW">Windows 設定</span>
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">Start with Windows</span>
+                                                <span lang="ja">表示言語</span>
+                                                <span lang="ru">Start with Windows</span>
+                                                <span lang="zh-TW">在 Windows 開機時啟動</span>
+                                                <span class="option-label-id">windows.startup</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">Let TREM starts on computer startup.</span>
+                                                <span lang="ja">パソコン起動時に TREM を起動させます。</span>
+                                                <span lang="ru">Let TREM starts on computer startup.</span>
+                                                <span lang="zh-TW">讓 TREM 跟著 Windows 一起啟動。</span>
+                                            </div>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="windows.startup" onclick="CheckSave('windows.startup')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">Start Minimized</span>
+                                                <span lang="ja">最小化した状態で起動する</span>
+                                                <span lang="ru">Start Minimized</span>
+                                                <span lang="zh-TW">以最小化啟動</span>
+                                                <span class="option-label-id">windows.minimize</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">Let TREM starts in the background.</span>
+                                                <span lang="ja">TREM をバックグラウンドで起動させます。</span>
+                                                <span lang="ru">Let TREM starts in the background.</span>
+                                                <span lang="zh-TW">讓 TREM 在背景執行。</span>
+                                            </div>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="windows.minimize" onclick="CheckSave('windows.minimize')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">Minimize to Tray</span>
+                                                <span lang="ja">トレイに最小化</span>
+                                                <span lang="ru">Minimize to Tray</span>
+                                                <span lang="zh-TW">最小化到系統列</span>
+                                                <span class="option-label-id">windows.tray</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">Let TREM minimize to your system tray when you close the app.</span>
+                                                <span lang="ja">「X」を押すと、アプリを閉じたときに TREM をシステムトレイで休止します。</span>
+                                                <span lang="ru">Let TREM minimize to your system tray when you close the app.</span>
+                                                <span lang="zh-TW">按下「X」關閉應用程式後，會讓 TREM 回到背景，留在系統通知區。</span>
+                                            </div>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="windows.tray" onclick="CheckSave('windows.tray')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             <div class="list-container" id="About">

@@ -5,8 +5,11 @@ const fs = require("fs");
 const path = require("path");
 const pushReceiver = require("electron-fcm-push-receiver");
 
+TREM.Configuration = new Configuration(TREM);
+TREM.Window = new Map();
+
 let tray = null;
-let _hide = false;
+let _hide = TREM.Configuration.data["windows.minimize"];
 let _devMode = false;
 
 if (process.argv.includes("--start")) _hide = true;
@@ -24,8 +27,6 @@ if (fs.existsSync(__dirname.replace("trem\\resources\\app", "trem_data")) && fs.
 	if (config["compatibility.hwaccel"] != undefined && !config["compatibility.hwaccel"]) TREM.disableHardwareAcceleration();
 }
 
-TREM.Configuration = new Configuration(TREM);
-TREM.Window = new Map();
 
 /**
  * @type {BrowserWindow}
@@ -37,9 +38,12 @@ let MainWindow = TREM.Window.get("main");
 let SettingWindow = TREM.Window.get("setting");
 
 TREM.setLoginItemSettings({
-	openAtLogin : true,
-	args        : ["--start"],
+	openAtLogin : TREM.Configuration.data["windows.startup"],
+	name        : "TREM",
+	args        : TREM.Configuration.data["windows.minimize"] ? ["--start"] : [],
 });
+
+TREM.commandLine.appendSwitch("disable-frame-rate-limit");
 
 function createWindow() {
 	fetch("https://exptech.com.tw/get?Function=EEW").catch(() => {
@@ -84,14 +88,13 @@ function createWindow() {
 		MainWindow.webContents.invalidate();
 	});
 	MainWindow.on("close", (event) => {
-		if (TREM.quitting)
-			MainWindow = null;
-		else {
+		if (TREM.Configuration.data["windows.tray"]) {
 			event.preventDefault();
 			MainWindow.hide();
 			if (SettingWindow)
 				SettingWindow.close();
-		}
+		} else
+			TREM.quit();
 	});
 }
 
@@ -194,12 +197,8 @@ TREM.on("ready", () => {
 	});
 });
 
-TREM.on("window-all-closed", () => {
-	if (process.platform !== "darwin") TREM.quit();
-});
-
 TREM.on("before-quit", () => {
-	TREM.quitting = true;if (tray)
+	if (tray)
 		tray.destroy();
 });
 
@@ -247,6 +246,24 @@ ipcMain.on("config:value", (event, key, value) => {
 
 		case "location.town": {
 			emitAllWindow("config:location", value);
+			break;
+		}
+
+		case "windows.startup": {
+			TREM.setLoginItemSettings({
+				openAtLogin : value,
+				name        : "TREM",
+				args        : TREM.Configuration.data["windows.minimize"] ? ["--start"] : [],
+			});
+			break;
+		}
+
+		case "windows.minimize": {
+			TREM.setLoginItemSettings({
+				openAtLogin : TREM.Configuration.data["windows.startup"],
+				name        : "TREM",
+				args        : value ? ["--start"] : [],
+			});
 			break;
 		}
 

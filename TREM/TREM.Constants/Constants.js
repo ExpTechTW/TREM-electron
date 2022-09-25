@@ -148,6 +148,18 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"windows.startup": {
+			type  : "toggle",
+			value : true,
+		},
+		"windows.minimize": {
+			type  : "toggle",
+			value : false,
+		},
+		"windows.tray": {
+			type  : "toggle",
+			value : true,
+		},
 	},
 });
 

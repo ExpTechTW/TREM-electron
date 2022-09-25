@@ -23,13 +23,19 @@ class Configuration extends EventEmitter {
 			for (let i = 0,
 				k = Object.keys(this._data),
 				dk = Object.keys(Constants.Default_Configurations),
-				n = dk.length; i < n; i++)
-				if (dk.includes(k[i])) {
-					const dki = dk.indexOf(k[i]);
-					if (typeof this._data[k[i]] != typeof Constants.Default_Configurations[dk[dki]].value)
-						this._data[k[i]] = Constants.Default_Configurations[dk[dki]].value;
-				} else
+				n = k.length; i < n; i++)
+				if (!dk.includes(k[i]))
 					delete this._data[k[i]];
+
+			for (let i = 0,
+				k = Object.keys(this._data),
+				dk = Object.keys(Constants.Default_Configurations),
+				n = dk.length; i < n; i++)
+				if (k.includes(dk[i])) {
+					const ki = k.indexOf(dk[i]);
+					if (typeof this._data[k[ki]] != typeof Constants.Default_Configurations[dk[i]].value)
+						this._data[k[ki]] = Constants.Default_Configurations[dk[i]].value;
+				} else this._data[dk[i]] = Constants.Default_Configurations[dk[i]].value;
 
 			this.save();
 
@@ -38,6 +44,9 @@ class Configuration extends EventEmitter {
 				set(target, key, value) {
 					target[key] = value;
 					thisClass.save();
+				},
+				get(target, key) {
+					return target[key];
 				},
 			});
 			this._watcher = chokidar.watch(this._path).on("change", () => {
