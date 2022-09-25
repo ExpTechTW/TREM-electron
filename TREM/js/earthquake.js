@@ -415,7 +415,7 @@ async function handler(response) {
 		if (station[keys[index]] == undefined) continue;
 		const Alert = NOW.getTime() - (Sdata.alert ?? 0) < 60000;
 		if (Alert && Json.Alert) amount = Sdata.MaxPGA;
-		const Intensity = (NOW.getTime() - Sdata.TS > 15000) ? "NA" :
+		const Intensity = (NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
 			(!Alert) ? 0 :
 				(amount >= 800) ? 9 :
 					(amount >= 440) ? 8 :
@@ -527,7 +527,7 @@ async function handler(response) {
 				MAXPGA.long = station[keys[index]].Long;
 				MAXPGA.loc = station[keys[index]].Loc;
 				MAXPGA.intensity = Intensity;
-				MAXPGA.ms = NOW.getTime() - Sdata.TS;
+				MAXPGA.ms = NOW.getTime() - Sdata.TS * 1000;
 			}
 		}
 	}
