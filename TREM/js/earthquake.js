@@ -23,7 +23,7 @@ let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let All = [];
 let AllT = 0;
-const arrive = [];
+let arrive = [];
 let audioList = [];
 let audioList1 = [];
 let locationEEW = {};
@@ -43,7 +43,7 @@ let RMT = 1;
 let PGALimit = 0;
 let PGAtag = -1;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
-const Info = { Notify: [], Warn: [], Focus: [] };
+let Info = { Notify: [], Warn: [], Focus: [] };
 const Focus = [];
 let PGAmark = false;
 let INFO = [];
@@ -538,7 +538,7 @@ async function handler(response) {
 				All[index + 1] = All[index];
 				All[index] = Temp;
 			}
-	if (PAlert.data != undefined && replay == 0)
+	if (PAlert.data != undefined && replay == 0) {
 		if (PAlert.timestamp != PAlertT) {
 			PAlertT = PAlert.timestamp;
 			const PLoc = {};
@@ -609,6 +609,9 @@ async function handler(response) {
 				}, 1250);
 			}
 		}
+		if (NOW.getTime() - PAlert.timestamp > 630000)
+			PAlert = {};
+	}
 	for (let index = 0; index < Object.keys(PGA).length; index++) {
 		if (RMT == 0) map.removeLayer(PGA[Object.keys(PGA)[index]]);
 		delete PGA[Object.keys(PGA)[index]];
@@ -1282,7 +1285,7 @@ ipcMain.once("start", () => {
 
 const stopReplay = function() {
 	if (Object.keys(EarthquakeList).length != 0) Cancel = true;
-	if (Object.keys(pga).length != 0)PGACancel = true;
+	if (Object.keys(pga).length != 0) PGACancel = true;
 	if (replay != 0) {
 		replay = 0;
 		ReportGET();
@@ -1446,7 +1449,6 @@ TREM.Earthquake.on("eew", async (data) => {
 	console.debug(data);
 
 	// handler
-	Info.ID = data.ID;
 	if (EarthquakeList[data.ID] == undefined) EarthquakeList[data.ID] = {};
 	EarthquakeList[data.ID].Time = data.Time;
 	EarthquakeList[data.ID].ID = data.ID;
@@ -1540,57 +1542,53 @@ TREM.Earthquake.on("eew", async (data) => {
 
 	let _time = -1;
 	let stamp = 0;
-	if (data.ID + data.Version != Info.Alert) {
-		if (EEW[data.ID] != undefined)
-			if (setting["audio.eew"] && Alert) audioPlay("./audio/Update.wav");
-		EEW[data.ID] = {
-			lon  : Number(data.EastLongitude),
-			lat  : Number(data.NorthLatitude),
-			time : 0,
-			Time : data.Time,
-			id   : data.ID,
-			km   : 0,
-		};
-		Info.Alert = data.ID + data.Version;
-		value = Math.round((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
-		if (Second == -1 || value < Second)
-			if (setting["audio.eew"] && Alert) {
-				if (t != null) clearInterval(t);
-				t = setInterval(() => {
-					value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
-					Second = value;
-					if (stamp != value && !audioLock1) {
-						stamp = value;
-						if (_time >= 0) {
-							audioPlay("./audio/1/ding.wav");
-							_time++;
-							if (_time >= 10)
-								clearInterval(t);
-						} else if (value < 100) {
-							if (arrive.includes(data.ID)) {
-								clearInterval(t);
-								return;
-							}
-							if (value > 10)
-								if (value.toString().substring(1, 2) == "0") {
-									audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
-									audioPlay1("./audio/1/x0.wav");
-								} else
-									audioPlay("./audio/1/ding.wav");
+	if (EEW[data.ID] != undefined)
+		if (setting["audio.eew"] && Alert) audioPlay("./audio/Update.wav");
+	EEW[data.ID] = {
+		lon  : Number(data.EastLongitude),
+		lat  : Number(data.NorthLatitude),
+		time : 0,
+		Time : data.Time,
+		id   : data.ID,
+		km   : 0,
+	};
+	value = Math.round((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
+	if (Second == -1 || value < Second)
+		if (setting["audio.eew"] && Alert) {
+			if (t != null) clearInterval(t);
+			t = setInterval(() => {
+				value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
+				Second = value;
+				if (stamp != value && !audioLock1) {
+					stamp = value;
+					if (_time >= 0) {
+						audioPlay("./audio/1/ding.wav");
+						_time++;
+						if (_time >= 10)
+							clearInterval(t);
+					} else if (value < 100) {
+						if (arrive.includes(data.ID)) {
+							clearInterval(t);
+							return;
+						}
+						if (value > 10)
+							if (value.toString().substring(1, 2) == "0") {
+								audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
+								audioPlay1("./audio/1/x0.wav");
+							} else
+								audioPlay("./audio/1/ding.wav");
 
-							else if (value > 0)
-								audioPlay1(`./audio/1/${value.toString()}.wav`);
-							else {
-								arrive.push(data.ID);
-								audioPlay1("./audio/1/arrive.wav");
-								_time = 0;
-							}
+						else if (value > 0)
+							audioPlay1(`./audio/1/${value.toString()}.wav`);
+						else {
+							arrive.push(data.ID);
+							audioPlay1("./audio/1/arrive.wav");
+							_time = 0;
 						}
 					}
-				}, 50);
-			}
-
-	}
+				}
+			}, 50);
+		}
 	if (ReportMarkID != null) {
 		ReportMarkID = null;
 		for (let index = 0; index < MarkList.length; index++)
@@ -2103,6 +2101,7 @@ function main(data, S1) {
 			GeoJson = null;
 			clearInterval(t);
 			audioList = [];
+			arrive = [];
 			audioList1 = [];
 			Second = -1;
 			EEWAlert = false;
@@ -2115,6 +2114,7 @@ function main(data, S1) {
 			}
 			INFO = [];
 			All = [];
+			Info = { Notify: [], Warn: [], Focus: [] };
 			$("#alert-box").removeClass("show");
 			$("#map-legends").removeClass("show");
 			// hide minimap
@@ -2123,8 +2123,6 @@ function main(data, S1) {
 			$(roll).fadeIn(200);
 			clearInterval(ITimer);
 			ITimer = null;
-			document.getElementById("togglenav_btn").classList.remove("hide");
-			document.getElementById("stopReplay").classList.add("hide");
 		}
 	}
 }
