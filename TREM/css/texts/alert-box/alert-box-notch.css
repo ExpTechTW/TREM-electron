@@ -1,0 +1,43 @@
+html:lang(en) body {
+    --alert-notch-alert-content: "EEW";
+    --alert-notch-pred-content: "Forecast";
+    --alert-notch-test-content: "Test";
+    --alert-notch-history-content: "History";
+    --alert-notch-cancel-content: "Cancelled";
+
+    --alert-notch-number-before: "Report #";
+    --alert-notch-number-after: "";
+}
+
+html:lang(ja) body {
+    --alert-notch-alert-content: "緊急地震速報";
+    --alert-notch-pred-content: "地震予報";
+    --alert-notch-test-content: "テスト";
+    --alert-notch-history-content: "歴史";
+    --alert-notch-cancel-content: "キャンセル";
+
+    --alert-notch-number-before: "第";
+    --alert-notch-number-after: "報";
+}
+
+html:lang(ru) body {
+    --alert-notch-alert-content: "Предупреждение";
+    --alert-notch-pred-content: "Прогноз";
+    --alert-notch-test-content: "Тест";
+    --alert-notch-history-content: "Воспроизведение истории";
+    --alert-notch-cancel-content: "Отмена";
+
+    --alert-notch-number-before: "Отчет №";
+    --alert-notch-number-after: "";
+}
+
+html:lang(zh-TW) body {
+    --alert-notch-alert-content: "強震即時警報";
+    --alert-notch-pred-content: "預報";
+    --alert-notch-test-content: "測試報";
+    --alert-notch-history-content: "歷史重播";
+    --alert-notch-cancel-content: "已取消";
+
+    --alert-notch-number-before: "第";
+    --alert-notch-number-after: "報";
+}
