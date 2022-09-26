@@ -1140,7 +1140,7 @@ stop.alert-mid {
 }
 
 stop.alert-stop {
-	stop-color: rgba(255, 0, 0, 0.25);
+	stop-color: rgba(255, 0, 0, 0.4);
 }
 
 stop.pred-start {
@@ -1152,7 +1152,7 @@ stop.pred-mid {
 }
 
 stop.pred-stop {
-	stop-color: rgba(255, 165, 0, 0.25);
+	stop-color: rgba(255, 165, 0, 0.4);
 }
 
 #map-legends {
