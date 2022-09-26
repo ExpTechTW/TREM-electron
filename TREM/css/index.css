@@ -286,7 +286,7 @@ kbd {
 	grid-template-columns: 100px auto;
 }
 
-#rolllist > div > .report-container > .report-intenisty-container {
+#rolllist > div > .report-container > .report-intensity-container {
 	display: grid;
 	grid-template-columns: auto;
 	grid-template-rows: auto auto;
@@ -298,8 +298,8 @@ kbd {
 #rolllist
 > div
 > .report-container
-> .report-intenisty-container
-> .report-intenisty-title-container {
+> .report-intensity-container
+> .report-intensity-title-container {
 	display: none;
 	line-height: 20px;
 	font-size: 16px;
@@ -307,15 +307,15 @@ kbd {
 #rolllist
 > div:first-child
 > .report-container
-> .report-intenisty-container
-> .report-intenisty-title-container {
+> .report-intensity-container
+> .report-intensity-title-container {
 	display: revert;
 }
 #rolllist
 > div
 > .report-container
-> .report-intenisty-container
-> .report-intenisty-value {
+> .report-intensity-container
+> .report-intensity-value {
 	line-height: 48px;
 	font-size: 32px;
 	font-weight: 600;
@@ -323,8 +323,8 @@ kbd {
 #rolllist
 > div:first-child
 > .report-container
-> .report-intenisty-container
-> .report-intenisty-value {
+> .report-intensity-container
+> .report-intensity-value {
 	line-height: 48px;
 	font-size: 52px;
 	font-weight: 600;

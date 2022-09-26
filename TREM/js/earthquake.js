@@ -1044,37 +1044,37 @@ function addReport(report, prepend = false) {
 		const report_container = document.createElement("div");
 		report_container.className = "report-container locating";
 
-		const report_intenisty_container = document.createElement("div");
-		report_intenisty_container.className = "report-intenisty-container";
+		const report_intensity_container = document.createElement("div");
+		report_intensity_container.className = "report-intensity-container";
 
-		const report_intenisty_title_container = document.createElement("div");
-		report_intenisty_title_container.className = "report-intenisty-title-container";
+		const report_intensity_title_container = document.createElement("div");
+		report_intensity_title_container.className = "report-intensity-title-container";
 
-		const report_intenisty_title_en = document.createElement("span");
-		report_intenisty_title_en.lang = "en";
-		report_intenisty_title_en.className = "report-intenisty-title";
-		report_intenisty_title_en.innerText = "Max Int.";
-		const report_intenisty_title_ja = document.createElement("span");
-		report_intenisty_title_ja.lang = "ja";
-		report_intenisty_title_ja.className = "report-intenisty-title";
-		report_intenisty_title_ja.innerText = "最大震度";
-		const report_intenisty_title_ru = document.createElement("span");
-		report_intenisty_title_ru.lang = "ru";
-		report_intenisty_title_ru.className = "report-intenisty-title";
-		report_intenisty_title_ru.innerText = "Макс интенси";
-		report_intenisty_title_ru.style = "font-size: 14px;line-height: 14px";
-		const report_intenisty_title_zh_tw = document.createElement("span");
-		report_intenisty_title_zh_tw.lang = "zh-TW";
-		report_intenisty_title_zh_tw.className = "report-intenisty-title";
-		report_intenisty_title_zh_tw.innerText = "最大震度";
+		const report_intensity_title_en = document.createElement("span");
+		report_intensity_title_en.lang = "en";
+		report_intensity_title_en.className = "report-intensity-title";
+		report_intensity_title_en.innerText = "Max Int.";
+		const report_intensity_title_ja = document.createElement("span");
+		report_intensity_title_ja.lang = "ja";
+		report_intensity_title_ja.className = "report-intensity-title";
+		report_intensity_title_ja.innerText = "最大震度";
+		const report_intensity_title_ru = document.createElement("span");
+		report_intensity_title_ru.lang = "ru";
+		report_intensity_title_ru.className = "report-intensity-title";
+		report_intensity_title_ru.innerText = "Макс интенси";
+		report_intensity_title_ru.style = "font-size: 14px;line-height: 14px";
+		const report_intensity_title_zh_tw = document.createElement("span");
+		report_intensity_title_zh_tw.lang = "zh-TW";
+		report_intensity_title_zh_tw.className = "report-intensity-title";
+		report_intensity_title_zh_tw.innerText = "最大震度";
 
-		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
-		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
+		report_intensity_title_container.append(report_intensity_title_en, report_intensity_title_ja, report_intensity_title_ru, report_intensity_title_zh_tw);
+		report_intensity_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
 
-		const report_intenisty_value = document.createElement("span");
-		report_intenisty_value.className = "report-intenisty-value";
-		report_intenisty_value.innerText = IntensityI(report.Max);
-		report_intenisty_container.append(report_intenisty_title_container, report_intenisty_value);
+		const report_intensity_value = document.createElement("span");
+		report_intensity_value.className = "report-intensity-value";
+		report_intensity_value.innerText = IntensityI(report.Max);
+		report_intensity_container.append(report_intensity_title_container, report_intensity_value);
 
 
 		const report_detail_container = document.createElement("div");
@@ -1088,7 +1088,7 @@ function addReport(report, prepend = false) {
 		report_time.innerText = report.Time.replace(/-/g, "/");
 		report_detail_container.append(report_location, report_time);
 
-		report_container.append(report_intenisty_container, report_detail_container);
+		report_container.append(report_intensity_container, report_detail_container);
 		Div.prepend(report_container);
 		Div.style.backgroundColor = `${color(report.Max)}cc`;
 		ripple(Div);
@@ -1098,37 +1098,37 @@ function addReport(report, prepend = false) {
 		const report_container = document.createElement("div");
 		report_container.className = "report-container";
 
-		const report_intenisty_container = document.createElement("div");
-		report_intenisty_container.className = "report-intenisty-container";
+		const report_intensity_container = document.createElement("div");
+		report_intensity_container.className = "report-intensity-container";
 
-		const report_intenisty_title_container = document.createElement("div");
-		report_intenisty_title_container.className = "report-intenisty-title-container";
+		const report_intensity_title_container = document.createElement("div");
+		report_intensity_title_container.className = "report-intensity-title-container";
 
-		const report_intenisty_title_en = document.createElement("span");
-		report_intenisty_title_en.lang = "en";
-		report_intenisty_title_en.className = "report-intenisty-title";
-		report_intenisty_title_en.innerText = "Max Int.";
-		const report_intenisty_title_ja = document.createElement("span");
-		report_intenisty_title_ja.lang = "ja";
-		report_intenisty_title_ja.className = "report-intenisty-title";
-		report_intenisty_title_ja.innerText = "最大震度";
-		const report_intenisty_title_ru = document.createElement("span");
-		report_intenisty_title_ru.lang = "ru";
-		report_intenisty_title_ru.className = "report-intenisty-title";
-		report_intenisty_title_ru.innerText = "Макс интенси";
-		report_intenisty_title_ru.style = "font-size: 14px;line-height: 14px";
-		const report_intenisty_title_zh_tw = document.createElement("span");
-		report_intenisty_title_zh_tw.lang = "zh-TW";
-		report_intenisty_title_zh_tw.className = "report-intenisty-title";
-		report_intenisty_title_zh_tw.innerText = "最大震度";
+		const report_intensity_title_en = document.createElement("span");
+		report_intensity_title_en.lang = "en";
+		report_intensity_title_en.className = "report-intensity-title";
+		report_intensity_title_en.innerText = "Max Int.";
+		const report_intensity_title_ja = document.createElement("span");
+		report_intensity_title_ja.lang = "ja";
+		report_intensity_title_ja.className = "report-intensity-title";
+		report_intensity_title_ja.innerText = "最大震度";
+		const report_intensity_title_ru = document.createElement("span");
+		report_intensity_title_ru.lang = "ru";
+		report_intensity_title_ru.className = "report-intensity-title";
+		report_intensity_title_ru.innerText = "Макс интенси";
+		report_intensity_title_ru.style = "font-size: 14px;line-height: 14px";
+		const report_intensity_title_zh_tw = document.createElement("span");
+		report_intensity_title_zh_tw.lang = "zh-TW";
+		report_intensity_title_zh_tw.className = "report-intensity-title";
+		report_intensity_title_zh_tw.innerText = "最大震度";
 
-		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
-		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
+		report_intensity_title_container.append(report_intensity_title_en, report_intensity_title_ja, report_intensity_title_ru, report_intensity_title_zh_tw);
+		report_intensity_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
 
-		const report_intenisty_value = document.createElement("span");
-		report_intenisty_value.className = "report-intenisty-value";
-		report_intenisty_value.innerText = Level;
-		report_intenisty_container.append(report_intenisty_title_container, report_intenisty_value);
+		const report_intensity_value = document.createElement("span");
+		report_intensity_value.className = "report-intensity-value";
+		report_intensity_value.innerText = Level;
+		report_intensity_container.append(report_intensity_title_container, report_intensity_value);
 
 
 		const report_detail_container = document.createElement("div");
@@ -1148,7 +1148,7 @@ function addReport(report, prepend = false) {
 		report_depth.innerText = report.depth;
 		report_detail_container.append(report_location, report_time, report_magnitude, report_depth);
 
-		report_container.append(report_intenisty_container, report_detail_container);
+		report_container.append(report_intensity_container, report_detail_container);
 		ripple(Div);
 		Div.append(report_container);
 		Div.style.backgroundColor = `${color(report.data[0].areaIntensity)}cc`;
