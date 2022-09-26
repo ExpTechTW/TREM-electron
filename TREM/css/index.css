@@ -86,7 +86,7 @@ kbd {
 }
 
 #togglenav_btn.hide, #stopReplay.hide {
-display: none;
+	bottom: -100px;
 }
 
 #view {
