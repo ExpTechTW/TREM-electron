@@ -85,7 +85,7 @@ const showDialog =
 		const Accept = document.createElement("button");
 		Accept.classList.add("flat-button");
 		Accept.id = "dialog-Accept";
-		Accept.textContent = { en: "Confirm", ja: "確認", "zh-TW": "確定" }[setting["general.locale"]];
+		Accept.textContent = { en: "Confirm", ja: "確認", kr: "적용", "zh-TW": "確定" }[setting["general.locale"]];
 		Accept.onclick = (...args) => {
 			closeDialog(...args);
 			callback();
@@ -95,7 +95,7 @@ const showDialog =
 		const Cancel = document.createElement("button");
 		Cancel.classList.add("flat-button");
 		Cancel.id = "dialog-Cancel";
-		Cancel.textContent = { en: "Cancel", ja: "キャンセル", "zh-TW": "取消" }[setting["general.locale"]];
+		Cancel.textContent = { en: "Cancel", ja: "キャンセル", kr: "취소", "zh-TW": "取消" }[setting["general.locale"]];
 		Cancel.onclick = closeDialog;
 		buttons.appendChild(Cancel);
 	} else {

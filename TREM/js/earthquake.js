@@ -1043,7 +1043,7 @@ function addReport(report, prepend = false) {
 	if (report.Time != undefined && report.report == undefined) {
 		const report_container = document.createElement("div");
 		report_container.className = "report-container locating";
-
+		//TODO: "intenisty" -> "intensity"
 		const report_intenisty_container = document.createElement("div");
 		report_intenisty_container.className = "report-intenisty-container";
 
@@ -1058,6 +1058,10 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_ja.lang = "ja";
 		report_intenisty_title_ja.className = "report-intenisty-title";
 		report_intenisty_title_ja.innerText = "最大震度";
+		const report_intenisty_title_kr = document.createElement("span");
+		report_intenisty_title_kr.lang = "kr";
+		report_intenisty_title_kr.className = "report-intenisty-title";
+		report_intenisty_title_kr.innerText = "최대진도";
 		const report_intenisty_title_ru = document.createElement("span");
 		report_intenisty_title_ru.lang = "ru";
 		report_intenisty_title_ru.className = "report-intenisty-title";
@@ -1068,7 +1072,7 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_zh_tw.className = "report-intenisty-title";
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
-		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
+		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_kr, report_intenisty_title_ru, report_intenisty_title_zh_tw);
 		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
 
 		const report_intenisty_value = document.createElement("span");
@@ -1112,6 +1116,10 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_ja.lang = "ja";
 		report_intenisty_title_ja.className = "report-intenisty-title";
 		report_intenisty_title_ja.innerText = "最大震度";
+		const report_intenisty_title_kr = document.createElement("span");
+		report_intenisty_title_kr.lang = "kr";
+		report_intenisty_title_kr.className = "report-intenisty-title";
+		report_intenisty_title_kr.innerText = "최대진도";
 		const report_intenisty_title_ru = document.createElement("span");
 		report_intenisty_title_ru.lang = "ru";
 		report_intenisty_title_ru.className = "report-intenisty-title";
@@ -1122,7 +1130,7 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_zh_tw.className = "report-intenisty-title";
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
-		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_ru, report_intenisty_title_zh_tw);
+		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_kr, report_intenisty_title_ru, report_intenisty_title_zh_tw);
 		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
 
 		const report_intenisty_value = document.createElement("span");
@@ -1726,9 +1734,9 @@ TREM.Earthquake.on("eew", async (data) => {
 			else if (data.Function == "NIED_earthquake")
 				msg = msg.replace("%Provider%", "防災科学技術研究所");
 			else if (data.Function == "JMA_earthquake")
-				msg = msg.replace("%Provider%", "気象庁");
+				msg = msg.replace("%Provider%", "気象庁(JMA)");
 			else if (data.Function == "KMA_earthquake")
-				msg = msg.replace("%Provider%", "기상청氣象廳");
+				msg = msg.replace("%Provider%", "기상청(KMA)");
 
 			msg = JSON.parse(msg);
 			msg.username = "TREM | 臺灣即時地震監測";
