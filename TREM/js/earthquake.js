@@ -23,7 +23,7 @@ let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let All = [];
 let AllT = 0;
-let arrive = [];
+let arrive = "";
 let audioList = [];
 let audioList1 = [];
 let locationEEW = {};
@@ -1554,41 +1554,39 @@ TREM.Earthquake.on("eew", async (data) => {
 	};
 	value = Math.round((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
 	if (Second == -1 || value < Second)
-		if (setting["audio.eew"] && Alert) {
-			if (t != null) clearInterval(t);
-			t = setInterval(() => {
-				value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
-				Second = value;
-				if (stamp != value && !audioLock1) {
-					stamp = value;
-					if (_time >= 0) {
-						audioPlay("./audio/1/ding.wav");
-						_time++;
-						if (_time >= 10)
-							clearInterval(t);
-					} else if (value < 100) {
-						if (arrive.includes(data.ID)) {
-							clearInterval(t);
-							return;
-						}
-						if (value > 10)
-							if (value.toString().substring(1, 2) == "0") {
-								audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
-								audioPlay1("./audio/1/x0.wav");
-							} else
-								audioPlay("./audio/1/ding.wav");
+		if (setting["audio.eew"] && Alert)
+			if (arrive == data.ID || arrive == "") {
+				arrive = data.ID;
+				if (t != null) clearInterval(t);
+				t = setInterval(() => {
+					value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
+					Second = value;
+					if (stamp != value && !audioLock1) {
+						stamp = value;
+						if (_time >= 0) {
+							audioPlay("./audio/1/ding.wav");
+							_time++;
+							if (_time >= 10)
+								clearInterval(t);
+						} else if (value < 100)
+							if (value > 10)
+								if (value.toString().substring(1, 2) == "0") {
+									audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
+									audioPlay1("./audio/1/x0.wav");
+								} else
+									audioPlay("./audio/1/ding.wav");
 
-						else if (value > 0)
-							audioPlay1(`./audio/1/${value.toString()}.wav`);
-						else {
-							arrive.push(data.ID);
-							audioPlay1("./audio/1/arrive.wav");
-							_time = 0;
-						}
+							else if (value > 0)
+								audioPlay1(`./audio/1/${value.toString()}.wav`);
+							else {
+								arrive = data.ID;
+								audioPlay1("./audio/1/arrive.wav");
+								_time = 0;
+							}
 					}
-				}
-			}, 50);
-		}
+				}, 50);
+			}
+
 	if (ReportMarkID != null) {
 		ReportMarkID = null;
 		for (let index = 0; index < MarkList.length; index++)
@@ -2101,7 +2099,7 @@ function main(data, S1) {
 			GeoJson = null;
 			clearInterval(t);
 			audioList = [];
-			arrive = [];
+			arrive = "";
 			audioList1 = [];
 			Second = -1;
 			EEWAlert = false;
