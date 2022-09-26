@@ -1,0 +1,22 @@
+{
+    "Application_Connecting": "서버와 연결중...",
+    "Application_Loading": "데이터 로딩중...",
+    "Application_Title": "TREM 대만 실시간 지진 모니터링",
+    "Application_Welcome": "환영합니다",
+    "Audio_Test": "소리 테스트",
+    "Audio_TestStop": "정지",
+    "Setting_Dialog_Error_Title": "해석 오류",
+    "Setting_Dialog_Error_Description": "설정 파일을 해석하지 못했습니다. 편집 중에 중요한 기호를 잘못 삭제하거나 설정 파일이 파손되었을 수 있습니다.\n\n오류:{0}",
+    "Setting_Dialog_Reset_Title": "설정을 초기화할까요?",
+    "Setting_Dialog_Reset_Description": "정말 모든 설정이 초기화되도 될까요?\n이 행동은 절대 복구할 수 없어요.",
+    "Setting_Title": "TREM | 설정",
+    "Webhook_Dialog_Error_Title": "웹훅 오류",
+    "Webhook_Dialog_Error_Empty": "테스트 메세지를 보내기 위해서는 유효한 웹훅 URL이 필요합니다.",
+    "Webhook_Dialog_Error_Invalid": "무효된 웹훅 URL",
+    "Webhook_Dialog_Title": "웹훅 테스트",
+    "Webhook_Dialog_Success": "테스트 메세지가 정상적으로 발송되었습니다.\n메세지 ID:{0}\n채널 ID:{1}",
+    "Tray_Show": "창 열기",
+    "Tray_Hide": "창 숨김",
+    "Tray_Restart": "TREM 재시작",
+    "Tray_Exit": "TREM 강제 종료"
+}
