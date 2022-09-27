@@ -583,9 +583,9 @@ kbd {
 
 #alert-local {
 	position: relative;
-	width: 56px;
-	height: 56px;
-	padding: 4px;
+	width: 52px;
+	height: 52px;
+	padding: 6px;
 	margin: 0 4px 0 0;
 	border-radius: 16px;
 	color: white;
@@ -593,7 +593,13 @@ kbd {
 				color .1s ease-in-out;
 }
 
+#alert-local span:not(#alert-local-intensity) {
+	font-size: 14px;
+	line-height: 16px;
+}
+
 #alert-local-intensity {
+	position: relative;
 	font-weight: 500;
 	font-size: 30px;
 	font-variant-numeric: tabular-nums;
@@ -952,6 +958,7 @@ kbd {
 	content: "-";
 	position: absolute;
 	right: 2px;
+	top: -2px;
 	font-size: 38px;
 }
 
@@ -959,8 +966,8 @@ kbd {
 #alert-local.six.strong #alert-local-intensity::after {
 	content: "+";
 	position: absolute;
-	top: 23px;
-	left: 36px;
+	top: -2px;
+	right: -6px;
 	font-size: 22px;
 }
 
@@ -968,9 +975,9 @@ kbd {
 #alert-local.six:not(.strong) #alert-local-intensity::after {
 	content: "-";
 	position: absolute;
-	top: 20px;
-	left: 38px;
-	font-size: 26px;
+	top: -2px;
+	right: -4px;
+	font-size: 24px;
 }
 
 .rt-intensity-container.five.strong span:last-child::after,
