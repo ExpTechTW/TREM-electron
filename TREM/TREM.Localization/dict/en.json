@@ -18,5 +18,8 @@
     "Tray_Show": "Show Window",
     "Tray_Hide": "Hide Window",
     "Tray_Restart": "Restart TREM",
-    "Tray_Exit": "Force Quit"
+    "Tray_Exit": "Force Quit",
+    "Dialog_Button_Confirm": "Confirm",
+    "Dialog_Button_Cancel": "Cancel",
+    "Dialog_Button_OK": "OK"
 }

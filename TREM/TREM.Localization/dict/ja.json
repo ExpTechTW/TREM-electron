@@ -18,5 +18,8 @@
     "Tray_Show": "ウィンドウを開く",
     "Tray_Hide": "ウィンドウを隠す",
     "Tray_Restart": "TREM を再起動",
-    "Tray_Exit": "TREM を強制終了"
+    "Tray_Exit": "TREM を強制終了",
+    "Dialog_Button_Confirm": "確認",
+    "Dialog_Button_Cancel": "キャンセル",
+    "Dialog_Button_OK": "OK"
 }

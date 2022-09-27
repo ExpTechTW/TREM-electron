@@ -109,8 +109,6 @@ win.on("leave-full-screen", () => {
 });
 
 async function init() {
-	TREM.Localization = new (require(path.resolve(__dirname, "./TREM.Localization/Localization.js")))(setting["general.locale"], window.navigator.language);
-
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
 

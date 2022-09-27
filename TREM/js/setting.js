@@ -110,8 +110,6 @@ let station;
  */
 function init() {
 	dump({ level: 0, message: "Initializing", origin: "Setting" });
-	TREM.Localization = new (require(path.resolve(__dirname, "../TREM.Localization/Localization.js")))(setting["general.locale"], window.navigator.language);
-
 	if (is_setting_disabled) {
 		win.flashFrame(true);
 		document.querySelectorAll(".setting-button").forEach((node) => node.disabled = true);
