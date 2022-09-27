@@ -401,8 +401,8 @@
                                                     "각지의 진도 추정"에만 적용됩니다</span>
                                                 <span lang="ru">Влияние на прогнозируемую интенсивность землетрясения
                                                     Применяется только к оценка интенсивности землетрясения</span>
-                                                    <span lang="zh-TW"> 一種影響地震震度的因素
-                                                        僅適用於「各地預估震度」</span>
+                                                <span lang="zh-TW"> 一種影響地震震度的因素
+                                                    僅適用於「各地預估震度」</span>
                                             </span>
                                         </div>
                                         <label class="md3 switch">
@@ -1120,11 +1120,11 @@
                                         </div>
                                         <div class="control">
                                             <select id="general.locale" name="locale" onchange="SelectSave('general.locale')">
-                                                <option value="en">English</option>
-                                                <option value="ja">日本語</option>
-                                                <option value="kr">한국어</option>
-                                                <option value="ru">Русский</option>
-                                                <option value="zh-TW">繁體中文</option>
+                                                <option value="en">English (en)</option>
+                                                <option value="ja">日本語 (ja)</option>
+                                                <option value="kr">한국어 (kr)</option>
+                                                <option value="ru">Русский (ru)</option>
+                                                <option value="zh-TW">繁體中文 (zh-TW)</option>
                                             </select>
                                         </div>
                                     </div>
@@ -1211,17 +1211,13 @@
                                             </div>
                                             <div class="option-label-description">
                                                 <span lang="en">Turns on Hardware Acceleration, which uses your GPU to make TREM smoother.
-                                                    Turn this off if you are experiencing frame drops.
-                                                </span>
+                                                    Turn this off if you are experiencing frame drops.</span>
                                                 <span lang="ja">TREM を快適にするために GPU を使用します。
-                                                    フレームの低下か生じる場合は無効にしてください
-                                                </span>
+                                                    フレームの低下か生じる場合は無効にしてください</span>
                                                 <span lang="kr">하드웨어 가속을 사용하여 TREM을 원할하게 사용할 수 있습니다.
-                                                    버벅이거나 문제가 생긴다면 이 기능을 끄세요.
-                                                </span>
+                                                    버벅이거나 문제가 생긴다면 이 기능을 끄세요.</span>
                                                 <span lang="ru">Включает аппаратное ускорение, которое использует ваш GPU для повышения плавности работы TREM
-                                                    Выключите эту функцию, если у вас наблюдаются провалы кадров.
-                                                </span>
+                                                    Выключите эту функцию, если у вас наблюдаются провалы кадров.</span>
                                                 <span lang="zh-TW">啟用硬體加速，使用 GPU 讓 TREM 跑得更加順暢。
                                                     如果你遇到了卡頓、幀數下降的問題，請關閉此功能。</span>
                                             </div>
@@ -1348,7 +1344,13 @@
                                     <span lang="ru">Открыть файл настроек</span>
                                     <span lang="zh-TW">開啟設定檔</span>
                                 </button>
-                                <button class="flat-button md3-ripple" onclick="openLogFolder()">開啟日誌資料夾</button>
+                                <button class="flat-button md3-ripple" onclick="openLogFolder()">
+                                    <span lang="en">Open log folder</span>
+                                    <span lang="ja">ログフォルダーを開く</span>
+                                    <span lang="kr">Open log folder</span> <!-- Translation needed-->
+                                    <span lang="ru">Open log folder</span> <!-- Translation needed-->
+                                    <span lang="zh-TW">開啟日誌資料夾</span>
+                                </button>
                             </div>
                         </div>
                     </div>
