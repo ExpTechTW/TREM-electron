@@ -15,9 +15,15 @@
 html:lang(en) {
     font-family: "Google Sans",  "Noto Sans TC", "Noto Sans JP", "Arial", sans-serif;
 }
+
 html:lang(ja) {
     font-family: "Google Sans", "Noto Sans JP", "Meiryo", "MS PGothic", sans-serif;
 }
+
+html:lang(kr) {
+    font-family: "Google Sans", "Noto Sans KR", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", sans-serif;
+}
+
 html:lang(ru),
 html:lang(zh-TW) {
     font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Microsoft JhengHei", sans-serif;
