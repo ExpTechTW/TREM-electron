@@ -49,8 +49,8 @@ let TINFO = 0;
 let ticker = null;
 let ITimer = null;
 let Report = 0;
-let Sspeed = 4;
-let Pspeed = 7;
+let Sspeed = 3.5;
+let Pspeed = 6.5;
 let Server = [];
 let PAlert = {};
 let Location;
@@ -1464,11 +1464,11 @@ TREM.Earthquake.on("eew", async (data) => {
 			const town = Object.keys(TREM.Resources.region[city])[Index];
 			const point = Math.sqrt(Math.pow(Math.abs(TREM.Resources.region[city][town][1] + (Number(data.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(TREM.Resources.region[city][town][2] + (Number(data.EastLongitude) * -1)) * 101, 2));
 			const Distance = Math.sqrt(Math.pow(Number(data.Depth), 2) + Math.pow(point, 2));
-			const Level = PGAcount(data.Scale, Distance, locationEEW[city][town][3]);
-			if (UserLocationLat == locationEEW[city][town][1] && UserLocationLon == locationEEW[city][town][2]) {
-				if (setting["auto.waveSpeed"]) {
-					Pspeed = data.Speed.Pv ?? 6.5;
-					Sspeed = data.Speed.Sv ?? 3.5;
+			const Level = PGAcount(data.Scale, Distance, TREM.Resources.region[city][town][3]);
+			if (UserLocationLat == TREM.Resources.region[city][town][1] && UserLocationLon == TREM.Resources.region[city][town][2]) {
+				if (setting["auto.waveSpeed"] && data.Speed != undefined) {
+					Pspeed = data.Speed.Pv;
+					Sspeed = data.Speed.Sv;
 				}
 				level = Level;
 				value = Math.round((Distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed) - 5;
