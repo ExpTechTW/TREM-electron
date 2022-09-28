@@ -1470,11 +1470,10 @@ TREM.Earthquake.on("eew", async (data) => {
 			const Distance = Math.sqrt(Math.pow(Number(data.Depth), 2) + Math.pow(point, 2));
 			const Level = PGAcount(data.Scale, Distance, locationEEW[city][town][3]);
 			if (UserLocationLat == locationEEW[city][town][1] && UserLocationLon == locationEEW[city][town][2]) {
-				if (setting["auto.waveSpeed"])
-					if (Distance < 50) {
-						Pspeed = 6.5;
-						Sspeed = 3.5;
-					}
+				if (setting["auto.waveSpeed"]) {
+					Pspeed = data.Speed.Pv ?? 6.5;
+					Sspeed = data.Speed.Sv ?? 3.5;
+				}
 				level = Level;
 				value = Math.round((Distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed) - 5;
 				distance = Distance;
