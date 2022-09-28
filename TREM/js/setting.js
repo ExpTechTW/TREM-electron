@@ -3,7 +3,6 @@ const os = require("node:os");
 let loc;
 const win = getCurrentWindow();
 TREM.Constants = require(path.resolve(__dirname, "../TREM.Constants/Constants.js"));
-TREM.Resources = require(path.resolve(__dirname, "../TREM.Resources/Resources.js"));
 
 document.onreadystatechange = () => {
 	if (document.readyState == "complete")
