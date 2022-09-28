@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 require("leaflet");
-require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
 const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
@@ -26,7 +25,6 @@ let AllT = 0;
 let arrive = "";
 let audioList = [];
 let audioList1 = [];
-let locationEEW = {};
 let audioLock = false;
 let audioLock1 = false;
 const ReportCache = {};
@@ -737,8 +735,6 @@ async function fetchFiles() {
 	dump({ level: 0, message: "Get Station File", origin: "Location" });
 	PGAjson = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
 	dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
-	locationEEW = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
-	dump({ level: 0, message: "Get LocationEEW File", origin: "Location" });
 	PGAMain();
 }
 
@@ -1462,14 +1458,14 @@ TREM.Earthquake.on("eew", async (data) => {
 	const GC = {};
 	let level;
 	let MaxIntensity = 0;
-	for (let index = 0; index < Object.keys(locationEEW).length; index++) {
-		const city = Object.keys(locationEEW)[index];
-		for (let Index = 0; Index < Object.keys(locationEEW[city]).length; Index++) {
-			const town = Object.keys(locationEEW[city])[Index];
-			const point = Math.sqrt(Math.pow(Math.abs(locationEEW[city][town][1] + (Number(data.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(locationEEW[city][town][2] + (Number(data.EastLongitude) * -1)) * 101, 2));
+	for (let index = 0; index < Object.keys(TREM.Resources.region).length; index++) {
+		const city = Object.keys(TREM.Resources.region)[index];
+		for (let Index = 0; Index < Object.keys(TREM.Resources.region[city]).length; Index++) {
+			const town = Object.keys(TREM.Resources.region[city])[Index];
+			const point = Math.sqrt(Math.pow(Math.abs(TREM.Resources.region[city][town][1] + (Number(data.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(TREM.Resources.region[city][town][2] + (Number(data.EastLongitude) * -1)) * 101, 2));
 			const Distance = Math.sqrt(Math.pow(Number(data.Depth), 2) + Math.pow(point, 2));
-			const Level = PGAcount(data.Scale, Distance, locationEEW[city][town][3]);
-			if (UserLocationLat == locationEEW[city][town][1] && UserLocationLon == locationEEW[city][town][2]) {
+			const Level = PGAcount(data.Scale, Distance, TREM.Resources.region[city][town][3]);
+			if (UserLocationLat == TREM.Resources.region[city][town][1] && UserLocationLon == TREM.Resources.region[city][town][2]) {
 				if (setting["auto.waveSpeed"])
 					if (Distance < 50) {
 						Pspeed = 6.5;
