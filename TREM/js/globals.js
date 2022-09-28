@@ -1,11 +1,13 @@
+const TREM = {};
 const $ = require("jquery");
 const { app } = require("@electron/remote");
 const fs = require("node:fs");
 const { ipcMain } = require("@electron/remote");
 const { ipcRenderer } = require("electron");
 const path = require("node:path");
-
 let setting, is_setting_disabled;
+
+TREM.Resources = require(path.resolve(app.getAppPath(), "./TREM.Resources/Resources.js"));
 
 ipcRenderer.on("setting", (event, data) => {
 	setting = data;
@@ -182,5 +184,3 @@ if (!String.prototype.format)
 		);
 	};
 // #endregion
-
-const TREM = {};
