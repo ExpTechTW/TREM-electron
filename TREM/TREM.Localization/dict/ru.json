@@ -18,5 +18,8 @@
     "Tray_Show": null,
     "Tray_Hide": null,
     "Tray_Restart": null,
-    "Tray_Exit": null
+    "Tray_Exit": null,
+    "Dialog_Button_Confirm": null,
+    "Dialog_Button_Cancel": null,
+    "Dialog_Button_OK": null
 }

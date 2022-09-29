@@ -18,7 +18,7 @@ html:lang(ja), html:lang(ja) .leaflet-tooltip {
     font-family: "Google Sans", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", sans-serif;
 }
 
-html:lang(ja), html:lang(ja) .leaflet-tooltip {
+html:lang(kr), html:lang(kr) .leaflet-tooltip {
     font-family: "Google Sans", "Noto Sans KR", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", sans-serif;
 }
 
@@ -97,7 +97,8 @@ kbd {
 }
 
 #togglenav_btn.hide, #stopReplay.hide {
-	bottom: -100px;
+	z-index: 0;
+	pointer-events: none;
 }
 
 #view {
@@ -130,6 +131,7 @@ kbd {
 
 #map-tw {
 	user-select: none !important;
+	pointer-events: none !important;
 	z-index: 1000;
 	position: absolute;
 	opacity: 0;
@@ -150,15 +152,8 @@ kbd {
 	opacity: 1;
 }
 
-.epicenterIcon, .tsunami {
-	animation: blink 1s ease-in-out infinite alternate;
-}
-
-@keyframes blink {
-	0% { opacity: 1; }
-	50% { opacity: 1; }
-	60% { opacity: 0; }
-	100% { opacity: 0; }
+.p-wave.hide, .s-wave.hide, .epicenterIcon.hide, .tsunami.hide {
+	visibility: hidden;
 }
 
 #nav-rail > button {
@@ -583,9 +578,9 @@ kbd {
 
 #alert-local {
 	position: relative;
-	width: 56px;
-	height: 56px;
-	padding: 4px;
+	width: 52px;
+	height: 52px;
+	padding: 6px;
 	margin: 0 4px 0 0;
 	border-radius: 16px;
 	color: white;
@@ -593,7 +588,13 @@ kbd {
 				color .1s ease-in-out;
 }
 
+#alert-local span:not(#alert-local-intensity) {
+	font-size: 14px;
+	line-height: 16px;
+}
+
 #alert-local-intensity {
+	position: relative;
 	font-weight: 500;
 	font-size: 30px;
 	font-variant-numeric: tabular-nums;
@@ -952,6 +953,7 @@ kbd {
 	content: "-";
 	position: absolute;
 	right: 2px;
+	top: -2px;
 	font-size: 38px;
 }
 
@@ -959,8 +961,8 @@ kbd {
 #alert-local.six.strong #alert-local-intensity::after {
 	content: "+";
 	position: absolute;
-	top: 23px;
-	left: 36px;
+	top: -2px;
+	right: -6px;
 	font-size: 22px;
 }
 
@@ -968,9 +970,9 @@ kbd {
 #alert-local.six:not(.strong) #alert-local-intensity::after {
 	content: "-";
 	position: absolute;
-	top: 20px;
-	left: 38px;
-	font-size: 26px;
+	top: -2px;
+	right: -4px;
+	font-size: 24px;
 }
 
 .rt-intensity-container.five.strong span:last-child::after,
@@ -1132,27 +1134,27 @@ svg#svg-defs {
 }
 
 stop.alert-start {
-	stop-color: rgba(255, 0, 0, 0.1);
+	stop-color: rgba(255, 0, 0, 0.05);
 }
 
 stop.alert-mid {
-	stop-color: rgba(255, 0, 0, 0.15);
+	stop-color: rgba(255, 0, 0, 0.1);
 }
 
 stop.alert-stop {
-	stop-color: rgba(255, 0, 0, 0.4);
+	stop-color: rgba(255, 0, 0, 0.2);
 }
 
 stop.pred-start {
-	stop-color: rgba(255, 165, 0, 0.1);
+	stop-color: rgba(255, 165, 0, 0.05);
 }
 
 stop.pred-mid {
-	stop-color: rgba(255, 165, 0, 0.15);
+	stop-color: rgba(255, 165, 0, 0.1);
 }
 
 stop.pred-stop {
-	stop-color: rgba(255, 165, 0, 0.4);
+	stop-color: rgba(255, 165, 0, 0.2);
 }
 
 #map-legends {

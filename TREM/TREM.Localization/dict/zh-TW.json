@@ -18,5 +18,8 @@
     "Tray_Show": "開啟視窗",
     "Tray_Hide": "隱藏視窗",
     "Tray_Restart": "重新啟動",
-    "Tray_Exit": "強制關閉"
+    "Tray_Exit": "強制關閉",
+    "Dialog_Button_Confirm": "確認",
+    "Dialog_Button_Cancel": "取消",
+    "Dialog_Button_OK": "OK"
 }

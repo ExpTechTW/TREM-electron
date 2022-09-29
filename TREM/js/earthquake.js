@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 require("leaflet");
-require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
 const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
@@ -8,6 +7,7 @@ const EventEmitter = require("node:events");
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 TREM.Constants = require(path.resolve(__dirname, "./TREM.Constants/Constants.js"));
+TREM.Utils = require(path.resolve(__dirname, "./TREM.Utils/Utils.js"));
 TREM.Earthquake = new EventEmitter();
 localStorage.dirname = __dirname;
 
@@ -26,7 +26,6 @@ let AllT = 0;
 let arrive = "";
 let audioList = [];
 let audioList1 = [];
-let locationEEW = {};
 let audioLock = false;
 let audioLock1 = false;
 const ReportCache = {};
@@ -51,8 +50,8 @@ let TINFO = 0;
 let ticker = null;
 let ITimer = null;
 let Report = 0;
-let Sspeed = 4;
-let Pspeed = 7;
+let Sspeed = 3.5;
+let Pspeed = 6.5;
 let Server = [];
 let PAlert = {};
 let Location;
@@ -109,8 +108,6 @@ win.on("leave-full-screen", () => {
 });
 
 async function init() {
-	TREM.Localization = new (require(path.resolve(__dirname, "./TREM.Localization/Localization.js")))(setting["general.locale"], window.navigator.language);
-
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
 
@@ -729,7 +726,7 @@ async function fetchFiles() {
 		if ((current[0] * 100 + current[1] * 10 + current[2]) < (latest[0] * 100 + latest[1] * 10 + latest[2])) {
 			should_check_update = false;
 			dump({ level: 0, message: `New version available: ${update[0].tag_name}`, origin: "VersionChecker" });
-			new Notification(`發現新版本：v${update[0].tag_name}`, { body: `v${app.getVersion()} → v${update[0].tag_name}\n點擊來下載最新版本`, icon: "TREM.ico" })
+			new Notification(`⬆ Update available`, { body: `v${app.getVersion()} → v${update[0].tag_name}\n點擊來下載最新版本\nClick to download the latest version`, icon: "TREM.ico" })
 				.onclick = () => shell.openExternal(update[0].html_url);
 		}
 	}
@@ -739,8 +736,6 @@ async function fetchFiles() {
 	dump({ level: 0, message: "Get Station File", origin: "Location" });
 	PGAjson = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
 	dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
-	locationEEW = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
-	dump({ level: 0, message: "Get LocationEEW File", origin: "Location" });
 	PGAMain();
 }
 
@@ -1046,12 +1041,17 @@ function addReport(report, prepend = false) {
 	if (report.Time != undefined && report.report == undefined) {
 		const report_container = document.createElement("div");
 		report_container.className = "report-container locating";
+<<<<<<< HEAD
+		const report_intensity_container = document.createElement("div");
+		report_intensity_container.className = "report-intensity-container";
+=======
 		//TODO: "intenisty" -> "intensity"
 		const report_intenisty_container = document.createElement("div");
 		report_intenisty_container.className = "report-intenisty-container";
 
 		const report_intenisty_title_container = document.createElement("div");
 		report_intenisty_title_container.className = "report-intenisty-title-container";
+>>>>>>> 492462b375c7ee7b437e644896b1fe27f01c3a55
 
 		const report_intenisty_title_en = document.createElement("span");
 		report_intenisty_title_en.lang = "en";
@@ -1075,6 +1075,38 @@ function addReport(report, prepend = false) {
 		report_intenisty_title_zh_tw.className = "report-intenisty-title";
 		report_intenisty_title_zh_tw.innerText = "最大震度";
 
+<<<<<<< HEAD
+		const report_intensity_title_en = document.createElement("span");
+		report_intensity_title_en.lang = "en";
+		report_intensity_title_en.className = "report-intensity-title";
+		report_intensity_title_en.innerText = "Max Int.";
+		const report_intensity_title_ja = document.createElement("span");
+		report_intensity_title_ja.lang = "ja";
+		report_intensity_title_ja.className = "report-intensity-title";
+		report_intensity_title_ja.innerText = "最大震度";
+		const report_intensity_title_kr = document.createElement("span");
+		report_intensity_title_kr.lang = "kr";
+		report_intensity_title_kr.className = "report-intensity-title";
+		report_intensity_title_kr.innerText = "최대진도";
+		const report_intensity_title_ru = document.createElement("span");
+		report_intensity_title_ru.lang = "ru";
+		report_intensity_title_ru.className = "report-intensity-title";
+		report_intensity_title_ru.innerText = "Макс интенси";
+		report_intensity_title_ru.style = "font-size: 14px;line-height: 14px";
+		const report_intensity_title_zh_tw = document.createElement("span");
+		report_intensity_title_zh_tw.lang = "zh-TW";
+		report_intensity_title_zh_tw.className = "report-intensity-title";
+		report_intensity_title_zh_tw.innerText = "最大震度";
+
+		report_intensity_title_container.append(report_intensity_title_en, report_intensity_title_ja, report_intensity_title_kr, report_intensity_title_ru, report_intensity_title_zh_tw);
+		report_intensity_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
+
+		const report_intensity_value = document.createElement("span");
+		report_intensity_value.className = "report-intensity-value";
+		report_intensity_value.innerText = IntensityI(report.Max);
+		report_intensity_container.append(report_intensity_title_container, report_intensity_value);
+
+=======
 		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_kr, report_intenisty_title_ru, report_intenisty_title_zh_tw);
 		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
 
@@ -1083,6 +1115,7 @@ function addReport(report, prepend = false) {
 		report_intenisty_value.innerText = IntensityI(report.Max);
 		report_intenisty_container.append(report_intenisty_title_container, report_intenisty_value);
 
+>>>>>>> 492462b375c7ee7b437e644896b1fe27f01c3a55
 		const report_detail_container = document.createElement("div");
 		report_detail_container.className = "report-detail-container";
 
@@ -1110,6 +1143,32 @@ function addReport(report, prepend = false) {
 		const report_intenisty_title_container = document.createElement("div");
 		report_intenisty_title_container.className = "report-intenisty-title-container";
 
+<<<<<<< HEAD
+		const report_intensity_title_en = document.createElement("span");
+		report_intensity_title_en.lang = "en";
+		report_intensity_title_en.className = "report-intensity-title";
+		report_intensity_title_en.innerText = "Max Int.";
+		const report_intensity_title_ja = document.createElement("span");
+		report_intensity_title_ja.lang = "ja";
+		report_intensity_title_ja.className = "report-intensity-title";
+		report_intensity_title_ja.innerText = "最大震度";
+		const report_intensity_title_kr = document.createElement("span");
+		report_intensity_title_kr.lang = "kr";
+		report_intensity_title_kr.className = "report-intensity-title";
+		report_intensity_title_kr.innerText = "최대진도";
+		const report_intensity_title_ru = document.createElement("span");
+		report_intensity_title_ru.lang = "ru";
+		report_intensity_title_ru.className = "report-intensity-title";
+		report_intensity_title_ru.innerText = "Макс интенси";
+		report_intensity_title_ru.style = "font-size: 14px;line-height: 14px";
+		const report_intensity_title_zh_tw = document.createElement("span");
+		report_intensity_title_zh_tw.lang = "zh-TW";
+		report_intensity_title_zh_tw.className = "report-intensity-title";
+		report_intensity_title_zh_tw.innerText = "最大震度";
+
+		report_intensity_title_container.append(report_intensity_title_en, report_intensity_title_ja, report_intensity_title_kr, report_intensity_title_ru, report_intensity_title_zh_tw);
+		report_intensity_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
+=======
 		const report_intenisty_title_en = document.createElement("span");
 		report_intenisty_title_en.lang = "en";
 		report_intenisty_title_en.className = "report-intenisty-title";
@@ -1134,6 +1193,7 @@ function addReport(report, prepend = false) {
 
 		report_intenisty_title_container.append(report_intenisty_title_en, report_intenisty_title_ja, report_intenisty_title_kr, report_intenisty_title_ru, report_intenisty_title_zh_tw);
 		report_intenisty_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
+>>>>>>> 492462b375c7ee7b437e644896b1fe27f01c3a55
 
 		const report_intenisty_value = document.createElement("span");
 		report_intenisty_value.className = "report-intenisty-value";
@@ -1465,28 +1525,40 @@ TREM.Earthquake.on("eew", async (data) => {
 	const GC = {};
 	let level;
 	let MaxIntensity = 0;
-	for (let index = 0; index < Object.keys(locationEEW).length; index++) {
-		const city = Object.keys(locationEEW)[index];
-		for (let Index = 0; Index < Object.keys(locationEEW[city]).length; Index++) {
-			const town = Object.keys(locationEEW[city])[Index];
-			const point = Math.sqrt(Math.pow(Math.abs(locationEEW[city][town][1] + (Number(data.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(locationEEW[city][town][2] + (Number(data.EastLongitude) * -1)) * 101, 2));
-			const Distance = Math.sqrt(Math.pow(Number(data.Depth), 2) + Math.pow(point, 2));
-			const Level = PGAcount(data.Scale, Distance, locationEEW[city][town][3]);
-			if (UserLocationLat == locationEEW[city][town][1] && UserLocationLon == locationEEW[city][town][2]) {
-				if (setting["auto.waveSpeed"])
-					if (Distance < 50) {
-						Pspeed = 6.5;
-						Sspeed = 3.5;
-					}
-				level = Level;
-				value = Math.round((Distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed) - 5;
-				distance = Distance;
+	for (const city in TREM.Resources.region)
+		for (const town in TREM.Resources.region[city]) {
+			const loc = TREM.Resources.region[city][town];
+			const d = TREM.Utils.twoSideDistance(
+				TREM.Utils.twoPointDistance(
+					{ lat: loc[1], lon: loc[2] },
+					{ lat: data.NorthLatitude, lon: data.EastLongitude },
+				),
+				data.Depth,
+			);
+
+			const int = TREM.Utils.PGAToIntensity(
+				TREM.Utils.pga(
+					data.Scale,
+					d,
+					setting["earthquake.siteEffect"] ? loc[3] : undefined,
+				),
+			);
+
+			if (setting["location.city"] == city && setting["location.town"] == town) {
+				if (setting["auto.waveSpeed"] && data.Speed != undefined) {
+					Pspeed = data.Speed.Pv;
+					Sspeed = data.Speed.Sv;
+				}
+				level = int;
+				value = Math.round((d - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed) - 5;
+				distance = d;
 			}
-			const Intensity = IntensityN(Level);
+
+			const Intensity = IntensityN(int);
 			if (Intensity > MaxIntensity) MaxIntensity = Intensity;
 			GC[city + town] = Intensity;
 		}
-	}
+
 	let Alert = true;
 	if (IntensityN(level) < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
 	if (!Info.Notify.includes(data.ID)) {
@@ -1924,74 +1996,91 @@ TREM.Earthquake.on("tsunami", (data) => {
 function main(data, S1) {
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (setting["shock.p"]) {
-			const km = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
-			if (km > 0) {
+			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
+			if (kmP > 0) {
 				if (!EarthquakeList[data.ID].CircleP)
 					EarthquakeList[data.ID].CircleP = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 						color     : "#6FB7B7",
 						fillColor : "transparent",
-						radius    : km,
+						radius    : kmP,
+						renderer  : L.svg(),
+						className : "p-wave",
 					}).addTo(map);
-				else
+
+				if (!EarthquakeList[data.ID].CircleP.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 					EarthquakeList[data.ID].CircleP
-						.setLatLng([+data.NorthLatitude, +data.EastLongitude])
-						.setRadius(km);
+						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+				EarthquakeList[data.ID].CircleP
+					.setRadius(kmP);
 
 				if (!EarthquakeList[data.ID].CirclePTW)
 					EarthquakeList[data.ID].CirclePTW = L.circle([data.NorthLatitude, data.EastLongitude], {
 						color     : "#6FB7B7",
 						fillColor : "transparent",
-						radius    : km,
+						radius    : kmP,
+						renderer  : L.svg(),
+						className : "p-wave",
 					}).addTo(mapTW);
-				else
+
+				if (!EarthquakeList[data.ID].CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 					EarthquakeList[data.ID].CirclePTW
-						.setLatLng([+data.NorthLatitude, +data.EastLongitude])
-						.setRadius(km);
+						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+				EarthquakeList[data.ID].CirclePTW
+					.setRadius(kmP);
 			}
 		}
 		const km = Math.pow((NOW.getTime() - data.Time) * Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
 		if (EarthquakeList[data.ID].Depth != null) map.removeLayer(EarthquakeList[data.ID].Depth);
 		if (km > 0) {
-			const KM = Math.sqrt(km);
-			EEW[data.ID].km = KM;
+			const kmS = Math.sqrt(km);
+			EEW[data.ID].km = kmS;
 			if (!EarthquakeList[data.ID].CircleS)
 				EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 					color       : data.Alert ? "red" : "orange",
 					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
 					fillOpacity : 1,
-					radius      : KM,
+					radius      : kmS,
 					renderer    : L.svg(),
-					className   : "s-wave-inner",
+					className   : "s-wave",
 				}).addTo(map);
-			else
+
+			if (!EarthquakeList[data.ID].CircleS.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 				EarthquakeList[data.ID].CircleS
-					.setLatLng([+data.NorthLatitude, +data.EastLongitude])
-					.setRadius(KM)
-					.setStyle(
-						{
-							color     : data.Alert ? "red" : "orange",
-							fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-						},
-					);
+					.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+			EarthquakeList[data.ID].CircleS
+				.setRadius(kmS)
+				.setStyle(
+					{
+						color     : data.Alert ? "red" : "orange",
+						fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+					},
+				);
 
 			if (!EarthquakeList[data.ID].CircleSTW)
 				EarthquakeList[data.ID].CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 					color       : data.Alert ? "red" : "orange",
 					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
 					fillOpacity : 1,
-					radius      : KM,
+					radius      : kmS,
 					renderer    : L.svg(),
+					className   : "s-wave",
 				}).addTo(mapTW);
-			else
+
+			if (!EarthquakeList[data.ID].CircleSTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 				EarthquakeList[data.ID].CircleSTW
-					.setLatLng([+data.NorthLatitude, +data.EastLongitude])
-					.setRadius(KM)
-					.setStyle(
-						{
-							color     : data.Alert ? "red" : "orange",
-							fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-						},
-					);
+					.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+			EarthquakeList[data.ID].CircleSTW
+				.setRadius(kmS)
+				.setStyle(
+					{
+						color     : data.Alert ? "red" : "orange",
+						fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+					},
+				);
 		} else {
 			let Progress = 0;
 			const num = Math.round(((NOW.getTime() - data.Time) * Sspeed / (data.Depth * 1000)) * 100);
@@ -2042,14 +2131,49 @@ function main(data, S1) {
 		// main map
 		if (!EarthquakeList[data.ID].epicenterIcon)
 			EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon, zIndexOffset: 6000 }).addTo(map);
-		else
-			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]).setIcon(epicenterIcon);
+
+		if (EarthquakeList[data.ID].epicenterIcon.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
+			EarthquakeList[data.ID].epicenterIcon.setIcon(epicenterIcon);
+
+		if (!EarthquakeList[data.ID].epicenterIcon.getLatLng().equals([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]))
+			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
 
 		// mini map
-		if (!EarthquakeList[data.ID].epicenterIconTW)
+		if (!EarthquakeList[data.ID].epicenterIconTW) {
 			EarthquakeList[data.ID].epicenterIconTW = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon }).addTo(mapTW);
-		else
-			EarthquakeList[data.ID].epicenterIconTW.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]).setIcon(epicenterIcon);
+			EarthquakeList[data.ID].epicenterIconTW.getElement().classList.add("hide");
+		}
+
+		if (EarthquakeList[data.ID].epicenterIconTW.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
+			EarthquakeList[data.ID].epicenterIconTW.setIcon(epicenterIcon);
+
+		if (!EarthquakeList[data.ID].epicenterIconTW.getLatLng().equals([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]))
+			EarthquakeList[data.ID].epicenterIconTW.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
+
+		if (!Timers.epicenterBlinker)
+			Timers.epicenterBlinker = setInterval(() => {
+				const epicenter_blink_state = EarthquakeList[Object.keys(EarthquakeList)[0]]?.epicenterIcon?.getElement()?.classList?.contains("hide");
+				if (epicenter_blink_state != undefined)
+					for (const key in EarthquakeList) {
+						const el = EarthquakeList[key];
+						if (epicenter_blink_state) {
+							if (el.epicenterIcon.getElement().classList.contains("hide"))
+								el.epicenterIcon.getElement().classList.remove("hide");
+						} else if (!el.epicenterIcon.getElement().classList.contains("hide"))
+							el.epicenterIcon.getElement().classList.add("hide");
+
+						if (key == INFO[TINFO].ID) {
+							if (epicenter_blink_state) {
+								if (el.epicenterIconTW.getElement().classList.contains("hide"))
+									el.epicenterIconTW.getElement().classList.remove("hide");
+							} else if (!el.epicenterIconTW.getElement().classList.contains("hide"))
+								el.epicenterIconTW.getElement().classList.add("hide");
+						} else if (!el.epicenterIconTW.getElement()?.classList?.contains("hide"))
+							el.epicenterIconTW.getElement().classList.add("hide");
+
+					}
+
+			}, 1_000);
 
 		// #endregion <- Epicenter Cross Icon
 
@@ -2126,6 +2250,7 @@ function main(data, S1) {
 			$("#map-tw").removeClass("show");
 			// restore reports
 			$(roll).fadeIn(200);
+			clearInterval(Timers.epicenterBlinker);
 			clearInterval(ITimer);
 			ITimer = null;
 		}
@@ -2181,9 +2306,21 @@ function updateText() {
 
 	// bring waves to front
 	if (EarthquakeList[INFO[TINFO].ID].CircleP) EarthquakeList[INFO[TINFO].ID].CircleP.bringToFront();
-	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.bringToFront();
 	if (EarthquakeList[INFO[TINFO].ID].CircleS) EarthquakeList[INFO[TINFO].ID].CircleS.bringToFront();
-	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.bringToFront();
+
+	for (const key in EarthquakeList) {
+		if (!EarthquakeList[key]?.epicenterIconTW?.getElement()?.classList?.contains("hide"))
+			EarthquakeList[key]?.epicenterIconTW?.getElement()?.classList?.add("hide");
+		if (!EarthquakeList[key]?.CirclePTW?.getElement()?.classList?.contains("hide"))
+			EarthquakeList[key]?.CirclePTW?.getElement()?.classList?.add("hide");
+		if (!EarthquakeList[key]?.CircleSTW?.getElement()?.classList?.contains("hide"))
+			EarthquakeList[key]?.CircleSTW?.getElement()?.classList?.add("hide");
+	}
+
+	if (EarthquakeList[INFO[TINFO].ID].epicenterIconTW) EarthquakeList[INFO[TINFO].ID].epicenterIconTW.getElement()?.classList?.remove("hide");
+	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.getElement()?.classList?.remove("hide");
+	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.getElement()?.classList?.remove("hide");
+
 
 	const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
 	const Catch = document.getElementById("box-10");

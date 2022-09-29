@@ -1,11 +1,13 @@
+const TREM = {};
 const $ = require("jquery");
 const { app } = require("@electron/remote");
 const fs = require("node:fs");
 const { ipcMain } = require("@electron/remote");
 const { ipcRenderer } = require("electron");
 const path = require("node:path");
-
 let setting, is_setting_disabled;
+
+TREM.Resources = require(path.resolve(app.getAppPath(), "./TREM.Resources/Resources.js"));
 
 ipcRenderer.on("setting", (event, data) => {
 	setting = data;
@@ -13,6 +15,7 @@ ipcRenderer.on("setting", (event, data) => {
 });
 
 ipcRenderer.once("setting", (event, data) => {
+	TREM.Localization = new (require(path.resolve(app.getAppPath(), "./TREM.Localization/Localization.js")))(setting["general.locale"], window.navigator.language);
 	init();
 	setThemeColor(data["theme.color"], data["theme.dark"]);
 	setLocale(data["general.locale"]);
@@ -66,7 +69,12 @@ const showDialog =
 	const icon = document.createElement("span");
 	icon.classList.add("material-symbols-rounded");
 	icon.classList.add("dialog-icon");
-	icon.textContent = customIcon != undefined ? customIcon : (type == "success" ? "check" : (type == "warn" ? "warning" : "error"));
+	icon.textContent = customIcon != undefined ? customIcon
+		: (
+			type == "success" ? "check"
+				: (type == "warn" ? "warning"
+					: "error")
+		);
 
 	const headline = document.createElement("span");
 	headline.classList.add("dialog-headline");
@@ -85,7 +93,11 @@ const showDialog =
 		const Accept = document.createElement("button");
 		Accept.classList.add("flat-button");
 		Accept.id = "dialog-Accept";
+<<<<<<< HEAD
+		Accept.textContent = TREM.Localization.getString("Dialog_Button_Confirm");
+=======
 		Accept.textContent = { en: "Confirm", ja: "確認", kr: "적용", "zh-TW": "確定" }[setting["general.locale"]];
+>>>>>>> 492462b375c7ee7b437e644896b1fe27f01c3a55
 		Accept.onclick = (...args) => {
 			closeDialog(...args);
 			callback();
@@ -95,14 +107,18 @@ const showDialog =
 		const Cancel = document.createElement("button");
 		Cancel.classList.add("flat-button");
 		Cancel.id = "dialog-Cancel";
+<<<<<<< HEAD
+		Cancel.textContent = TREM.Localization.getString("Dialog_Button_Cancel");
+=======
 		Cancel.textContent = { en: "Cancel", ja: "キャンセル", kr: "취소", "zh-TW": "取消" }[setting["general.locale"]];
+>>>>>>> 492462b375c7ee7b437e644896b1fe27f01c3a55
 		Cancel.onclick = closeDialog;
 		buttons.appendChild(Cancel);
 	} else {
 		const OK = document.createElement("button");
 		OK.classList.add("flat-button");
 		OK.id = "dialog-OK";
-		OK.textContent = "OK";
+		OK.textContent = TREM.Localization.getString("Dialog_Button_OK");
 		OK.onclick = closeDialog;
 		buttons.appendChild(OK);
 	}
@@ -176,5 +192,3 @@ if (!String.prototype.format)
 		);
 	};
 // #endregion
-
-const TREM = {};
