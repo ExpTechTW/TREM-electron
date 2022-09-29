@@ -97,7 +97,8 @@ kbd {
 }
 
 #togglenav_btn.hide, #stopReplay.hide {
-	bottom: -100px;
+	z-index: 0;
+	pointer-events: none;
 }
 
 #view {
@@ -130,6 +131,7 @@ kbd {
 
 #map-tw {
 	user-select: none !important;
+	pointer-events: none !important;
 	z-index: 1000;
 	position: absolute;
 	opacity: 0;
@@ -150,15 +152,8 @@ kbd {
 	opacity: 1;
 }
 
-.epicenterIcon, .tsunami {
-	animation: blink 1s ease-in-out infinite alternate;
-}
-
-@keyframes blink {
-	0% { opacity: 1; }
-	50% { opacity: 1; }
-	60% { opacity: 0; }
-	100% { opacity: 0; }
+.p-wave.hide, .s-wave.hide, .epicenterIcon.hide, .tsunami.hide {
+	visibility: hidden;
 }
 
 #nav-rail > button {
@@ -1139,27 +1134,27 @@ svg#svg-defs {
 }
 
 stop.alert-start {
-	stop-color: rgba(255, 0, 0, 0.1);
+	stop-color: rgba(255, 0, 0, 0.05);
 }
 
 stop.alert-mid {
-	stop-color: rgba(255, 0, 0, 0.15);
+	stop-color: rgba(255, 0, 0, 0.1);
 }
 
 stop.alert-stop {
-	stop-color: rgba(255, 0, 0, 0.4);
+	stop-color: rgba(255, 0, 0, 0.2);
 }
 
 stop.pred-start {
-	stop-color: rgba(255, 165, 0, 0.1);
+	stop-color: rgba(255, 165, 0, 0.05);
 }
 
 stop.pred-mid {
-	stop-color: rgba(255, 165, 0, 0.15);
+	stop-color: rgba(255, 165, 0, 0.1);
 }
 
 stop.pred-stop {
-	stop-color: rgba(255, 165, 0, 0.4);
+	stop-color: rgba(255, 165, 0, 0.2);
 }
 
 #map-legends {

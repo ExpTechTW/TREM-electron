@@ -7,6 +7,7 @@ const EventEmitter = require("node:events");
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 TREM.Constants = require(path.resolve(__dirname, "./TREM.Constants/Constants.js"));
+TREM.Utils = require(path.resolve(__dirname, "./TREM.Utils/Utils.js"));
 TREM.Earthquake = new EventEmitter();
 localStorage.dirname = __dirname;
 
@@ -1458,27 +1459,40 @@ TREM.Earthquake.on("eew", async (data) => {
 	const GC = {};
 	let level;
 	let MaxIntensity = 0;
-	for (let index = 0; index < Object.keys(TREM.Resources.region).length; index++) {
-		const city = Object.keys(TREM.Resources.region)[index];
-		for (let Index = 0; Index < Object.keys(TREM.Resources.region[city]).length; Index++) {
-			const town = Object.keys(TREM.Resources.region[city])[Index];
-			const point = Math.sqrt(Math.pow(Math.abs(TREM.Resources.region[city][town][1] + (Number(data.NorthLatitude) * -1)) * 111, 2) + Math.pow(Math.abs(TREM.Resources.region[city][town][2] + (Number(data.EastLongitude) * -1)) * 101, 2));
-			const Distance = Math.sqrt(Math.pow(Number(data.Depth), 2) + Math.pow(point, 2));
-			const Level = PGAcount(data.Scale, Distance, TREM.Resources.region[city][town][3]);
-			if (UserLocationLat == TREM.Resources.region[city][town][1] && UserLocationLon == TREM.Resources.region[city][town][2]) {
+	for (const city in TREM.Resources.region)
+		for (const town in TREM.Resources.region[city]) {
+			const loc = TREM.Resources.region[city][town];
+			const d = TREM.Utils.twoSideDistance(
+				TREM.Utils.twoPointDistance(
+					{ lat: loc[1], lon: loc[2] },
+					{ lat: data.NorthLatitude, lon: data.EastLongitude },
+				),
+				data.Depth,
+			);
+
+			const int = TREM.Utils.PGAToIntensity(
+				TREM.Utils.pga(
+					data.Scale,
+					d,
+					setting["earthquake.siteEffect"] ? loc[3] : undefined,
+				),
+			);
+
+			if (setting["location.city"] == city && setting["location.town"] == town) {
 				if (setting["auto.waveSpeed"] && data.Speed != undefined) {
 					Pspeed = data.Speed.Pv;
 					Sspeed = data.Speed.Sv;
 				}
-				level = Level;
-				value = Math.round((Distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed) - 5;
-				distance = Distance;
+				level = int;
+				value = Math.round((d - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed) - 5;
+				distance = d;
 			}
-			const Intensity = IntensityN(Level);
+
+			const Intensity = IntensityN(int);
 			if (Intensity > MaxIntensity) MaxIntensity = Intensity;
 			GC[city + town] = Intensity;
 		}
-	}
+
 	let Alert = true;
 	if (IntensityN(level) < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
 	if (!Info.Notify.includes(data.ID)) {
@@ -1916,74 +1930,91 @@ TREM.Earthquake.on("tsunami", (data) => {
 function main(data, S1) {
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (setting["shock.p"]) {
-			const km = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
-			if (km > 0) {
+			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
+			if (kmP > 0) {
 				if (!EarthquakeList[data.ID].CircleP)
 					EarthquakeList[data.ID].CircleP = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 						color     : "#6FB7B7",
 						fillColor : "transparent",
-						radius    : km,
+						radius    : kmP,
+						renderer  : L.svg(),
+						className : "p-wave",
 					}).addTo(map);
-				else
+
+				if (!EarthquakeList[data.ID].CircleP.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 					EarthquakeList[data.ID].CircleP
-						.setLatLng([+data.NorthLatitude, +data.EastLongitude])
-						.setRadius(km);
+						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+				EarthquakeList[data.ID].CircleP
+					.setRadius(kmP);
 
 				if (!EarthquakeList[data.ID].CirclePTW)
 					EarthquakeList[data.ID].CirclePTW = L.circle([data.NorthLatitude, data.EastLongitude], {
 						color     : "#6FB7B7",
 						fillColor : "transparent",
-						radius    : km,
+						radius    : kmP,
+						renderer  : L.svg(),
+						className : "p-wave",
 					}).addTo(mapTW);
-				else
+
+				if (!EarthquakeList[data.ID].CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 					EarthquakeList[data.ID].CirclePTW
-						.setLatLng([+data.NorthLatitude, +data.EastLongitude])
-						.setRadius(km);
+						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+				EarthquakeList[data.ID].CirclePTW
+					.setRadius(kmP);
 			}
 		}
 		const km = Math.pow((NOW.getTime() - data.Time) * Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
 		if (EarthquakeList[data.ID].Depth != null) map.removeLayer(EarthquakeList[data.ID].Depth);
 		if (km > 0) {
-			const KM = Math.sqrt(km);
-			EEW[data.ID].km = KM;
+			const kmS = Math.sqrt(km);
+			EEW[data.ID].km = kmS;
 			if (!EarthquakeList[data.ID].CircleS)
 				EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 					color       : data.Alert ? "red" : "orange",
 					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
 					fillOpacity : 1,
-					radius      : KM,
+					radius      : kmS,
 					renderer    : L.svg(),
-					className   : "s-wave-inner",
+					className   : "s-wave",
 				}).addTo(map);
-			else
+
+			if (!EarthquakeList[data.ID].CircleS.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 				EarthquakeList[data.ID].CircleS
-					.setLatLng([+data.NorthLatitude, +data.EastLongitude])
-					.setRadius(KM)
-					.setStyle(
-						{
-							color     : data.Alert ? "red" : "orange",
-							fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-						},
-					);
+					.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+			EarthquakeList[data.ID].CircleS
+				.setRadius(kmS)
+				.setStyle(
+					{
+						color     : data.Alert ? "red" : "orange",
+						fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+					},
+				);
 
 			if (!EarthquakeList[data.ID].CircleSTW)
 				EarthquakeList[data.ID].CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 					color       : data.Alert ? "red" : "orange",
 					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
 					fillOpacity : 1,
-					radius      : KM,
+					radius      : kmS,
 					renderer    : L.svg(),
+					className   : "s-wave",
 				}).addTo(mapTW);
-			else
+
+			if (!EarthquakeList[data.ID].CircleSTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 				EarthquakeList[data.ID].CircleSTW
-					.setLatLng([+data.NorthLatitude, +data.EastLongitude])
-					.setRadius(KM)
-					.setStyle(
-						{
-							color     : data.Alert ? "red" : "orange",
-							fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-						},
-					);
+					.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+			EarthquakeList[data.ID].CircleSTW
+				.setRadius(kmS)
+				.setStyle(
+					{
+						color     : data.Alert ? "red" : "orange",
+						fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+					},
+				);
 		} else {
 			let Progress = 0;
 			const num = Math.round(((NOW.getTime() - data.Time) * Sspeed / (data.Depth * 1000)) * 100);
@@ -2034,14 +2065,49 @@ function main(data, S1) {
 		// main map
 		if (!EarthquakeList[data.ID].epicenterIcon)
 			EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon, zIndexOffset: 6000 }).addTo(map);
-		else
-			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]).setIcon(epicenterIcon);
+
+		if (EarthquakeList[data.ID].epicenterIcon.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
+			EarthquakeList[data.ID].epicenterIcon.setIcon(epicenterIcon);
+
+		if (!EarthquakeList[data.ID].epicenterIcon.getLatLng().equals([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]))
+			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
 
 		// mini map
-		if (!EarthquakeList[data.ID].epicenterIconTW)
+		if (!EarthquakeList[data.ID].epicenterIconTW) {
 			EarthquakeList[data.ID].epicenterIconTW = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon }).addTo(mapTW);
-		else
-			EarthquakeList[data.ID].epicenterIconTW.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]).setIcon(epicenterIcon);
+			EarthquakeList[data.ID].epicenterIconTW.getElement().classList.add("hide");
+		}
+
+		if (EarthquakeList[data.ID].epicenterIconTW.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
+			EarthquakeList[data.ID].epicenterIconTW.setIcon(epicenterIcon);
+
+		if (!EarthquakeList[data.ID].epicenterIconTW.getLatLng().equals([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]))
+			EarthquakeList[data.ID].epicenterIconTW.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
+
+		if (!Timers.epicenterBlinker)
+			Timers.epicenterBlinker = setInterval(() => {
+				const epicenter_blink_state = EarthquakeList[Object.keys(EarthquakeList)[0]]?.epicenterIcon?.getElement()?.classList?.contains("hide");
+				if (epicenter_blink_state != undefined)
+					for (const key in EarthquakeList) {
+						const el = EarthquakeList[key];
+						if (epicenter_blink_state) {
+							if (el.epicenterIcon.getElement().classList.contains("hide"))
+								el.epicenterIcon.getElement().classList.remove("hide");
+						} else if (!el.epicenterIcon.getElement().classList.contains("hide"))
+							el.epicenterIcon.getElement().classList.add("hide");
+
+						if (key == INFO[TINFO].ID) {
+							if (epicenter_blink_state) {
+								if (el.epicenterIconTW.getElement().classList.contains("hide"))
+									el.epicenterIconTW.getElement().classList.remove("hide");
+							} else if (!el.epicenterIconTW.getElement().classList.contains("hide"))
+								el.epicenterIconTW.getElement().classList.add("hide");
+						} else if (!el.epicenterIconTW.getElement()?.classList?.contains("hide"))
+							el.epicenterIconTW.getElement().classList.add("hide");
+
+					}
+
+			}, 1_000);
 
 		// #endregion <- Epicenter Cross Icon
 
@@ -2118,6 +2184,7 @@ function main(data, S1) {
 			$("#map-tw").removeClass("show");
 			// restore reports
 			$(roll).fadeIn(200);
+			clearInterval(Timers.epicenterBlinker);
 			clearInterval(ITimer);
 			ITimer = null;
 		}
@@ -2173,9 +2240,21 @@ function updateText() {
 
 	// bring waves to front
 	if (EarthquakeList[INFO[TINFO].ID].CircleP) EarthquakeList[INFO[TINFO].ID].CircleP.bringToFront();
-	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.bringToFront();
 	if (EarthquakeList[INFO[TINFO].ID].CircleS) EarthquakeList[INFO[TINFO].ID].CircleS.bringToFront();
-	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.bringToFront();
+
+	for (const key in EarthquakeList) {
+		if (!EarthquakeList[key]?.epicenterIconTW?.getElement()?.classList?.contains("hide"))
+			EarthquakeList[key]?.epicenterIconTW?.getElement()?.classList?.add("hide");
+		if (!EarthquakeList[key]?.CirclePTW?.getElement()?.classList?.contains("hide"))
+			EarthquakeList[key]?.CirclePTW?.getElement()?.classList?.add("hide");
+		if (!EarthquakeList[key]?.CircleSTW?.getElement()?.classList?.contains("hide"))
+			EarthquakeList[key]?.CircleSTW?.getElement()?.classList?.add("hide");
+	}
+
+	if (EarthquakeList[INFO[TINFO].ID].epicenterIconTW) EarthquakeList[INFO[TINFO].ID].epicenterIconTW.getElement()?.classList?.remove("hide");
+	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.getElement()?.classList?.remove("hide");
+	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.getElement()?.classList?.remove("hide");
+
 
 	const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
 	const Catch = document.getElementById("box-10");
