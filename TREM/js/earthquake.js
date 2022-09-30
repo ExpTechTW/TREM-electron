@@ -409,22 +409,22 @@ async function handler(response) {
 	}
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
-		let amount = Number(Sdata.PGA);
+		const amount = Number(Sdata.PGA);
 		if (station[keys[index]] == undefined) continue;
 		const Alert = NOW.getTime() - (Sdata.alert * 1000 ?? 0) < 60000;
-		if (Alert && Json.Alert) amount = Sdata.pga;
-		const Intensity = (NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
-			(!Alert) ? 0 :
-				(amount >= 800) ? 9 :
-					(amount >= 440) ? 8 :
-						(amount >= 250) ? 7 :
-							(amount >= 140) ? 6 :
-								(amount >= 80) ? 5 :
-									(amount >= 25) ? 4 :
-										(amount >= 8) ? 3 :
-											(amount >= 5) ? 2 :
-												(amount >= 2.2) ? 1 :
-													0;
+		const Intensity = (Alert && Json.Alert) ? Sdata.I :
+			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
+				(!Alert) ? 0 :
+					(amount >= 800) ? 9 :
+						(amount >= 440) ? 8 :
+							(amount >= 250) ? 7 :
+								(amount >= 140) ? 6 :
+									(amount >= 80) ? 5 :
+										(amount >= 25) ? 4 :
+											(amount >= 8) ? 3 :
+												(amount >= 5) ? 2 :
+													(amount >= 2.2) ? 1 :
+														0;
 		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
 		const Image = (Intensity != 0) ? `./image/${Intensity}.png` :
 			(amount > 3.5) ? "./image/0-5.png" :
