@@ -1249,7 +1249,7 @@ function IntensityN(level) {
 
 // #region Intensity >> Class String
 function IntensityToClassString(level) {
-	const classname = (level == 9) ? "seven" :
+	let classname = (level == 9) ? "seven" :
 		(level == 8) ? "six strong" :
 			(level == 7) ? "six" :
 				(level == 6) ? "five strong" :
@@ -1259,10 +1259,10 @@ function IntensityToClassString(level) {
 								(level == 2) ? "two" :
 									(level == 1) ? "one" :
 										"zero";
-	/*
-	if (tinycolor(setting[`theme.int.${level}`]).getLuminance() > 0.575)
+
+	if (tinycolor(setting["theme.customColor"] ? setting[`theme.int.${level}`] : ["#808080", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][level - 1]).getLuminance() > 0.575)
 		classname += " darkText";
-		*/
+
 	return classname;
 }
 // #endregion
@@ -1375,6 +1375,7 @@ const updateMapColors = async (event, value) => {
 };
 ipcRenderer.on("config:theme", updateMapColors);
 ipcRenderer.on("config:color", (event, key, value) => {
+	if (typeof event == "boolean") key = event;
 	if (typeof key == "boolean")
 		for (let i = 1; i < 10; i++) {
 			document.body.style[key ? "setProperty" : "removeProperty"](`--custom-int-${i}`, setting[`theme.int.${i}`]);
@@ -1385,7 +1386,6 @@ ipcRenderer.on("config:color", (event, key, value) => {
 		}
 	else if (setting["theme.customColor"]) {
 		document.body.style.setProperty(`--${key.replace(/\./g, "-").replace("theme", "custom")}`, value);
-		console.log(tinycolor(value).getLuminance() > 0.575);
 		if (tinycolor(value).getLuminance() > 0.575)
 			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).addClass("darkText");
 		else

@@ -1191,18 +1191,18 @@
                                     <div class="option-container">
                                         <div class="option-label">
                                             <div class="option-label-title">
-                                                <span lang="en">Custom intensity color</span>
-                                                <span lang="ja">ダークモード</span>
-                                                <span lang="kr">다크 모드</span>
-                                                <span lang="ru">Темный режим</span>
+                                                <span lang="en">Custom intensity colors</span>
+                                                <span lang="ja">カスタム震度色</span>
+                                                <span lang="kr">Custom intensity colors</span> <!-- Untranslated -->
+                                                <span lang="ru">Custom intensity colors</span> <!-- Untranslated -->
                                                 <span lang="zh-TW">自訂義震度顏色</span>
                                                 <span class="option-label-id">theme.customColor</span>
                                             </div>
                                             <div class="option-label-description">
-                                                <span lang="en">Live in the dark</span>
-                                                <span lang="ja">暗闇の中で住みましょう</span>
-                                                <span lang="kr">어둡게 표시합니다</span>
-                                                <span lang="ru">Защитите свои глаза</span>
+                                                <span lang="en">Use custom colors for seismic intensities.</span>
+                                                <span lang="ja">カスタム色で震度を表現する。</span>
+                                                <span lang="kr">Use custom colors for seismic intensities.</span> <!-- Untranslated -->
+                                                <span lang="ru">Use custom colors for seismic intensities.</span> <!-- Untranslated -->
                                                 <span lang="zh-TW">使用自訂義震度顏色</span>
                                             </div>
                                         </div>
@@ -1213,122 +1213,131 @@
                                             </span>
                                         </label>
                                     </div>
-                                </div>
-                                <div class="control-container">
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span>1</span>
-                                                <span class="option-label-id">theme.int.1</span>
+                                    <div id="intensity-palette-container" class="control-container hide">
+                                        <div class="control-title-2">
+                                            <div>
+                                                <span lang="en">Intensity colors</span>
+                                                <span lang="ja">震度の色</span>
+                                                <span lang="kr">Intensity colors</span> <!-- Untranslated -->
+                                                <span lang="ru">Intensity colors</span> <!-- Untranslated -->
+                                                <span lang="zh-TW">震度顏色</span>
                                             </div>
                                         </div>
-                                        <div class="control">
-                                            <div id="theme-int-1" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.int.1" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.1');">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span>1</span>
+                                                    <span class="option-label-id">theme.int.1</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <div id="theme-int-1" class="color-input-wrapper">
+                                                    <input class="color-input" type="color" id="theme.int.1" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.1');">
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span>2</span>
-                                                <span class="option-label-id">theme.int.2</span>
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span>2</span>
+                                                    <span class="option-label-id">theme.int.2</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <div id="theme-int-2" class="color-input-wrapper">
+                                                    <input class="color-input" type="color" id="theme.int.2" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.2');">
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="control">
-                                            <div id="theme-int-2" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.int.2" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.2');">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span>3</span>
+                                                    <span class="option-label-id">theme.int.3</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <div id="theme-int-3" class="color-input-wrapper">
+                                                    <input class="color-input" type="color" id="theme.int.3" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.3');">
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span>3</span>
-                                                <span class="option-label-id">theme.int.3</span>
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span>4</span>
+                                                    <span class="option-label-id">theme.int.4</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <div id="theme-int-4" class="color-input-wrapper">
+                                                    <input class="color-input" type="color" id="theme.int.4" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.4');">
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="control">
-                                            <div id="theme-int-3" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.int.3" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.3');">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span>5-</span>
+                                                    <span class="option-label-id">theme.int.5</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <div id="theme-int-5" class="color-input-wrapper">
+                                                    <input class="color-input" type="color" id="theme.int.5" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.5');">
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span>4</span>
-                                                <span class="option-label-id">theme.int.4</span>
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span>5+</span>
+                                                    <span class="option-label-id">theme.int.6</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <div id="theme-int-6" class="color-input-wrapper">
+                                                    <input class="color-input" type="color" id="theme.int.6" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.6');">
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="control">
-                                            <div id="theme-int-4" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.int.4" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.4');">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span>6-</span>
+                                                    <span class="option-label-id">theme.int.7</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <div id="theme-int-7" class="color-input-wrapper">
+                                                    <input class="color-input" type="color" id="theme.int.7" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.7');">
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span>5-</span>
-                                                <span class="option-label-id">theme.int.5</span>
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span>6+</span>
+                                                    <span class="option-label-id">theme.int.8</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <div id="theme-int-8" class="color-input-wrapper">
+                                                    <input class="color-input" type="color" id="theme.int.8" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.8');">
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="control">
-                                            <div id="theme-int-5" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.int.5" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.5');">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span>7</span>
+                                                    <span class="option-label-id">theme.int.9</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span>5+</span>
-                                                <span class="option-label-id">theme.int.6</span>
-                                            </div>
-                                        </div>
-                                        <div class="control">
-                                            <div id="theme-int-6" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.int.6" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.6');">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span>6-</span>
-                                                <span class="option-label-id">theme.int.7</span>
-                                            </div>
-                                        </div>
-                                        <div class="control">
-                                            <div id="theme-int-7" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.int.7" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.7');">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span>6+</span>
-                                                <span class="option-label-id">theme.int.8</span>
-                                            </div>
-                                        </div>
-                                        <div class="control">
-                                            <div id="theme-int-8" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.int.8" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.8');">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span>7</span>
-                                                <span class="option-label-id">theme.int.9</span>
-                                            </div>
-                                        </div>
-                                        <div class="control">
-                                            <div id="theme-int-9" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.int.9" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.9');">
+                                            <div class="control">
+                                                <div id="theme-int-9" class="color-input-wrapper">
+                                                    <input class="color-input" type="color" id="theme.int.9" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.9');">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1491,8 +1500,8 @@
                                 <button class="flat-button md3-ripple" onclick="openLogFolder()">
                                     <span lang="en">Open log folder</span>
                                     <span lang="ja">ログフォルダーを開く</span>
-                                    <span lang="kr">로그 폴더 열기</span> <!-- Translation needed-->
-                                    <span lang="ru">Open log folder</span> <!-- Translation needed-->
+                                    <span lang="kr">로그 폴더 열기</span>
+                                    <span lang="ru">Open log folder</span> <!-- Untranslated -->
                                     <span lang="zh-TW">開啟日誌資料夾</span>
                                 </button>
                             </div>

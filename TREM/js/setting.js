@@ -127,6 +127,11 @@ function init() {
 					element.checked = setting[id];
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
+					if (id == "theme.customColor")
+						if (setting[id])
+							$("#intensity-palette-container").removeClass("hide");
+						else
+							$("#intensity-palette-container").addClass("hide");
 				}
 				break;
 			}
@@ -227,6 +232,11 @@ function CheckSave(id) {
 	ipcRenderer.send("config:value", id, value);
 	if (id == "compatibility.hwaccel")
 		$("#HAReloadButton").fadeIn(100);
+	if (id == "theme.customColor")
+		if (value)
+			$("#intensity-palette-container").fadeIn(100).removeClass("hide");
+		else
+			$("#intensity-palette-container").fadeOut(100).addClass("hide");
 }
 
 function TextSave(id) {
