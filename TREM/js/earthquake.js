@@ -726,7 +726,7 @@ async function fetchFiles() {
 		if ((current[0] * 100 + current[1] * 10 + current[2]) < (latest[0] * 100 + latest[1] * 10 + latest[2])) {
 			should_check_update = false;
 			dump({ level: 0, message: `New version available: ${update[0].tag_name}`, origin: "VersionChecker" });
-			new Notification(`發現新版本：v${update[0].tag_name}`, { body: `v${app.getVersion()} → v${update[0].tag_name}\n點擊來下載最新版本`, icon: "TREM.ico" })
+			new Notification(`⬆ Update available`, { body: `v${app.getVersion()} → v${update[0].tag_name}\n點擊來下載最新版本\nClick to download the latest version`, icon: "TREM.ico" })
 				.onclick = () => shell.openExternal(update[0].html_url);
 		}
 	}

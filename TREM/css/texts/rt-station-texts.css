@@ -8,6 +8,11 @@ html:lang(ja) body {
     --rt-station-intensity: "震度";
 }
 
+html:lang(kr) body {
+    --rt-station-time: "시간";
+    --rt-station-intensity: "진도";
+}
+
 html:lang(ru) body {
     --rt-station-time: "Время";
     --rt-station-intensity: "Интенси";
