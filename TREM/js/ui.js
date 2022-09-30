@@ -1,3 +1,11 @@
+document.addEventListener("keydown", (event) => {
+	console.log(event);
+	if (event.key == "F11")
+		ipcRenderer.send("toggleFullscreen");
+	if (event.ctrlKey && event.shiftKey && event.key.toLocaleLowerCase() == "i")
+		ipcRenderer.send("openDevtool");
+});
+
 const toggleNav = state => {
 	if (state == undefined) {
 		$("#nav-rail").toggleClass("hide");

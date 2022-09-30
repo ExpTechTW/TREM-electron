@@ -144,23 +144,22 @@ else {
 	});
 }
 
-TREM.on("ready", () => {
-	globalShortcut.register("Ctrl+Shift+I", () => {
-		if (_devMode) {
-			const currentWindow = BrowserWindow.getFocusedWindow();
-			if (currentWindow)
-				currentWindow.webContents.openDevTools({ mode: "detach" });
-		}
-	});
-	globalShortcut.register("F11", () => {
-		if (MainWindow)
-			MainWindow.setFullScreen(!MainWindow.fullScreen);
-	});
-});
-
 TREM.on("before-quit", () => {
 	if (tray)
 		tray.destroy();
+});
+
+ipcMain.on("toggleFullscreen", () => {
+	if (MainWindow)
+		MainWindow.setFullScreen(!MainWindow.isFullScreen());
+});
+
+ipcMain.on("openDevtool", () => {
+	if (_devMode) {
+		const currentWindow = BrowserWindow.getFocusedWindow();
+		if (currentWindow)
+			currentWindow.webContents.openDevTools({ mode: "detach" });
+	}
 });
 
 ipcMain.on("openChildWindow", async (event, arg) => {
