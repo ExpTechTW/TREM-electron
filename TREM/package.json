@@ -70,6 +70,7 @@
     "leaflet-edgebuffer": "^1.0.6",
     "leaflet-geojson-vt": "^1.1.0",
     "lodash": "^4.17.21",
+    "tinycolor2": "^1.4.2",
     "ws": "^8.8.0"
   }
 }

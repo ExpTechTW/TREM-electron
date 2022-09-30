@@ -18,6 +18,7 @@ ipcRenderer.once("setting", (event, data) => {
 	TREM.Localization = new (require(path.resolve(app.getAppPath(), "./TREM.Localization/Localization.js")))(setting["general.locale"], window.navigator.language);
 	init();
 	setThemeColor(data["theme.color"], data["theme.dark"]);
+	ipcRenderer.emit("config:color", setting["theme.customColor"]);
 	setLocale(data["general.locale"]);
 });
 

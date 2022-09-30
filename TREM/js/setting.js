@@ -177,7 +177,8 @@ function init() {
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
-				const wrapper = document.getElementById(id.replace(".", "-"));
+				const wrapper = document.getElementById(id.replace(/\./g, "-"));
+				console.log(wrapper);
 				if (wrapper)
 					wrapper.style.backgroundColor = setting[id];
 				break;
@@ -413,8 +414,8 @@ const webhook = async () => {
 		});
 };
 
-const colorUpdate = () => {
-	$("#theme-color")[0].style.backgroundColor = $("#theme\\.color")[0].value;
+const colorUpdate = (el) => {
+	document.getElementById(el.id.replace(/\./g, "-")).style.backgroundColor = el.value;
 };
 
 const showError = () => {
@@ -439,6 +440,8 @@ const stepUnlockRange = (e) => {
 		$("input[type=range]")[0].step = 0.01;
 };
 
+/*
 // register the handler
 document.addEventListener("keydown", stepLockRange, false);
 document.addEventListener("keyup", stepUnlockRange, false);
+*/

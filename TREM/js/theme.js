@@ -10,7 +10,7 @@ const setThemeColor = (color, dark) => {
 		// console.log(JSON.stringify(theme, null, 2));
 
 		// Apply the theme to the body by updating custom properties for material tokens
-		document.body.style = "";
+		// document.body.style = "";
 		if (typeof color == "boolean")
 			m.applyTheme(theme, { target: document.body, dark: color });
 		else

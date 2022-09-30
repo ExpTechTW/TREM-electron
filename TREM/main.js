@@ -177,6 +177,7 @@ ipcMain.on("restart", () => {
 
 TREM.Configuration.on("update", (data) => {
 	emitAllWindow("setting", data);
+	emitAllWindow("config:color", data["theme.customColor"]);
 });
 
 TREM.Configuration.on("detect-locale", (data) => {
@@ -197,6 +198,11 @@ ipcMain.on("config:value", (event, key, value) => {
 
 		case "theme.dark": {
 			emitAllWindow("config:dark", value);
+			break;
+		}
+
+		case "theme.customColor": {
+			emitAllWindow("config:color", value);
 			break;
 		}
 
@@ -235,6 +241,9 @@ ipcMain.on("config:value", (event, key, value) => {
 		default:
 			break;
 	}
+	if (key.startsWith("theme.int"))
+		emitAllWindow("config:color", key, value);
+
 	TREM.Configuration.data[key] = value;
 	emitAllWindow("setting", TREM.Configuration._data);
 });
