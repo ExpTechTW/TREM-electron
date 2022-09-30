@@ -93,11 +93,7 @@ const showDialog =
 		const Accept = document.createElement("button");
 		Accept.classList.add("flat-button");
 		Accept.id = "dialog-Accept";
-<<<<<<< HEAD
 		Accept.textContent = TREM.Localization.getString("Dialog_Button_Confirm");
-=======
-		Accept.textContent = { en: "Confirm", ja: "確認", kr: "적용", "zh-TW": "確定" }[setting["general.locale"]];
->>>>>>> 492462b375c7ee7b437e644896b1fe27f01c3a55
 		Accept.onclick = (...args) => {
 			closeDialog(...args);
 			callback();
@@ -107,11 +103,7 @@ const showDialog =
 		const Cancel = document.createElement("button");
 		Cancel.classList.add("flat-button");
 		Cancel.id = "dialog-Cancel";
-<<<<<<< HEAD
 		Cancel.textContent = TREM.Localization.getString("Dialog_Button_Cancel");
-=======
-		Cancel.textContent = { en: "Cancel", ja: "キャンセル", kr: "취소", "zh-TW": "取消" }[setting["general.locale"]];
->>>>>>> 492462b375c7ee7b437e644896b1fe27f01c3a55
 		Cancel.onclick = closeDialog;
 		buttons.appendChild(Cancel);
 	} else {
