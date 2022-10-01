@@ -2122,7 +2122,6 @@ function main(data) {
 								el.epicenterIcon.getElement().classList.remove("hide");
 						} else if (!el.epicenterIcon.getElement().classList.contains("hide"))
 							el.epicenterIcon.getElement().classList.add("hide");
-
 						if (key == INFO[TINFO].ID) {
 							if (epicenter_blink_state) {
 								if (el.epicenterIconTW.getElement().classList.contains("hide"))
@@ -2131,9 +2130,7 @@ function main(data) {
 								el.epicenterIconTW.getElement().classList.add("hide");
 						} else if (!el.epicenterIconTW.getElement()?.classList?.contains("hide"))
 							el.epicenterIconTW.getElement().classList.add("hide");
-
 					}
-
 			}, 500);
 
 		// #endregion <- Epicenter Cross Icon
@@ -2212,6 +2209,7 @@ function main(data) {
 			// restore reports
 			$(roll).fadeIn(200);
 			clearInterval(Timers.epicenterBlinker);
+			delete Timers.epicenterBlinker;
 			clearInterval(ITimer);
 			ITimer = null;
 		}
