@@ -803,7 +803,7 @@ kbd {
 .rt-intensity-container.darkText,
 #alert-local.darkText,
 #rt-list div.darkText,
-.alert-box.darkText .alert-box-body,
+.alert-box.darkText .alert-box-body > *,
 .rt-intensity-container.darkText,
 .intensity-item.darkText::before,
 #rolllist > div.darkText {
