@@ -158,35 +158,35 @@ const Constants = Object.freeze({
 		},
 		"theme.int.2": {
 			type  : "color",
-			value : "#2774C2",
+			value : "#0165CC",
 		},
 		"theme.int.3": {
 			type  : "color",
-			value : "#7BA822",
+			value : "#01BB02",
 		},
 		"theme.int.4": {
 			type  : "color",
-			value : "#E8D630",
+			value : "#EBC000",
 		},
 		"theme.int.5": {
 			type  : "color",
-			value : "#E68439",
+			value : "#FF8400",
 		},
 		"theme.int.6": {
 			type  : "color",
-			value : "#DB641F",
+			value : "#E06300",
 		},
 		"theme.int.7": {
 			type  : "color",
-			value : "#F55647",
+			value : "#FF0000",
 		},
 		"theme.int.8": {
 			type  : "color",
-			value : "#DB1F1F",
+			value : "#B50000",
 		},
 		"theme.int.9": {
 			type  : "color",
-			value : "#862DB3",
+			value : "#68009E",
 		},
 		"windows.startup": {
 			type  : "toggle",
