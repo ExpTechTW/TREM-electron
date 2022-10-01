@@ -108,6 +108,7 @@ kbd {
 
 #togglenav_btn.hide, #stopReplay.hide {
 	z-index: 0;
+	box-shadow: none;
 	pointer-events: none;
 }
 
@@ -264,7 +265,8 @@ kbd {
 	margin: 8px 0;
 	opacity: 0.5;
 	color: white;
-	transition: opacity 0.1s ease-in-out;
+	transition: background-color 0.1s ease-in-out,
+				opacity 0.1s ease-in-out;
 	cursor: pointer;
 }
 
