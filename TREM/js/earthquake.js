@@ -2134,7 +2134,7 @@ function main(data) {
 
 					}
 
-			}, 1_000);
+			}, 500);
 
 		// #endregion <- Epicenter Cross Icon
 
