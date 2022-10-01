@@ -1700,10 +1700,9 @@ TREM.Earthquake.on("eew", async (data) => {
 
 	EEWshot = NOW.getTime() - 28500;
 	EEWshotC = 1;
-	const S1 = 0;
-	main(data, S1);
+	main(data);
 	EarthquakeList[data.ID].Timer = setInterval(() => {
-		main(data, S1);
+		main(data);
 	}, speed);
 
 	const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
@@ -1955,7 +1954,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 	}
 });
 
-function main(data, S1) {
+function main(data) {
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (setting["shock.p"]) {
 			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
@@ -2142,7 +2141,7 @@ function main(data, S1) {
 
 		if (NOW.getTime() - EEWshot > 60000)
 			EEWshotC = 1;
-		if (NOW.getTime() - EEWshot > 30000 && EEWshotC <= 2 && S1 == 1) {
+		if (NOW.getTime() - EEWshot > 30000 && EEWshotC <= 2) {
 			EEWshotC++;
 			EEWshot = NOW.getTime();
 			setTimeout(() => {
