@@ -1,5 +1,5 @@
 {
-    "Application_Connecting": null,
+    "Application_Connecting": "Подключение к серверу",
     "Application_Loading": "Загрузка",
     "Application_Title": "TREM Мониторинг землетрясений на Тайване в режиме реального времени",
     "Application_Welcome": "Добро пожаловать",
@@ -15,11 +15,11 @@
     "Webhook_Dialog_Error_Invalid": "Неверный ссылка Webhook",
     "Webhook_Dialog_Title": "Тест Webhook",
     "Webhook_Dialog_Success": "Тестовое сообщение успешно отправлено.\nИдентификатор сообщения：{0}\nИдентификатор канала：{1}",
-    "Tray_Show": null,
-    "Tray_Hide": null,
-    "Tray_Restart": null,
-    "Tray_Exit": null,
-    "Dialog_Button_Confirm": null,
-    "Dialog_Button_Cancel": null,
-    "Dialog_Button_OK": null
+    "Tray_Show": "Показать окно",
+    "Tray_Hide": "Скрыть окно",
+    "Tray_Restart": "Перезапуск TREM",
+    "Tray_Exit": "Принудительный выход",
+    "Dialog_Button_Confirm": "Подтвердить",
+    "Dialog_Button_Cancel": "Отмена",
+    "Dialog_Button_OK": "OK"
 }
