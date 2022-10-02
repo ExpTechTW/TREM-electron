@@ -1,4 +1,4 @@
-const { BrowserWindow, Menu, app: TREM, Tray, globalShortcut, ipcMain, nativeImage, shell } = require("electron");
+const { BrowserWindow, Menu, app: TREM, Tray, ipcMain, nativeImage, shell } = require("electron");
 const Configuration = require("./TREM.Configuration/Configuration");
 const fetch = require("node-fetch");
 const fs = require("fs");
@@ -26,11 +26,10 @@ if (fs.existsSync(latestLog)) {
 	fs.renameSync(path.join(TREM.getPath("logs"), "latest.log"), path.join(TREM.getPath("logs"), `${filename}.log`));
 }
 
-if (fs.existsSync(__dirname.replace("trem\\resources\\app", "trem_data")) && fs.existsSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`)) {
-	const config = JSON.parse(fs.readFileSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`).toString());
-	if (config["compatibility.hwaccel"] != undefined && !config["compatibility.hwaccel"]) TREM.disableHardwareAcceleration();
+if (!TREM.Configuration.data["compatibility.hwaccel"]) {
+	TREM.disableHardwareAcceleration();
+	console.log("Hardware Acceleration is disabled.");
 }
-
 
 /**
  * @type {BrowserWindow}
