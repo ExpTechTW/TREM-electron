@@ -228,17 +228,18 @@ async function init() {
 		if (!mapTW) {
 			mapTW = L.map("map-tw", {
 				attributionControl : false,
+				zoomControl        : false,
 				closePopupOnClick  : false,
 				preferCanvas       : true,
 				fadeAnimation      : false,
+				dragging           : false,
+				touchZoom          : false,
+				doubleClickZoom    : false,
+				scrollWheelZoom    : false,
+				boxZoom            : false,
+				keyboard           : false,
 			}).setView([23.608428, 120.799168], 7);
-
 			mapTW.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
-
-			mapTW.dragging.disable();
-			mapTW.scrollWheelZoom.disable();
-			mapTW.doubleClickZoom.disable();
-			mapTW.removeControl(mapTW.zoomControl);
 		}
 
 		progressbar.value = (1 / progressStep) * 2;
