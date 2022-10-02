@@ -61,7 +61,7 @@ let PGAjson = {};
 let PalertT = 0;
 let PGAMainClock = null;
 let Pgeojson = null;
-let map_geoJson;
+let map_base, mapTW_base;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -137,6 +137,8 @@ async function init() {
 					time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 					if (NOW.getTime() - replayT > 180_000) {
 						replay = 0;
+						document.getElementById("togglenav_btn").classList.remove("hide");
+						document.getElementById("stopReplay").classList.add("hide");
 						ReportGET();
 					}
 				} else {
@@ -272,8 +274,8 @@ async function init() {
 		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
 		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
-		if (!map_geoJson)
-			map_geoJson = L.geoJson.vt(MapData.Dmap, {
+		if (!map_base)
+			map_base = L.geoJson.vt(MapData.Dmap, {
 				edgeBufferTiles : 2,
 				minZoom         : 4,
 				maxZoom         : 12,
@@ -287,6 +289,23 @@ async function init() {
 					fillOpacity : 1,
 				},
 			}).addTo(map);
+
+		if (!mapTW_base)
+			mapTW_base = L.geoJson.vt(MapData.Dmap, {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				zIndex    : 10,
+				style     : {
+					weight      : 0.8,
+					color       : colors.primary,
+					fillColor   : "transparent",
+					fillOpacity : 0,
+				},
+			}).addTo(mapTW);
+
 		progressbar.value = (1 / progressStep) * 4;
 	})().catch(e => dump({ level: 2, message: e }));
 
@@ -1366,13 +1385,13 @@ const updateMapColors = async (event, value) => {
 	}
 	const colors = await getThemeColors(accent, dark);
 
-	map_geoJson.options.style = {
+	map_base.options.style = {
 		weight      : 0.8,
 		color       : colors.primary,
 		fillColor   : colors.surfaceVariant,
 		fillOpacity : 1,
 	};
-	map_geoJson.redraw();
+	map_base.redraw();
 };
 ipcRenderer.on("config:theme", updateMapColors);
 ipcRenderer.on("config:color", (event, key, value) => {
@@ -1713,29 +1732,30 @@ TREM.Earthquake.on("eew", async (data) => {
 		tolerance : 10,
 		buffer    : 256,
 		debug     : 0,
+		zIndex    : 1,
 		style     : (properties) => {
-			if (properties.COUNTY != undefined) {
+			if (properties.COUNTY) {
 				const name = properties.COUNTY + properties.TOWN;
-				if (GC[name] == 0 || GC[name] == undefined)
+				if (!GC[name])
 					return {
-						color       : colors.primary,
-						weight      : 0.4,
-						opacity     : 1,
+						color       : "transparent",
+						weight      : 0.8,
+						opacity     : 0,
 						fillColor   : colors.surfaceVariant,
 						fillOpacity : 0.6,
 					};
 				return {
-					color       : colors.primary,
-					weight      : 0.4,
-					opacity     : 1,
+					color       : "transparent",
+					weight      : 0.8,
+					opacity     : 0,
 					fillColor   : color(GC[name]),
 					fillOpacity : 1,
 				};
 			} else
 				return {
-					color       : colors.primary,
-					weight      : 0.4,
-					opacity     : 1,
+					color       : "transparent",
+					weight      : 0.8,
+					opacity     : 0,
 					fillColor   : colors.surfaceVariant,
 					fillOpacity : 0.6,
 				};
