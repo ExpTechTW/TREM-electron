@@ -10,23 +10,23 @@ const Constants = Object.freeze({
 		},
 		"accept.eew.NIED": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"accept.eew.JMA": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"accept.eew.KMA": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"accept.eew.SCDZJ": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"accept.eew.FJDZJ": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"shock.smoothing": {
 			type  : "toggle",
