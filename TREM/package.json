@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "5.1.2",
+  "version": "5.1.3",
   "description": "臺灣即時地震監測",
   "main": "main.js",
   "scripts": {
