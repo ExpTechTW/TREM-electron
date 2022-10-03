@@ -252,10 +252,27 @@ body.settingDisabled .control-title, body.settingDisabled .option-label {
     font-weight: 400;
 }
 
+.control-title-2 {
+    user-select: none;
+    margin: 10px 0;
+    color: rgb(var(--md-sys-color-primary));
+    font-size: 20px;
+    font-weight: 400;
+}
+
 .control-container {
     display: flex;
     flex-direction: column;
     margin-bottom: 24px;
+}
+
+.control-container > .control-container {
+    margin-left: 2rem;
+    margin-bottom: 0;
+}
+
+.hide {
+    display: none !important;
 }
 
 .option-container {

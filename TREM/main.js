@@ -1,4 +1,4 @@
-const { BrowserWindow, Menu, app: TREM, Tray, globalShortcut, ipcMain, nativeImage, shell } = require("electron");
+const { BrowserWindow, Menu, app: TREM, Tray, ipcMain, nativeImage, shell } = require("electron");
 const Configuration = require("./TREM.Configuration/Configuration");
 const fetch = require("node-fetch");
 const fs = require("fs");
@@ -26,11 +26,10 @@ if (fs.existsSync(latestLog)) {
 	fs.renameSync(path.join(TREM.getPath("logs"), "latest.log"), path.join(TREM.getPath("logs"), `${filename}.log`));
 }
 
-if (fs.existsSync(__dirname.replace("trem\\resources\\app", "trem_data")) && fs.existsSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`)) {
-	const config = JSON.parse(fs.readFileSync(`${__dirname.replace("trem\\resources\\app", "trem_data")}/Data/config.json`).toString());
-	if (config["compatibility.hwaccel"] != undefined && !config["compatibility.hwaccel"]) TREM.disableHardwareAcceleration();
+if (!TREM.Configuration.data["compatibility.hwaccel"]) {
+	TREM.disableHardwareAcceleration();
+	console.log("Hardware Acceleration is disabled.");
 }
-
 
 /**
  * @type {BrowserWindow}
@@ -144,23 +143,22 @@ else {
 	});
 }
 
-TREM.on("ready", () => {
-	globalShortcut.register("Ctrl+Shift+I", () => {
-		if (_devMode) {
-			const currentWindow = BrowserWindow.getFocusedWindow();
-			if (currentWindow)
-				currentWindow.webContents.openDevTools({ mode: "detach" });
-		}
-	});
-	globalShortcut.register("F11", () => {
-		if (MainWindow)
-			MainWindow.setFullScreen(!MainWindow.fullScreen);
-	});
-});
-
 TREM.on("before-quit", () => {
 	if (tray)
 		tray.destroy();
+});
+
+ipcMain.on("toggleFullscreen", () => {
+	if (MainWindow)
+		MainWindow.setFullScreen(!MainWindow.isFullScreen());
+});
+
+ipcMain.on("openDevtool", () => {
+	if (_devMode) {
+		const currentWindow = BrowserWindow.getFocusedWindow();
+		if (currentWindow)
+			currentWindow.webContents.openDevTools({ mode: "detach" });
+	}
 });
 
 ipcMain.on("openChildWindow", async (event, arg) => {
@@ -177,6 +175,7 @@ ipcMain.on("restart", () => {
 
 TREM.Configuration.on("update", (data) => {
 	emitAllWindow("setting", data);
+	emitAllWindow("config:color", data["theme.customColor"]);
 });
 
 TREM.Configuration.on("detect-locale", (data) => {
@@ -197,6 +196,11 @@ ipcMain.on("config:value", (event, key, value) => {
 
 		case "theme.dark": {
 			emitAllWindow("config:dark", value);
+			break;
+		}
+
+		case "theme.customColor": {
+			emitAllWindow("config:color", value);
 			break;
 		}
 
@@ -235,6 +239,9 @@ ipcMain.on("config:value", (event, key, value) => {
 		default:
 			break;
 	}
+	if (key.startsWith("theme.int"))
+		emitAllWindow("config:color", key, value);
+
 	TREM.Configuration.data[key] = value;
 	emitAllWindow("setting", TREM.Configuration._data);
 });

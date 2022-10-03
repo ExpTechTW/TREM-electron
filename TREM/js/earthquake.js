@@ -6,6 +6,7 @@ const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const EventEmitter = require("node:events");
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
+const tinycolor = require("tinycolor2");
 TREM.Constants = require(path.resolve(__dirname, "./TREM.Constants/Constants.js"));
 TREM.Utils = require(path.resolve(__dirname, "./TREM.Utils/Utils.js"));
 TREM.Earthquake = new EventEmitter();
@@ -60,7 +61,7 @@ let PGAjson = {};
 let PalertT = 0;
 let PGAMainClock = null;
 let Pgeojson = null;
-let map_geoJson;
+let map_base, mapTW_base;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -136,6 +137,8 @@ async function init() {
 					time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 					if (NOW.getTime() - replayT > 180_000) {
 						replay = 0;
+						document.getElementById("togglenav_btn").classList.remove("hide");
+						document.getElementById("stopReplay").classList.add("hide");
 						ReportGET();
 					}
 				} else {
@@ -227,17 +230,18 @@ async function init() {
 		if (!mapTW) {
 			mapTW = L.map("map-tw", {
 				attributionControl : false,
+				zoomControl        : false,
 				closePopupOnClick  : false,
 				preferCanvas       : true,
 				fadeAnimation      : false,
+				dragging           : false,
+				touchZoom          : false,
+				doubleClickZoom    : false,
+				scrollWheelZoom    : false,
+				boxZoom            : false,
+				keyboard           : false,
 			}).setView([23.608428, 120.799168], 7);
-
 			mapTW.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
-
-			mapTW.dragging.disable();
-			mapTW.scrollWheelZoom.disable();
-			mapTW.doubleClickZoom.disable();
-			mapTW.removeControl(mapTW.zoomControl);
 		}
 
 		progressbar.value = (1 / progressStep) * 2;
@@ -270,8 +274,8 @@ async function init() {
 		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
 		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
-		if (!map_geoJson)
-			map_geoJson = L.geoJson.vt(MapData.Dmap, {
+		if (!map_base)
+			map_base = L.geoJson.vt(MapData.Dmap, {
 				edgeBufferTiles : 2,
 				minZoom         : 4,
 				maxZoom         : 12,
@@ -285,6 +289,23 @@ async function init() {
 					fillOpacity : 1,
 				},
 			}).addTo(map);
+
+		if (!mapTW_base)
+			mapTW_base = L.geoJson.vt(MapData.Dmap, {
+				minZoom   : 4,
+				maxZoom   : 12,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				zIndex    : 10,
+				style     : {
+					weight      : 0.8,
+					color       : colors.primary,
+					fillColor   : "transparent",
+					fillOpacity : 0,
+				},
+			}).addTo(mapTW);
+
 		progressbar.value = (1 / progressStep) * 4;
 	})().catch(e => dump({ level: 2, message: e }));
 
@@ -408,22 +429,22 @@ async function handler(response) {
 	}
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
-		let amount = Number(Sdata.PGA);
+		const amount = Number(Sdata.PGA);
 		if (station[keys[index]] == undefined) continue;
 		const Alert = NOW.getTime() - (Sdata.alert * 1000 ?? 0) < 60000;
-		if (Alert && Json.Alert) amount = Sdata.pga;
-		const Intensity = (NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
-			(!Alert) ? 0 :
-				(amount >= 800) ? 9 :
-					(amount >= 440) ? 8 :
-						(amount >= 250) ? 7 :
-							(amount >= 140) ? 6 :
-								(amount >= 80) ? 5 :
-									(amount >= 25) ? 4 :
-										(amount >= 8) ? 3 :
-											(amount >= 5) ? 2 :
-												(amount >= 2.2) ? 1 :
-													0;
+		const Intensity = (Alert && Json.Alert) ? Sdata.I :
+			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
+				(!Alert) ? 0 :
+					(amount >= 800) ? 9 :
+						(amount >= 440) ? 8 :
+							(amount >= 250) ? 7 :
+								(amount >= 140) ? 6 :
+									(amount >= 80) ? 5 :
+										(amount >= 25) ? 4 :
+											(amount >= 8) ? 3 :
+												(amount >= 5) ? 2 :
+													(amount >= 2.2) ? 1 :
+														0;
 		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
 		const Image = (Intensity != 0) ? `./image/${Intensity}.png` :
 			(amount > 3.5) ? "./image/0-5.png" :
@@ -726,7 +747,7 @@ async function fetchFiles() {
 		if ((current[0] * 100 + current[1] * 10 + current[2]) < (latest[0] * 100 + latest[1] * 10 + latest[2])) {
 			should_check_update = false;
 			dump({ level: 0, message: `New version available: ${update[0].tag_name}`, origin: "VersionChecker" });
-			new Notification(`⬆ Update available`, { body: `v${app.getVersion()} → v${update[0].tag_name}\n點擊來下載最新版本\nClick to download the latest version`, icon: "TREM.ico" })
+			new Notification("⬆ Update available", { body: `v${app.getVersion()} → v${update[0].tag_name}\n點擊來下載最新版本\nClick to download the latest version`, icon: "TREM.ico" })
 				.onclick = () => shell.openExternal(update[0].html_url);
 		}
 	}
@@ -1037,7 +1058,7 @@ function addReport(report, prepend = false) {
 	if (report.earthquakeNo % 1000 != 0) star += "✩ ";
 
 	const Div = document.createElement("div");
-	Div.className = "md3-ripple";
+	Div.className = "md3-ripple ";
 	if (report.Time != undefined && report.report == undefined) {
 		const report_container = document.createElement("div");
 		report_container.className = "report-container locating";
@@ -1090,7 +1111,7 @@ function addReport(report, prepend = false) {
 
 		report_container.append(report_intensity_container, report_detail_container);
 		Div.prepend(report_container);
-		Div.style.backgroundColor = `${color(report.Max)}cc`;
+		Div.className += IntensityToClassString(report.Max);
 		ripple(Div);
 		roll.prepend(Div);
 		investigation = true;
@@ -1155,7 +1176,7 @@ function addReport(report, prepend = false) {
 		report_container.append(report_intensity_container, report_detail_container);
 		ripple(Div);
 		Div.append(report_container);
-		Div.style.backgroundColor = `${color(report.data[0].areaIntensity)}cc`;
+		Div.className += IntensityToClassString(report.data[0].areaIntensity);
 		ReportCache[report.originTime] = report;
 		Div.addEventListener("click", (event) => {
 			ReportClick(report.originTime);
@@ -1248,7 +1269,7 @@ function IntensityN(level) {
 
 // #region Intensity >> Class String
 function IntensityToClassString(level) {
-	return (level == 9) ? "seven" :
+	let classname = (level == 9) ? "seven" :
 		(level == 8) ? "six strong" :
 			(level == 7) ? "six" :
 				(level == 6) ? "five strong" :
@@ -1258,12 +1279,19 @@ function IntensityToClassString(level) {
 								(level == 2) ? "two" :
 									(level == 1) ? "one" :
 										"zero";
+
+	if (tinycolor(setting["theme.customColor"] ? setting[`theme.int.${level ? level : 1}`] : ["#808080", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][level ? level - 1 : 0]).getLuminance() > 0.575)
+		classname += " darkText";
+
+	return classname;
 }
 // #endregion
 
 // #region color
 function color(Intensity) {
-	return ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"][Intensity ? Intensity - 1 : Intensity];
+	return setting["theme.customColor"] ? setting[`theme.int.${Intensity}`]
+		: ["#808080", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][Intensity ? Intensity - 1 : Intensity];
+	// return ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"][Intensity ? Intensity - 1 : Intensity];
 }
 // #endregion
 
@@ -1357,15 +1385,35 @@ const updateMapColors = async (event, value) => {
 	}
 	const colors = await getThemeColors(accent, dark);
 
-	map_geoJson.options.style = {
+	map_base.options.style = {
 		weight      : 0.8,
 		color       : colors.primary,
 		fillColor   : colors.surfaceVariant,
 		fillOpacity : 1,
 	};
-	map_geoJson.redraw();
+	map_base.redraw();
 };
 ipcRenderer.on("config:theme", updateMapColors);
+ipcRenderer.on("config:color", (event, key, value) => {
+	if (typeof event == "boolean") key = event;
+	if (typeof key == "boolean")
+		for (let i = 0; i < 10; i++) {
+			if (i > 0) document.body.style[key ? "setProperty" : "removeProperty"](`--custom-int-${i}`, setting[`theme.int.${i}`]);
+			if (tinycolor(key ? setting[`theme.int.${i ? i : 1}`] : ["#808080", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][i ? i - 1 : 0]).getLuminance() > 0.575)
+				$(`.${IntensityToClassString(i).replace(" darkText", "").split(" ").join(".")}`).addClass("darkText");
+			else
+				$(`.${IntensityToClassString(i).replace(" darkText", "").split(" ").join(".")}`).removeClass("darkText");
+		}
+	else if (setting["theme.customColor"]) {
+		document.body.style.setProperty(`--${key.replace(/\./g, "-").replace("theme", "custom")}`, value);
+		if (tinycolor(value).getLuminance() > 0.575)
+			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).addClass("darkText");
+		else
+			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).removeClass("darkText");
+
+	}
+
+});
 ipcRenderer.on("config:dark", updateMapColors);
 ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
@@ -1672,10 +1720,9 @@ TREM.Earthquake.on("eew", async (data) => {
 
 	EEWshot = NOW.getTime() - 28500;
 	EEWshotC = 1;
-	const S1 = 0;
-	main(data, S1);
+	main(data);
 	EarthquakeList[data.ID].Timer = setInterval(() => {
-		main(data, S1);
+		main(data);
 	}, speed);
 
 	const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
@@ -1685,29 +1732,30 @@ TREM.Earthquake.on("eew", async (data) => {
 		tolerance : 10,
 		buffer    : 256,
 		debug     : 0,
+		zIndex    : 1,
 		style     : (properties) => {
-			if (properties.COUNTY != undefined) {
+			if (properties.COUNTY) {
 				const name = properties.COUNTY + properties.TOWN;
-				if (GC[name] == 0 || GC[name] == undefined)
+				if (!GC[name])
 					return {
-						color       : colors.primary,
-						weight      : 0.4,
-						opacity     : 1,
+						color       : "transparent",
+						weight      : 0.8,
+						opacity     : 0,
 						fillColor   : colors.surfaceVariant,
 						fillOpacity : 0.6,
 					};
 				return {
-					color       : colors.primary,
-					weight      : 0.4,
-					opacity     : 1,
+					color       : "transparent",
+					weight      : 0.8,
+					opacity     : 0,
 					fillColor   : color(GC[name]),
 					fillOpacity : 1,
 				};
 			} else
 				return {
-					color       : colors.primary,
-					weight      : 0.4,
-					opacity     : 1,
+					color       : "transparent",
+					weight      : 0.8,
+					opacity     : 0,
 					fillColor   : colors.surfaceVariant,
 					fillOpacity : 0.6,
 				};
@@ -1927,7 +1975,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 	}
 });
 
-function main(data, S1) {
+function main(data) {
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (setting["shock.p"]) {
 			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
@@ -2095,7 +2143,6 @@ function main(data, S1) {
 								el.epicenterIcon.getElement().classList.remove("hide");
 						} else if (!el.epicenterIcon.getElement().classList.contains("hide"))
 							el.epicenterIcon.getElement().classList.add("hide");
-
 						if (key == INFO[TINFO].ID) {
 							if (epicenter_blink_state) {
 								if (el.epicenterIconTW.getElement().classList.contains("hide"))
@@ -2104,17 +2151,15 @@ function main(data, S1) {
 								el.epicenterIconTW.getElement().classList.add("hide");
 						} else if (!el.epicenterIconTW.getElement()?.classList?.contains("hide"))
 							el.epicenterIconTW.getElement().classList.add("hide");
-
 					}
-
-			}, 1_000);
+			}, 500);
 
 		// #endregion <- Epicenter Cross Icon
 
 
 		if (NOW.getTime() - EEWshot > 60000)
 			EEWshotC = 1;
-		if (NOW.getTime() - EEWshot > 30000 && EEWshotC <= 2 && S1 == 1) {
+		if (NOW.getTime() - EEWshot > 30000 && EEWshotC <= 2) {
 			EEWshotC++;
 			EEWshot = NOW.getTime();
 			setTimeout(() => {
@@ -2185,6 +2230,7 @@ function main(data, S1) {
 			// restore reports
 			$(roll).fadeIn(200);
 			clearInterval(Timers.epicenterBlinker);
+			delete Timers.epicenterBlinker;
 			clearInterval(ITimer);
 			ITimer = null;
 		}

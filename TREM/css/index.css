@@ -33,6 +33,16 @@ body {
 	background-color: rgb(var(--md-sys-color-background));
 	overflow: hidden;
 	transition: background-color .1s ease-in-out;
+
+	--custom-int-1: #808080;
+	--custom-int-2: #2774C2;
+	--custom-int-3: #7BA822;
+	--custom-int-4: #E8D630;
+	--custom-int-5: #E68439;
+	--custom-int-6: #DB641F;
+	--custom-int-7: #F55647;
+	--custom-int-8: #DB1F1F;
+	--custom-int-9: #862DB3;
 }
 
 :not(html)[lang] {
@@ -98,6 +108,7 @@ kbd {
 
 #togglenav_btn.hide, #stopReplay.hide {
 	z-index: 0;
+	box-shadow: none;
 	pointer-events: none;
 }
 
@@ -253,7 +264,9 @@ kbd {
 	padding: 6px;
 	margin: 8px 0;
 	opacity: 0.5;
-	transition: opacity 0.1s ease-in-out;
+	color: white;
+	transition: background-color 0.1s ease-in-out,
+				opacity 0.1s ease-in-out;
 	cursor: pointer;
 }
 
@@ -278,7 +291,6 @@ kbd {
 	grid-template-rows: auto;
 	height: 100%;
 	align-items: center;
-	color: white;
 	font-variant-numeric: tabular-nums;
 }
 
@@ -775,19 +787,32 @@ kbd {
 }
 
 .alert-box.eew-alert .alert-box-body, .alert-box.eew-alert .alert-notch {
-	border-color: #B50000;
+	border-color: #DB1F1F;
 }
 
 .alert-box.eew-pred .alert-box-body, .alert-box.eew-pred .alert-notch {
-	border-color: #E06300;
+	border-color: #DB641F;
 }
 
 .alert-box.eew-test .alert-box-body, .alert-box.eew-test .alert-notch {
-	border-color: #0165CC;
+	border-color: #2774C2;
 }
 
 .alert-box.eew-cancel .alert-box-body, .alert-box.eew-cancel .alert-notch, .alert-box.eew-history .alert-box-body, .alert-box.eew-history .alert-notch {
-	border-color: #666;
+	border-color: #808080;
+}
+
+.rt-intensity-container.darkText,
+#alert-local.darkText,
+#rt-list div.darkText,
+.alert-box.darkText .alert-box-body > *,
+.rt-intensity-container.darkText,
+.intensity-item.darkText::before,
+#rolllist > div.darkText {
+	color: black;
+}
+.alert-box.darkText .alert-box-body > * {
+	border-color: black !important;
 }
 
 .alert-box.zero .alert-box-body, .alert-box.eew-cancel .alert-notch, .alert-box.eew-history .alert-notch,
@@ -798,73 +823,81 @@ kbd {
 .rt-intensity-container.one,
 #alert-local.one,
 #rt-list div.one,
-.intensity-item.one::before {
-	background-color: #666;
+.intensity-item.one::before,
+#rolllist > div.one {
+	background-color: var(--custom-int-1);
 }
 
 .alert-box.two .alert-box-body, .alert-box.eew-test .alert-notch,
 .rt-intensity-container.two,
 #alert-local.two,
 #rt-list div.two,
-.intensity-item.two::before {
-	background-color: #0165CC;
+.intensity-item.two::before,
+#rolllist > div.two {
+	background-color: var(--custom-int-2);
 }
 
 .alert-box.three .alert-box-body,
 .rt-intensity-container.three,
 #alert-local.three,
 #rt-list div.three,
-.intensity-item.three::before {
-	background-color: #01BB02;
+.intensity-item.three::before,
+#rolllist > div.three {
+	background-color: var(--custom-int-3);
 }
 
 .alert-box.four .alert-box-body,
 .rt-intensity-container.four,
 #alert-local.four,
 #rt-list div.four,
-.intensity-item.four::before {
-	background-color: #FBDF00;
-	color: black;
+.intensity-item.four::before,
+#rolllist > div.four {
+	background-color: var(--custom-int-4);
 }
 
 .alert-box.five .alert-box-body,
 .rt-intensity-container.five,
 #alert-local.five,
 #rt-list div.five,
-.intensity-item.five::before {
-	background-color: #FF8400;
+.intensity-item.five::before,
+#rolllist > div.five {
+	background-color: var(--custom-int-5);
 }
 
 .alert-box.five.strong .alert-box-body, .alert-box.eew-pred .alert-notch,
 .rt-intensity-container.five.strong,
 #alert-local.five.strong,
 #rt-list div.five.strong,
-.intensity-item.five.strong::before {
-	background-color: #E06300;
+.intensity-item.five.strong::before,
+#rolllist > div.five.strong {
+	background-color: var(--custom-int-6);
 }
 
 .alert-box.six .alert-box-body,
 .rt-intensity-container.six,
 #alert-local.six,
 #rt-list div.six,
-.intensity-item.six::before {
-	background-color: #FF0000;
+.intensity-item.six::before,
+#rolllist > div.six {
+	background-color: var(--custom-int-7);
 }
 
 .alert-box.six.strong .alert-box-body, .alert-box.eew-alert .alert-notch,
 .rt-intensity-container.six.strong,
 #alert-local.six.strong,
 #rt-list div.six.strong,
-.intensity-item.six.strong::before {
-	background-color: #B50000;
+.intensity-item.six.strong::before,
+#rolllist > div.six.strong {
+	background-color: var(--custom-int-8);
 }
 
 .alert-box.seven .alert-box-body,
 .rt-intensity-container.seven,
 #alert-local.seven,
 #rt-list div.seven,
-.intensity-item.seven::before {
-	background-color: #68009E;
+.intensity-item.seven::before,
+#rolllist > div.seven {
+	background-color: var(--custom-int-9);
 }
 
 .alert-box.zero .alert-box-body #alert-intensity::before,
@@ -1009,15 +1042,6 @@ kbd {
 	top: -4px;
 	left: 16px;
 	font-size: 18px;
-}
-
-.alert-box.four > .alert-box-body > * {
-	color: black;
-	border-color: black !important;
-}
-
-#alert-local.four {
-	color: black;
 }
 
 .alert-box.eew-alert .alert-notch #alert-type:empty:before {

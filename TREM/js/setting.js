@@ -127,6 +127,11 @@ function init() {
 					element.checked = setting[id];
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
+					if (id == "theme.customColor")
+						if (setting[id])
+							$("#intensity-palette-container").removeClass("hide");
+						else
+							$("#intensity-palette-container").addClass("hide");
 				}
 				break;
 			}
@@ -177,7 +182,8 @@ function init() {
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
-				const wrapper = document.getElementById(id.replace(".", "-"));
+				const wrapper = document.getElementById(id.replace(/\./g, "-"));
+				console.log(wrapper);
 				if (wrapper)
 					wrapper.style.backgroundColor = setting[id];
 				break;
@@ -226,6 +232,11 @@ function CheckSave(id) {
 	ipcRenderer.send("config:value", id, value);
 	if (id == "compatibility.hwaccel")
 		$("#HAReloadButton").fadeIn(100);
+	if (id == "theme.customColor")
+		if (value)
+			$("#intensity-palette-container").fadeIn(100).removeClass("hide");
+		else
+			$("#intensity-palette-container").fadeOut(100).addClass("hide");
 }
 
 function TextSave(id) {
@@ -413,8 +424,8 @@ const webhook = async () => {
 		});
 };
 
-const colorUpdate = () => {
-	$("#theme-color")[0].style.backgroundColor = $("#theme\\.color")[0].value;
+const colorUpdate = (el) => {
+	document.getElementById(el.id.replace(/\./g, "-")).style.backgroundColor = el.value;
 };
 
 const showError = () => {
@@ -439,6 +450,8 @@ const stepUnlockRange = (e) => {
 		$("input[type=range]")[0].step = 0.01;
 };
 
+/*
 // register the handler
 document.addEventListener("keydown", stepLockRange, false);
 document.addEventListener("keyup", stepUnlockRange, false);
+*/

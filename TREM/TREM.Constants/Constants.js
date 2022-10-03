@@ -10,23 +10,23 @@ const Constants = Object.freeze({
 		},
 		"accept.eew.NIED": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"accept.eew.JMA": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"accept.eew.KMA": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"accept.eew.SCDZJ": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"accept.eew.FJDZJ": {
 			type  : "toggle",
-			value : true,
+			value : false,
 		},
 		"shock.smoothing": {
 			type  : "toggle",
@@ -147,6 +147,46 @@ const Constants = Object.freeze({
 		"theme.dark": {
 			type  : "toggle",
 			value : true,
+		},
+		"theme.customColor": {
+			type  : "toggle",
+			value : true,
+		},
+		"theme.int.1": {
+			type  : "color",
+			value : "#808080",
+		},
+		"theme.int.2": {
+			type  : "color",
+			value : "#0165CC",
+		},
+		"theme.int.3": {
+			type  : "color",
+			value : "#01BB02",
+		},
+		"theme.int.4": {
+			type  : "color",
+			value : "#EBC000",
+		},
+		"theme.int.5": {
+			type  : "color",
+			value : "#FF8400",
+		},
+		"theme.int.6": {
+			type  : "color",
+			value : "#E06300",
+		},
+		"theme.int.7": {
+			type  : "color",
+			value : "#FF0000",
+		},
+		"theme.int.8": {
+			type  : "color",
+			value : "#B50000",
+		},
+		"theme.int.9": {
+			type  : "color",
+			value : "#68009E",
 		},
 		"windows.startup": {
 			type  : "toggle",
