@@ -83,6 +83,7 @@ let should_check_update = true;
 let EEWAlert = false;
 let Cancel = false;
 let PGACancel = false;
+let IntensityListTime = 0;
 // #endregion
 
 // #region 初始化
@@ -735,7 +736,8 @@ async function handler(response) {
 			list.push(container);
 		}
 	}
-	if (!Json.Alert) list = [];
+	if (Json.Alert) IntensityListTime = Date.now();
+	if (Date.now() - IntensityListTime > 180000) list = [];
 	document.getElementById("rt-list").replaceChildren(...list);
 }
 
