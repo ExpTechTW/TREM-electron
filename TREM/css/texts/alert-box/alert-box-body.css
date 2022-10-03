@@ -8,6 +8,11 @@ html:lang(ja) body {
     --alert-body-timer-second: "秒";
 }
 
+html:lang(kr) body {
+    --alert-body-timer-arrive: "도달";
+    --alert-body-timer-second: "초";
+}
+
 html:lang(ru) body {
     --alert-body-timer-arrive: "Прибытие";
     --alert-body-timer-second: "с";
