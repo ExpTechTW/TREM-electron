@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500&family=Roboto&display=swap");
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 @import url("./m3/m3_theme.css");
 @import url("./m3/m3_dialog.css");
 @import url("./m3/m3_flat_button.css");
@@ -1340,3 +1341,7 @@ border: 1px solid white;
 .map-intensity-icon.pga3 { background-color: #00CEFF; }
 .map-intensity-icon.pga4 { background-color: #00FF89; }
 .map-intensity-icon.pga5 { background-color: #09FF01; }
+
+#system_update_btn{
+	visibility: hidden;
+}
