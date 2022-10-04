@@ -326,6 +326,23 @@ function reset() {
 		});
 }
 
+function opencheckver() {
+	var getclientVersion = app.getVersion();
+	document.getElementById("client-check-version").innerText = `當前版本 : ${getclientVersion}`;
+	// const options = {
+	// 	headers: { 'User-Agent': 'PostmanRuntime/7.29.2' }
+	// };
+	var axios = require('axios')
+
+	axios.get('https://api.github.com/repos/ExpTechTW/TREM/releases/latest')
+	.then((response) => {
+		document.getElementById("request-check-version").innerText = `最新版本 : ${response.data.tag_name}`;
+		if (getclientVersion != response.data.tag_name){
+			document.getElementById("request-new-version").style.visibility="visible";
+		}
+	}).catch( (error) => document.getElementById("request-check-version").innerText = `${error}`);
+}
+
 function openLogFolder() {
 	shell.openPath(app.getPath("logs"));
 }
