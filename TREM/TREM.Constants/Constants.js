@@ -154,7 +154,7 @@ const Constants = Object.freeze({
 		},
 		"theme.int.1": {
 			type  : "color",
-			value : "#808080",
+			value : "#757575",
 		},
 		"theme.int.2": {
 			type  : "color",

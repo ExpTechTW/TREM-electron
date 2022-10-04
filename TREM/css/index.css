@@ -34,7 +34,7 @@ body {
 	overflow: hidden;
 	transition: background-color .1s ease-in-out;
 
-	--custom-int-1: #808080;
+	--custom-int-1: #757575;
 	--custom-int-2: #2774C2;
 	--custom-int-3: #7BA822;
 	--custom-int-4: #E8D630;
@@ -812,12 +812,12 @@ kbd {
 
 .alert-box.eew-cancel .alert-notch ,
 .alert-box.eew-history .alert-notch {
-	background-color: #808080;
+	background-color: #757575;
 }
 
 .alert-box.eew-cancel .alert-box-body, .alert-box.eew-cancel .alert-notch,
 .alert-box.eew-history .alert-box-body, .alert-box.eew-history .alert-notch {
-	border-color: #808080;
+	border-color: #757575;
 }
 
 .rt-intensity-container.darkText,

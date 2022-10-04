@@ -1282,7 +1282,7 @@ function IntensityToClassString(level) {
 									(level == 1) ? "one" :
 										"zero";
 
-	if (tinycolor(setting["theme.customColor"] ? setting[`theme.int.${level ? level : 1}`] : ["#808080", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][level ? level - 1 : 0]).getLuminance() > 0.575)
+	if (tinycolor(setting["theme.customColor"] ? setting[`theme.int.${level ? level : 1}`] : ["#757575", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][level ? level - 1 : 0]).getLuminance() > 0.575)
 		classname += " darkText";
 
 	return classname;
@@ -1292,7 +1292,7 @@ function IntensityToClassString(level) {
 // #region color
 function color(Intensity) {
 	return setting["theme.customColor"] ? setting[`theme.int.${Intensity}`]
-		: ["#808080", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][Intensity ? Intensity - 1 : Intensity];
+		: ["#757575", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][Intensity ? Intensity - 1 : Intensity];
 	// return ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"][Intensity ? Intensity - 1 : Intensity];
 }
 // #endregion
@@ -1401,7 +1401,7 @@ ipcRenderer.on("config:color", (event, key, value) => {
 	if (typeof key == "boolean")
 		for (let i = 0; i < 10; i++) {
 			if (i > 0) document.body.style[key ? "setProperty" : "removeProperty"](`--custom-int-${i}`, setting[`theme.int.${i}`]);
-			if (tinycolor(key ? setting[`theme.int.${i ? i : 1}`] : ["#808080", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][i ? i - 1 : 0]).getLuminance() > 0.575)
+			if (tinycolor(key ? setting[`theme.int.${i ? i : 1}`] : ["#757575", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][i ? i - 1 : 0]).getLuminance() > 0.575)
 				$(`.${IntensityToClassString(i).replace(" darkText", "").split(" ").join(".")}`).addClass("darkText");
 			else
 				$(`.${IntensityToClassString(i).replace(" darkText", "").split(" ").join(".")}`).removeClass("darkText");
