@@ -1309,11 +1309,13 @@ stop.pred-stop {
 	font-weight: 500;
 	font-family: "Google Sans", sans-serif;
 	font-variant-numeric: tabular-nums;
+	border-radius: 4px;
 }
 
 .map-intensity-icon:not([class*=pga]) {
 border: 1px solid white;
 }
+
 .map-intensity-icon::before {
 	position: absolute;
 	display: inline-block;
