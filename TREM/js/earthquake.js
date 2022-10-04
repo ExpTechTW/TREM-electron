@@ -447,42 +447,52 @@ async function handler(response) {
 													(amount >= 2.2) ? 1 :
 														0;
 		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
-		const Image = (Intensity != 0) ? `./image/${Intensity}.png` :
-			(amount > 3.5) ? "./image/0-5.png" :
-				(amount > 3) ? "./image/0-4.png" :
-					(amount > 2.5) ? "./image/0-3.png" :
-						(amount > 2) ? "./image/0-2.png" :
-							"./image/0-1.png";
+		const levelClass = (Intensity != 0) ? IntensityToClassString(Intensity) :
+			(amount > 3.5) ? "pga5" :
+				(amount > 3) ? "pga4" :
+					(amount > 2.5) ? "pga3" :
+						(amount > 2) ? "pga2" :
+							"pga1";
+
 		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
-		if (!Station[keys[index]]) {
-			Station[keys[index]] = L.marker([station[keys[index]].Lat, station[keys[index]].Long], { keyboard: false })
-				.addTo(map).bindTooltip(station_tooltip, {
+
+		if (!Station[keys[index]])
+			Station[keys[index]] = L.marker(
+				[station[keys[index]].Lat, station[keys[index]].Long],
+				{
+					icon: L.divIcon({
+						iconSize  : [size, size],
+						className : `map-intensity-icon rt-icon ${levelClass}`,
+					}),
+					keyboard: false,
+				})
+				.addTo(map)
+				.bindTooltip(station_tooltip, {
 					offset    : [8, 0],
 					permanent : false,
 					className : "rt-station-tooltip",
+				})
+				.on("click", () => {
+					Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
+					if (map.getZoom() < 11) {
+						const tooltip = Station[keys[index]].getTooltip();
+						Station[keys[index]].unbindTooltip();
+						if (Station[keys[index]].keepTooltipAlive)
+							tooltip.options.permanent = true;
+						else
+							tooltip.options.permanent = false;
+						Station[keys[index]].bindTooltip(tooltip);
+					}
 				});
-			Station[keys[index]].on("click", () => {
-				Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
-				if (map.getZoom() < 11) {
-					const tooltip = Station[keys[index]].getTooltip();
-					Station[keys[index]].unbindTooltip();
-					if (Station[keys[index]].keepTooltipAlive)
-						tooltip.options.permanent = true;
-					else
-						tooltip.options.permanent = false;
-					Station[keys[index]].bindTooltip(tooltip);
-				}
-			});
-		}
 
-		if (Station[keys[index]].getIcon()?.options?.iconUrl != Image)
-			Station[keys[index]].setIcon(L.icon({
-				iconUrl  : Image,
-				iconSize : [size, size],
+		if (Station[keys[index]].getIcon()?.options?.className != `map-intensity-icon rt-icon ${levelClass}`)
+			Station[keys[index]].setIcon(L.divIcon({
+				iconSize  : [size, size],
+				className : `map-intensity-icon rt-icon ${levelClass}`,
 			}));
 
 		Station[keys[index]]
-			.setZIndexOffset(2000 + amount)
+			.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
 			.setTooltipContent(station_tooltip);
 
 		const Level = IntensityI(Intensity);
