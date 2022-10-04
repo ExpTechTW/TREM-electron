@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 require("leaflet");
+require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
 const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
@@ -183,16 +184,19 @@ async function init() {
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
 		if (!map) {
 			map = L.map("map", {
+				edgeBufferTiles    : 2.5,
 				attributionControl : false,
 				closePopupOnClick  : false,
 				maxBounds          : [
 					[60, 50],
 					[10, 180],
 				],
-				preferCanvas : true,
-				zoomSnap     : 0.25,
-				zoomDelta    : 0.5,
-			}).setView([23, 121], 7.75);
+				preferCanvas  : true,
+				zoomSnap      : 0.25,
+				zoomDelta     : 0.5,
+				zoomAnimation : false,
+				fadeAnimation : false,
+			}).fitBounds([[25.35, 119.65], [21.85, 124.05]]);
 			map.doubleClickZoom.disable();
 			map.removeControl(map.zoomControl);
 			map.on("click", () => {
@@ -795,7 +799,7 @@ async function setUserLocationMarker(town) {
 			.addTo(map);
 	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
 	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
-	TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+	map.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
 }
 // #endregion
 
@@ -958,29 +962,40 @@ async function ReportClick(time) {
 								let Intensity = Station.stationIntensity.$t;
 								if (Station.stationIntensity.unit == "強") Intensity += "+";
 								if (Station.stationIntensity.unit == "弱") Intensity += "-";
-								const myIcon = L.icon({
-									iconUrl  : `./image/${IntensityN(Intensity)}.png`,
-									iconSize : [20, 20],
-								});
-								const ReportMark = L.marker([Station.stationLat.$t, Station.stationLon.$t], { icon: myIcon });
+
+								const ReportMark = L.marker(
+									[Station.stationLat.$t, Station.stationLon.$t],
+									{
+										icon: L.divIcon({
+											iconSize  : [16, 16],
+											className : `map-intensity-icon ${IntensityToClassString(IntensityN(Intensity))}`,
+										}),
+										zIndexOffset: 2000 + IntensityN(Intensity) * 50,
+									}).addTo(map);
+
 								// eslint-disable-next-line no-shadow
 								let PGA = "";
 								if (Station.pga != undefined) PGA = `<br>PGA<br>垂直向: ${Station.pga.vComponent}<br>東西向: ${Station.pga.ewComponent}<br>南北向: ${Station.pga.nsComponent}<br><a onclick="openURL('${Station.waveImageURI}')">震波圖</a>`;
 								ReportMark.bindPopup(`站名: ${Station.stationName}<br>代號: ${Station.stationCode}<br>經度: ${Station.stationLon.$t}<br>緯度: ${Station.stationLat.$t}<br>震央距: ${Station.distance.$t}<br>方位角: ${Station.azimuth.$t}<br>震度: ${Intensity}<br>${PGA}`);
-								map.addLayer(ReportMark);
-								ReportMark.setZIndexOffset(1000 + index);
 								MarkList.push(ReportMark);
 							}
-						TREM.Earthquake.emit("focus", { center: [+json.NorthLatitude, +json.EastLongitude], size: 7.75 });
-						const myIcon = L.icon({
-							iconUrl  : "./image/star.png",
-							iconSize : [25, 25],
-						});
-						const ReportMark = L.marker([Number(json.NorthLatitude), Number(json.EastLongitude)], { icon: myIcon });
-						ReportMark.bindPopup(`編號: ${json.No}<br>經度: ${json.EastLongitude}<br>緯度: ${json.NorthLatitude}<br>深度: ${json.Depth}<br>規模: ${json.Scale}<br>位置: ${json.Location}<br>時間: ${json["UTC+8"]}<br><br><a onclick="openURL('${json.Web}')">網頁</a><br><a onclick="openURL('${json.EventImage}')">地震報告</a><br><a onclick="openURL('${json.ShakeImage}')">震度分布</a>`);
-						map.addLayer(ReportMark);
-						ReportMark.setZIndexOffset(3000);
-						MarkList.push(ReportMark);
+
+						map.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
+						// TREM.Earthquake.emit("focus", { center: [+json.NorthLatitude, +json.EastLongitude], size: 7.75 });
+
+						MarkList.push(
+							L.marker(
+								[+json.NorthLatitude, +json.EastLongitude],
+								{
+									icon: L.icon({
+										iconUrl  : "./image/star.png",
+										iconSize : [25, 25],
+									}),
+									zIndexOffset: 10000,
+								})
+								.bindPopup(`編號: ${json.No}<br>經度: ${json.EastLongitude}<br>緯度: ${json.NorthLatitude}<br>深度: ${json.Depth}<br>規模: ${json.Scale}<br>位置: ${json.Location}<br>時間: ${json["UTC+8"]}<br><br><a onclick="openURL('${json.Web}')">網頁</a><br><a onclick="openURL('${json.EventImage}')">地震報告</a><br><a onclick="openURL('${json.ShakeImage}')">震度分布</a>`)
+								.addTo(map),
+						);
 						return false;
 					}
 				})
@@ -992,17 +1007,17 @@ async function ReportClick(time) {
 			for (let Index = 0; Index < ReportCache[time].data.length; Index++)
 				for (let index = 0; index < ReportCache[time].data[Index].eqStation.length; index++) {
 					const data = ReportCache[time].data[Index].eqStation[index];
-					const myIcon = L.icon({
-						iconUrl  : `./image/${data.stationIntensity}.png`,
-						iconSize : [20, 20],
+					const myIcon = L.divIcon({
+						iconSize  : [16, 16],
+						className : `map-intensity-icon ${IntensityToClassString(data.stationIntensity)}`,
 					});
 					const level = IntensityI(data.stationIntensity);
 					LIST.push({
-						Lat       : Number(data.stationLat),
-						Long      : Number(data.stationLon),
+						Lat       : +data.stationLat,
+						Long      : +data.stationLon,
 						Icon      : myIcon,
 						Level     : level,
-						Intensity : Number(data.stationIntensity),
+						Intensity : +data.stationIntensity,
 						Name      : `${ReportCache[time].data[Index].areaName} ${data.stationName}`,
 					});
 				}
@@ -1015,25 +1030,34 @@ async function ReportClick(time) {
 						LIST[index + 1] = Temp;
 					}
 
-			for (let index = 0; index < LIST.length; index++) {
-				const ReportMark = L.marker([LIST[index].Lat, LIST[index].Long], { icon: LIST[index].Icon });
-				ReportMark.bindPopup(`站名: ${LIST[index].Name}<br>經度: ${LIST[index].Long}<br>緯度: ${LIST[index].Lat}<br>震度: ${LIST[index].Level}`);
-				map.addLayer(ReportMark);
-				ReportMark.setZIndexOffset(1000 + index);
-				MarkList.push(ReportMark);
-			}
-			TREM.Earthquake.emit("focus", { center: [ReportCache[time].epicenterLat, +ReportCache[time].epicenterLon], size: 7.75 });
-			const icon = L.icon({
-				iconUrl  : "./image/star.png",
-				iconSize : [25, 25],
-			});
-			const ReportMark = L.marker([Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)], { icon });
-			let Num = "無";
-			if (ReportCache[time].earthquakeNo.toString().substring(3, 6) != "000") Num = ReportCache[time].earthquakeNo;
-			ReportMark.bindPopup(`編號: ${Num}<br>經度: ${ReportCache[time].epicenterLon}<br>緯度: ${ReportCache[time].epicenterLat}<br>深度: ${ReportCache[time].depth}<br>規模: ${ReportCache[time].magnitudeValue}<br>位置: ${ReportCache[time].location}<br>時間: ${ReportCache[time].originTime}`);
-			map.addLayer(ReportMark);
-			ReportMark.setZIndexOffset(3000);
-			MarkList.push(ReportMark);
+			for (const i in LIST)
+				MarkList.push(
+					L.marker(
+						[LIST[i].Lat, LIST[i].Long],
+						{
+							icon         : LIST[i].Icon,
+							zIndexOffset : 2000 + IntensityN(LIST[i].Level) * 50,
+						})
+						.bindPopup(`站名: ${LIST[i].Name}<br>經度: ${LIST[i].Long}<br>緯度: ${LIST[i].Lat}<br>震度: ${LIST[i].Level}`)
+						.addTo(map),
+				);
+
+			map.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
+			// TREM.Earthquake.emit("focus", { center: [ReportCache[time].epicenterLat, +ReportCache[time].epicenterLon], size: 7.75 });
+
+			MarkList.push(
+				L.marker(
+					[Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)],
+					{
+						icon: L.icon({
+							iconUrl  : "./image/star.png",
+							iconSize : [25, 25],
+						}),
+						zIndexOffset: 10000,
+					})
+					.bindPopup(`編號: ${ReportCache[time].earthquakeNo % 100 ? ReportCache[time].earthquakeNo : "無（小地區小區域有感地震）"}<br>經度: ${ReportCache[time].epicenterLon}<br>緯度: ${ReportCache[time].epicenterLat}<br>深度: ${ReportCache[time].depth}<br>規模: ${ReportCache[time].magnitudeValue}<br>位置: ${ReportCache[time].location}<br>時間: ${ReportCache[time].originTime}`)
+					.addTo(map),
+			);
 		}
 	}
 }
