@@ -184,7 +184,7 @@ async function init() {
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
 		if (!map) {
 			map = L.map("map", {
-				edgeBufferTiles    : 2.5,
+				edgeBufferTiles    : 1,
 				attributionControl : false,
 				closePopupOnClick  : false,
 				maxBounds          : [
