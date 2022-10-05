@@ -10,6 +10,7 @@
     "Setting_Dialog_Reset_Title": "설정을 초기화할까요?",
     "Setting_Dialog_Reset_Description": "정말 모든 설정이 초기화되도 될까요?\n이 행동은 절대 복구할 수 없어요.",
     "Setting_Title": "TREM | 설정",
+    "Setting_Update_Latest": null,
     "Webhook_Dialog_Error_Title": "웹훅 오류",
     "Webhook_Dialog_Error_Empty": "테스트 메세지를 보내기 위해서는 유효한 웹훅 URL이 필요합니다.",
     "Webhook_Dialog_Error_Invalid": "무효된 웹훅 URL",
@@ -21,5 +22,7 @@
     "Tray_Exit": "TREM 강제 종료",
     "Dialog_Button_Confirm": "적용",
     "Dialog_Button_Cancel": "취소",
-    "Dialog_Button_OK": "OK"
+    "Dialog_Button_OK": "OK",
+    "Notification_Update_Title": null,
+    "Notification_Update_Body": null
 }

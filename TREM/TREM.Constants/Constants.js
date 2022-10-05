@@ -200,6 +200,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"update.mode": {
+			type  : "choice",
+			value : "notify",
+		},
 	},
 });
 

@@ -10,6 +10,7 @@
     "Setting_Dialog_Reset_Title": "設定をリセットする？",
     "Setting_Dialog_Reset_Description": "本当にすべての設定をリセットしてもよろしいですか？\nこのアクションは元に戻せません。",
     "Setting_Title": "TREM | 設定",
+    "Setting_Update_Latest": "最新バージョンです",
     "Webhook_Dialog_Error_Title": "ウェブフックエラー",
     "Webhook_Dialog_Error_Empty": "テストメッセージを送信するには、有効な Webhook URL が必要です。",
     "Webhook_Dialog_Error_Invalid": "無效な Webhook URL",
@@ -21,5 +22,7 @@
     "Tray_Exit": "TREM を強制終了",
     "Dialog_Button_Confirm": "確認",
     "Dialog_Button_Cancel": "キャンセル",
-    "Dialog_Button_OK": "OK"
+    "Dialog_Button_OK": "OK",
+    "Notification_Update_Title": "⬆ 新しいバージョン",
+    "Notification_Update_Body": "v{0} → v{1}\nここをクリック して、最新バージョンのダウンロードを開始します"
 }

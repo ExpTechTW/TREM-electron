@@ -1131,6 +1131,91 @@
                                 </div>
                                 <div class="control-title">
                                     <div>
+                                        <span lang="en">Auto Update</span>
+                                        <span lang="ja">自動更新</span>
+                                        <span lang="kr">Auto Update</span>
+                                        <span lang="ru">Auto Update</span>
+                                        <span lang="zh-TW">自動更新</span>
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">Auto Update</span>
+                                                <span lang="ja">自動更新</span>
+                                                <span lang="kr">Auto Update</span>
+                                                <span lang="ru">Auto Update</span>
+                                                <span lang="zh-TW">自動更新</span>
+                                                <span class="option-label-id">update.mode</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">How Auto Updater behaves.</span>
+                                                <span lang="ja">自動更新の更新モード。</span>
+                                                <span lang="kr">How Auto Updater behaves.</span>
+                                                <span lang="ru">How Auto Updater behaves.</span>
+                                                <span lang="zh-TW">自動更新的更新方式。</span>
+                                            </div>
+                                        </div>
+                                        <div id="update.mode" class="control segmented-button">
+                                            <label>
+                                                <input type="radio" name="update.mode" value="install" onclick="ChoiceSave('update.mode', this)">
+                                                <div class="button-label">
+                                                    <span lang="en">Install</span>
+                                                    <span lang="ja">インストール</span>
+                                                    <span lang="kr">Install</span>
+                                                    <span lang="ru">Install</span>
+                                                    <span lang="zh-TW">自動安裝</span>
+                                                </div>
+                                            </label>
+                                            <label>
+                                                <input type="radio" name="update.mode" value="download" onclick="ChoiceSave('update.mode', this)">
+                                                <div class="button-label">
+                                                    <span lang="en">Download</span>
+                                                    <span lang="ja">ダウンロード</span>
+                                                    <span lang="kr">Download</span>
+                                                    <span lang="ru">Download</span>
+                                                    <span lang="zh-TW">自動下載</span>
+                                                </div>
+                                            </label>
+                                            <label>
+                                                <input type="radio" name="update.mode" value="notify" onclick="ChoiceSave('update.mode', this)">
+                                                <div class="button-label">
+                                                    <span lang="en">Notify</span>
+                                                    <span lang="ja">通知</span>
+                                                    <span lang="kr">Notify</span>
+                                                    <span lang="ru">Notify</span>
+                                                    <span lang="zh-TW">通知</span>
+                                                </div>
+                                            </label>
+                                            <label>
+                                                <input type="radio" name="update.mode" value="never" onclick="ChoiceSave('update.mode', this)">
+                                                <div class="button-label">
+                                                    <span lang="en">Disable</span>
+                                                    <span lang="ja">無効</span>
+                                                    <span lang="kr">Disable</span>
+                                                    <span lang="ru">Disable</span>
+                                                    <span lang="zh-TW">停用</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button class="filled-tonal-button setting-button md3-ripple" onclick="checkUpdate()" style="margin: 5px 0 16px 0;">
+                                            <span class="material-symbols-rounded filled-tonal-button-icon">update</span>
+                                            <span class="filled-tonal-button-label">
+                                                <span lang="en">Check for updates</span>
+                                                <span lang="ja">更新のチェック</span>
+                                                <span lang="kr">Check for updates</span>
+                                                <span lang="ru">Check for updates</span>
+                                                <span lang="zh-TW">檢查更新</span>
+                                            </span>
+                                        </button>
+                                        <span id="updateVersion"></span>
+                                    </div>
+                                </div>
+                                <div class="control-title">
+                                    <div>
                                         <span lang="en">Theme</span>
                                         <span lang="ja">テーマ</span>
                                         <span lang="kr">테마</span>

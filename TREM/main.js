@@ -1,11 +1,12 @@
-const { BrowserWindow, Menu, app: TREM, Tray, ipcMain, nativeImage, shell } = require("electron");
+const { BrowserWindow, Menu, Notification, app: TREM, Tray, ipcMain, nativeImage, shell } = require("electron");
 const Configuration = require("./TREM.Configuration/Configuration");
-const fetch = require("node-fetch");
+const fetch = require("node-fetch").default;
 const fs = require("fs");
 const path = require("path");
 const pushReceiver = require("electron-fcm-push-receiver");
 
 TREM.Configuration = new Configuration(TREM);
+TREM.Utils = require("./TREM.Utils/Utils.js");
 TREM.Localization = new (require("./TREM.Localization/Localization"))(TREM.Configuration.data["general.locale"], TREM.getLocale());
 TREM.Window = new Map();
 
@@ -143,6 +144,63 @@ else {
 	});
 }
 
+let updateChecker;
+TREM.once("ready", async () => {
+	if (TREM.Configuration.data["update.mode"] != "never") {
+		const updater = async () => {
+			const response = await checkUpdate();
+			if (response) {
+				switch (TREM.Configuration.data["update.mode"]) {
+					case "install": {
+						const filepath = await TREM.Utils.downloadFile(
+							response.files[0].browser_download_url,
+							path.resolve(TREM.getPath("temp"), response.files[0].name),
+							(bytes, percent) => {
+								if (MainWindow) MainWindow.setProgressBar(percent / 100);
+							},
+							response.files[0].size,
+						);
+						if (MainWindow) MainWindow.setProgressBar(0);
+						shell.openPath(filepath);
+						TREM.exit(0);
+						break;
+					}
+
+					case "download": {
+						await TREM.Utils.downloadFile(
+							response.files[0].browser_download_url,
+							path.resolve(TREM.getPath("temp"), response.files[0].name),
+							(bytes, percent) => {
+								if (MainWindow) MainWindow.setProgressBar(percent / 100);
+							},
+							response.files[0].size,
+						);
+						if (MainWindow) MainWindow.setProgressBar(0);
+						break;
+					}
+
+					case "notify": {
+						new Notification({
+							title : TREM.Localization.getString("Notification_Update_Title"),
+							body  : TREM.Localization.getString("Notification_Update_Body").format(TREM.getVersion(), response.tag),
+							icon  : "TREM.ico",
+						}).on("click", () => {
+							shell.openExternal(response.url);
+						}).show();
+						break;
+					}
+
+					default:
+						break;
+				}
+				clearInterval(updateChecker);
+			}
+		};
+		updateChecker = setInterval(updater, 600_000);
+		await updater();
+	}
+});
+
 TREM.on("before-quit", () => {
 	if (tray)
 		tray.destroy();
@@ -277,6 +335,18 @@ ipcMain.on("screenshot", async () => {
 	shell.showItemInFolder(path.join(folder, filename));
 });
 
+ipcMain.handle("checkUpdate", checkUpdate);
+
+async function checkUpdate() {
+	const update = await (await fetch("https://api.github.com/repos/ExpTechTW/TREM/releases")).json();
+	const latest = update[0].tag_name.split(".");
+	const current = TREM.getVersion().split(".");
+	if ((current[0] * 100 + current[1] * 10 + current[2]) < (latest[0] * 100 + latest[1] * 10 + latest[2]))
+		return { tag: update[0].tag_name, url: update[0].html_url, files: update[0].assets };
+
+	return false;
+}
+
 function emitAllWindow(channel, ...args) {
 	for (const [key, win] of TREM.Window[Symbol.iterator]())
 		if (win instanceof BrowserWindow)
@@ -341,3 +411,58 @@ function trayIcon() {
 	tray.setToolTip(TREM.Localization.getString("Application_Title"));
 	tray.setContextMenu(contextMenu);
 }
+
+
+// #region override prototype
+if (!Date.prototype.format)
+	Date.prototype.format =
+	/**
+	 * Format DateTime into string with provided formatting string.
+	 * @param {string} format The formatting string to use.
+	 * @returns {string} The formatted string.
+	 */
+	function(format) {
+		/**
+		 * @type {Date}
+		 */
+		const me = this;
+		return format.replace(/a|A|Z|S(SS)?|ss?|mm?|HH?|hh?|D{1,2}|M{1,2}|YY(YY)?|'([^']|'')*'/g, (str) => {
+			let c1 = str.charAt(0);
+			const ret = str.charAt(0) == "'"
+				? (c1 = 0) || str.slice(1, -1).replace(/''/g, "'")
+				: str == "a"
+					? (me.getHours() < 12 ? "am" : "pm")
+					: str == "A"
+						? (me.getHours() < 12 ? "AM" : "PM")
+						: str == "Z"
+							? (("+" + -me.getTimezoneOffset() / 60).replace(/^\D?(\D)/, "$1").replace(/^(.)(.)$/, "$10$2") + "00")
+							: c1 == "S"
+								? me.getMilliseconds()
+								: c1 == "s"
+									? me.getSeconds()
+									: c1 == "H"
+										? me.getHours()
+										: c1 == "h"
+											? (me.getHours() % 12) || 12
+											: c1 == "D"
+												? me.getDate()
+												: c1 == "m"
+													? me.getMinutes()
+													: c1 == "M"
+														? me.getMonth() + 1
+														: ("" + me.getFullYear()).slice(-str.length);
+			return c1 && str.length < 4 && ("" + ret).length < str.length
+				? ("00" + ret).slice(-str.length)
+				: ret;
+		});
+	};
+
+if (!String.prototype.format)
+	String.prototype.format = function() {
+		const args = arguments;
+		return this.replace(/{(\d+)}/g, (match, number) => typeof args[number] != "undefined"
+			? args[number]
+			: match,
+		);
+	};
+// #endregion

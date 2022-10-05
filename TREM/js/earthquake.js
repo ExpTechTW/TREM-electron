@@ -80,7 +80,6 @@ let TSUNAMI = {};
 let Ping = 0;
 let GeoJson = null;
 let GeoJsonID = 0;
-let should_check_update = true;
 let EEWAlert = false;
 let Cancel = false;
 let PGACancel = false;
@@ -757,17 +756,6 @@ async function handler(response) {
 }
 
 async function fetchFiles() {
-	if (should_check_update) {
-		const update = await (await fetch("https://api.github.com/repos/ExpTechTW/TREM/releases")).json();
-		const latest = update[0].tag_name.split(".");
-		const current = app.getVersion().split(".");
-		if ((current[0] * 100 + current[1] * 10 + current[2]) < (latest[0] * 100 + latest[1] * 10 + latest[2])) {
-			should_check_update = false;
-			dump({ level: 0, message: `New version available: ${update[0].tag_name}`, origin: "VersionChecker" });
-			new Notification("⬆ Update available", { body: `v${app.getVersion()} → v${update[0].tag_name}\n點擊來下載最新版本\nClick to download the latest version`, icon: "TREM.ico" })
-				.onclick = () => shell.openExternal(update[0].html_url);
-		}
-	}
 	Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
 	dump({ level: 0, message: "Get Location File", origin: "Location" });
 	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();

@@ -10,6 +10,7 @@
     "Setting_Dialog_Reset_Title": "Сбросить настройки?",
     "Setting_Dialog_Reset_Description": "Вы уверены, что действительно хотите сбросить все настройки?\nэто действие необратимо",
     "Setting_Title": "TREM | Настройки",
+    "Setting_Update_Latest": null,
     "Webhook_Dialog_Error_Title": "Ошибка Webhook",
     "Webhook_Dialog_Error_Empty": "Для отправки тестового сообщения необходим действительный ссылка Webhook",
     "Webhook_Dialog_Error_Invalid": "Неверный ссылка Webhook",
@@ -21,5 +22,7 @@
     "Tray_Exit": "Принудительный выход",
     "Dialog_Button_Confirm": "Подтвердить",
     "Dialog_Button_Cancel": "Отмена",
-    "Dialog_Button_OK": "OK"
+    "Dialog_Button_OK": "OK",
+    "Notification_Update_Title": null,
+    "Notification_Update_Body": null
 }

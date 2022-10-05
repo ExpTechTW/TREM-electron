@@ -6,6 +6,7 @@
 @import url("../css/m3/m3_flat_button.css");
 @import url("../css/m3/m3_input_field.css");
 @import url("../css/m3/m3_ripple.css");
+@import url("../css/m3/m3_segmented_button.css");
 @import url("../css/m3/m3_select_menu.css");
 @import url("../css/m3/m3_slider.css");
 @import url("../css/m3/m3_switch.css");
@@ -39,6 +40,7 @@ body {
     left: 0;
     margin: 0;
     border-radius: 16px;
+    user-select: none;
 }
 
 :not(body):lang() {
@@ -367,6 +369,15 @@ code {
     font-size: 20px;
     vertical-align: middle;
     padding-left: 4px;
+}
+
+#updateVersion {
+    color: rgb(var(--md-sys-color-on-secondary-container));
+    line-height: 40px;
+}
+#updateVersion > .icon {
+    color: #a0ff00;
+    vertical-align: middle;
 }
 
 ::selection {

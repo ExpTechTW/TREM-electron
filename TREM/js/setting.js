@@ -1,6 +1,5 @@
 const { getCurrentWindow, shell } = require("@electron/remote");
 const os = require("node:os");
-let loc;
 const win = getCurrentWindow();
 TREM.Constants = require(path.resolve(__dirname, "../TREM.Constants/Constants.js"));
 
@@ -200,6 +199,16 @@ function init() {
 				break;
 			}
 
+			case "choice": {
+				const element = document.getElementById(id);
+				if (element) {
+					$(element).children("label").children(`input[value=${setting[id]}]`)[0].checked = true;
+					if (is_setting_disabled) element.disabled = true;
+					else element.disabled = false;
+				}
+				break;
+			}
+
 			default:
 				break;
 		}
@@ -241,6 +250,12 @@ function CheckSave(id) {
 
 function TextSave(id) {
 	const value = document.getElementById(id).value;
+	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+	ipcRenderer.send("config:value", id, value);
+}
+
+function ChoiceSave(id, el) {
+	const value = el.value;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 }
@@ -448,6 +463,12 @@ const stepLockRange = (e) => {
 const stepUnlockRange = (e) => {
 	if (!e.shiftKey)
 		$("input[type=range]")[0].step = 0.01;
+};
+
+const checkUpdate = async () => {
+	const response = await ipcRenderer.invoke("checkUpdate");
+	if (!response)
+		document.getElementById("updateVersion").innerHTML = `<span class="material-symbols-rounded icon">done</span> ${TREM.Localization.getString("Setting_Update_Latest")}`;
 };
 
 /*
