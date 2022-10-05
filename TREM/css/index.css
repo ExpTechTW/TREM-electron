@@ -1340,3 +1340,7 @@ border: 1px solid white;
 .map-intensity-icon.pga3 { background-color: #00CEFF; }
 .map-intensity-icon.pga4 { background-color: #00FF89; }
 .map-intensity-icon.pga5 { background-color: #09FF01; }
+
+#system_update_btn{
+	visibility: hidden;
+}

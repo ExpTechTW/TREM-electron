@@ -165,6 +165,12 @@ ipcMain.on("openChildWindow", async (event, arg) => {
 	await createSettingWindow();
 });
 
+ipcMain.on("openSystemUpdate", async (event, arg) => {
+	const update = await (await fetch("https://api.github.com/repos/ExpTechTW/TREM/releases/latest")).json();
+	await shell.openExternal(update.html_url);
+	await shell.openExternal(update.assets[0].browser_download_url);
+});
+
 ipcMain.on("reset", (event, arg) => {
 	TREM.exit(0);
 });

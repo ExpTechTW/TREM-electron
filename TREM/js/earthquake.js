@@ -765,6 +765,7 @@ async function fetchFiles() {
 			dump({ level: 0, message: `New version available: ${update[0].tag_name}`, origin: "VersionChecker" });
 			new Notification("⬆ Update available", { body: `v${app.getVersion()} → v${update[0].tag_name}\n點擊來下載最新版本\nClick to download the latest version`, icon: "TREM.ico" })
 				.onclick = () => shell.openExternal(update[0].html_url);
+			document.getElementById("system_update_btn").style.visibility="visible";
 		}
 	}
 	Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
@@ -1261,6 +1262,11 @@ function openSettingWindow() {
 	ipcRenderer.send("openChildWindow");
 }
 // #endregion
+
+function systemUpdatebtn() {
+	win.setAlwaysOnTop(false);
+	ipcRenderer.send("openSystemUpdate");
+}
 
 // #region PGA
 function PGAcount(Scale, distance, Si) {
