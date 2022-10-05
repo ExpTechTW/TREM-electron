@@ -452,11 +452,12 @@ async function handler(response) {
 														0;
 		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
 		const levelClass = (Intensity != 0) ? IntensityToClassString(Intensity) :
-			(amount > 3.5) ? "pga5" :
-				(amount > 3) ? "pga4" :
-					(amount > 2.5) ? "pga3" :
-						(amount > 2) ? "pga2" :
-							"pga1";
+			(amount == 999) ? "pga6" :
+				(amount > 3.5) ? "pga5" :
+					(amount > 3) ? "pga4" :
+						(amount > 2.5) ? "pga3" :
+							(amount > 2) ? "pga2" :
+								"pga1";
 
 		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 
