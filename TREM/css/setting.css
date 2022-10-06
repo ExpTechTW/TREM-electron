@@ -380,6 +380,11 @@ code {
     vertical-align: middle;
 }
 
+#updateVersion > .icona {
+    color: #FFFF00;
+    vertical-align: middle;
+}
+
 ::selection {
     background-color: rgb(var(--md-sys-color-outline));
 }

@@ -11,6 +11,8 @@
     "Setting_Dialog_Reset_Description": "本当にすべての設定をリセットしてもよろしいですか？\nこのアクションは元に戻せません。",
     "Setting_Title": "TREM | 設定",
     "Setting_Update_Latest": "最新バージョンです",
+    "Setting_Update": "⬆ 新しいバージョン v{0}",
+    "Setting_Update_download": "手動でクリックしてアップデートをダウンロードする",
     "Webhook_Dialog_Error_Title": "ウェブフックエラー",
     "Webhook_Dialog_Error_Empty": "テストメッセージを送信するには、有効な Webhook URL が必要です。",
     "Webhook_Dialog_Error_Invalid": "無效な Webhook URL",
