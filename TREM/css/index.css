@@ -1222,11 +1222,7 @@ svg#svg-defs {
 }
 
 stop.alert-start {
-	stop-color: rgba(255, 0, 0, 0.05);
-}
-
-stop.alert-mid {
-	stop-color: rgba(255, 0, 0, 0.1);
+	stop-color: rgba(255, 0, 0, 0.01);
 }
 
 stop.alert-stop {
@@ -1234,11 +1230,7 @@ stop.alert-stop {
 }
 
 stop.pred-start {
-	stop-color: rgba(255, 165, 0, 0.05);
-}
-
-stop.pred-mid {
-	stop-color: rgba(255, 165, 0, 0.1);
+	stop-color: rgba(255, 165, 0, 0.01);
 }
 
 stop.pred-stop {
