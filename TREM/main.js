@@ -60,9 +60,9 @@ function createWindow() {
 	MainWindow = TREM.Window.set("main", new BrowserWindow({
 		title          : TREM.Localization.getString("Application_Title"),
 		width          : 1280,
-		minWidth       : 960,
-		height         : 800,
-		minHeight      : 600,
+		minWidth       : 1280,
+		height         : 720,
+		minHeight      : 720,
 		resizable      : true,
 		show           : false,
 		icon           : "TREM.ico",
@@ -79,7 +79,7 @@ function createWindow() {
 	require("@electron/remote/main").enable(MainWindow.webContents);
 	process.env.window = MainWindow.id;
 	MainWindow.loadFile("./index.html");
-	MainWindow.setAspectRatio(16 / 10);
+	MainWindow.setAspectRatio(16 / 9);
 	MainWindow.setMenu(null);
 	MainWindow.webContents.on("did-finish-load", () => {
 		MainWindow.webContents.send("setting", TREM.Configuration._data);
