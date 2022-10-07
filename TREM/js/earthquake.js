@@ -70,6 +70,7 @@ let EEWshotC = 0;
 let Response = {};
 let replay = 0;
 let replayT = 0;
+let replaytestEEW = 0;
 let Second = -1;
 let mapLock = false;
 let PAlertT = 0;
@@ -109,6 +110,12 @@ win.on("leave-full-screen", () => {
 	if (fullscreenTipTimeout) clearTimeout(fullscreenTipTimeout);
 });
 
+function replayReportGET(){
+	document.getElementById("togglenav_btn").classList.remove("hide");
+	document.getElementById("stopReplay").classList.add("hide");
+	ReportGET();
+}
+
 async function init() {
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
@@ -138,9 +145,7 @@ async function init() {
 					time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 					if (NOW.getTime() - replayT > 180_000) {
 						replay = 0;
-						document.getElementById("togglenav_btn").classList.remove("hide");
-						document.getElementById("stopReplay").classList.add("hide");
-						ReportGET();
+						replayReportGET();
 					}
 				} else {
 					if (time.classList.contains("replay"))
@@ -148,6 +153,9 @@ async function init() {
 					if (time.classList.contains("desynced"))
 						time.classList.remove("desynced");
 					time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
+					if (NOW.getTime() - replaytestEEW > 180_000) {
+						replayReportGET();
+					}
 				}
 				let GetDataState = "";
 				if (GetData) {
@@ -1364,6 +1372,10 @@ const stopReplay = function() {
 };
 
 ipcMain.on("testEEW", () => {
+	toggleNav(false);
+	document.getElementById("togglenav_btn").classList.add("hide");
+	document.getElementById("stopReplay").classList.remove("hide");
+	replaytestEEW = NOW.getTime();
 	Server = [];
 	if (localStorage.TestID != undefined) {
 		const list = localStorage.TestID.split(",");
@@ -1385,7 +1397,7 @@ ipcMain.on("testEEW", () => {
 			}, 100);
 		delete localStorage.TestID;
 	} else {
-		dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+		dump({ level: 0, message: "Start EEW Test No TestID", origin: "EEW" });
 		const data = {
 			Function      : "earthquake",
 			Type          : "test",
