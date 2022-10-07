@@ -185,7 +185,7 @@ async function init() {
 			}, 250);
 
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
-		if (!map)
+		if (!map) {
 			map = L.map("map",
 				{
 					edgeBufferTiles    : 1,
@@ -198,8 +198,8 @@ async function init() {
 					preferCanvas    : true,
 					zoomSnap        : 0.25,
 					zoomDelta       : 0.5,
-					zoomAnimation   : false,
-					fadeAnimation   : false,
+					zoomAnimation   : true,
+					fadeAnimation   : setting["map.animation"],
 					doubleClickZoom : false,
 					zoomControl     : false,
 				})
@@ -235,6 +235,8 @@ async function init() {
 							}
 						}
 				});
+			map._zoomAnimated = setting["map.animation"];
+		}
 
 
 		if (!mapTW)
@@ -244,6 +246,7 @@ async function init() {
 					zoomControl        : false,
 					closePopupOnClick  : false,
 					preferCanvas       : true,
+					zoomAnimation      : false,
 					fadeAnimation      : false,
 					dragging           : false,
 					touchZoom          : false,
@@ -256,7 +259,7 @@ async function init() {
 				.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
 
 
-		if (!mapReport)
+		if (!mapReport) {
 			mapReport = L.map("map-report",
 				{
 					attributionControl : false,
@@ -268,14 +271,16 @@ async function init() {
 					preferCanvas    : true,
 					zoomSnap        : 0.5,
 					zoomDelta       : 0.5,
-					zoomAnimation   : false,
-					fadeAnimation   : false,
+					zoomAnimation   : true,
+					fadeAnimation   : setting["map.animation"],
 					zoomControl     : false,
 					doubleClickZoom : false,
 					keyboard        : false,
 				})
 				.fitBounds([[25.35, 119.65], [21.85, 124.05]])
 				.on("click", () => mapReport.fitBounds([[25.35, 119], [21.9, 123]]));
+			mapReport._zoomAnimated = setting["map.animation"];
+		}
 
 		progressbar.value = (1 / progressStep) * 2;
 	})();
@@ -1485,6 +1490,12 @@ ipcRenderer.on("config:color", (event, key, value) => {
 ipcRenderer.on("config:dark", updateMapColors);
 ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
+});
+ipcRenderer.on("config:mapanimation", (event, value) => {
+	map._fadeAnimated = value;
+	map._zoomAnimated = value;
+	mapReport._fadeAnimated = value;
+	mapReport._zoomAnimated = value;
 });
 // #endregion
 

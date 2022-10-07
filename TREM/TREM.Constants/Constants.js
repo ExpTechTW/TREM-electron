@@ -96,6 +96,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"map.animation": {
+			type  : "toggle",
+			value : false,
+		},
 		"report.show": {
 			type  : "toggle",
 			value : true,

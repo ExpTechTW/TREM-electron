@@ -297,6 +297,11 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
+		case "map.animation": {
+			emitAllWindow("config:mapanimation", value);
+			break;
+		}
+
 		default:
 			break;
 	}
