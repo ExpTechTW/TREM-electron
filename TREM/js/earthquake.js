@@ -45,7 +45,7 @@ let PGALimit = 0;
 let PGAtag = -1;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 let Info = { Notify: [], Warn: [], Focus: [] };
-const Focus = [];
+const Focus = [23.608428, 121.699168, 7.75];
 let PGAmark = false;
 let INFO = [];
 let TINFO = 0;
@@ -207,6 +207,9 @@ async function init() {
 				}
 				mapLock = false;
 				TREM.Earthquake.emit("focus", {}, true);
+			});
+			map.on("contextmenu", () => {
+				TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 			});
 			map.on("drag", () => mapLock = true);
 			map.on("zoomend", () => {
