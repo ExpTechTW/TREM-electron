@@ -11,6 +11,8 @@
     "Setting_Dialog_Reset_Description": "Are you sure that you really want to reset all settings?\nThis action is irreversible.",
     "Setting_Title": "TREM | Settings",
     "Setting_Update_Latest": "No updates available.",
+    "Setting_Update": "⬆ Update Available v{0}",
+    "Setting_Update_download": "Manually click to download updates",
     "Webhook_Dialog_Error_Title": "Webhook Error",
     "Webhook_Dialog_Error_Empty": "A valid webhook URL is needed to send a test message.",
     "Webhook_Dialog_Error_Invalid": "Invalid Webhook URL",

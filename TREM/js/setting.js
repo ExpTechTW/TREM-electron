@@ -467,8 +467,12 @@ const stepUnlockRange = (e) => {
 
 const checkUpdate = async () => {
 	const response = await ipcRenderer.invoke("checkUpdate");
-	if (!response)
+	if (!response){
 		document.getElementById("updateVersion").innerHTML = `<span class="material-symbols-rounded icon">done</span> ${TREM.Localization.getString("Setting_Update_Latest")}`;
+	}else{
+		document.getElementById("updateVersion").innerHTML = `<span class="material-symbols-rounded icona">priority_high</span> ${TREM.Localization.getString("Setting_Update").format(response.tag)}<button class="flat-button md3-ripple" role="link" onclick="openURL('${response.files[0].browser_download_url}')">
+		${TREM.Localization.getString("Setting_Update_download")}</button>`;
+	}
 };
 
 /*

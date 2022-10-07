@@ -11,6 +11,8 @@
     "Setting_Dialog_Reset_Description": "Вы уверены, что действительно хотите сбросить все настройки?\nэто действие необратимо",
     "Setting_Title": "TREM | Настройки",
     "Setting_Update_Latest": null,
+    "Setting_Update": null,
+    "Setting_Update_download": null,
     "Webhook_Dialog_Error_Title": "Ошибка Webhook",
     "Webhook_Dialog_Error_Empty": "Для отправки тестового сообщения необходим действительный ссылка Webhook",
     "Webhook_Dialog_Error_Invalid": "Неверный ссылка Webhook",

@@ -11,6 +11,8 @@
     "Setting_Dialog_Reset_Description": "您確定您真的要重置所有設定嗎\n這個動作將無法挽回",
     "Setting_Title": "TREM | 設定",
     "Setting_Update_Latest": "目前已是最新版",
+    "Setting_Update": "有可用的更新 v{0}",
+    "Setting_Update_download": "手動點擊下載更新",
     "Webhook_Dialog_Error_Title": "Webhook 錯誤",
     "Webhook_Dialog_Error_Empty": "發送測試訊息需要有效的 Webhook 連結。",
     "Webhook_Dialog_Error_Invalid": "無效的 Webhook 連結",
