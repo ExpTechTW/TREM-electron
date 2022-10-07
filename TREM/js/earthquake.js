@@ -635,9 +635,9 @@ async function handler(response) {
 			if (PalertT != PAlert.timestamp && Object.keys(PLoc).length != 0) {
 				PalertT = PAlert.timestamp;
 				if (Pgeojson == null) {
-					if (setting["Real-time.show"]) win.show();
-					if (setting["Real-time.cover"]) win.setAlwaysOnTop(true);
-					win.setAlwaysOnTop(false);
+					if (setting["Real-time.show"]) win.showInactive();
+					if (setting["Real-time.cover"]) win.moveTop();
+					win.flashFrame(true);
 					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
 				}
 				if (Pgeojson != null) map.removeLayer(Pgeojson);
@@ -754,10 +754,11 @@ async function handler(response) {
 				Shot     : 1,
 			});
 		}, 2250);
-		if (setting["Real-time.show"])
-			win.show();
-		if (setting["Real-time.cover"]) win.setAlwaysOnTop(true);
-		win.setAlwaysOnTop(false);
+
+		if (setting["Real-time.show"]) win.showInactive();
+		if (setting["Real-time.cover"]) win.moveTop();
+		win.flashFrame(true);
+
 		PGAtag = All[0].intensity;
 	}
 	let list = [];
@@ -1526,11 +1527,10 @@ async function FCMdata(data) {
 			Pgeojson = null;
 		}
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
-		if (setting["report.show"]) {
-			win.show();
-			if (setting["report.cover"]) win.setAlwaysOnTop(true);
-			win.setAlwaysOnTop(false);
-		}
+
+		if (setting["report.show"]) win.showInactive();
+		if (setting["report.cover"]) win.moveTop();
+
 		if (setting["audio.report"]) audioPlay("./audio/Report.wav");
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
 		const report = await getReportData();
@@ -1626,12 +1626,13 @@ TREM.Earthquake.on("eew", async (data) => {
 				TINFO = 0;
 			else TINFO++;
 		}, 5000);
-		if (setting["eew.show"] && Alert) {
-			win.show();
+
+		if (Alert) {
+			if (setting["eew.show"]) win.showInactive();
+			if (setting["eew.cover"]) win.moveTop();
 			win.flashFrame(true);
-			if (setting["eew.cover"]) win.setAlwaysOnTop(true);
-			win.setAlwaysOnTop(false);
 		}
+
 		EEWT.id = data.ID;
 		if (setting["audio.eew"] && Alert) {
 			audioPlay("./audio/EEW.wav");
@@ -1874,11 +1875,10 @@ TREM.Earthquake.on("eew", async (data) => {
 TREM.Earthquake.on("tsunami", (data) => {
 	if (data.Version == 1) {
 		new Notification("海嘯警報", { body: `${data["UTC+8"]} 發生 ${data.Scale} 地震\n\n東經: ${data.EastLongitude} 度\n北緯: ${data.NorthLatitude} 度`, icon: "TREM.ico" });
-		if (setting["report.show"]) {
-			win.show();
-			if (setting["report.cover"]) win.setAlwaysOnTop(true);
-			win.setAlwaysOnTop(false);
-		}
+
+		if (setting["report.show"]) win.showInactive();
+		if (setting["report.cover"]) win.moveTop();
+
 		if (setting["audio.report"]) audioPlay("./audio/Water.wav");
 		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 	}
