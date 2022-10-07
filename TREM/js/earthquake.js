@@ -435,7 +435,7 @@ async function handler(response) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.PGA);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = NOW.getTime() - (Sdata.alert * 1000 ?? 0) < 60000;
+		const Alert = Sdata.alert;
 		const Intensity = (Alert && Json.Alert) ? Sdata.I :
 			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
 				(!Alert) ? 0 :
