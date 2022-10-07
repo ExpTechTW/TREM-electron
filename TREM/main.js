@@ -1,7 +1,9 @@
 const { BrowserWindow, Menu, Notification, app: TREM, Tray, ipcMain, nativeImage, shell } = require("electron");
 const Configuration = require("./TREM.Configuration/Configuration");
+const { autoUpdater } = require("electron-updater");
 const fetch = require("node-fetch").default;
 const fs = require("fs");
+const logger = require("electron-log");
 const path = require("path");
 const pushReceiver = require("electron-fcm-push-receiver");
 
@@ -9,6 +11,10 @@ TREM.Configuration = new Configuration(TREM);
 TREM.Utils = require("./TREM.Utils/Utils.js");
 TREM.Localization = new (require("./TREM.Localization/Localization"))(TREM.Configuration.data["general.locale"], TREM.getLocale());
 TREM.Window = new Map();
+
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.logger = logger;
 
 /**
  * @type {Tray}
@@ -29,7 +35,7 @@ if (fs.existsSync(latestLog)) {
 
 if (!TREM.Configuration.data["compatibility.hwaccel"]) {
 	TREM.disableHardwareAcceleration();
-	console.log("Hardware Acceleration is disabled.");
+	logger.info("Hardware Acceleration is disabled.");
 }
 
 /**
@@ -144,61 +150,58 @@ else {
 	});
 }
 
-let updateChecker;
-TREM.once("ready", async () => {
-	if (TREM.Configuration.data["update.mode"] != "never") {
-		const updater = async () => {
-			const response = await checkUpdate();
-			if (response) {
-				switch (TREM.Configuration.data["update.mode"]) {
-					case "install": {
-						const filepath = await TREM.Utils.downloadFile(
-							response.files[0].browser_download_url,
-							path.resolve(TREM.getPath("temp"), response.files[0].name),
-							(bytes, percent) => {
-								if (MainWindow) MainWindow.setProgressBar(percent / 100);
-							},
-							response.files[0].size,
-						);
-						if (MainWindow) MainWindow.setProgressBar(0);
-						shell.openPath(filepath);
-						TREM.exit(0);
-						break;
-					}
+TREM.on("ready", () => {
+	autoUpdater.checkForUpdates();
+});
 
-					case "download": {
-						await TREM.Utils.downloadFile(
-							response.files[0].browser_download_url,
-							path.resolve(TREM.getPath("temp"), response.files[0].name),
-							(bytes, percent) => {
-								if (MainWindow) MainWindow.setProgressBar(percent / 100);
-							},
-							response.files[0].size,
-						);
-						if (MainWindow) MainWindow.setProgressBar(0);
-						break;
-					}
-
-					case "notify": {
-						new Notification({
-							title : TREM.Localization.getString("Notification_Update_Title"),
-							body  : TREM.Localization.getString("Notification_Update_Body").format(TREM.getVersion(), response.tag),
-							icon  : "TREM.ico",
-						}).on("click", () => {
-							shell.openExternal(response.url);
-						}).show();
-						break;
-					}
-
-					default:
-						break;
-				}
-				clearInterval(updateChecker);
+autoUpdater.on("update-available", (info) => {
+	if (TREM.Configuration.data["update.mode"] != "never")
+		switch (TREM.Configuration.data["update.mode"]) {
+			case "install": {
+				autoUpdater.downloadUpdate();
+				break;
 			}
-		};
-		updateChecker = setInterval(updater, 600_000);
-		await updater();
-	}
+
+			case "download": {
+				autoUpdater.downloadUpdate();
+				break;
+			}
+
+			case "notify": {
+				new Notification({
+					title : TREM.Localization.getString("Notification_Update_Title"),
+					body  : TREM.Localization.getString("Notification_Update_Body").format(TREM.getVersion(), info.version),
+					icon  : "TREM.ico",
+				}).on("click", () => {
+					logger.info(info);
+					shell.openExternal(`https://github.com/ExpTechTW/TREM/releases/tag/5.1.4${info.version}`);
+				}).show();
+				break;
+			}
+
+			default:
+				break;
+		}
+});
+
+autoUpdater.on("update-not-available", (info) => {
+	logger.info("No new updates found");
+});
+
+autoUpdater.on("error", (err) => {
+	logger.error(err);
+});
+
+autoUpdater.on("download-progress", (progressObj) => {
+	if (MainWindow)
+		MainWindow.setProgressBar(progressObj.percent);
+});
+
+autoUpdater.on("update-downloaded", (info) => {
+	if (MainWindow)
+		MainWindow.setProgressBar(0);
+	if (TREM.Configuration.data["update.mode"] == "install")
+		autoUpdater.quitAndInstall();
 });
 
 TREM.on("before-quit", () => {

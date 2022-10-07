@@ -465,12 +465,6 @@ const stepUnlockRange = (e) => {
 		$("input[type=range]")[0].step = 0.01;
 };
 
-const checkUpdate = async () => {
-	const response = await ipcRenderer.invoke("checkUpdate");
-	if (!response)
-		document.getElementById("updateVersion").innerHTML = `<span class="material-symbols-rounded icon">done</span> ${TREM.Localization.getString("Setting_Update_Latest")}`;
-};
-
 /*
 // register the handler
 document.addEventListener("keydown", stepLockRange, false);

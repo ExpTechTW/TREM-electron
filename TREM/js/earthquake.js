@@ -35,7 +35,8 @@ let ReportMarkID = null;
 const MarkList = [];
 const EarthquakeList = {};
 let marker = null;
-let map, mapTW;
+let map, mapTW, mapReport;
+let map_base, mapTW_base, mapReport_base;
 let PGAMainLock = false;
 const Station = {};
 const PGA = {};
@@ -62,7 +63,6 @@ let PGAjson = {};
 let PalertT = 0;
 let PGAMainClock = null;
 let Pgeojson = null;
-let map_base, mapTW_base;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -84,6 +84,10 @@ let EEWAlert = false;
 let Cancel = false;
 let PGACancel = false;
 let IntensityListTime = 0;
+const ReportViewStates = {
+	id : null,
+	ui : true,
+};
 // #endregion
 
 // #region 初始化
@@ -181,75 +185,97 @@ async function init() {
 			}, 250);
 
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
-		if (!map) {
-			map = L.map("map", {
-				edgeBufferTiles    : 1,
-				attributionControl : false,
-				closePopupOnClick  : false,
-				maxBounds          : [
-					[60, 50],
-					[10, 180],
-				],
-				preferCanvas  : true,
-				zoomSnap      : 0.25,
-				zoomDelta     : 0.5,
-				zoomAnimation : false,
-				fadeAnimation : false,
-			}).fitBounds([[25.35, 119.65], [21.85, 124.05]]);
-			map.doubleClickZoom.disable();
-			map.removeControl(map.zoomControl);
-			map.on("click", () => {
-				if (ReportMarkID != null) {
-					ReportMarkID = null;
-					for (let index = 0; index < MarkList.length; index++)
-						map.removeLayer(MarkList[index]);
-					TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-				}
-				mapLock = false;
-				TREM.Earthquake.emit("focus", {}, true);
-			});
-			map.on("contextmenu", () => {
-				TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-			});
-			map.on("drag", () => mapLock = true);
-			map.on("zoomend", () => {
-				if (map.getZoom() >= 11)
-					for (const key in Station) {
-						const tooltip = Station[key].getTooltip();
-						if (tooltip) {
-							Station[key].unbindTooltip();
-							tooltip.options.permanent = true;
-							Station[key].bindTooltip(tooltip);
-						}
+		if (!map)
+			map = L.map("map",
+				{
+					edgeBufferTiles    : 1,
+					attributionControl : false,
+					closePopupOnClick  : false,
+					maxBounds          : [
+						[60, 50],
+						[10, 180],
+					],
+					preferCanvas    : true,
+					zoomSnap        : 0.25,
+					zoomDelta       : 0.5,
+					zoomAnimation   : false,
+					fadeAnimation   : false,
+					doubleClickZoom : false,
+					zoomControl     : false,
+				})
+				.fitBounds([[25.35, 119.65], [21.85, 124.05]])
+				.on("click", () => {
+					if (ReportMarkID != null) {
+						ReportMarkID = null;
+						for (let index = 0; index < MarkList.length; index++)
+							map.removeLayer(MarkList[index]);
+						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 					}
-				else
-					for (const key in Station) {
-						const tooltip = Station[key].getTooltip();
-						if (tooltip && !Station[key].keepTooltipAlive) {
-							Station[key].unbindTooltip();
-							tooltip.options.permanent = false;
-							Station[key].bindTooltip(tooltip);
+					mapLock = false;
+					TREM.Earthquake.emit("focus", {}, true);
+				})
+				.on("drag", () => mapLock = true)
+				.on("zoomend", () => {
+					if (map.getZoom() >= 11)
+						for (const key in Station) {
+							const tooltip = Station[key].getTooltip();
+							if (tooltip) {
+								Station[key].unbindTooltip();
+								tooltip.options.permanent = true;
+								Station[key].bindTooltip(tooltip);
+							}
 						}
-					}
-			});
-		}
+					else
+						for (const key in Station) {
+							const tooltip = Station[key].getTooltip();
+							if (tooltip && !Station[key].keepTooltipAlive) {
+								Station[key].unbindTooltip();
+								tooltip.options.permanent = false;
+								Station[key].bindTooltip(tooltip);
+							}
+						}
+				});
 
-		if (!mapTW) {
-			mapTW = L.map("map-tw", {
-				attributionControl : false,
-				zoomControl        : false,
-				closePopupOnClick  : false,
-				preferCanvas       : true,
-				fadeAnimation      : false,
-				dragging           : false,
-				touchZoom          : false,
-				doubleClickZoom    : false,
-				scrollWheelZoom    : false,
-				boxZoom            : false,
-				keyboard           : false,
-			}).setView([23.608428, 120.799168], 7);
-			mapTW.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
-		}
+
+		if (!mapTW)
+			mapTW = L.map("map-tw",
+				{
+					attributionControl : false,
+					zoomControl        : false,
+					closePopupOnClick  : false,
+					preferCanvas       : true,
+					fadeAnimation      : false,
+					dragging           : false,
+					touchZoom          : false,
+					doubleClickZoom    : false,
+					scrollWheelZoom    : false,
+					boxZoom            : false,
+					keyboard           : false,
+				})
+				.setView([23.608428, 120.799168], 7)
+				.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
+
+
+		if (!mapReport)
+			mapReport = L.map("map-report",
+				{
+					attributionControl : false,
+					closePopupOnClick  : false,
+					maxBounds          : [
+						[30, 125],
+						[15, 115],
+					],
+					preferCanvas    : true,
+					zoomSnap        : 0.5,
+					zoomDelta       : 0.5,
+					zoomAnimation   : false,
+					fadeAnimation   : false,
+					zoomControl     : false,
+					doubleClickZoom : false,
+					keyboard        : false,
+				})
+				.fitBounds([[25.35, 119.65], [21.85, 124.05]])
+				.on("click", () => mapReport.fitBounds([[25.35, 119], [21.9, 123]]));
 
 		progressbar.value = (1 / progressStep) * 2;
 	})();
@@ -258,7 +284,6 @@ async function init() {
 		setUserLocationMarker(setting["location.town"]);
 		progressbar.value = (1 / progressStep) * 3;
 	})();
-
 
 	await (async () => {
 		const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
@@ -312,6 +337,22 @@ async function init() {
 					fillOpacity : 0,
 				},
 			}).addTo(mapTW);
+
+		if (!mapReport_base)
+			mapReport_base = L.geoJson.vt(MapData.tw_county, {
+				minZoom   : 8,
+				maxZoom   : 10,
+				tolerance : 10,
+				buffer    : 256,
+				debug     : 0,
+				zIndex    : 10,
+				style     : {
+					weight      : 0.8,
+					color       : colors.primary,
+					fillColor   : "transparent",
+					fillOpacity : 0,
+				},
+			}).addTo(mapReport);
 
 		progressbar.value = (1 / progressStep) * 4;
 	})().catch(e => dump({ level: 2, message: e }));
@@ -385,6 +426,7 @@ async function init() {
 	}, 500);
 }
 // #endregion
+
 function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 	if (PGAMainClock) clearInterval(PGAMainClock);
@@ -930,7 +972,7 @@ async function ReportClick(time) {
 	} else {
 		ReportMarkID = time;
 		for (let index = 0; index < MarkList.length; index++)
-			map.removeLayer(MarkList[index]);
+			mapReport.removeLayer(MarkList[index]);
 
 		const LIST = [];
 		const body = {
@@ -963,7 +1005,7 @@ async function ReportClick(time) {
 											className : `map-intensity-icon ${IntensityToClassString(IntensityN(Intensity))}`,
 										}),
 										zIndexOffset: 2000 + IntensityN(Intensity) * 50,
-									}).addTo(map);
+									}).addTo(mapReport);
 
 								// eslint-disable-next-line no-shadow
 								let PGA = "";
@@ -971,9 +1013,6 @@ async function ReportClick(time) {
 								ReportMark.bindPopup(`站名: ${Station.stationName}<br>代號: ${Station.stationCode}<br>經度: ${Station.stationLon.$t}<br>緯度: ${Station.stationLat.$t}<br>震央距: ${Station.distance.$t}<br>方位角: ${Station.azimuth.$t}<br>震度: ${Intensity}<br>${PGA}`);
 								MarkList.push(ReportMark);
 							}
-
-						map.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
-						// TREM.Earthquake.emit("focus", { center: [+json.NorthLatitude, +json.EastLongitude], size: 7.75 });
 
 						MarkList.push(
 							L.marker(
@@ -986,7 +1025,7 @@ async function ReportClick(time) {
 									zIndexOffset: 10000,
 								})
 								.bindPopup(`編號: ${json.No}<br>經度: ${json.EastLongitude}<br>緯度: ${json.NorthLatitude}<br>深度: ${json.Depth}<br>規模: ${json.Scale}<br>位置: ${json.Location}<br>時間: ${json["UTC+8"]}<br><br><a onclick="openURL('${json.Web}')">網頁</a><br><a onclick="openURL('${json.EventImage}')">地震報告</a><br><a onclick="openURL('${json.ShakeImage}')">震度分布</a>`)
-								.addTo(map),
+								.addTo(mapReport),
 						);
 						return false;
 					}
@@ -1031,15 +1070,12 @@ async function ReportClick(time) {
 							zIndexOffset : 2000 + IntensityN(LIST[i].Level) * 50,
 						})
 						.bindPopup(`站名: ${LIST[i].Name}<br>經度: ${LIST[i].Long}<br>緯度: ${LIST[i].Lat}<br>震度: ${LIST[i].Level}`)
-						.addTo(map),
+						.addTo(mapReport),
 				);
-
-			map.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
-			// TREM.Earthquake.emit("focus", { center: [ReportCache[time].epicenterLat, +ReportCache[time].epicenterLon], size: 7.75 });
 
 			MarkList.push(
 				L.marker(
-					[Number(ReportCache[time].epicenterLat), Number(ReportCache[time].epicenterLon)],
+					[+ReportCache[time].epicenterLat, +ReportCache[time].epicenterLon],
 					{
 						icon: L.icon({
 							iconUrl  : "./image/star.png",
@@ -1048,10 +1084,13 @@ async function ReportClick(time) {
 						zIndexOffset: 10000,
 					})
 					.bindPopup(`編號: ${ReportCache[time].earthquakeNo % 100 ? ReportCache[time].earthquakeNo : "無（小地區小區域有感地震）"}<br>經度: ${ReportCache[time].epicenterLon}<br>緯度: ${ReportCache[time].epicenterLat}<br>深度: ${ReportCache[time].depth}<br>規模: ${ReportCache[time].magnitudeValue}<br>位置: ${ReportCache[time].location}<br>時間: ${ReportCache[time].originTime}`)
-					.addTo(map),
+					.addTo(mapReport),
 			);
 		}
 	}
+
+	changeView("report", "#reportView_btn");
+	mapReport.fitBounds([[25.35, 119], [21.9, 123]]);
 }
 const openURL = url => {
 	shell.openExternal(url);
@@ -2337,3 +2376,23 @@ function updateText() {
 	else
 		Catch.innerHTML = "";
 }
+
+const changeView = (args, el, event) => {
+	if (event instanceof KeyboardEvent && event?.key !== "Enter" && event?.key !== " ")
+		return;
+
+	const currentel = $(".view.show");
+	const changeel = $(`#${args}`);
+
+	if (changeel.attr("id") == currentel.attr("id")) return;
+
+	const currentnav = $(".active");
+	currentnav.removeClass("active");
+	$(el)?.addClass("active");
+
+	currentel.removeClass("show");
+	changeel.addClass("show");
+
+	if (changeel.attr("id") == "report")
+		mapReport.invalidateSize();
+};
