@@ -179,6 +179,11 @@ kbd {
 	align-self: flex-end;
 }
 
+#nav-rail > button.active {
+	background-color: rgb(var(--md-sys-color-secondary-container));
+	align-self: flex-end;
+}
+
 #load {
 	z-index: 25560;
 	position: fixed;

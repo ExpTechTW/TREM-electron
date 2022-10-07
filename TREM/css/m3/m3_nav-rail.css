@@ -17,15 +17,23 @@
     transition: .1s ease-in-out;
 }
 
-.nav-rail .nav-rail-button:hover {
+.nav-rail .nav-rail-button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: transparent;
+    border-radius: 28px;
+    transition: background-color .1s ease-in-out;
+}
+
+.nav-rail .nav-rail-button:hover::after {
     background-color: rgba(var(--md-sys-color-on-surface), .08);
 }
 
-.nav-rail .nav-rail-button:focus {
-    background-color: rgba(var(--md-sys-color-on-surface), .12);
-}
-
-.nav-rail .nav-rail-button:active {
+.nav-rail .nav-rail-button:focus::after {
     background-color: rgba(var(--md-sys-color-on-surface), .12);
 }
 
