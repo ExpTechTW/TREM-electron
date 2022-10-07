@@ -110,12 +110,6 @@ win.on("leave-full-screen", () => {
 	if (fullscreenTipTimeout) clearTimeout(fullscreenTipTimeout);
 });
 
-function replayReportGET(){
-	document.getElementById("togglenav_btn").classList.remove("hide");
-	document.getElementById("stopReplay").classList.add("hide");
-	ReportGET();
-}
-
 async function init() {
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
@@ -145,7 +139,7 @@ async function init() {
 					time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 					if (NOW.getTime() - replayT > 180_000) {
 						replay = 0;
-						replayReportGET();
+						stopReplay();
 					}
 				} else {
 					if (time.classList.contains("replay"))
@@ -154,7 +148,7 @@ async function init() {
 						time.classList.remove("desynced");
 					time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 					if (NOW.getTime() - replaytestEEW > 180_000) {
-						replayReportGET();
+						stopReplay();
 					}
 				}
 				let GetDataState = "";
@@ -1226,9 +1220,7 @@ function addReport(report, prepend = false) {
 				replay = new Date(report.originTime).getTime() - 25000;
 				replayT = NOW.getTime();
 			}
-			toggleNav(false);
-			document.getElementById("togglenav_btn").classList.add("hide");
-			document.getElementById("stopReplay").classList.remove("hide");
+			stopReplaybtn();
 		});
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
@@ -1371,10 +1363,14 @@ const stopReplay = function() {
 	document.getElementById("stopReplay").classList.add("hide");
 };
 
-ipcMain.on("testEEW", () => {
+function stopReplaybtn(){
 	toggleNav(false);
 	document.getElementById("togglenav_btn").classList.add("hide");
 	document.getElementById("stopReplay").classList.remove("hide");
+}
+
+ipcMain.on("testEEW", () => {
+	stopReplaybtn();
 	replaytestEEW = NOW.getTime();
 	Server = [];
 	if (localStorage.TestID != undefined) {
@@ -1536,6 +1532,8 @@ async function FCMdata(data) {
 TREM.Earthquake.on("eew", async (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.debug(data);
+
+	stopReplaybtn();
 
 	// handler
 	if (EarthquakeList[data.ID] == undefined) EarthquakeList[data.ID] = {};
