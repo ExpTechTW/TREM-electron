@@ -53,6 +53,15 @@ export function argbFromRgb(red, green, blue) {
         0;
 }
 /**
+ * Converts a color from linear RGB components to ARGB format.
+ */
+export function argbFromLinrgb(linrgb) {
+    const r = delinearized(linrgb[0]);
+    const g = delinearized(linrgb[1]);
+    const b = delinearized(linrgb[2]);
+    return argbFromRgb(r, g, b);
+}
+/**
  * Returns the alpha component of a color in ARGB format.
  */
 export function alphaFromArgb(argb) {
@@ -156,18 +165,9 @@ export function labFromArgb(argb) {
  * matching L*
  */
 export function argbFromLstar(lstar) {
-    const fy = (lstar + 16.0) / 116.0;
-    const fz = fy;
-    const fx = fy;
-    const kappa = 24389.0 / 27.0;
-    const epsilon = 216.0 / 24389.0;
-    const lExceedsEpsilonKappa = lstar > 8.0;
-    const y = lExceedsEpsilonKappa ? fy * fy * fy : lstar / kappa;
-    const cubeExceedEpsilon = fy * fy * fy > epsilon;
-    const x = cubeExceedEpsilon ? fx * fx * fx : lstar / kappa;
-    const z = cubeExceedEpsilon ? fz * fz * fz : lstar / kappa;
-    const whitePoint = WHITE_POINT_D65;
-    return argbFromXyz(x * whitePoint[0], y * whitePoint[1], z * whitePoint[2]);
+    const y = yFromLstar(lstar);
+    const component = delinearized(y);
+    return argbFromRgb(component, component, component);
 }
 /**
  * Computes the L* value of a color in ARGB representation.
@@ -176,15 +176,8 @@ export function argbFromLstar(lstar) {
  * @return L*, from L*a*b*, coordinate of the color
  */
 export function lstarFromArgb(argb) {
-    const y = xyzFromArgb(argb)[1] / 100.0;
-    const e = 216.0 / 24389.0;
-    if (y <= e) {
-        return 24389.0 / 27.0 * y;
-    }
-    else {
-        const yIntermediate = Math.pow(y, 1.0 / 3.0);
-        return 116.0 * yIntermediate - 16.0;
-    }
+    const y = xyzFromArgb(argb)[1];
+    return 116.0 * labF(y / 100.0) - 16.0;
 }
 /**
  * Converts an L* value to a Y value.
@@ -198,13 +191,7 @@ export function lstarFromArgb(argb) {
  * @return Y in XYZ
  */
 export function yFromLstar(lstar) {
-    const ke = 8.0;
-    if (lstar > ke) {
-        return Math.pow((lstar + 16.0) / 116.0, 3.0) * 100.0;
-    }
-    else {
-        return lstar / (24389.0 / 27.0) * 100.0;
-    }
+    return 100.0 * labInvf((lstar + 16.0) / 116.0);
 }
 /**
  * Linearizes an RGB component.

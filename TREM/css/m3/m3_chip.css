@@ -1,0 +1,86 @@
+.chip > input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+	margin: 0;
+	padding: 0;
+}
+
+.chip {
+	position: relative;
+	margin-right: 8px;
+}
+
+.chip > .chip-label {
+	position: relative;
+	height: 32px;
+	padding-right: 16px;
+	background-color: rgb(var(--md-sys-color-surface));
+	outline: 1px solid rgb(var(--md-sys-color-outline));
+	border-radius: 8px;
+	color: rgb(var(--md-sys-color-on-surface-variant));
+	white-space: nowrap;
+	line-height: 32px;
+	transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out,
+		padding 0.1s ease-in-out, box-shadow 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.chip > input:checked + .chip-label {
+	padding-right: 16px;
+	outline: 0;
+	background-color: rgb(var(--md-sys-color-secondary-container));
+	color: rgb(var(--md-sys-color-on-secondary-container));
+}
+
+.chip > input:disabled:not(:checked) + .chip-label {
+	outline-color: rgba(var(--md-sys-color-on-surface), 0.12);
+	color: rgba(var(--md-sys-color-on-surface), 0.38);
+}
+
+.chip > input:disabled:checked + .chip-label {
+	background-color: rgba(var(--md-sys-color-on-surface), 0.12);
+	color: rgba(var(--md-sys-color-on-surface), 0.38);
+}
+
+.chip.filter > .chip-label::before {
+	content: "done";
+	display: inline-block;
+	font-family: "Material Symbols Rounded";
+	font-size: 16px;
+	width: 0;
+	padding: 0 8px;
+	vertical-align: bottom;
+	line-height: 32px;
+	opacity: 0;
+	transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out,
+		width 0.1s ease-in-out, opacity 0.1s ease-in-out;
+}
+
+.chip.filter > input:checked + .chip-label::before {
+	width: 16px;
+	opacity: 1;
+}
+
+.chip > .chip-label::after {
+	position: absolute;
+	content: "";
+	height: 100%;
+	width: 100%;
+	top: 0;
+	left: 0;
+	border-radius: inherit;
+	background-color: transparent;
+	transition: background-color 0.1s ease-in-out;
+}
+
+.chip:hover > input:not(:disabled) + .chip-label::after {
+	background-color: rgba(var(--md-sys-color-on-surface), 0.08);
+}
+
+.chip:hover > input:not(:disabled) + .chip-label {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.chip:focus > input:not(:disabled) + .chip-label::after {
+	background-color: rgba(var(--md-sys-color-on-surface), 0.08);
+}

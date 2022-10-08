@@ -43,6 +43,7 @@ export declare class Score {
      *     were not suitable for a theme, a default fallback color will be
      *     provided, Google Blue.
      */
-    static score(colorsToPopulation: Map<number, number>): number[];
+    static score(colorsToPopulation: Map<number, number>, contentColor?: boolean): number[];
     private static filter;
+    private static filterContent;
 }

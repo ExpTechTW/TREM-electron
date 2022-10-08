@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { CorePalette } from '../palettes/core_palette';
 /**
  * Represents an Android 12 color scheme, a mapping of color roles to colors.
  */
@@ -54,5 +55,50 @@ export declare class SchemeAndroid {
      * @return Dark Material color scheme, based on the color's hue.
      */
     static dark(argb: number): SchemeAndroid;
+    /**
+     * @param argb ARGB representation of a color.
+     * @return Light Android color scheme, based on the color's hue.
+     */
+    static lightContent(argb: number): SchemeAndroid;
+    /**
+     * @param argb ARGB representation of a color.
+     * @return Dark Android color scheme, based on the color's hue.
+     */
+    static darkContent(argb: number): SchemeAndroid;
+    /**
+     * Light scheme from core palette
+     */
+    static lightFromCorePalette(core: CorePalette): SchemeAndroid;
+    /**
+     * Dark scheme from core palette
+     */
+    static darkFromCorePalette(core: CorePalette): SchemeAndroid;
     private constructor();
+    toJSON(): {
+        colorAccentPrimary: number;
+        colorAccentPrimaryVariant: number;
+        colorAccentSecondary: number;
+        colorAccentSecondaryVariant: number;
+        colorAccentTertiary: number;
+        colorAccentTertiaryVariant: number;
+        textColorPrimary: number;
+        textColorSecondary: number;
+        textColorTertiary: number;
+        textColorPrimaryInverse: number;
+        textColorSecondaryInverse: number;
+        textColorTertiaryInverse: number;
+        colorBackground: number;
+        colorBackgroundFloating: number;
+        colorSurface: number;
+        colorSurfaceVariant: number;
+        colorSurfaceHighlight: number;
+        surfaceHeader: number;
+        underSurface: number;
+        offState: number;
+        accentSurface: number;
+        textPrimaryOnAccent: number;
+        textSecondaryOnAccent: number;
+        volumeBackground: number;
+        scrim: number;
+    };
 }

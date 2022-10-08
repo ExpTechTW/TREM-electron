@@ -103,6 +103,36 @@ export class SchemeAndroid {
      */
     static light(argb) {
         const core = CorePalette.of(argb);
+        return SchemeAndroid.lightFromCorePalette(core);
+    }
+    /**
+     * @param argb ARGB representation of a color.
+     * @return Dark Material color scheme, based on the color's hue.
+     */
+    static dark(argb) {
+        const core = CorePalette.of(argb);
+        return SchemeAndroid.darkFromCorePalette(core);
+    }
+    /**
+     * @param argb ARGB representation of a color.
+     * @return Light Android color scheme, based on the color's hue.
+     */
+    static lightContent(argb) {
+        const core = CorePalette.contentOf(argb);
+        return SchemeAndroid.lightFromCorePalette(core);
+    }
+    /**
+     * @param argb ARGB representation of a color.
+     * @return Dark Android color scheme, based on the color's hue.
+     */
+    static darkContent(argb) {
+        const core = CorePalette.contentOf(argb);
+        return SchemeAndroid.darkFromCorePalette(core);
+    }
+    /**
+     * Light scheme from core palette
+     */
+    static lightFromCorePalette(core) {
         return new SchemeAndroid({
             colorAccentPrimary: core.a1.tone(90),
             colorAccentPrimaryVariant: core.a1.tone(40),
@@ -132,11 +162,9 @@ export class SchemeAndroid {
         });
     }
     /**
-     * @param argb ARGB representation of a color.
-     * @return Dark Material color scheme, based on the color's hue.
+     * Dark scheme from core palette
      */
-    static dark(argb) {
-        const core = CorePalette.of(argb);
+    static darkFromCorePalette(core) {
         return new SchemeAndroid({
             colorAccentPrimary: core.a1.tone(90),
             colorAccentPrimaryVariant: core.a1.tone(70),
@@ -164,6 +192,9 @@ export class SchemeAndroid {
             volumeBackground: core.n1.tone(25),
             scrim: core.n1.tone(80),
         });
+    }
+    toJSON() {
+        return Object.assign({}, this.props);
     }
 }
 //# sourceMappingURL=scheme_android.js.map

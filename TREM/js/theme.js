@@ -1,4 +1,5 @@
 let accent, is_dark;
+
 const setThemeColor = (color, dark) => {
 	if (typeof color == "string") accent = color;
 	if (dark != undefined) is_dark = dark;
