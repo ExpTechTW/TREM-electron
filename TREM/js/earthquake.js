@@ -84,6 +84,7 @@ let EEWAlert = false;
 let Cancel = false;
 let PGACancel = false;
 let IntensityListTime = 0;
+let WarnAudio = 0;
 const ReportViewStates = {
 	id : null,
 	ui : true,
@@ -802,7 +803,16 @@ async function handler(response) {
 		}
 	}
 	if (Json.Alert) IntensityListTime = Date.now();
-	if (Date.now() - IntensityListTime > 180000) list = [];
+	if (Date.now() - IntensityListTime > 180000)
+		list = [];
+	else
+	if (Object.keys(EEW).length == 0)
+		if (Date.now() - WarnAudio > 1500 && audioList.length == 0) {
+			WarnAudio = Date.now();
+			audioPlay("audio/Warn.wav");
+		}
+
+
 	document.getElementById("rt-list").replaceChildren(...list);
 }
 
@@ -1392,6 +1402,7 @@ const stopReplay = function() {
 		replay = 0;
 		ReportGET();
 	}
+	IntensityListTime = 0;
 	All = [];
 	const data = {
 		Function      : "earthquake",
