@@ -1577,7 +1577,9 @@ async function FCMdata(data) {
 			if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
 			TREM.Earthquake.emit("eew", json);
 		} else
+			// if (json.Function != "earthquake") return;
 			TREM.Earthquake.emit("eew", json);
+
 	}
 }
 // #endregion
