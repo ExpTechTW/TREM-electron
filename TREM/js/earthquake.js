@@ -1362,7 +1362,7 @@ function IntensityToClassString(level) {
 
 // #region color
 function color(Intensity) {
-	return setting["theme.customColor"] ? setting[`theme.int.${Intensity}`]
+	return setting["theme.customColor"] ? setting[`theme.int.${Intensity ? Intensity : 1}`]
 		: ["#757575", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#F55647", "#DB1F1F", "#862DB3"][Intensity ? Intensity - 1 : Intensity];
 	// return ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"][Intensity ? Intensity - 1 : Intensity];
 }
