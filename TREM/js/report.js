@@ -4,9 +4,9 @@ TREM.Report = {
 	_filterHasReplay      : false,
 	_filterHasNumber      : false,
 	_filterMagnitude      : false,
-	_filterMagnitudeValue : false,
+	_filterMagnitudeValue : 2,
 	_filterIntensity      : false,
-	_filterIntensityValue : false,
+	_filterIntensityValue : 4,
 	_reportItemTemplate   : document.getElementById("template-report-list-item"),
 	unloadReports() {
 		document.getElementById("report-list-container").replaceChildren();
