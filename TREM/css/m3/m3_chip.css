@@ -26,7 +26,6 @@
 }
 
 .chip > input:checked + .chip-label {
-	padding-right: 16px;
 	outline: 0;
 	background-color: rgb(var(--md-sys-color-secondary-container));
 	color: rgb(var(--md-sys-color-on-secondary-container));
@@ -48,7 +47,7 @@
 	font-family: "Material Symbols Rounded";
 	font-size: 16px;
 	width: 0;
-	padding: 0 8px;
+	padding: 0 4px 0 12px;
 	vertical-align: bottom;
 	line-height: 32px;
 	opacity: 0;
@@ -71,6 +70,7 @@
 	border-radius: inherit;
 	background-color: transparent;
 	transition: background-color 0.1s ease-in-out;
+	pointer-events: none;
 }
 
 .chip:hover > input:not(:disabled) + .chip-label::after {
@@ -83,4 +83,19 @@
 
 .chip:focus > input:not(:disabled) + .chip-label::after {
 	background-color: rgba(var(--md-sys-color-on-surface), 0.08);
+}
+
+.chip.select > .chip-label {
+	padding-right: 8px;
+}
+
+.chip.select select {
+	background-color: inherit;
+	border: 0;
+	font: inherit;
+	color: inherit;
+}
+
+.chip.select select:focus-visible {
+	outline: 0;
 }

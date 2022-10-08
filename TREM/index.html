@@ -170,45 +170,60 @@
             <div class="view info" id="report">
                 <div id="report-detail">
                     <div id="report-detail-container">
-                        <div id="report-list">
-                            <div id="report-list-filter">
-                                <label for="report-filter-hasNumber" class="chip filter md3-ripple">
-                                    <input type="checkbox" id="report-filter-hasNumber">
-                                    <div class="chip-label">有編號</div>
-                                </label>
-                                <label for="report-filter-hasReplay" class="chip filter md3-ripple">
-                                    <input type="checkbox" id="report-filter-hasReplay">
-                                    <div class="chip-label">有重播</div>
-                                </label>
-                            </div>
-                            <hr class="divider">
-                            <div id="report-list-container">
-                                <template id="template-report-list-item">
-                                    <div class="report-list-item">
-                                        <div class="report-list-item-container">
-                                            <div class="report-list-item-intensity">1</div>
-                                            <div class="report-list-item-label">
-                                                <span class="report-list-item-location"></span>
-                                                <span class="report-list-item-time"></span>
-                                            </div>
-                                            <div class="report-list-item-button">
-                                                <button class="filled-tonal-button icon md3-ripple">
-                                                    <span class="material-symbols-rounded filled-tonal-button-icon">arrow_forward</span>
-                                                </button>
-                                            </div>
+                        <div id="report-detail-header">
+                            <div class="report-detail-header-title">地震報告</div>
+                        </div>
+                        <div id="report-detail-body">
+                            <div id="report-list">
+                                <div id="report-list-filter">
+                                    <label for="report-filter-hasNumber" class="chip filter md3-ripple">
+                                        <input type="checkbox" id="report-filter-hasNumber" onclick="TREM.Report._handleFilter('filterHasNumber', this.checked)">
+                                        <div class="chip-label">有編號</div>
+                                    </label>
+                                    <label for="report-filter-hasReplay" class="chip filter md3-ripple">
+                                        <input type="checkbox" id="report-filter-hasReplay" onclick="TREM.Report._handleFilter('filterHasReplay', this.checked)">
+                                        <div class="chip-label">有重播</div>
+                                    </label>
+                                    <label for="report-filter-magnitude" class="chip filter select md3-ripple">
+                                        <input type="checkbox" id="report-filter-magnitude" onclick="TREM.Report._handleFilter('filterMagnitude', this.checked)">
+                                        <div class="chip-label">
+                                            <span>規模</span>
+                                            <select id="report-filter-magnitude-value" onchange="TREM.Report._handleFilter('filterMagnitudeValue', this.options[this.selectedIndex].value)">
+                                                <option value="1">＜4</option>
+                                                <option value="2" selected>≥4</option>
+                                            </select>
                                         </div>
-                                    </div>
-                                </template>
+                                    </label>
+                                    <label for="report-filter-intensity" class="chip filter select md3-ripple">
+                                        <input type="checkbox" id="report-filter-intensity" onclick="TREM.Report._handleFilter('filterIntensity', this.checked)">
+                                        <div class="chip-label">
+                                            <span>震度</span>
+                                            <select id="report-filter-intensity-value" onchange="TREM.Report._handleFilter('filterIntensityValue', this.options[this.selectedIndex].value)">
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4" selected>4</option>
+                                                <option value="5">5-</option>
+                                                <option value="6">5+</option>
+                                                <option value="7">6-</option>
+                                                <option value="8">6+</option>
+                                                <option value="9">7</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                </div>
+                                <hr class="divider">
+                                <div id="report-list-container"></div>
                             </div>
-                        </div>
-                        <div id="report-overview">
-                            <div class="report-id"></div>
-                            <div class="report-max"></div>
-                            <div class="report"></div>
-                            <div class="report"></div>
-                        </div>
-                        <div id="report-station">
+                            <div id="report-overview">
+                                <div class="report-id"></div>
+                                <div class="report-max"></div>
+                                <div class="report"></div>
+                                <div class="report"></div>
+                            </div>
+                            <div id="report-station">
 
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -228,6 +243,23 @@
                 </radialGradient>
             </defs>
         </svg>
+
+        <template id="template-report-list-item">
+            <div class="report-list-item">
+                <div class="report-list-item-container">
+                    <div class="report-list-item-intensity"></div>
+                    <div class="report-list-item-label">
+                        <span class="report-list-item-location"></span>
+                        <span class="report-list-item-time"></span>
+                    </div>
+                    <div class="report-list-item-button">
+                        <button class="filled-tonal-button icon md3-ripple">
+                            <span class="material-symbols-rounded filled-tonal-button-icon">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
 
         <script src="./js/theme.js"></script>
         <script src="./js/locale.js"></script>
