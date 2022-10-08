@@ -49,3 +49,6 @@ button.filled-tonal-button::after {
     width: calc(var(--progress) * 100%);
     background-color: rgba(var(--md-sys-color-on-secondary-container), .4);
 }
+button.filled-tonal-button.icon {
+    padding: 0 8px;
+}

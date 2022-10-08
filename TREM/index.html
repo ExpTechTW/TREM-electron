@@ -183,18 +183,22 @@
                             </div>
                             <hr class="divider">
                             <div id="report-list-container">
-                                <div class="report-list-item">
-                                    <div class="report-list-item-container">
-                                        <div class="report-list-item-intensity one">1</div>
-                                        <div class="report-list-item-label">
-                                            <span class="report-list-item-location">台東縣東河鄉</span>
-                                            <span class="report-list-item-time">2022/10/08 10:41:30</span>
-                                        </div>
-                                        <div class="report-list-item-button">
-
+                                <template id="template-report-list-item">
+                                    <div class="report-list-item">
+                                        <div class="report-list-item-container">
+                                            <div class="report-list-item-intensity">1</div>
+                                            <div class="report-list-item-label">
+                                                <span class="report-list-item-location"></span>
+                                                <span class="report-list-item-time"></span>
+                                            </div>
+                                            <div class="report-list-item-button">
+                                                <button class="filled-tonal-button icon md3-ripple">
+                                                    <span class="material-symbols-rounded filled-tonal-button-icon">arrow_forward</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </template>
                             </div>
                         </div>
                         <div id="report-overview">
@@ -232,6 +236,7 @@
         <script src="./js/dump.js"></script>
         <script src="./js/ripple.js"></script>
         <script src="./js/earthquake.js"></script>
+        <script src="./js/report.js"></script>
     </body>
 
 </html>

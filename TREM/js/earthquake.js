@@ -4,7 +4,6 @@ require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
 const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
-const EventEmitter = require("node:events");
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 const tinycolor = require("tinycolor2");
@@ -85,6 +84,7 @@ let Cancel = false;
 let PGACancel = false;
 let IntensityListTime = 0;
 let WarnAudio = 0;
+let reportCache = [];
 const ReportViewStates = {
 	id : null,
 	ui : true,
@@ -956,6 +956,7 @@ async function ReportGET(eew) {
 	try {
 		const res = await getReportData();
 		if (!res) return setTimeout(ReportGET, 1000, eew);
+		reportCache = res;
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 		ReportList(res, eew);
 	} catch (error) {
@@ -2455,7 +2456,6 @@ function updateText() {
 	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.getElement()?.classList?.remove("hide");
 	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.getElement()?.classList?.remove("hide");
 
-
 	const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
 	const Catch = document.getElementById("box-10");
 	if (Num <= 100)
@@ -2482,4 +2482,6 @@ const changeView = (args, el, event) => {
 
 	if (changeel.attr("id") == "report")
 		mapReport.invalidateSize();
+
+	TREM.emit("viewChange", currentel.attr("id"), changeel.attr("id"));
 };

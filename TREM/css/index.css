@@ -3,6 +3,7 @@
 @import url("./m3/m3_chip.css");
 @import url("./m3/m3_dialog.css");
 @import url("./m3/m3_divider.css");
+@import url("./m3/m3_filled_tonal_button.css");
 @import url("./m3/m3_flat_button.css");
 @import url("./m3/m3_fab.css");
 @import url("./m3/m3_nav-rail.css");
@@ -1371,15 +1372,22 @@ border: 1px solid white;
 	user-select: none;
 }
 
+#report-list-container {
+	max-height: 250px;
+	overflow: auto;
+}
+
 .report-list-item > .report-list-item-container {
 	display: flex;
+	align-items: center;
 	margin: 8px;
+	color: rgb(var(--md-sys-color-on-surface));
 }
 
 .report-list-item > .report-list-item-container > .report-list-item-intensity {
 	width: 36px;
 	height: 36px;
-	background-color: #00FF89;
+	background-color: var(--custom-int-3);
 	text-align: center;
 	line-height: 36px;
 	border-radius: 36px;
@@ -1388,6 +1396,8 @@ border: 1px solid white;
 .report-list-item > .report-list-item-container > .report-list-item-label {
 	display: flex;
 	flex-direction: column;
+	flex: 1;
+	margin: 0 8px;
 }
 
 .report-list-item > .report-list-item-container > .report-list-item-label > .report-list-item-location {
