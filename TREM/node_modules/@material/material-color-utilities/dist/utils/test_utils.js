@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import 'jasmine';
-import { hexFromArgb } from './string_utils';
+import { hexFromArgb } from './string_utils.js';
 /**
  * Exports a matcher called `matchesColor` that takes two numbers, and logs
  * the equivalent hex codes on failure.

@@ -31,5 +31,9 @@ export declare class CorePalette {
      * @param argb ARGB representation of a color
      */
     static of(argb: number): CorePalette;
+    /**
+     * @param argb ARGB representation of a color
+     */
+    static contentOf(argb: number): CorePalette;
     private constructor();
 }

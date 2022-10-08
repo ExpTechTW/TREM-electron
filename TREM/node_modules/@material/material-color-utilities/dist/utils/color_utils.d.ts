@@ -19,6 +19,10 @@
  */
 export declare function argbFromRgb(red: number, green: number, blue: number): number;
 /**
+ * Converts a color from linear RGB components to ARGB format.
+ */
+export declare function argbFromLinrgb(linrgb: number[]): number;
+/**
  * Returns the alpha component of a color in ARGB format.
  */
 export declare function alphaFromArgb(argb: number): number;

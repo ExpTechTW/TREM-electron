@@ -168,6 +168,50 @@
                 <div id="map-tw"></div>
             </div>
             <div class="view info" id="report">
+                <div id="report-detail">
+                    <div id="report-detail-container">
+                        <div id="report-list">
+                            <div id="report-list-filter">
+                                <label for="report-filter-hasNumber" class="chip filter md3-ripple">
+                                    <input type="checkbox" id="report-filter-hasNumber">
+                                    <div class="chip-label">有編號</div>
+                                </label>
+                                <label for="report-filter-hasReplay" class="chip filter md3-ripple">
+                                    <input type="checkbox" id="report-filter-hasReplay">
+                                    <div class="chip-label">有重播</div>
+                                </label>
+                            </div>
+                            <hr class="divider">
+                            <div id="report-list-container">
+                                <template id="template-report-list-item">
+                                    <div class="report-list-item">
+                                        <div class="report-list-item-container">
+                                            <div class="report-list-item-intensity">1</div>
+                                            <div class="report-list-item-label">
+                                                <span class="report-list-item-location"></span>
+                                                <span class="report-list-item-time"></span>
+                                            </div>
+                                            <div class="report-list-item-button">
+                                                <button class="filled-tonal-button icon md3-ripple">
+                                                    <span class="material-symbols-rounded filled-tonal-button-icon">arrow_forward</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        <div id="report-overview">
+                            <div class="report-id"></div>
+                            <div class="report-max"></div>
+                            <div class="report"></div>
+                            <div class="report"></div>
+                        </div>
+                        <div id="report-station">
+
+                        </div>
+                    </div>
+                </div>
                 <div id="map-report"></div>
             </div>
         </div>
@@ -192,6 +236,7 @@
         <script src="./js/dump.js"></script>
         <script src="./js/ripple.js"></script>
         <script src="./js/earthquake.js"></script>
+        <script src="./js/report.js"></script>
     </body>
 
 </html>

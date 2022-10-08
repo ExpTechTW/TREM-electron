@@ -4,7 +4,6 @@ require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
 const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
-const EventEmitter = require("node:events");
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 const tinycolor = require("tinycolor2");
@@ -85,6 +84,7 @@ let Cancel = false;
 let PGACancel = false;
 let IntensityListTime = 0;
 let WarnAudio = 0;
+let reportCache = [];
 const ReportViewStates = {
 	id : null,
 	ui : true,
@@ -239,7 +239,6 @@ async function init() {
 			map._zoomAnimated = setting["map.animation"];
 		}
 
-
 		if (!mapTW)
 			mapTW = L.map("map-tw",
 				{
@@ -258,7 +257,6 @@ async function init() {
 				})
 				.setView([23.608428, 120.799168], 7)
 				.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
-
 
 		if (!mapReport) {
 			mapReport = L.map("map-report",
@@ -958,6 +956,7 @@ async function ReportGET(eew) {
 	try {
 		const res = await getReportData();
 		if (!res) return setTimeout(ReportGET, 1000, eew);
+		reportCache = res;
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 		ReportList(res, eew);
 	} catch (error) {
@@ -983,7 +982,7 @@ async function ReportClick(time) {
 	if (ReportMarkID == time) {
 		ReportMarkID = null;
 		for (let index = 0; index < MarkList.length; index++)
-			map.removeLayer(MarkList[index]);
+			mapReport.removeLayer(MarkList[index]);
 		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 	} else {
 		ReportMarkID = time;
@@ -996,6 +995,73 @@ async function ReportClick(time) {
 			Type     : "report",
 			Value    : ReportCache[time].earthquakeNo,
 		};
+
+		const report = {
+			id           : null,
+			description  : null,
+			latitude     : null,
+			longitude    : null,
+			maxIntensity : null,
+			magnitude    : null,
+			depth        : null,
+			time         : null,
+			area         : [],
+			image        : null,
+		};
+
+		if (ReportCache[time].earthquakeNo % 1000 != 0) {
+			const response = (await (await fetch(PostAddressIP,
+				{
+					headers: {
+						"Content-Type": "application/json",
+					},
+					method : "POST",
+					body   : JSON.stringify(body),
+				})).json()).response;
+			console.log("response", response);
+			const objectToInt = (obj) => IntensityN(`${obj.$t}${{ 級: "", 弱: "-", 強: "+" }[obj.unit]}`);
+
+			for (const area of response.Intensity) {
+				const data = {
+					area         : area.areaDesc,
+					maxIntensity : objectToInt(area.areaMaxIntensity),
+					stations     : [],
+				};
+				if (area.station instanceof Array)
+					data.stations = area.station;
+				else if (area.station instanceof Object)
+					data.stations.push(area.station);
+				report.area.push(data);
+			}
+
+			report.id = +response?.No || null;
+			report.description = response?.Location || null;
+			report.latitude = +response?.NorthLatitude || null;
+			report.longitude = +response?.EastLongitude || null;
+			report.maxIntensity = response?.Intensity
+				?.reduce((acc, v) => v?.station?.length ? (acc.push(...v.station) && acc) : (acc.push(v?.station) && acc), [])
+				.sort((a, b) => (a.pga && b.pga) ? ((b.pga.ewComponent ** 2 + b.pga.nsComponent ** 2 + b.pga.vComponent ** 2) ** 0.5) - ((a.pga.ewComponent ** 2 + a.pga.nsComponent ** 2 + a.pga.vComponent ** 2) ** 0.5) : objectToInt(b.stationIntensity) - objectToInt(a.stationIntensity) == 0 ? b.distance.$t - a.distance.$t : objectToInt(b.stationIntensity) - objectToInt(a.stationIntensity))[0] || null;
+			report.magnitude = +response?.Scale || null;
+			report.depth = +response?.Depth || null;
+			report.time = new Date(response[time]?.["UTC+8"]) || null;
+			report.image = response?.EventImage || null;
+		}
+
+		if (report.id == null) {
+			console.log("ReportCache[time]", ReportCache[time]);
+			report.id = "小地區有感地震";
+			report.description = ReportCache[time]?.location || null;
+			report.latitude = +ReportCache[time]?.epicenterLat || null;
+			report.longitude = +ReportCache[time]?.epicenterLon || null;
+			report.maxIntensity = ReportCache[time]?.data
+				?.reduce((acc, v) => v?.eqStation?.length ? (acc.push(...v.eqStation) && acc) : acc, [])
+				.sort((a, b) => b.stationIntensity - a.stationIntensity == 0 ? b.distance - a.distance : b.stationIntensity - a.stationIntensity)[0];
+			report.magnitude = +ReportCache[time]?.magnitudeValue || null;
+			report.depth = +ReportCache[time]?.depth || null;
+			report.time = new Date(ReportCache[time]?.originTime) || null;
+		}
+		console.log("report", report);
+
 		if (
 			// 確認是否為無編號地震
 			ReportCache[time].earthquakeNo % 1000 == 0
@@ -2392,7 +2458,6 @@ function updateText() {
 	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.getElement()?.classList?.remove("hide");
 	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.getElement()?.classList?.remove("hide");
 
-
 	const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
 	const Catch = document.getElementById("box-10");
 	if (Num <= 100)
@@ -2419,4 +2484,6 @@ const changeView = (args, el, event) => {
 
 	if (changeel.attr("id") == "report")
 		mapReport.invalidateSize();
+
+	TREM.emit("viewChange", currentel.attr("id"), changeel.attr("id"));
 };

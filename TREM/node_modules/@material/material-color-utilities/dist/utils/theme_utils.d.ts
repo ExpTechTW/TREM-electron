@@ -96,4 +96,6 @@ export declare function customColor(source: number, color: CustomColor): CustomC
 export declare function applyTheme(theme: Theme, options?: {
     dark?: boolean;
     target?: HTMLElement;
+    brightnessSuffix?: boolean;
+    paletteTones?: number[];
 }): void;
