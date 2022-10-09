@@ -19,7 +19,7 @@ TREM.Report = {
 		this.reportList = reportCache
 			.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 			.filter(v => this._filterHasReplay ? v.ID?.length : true)
-			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4 : v.magnitudeValue >= 4 : true)
+			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 			.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
 
 		for (const report of this.reportList)
@@ -43,7 +43,7 @@ TREM.Report = {
 		this.reportList = reportCache
 			.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 			.filter(v => this._filterHasReplay ? v.ID?.length : true)
-			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4 : v.magnitudeValue >= 4 : true)
+			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 			.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
 
 		this._updateReports(oldlist, this.reportList);
