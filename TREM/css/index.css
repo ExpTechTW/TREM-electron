@@ -1399,20 +1399,16 @@ border: 1px solid white;
 	overflow: hidden;
 }
 
-#report-detail-body {
-	position: relative;
-}
-
 #report-list {
 	position: relative;
-	left: -50%;
+	transform: translate3d(-50%, 0, 0);
 	opacity: 0;
-	transition: left .1s ease-out,
+	transition: transform .1s ease-out,
 				opacity .1s ease-out;
 }
 
 #report-list.show {
-	left: 0;
+	transform: translateZ(0);
 	opacity: 1;
 }
 
@@ -1443,9 +1439,10 @@ border: 1px solid white;
 
 .report-list-item {
 	position: relative;
+	overflow: hidden;
 	margin-bottom: 8px;
-	left: 0;
-	transition: left .2s ease-out,
+	transform: translateZ(0);
+	transition: transform .2s ease-out,
 				opacity .2s ease-out;
 }
 
@@ -1454,7 +1451,7 @@ border: 1px solid white;
 }
 
 .report-list-item.hide {
-	left: -50%;
+	transform: translate3d(-50%, 0, 0);
 	opacity: 0;
 	pointer-events: none;
 }
