@@ -132,6 +132,8 @@ TREM.Report = {
 	_setupReport(report) {
 		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 == 0 ? "小區域有感地震" : report.earthquakeNo;
 		document.getElementById("report-overview-location").innerText = report.location;
+		const time = new Date(`${report.originTime} GMT+08:00`);
+		document.getElementById("report-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
 		document.getElementById("report-overview-latitude").innerText = report.epicenterLat;
 		document.getElementById("report-overview-longitude").innerText = report.epicenterLon;
 		const int = `${IntensityI(report.data[0].areaIntensity)}`.split("");

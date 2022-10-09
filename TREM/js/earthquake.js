@@ -275,13 +275,13 @@ async function init() {
 					doubleClickZoom : false,
 					keyboard        : false,
 				})
-				.fitBounds([[25.55, 119.6], [21.8, 122.22]], {
+				.fitBounds([[25.7, 119.6], [21.9, 122.22]], {
 					paddingTopLeft: [
 						document.getElementById("map-report").offsetWidth / 2,
 						0,
 					],
 				})
-				.on("click", () => mapReport.fitBounds([[25.55, 119.6], [21.8, 122.22]], {
+				.on("click", () => mapReport.fitBounds([[25.7, 119.6], [21.9, 122.22]], {
 					paddingTopLeft: [
 						document.getElementById("map-report").offsetWidth / 2,
 						0,
@@ -1181,7 +1181,12 @@ async function ReportClick(time) {
 	}
 
 	changeView("report", "#reportView_btn");
-	mapReport.fitBounds([[25.35, 119], [21.9, 123]]);
+	mapReport.fitBounds([[25.7, 119.6], [21.9, 122.22]], {
+		paddingTopLeft: [
+			document.getElementById("map-report").offsetWidth / 2,
+			0,
+		],
+	});
 }
 const openURL = url => {
 	shell.openExternal(url);
