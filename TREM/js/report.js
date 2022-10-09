@@ -103,7 +103,7 @@ TREM.Report = {
 		const index = this.reportList.findIndex(v => v.identifier == element.id) - 1;
 		const ref = document.getElementById(this.reportList[index]?.identifier)?.nextSibling;
 		this.reportListElement.insertBefore(element, ref);
-		setTimeout(() => element.classList.remove("hide"), 100);
+		setTimeout(() => element.classList.remove("hide"), 10);
 	},
 };
 
