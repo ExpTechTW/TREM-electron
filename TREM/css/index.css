@@ -232,6 +232,20 @@ kbd {
 	transition: color .1s ease-in-out,
 				font-weight .1s ease-in-out;
 }
+#time1 {
+	user-select: none;
+	pointer-events: none;
+	z-index: 1000;
+	position: fixed;
+	left: 90px;
+	bottom: 22px;
+	color: rgb(var(--md-sys-color-on-background));
+	font-size: 16px;
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
+	transition: color .1s ease-in-out,
+				font-weight .1s ease-in-out;
+}
 
 #time.desynced {
 	color: rgb(var(--md-sys-color-error));
@@ -244,6 +258,19 @@ kbd {
 }
 
 #app-version {
+	user-select: none;
+	pointer-events: none;
+	z-index: 1000;
+	position: fixed;
+	left: 90px;
+	bottom: 45px;
+	color: rgba(var(--md-sys-color-on-surface-variant), .6);
+	font-size: 14px;
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
+	transition: color .1s ease-in-out;
+}
+#app-version1 {
 	user-select: none;
 	pointer-events: none;
 	z-index: 1000;

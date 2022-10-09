@@ -130,6 +130,7 @@ async function init() {
 	(() => {
 		$("#loading").text(TREM.Localization.getString("Application_Loading"));
 		const time = document.getElementById("time");
+		const time1 = document.getElementById("time1");
 
 		// clock
 		dump({ level: 3, message: "Initializing clock", origin: "Clock" });
@@ -153,6 +154,7 @@ async function init() {
 					if (time.classList.contains("desynced"))
 						time.classList.remove("desynced");
 					time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
+					time1.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 					if (NOW.getTime() - replaytestEEW > 180_000) {
 						unstopReplaybtn();
 					}
@@ -172,6 +174,7 @@ async function init() {
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
 				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
+				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -998,7 +1001,8 @@ async function getReportData() {
 
 // #region Report 點擊
 // eslint-disable-next-line no-shadow
-async function ReportClick(time,identifier = "") {
+async function ReportClick(time,identifier = " ") {
+	if (identifier == " ") return;
 	if (ReportMarkID == time) {
 		ReportMarkID = null;
 		for (let index = 0; index < MarkList.length; index++)
@@ -1393,6 +1397,8 @@ function addReport(report, prepend = false) {
 			}
 			ReportClick(report.originTime,report.identifier);
 			ReportTag = NOW.getTime();
+			ReportTag1 = NOW.getTime();
+			console.log("ReportTag1: ", ReportTag1);
 		} else
 			roll.append(Div);
 	}

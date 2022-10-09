@@ -39,7 +39,7 @@ TREM.Report = {
 		el.querySelector("button").value = data.identifier;
 		el.querySelector("button").addEventListener("click", function() {
 			TREM.Report.setView("report-overview", this.value);
-			ReportClick(data.originTime);
+			ReportClick(data.originTime, this.value);
 		});
 		ripple(el.querySelector("button"));
 		return el;
