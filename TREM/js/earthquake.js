@@ -6,7 +6,6 @@ const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
-const tinycolor = require("tinycolor2");
 TREM.Constants = require(path.resolve(__dirname, "./TREM.Constants/Constants.js"));
 TREM.Utils = require(path.resolve(__dirname, "./TREM.Utils/Utils.js"));
 TREM.Earthquake = new EventEmitter();
@@ -268,7 +267,7 @@ async function init() {
 						[15, 115],
 					],
 					preferCanvas    : true,
-					zoomSnap        : 0.5,
+					zoomSnap        : 0.25,
 					zoomDelta       : 0.5,
 					zoomAnimation   : true,
 					fadeAnimation   : setting["map.animation"],
@@ -276,8 +275,18 @@ async function init() {
 					doubleClickZoom : false,
 					keyboard        : false,
 				})
-				.fitBounds([[25.35, 119.65], [21.85, 124.05]])
-				.on("click", () => mapReport.fitBounds([[25.35, 119], [21.9, 123]]));
+				.fitBounds([[25.55, 119.6], [21.8, 122.22]], {
+					paddingTopLeft: [
+						document.getElementById("map-report").offsetWidth / 2,
+						0,
+					],
+				})
+				.on("click", () => mapReport.fitBounds([[25.55, 119.6], [21.8, 122.22]], {
+					paddingTopLeft: [
+						document.getElementById("map-report").offsetWidth / 2,
+						0,
+					],
+				}));
 			mapReport._zoomAnimated = setting["map.animation"];
 		}
 
@@ -344,7 +353,7 @@ async function init() {
 
 		if (!mapReport_base)
 			mapReport_base = L.geoJson.vt(MapData.tw_county, {
-				minZoom   : 8,
+				minZoom   : 7,
 				maxZoom   : 10,
 				tolerance : 10,
 				buffer    : 256,
@@ -1542,6 +1551,23 @@ const updateMapColors = async (event, value) => {
 		fillOpacity : 1,
 	};
 	map_base.redraw();
+
+	mapTW_base.options.style = {
+		weight      : 0.8,
+		color       : colors.primary,
+		fillColor   : colors.surfaceVariant,
+		fillOpacity : 1,
+	};
+	mapTW_base.redraw();
+
+
+	mapReport_base.options.style = {
+		weight      : 0.8,
+		color       : colors.primary,
+		fillColor   : colors.surfaceVariant,
+		fillOpacity : 1,
+	};
+	mapReport_base.redraw();
 };
 ipcRenderer.on("config:theme", updateMapColors);
 ipcRenderer.on("config:color", (event, key, value) => {

@@ -1,4 +1,4 @@
-/* global IntensityToClassString: false, reportCache: false */
+/* global IntensityToClassString: false, reportCache: false, mapReport: true, IntensityI: false */
 TREM.Report = {
 	view                  : "report-list",
 	reportList            : [],
@@ -28,12 +28,18 @@ TREM.Report = {
 		this.reportListElement.appendChild(fragment);
 	},
 	_createReportItem(data) {
+		/**
+		 * @type {HTMLElement}
+		 */
 		const el = document.importNode(this._reportItemTemplate.content, true).querySelector(".report-list-item");
 		el.id = data.identifier;
 		el.className += ` ${IntensityToClassString(data.data[0].areaIntensity)}`;
 		el.querySelector(".report-list-item-location").innerText = data.location;
 		el.querySelector(".report-list-item-time").innerText = data.originTime.replace(/-/g, "/");
 		el.querySelector("button").value = data.identifier;
+		el.querySelector("button").addEventListener("click", function() {
+			TREM.Report.setView("report-overview", this.value);
+		});
 		ripple(el.querySelector("button"));
 		return el;
 	},
@@ -48,13 +54,13 @@ TREM.Report = {
 
 		this._updateReports(oldlist, this.reportList);
 	},
-	_setView(view, report) {
+	setView(view, reportIdentifier) {
+		if (this.view == view) return;
 		const oldView = document.getElementById(this.view);
 		const newView = document.getElementById(view);
-		if (oldView.classList.contains("show"))
-			oldView.classList.remove("show");
-		if (!newView.classList.contains("show"))
-			newView.classList.add("show");
+
+		document.getElementById("report-detail-body").style.height = `${oldView.offsetHeight}px`;
+		document.getElementById("report-detail-body").style.width = `${oldView.offsetWidth}px`;
 
 		switch (view) {
 			case "report-list": {
@@ -64,13 +70,28 @@ TREM.Report = {
 
 			case "report-overview": {
 				if (this.view == "report-list") this.unloadReports();
-
+				this._setupReport(reportCache.find(v => v.identifier == reportIdentifier));
 				break;
 			}
 
 			default:
 				break;
 		}
+
+		oldView.classList.remove("show");
+		newView.style.visibility = "visible";
+		document.getElementById("report-detail-body").style.height = `${newView.offsetHeight}px`;
+		document.getElementById("report-detail-body").style.width = `${newView.offsetWidth}px`;
+		setTimeout(() => {
+			oldView.style.visibility = "hidden";
+			newView.classList.add("show");
+			setTimeout(() => {
+				document.getElementById("report-detail-body").style.height = "";
+				document.getElementById("report-detail-body").style.width = "";
+			}, 400);
+		}, 400);
+
+		this.view = view;
 	},
 	/**
 	 * @param {EarthquakeReport[]} oldlist
@@ -105,6 +126,22 @@ TREM.Report = {
 		this.reportListElement.insertBefore(element, ref);
 		setTimeout(() => element.classList.remove("hide"), 10);
 	},
+	/**
+	 * @param {EarthquakeReport} report
+	 */
+	_setupReport(report) {
+		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 == 0 ? "小區域有感地震" : report.earthquakeNo;
+		document.getElementById("report-overview-location").innerText = report.location;
+		document.getElementById("report-overview-latitude").innerText = report.epicenterLat;
+		document.getElementById("report-overview-longitude").innerText = report.epicenterLon;
+		const int = `${IntensityI(report.data[0].areaIntensity)}`.split("");
+		document.getElementById("report-overview-intensity").innerText = int[0];
+		document.getElementById("report-overview-intensity").className = (int[1] == "+") ? "strong"
+			: (int[1] == "-") ? "weak"
+				: "";
+		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
+		document.getElementById("report-overview-depth").innerText = report.depth;
+	},
 };
 
 TREM.on("viewChange", (oldView, newView) => {
@@ -120,6 +157,7 @@ TREM.on("viewChange", (oldView, newView) => {
 	switch (newView) {
 		case "report": {
 			TREM.Report.loadReports();
+			mapReport.invalidateSize();
 			break;
 		}
 

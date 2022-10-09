@@ -33,7 +33,7 @@ html:lang(zh-TW), html:lang(zh-TW) .leaflet-tooltip {
 body {
 	all: unset;
 	display: flex;
-	background-color: rgb(var(--md-sys-color-background));
+	background: linear-gradient(0deg, rgba(var(--md-sys-color-primary), .14) 0%, rgba(var(--md-sys-color-primary), .14) 100%), rgb(var(--md-sys-color-background));
 	overflow: hidden;
 	transition: background-color .1s ease-in-out;
 
@@ -145,7 +145,7 @@ kbd {
 
 #map, #map-report {
 	border-radius: 16px 0;
-	background: rgb(var(--md-sys-color-surface));
+	background: linear-gradient(0deg, rgba(var(--md-sys-color-primary), .05) 0%, rgba(var(--md-sys-color-primary), .05) 100%), rgb(var(--md-sys-color-surface));
 	height: 100%;
 	outline: none;
 	transition: border-radius .5s ease-in-out;
@@ -165,7 +165,7 @@ kbd {
 	border-radius: 16px;
 	border: 2px solid rgb(var(--md-sys-color-outline));
 	outline: none;
-	background: rgb(var(--md-sys-color-surface));
+	background: linear-gradient(0deg, rgba(var(--md-sys-color-primary), .05) 0%, rgba(var(--md-sys-color-primary), .05) 100%), rgb(var(--md-sys-color-surface));
 	transition: opacity .2s ease-in-out;
 }
 
@@ -1357,7 +1357,7 @@ stop.pred-stop {
 }
 
 .map-intensity-icon:not([class*=pga]) {
-border: 1px solid white;
+	border: 1px solid white;
 }
 
 .map-intensity-icon::before {
@@ -1390,43 +1390,55 @@ border: 1px solid white;
 	position: absolute;
 	top: 0;
 	left: 0;
-	margin: 8px;
-	border-radius: 8px;
+	margin: 12px;
+	border-radius: 12px;
 	background-color: rgb(var(--md-sys-color-background));
 	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 	color: rgb(var(--md-sys-color-on-surface));
+	font-variant-numeric: tabular-nums;
 	z-index: 100000;
 	overflow: hidden;
 }
 
-#report-list {
-	position: relative;
-	transform: translate3d(-50%, 0, 0);
-	opacity: 0;
-	transition: transform .1s ease-out,
-				opacity .1s ease-out;
-}
-
-#report-list.show {
-	transform: translateZ(0);
-	opacity: 1;
-}
-
 #report-detail-container {
-	padding: 8px;
-	background-color: rgba(var(--md-sys-color-primary), 0.05);
+	padding: 12px;
+	background-color: rgba(var(--md-sys-color-primary), 0.11);
 }
 
 #report-detail-header {
 	margin: 8px 0 12px 8px;
-	line-height: 28px;
-	font-size: 22px;
+	line-height: 24px;
+}
+
+#report-detail-header-title {
+	font-size: 18px;
 	letter-spacing: 0;
 	font-weight: 400;
 }
 
-#report-list-filter {
+#report-detail-body {
+	position: relative;
+	transition: height .8s cubic-bezier(0.45, -0.05, 0.58, 0.8),
+				width .8s cubic-bezier(0.45, -0.05, 0.58, 0.8);
+}
+
+.report-detail-panel {
 	margin: 8px;
+	position: absolute;
+	transform: translate3d(-50%, 0, 0);
+	opacity: 0;
+	transition: transform .4s ease-in-out,
+				opacity .4s ease-in-out;
+}
+
+.report-detail-panel.show {
+	position: relative;
+	transform: translateZ(0);
+	opacity: 1;
+}
+
+#report-list-filter {
+	margin-bottom: 8px;
 	display: flex;
 	user-select: none;
 }
@@ -1460,7 +1472,7 @@ border: 1px solid white;
 	display: flex;
 	align-items: center;
 	height: 42px;
-	margin: 0 8px;
+	margin-right: 8px;
 }
 
 .report-list-item > .report-list-item-container > .report-list-item-intensity {
@@ -1480,6 +1492,7 @@ border: 1px solid white;
 	flex-direction: column;
 	flex: 1;
 	margin: 0 8px;
+	white-space: nowrap;
 }
 
 .report-list-item > .report-list-item-container > .report-list-item-label > .report-list-item-location {
@@ -1489,4 +1502,61 @@ border: 1px solid white;
 .report-list-item > .report-list-item-container > .report-list-item-label > .report-list-item-time {
 	color: rgb(var(--md-sys-color-on-surface-variant));
 	font-size: 14px;
+}
+
+#report-overview-number {
+	line-height: 54px;
+	font-size: 42px;
+	font-weight: 700;
+	letter-spacing: 0.75px;
+	color: rgb(var(--md-sys-color-on-primary-container));
+}
+
+#report-overview-header, #report-overview-body {
+	margin-bottom: 16px;
+	display: flex;
+	flex-direction: column;
+}
+
+#report-overview-body .report-overview-item {
+	margin-bottom: 8px;
+}
+
+.report-overview-item .report-overview-item-label {
+	color: rgb(var(--md-sys-color-on-surface-variant));
+	margin-bottom: 4px;
+	font-weight: 400;
+}
+
+.report-overview-item .report-overview-value {
+	color: rgb(var(--md-sys-color-on-surface));
+}
+
+.report-overview-item .report-overview-value > span {
+	position: relative;
+	line-height: 28px;
+	font-size: 24px;
+	font-weight: 500;
+}
+
+.report-overview-item .report-overview-value > .report-overview-unit {
+	color: rgb(var(--md-sys-color-on-surface-variant));
+	font-size: 14px;
+	font-weight: 400;
+}
+
+#report-overview-intensity.strong::after {
+	position: absolute;
+	content: "+";
+	top: -5px;
+	right: -10px;
+	font-size: 20px;
+}
+
+#report-overview-intensity.weak::after {
+	position: absolute;
+	content: "-";
+	top: -4px;
+	right: -8px;
+	font-size: 20px;
 }

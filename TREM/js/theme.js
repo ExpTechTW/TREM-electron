@@ -1,4 +1,5 @@
 let accent, is_dark;
+const tinycolor = require("tinycolor2");
 
 const setThemeColor = (color, dark) => {
 	if (typeof color == "string") accent = color;
@@ -27,5 +28,13 @@ const getThemeColors = (color, dark) =>
 		const colors = {};
 		for (const [key, value] of Object.entries(scheme.toJSON()))
 			colors[key] = m.hexFromArgb(value);
+
+		colors.surface1 = tinycolor.mix(colors.surface, colors.primary, 5).toHexString();
+		colors.surface2 = tinycolor.mix(colors.surface, colors.primary, 8).toHexString();
+		colors.surface3 = tinycolor.mix(colors.surface, colors.primary, 11).toHexString();
+		colors.surface4 = tinycolor.mix(colors.surface, colors.primary, 12).toHexString();
+		colors.surface5 = colors.surface4;
+		colors.surface6 = tinycolor.mix(colors.surface, colors.primary, 14).toHexString();
+
 		resolve(colors);
 	}));
