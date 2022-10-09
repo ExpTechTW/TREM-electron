@@ -1,6 +1,6 @@
 {
-  "name": "trem",
-  "version": "5.1.4",
+  "name": "tremtest",
+  "version": "5.1.4-24-pre1",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "scripts": {
@@ -54,7 +54,7 @@
   "author": "whes1015",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "electron": "^18.2.3",
+    "electron": "^18.3.15",
     "electron-builder": "^23.0.3",
     "eslint": "^8.23.1",
     "eslint-plugin-require-sort": "^1.2.2"

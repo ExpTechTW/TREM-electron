@@ -63,11 +63,13 @@ let PGAMainClock = null;
 let Pgeojson = null;
 let investigation = false;
 let ReportTag = 0;
+let ReportTag1 = 0;
 let EEWshot = 0;
 let EEWshotC = 0;
 let Response = {};
 let replay = 0;
 let replayT = 0;
+let replaytestEEW = 0;
 let Second = -1;
 let mapLock = false;
 let PAlertT = 0;
@@ -142,8 +144,7 @@ async function init() {
 					time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 					if (NOW.getTime() - replayT > 180_000) {
 						replay = 0;
-						document.getElementById("togglenav_btn").classList.remove("hide");
-						document.getElementById("stopReplay").classList.add("hide");
+						unstopReplaybtn();
 						ReportGET();
 					}
 				} else {
@@ -152,6 +153,16 @@ async function init() {
 					if (time.classList.contains("desynced"))
 						time.classList.remove("desynced");
 					time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
+					if (NOW.getTime() - replaytestEEW > 180_000) {
+						unstopReplaybtn();
+					}
+					if (ReportTag1 != 0 && NOW.getTime() - ReportTag1 > 30_000) {
+						console.log("ReportTag1 end: ", NOW.getTime());
+						ReportTag1 = 0;
+						reportOverviewButton();
+						toggleNav(false);
+						changeView("main", "#mainView_btn");
+					}
 				}
 				let GetDataState = "";
 				if (GetData) {
@@ -323,7 +334,7 @@ async function init() {
 			map_base = L.geoJson.vt(MapData.Dmap, {
 				edgeBufferTiles : 2,
 				minZoom         : 4,
-				maxZoom         : 12,
+				maxZoom         : 24,
 				tolerance       : 10,
 				buffer          : 256,
 				debug           : 0,
@@ -987,7 +998,7 @@ async function getReportData() {
 
 // #region Report 點擊
 // eslint-disable-next-line no-shadow
-async function ReportClick(time) {
+async function ReportClick(time,identifier = "") {
 	if (ReportMarkID == time) {
 		ReportMarkID = null;
 		for (let index = 0; index < MarkList.length; index++)
@@ -1180,6 +1191,7 @@ async function ReportClick(time) {
 		}
 	}
 
+	TREM.Report.setView("report-overview", identifier);
 	changeView("report", "#reportView_btn");
 	mapReport.fitBounds([[25.7, 119.6], [21.9, 122.22]], {
 		paddingTopLeft: [
@@ -1342,20 +1354,26 @@ function addReport(report, prepend = false) {
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
 		ReportCache[report.originTime] = report;
 		Div.addEventListener("click", (event) => {
-			ReportClick(report.originTime);
+			ReportClick(report.originTime,report.identifier);
+			ReportTag1 = NOW.getTime();
+			console.log("ReportTag1: ", ReportTag1);
 		});
 		Div.addEventListener("contextmenu", (event) => {
 			if (replay != 0) return;
 			if (report.ID.length != 0) {
 				localStorage.TestID = report.ID;
 				ipcRenderer.send("testEEW");
+				stopReplaybtn();
 			} else {
-				replay = new Date(report.originTime).getTime() - 25000;
-				replayT = NOW.getTime();
+				ReportClick(report.originTime,report.identifier);
+				ReportTag1 = NOW.getTime();
+				console.log("ReportTag1: ", ReportTag1);
+				// replay = new Date(report.originTime).getTime() - 25000;
+				// replayT = NOW.getTime();
 			}
-			toggleNav(false);
-			document.getElementById("togglenav_btn").classList.add("hide");
-			document.getElementById("stopReplay").classList.remove("hide");
+			// toggleNav(false);
+			// document.getElementById("togglenav_btn").classList.add("hide");
+			// document.getElementById("stopReplay").classList.remove("hide");
 		});
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
@@ -1373,7 +1391,7 @@ function addReport(report, prepend = false) {
 				for (let index = 0; index < MarkList.length; index++)
 					map.removeLayer(MarkList[index]);
 			}
-			ReportClick(report.originTime);
+			ReportClick(report.originTime,report.identifier);
 			ReportTag = NOW.getTime();
 		} else
 			roll.append(Div);
@@ -1495,11 +1513,28 @@ const stopReplay = function() {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
 
-	document.getElementById("togglenav_btn").classList.remove("hide");
-	document.getElementById("stopReplay").classList.add("hide");
+	unstopReplaybtn();
 };
 
+function unstopReplaybtn(){
+	document.getElementById("togglenav_btn").classList.remove("hide");
+	document.getElementById("stopReplay").classList.add("hide");
+}
+
+function stopReplaybtn(){
+	toggleNav(false);
+	changeView("main", "#mainView_btn");
+	document.getElementById("togglenav_btn").classList.add("hide");
+	document.getElementById("stopReplay").classList.remove("hide");
+}
+
+function reportOverviewButton(){
+	TREM.Report.setView("report-list");
+}
+
 ipcMain.on("testEEW", () => {
+	replaytestEEW = NOW.getTime();
+	stopReplaybtn();
 	Server = [];
 	if (localStorage.TestID != undefined) {
 		const list = localStorage.TestID.split(",");
@@ -1672,9 +1707,11 @@ async function FCMdata(data) {
 			if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
 			if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
 			if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
+			stopReplaybtn();
 			TREM.Earthquake.emit("eew", json);
 		} else
 			// if (json.Function != "earthquake") return;
+			stopReplaybtn();
 			TREM.Earthquake.emit("eew", json);
 
 	}
@@ -1991,6 +2028,7 @@ TREM.Earthquake.on("eew", async (data) => {
 				});
 		}
 	}, 2000);
+	stopReplaybtn();
 });
 
 TREM.Earthquake.on("tsunami", (data) => {
@@ -2515,6 +2553,8 @@ const changeView = (args, el, event) => {
 
 	if (changeel.attr("id") == "report")
 		mapReport.invalidateSize();
+	if (changeel.attr("id") == "main")
+		reportOverviewButton();
 
 	TREM.emit("viewChange", currentel.attr("id"), changeel.attr("id"));
 };

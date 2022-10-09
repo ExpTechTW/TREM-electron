@@ -39,6 +39,7 @@ TREM.Report = {
 		el.querySelector("button").value = data.identifier;
 		el.querySelector("button").addEventListener("click", function() {
 			TREM.Report.setView("report-overview", this.value);
+			ReportClick(data.originTime);
 		});
 		ripple(el.querySelector("button"));
 		return el;
@@ -130,6 +131,9 @@ TREM.Report = {
 	 * @param {EarthquakeReport} report
 	 */
 	_setupReport(report) {
+		// document.getElementById("report-overview-button").onclick = function(){
+		// 	TREM.Report.setView("report-list");
+		//   };
 		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 == 0 ? "小區域有感地震" : report.earthquakeNo;
 		document.getElementById("report-overview-location").innerText = report.location;
 		const time = new Date(`${report.originTime} GMT+08:00`);
