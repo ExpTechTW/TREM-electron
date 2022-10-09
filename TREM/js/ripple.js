@@ -3,16 +3,17 @@
 
 	const mdripple = $("<div>", {
 		class: "md3-ripple__container",
-	});
+	}).hide();
 
 	$("<span>", {
 		class: "md3-ripple__circle",
 	}).appendTo(mdripple);
 
-	mdripple.on("click.ui.ripple", function(e) {
+	$ripple.on("click.ui.ripple", function(e) {
 		const $this = $(this);
-		const $offset = $this.parent().offset();
-		const $circle = $this.find(".md3-ripple__circle");
+		const $offset = $this.offset();
+		const $container = $this.find(".md3-ripple__container");
+		const $circle = $container.find(".md3-ripple__circle");
 
 		const x = e.pageX - $offset.left;
 		const y = e.pageY - $offset.top;
@@ -22,11 +23,11 @@
 			left : x + "px",
 		});
 
-		$this.addClass("is-active");
+		$container.show().addClass("is-active");
 	});
 
 	mdripple.on("animationend webkitAnimationEnd oanimationend MSAnimationEnd", function(e) {
-		$(this).removeClass("is-active");
+		$(this).removeClass("is-active").hide();
 	});
 
 	$ripple.append(mdripple);
@@ -37,16 +38,17 @@ function ripple(element) {
 
 	const mdripple = $("<div>", {
 		class: "md3-ripple__container",
-	});
+	}).hide();
 
 	$("<span>", {
 		class: "md3-ripple__circle",
 	}).appendTo(mdripple);
 
-	mdripple.on("click.ui.ripple", function(e) {
+	$ripple.on("click.ui.ripple", function(e) {
 		const $this = $(this);
-		const $offset = $this.parent().offset();
-		const $circle = $this.find(".md3-ripple__circle");
+		const $offset = $this.offset();
+		const $container = $this.find(".md3-ripple__container");
+		const $circle = $container.find(".md3-ripple__circle");
 
 		const x = e.pageX - $offset.left;
 		const y = e.pageY - $offset.top;
@@ -56,11 +58,11 @@ function ripple(element) {
 			left : x + "px",
 		});
 
-		$this.addClass("is-active");
+		$container.show().addClass("is-active");
 	});
 
 	mdripple.on("animationend webkitAnimationEnd oanimationend MSAnimationEnd", function(e) {
-		$(this).removeClass("is-active");
+		$(this).removeClass("is-active").hide();
 	});
 
 	$ripple.append(mdripple);

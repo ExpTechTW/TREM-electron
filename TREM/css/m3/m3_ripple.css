@@ -7,7 +7,6 @@
     border-radius: inherit;
     overflow: hidden;
     background: transparent;
-    pointer-events: none;
 }
 
 .md3-ripple__circle {
