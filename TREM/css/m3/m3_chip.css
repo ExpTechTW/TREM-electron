@@ -23,12 +23,17 @@
 	line-height: 32px;
 	transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out,
 		padding 0.1s ease-in-out, box-shadow 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+	cursor: pointer;
 }
 
 .chip > input:checked + .chip-label {
 	outline: 0;
 	background-color: rgb(var(--md-sys-color-secondary-container));
 	color: rgb(var(--md-sys-color-on-secondary-container));
+}
+
+.chip > input:disabled + .chip-label {
+    cursor: not-allowed;
 }
 
 .chip > input:disabled:not(:checked) + .chip-label {
@@ -94,6 +99,7 @@
 	border: 0;
 	font: inherit;
 	color: inherit;
+    cursor: inherit;
 }
 
 .chip.select select:focus-visible {

@@ -9,6 +9,11 @@ button.filled-tonal-button {
     transition: background .1s ease-in-out;
     padding-left: 16px;
     overflow: hidden;
+    cursor: pointer;
+}
+
+button:disabled.filled-tonal-button {
+    cursor: not-allowed;
 }
 
 button.filled-tonal-button .filled-tonal-button-icon {
@@ -49,6 +54,7 @@ button.filled-tonal-button::after {
     width: calc(var(--progress) * 100%);
     background-color: rgba(var(--md-sys-color-on-secondary-container), .4);
 }
+
 button.filled-tonal-button.icon {
     padding: 0 8px;
 }

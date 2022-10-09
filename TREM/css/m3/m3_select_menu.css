@@ -21,6 +21,11 @@ select {
     border: none;
     border-bottom: 2px solid rgb(var(--md-sys-color-on-surface-variant));
     outline: none;
+    cursor: pointer;
+}
+
+select:disabled {
+    cursor: not-allowed;
 }
 
 select:focus-visible {
