@@ -1406,7 +1406,8 @@ stop.pred-stop {
 }
 
 #report-detail-header {
-	margin: 8px 0 12px 8px;
+	display: flex;
+	align-items: center;
 	line-height: 24px;
 }
 
@@ -1414,6 +1415,8 @@ stop.pred-stop {
 	font-size: 18px;
 	letter-spacing: 0;
 	font-weight: 400;
+	flex: 1;
+	transition: margin .1s ease-in-out;
 }
 
 #report-detail-body {
@@ -1435,6 +1438,19 @@ stop.pred-stop {
 	position: relative;
 	transform: translateZ(0);
 	opacity: 1;
+}
+
+#report-overview-header > .report-overview-item:first-child {
+	display: flex;
+	align-items: center;
+}
+
+#report-overview-number {
+	flex: 1;
+}
+
+#report-detail-copy {
+	align-self: center;
 }
 
 #report-list-filter, #report-overview-actions {

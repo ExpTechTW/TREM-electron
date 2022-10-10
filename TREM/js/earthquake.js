@@ -985,7 +985,6 @@ async function getReportData() {
 // eslint-disable-next-line no-shadow
 const openURL = url => {
 	shell.openExternal(url);
-
 };
 // #endregion
 

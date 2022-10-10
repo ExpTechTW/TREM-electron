@@ -241,7 +241,12 @@
                             </div>
                             <div id="report-overview" class="report-detail-panel">
                                 <div id="report-overview-header">
-                                    <div id="report-overview-number"></div>
+                                    <div class="report-overview-item">
+                                        <span id="report-overview-number"></span>
+                                        <button id="report-detail-copy" class="flat-button icon md3-ripple hide" onclick="TREM.Report.copyReport(this.value)">
+                                            <span class="material-symbols-rounded">content_copy</span>
+                                        </button>
+                                    </div>
                                     <div class="report-overview-item">
                                         <span class="report-overview-item-icon material-symbols-rounded">pin_drop</span>
                                         <span id="report-overview-location"></span>
