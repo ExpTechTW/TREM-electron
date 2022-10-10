@@ -131,9 +131,14 @@ TREM.Report = {
 	 * @param {EarthquakeReport} report
 	 */
 	_setupReport(report) {
-		// document.getElementById("report-overview-button").onclick = function(){
-		// 	TREM.Report.setView("report-list");
-		//   };
+		if (report.ID.length != 0) {
+			document.getElementById("replayOverviewButton").style.display = "block"
+			document.getElementById("replayOverviewButton").onclick = function(){
+				replayOverviewButton(report);
+			};
+		}else{
+			document.getElementById("replayOverviewButton").style.display = "none"
+		}
 		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 == 0 ? "小區域有感地震" : report.earthquakeNo;
 		document.getElementById("report-overview-location").innerText = report.location;
 		const time = new Date(`${report.originTime} GMT+08:00`);

@@ -6,6 +6,8 @@ document.addEventListener("keydown", (event) => {
 });
 
 const toggleNav = state => {
+	toggleNavTime = NOW.getTime();
+	console.log("toggleNavTime: ", toggleNavTime);
 	if (state == undefined) {
 		$("#nav-rail").toggleClass("hide");
 		state = !$("#nav-rail").hasClass("hide");

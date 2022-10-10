@@ -70,6 +70,7 @@ let Response = {};
 let replay = 0;
 let replayT = 0;
 let replaytestEEW = 0;
+let toggleNavTime = 0;
 let Second = -1;
 let mapLock = false;
 let PAlertT = 0;
@@ -164,6 +165,11 @@ async function init() {
 						reportOverviewButton();
 						toggleNav(false);
 						changeView("main", "#mainView_btn");
+					}
+					if (toggleNavTime != 0 && NOW.getTime() - toggleNavTime > 10_000) {
+						console.log("toggleNavTime end: ", NOW.getTime());
+						toggleNavTime = 0;
+						$("#nav-rail").addClass("hide");
 					}
 				}
 				let GetDataState = "";
@@ -1538,6 +1544,12 @@ function reportOverviewButton(){
 	TREM.Report.setView("report-list");
 }
 
+function replayOverviewButton(report){
+	localStorage.TestID = report.ID;
+	ipcRenderer.send("testEEW");
+	stopReplaybtn();
+}
+
 ipcMain.on("testEEW", () => {
 	replaytestEEW = NOW.getTime();
 	stopReplaybtn();
@@ -2559,8 +2571,10 @@ const changeView = (args, el, event) => {
 
 	if (changeel.attr("id") == "report")
 		mapReport.invalidateSize();
+		toggleNav(false);
 	if (changeel.attr("id") == "main")
 		reportOverviewButton();
+		toggleNav(false);
 
 	TREM.emit("viewChange", currentel.attr("id"), changeel.attr("id"));
 };
