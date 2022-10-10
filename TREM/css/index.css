@@ -1419,6 +1419,23 @@ stop.pred-stop {
 	transition: margin .1s ease-in-out;
 }
 
+button.hide + #report-detail-header-title {
+	margin-left: 8px;
+}
+
+#report-detail-header > button {
+	opacity: 1;
+	overflow: hidden;
+	transition: opacity .1s ease-in-out,
+				width .1s ease-in-out
+}
+
+#report-detail-header > button.hide {
+	opacity: 0;
+	width: 0;
+	pointer-events: none;
+}
+
 #report-detail-body {
 	position: relative;
 	transition: height .5s cubic-bezier(0.45, -0.05, 0.58, 0.8),
@@ -1464,7 +1481,7 @@ stop.pred-stop {
 }
 
 #report-list {
-	max-width: 520px;
+	max-width: 540px;
 }
 
 #report-list-container {
@@ -1552,6 +1569,8 @@ stop.pred-stop {
 
 .report-overview-item .report-overview-item-icon {
 	color: rgb(var(--md-sys-color-secondary));
+	font-size: 20px;
+	vertical-align: bottom;
 }
 
 .report-overview-item .report-overview-item-label {

@@ -97,12 +97,16 @@ TREM.Report = {
 			case "report-list": {
 				this.loadReports(true);
 				this._clearMap(true);
+				document.getElementById("report-detail-back").classList.add("hide");
+				document.getElementById("report-detail-refresh").classList.remove("hide");
 				break;
 			}
 
 			case "report-overview": {
 				if (this.view == "report-list") this.unloadReports();
 				this._setupReport(reportCache.find(v => v.identifier == reportIdentifier));
+				document.getElementById("report-detail-back").classList.remove("hide");
+				document.getElementById("report-detail-refresh").classList.add("hide");
 				break;
 			}
 
@@ -142,6 +146,20 @@ TREM.Report = {
 		toggleNav(false);
 		document.getElementById("togglenav_btn").classList.add("hide");
 		document.getElementById("stopReplay").classList.remove("hide");
+	},
+	back() {
+		switch (this.view) {
+			case "report-overview":
+				this.setView("report-list");
+				break;
+
+			default:
+				break;
+		}
+	},
+	refreshList() {
+		this.unloadReports();
+		this.loadReports();
 	},
 	copyReport(id) {
 		const { clipboard, shell } = require("electron");
@@ -286,7 +304,7 @@ TREM.Report = {
 	_setupReport(report) {
 		this._clearMap();
 
-		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 == 0 ? "小區域有感地震" : report.earthquakeNo;
+		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 ? report.earthquakeNo : "小區域有感地震";
 		document.getElementById("report-overview-location").innerText = report.location;
 		const time = new Date(`${report.originTime} GMT+08:00`);
 		document.getElementById("report-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
@@ -312,9 +330,7 @@ TREM.Report = {
 			+ (time.getHours() < 10 ? "0" : "") + time.getHours()
 			+ (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
 			+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds();
-
 		document.getElementById("report-cwb").value = `https://www.cwb.gov.tw/V8/C/E/EQ/${cwb_code}.html`;
-
 
 		const scweb_code = ""
 			+ time.getFullYear()
@@ -325,7 +341,6 @@ TREM.Report = {
 			+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds()
 			+ (report.magnitudeValue * 10)
 			+ (report.earthquakeNo - 111000 ? report.earthquakeNo - 111000 : "");
-
 		document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
 
 		for (const data of report.data)

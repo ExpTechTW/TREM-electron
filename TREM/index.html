@@ -171,7 +171,13 @@
                 <div id="report-detail">
                     <div id="report-detail-container">
                         <div id="report-detail-header">
-                            <div id="report-detail-header-title">地震報告</div>
+                            <button id="report-detail-back" class="flat-button icon md3-ripple hide" onclick="TREM.Report.back()">
+                                <span class="material-symbols-rounded">arrow_back</span>
+                            </button>
+                            <span id="report-detail-header-title">地震報告</span>
+                            <button id="report-detail-refresh" class="flat-button icon md3-ripple" onclick="TREM.Report.refreshList()">
+                                <span class="material-symbols-rounded">refresh</span>
+                            </button>
                         </div>
                         <div id="report-detail-body">
                             <div id="report-list" class="report-detail-panel show">
