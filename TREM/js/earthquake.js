@@ -339,7 +339,7 @@ async function init() {
 			map_base = L.geoJson.vt(MapData.Dmap, {
 				edgeBufferTiles : 2,
 				minZoom         : 4,
-				maxZoom         : 18,
+				maxZoom         : 15,
 				tolerance       : 10,
 				buffer          : 256,
 				debug           : 0,
@@ -1835,17 +1835,19 @@ TREM.Earthquake.on("eew", async (data) => {
 			}
 		}
 	}
-	if (EEW[data.ID] == undefined && !Info.Warn.includes(data.ID) && MaxIntensity >= 5) {
-		Info.Warn.push(data.ID);
+	if (MaxIntensity >= 5)
 		data.Alert = true;
+	else
+		data.Alert = false;
+	if (!Info.Warn.includes(data.ID)) {
+		Info.Warn.push(data.ID);
 		if (!EEWAlert) {
 			EEWAlert = true;
 			if (setting["audio.eew"] && Alert)
 				for (let index = 0; index < 5; index++)
 					audioPlay("./audio/Alert.wav");
 		}
-	} else
-		data.Alert = false;
+	}
 
 	let _time = -1;
 	let stamp = 0;
