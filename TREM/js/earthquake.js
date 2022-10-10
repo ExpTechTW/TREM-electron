@@ -1156,7 +1156,6 @@ function addReport(report, prepend = false) {
 				for (let index = 0; index < MarkList.length; index++)
 					map.removeLayer(MarkList[index]);
 			}
-			ReportClick(report.originTime);
 			ReportTag = NOW.getTime();
 		} else
 			roll.append(Div);
