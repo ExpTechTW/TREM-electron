@@ -1,8 +1,19 @@
 /* global IntensityToClassString: false, reportCache: false, mapReport: true, IntensityI: false */
+
+
 TREM.Report = {
 	view                  : "report-list",
 	reportList            : [],
 	reportListElement     : document.getElementById("report-list-container"),
+	/**
+	 * @type {L.Marker[]}
+	 */
+	_markers              : [],
+	/**
+	 * @type {L.FeatureGroup}
+	 */
+	_markersGroup         : null,
+	_lastFocus            : [],
 	_filterHasReplay      : false,
 	_filterHasNumber      : false,
 	_filterMagnitude      : false,
@@ -10,22 +21,27 @@ TREM.Report = {
 	_filterIntensity      : false,
 	_filterIntensityValue : 4,
 	_reportItemTemplate   : document.getElementById("template-report-list-item"),
+	get _mapPaddingLeft() {
+		return document.getElementById("map-report").offsetWidth / 2;
+	},
 	unloadReports() {
 		this.reportListElement.replaceChildren();
 	},
-	loadReports() {
-		const fragment = new DocumentFragment();
+	loadReports(skipCheck = false) {
+		if (this.view == "report-list" || skipCheck) {
+			const fragment = new DocumentFragment();
 
-		this.reportList = reportCache
-			.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
-			.filter(v => this._filterHasReplay ? v.ID?.length : true)
-			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
-			.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
+			this.reportList = reportCache
+				.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
+				.filter(v => this._filterHasReplay ? v.ID?.length : true)
+				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
+				.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
 
-		for (const report of this.reportList)
-			fragment.appendChild(this._createReportItem(report));
+			for (const report of this.reportList)
+				fragment.appendChild(this._createReportItem(report));
 
-		this.reportListElement.appendChild(fragment);
+			this.reportListElement.appendChild(fragment);
+		}
 	},
 	_createReportItem(data) {
 		/**
@@ -64,7 +80,8 @@ TREM.Report = {
 
 		switch (view) {
 			case "report-list": {
-				this.loadReports();
+				this.loadReports(true);
+				this._clearMap(true);
 				break;
 			}
 
@@ -88,8 +105,8 @@ TREM.Report = {
 			setTimeout(() => {
 				document.getElementById("report-detail-body").style.height = "";
 				document.getElementById("report-detail-body").style.width = "";
-			}, 400);
-		}, 400);
+			}, 250);
+		}, 250);
 
 		this.view = view;
 	},
@@ -114,7 +131,6 @@ TREM.Report = {
 		element.classList.add("hide");
 		setTimeout(() => element.remove(), 200);
 	},
-
 	/**
 	 * @param {HTMLElement} element
 	 * @param {HTMLElement} reference
@@ -126,10 +142,39 @@ TREM.Report = {
 		this.reportListElement.insertBefore(element, ref);
 		setTimeout(() => element.classList.remove("hide"), 10);
 	},
+	_focusMap(...args) {
+		if (args.length) {
+			this._lastFocus = [...args];
+			mapReport.fitBounds(...args);
+		} else if (this._lastFocus.length)
+			mapReport.fitBounds(...this._lastFocus);
+		else {
+			this._lastFocus = [[[25.7, 119.6], [21.9, 122.22]], {
+				paddingTopLeft: [
+					this._mapPaddingLeft,
+					0,
+				],
+			}];
+			mapReport.fitBounds(...this._lastFocus);
+		}
+	},
+	_clearMap(resetFoucs = false) {
+		if (this._markersGroup) {
+			this._markersGroup.remove();
+			this._markersGroup = null;
+			this._markers = [];
+		}
+		if (resetFoucs) {
+			this._lastFocus = [];
+			this._focusMap();
+		}
+	},
 	/**
 	 * @param {EarthquakeReport} report
 	 */
 	_setupReport(report) {
+		this._clearMap();
+
 		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 == 0 ? "小區域有感地震" : report.earthquakeNo;
 		document.getElementById("report-overview-location").innerText = report.location;
 		const time = new Date(`${report.originTime} GMT+08:00`);
@@ -143,6 +188,34 @@ TREM.Report = {
 				: "";
 		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
 		document.getElementById("report-overview-depth").innerText = report.depth;
+
+		for (const data of report.data)
+			for (const eqStation of data.eqStation) {
+				const marker = L.marker(
+					[eqStation.stationLat, eqStation.stationLon],
+					{
+						icon: L.divIcon({
+							iconSize  : [16, 16],
+							className : `map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}`,
+						}),
+						zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
+					});
+				this._markers.push(marker);
+			}
+
+		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
+
+		const zoomPredict = (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom()) / mapReport.getMaxZoom();
+		this._focusMap(this._markersGroup.getBounds(), {
+			paddingTopLeft: [
+				document.getElementById("map-report").offsetWidth / 2,
+				document.getElementById("map-report").offsetHeight * zoomPredict,
+			],
+			paddingBottomRight: [
+				document.getElementById("map-report").offsetWidth * zoomPredict,
+				document.getElementById("map-report").offsetHeight * zoomPredict,
+			],
+		});
 	},
 };
 
