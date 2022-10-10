@@ -59,9 +59,22 @@ TREM.Report = {
 		ripple(el.querySelector("button"));
 		return el;
 	},
-	_handleFilter(key, value) {
+	/**
+	 *
+	 * @param {*} key
+	 * @param {*} value
+	 * @param {HTMLSelectElement} select
+	 */
+	_handleFilter(key, value, select) {
 		const oldlist = [...this.reportList];
 		this[`_${key}`] = value;
+
+		if (select) {
+			const parent = document.getElementById(select.id.slice(0, select.id.length - 6));
+			if (!parent.checked)
+				return parent.click();
+		}
+
 		this.reportList = reportCache
 			.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 			.filter(v => this._filterHasReplay ? v.ID?.length : true)

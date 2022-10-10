@@ -1438,9 +1438,17 @@ stop.pred-stop {
 }
 
 #report-list-filter, #report-overview-actions {
-	margin-bottom: 8px;
 	display: flex;
+	flex-wrap: wrap;
 	user-select: none;
+}
+
+#report-list-filter > .chip, #report-overview-actions > .chip {
+	margin-bottom: 8px;
+}
+
+#report-list {
+	max-width: 520px;
 }
 
 #report-list-container {
