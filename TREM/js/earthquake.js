@@ -358,7 +358,7 @@ async function init() {
 				style     : {
 					weight      : 0.8,
 					color       : colors.primary,
-					fillColor   : "transparent",
+					fillColor   : colors.surfaceVariant,
 					fillOpacity : 0,
 				},
 			}).addTo(mapReport);
