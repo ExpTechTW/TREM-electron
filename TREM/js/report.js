@@ -38,6 +38,7 @@ TREM.Report = {
 		el.querySelector(".report-list-item-time").innerText = data.originTime.replace(/-/g, "/");
 		el.querySelector("button").value = data.identifier;
 		el.querySelector("button").addEventListener("click", function() {
+			set_report_overview = 0;
 			TREM.Report.setView("report-overview", this.value);
 			ReportClick(data.originTime, this.value);
 		});
@@ -138,6 +139,15 @@ TREM.Report = {
 			};
 		}else{
 			document.getElementById("replayOverviewButton").style.display = "none"
+		}
+		if (set_report_overview != 0) {
+			document.getElementById("reportOverviewButton").onclick = function(){
+				backindexButton();
+			};
+		}else{
+			document.getElementById("reportOverviewButton").onclick = function(){
+				reportOverviewButton();
+			};
 		}
 		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 == 0 ? "小區域有感地震" : report.earthquakeNo;
 		document.getElementById("report-overview-location").innerText = report.location;

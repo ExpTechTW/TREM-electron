@@ -91,6 +91,7 @@ const ReportViewStates = {
 	id : null,
 	ui : true,
 };
+let set_report_overview = 0;
 // #endregion
 
 // #region 初始化
@@ -1201,6 +1202,7 @@ async function ReportClick(time,identifier = " ") {
 		}
 	}
 
+	set_report_overview = 1;
 	TREM.Report.setView("report-overview", identifier);
 	changeView("report", "#reportView_btn");
 	mapReport.fitBounds([[25.7, 119.6], [21.9, 122.22]], {
@@ -1548,6 +1550,11 @@ function replayOverviewButton(report){
 	localStorage.TestID = report.ID;
 	ipcRenderer.send("testEEW");
 	stopReplaybtn();
+}
+
+function backindexButton(){
+	toggleNav(false);
+	changeView("main", "#mainView_btn");
 }
 
 ipcMain.on("testEEW", () => {
