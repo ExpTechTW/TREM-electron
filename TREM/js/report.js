@@ -170,9 +170,9 @@ TREM.Report = {
 		string.push(`　　　　　　　　　　中央氣象局地震測報中心　${report.earthquakeNo % 1000 ? `第${report.earthquakeNo - 111000}號` : "小區域"}有感地震報告`);
 		const time = new Date(report.originTime);
 		string.push(`　　　　　　　　　　發　震　時　間： ${time.getFullYear() - 1911}年${(time.getMonth() + 1 < 10 ? " " : "") + (time.getMonth() + 1)}月${(time.getDate() < 10 ? " " : "") + time.getDate()}日${(time.getHours() < 10 ? " " : "") + time.getHours()}時${(time.getMinutes() < 10 ? " " : "") + time.getMinutes()}分${(time.getSeconds() < 10 ? " " : "") + time.getSeconds()}秒`);
-		string.push(`　　　　　　　　　　震　央　位　置： 北　緯　 ${report.epicenterLat} °`);
-		string.push(`　　　　　　　　　　　　　　　　　　 東  經　${report.epicenterLon} °`);
-		string.push(`　　　　　　　　　　震　源　深　度：　 ${report.depth.toFixed(1)}  公里`);
+		string.push(`　　　　　　　　　　震　央　位　置： 北　緯　 ${report.epicenterLat.toFixed(2)} °`);
+		string.push(`　　　　　　　　　　　　　　　　　　 東  經　${report.epicenterLon.toFixed(2)} °`);
+		string.push(`　　　　　　　　　　震　源　深　度：　 ${report.depth < 10 ? " " : ""}${report.depth.toFixed(1)}  公里`);
 		string.push(`　　　　　　　　　　芮　氏　規　模：　  ${report.magnitudeValue.toFixed(1)}`);
 		string.push(`　　　　　　　　　　相　對　位　置： ${report.location}`);
 		string.push("");
