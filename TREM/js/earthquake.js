@@ -1159,6 +1159,7 @@ function addReport(report, prepend = false) {
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
 		ReportCache[report.originTime] = report;
 		Div.addEventListener("click", (event) => {
+			set_report_overview = 1;
 			TREM.Report.setView("report-overview", report.identifier);
 			changeView("report", "#reportView_btn");
 			ReportTag1 = NOW.getTime();
@@ -1171,6 +1172,7 @@ function addReport(report, prepend = false) {
 				ipcRenderer.send("testEEW");
 				stopReplaybtn();
 			} else {
+				set_report_overview = 1;
 				TREM.Report.setView("report-overview", report.identifier);
 				changeView("report", "#reportView_btn");
 				ReportTag1 = NOW.getTime();
@@ -2262,8 +2264,7 @@ function main(data) {
 			Cancel = false;
 			if (replay != 0) {
 				replay = 0;
-				document.getElementById("togglenav_btn").classList.remove("hide");
-				document.getElementById("stopReplay").classList.add("hide");
+				unstopReplaybtn();
 				ReportGET();
 			}
 			INFO = [];

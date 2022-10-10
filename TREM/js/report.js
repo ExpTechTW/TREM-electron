@@ -55,7 +55,6 @@ TREM.Report = {
 		el.querySelector("button").addEventListener("click", function() {
 			set_report_overview = 0;
 			TREM.Report.setView("report-overview", this.value);
-			ReportClick(data.originTime, this.value);
 		});
 		ripple(el.querySelector("button"));
 		return el;
@@ -145,11 +144,12 @@ TREM.Report = {
 			replay = new Date(report.originTime).getTime() - 25000;
 			replayT = NOW.getTime();
 		}
-		toggleNav(false);
-		document.getElementById("togglenav_btn").classList.add("hide");
-		document.getElementById("stopReplay").classList.remove("hide");
+		stopReplaybtn();
 	},
 	back() {
+		if (set_report_overview != 0) {
+			backindexButton();
+		}
 		switch (this.view) {
 			case "report-overview":
 				this.setView("report-list");
@@ -307,15 +307,6 @@ TREM.Report = {
 	_setupReport(report) {
 		this._clearMap();
 
-		if (set_report_overview != 0) {
-			document.getElementById("reportOverviewButton").onclick = function(){
-				backindexButton();
-			};
-		}else{
-			document.getElementById("reportOverviewButton").onclick = function(){
-				reportOverviewButton();
-			};
-		}
 		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 ? report.earthquakeNo : "小區域有感地震";
 		document.getElementById("report-overview-location").innerText = report.location;
 		const time = new Date(`${report.originTime} GMT+08:00`);
@@ -371,6 +362,19 @@ TREM.Report = {
 
 		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
 
+		this._markers.push(
+			L.marker(
+				[report.epicenterLat, report.epicenterLon],
+				{
+					icon: L.icon({
+						iconUrl  : "./image/star.png",
+						iconSize : [25, 25],
+					}),
+					zIndexOffset: 10000,
+				},
+			).addTo(mapReport),
+		);
+
 		const zoomPredict = (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom()) / (mapReport.getMaxZoom() * (1.5 ** (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom())));
 		this._focusMap(this._markersGroup.getBounds(), {
 			paddingTopLeft: [
@@ -382,6 +386,18 @@ TREM.Report = {
 				document.getElementById("map-report").offsetHeight * zoomPredict,
 			],
 		});
+
+		if(report.ID == undefined){
+			document.getElementById("report-replay").style.display = "none"
+		}
+		if (report.ID.length != 0) {
+			document.getElementById("report-replay").style.display = "block"
+			document.getElementById("report-replay").onclick = function(){
+				replayOverviewButton(report);
+			};
+		}else{
+			document.getElementById("report-replay").style.display = "none"
+		}
 	},
 };
 
