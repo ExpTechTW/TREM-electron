@@ -644,6 +644,7 @@ async function handler(response) {
 			if (PalertT != PAlert.timestamp && Object.keys(PLoc).length != 0) {
 				PalertT = PAlert.timestamp;
 				if (Pgeojson == null) {
+					changeView("main", "#mainView_btn");
 					if (setting["Real-time.show"]) win.showInactive();
 					if (setting["Real-time.cover"]) win.moveTop();
 					win.flashFrame(true);
@@ -764,6 +765,7 @@ async function handler(response) {
 			});
 		}, 2250);
 
+		changeView("main", "#mainView_btn");
 		if (setting["Real-time.show"]) win.showInactive();
 		if (setting["Real-time.cover"]) win.moveTop();
 		win.flashFrame(true);
@@ -1530,6 +1532,7 @@ TREM.Earthquake.on("eew", async (data) => {
 		}, 5000);
 
 		if (Alert) {
+			changeView("main", "#mainView_btn");
 			if (setting["eew.show"]) win.showInactive();
 			if (setting["eew.cover"]) win.moveTop();
 			win.flashFrame(true);
