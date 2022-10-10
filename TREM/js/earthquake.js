@@ -284,8 +284,8 @@ async function init() {
 					attributionControl : false,
 					closePopupOnClick  : false,
 					maxBounds          : [
-						[30, 125],
-						[15, 115],
+						[30, 130],
+						[10, 100],
 					],
 					preferCanvas    : true,
 					zoomSnap        : 0.25,
@@ -302,12 +302,7 @@ async function init() {
 						0,
 					],
 				})
-				.on("click", () => mapReport.fitBounds([[25.7, 119.6], [21.9, 122.22]], {
-					paddingTopLeft: [
-						document.getElementById("map-report").offsetWidth / 2,
-						0,
-					],
-				}));
+				.on("click", () => TREM.Report._focusMap());
 			mapReport._zoomAnimated = setting["map.animation"];
 		}
 
@@ -344,7 +339,7 @@ async function init() {
 			map_base = L.geoJson.vt(MapData.Dmap, {
 				edgeBufferTiles : 2,
 				minZoom         : 4,
-				maxZoom         : 24,
+				maxZoom         : 18,
 				tolerance       : 10,
 				buffer          : 256,
 				debug           : 0,
@@ -374,9 +369,9 @@ async function init() {
 
 		if (!mapReport_base)
 			mapReport_base = L.geoJson.vt(MapData.tw_county, {
-				minZoom   : 7,
+				minZoom   : 7.5,
 				maxZoom   : 10,
-				tolerance : 10,
+				tolerance : 15,
 				buffer    : 256,
 				debug     : 0,
 				zIndex    : 10,
