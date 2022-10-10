@@ -296,7 +296,7 @@ async function init() {
 					doubleClickZoom : false,
 					keyboard        : false,
 				})
-				.fitBounds([[25.7, 119.6], [21.9, 122.22]], {
+				.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
 					paddingTopLeft: [
 						document.getElementById("map-report").offsetWidth / 2,
 						0,

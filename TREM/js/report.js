@@ -152,7 +152,7 @@ TREM.Report = {
 		} else if (this._lastFocus.length)
 			mapReport.fitBounds(...this._lastFocus);
 		else {
-			this._lastFocus = [[[25.7, 119.6], [21.9, 122.22]], {
+			this._lastFocus = [[[25.35, 119.4], [21.9, 122.22]], {
 				paddingTopLeft: [
 					this._mapPaddingLeft,
 					0,
@@ -225,7 +225,7 @@ TREM.Report = {
 
 		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
 
-		const zoomPredict = (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom()) / mapReport.getMaxZoom();
+		const zoomPredict = (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom()) / (mapReport.getMaxZoom() * (1.5 ** (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom())));
 		this._focusMap(this._markersGroup.getBounds(), {
 			paddingTopLeft: [
 				document.getElementById("map-report").offsetWidth / 2,
