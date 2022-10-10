@@ -1004,210 +1004,6 @@ async function getReportData() {
 
 // #region Report 點擊
 // eslint-disable-next-line no-shadow
-async function ReportClick(time,identifier = " ") {
-	if (identifier == " ") return;
-	if (ReportMarkID == time) {
-		ReportMarkID = null;
-		for (let index = 0; index < MarkList.length; index++)
-			mapReport.removeLayer(MarkList[index]);
-		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-	} else {
-		ReportMarkID = time;
-		for (let index = 0; index < MarkList.length; index++)
-			mapReport.removeLayer(MarkList[index]);
-
-		const LIST = [];
-		const body = {
-			Function : "data",
-			Type     : "report",
-			Value    : ReportCache[time].earthquakeNo,
-		};
-
-		const report = {
-			id           : null,
-			description  : null,
-			latitude     : null,
-			longitude    : null,
-			maxIntensity : null,
-			magnitude    : null,
-			depth        : null,
-			time         : null,
-			area         : [],
-			image        : null,
-		};
-
-		if (ReportCache[time].earthquakeNo % 1000 != 0) {
-			const response = (await (await fetch(PostAddressIP,
-				{
-					headers: {
-						"Content-Type": "application/json",
-					},
-					method : "POST",
-					body   : JSON.stringify(body),
-				})).json()).response;
-			console.log("response", response);
-			const objectToInt = (obj) => IntensityN(`${obj.$t}${{ 級: "", 弱: "-", 強: "+" }[obj.unit]}`);
-
-			for (const area of response.Intensity) {
-				const data = {
-					area         : area.areaDesc,
-					maxIntensity : objectToInt(area.areaMaxIntensity),
-					stations     : [],
-				};
-				if (area.station instanceof Array)
-					data.stations = area.station;
-				else if (area.station instanceof Object)
-					data.stations.push(area.station);
-				report.area.push(data);
-			}
-
-			report.id = +response?.No || null;
-			report.description = response?.Location || null;
-			report.latitude = +response?.NorthLatitude || null;
-			report.longitude = +response?.EastLongitude || null;
-			report.maxIntensity = response?.Intensity
-				?.reduce((acc, v) => v?.station?.length ? (acc.push(...v.station) && acc) : (acc.push(v?.station) && acc), [])
-				.sort((a, b) => (a.pga && b.pga) ? ((b.pga.ewComponent ** 2 + b.pga.nsComponent ** 2 + b.pga.vComponent ** 2) ** 0.5) - ((a.pga.ewComponent ** 2 + a.pga.nsComponent ** 2 + a.pga.vComponent ** 2) ** 0.5) : objectToInt(b.stationIntensity) - objectToInt(a.stationIntensity) == 0 ? b.distance.$t - a.distance.$t : objectToInt(b.stationIntensity) - objectToInt(a.stationIntensity))[0] || null;
-			report.magnitude = +response?.Scale || null;
-			report.depth = +response?.Depth || null;
-			report.time = new Date(response[time]?.["UTC+8"]) || null;
-			report.image = response?.EventImage || null;
-		}
-
-		if (report.id == null) {
-			console.log("ReportCache[time]", ReportCache[time]);
-			report.id = "小地區有感地震";
-			report.description = ReportCache[time]?.location || null;
-			report.latitude = +ReportCache[time]?.epicenterLat || null;
-			report.longitude = +ReportCache[time]?.epicenterLon || null;
-			report.maxIntensity = ReportCache[time]?.data
-				?.reduce((acc, v) => v?.eqStation?.length ? (acc.push(...v.eqStation) && acc) : acc, [])
-				.sort((a, b) => b.stationIntensity - a.stationIntensity == 0 ? b.distance - a.distance : b.stationIntensity - a.stationIntensity)[0];
-			report.magnitude = +ReportCache[time]?.magnitudeValue || null;
-			report.depth = +ReportCache[time]?.depth || null;
-			report.time = new Date(ReportCache[time]?.originTime) || null;
-		}
-		console.log("report", report);
-
-		if (
-			// 確認是否為無編號地震
-			ReportCache[time].earthquakeNo % 1000 == 0
-			|| await axios.post(PostAddressIP, body)
-				.then((response) => {
-					const json = response.data.response;
-					if (json == undefined)
-						return true;
-					else {
-						for (let Index = 0; Index < json.Intensity.length; Index++)
-							for (let index = 0; index < json.Intensity[Index].station.length; index++) {
-								// eslint-disable-next-line no-shadow
-								const Station = json.Intensity[Index].station[index];
-								let Intensity = Station.stationIntensity.$t;
-								if (Station.stationIntensity.unit == "強") Intensity += "+";
-								if (Station.stationIntensity.unit == "弱") Intensity += "-";
-
-								const ReportMark = L.marker(
-									[Station.stationLat.$t, Station.stationLon.$t],
-									{
-										icon: L.divIcon({
-											iconSize  : [16, 16],
-											className : `map-intensity-icon ${IntensityToClassString(IntensityN(Intensity))}`,
-										}),
-										zIndexOffset: 2000 + IntensityN(Intensity) * 50,
-									}).addTo(mapReport);
-
-								// eslint-disable-next-line no-shadow
-								let PGA = "";
-								if (Station.pga != undefined) PGA = `<br>PGA<br>垂直向: ${Station.pga.vComponent}<br>東西向: ${Station.pga.ewComponent}<br>南北向: ${Station.pga.nsComponent}<br><a onclick="openURL('${Station.waveImageURI}')">震波圖</a>`;
-								ReportMark.bindPopup(`站名: ${Station.stationName}<br>代號: ${Station.stationCode}<br>經度: ${Station.stationLon.$t}<br>緯度: ${Station.stationLat.$t}<br>震央距: ${Station.distance.$t}<br>方位角: ${Station.azimuth.$t}<br>震度: ${Intensity}<br>${PGA}`);
-								MarkList.push(ReportMark);
-							}
-
-						MarkList.push(
-							L.marker(
-								[+json.NorthLatitude, +json.EastLongitude],
-								{
-									icon: L.icon({
-										iconUrl  : "./image/star.png",
-										iconSize : [25, 25],
-									}),
-									zIndexOffset: 10000,
-								})
-								.bindPopup(`編號: ${json.No}<br>經度: ${json.EastLongitude}<br>緯度: ${json.NorthLatitude}<br>深度: ${json.Depth}<br>規模: ${json.Scale}<br>位置: ${json.Location}<br>時間: ${json["UTC+8"]}<br><br><a onclick="openURL('${json.Web}')">網頁</a><br><a onclick="openURL('${json.EventImage}')">地震報告</a><br><a onclick="openURL('${json.ShakeImage}')">震度分布</a>`)
-								.addTo(mapReport),
-						);
-						return false;
-					}
-				})
-				.catch((error) => {
-					console.log(error);
-					return false;
-				})
-		) {
-			for (let Index = 0; Index < ReportCache[time].data.length; Index++)
-				for (let index = 0; index < ReportCache[time].data[Index].eqStation.length; index++) {
-					const data = ReportCache[time].data[Index].eqStation[index];
-					const myIcon = L.divIcon({
-						iconSize  : [16, 16],
-						className : `map-intensity-icon ${IntensityToClassString(data.stationIntensity)}`,
-					});
-					const level = IntensityI(data.stationIntensity);
-					LIST.push({
-						Lat       : +data.stationLat,
-						Long      : +data.stationLon,
-						Icon      : myIcon,
-						Level     : level,
-						Intensity : +data.stationIntensity,
-						Name      : `${ReportCache[time].data[Index].areaName} ${data.stationName}`,
-					});
-				}
-
-			for (let Index = 0; Index < LIST.length - 1; Index++)
-				for (let index = 0; index < LIST.length - 1; index++)
-					if (LIST[index].Intensity > LIST[index + 1].Intensity) {
-						const Temp = LIST[index];
-						LIST[index] = LIST[index + 1];
-						LIST[index + 1] = Temp;
-					}
-
-			for (const i in LIST)
-				MarkList.push(
-					L.marker(
-						[LIST[i].Lat, LIST[i].Long],
-						{
-							icon         : LIST[i].Icon,
-							zIndexOffset : 2000 + IntensityN(LIST[i].Level) * 50,
-						})
-						.bindPopup(`站名: ${LIST[i].Name}<br>經度: ${LIST[i].Long}<br>緯度: ${LIST[i].Lat}<br>震度: ${LIST[i].Level}`)
-						.addTo(mapReport),
-				);
-
-			MarkList.push(
-				L.marker(
-					[+ReportCache[time].epicenterLat, +ReportCache[time].epicenterLon],
-					{
-						icon: L.icon({
-							iconUrl  : "./image/star.png",
-							iconSize : [25, 25],
-						}),
-						zIndexOffset: 10000,
-					})
-					.bindPopup(`編號: ${ReportCache[time].earthquakeNo % 100 ? ReportCache[time].earthquakeNo : "無（小地區小區域有感地震）"}<br>經度: ${ReportCache[time].epicenterLon}<br>緯度: ${ReportCache[time].epicenterLat}<br>深度: ${ReportCache[time].depth}<br>規模: ${ReportCache[time].magnitudeValue}<br>位置: ${ReportCache[time].location}<br>時間: ${ReportCache[time].originTime}`)
-					.addTo(mapReport),
-			);
-		}
-	}
-
-	set_report_overview = 1;
-	TREM.Report.setView("report-overview", identifier);
-	changeView("report", "#reportView_btn");
-	mapReport.fitBounds([[25.7, 119.6], [21.9, 122.22]], {
-		paddingTopLeft: [
-			document.getElementById("map-report").offsetWidth / 2,
-			0,
-		],
-	});
-}
 const openURL = url => {
 	shell.openExternal(url);
 
@@ -1362,7 +1158,8 @@ function addReport(report, prepend = false) {
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
 		ReportCache[report.originTime] = report;
 		Div.addEventListener("click", (event) => {
-			ReportClick(report.originTime,report.identifier);
+			TREM.Report.setView("report-overview", report.identifier);
+			changeView("report", "#reportView_btn");
 			ReportTag1 = NOW.getTime();
 			console.log("ReportTag1: ", ReportTag1);
 		});
@@ -1373,15 +1170,11 @@ function addReport(report, prepend = false) {
 				ipcRenderer.send("testEEW");
 				stopReplaybtn();
 			} else {
-				ReportClick(report.originTime,report.identifier);
+				TREM.Report.setView("report-overview", report.identifier);
+				changeView("report", "#reportView_btn");
 				ReportTag1 = NOW.getTime();
 				console.log("ReportTag1: ", ReportTag1);
-				// replay = new Date(report.originTime).getTime() - 25000;
-				// replayT = NOW.getTime();
 			}
-			// toggleNav(false);
-			// document.getElementById("togglenav_btn").classList.add("hide");
-			// document.getElementById("stopReplay").classList.remove("hide");
 		});
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
@@ -1399,7 +1192,8 @@ function addReport(report, prepend = false) {
 				for (let index = 0; index < MarkList.length; index++)
 					map.removeLayer(MarkList[index]);
 			}
-			ReportClick(report.originTime,report.identifier);
+			TREM.Report.setView("report-overview", report.identifier);
+			changeView("report", "#reportView_btn");
 			ReportTag1 = NOW.getTime();
 			console.log("ReportTag1: ", ReportTag1);
 		} else
