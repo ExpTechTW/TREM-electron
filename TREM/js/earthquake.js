@@ -235,6 +235,7 @@ async function init() {
 					mapLock = false;
 					TREM.Earthquake.emit("focus", {}, true);
 				})
+				.on("contextmenu", () => {TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });})
 				.on("drag", () => mapLock = true)
 				.on("zoomend", () => {
 					if (map.getZoom() >= 11)
