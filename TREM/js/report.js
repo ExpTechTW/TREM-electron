@@ -387,6 +387,22 @@ TREM.Report = {
 			],
 		});
 
+		this._markers.push(
+			L.marker(
+				[report.epicenterLat, report.epicenterLon],
+				{
+					icon: L.icon({
+						iconUrl  : "./image/star.png",
+						iconSize : [25, 25],
+					}),
+					zIndexOffset: 10000,
+				},
+			)
+		);
+
+		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
+
+
 		if(report.ID == undefined){
 			document.getElementById("report-replay").style.display = "none"
 		}
