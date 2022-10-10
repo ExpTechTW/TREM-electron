@@ -1,6 +1,5 @@
 /* global IntensityToClassString: false, reportCache: false, mapReport: true, IntensityI: false, changeView: false, replay: true, replayT: true */
 
-
 TREM.Report = {
 	view                  : "report-list",
 	reportList            : [],
@@ -146,6 +145,84 @@ TREM.Report = {
 		document.getElementById("togglenav_btn").classList.add("hide");
 		document.getElementById("stopReplay").classList.remove("hide");
 	},
+	copyReport(id) {
+		const { clipboard, shell } = require("electron");
+		const report = reportCache.find(v => v.identifier == id);
+		const string = [];
+		string.push(`　　　　　　　　　　中央氣象局地震測報中心　${report.earthquakeNo % 1000 ? `第${report.earthquakeNo - 111000}號` : "小區域"}有感地震報告`);
+		const time = new Date(report.originTime);
+		string.push(`　　　　　　　　　　發　震　時　間： ${time.getFullYear() - 1911}年${(time.getMonth() + 1 < 10 ? " " : "") + (time.getMonth() + 1)}月${(time.getDate() < 10 ? " " : "") + time.getDate()}日${(time.getHours() < 10 ? " " : "") + time.getHours()}時${(time.getMinutes() < 10 ? " " : "") + time.getMinutes()}分${(time.getSeconds() < 10 ? " " : "") + time.getSeconds()}秒`);
+		string.push(`　　　　　　　　　　震　央　位　置： 北　緯　 ${report.epicenterLat} °`);
+		string.push(`　　　　　　　　　　　　　　　　　　 東  經　${report.epicenterLon} °`);
+		string.push(`　　　　　　　　　　震　源　深　度：　 ${report.depth.toFixed(1)}  公里`);
+		string.push(`　　　　　　　　　　芮　氏　規　模：　  ${report.magnitudeValue.toFixed(1)}`);
+		string.push(`　　　　　　　　　　相　對　位　置： ${report.location}`);
+		string.push("");
+		string.push("                                 各 地 震 度 級");
+		string.push("");
+
+		const name = (text) => text.length < 3 ? text.split("").join("　") : text;
+		const int = (number) => `${IntensityI(number)}級`.replace("-級", "弱").replace("+級", "強");
+		const areas = [];
+
+		for (const areaData of report.data) {
+			const areaString = [];
+			areaString.push(`${areaData.areaName}地區最大震度 ${int(areaData.areaIntensity)}`);
+			for (const stationData of areaData.eqStation)
+				areaString.push(`　　　${name(stationData.stationName)} ${int(stationData.stationIntensity)}　　　`);
+
+			areas.push(areaString);
+		}
+
+		let count = areas.length;
+		if (count > 2)
+			while (count > 0) {
+				const threeAreas = [ areas.shift(), areas.shift(), areas.shift() ];
+				const whichToLoop = threeAreas[threeAreas.reduce((p, c, i, a) => a[p]?.length > c?.length ? p : i, 0)];
+				const theLine = [];
+				for (const index in whichToLoop) {
+					const a = threeAreas[0][index];
+					const b = threeAreas[1][index];
+					const c = threeAreas[2][index];
+					let strToPush = "";
+					if (a)
+						strToPush += a;
+					else
+						strToPush += "　　　　　　　　　　　";
+
+					if (b)
+						strToPush += `　　　${b}`;
+					else
+						strToPush += "　　　　　　　　　　　　　　";
+
+					if (c)
+						strToPush += `　　　${c}`;
+					else
+						strToPush += "　　　　　　　　　　　";
+					theLine.push(strToPush.trimEnd());
+				}
+				string.push(theLine.join("\n"));
+				count -= 3;
+				continue;
+			}
+		else
+			for (const area of areas) {
+				const theLine = [];
+				for (const str of area) {
+					let strToPush = "";
+					if (str)
+						strToPush += `　　　　　　　　　　　　　　${str}`;
+
+					theLine.push(strToPush.trimEnd());
+				}
+				string.push(theLine.join("\n"));
+			}
+
+		const filepath = path.join(app.getPath("temp"), `TREM_Report_${id}.txt`);
+		fs.writeFileSync(filepath, string.join("\n"), { encoding: "utf-8" });
+		shell.openPath(filepath);
+		setTimeout(() => fs.rmSync(filepath), 500);
+	},
 	/**
 	 * @param {EarthquakeReport[]} oldlist
 	 * @param {EarthquakeReport[]} newlist
@@ -235,6 +312,7 @@ TREM.Report = {
 		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
 		document.getElementById("report-overview-depth").innerText = report.depth;
 
+		document.getElementById("report-detail-copy").value = report.identifier;
 		document.getElementById("report-replay").value = report.identifier;
 
 		const cwb_code = "EQ"
