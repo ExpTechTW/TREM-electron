@@ -71,7 +71,10 @@ TREM.Report = {
 		this._updateReports(oldlist, this.reportList);
 	},
 	setView(view, reportIdentifier) {
-		if (this.view == view) return;
+		if (this.view == view)
+			if (!reportIdentifier)
+				return;
+
 		const oldView = document.getElementById(this.view);
 		const newView = document.getElementById(view);
 
@@ -100,7 +103,7 @@ TREM.Report = {
 		document.getElementById("report-detail-body").style.height = `${newView.offsetHeight}px`;
 		document.getElementById("report-detail-body").style.width = `${newView.offsetWidth}px`;
 		setTimeout(() => {
-			oldView.style.visibility = "hidden";
+			if (this.view != view) oldView.style.visibility = "hidden";
 			newView.classList.add("show");
 			setTimeout(() => {
 				document.getElementById("report-detail-body").style.height = "";
