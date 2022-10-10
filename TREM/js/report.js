@@ -100,18 +100,21 @@ TREM.Report = {
 				break;
 		}
 
-		oldView.classList.remove("show");
-		newView.style.visibility = "visible";
-		document.getElementById("report-detail-body").style.height = `${newView.offsetHeight}px`;
-		document.getElementById("report-detail-body").style.width = `${newView.offsetWidth}px`;
-		setTimeout(() => {
-			if (this.view != view) oldView.style.visibility = "hidden";
-			newView.classList.add("show");
+		if (this.view != view) {
+			oldView.classList.remove("show");
+			newView.style.visibility = "visible";
+			document.getElementById("report-detail-body").style.height = `${newView.offsetHeight}px`;
+			document.getElementById("report-detail-body").style.width = `${newView.offsetWidth}px`;
 			setTimeout(() => {
-				document.getElementById("report-detail-body").style.height = "";
-				document.getElementById("report-detail-body").style.width = "";
+				oldView.style.visibility = "hidden";
+				newView.classList.add("show");
 			}, 250);
-		}, 250);
+		}
+
+		setTimeout(() => {
+			document.getElementById("report-detail-body").style.height = "";
+			document.getElementById("report-detail-body").style.width = "";
+		}, 500);
 
 		this.view = view;
 	},
