@@ -1629,19 +1629,19 @@ TREM.Earthquake.on("eew", async (data) => {
 			}
 		}
 	}
-	if (MaxIntensity >= 5)
+	if (MaxIntensity >= 5) {
 		data.Alert = true;
-	else
-		data.Alert = false;
-	if (!Info.Warn.includes(data.ID)) {
-		Info.Warn.push(data.ID);
-		if (!EEWAlert) {
-			EEWAlert = true;
-			if (setting["audio.eew"] && Alert)
-				for (let index = 0; index < 5; index++)
-					audioPlay("./audio/Alert.wav");
+		if (!Info.Warn.includes(data.ID)) {
+			Info.Warn.push(data.ID);
+			if (!EEWAlert) {
+				EEWAlert = true;
+				if (setting["audio.eew"] && Alert)
+					for (let index = 0; index < 5; index++)
+						audioPlay("./audio/Alert.wav");
+			}
 		}
-	}
+	} else
+	data.Alert = false;
 
 	let _time = -1;
 	let stamp = 0;
