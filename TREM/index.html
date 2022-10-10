@@ -219,15 +219,39 @@
                                 <div id="report-overview-header">
                                     <div id="report-overview-number"></div>
                                     <div class="report-overview-item">
-                                        <span class="material-symbols-rounded">pin_drop</span>
+                                        <span class="report-overview-item-icon material-symbols-rounded">pin_drop</span>
                                         <span id="report-overview-location"></span>
                                     </div>
                                 </div>
+                                <div id="report-overview-actions">
+                                    <button id="report-replay" class="chip assist md3-ripple" onclick="TREM.Report.replay(this.value)">
+                                        <span class="chip-icon material-symbols-rounded">replay</span>
+                                        <span class="chip-label">重播</span>
+                                        <span class="chip-icon material-symbols-rounded"></span>
+                                    </button>
+                                    <button id="report-cwb" class="chip assist md3-ripple" onclick="openURL(this.value)">
+                                        <span class="chip-icon material-symbols-rounded">summarize</span>
+                                        <span class="chip-label">報告頁面</span>
+                                        <span class="chip-icon material-symbols-rounded">open_in_new</span>
+                                    </button>
+                                    <button id="report-scweb" class="chip assist md3-ripple" onclick="openURL(this.value)">
+                                        <span class="chip-icon material-symbols-rounded">summarize</span>
+                                        <span class="chip-label">地震測報中心</span>
+                                        <span class="chip-icon material-symbols-rounded">open_in_new</span>
+                                    </button>
+                                </div>
+                                <hr class="divider">
                                 <div id="report-overview-body">
                                     <div class="report-overview-item">
                                         <div class="report-overview-item-label">
-                                            <span class="material-symbols-rounded">schedule</span>
-                                            <span class="report-overview-item-label-text">發震時間</span>
+                                            <span class="report-overview-item-icon material-symbols-rounded">schedule</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Time of Occurrence</span>
+                                                <span lang="ja">発生時刻</span>
+                                                <span lang="kr">Time of occurrence</span>
+                                                <span lang="ru">Time of occurrence</span>
+                                                <span lang="zh-TW">發震時間</span>
+                                            </span>
                                         </div>
                                         <div class="report-overview-value">
                                             <span id="report-overview-time"></span>
@@ -236,8 +260,14 @@
                                     </div>
                                     <div class="report-overview-item">
                                         <div class="report-overview-item-label">
-                                            <span class="material-symbols-rounded">my_location</span>
-                                            <span class="report-overview-item-label-text">震央位置</span>
+                                            <span class="report-overview-item-icon material-symbols-rounded">my_location</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Epicenter Coordinate</span>
+                                                <span lang="ja">震央座標</span>
+                                                <span lang="kr">Epicenter coordinates</span>
+                                                <span lang="ru">Epicenter coordinates</span>
+                                                <span lang="zh-TW">震央位置</span>
+                                            </span>
                                         </div>
                                         <div class="report-overview-value">
                                             <span id="report-overview-latitude"></span>
@@ -248,8 +278,14 @@
                                     </div>
                                     <div class="report-overview-item">
                                         <div class="report-overview-item-label">
-                                            <span class="material-symbols-rounded">tag</span>
-                                            <span class="report-overview-item-label-text">最大震度</span>
+                                            <span class="report-overview-item-icon material-symbols-rounded">tag</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Max Intensity</span>
+                                                <span lang="ja">最大震度</span>
+                                                <span lang="kr">Max Intensity</span>
+                                                <span lang="ru">Max Intensity</span>
+                                                <span lang="zh-TW">最大震度</span>
+                                            </span>
                                         </div>
                                         <div class="report-overview-value">
                                             <span id="report-overview-intensity"></span>
@@ -257,27 +293,43 @@
                                     </div>
                                     <div class="report-overview-item">
                                         <div class="report-overview-item-label">
-                                            <span class="material-symbols-rounded">crisis_alert</span>
-                                            <span class="report-overview-item-label-text">芮氏規模</span>
+                                            <span class="report-overview-item-icon material-symbols-rounded">crisis_alert</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Magnitude</span>
+                                                <span lang="ja">マグニチュード</span>
+                                                <span lang="kr">Magnitude</span>
+                                                <span lang="ru">Magnitude</span>
+                                                <span lang="zh-TW">芮氏規模</span>
+                                            </span>
                                         </div>
                                         <div class="report-overview-value">
+                                            <span class="report-overview-unit">M<sub>L</sub></span>
                                             <span id="report-overview-magnitude"></span>
                                         </div>
                                     </div>
                                     <div class="report-overview-item">
                                         <div class="report-overview-item-label">
-                                            <span class="material-symbols-rounded">keyboard_double_arrow_down</span>
-                                            <span class="report-overview-item-label-text">震源深度</span>
+                                            <span class="report-overview-item-icon material-symbols-rounded">keyboard_double_arrow_down</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Focal Depth</span>
+                                                <span lang="ja">深さ</span>
+                                                <span lang="kr">Focal Depth</span>
+                                                <span lang="ru">Focal Depth</span>
+                                                <span lang="zh-TW">震源深度</span>
+                                            </span>
                                         </div>
                                         <div class="report-overview-value">
                                             <span id="report-overview-depth"></span>
-                                            <span class="report-overview-unit">公里</span>
+                                            <span class="report-overview-unit">
+                                                <span lang="en">km</span>
+                                                <span lang="ja">km</span>
+                                                <span lang="kr">km</span>
+                                                <span lang="ru">km</span>
+                                                <span lang="zh-TW">公里</span>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div id="report-station" class="report-detail-panel">
-
                             </div>
                         </div>
                     </div>
