@@ -1,4 +1,4 @@
-.chip > input {
+label.chip > input {
 	opacity: 0;
 	width: 0;
 	height: 0;
@@ -6,16 +6,13 @@
 	padding: 0;
 }
 
-.chip {
-	position: relative;
-	margin-right: 8px;
-}
-
-.chip > .chip-label {
+label.chip > .chip-label, button.chip.assist {
+	all: inherit;
+	display: inline-block;
 	position: relative;
 	height: 32px;
 	padding-right: 16px;
-	background-color: rgb(var(--md-sys-color-surface));
+	background-color: transparent;
 	outline: 1px solid rgb(var(--md-sys-color-outline));
 	border-radius: 8px;
 	color: rgb(var(--md-sys-color-on-surface-variant));
@@ -26,27 +23,51 @@
 	cursor: pointer;
 }
 
-.chip > input:checked + .chip-label {
+label.chip > .chip-label {
+	margin: 0;
+}
+
+button.chip.assist {
+	padding: 0;
+}
+
+button.chip.assist > span {
+	color: rgb(var(--md-sys-color-on-surface));
+	white-space: nowrap;
+	line-height: 32px;
+}
+
+button.chip.assist > .chip-icon {
+	color: rgb(var(--md-sys-color-primary));
+	padding: 0 4px 0 12px;
+	font-size: 18px;
+}
+
+button.chip.assist > .chip-icon:last-of-type {
+	padding: 0 12px 0 4px;
+}
+
+label.chip > input:checked + .chip-label {
 	outline: 0;
 	background-color: rgb(var(--md-sys-color-secondary-container));
 	color: rgb(var(--md-sys-color-on-secondary-container));
 }
 
-.chip > input:disabled + .chip-label {
+label.chip > input:disabled + .chip-label {
     cursor: not-allowed;
 }
 
-.chip > input:disabled:not(:checked) + .chip-label {
+label.chip > input:disabled:not(:checked) + .chip-label {
 	outline-color: rgba(var(--md-sys-color-on-surface), 0.12);
 	color: rgba(var(--md-sys-color-on-surface), 0.38);
 }
 
-.chip > input:disabled:checked + .chip-label {
+label.chip > input:disabled:checked + .chip-label {
 	background-color: rgba(var(--md-sys-color-on-surface), 0.12);
 	color: rgba(var(--md-sys-color-on-surface), 0.38);
 }
 
-.chip.filter > .chip-label::before {
+label.chip.filter > .chip-label::before {
 	content: "done";
 	display: inline-block;
 	font-family: "Material Symbols Rounded";
@@ -60,12 +81,12 @@
 		width 0.1s ease-in-out, opacity 0.1s ease-in-out;
 }
 
-.chip.filter > input:checked + .chip-label::before {
+label.chip.filter > input:checked + .chip-label::before {
 	width: 16px;
 	opacity: 1;
 }
 
-.chip > .chip-label::after {
+label.chip > .chip-label::after {
 	position: absolute;
 	content: "";
 	height: 100%;
@@ -104,4 +125,9 @@
 
 .chip.select select:focus-visible {
 	outline: 0;
+}
+
+label.chip.filter, button.chip.assist {
+	position: relative;
+	margin-right: 8px;
 }

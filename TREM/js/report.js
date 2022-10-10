@@ -1,4 +1,4 @@
-/* global IntensityToClassString: false, reportCache: false, mapReport: true, IntensityI: false */
+/* global IntensityToClassString: false, reportCache: false, mapReport: true, IntensityI: false, changeView: false, replay: true, replayT: true */
 
 
 TREM.Report = {
@@ -112,6 +112,21 @@ TREM.Report = {
 
 		this.view = view;
 	},
+	replay(id) {
+		const report = reportCache.find(v => v.identifier == id);
+		if (replay != 0) return;
+		changeView("main", "#mainView_btn");
+		if (report.ID.length != 0) {
+			localStorage.TestID = report.ID;
+			ipcRenderer.send("testEEW");
+		} else {
+			replay = new Date(report.originTime).getTime() - 25000;
+			replayT = NOW.getTime();
+		}
+		toggleNav(false);
+		document.getElementById("togglenav_btn").classList.add("hide");
+		document.getElementById("stopReplay").classList.remove("hide");
+	},
 	/**
 	 * @param {EarthquakeReport[]} oldlist
 	 * @param {EarthquakeReport[]} newlist
@@ -178,6 +193,9 @@ TREM.Report = {
 	_setupReport(report) {
 		this._clearMap();
 
+		if(report.ID == undefined){
+			document.getElementById("replayOverviewButton").style.display = "none"
+		}
 		if (report.ID.length != 0) {
 			document.getElementById("replayOverviewButton").style.display = "block"
 			document.getElementById("replayOverviewButton").onclick = function(){
@@ -208,6 +226,33 @@ TREM.Report = {
 				: "";
 		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
 		document.getElementById("report-overview-depth").innerText = report.depth;
+
+		document.getElementById("report-replay").value = report.identifier;
+
+		const cwb_code = "EQ"
+			+ report.earthquakeNo
+			+ "-"
+			+ (time.getMonth() + 1 < 10 ? "0" : "") + (time.getMonth() + 1)
+			+ (time.getDate() < 10 ? "0" : "") + time.getDate()
+			+ "-"
+			+ (time.getHours() < 10 ? "0" : "") + time.getHours()
+			+ (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
+			+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds();
+
+		document.getElementById("report-cwb").value = `https://www.cwb.gov.tw/V8/C/E/EQ/${cwb_code}.html`;
+
+
+		const scweb_code = ""
+			+ time.getFullYear()
+			+ (time.getMonth() + 1 < 10 ? "0" : "") + (time.getMonth() + 1)
+			+ (time.getDate() < 10 ? "0" : "") + time.getDate()
+			+ (time.getHours() < 10 ? "0" : "") + time.getHours()
+			+ (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
+			+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds()
+			+ (report.magnitudeValue * 10)
+			+ (report.earthquakeNo - 111000 ? report.earthquakeNo - 111000 : "");
+
+		document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
 
 		for (const data of report.data)
 			for (const eqStation of data.eqStation) {

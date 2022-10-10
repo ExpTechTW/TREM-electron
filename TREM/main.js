@@ -344,18 +344,6 @@ ipcMain.on("screenshot", async () => {
 	shell.showItemInFolder(path.join(folder, filename));
 });
 
-ipcMain.handle("checkUpdate", checkUpdate);
-
-async function checkUpdate() {
-	const update = await (await fetch("https://api.github.com/repos/ExpTechTW/TREM/releases")).json();
-	const latest = update[0].tag_name.split(".");
-	const current = TREM.getVersion().split(".");
-	if ((current[0] * 100 + current[1] * 10 + current[2]) < (latest[0] * 100 + latest[1] * 10 + latest[2]))
-		return { tag: update[0].tag_name, url: update[0].html_url, files: update[0].assets };
-
-	return false;
-}
-
 function emitAllWindow(channel, ...args) {
 	for (const [key, win] of TREM.Window[Symbol.iterator]())
 		if (win instanceof BrowserWindow)

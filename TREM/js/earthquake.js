@@ -1400,7 +1400,6 @@ function addReport(report, prepend = false) {
 					map.removeLayer(MarkList[index]);
 			}
 			ReportClick(report.originTime,report.identifier);
-			ReportTag = NOW.getTime();
 			ReportTag1 = NOW.getTime();
 			console.log("ReportTag1: ", ReportTag1);
 		} else
