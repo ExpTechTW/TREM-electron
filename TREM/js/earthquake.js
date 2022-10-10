@@ -2189,6 +2189,8 @@ function main(data) {
 			Cancel = false;
 			if (replay != 0) {
 				replay = 0;
+				document.getElementById("togglenav_btn").classList.remove("hide");
+				document.getElementById("stopReplay").classList.add("hide");
 				ReportGET();
 			}
 			INFO = [];
