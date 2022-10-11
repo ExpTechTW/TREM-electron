@@ -30,6 +30,10 @@ html:lang(zh-TW) {
     font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Microsoft JhengHei", sans-serif;
 }
 
+html:lang(zh-CN) {
+    font-family: "Google Sans", "Noto Sans SC", "Noto Sans TC", "Noto Sans JP", sans-serif;
+}
+
 body {
     position: absolute;
     background-color: transparent;
