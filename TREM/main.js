@@ -33,6 +33,9 @@ if (fs.existsSync(latestLog)) {
 	fs.renameSync(path.join(TREM.getPath("logs"), "latest.log"), path.join(TREM.getPath("logs"), `${filename}.log`));
 }
 
+if (!fs.existsSync(path.join(TREM.getPath("userData"), "server.json")))
+	fs.writeFileSync(path.join(TREM.getPath("userData"), "server.json"), JSON.stringify([]));
+
 if (!TREM.Configuration.data["compatibility.hwaccel"]) {
 	TREM.disableHardwareAcceleration();
 	logger.info("Hardware Acceleration is disabled.");
