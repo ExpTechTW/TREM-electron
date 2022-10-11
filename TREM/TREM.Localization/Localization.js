@@ -12,7 +12,7 @@ class Localization {
 			this[locale] = new Dictionary(locale);
 	}
 
-	static availableLocales = ["en", "ja", "kr", "ru", "zh-TW", "zh-cn"];
+	static availableLocales = ["en", "ja", "kr", "ru", "zh-TW", "zh-CN"];
 
 	matchLocale(value) {
 		value = Localization.availableLocales.includes(value) ? value
