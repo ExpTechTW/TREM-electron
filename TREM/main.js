@@ -394,6 +394,14 @@ function trayIcon() {
 			},
 		},
 		{
+			label : TREM.Localization.getString("Setting"),
+			type  : "normal",
+			click : () => {
+				BrowserWindow.fromId(process.env.window * 1).setAlwaysOnTop(false);
+				createSettingWindow();
+			},
+		},
+		{
 			label : TREM.Localization.getString("Tray_Restart"),
 			type  : "normal",
 			click : () => {

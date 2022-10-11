@@ -24,5 +24,6 @@
     "Dialog_Button_Cancel": "Отмена",
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": null,
-    "Notification_Update_Body": null
+    "Notification_Update_Body": null,
+    "Setting_Open": "Открыть настройки"
 }

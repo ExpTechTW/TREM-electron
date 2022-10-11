@@ -360,20 +360,20 @@ TREM.Report = {
 				this._markers.push(marker);
 			}
 
-		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
-
 		this._markers.push(
 			L.marker(
 				[report.epicenterLat, report.epicenterLon],
 				{
 					icon: L.icon({
-						iconUrl  : "./image/star.png",
-						iconSize : [25, 25],
+						iconUrl  : "./image/cross.png",
+						iconSize : [32, 32],
 					}),
-					zIndexOffset: 10000,
+					zIndexOffset: 5000,
 				},
-			).addTo(mapReport),
+			)
 		);
+
+		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
 
 		const zoomPredict = (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom()) / (mapReport.getMaxZoom() * (1.5 ** (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom())));
 		this._focusMap(this._markersGroup.getBounds(), {
@@ -386,22 +386,6 @@ TREM.Report = {
 				document.getElementById("map-report").offsetHeight * zoomPredict,
 			],
 		});
-
-		this._markers.push(
-			L.marker(
-				[report.epicenterLat, report.epicenterLon],
-				{
-					icon: L.icon({
-						iconUrl  : "./image/star.png",
-						iconSize : [25, 25],
-					}),
-					zIndexOffset: 10000,
-				},
-			)
-		);
-
-		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
-
 
 		if(report.ID == undefined){
 			document.getElementById("report-replay").style.display = "none"

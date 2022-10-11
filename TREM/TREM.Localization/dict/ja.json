@@ -24,5 +24,6 @@
     "Dialog_Button_Cancel": "キャンセル",
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": "⬆ 新しいバージョン",
-    "Notification_Update_Body": "v{0} → v{1}\nここをクリック して、最新バージョンのダウンロードを開始します"
+    "Notification_Update_Body": "v{0} → v{1}\nここをクリック して、最新バージョンのダウンロードを開始します",
+    "Setting_Open": "設定を開く"
 }
