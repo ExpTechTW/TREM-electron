@@ -294,7 +294,10 @@ TREM.Report = {
 					opacity      : (reportCache.length - reportCache.indexOf(report)) / reportCache.length,
 					zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
 				}
-			));
+			).bindPopup().on('popupopen', function(e) {
+				set_report_overview = 0;
+				TREM.Report.setView("report-overview", report.identifier);
+			}));
 
 		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
 	},
