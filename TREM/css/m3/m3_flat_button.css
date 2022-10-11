@@ -8,7 +8,7 @@ button.flat-button {
     color: rgb(var(--md-sys-color-primary));
     line-height: 40px;
     font-size: 14px;
-    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    font-family: inherit;
     font-weight: 500;
     border-radius: 20px;
     text-transform: uppercase;

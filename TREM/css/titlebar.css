@@ -95,7 +95,7 @@
 	align-items: center;
 	margin-left: 8px;
 	overflow: hidden;
-	font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+	font-family: inherit;
 	font-size: 14px;
 }
 

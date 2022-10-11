@@ -30,6 +30,10 @@ html:lang(zh-TW), html:lang(zh-TW) .leaflet-tooltip {
     font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", sans-serif;
 }
 
+html:lang(zh-CN), html:lang(zh-CN) .leaflet-tooltip {
+    font-family: "Google Sans", "Noto Sans SC", "Noto Sans TC", "Noto Sans JP", sans-serif;
+}
+
 body {
 	all: unset;
 	display: flex;

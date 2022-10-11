@@ -24,7 +24,5 @@
     "Dialog_Button_Cancel": "撤销",
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": ":arrow_up: 有可用的更新",
-    "Notification_Update_Body": "v{0} → v{1}\n单击下载最新版本",
-    "Setting": "设置",
-    "Setting_Open": "打开设置"
+    "Notification_Update_Body": "v{0} → v{1}\n单击下载最新版本"
 }
