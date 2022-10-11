@@ -3,6 +3,8 @@ const os = require("node:os");
 const win = getCurrentWindow();
 TREM.Constants = require(path.resolve(__dirname, "../TREM.Constants/Constants.js"));
 
+win.webContents.openDevTools({ mode: "detach" });
+
 document.onreadystatechange = () => {
 	if (document.readyState == "complete")
 		handleWindowControls();
