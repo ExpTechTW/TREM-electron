@@ -351,6 +351,20 @@ async function init() {
 					fillOpacity : 1,
 				},
 			}).addTo(map);
+			map_base = L.geoJson.vt(MapData.S, {
+				edgeBufferTiles : 2,
+				minZoom         : 4,
+				maxZoom         : 15,
+				tolerance       : 10,
+				buffer          : 256,
+				debug           : 0,
+				style           : {
+					weight      : 0.8,
+					color       : colors.primary,
+					fillColor   : colors.surfaceVariant,
+					fillOpacity : 1,
+				},
+			}).addTo(map);
 
 		if (!mapTW_base)
 			mapTW_base = L.geoJson.vt(MapData.Dmap, {
