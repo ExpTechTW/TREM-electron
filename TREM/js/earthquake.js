@@ -1048,8 +1048,12 @@ function addReport(report, prepend = false) {
 		report_intensity_title_zh_tw.lang = "zh-TW";
 		report_intensity_title_zh_tw.className = "report-intensity-title";
 		report_intensity_title_zh_tw.innerText = "最大震度";
+		const report_intensity_title_zh_cn = document.createElement("span");
+		report_intensity_title_zh_cn.lang = "zh-CN";
+		report_intensity_title_zh_cn.className = "report-intensity-title";
+		report_intensity_title_zh_cn.innerText = "最大震度";
 
-		report_intensity_title_container.append(report_intensity_title_en, report_intensity_title_ja, report_intensity_title_kr, report_intensity_title_ru, report_intensity_title_zh_tw);
+		report_intensity_title_container.append(report_intensity_title_en, report_intensity_title_ja, report_intensity_title_kr, report_intensity_title_ru, report_intensity_title_zh_tw, report_intensity_title_zh_cn);
 		report_intensity_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
 
 		const report_intensity_value = document.createElement("span");
@@ -1105,8 +1109,12 @@ function addReport(report, prepend = false) {
 		report_intensity_title_zh_tw.lang = "zh-TW";
 		report_intensity_title_zh_tw.className = "report-intensity-title";
 		report_intensity_title_zh_tw.innerText = "最大震度";
+		const report_intensity_title_zh_cn = document.createElement("span");
+		report_intensity_title_zh_cn.lang = "zh-CN";
+		report_intensity_title_zh_cn.className = "report-intensity-title";
+		report_intensity_title_zh_cn.innerText = "最大震度";
 
-		report_intensity_title_container.append(report_intensity_title_en, report_intensity_title_ja, report_intensity_title_kr, report_intensity_title_ru, report_intensity_title_zh_tw);
+		report_intensity_title_container.append(report_intensity_title_en, report_intensity_title_ja, report_intensity_title_kr, report_intensity_title_ru, report_intensity_title_zh_tw, report_intensity_title_zh_cn);
 		report_intensity_title_container.childNodes.forEach((node) => node.style.display = node.lang == setting["general.locale"] ? "unset" : "none");
 
 		const report_intensity_value = document.createElement("span");
