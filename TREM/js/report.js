@@ -130,7 +130,9 @@ TREM.Report = {
 			newView.style.visibility = "visible";
 			document.getElementById("report-detail-body").style.height = `${newView.offsetHeight}px`;
 			document.getElementById("report-detail-body").style.width = `${newView.offsetWidth}px`;
+			newView.style.position = "absolute";
 			setTimeout(() => {
+				newView.style.position = "";
 				oldView.style.visibility = "hidden";
 				newView.classList.add("show");
 			}, 250);
