@@ -138,9 +138,6 @@ function createSettingWindow() {
 	SettingWindow.on("close", () => {
 		SettingWindow = null;
 	});
-	if (_devMode) {
-		SettingWindow.webContents.openDevTools({ mode: "detach" });
-	}
 }
 
 const shouldQuit = TREM.requestSingleInstanceLock();
@@ -342,11 +339,12 @@ ipcMain.on("screenshotEEW", async (event, json) => {
 });
 
 ipcMain.on("screenshot", async () => {
+	const screenshot = BrowserWindow.getFocusedWindow();
 	const folder = path.join(TREM.getPath("userData"), "Screenshots");
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);
 	const filename = "screenshot" + Date.now() + ".png";
-	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
+	fs.writeFileSync(path.join(folder, filename), (await screenshot.webContents.capturePage()).toPNG());
 	shell.showItemInFolder(path.join(folder, filename));
 });
 
