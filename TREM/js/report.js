@@ -4,13 +4,7 @@ TREM.Report = {
 	view                  : "report-list",
 	reportList            : [],
 	reportListElement     : document.getElementById("report-list-container"),
-	/**
-	 * @type {L.Marker[]}
-	 */
 	_markers              : [],
-	/**
-	 * @type {L.FeatureGroup}
-	 */
 	_markersGroup         : null,
 	_lastFocus            : [],
 	_filterHasReplay      : false,
@@ -23,13 +17,15 @@ TREM.Report = {
 	get _mapPaddingLeft() {
 		return document.getElementById("map-report").offsetWidth / 2;
 	},
-	unloadReports() {
-		this.reportListElement.replaceChildren();
+	unloadReports(skipCheck = false) {
+		if (this.view == "report-list" || skipCheck) {
+			this.reportListElement.replaceChildren();
+			this._clearMap();
+		}
 	},
 	loadReports(skipCheck = false) {
 		if (this.view == "report-list" || skipCheck) {
 			const fragment = new DocumentFragment();
-
 			this.reportList = reportCache
 				.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 				.filter(v => this._filterHasReplay ? v.ID?.length : true)
@@ -46,9 +42,22 @@ TREM.Report = {
 					element.classList.add("hide");
 					element.style.display = "none";
 				}
+				this._markers.push(L.marker(
+					[report.epicenterLat, report.epicenterLon],
+					{
+						icon: L.icon({
+							iconUrl   : "./image/cross.png",
+							iconSize  : [report.data[0].areaIntensity * 6, report.data[0].areaIntensity * 6],
+							className : "epicenterIcon",
+						}),
+						opacity      : (reportCache.length - reportCache.indexOf(report)) / reportCache.length,
+						zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
+					}
+				));
 				fragment.appendChild(element);
 			}
 
+			this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
 			this.reportListElement.appendChild(fragment);
 		}
 	},
@@ -107,8 +116,8 @@ TREM.Report = {
 
 		switch (view) {
 			case "report-list": {
-				this.loadReports(true);
 				this._clearMap(true);
+				this.loadReports(true);
 				document.getElementById("report-detail-back").classList.add("hide");
 				document.getElementById("report-detail-refresh").classList.remove("hide");
 				break;
@@ -262,11 +271,29 @@ TREM.Report = {
 		const removed = oldlist.filter(v => !newlist.includes(v));
 		const added = newlist.filter(v => !oldlist.includes(v));
 
+		this._clearMap();
+
 		for (const report of removed)
 			this._hideItem(document.getElementById(report.identifier));
 
 		for (const report of added)
 			this._showItem(document.getElementById(report.identifier));
+
+		for (const report of newlist)
+			this._markers.push(L.marker(
+				[report.epicenterLat, report.epicenterLon],
+				{
+					icon: L.icon({
+						iconUrl   : "./image/cross.png",
+						iconSize  : [report.data[0].areaIntensity * 6, report.data[0].areaIntensity * 6],
+						className : "epicenterIcon",
+					}),
+					opacity      : (reportCache.length - reportCache.indexOf(report)) / reportCache.length,
+					zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
+				}
+			));
+
+		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
 	},
 	/**
 	 * @param {HTMLElement} element
@@ -358,8 +385,8 @@ TREM.Report = {
 		document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
 
 		for (const data of report.data)
-			for (const eqStation of data.eqStation) {
-				const marker = L.marker(
+			for (const eqStation of data.eqStation)
+				this._markers.push(L.marker(
 					[eqStation.stationLat, eqStation.stationLon],
 					{
 						icon: L.divIcon({
@@ -367,9 +394,8 @@ TREM.Report = {
 							className : `map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}`,
 						}),
 						zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
-					});
-				this._markers.push(marker);
-			}
+					}
+				));
 
 		this._markers.push(
 			L.marker(
