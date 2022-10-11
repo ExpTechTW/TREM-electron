@@ -1547,9 +1547,11 @@ button.hide + #report-detail-header-title {
 
 .report-list-item > .report-list-item-container > .report-list-item-label > .report-list-item-description > .report-list-item-icon:not(:first-child)  {
 	margin-left: 8px;
+	margin-right: 2px;
 }
 
 .report-list-item > .report-list-item-container > .report-list-item-label > .report-list-item-description > .report-list-item-icon  {
+	margin-right: 4px;
 	font-size: 18px;
 	vertical-align: bottom;
 }
