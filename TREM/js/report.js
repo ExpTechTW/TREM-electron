@@ -127,18 +127,18 @@ TREM.Report = {
 
 		if (this.view != view) {
 			oldView.classList.remove("show");
+			newView.style.position = "absolute";
 			newView.style.visibility = "visible";
 			document.getElementById("report-detail-body").style.height = `${newView.offsetHeight}px`;
 			document.getElementById("report-detail-body").style.width = `${newView.offsetWidth}px`;
-			newView.style.position = "absolute";
 			setTimeout(() => {
-				newView.style.position = "";
 				oldView.style.visibility = "hidden";
 				newView.classList.add("show");
 			}, 250);
 		}
 
 		setTimeout(() => {
+			newView.style.position = "";
 			document.getElementById("report-detail-body").style.height = "";
 			document.getElementById("report-detail-body").style.width = "";
 		}, 500);
