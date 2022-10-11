@@ -192,6 +192,7 @@ kbd {
 }
 
 #load {
+	user-select: none;
 	z-index: 25560;
 	position: fixed;
 	display: flex;
@@ -205,7 +206,6 @@ kbd {
 	width: 100%;
 	background-color: rgb(var(--md-sys-color-background));
 	color: rgb(var(--md-sys-color-on-background));
-	user-select: none;
 }
 
 #load #app-name {
@@ -1391,6 +1391,7 @@ stop.pred-stop {
 .map-intensity-icon.pga6 { background-color: #ff0000; }
 
 #report-detail {
+	user-select: none;
 	position: absolute;
 	top: 0;
 	left: 0;

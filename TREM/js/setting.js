@@ -3,7 +3,10 @@ const os = require("node:os");
 const win = getCurrentWindow();
 TREM.Constants = require(path.resolve(__dirname, "../TREM.Constants/Constants.js"));
 
-win.webContents.openDevTools({ mode: "detach" });
+document.addEventListener("keydown", (event) => {
+	if (event.ctrlKey && event.shiftKey && event.key.toLocaleLowerCase() == "i")
+		ipcRenderer.send("openDevtool");
+});
 
 document.onreadystatechange = () => {
 	if (document.readyState == "complete")
@@ -184,7 +187,6 @@ function init() {
 					else element.disabled = false;
 				}
 				const wrapper = document.getElementById(id.replace(/\./g, "-"));
-				console.log(wrapper);
 				if (wrapper)
 					wrapper.style.backgroundColor = setting[id];
 				break;
@@ -451,12 +453,14 @@ const showError = () => {
 		TREM.Localization.getString("Setting_Dialog_Error_Description").format(is_setting_disabled));
 };
 
-$("input[type=range]").on("input", function() {
-	const value = this.value;
-	$(this).siblings("span.slider-value").text(function() {return this.className.includes("percentage") ? ~~(value * 100) : value;});
-})
+$("input[type=range]")
+	.on("input", function() {
+		const value = this.value;
+		$(this).siblings("span.slider-value").text(function() {return this.className.includes("percentage") ? ~~(value * 100) : value;});
+	})
 	.on("mousedown", () => window.getSelection().removeAllRanges());
 
+/*
 const stepLockRange = (e) => {
 	if (e.shiftKey)
 		$("input[type=range]")[0].step = 0.1;
@@ -467,7 +471,6 @@ const stepUnlockRange = (e) => {
 		$("input[type=range]")[0].step = 0.01;
 };
 
-/*
 // register the handler
 document.addEventListener("keydown", stepLockRange, false);
 document.addEventListener("keyup", stepUnlockRange, false);
