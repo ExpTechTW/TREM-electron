@@ -250,28 +250,26 @@ TREM.Report = {
 		const added = newlist.filter(v => !oldlist.includes(v));
 
 		for (const report of removed)
-			this._removeItem(document.getElementById(report.identifier));
+			this._hideItem(document.getElementById(report.identifier));
 
 		for (const report of added)
-			this._addItem(this._createReportItem(report));
+			this._showItem(document.getElementById(report.identifier));
 	},
 	/**
 	 * @param {HTMLElement} element
 	 */
-	_removeItem(element) {
+	_hideItem(element) {
 		element.classList.add("hide");
-		setTimeout(() => element.remove(), 200);
+
+		setTimeout(() => element.style.display = "none", 200);
 	},
 
 	/**
 	 * @param {HTMLElement} element
 	 * @param {HTMLElement} reference
 	 */
-	_addItem(element) {
-		element.classList.add("hide");
-		const index = this.reportList.findIndex(v => v.identifier == element.id) - 1;
-		const ref = document.getElementById(this.reportList[index]?.identifier)?.nextSibling;
-		this.reportListElement.insertBefore(element, ref);
+	_showItem(element) {
+		element.style.display = "";
 		setTimeout(() => element.classList.remove("hide"), 10);
 	},
 	_focusMap(...args) {
