@@ -1567,7 +1567,16 @@ button.hide + #report-detail-header-title {
 	font-weight: 500;
 }
 
-.report-list-item > .report-list-item-container > .report-list-item-label > .report-list-item-time {
+.report-list-item > .report-list-item-container > .report-list-item-label > .report-list-item-description > .report-list-item-icon:not(:first-child)  {
+	margin-left: 8px;
+}
+
+.report-list-item > .report-list-item-container > .report-list-item-label > .report-list-item-description > .report-list-item-icon  {
+	font-size: 18px;
+	vertical-align: bottom;
+}
+
+.report-list-item > .report-list-item-container > .report-list-item-label > .report-list-item-description {
 	color: rgb(var(--md-sys-color-on-surface-variant));
 	font-size: 14px;
 }

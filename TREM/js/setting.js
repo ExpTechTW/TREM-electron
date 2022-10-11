@@ -68,6 +68,10 @@ ipcRenderer.on("settingError", (event, error) => {
 	init();
 });
 
+ipcRenderer.on("Select:Save", (event, key, value) => {
+	SelectSave(key,value);
+});
+
 let station;
 
 // #region 選單
