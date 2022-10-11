@@ -357,6 +357,17 @@ TREM.Report = {
 				this._markers.push(marker);
 			}
 
+		this._markers.push(L.marker(
+			[report.epicenterLat, report.epicenterLon],
+			{
+				icon: L.icon({
+					iconUrl   : "./image/cross.png",
+					iconSize  : [32, 32],
+					className : "epicenterIcon",
+				}),
+				zIndexOffset: 5000,
+			}));
+
 		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
 
 		const zoomPredict = (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom()) / (mapReport.getMaxZoom() * (1.5 ** (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom())));
