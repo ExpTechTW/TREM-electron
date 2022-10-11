@@ -53,7 +53,7 @@ let ITimer = null;
 let Report = 0;
 let Sspeed = 3.5;
 let Pspeed = 6.5;
-let Server = [];
+const Server = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
 let PAlert = {};
 let Location;
 let station = {};
@@ -1345,6 +1345,7 @@ function replayOverviewButton(report){
 }
 
 function backindexButton(){
+	ReportTag1 = 0;
 	toggleNav(false);
 	changeView("main", "#mainView_btn");
 }
@@ -1352,7 +1353,6 @@ function backindexButton(){
 ipcMain.on("testEEW", () => {
 	replaytestEEW = NOW.getTime();
 	stopReplaybtn();
-	Server = [];
 	if (localStorage.TestID != undefined) {
 		const list = localStorage.TestID.split(",");
 		for (let index = 0; index < list.length; index++)
@@ -1464,6 +1464,9 @@ async function FCMdata(data) {
 	const json = JSON.parse(data);
 	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	Server.push(json.TimeStamp);
+	if (Server.length > 5) Server.splice(0, 1);
+	// eslint-disable-next-line no-empty-function
+	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(Server), () => {});
 	GetData = true;
 	if (json.response != "You have successfully subscribed to earthquake information" && json.FormatVersion == 1) {
 		const folder = path.join(app.getPath("userData"), "data");

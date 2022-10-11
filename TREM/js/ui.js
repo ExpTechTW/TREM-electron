@@ -6,6 +6,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 const toggleNav = state => {
+	ReportTag1 = 0;
 	toggleNavTime = NOW.getTime();
 	console.log("toggleNavTime: ", toggleNavTime);
 	if (state == undefined) {
