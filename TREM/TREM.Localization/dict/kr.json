@@ -26,5 +26,7 @@
     "Notification_Update_Title": "⬆ 업데이트가 가능합니다",
     "Notification_Update_Body": "v{0} → v{1}\n여기를 눌러 최신 버전을 다운로드 합니다.",
     "Setting": "환경",
-    "Setting_Open": "설정 열기"
+    "Setting_Open": "설정 열기",
+    "general_locale": "표시 언어",
+    "Tray_Reload": null
 }

@@ -68,10 +68,6 @@ ipcRenderer.on("settingError", (event, error) => {
 	init();
 });
 
-ipcRenderer.on("Select:Save", (event, key, value) => {
-	SelectSave(key,value);
-});
-
 let station;
 
 // #region 選單
@@ -219,17 +215,11 @@ function init() {
 	});
 }
 
-function SelectSave(id,value=" ") {
-	if (value==" "){
-		const select = document.getElementById(id);
-		const value = select.options[select.selectedIndex].value;
-		dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
-		ipcRenderer.send("config:value", id, value);
-	}
-	if (value!=" "){
-		dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
-		ipcRenderer.send("config:value", id, value);
-	}
+function SelectSave(id) {
+	const select = document.getElementById(id);
+	const value = select.options[select.selectedIndex].value;
+	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+	ipcRenderer.send("config:value", id, value);
 
 	if (id == "location.city") {
 		const town = document.getElementById("location.town");

@@ -354,6 +354,20 @@ function emitAllWindow(channel, ...args) {
 			win.webContents.send(channel, ...args);
 }
 
+function changelocale(value){
+	TREM.Configuration.data['general.locale'] = value;
+	TREM.Localization.setLocale(value);
+	if (MainWindow){
+		MainWindow.setTitle(TREM.Localization.getString("Application_Title"));
+		MainWindow.reload();
+	}
+	if (SettingWindow){
+		SettingWindow.setTitle(TREM.Localization.getString("Setting_Title"));
+		MainWindow.reload();
+	}
+	trayIcon();
+}
+
 function trayIcon() {
 	if (tray) {
 		tray.destroy();
@@ -407,42 +421,55 @@ function trayIcon() {
 					}
 				},
 				{
-					label: '顯示語言',
+					label: TREM.Localization.getString("general_locale"),
 					submenu: [
 
 						{
 							label: '繁體中文 (zh-TW)',
 							click : () => {
-								MainWindow.webContents.send('Select:Save','general.locale','zh-TW');
+								changelocale('zh-TW');
 							}
 						},
 						{
 							label: 'English (en)',
 							click : () => {
-								MainWindow.webContents.send('Select:Save','general.locale','en');
+								changelocale('en');
 							}
 						},
 						{
 							label: '日本語 (ja)',
 							click : () => {
-								MainWindow.webContents.send('Select:Save','general.locale','ja');
+								changelocale('ja');
 							}
 						},
 						{
 							label: '한국어 (kr)',
 							click : () => {
-								MainWindow.webContents.send('Select:Save','general.locale','kr');
+								changelocale('kr');
 							}
 						},
 						{
 							label: 'Русский (ru)',
 							click : () => {
-								MainWindow.webContents.send('Select:Save','general.locale','ru');
+								changelocale('ru');
+							}
+						},
+						{
+							label: '简体中文 (zh-CN)',
+							click : () => {
+								changelocale('zh-CN');
 							}
 						},
 					]
 				}
 			]
+		},
+		{
+			label : TREM.Localization.getString("Tray_Reload"),
+			type  : "normal",
+			click : () => {
+				MainWindow.reload();
+			},
 		},
 		{
 			label : TREM.Localization.getString("Tray_Restart"),

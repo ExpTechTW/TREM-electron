@@ -26,5 +26,7 @@
     "Notification_Update_Title": "⬆ Update Available",
     "Notification_Update_Body": "v{0} → v{1}\nClick here to download the latest version.",
     "Setting": "Settings",
-    "Setting_Open": "Open Settings"
+    "Setting_Open": "Open Settings",
+    "general_locale": "Display Language",
+    "Tray_Reload": "Reload TREM"
 }
