@@ -41,19 +41,19 @@ TREM.Report = {
 					|| (this._filterIntensity && !(report.data[0].areaIntensity == this._filterIntensityValue))) {
 					element.classList.add("hide");
 					element.style.display = "none";
-				}
-				this._markers.push(L.marker(
-					[report.epicenterLat, report.epicenterLon],
-					{
-						icon: L.icon({
-							iconUrl   : "./image/cross.png",
-							iconSize  : [report.data[0].areaIntensity * 6, report.data[0].areaIntensity * 6],
-							className : "epicenterIcon",
-						}),
-						opacity      : (reportCache.length - reportCache.indexOf(report)) / reportCache.length,
-						zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
-					}
-				));
+				} else
+					this._markers.push(L.marker(
+						[report.epicenterLat, report.epicenterLon],
+						{
+							icon: L.icon({
+								iconUrl   : "./image/cross.png",
+								iconSize  : [report.data[0].areaIntensity * 6, report.data[0].areaIntensity * 6],
+								className : "epicenterIcon",
+							}),
+							opacity      : (reportCache.length - reportCache.indexOf(report)) / reportCache.length,
+							zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
+						}
+					));
 				fragment.appendChild(element);
 			}
 
