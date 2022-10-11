@@ -60,6 +60,7 @@ TREM.Report = {
 		el.id = data.identifier;
 		el.className += ` ${IntensityToClassString(data.data[0].areaIntensity)}`;
 		el.querySelector(".report-list-item-location").innerText = data.location;
+		el.querySelector(".report-list-item-id").innerText = data.earthquakeNo % 1000 ? data.earthquakeNo : "小區域有感地震";
 		el.querySelector(".report-list-item-time").innerText = data.originTime.replace(/-/g, "/");
 		el.querySelector("button").value = data.identifier;
 		el.querySelector("button").addEventListener("click", function() {
