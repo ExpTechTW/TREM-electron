@@ -138,6 +138,9 @@ function createSettingWindow() {
 	SettingWindow.on("close", () => {
 		SettingWindow = null;
 	});
+	if (_devMode) {
+		SettingWindow.webContents.openDevTools({ mode: "detach" });
+	}
 }
 
 const shouldQuit = TREM.requestSingleInstanceLock();
@@ -412,32 +415,31 @@ function trayIcon() {
 						{
 							label: '繁體中文 (zh-TW)',
 							click : () => {
-								this.SelectSave('general.locale','zh-TW');
-								// ipcMain.emit("config:value", "general.locale", "zh-TW");
+								MainWindow.webContents.send('Select:Save','general.locale','zh-TW');
 							}
 						},
 						{
 							label: 'English (en)',
 							click : () => {
-								ipcMain.emit("config:value", "general.locale", "en");
+								MainWindow.webContents.send('Select:Save','general.locale','en');
 							}
 						},
 						{
 							label: '日本語 (ja)',
 							click : () => {
-								ipcMain.emit("config:value", "general.locale", "ja");
+								MainWindow.webContents.send('Select:Save','general.locale','ja');
 							}
 						},
 						{
 							label: '한국어 (kr)',
 							click : () => {
-								ipcMain.emit("config:value", "general.locale", "kr");
+								MainWindow.webContents.send('Select:Save','general.locale','kr');
 							}
 						},
 						{
 							label: 'Русский (ru)',
 							click : () => {
-								ipcMain.emit("config:value", "general.locale", "ru");
+								MainWindow.webContents.send('Select:Save','general.locale','ru');
 							}
 						},
 					]
