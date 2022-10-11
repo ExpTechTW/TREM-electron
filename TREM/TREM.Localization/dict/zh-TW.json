@@ -25,5 +25,6 @@
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": "⬆ 有可用的更新",
     "Notification_Update_Body": "v{0} → v{1}\n點擊來下載最新版本",
+    "Setting": "設定",
     "Setting_Open": "開啟設定"
 }

@@ -36,8 +36,18 @@ TREM.Report = {
 				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 				.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
 
-			for (const report of this.reportList)
-				fragment.appendChild(this._createReportItem(report));
+			for (const report of reportCache) {
+				const element = this._createReportItem(report);
+				if (
+					(this._filterHasNumber && !(report.earthquakeNo % 1000))
+					|| (this._filterHasReplay && !(report.ID?.length))
+					|| (this._filterMagnitude && !(this._filterMagnitudeValue == 1 ? report.magnitudeValue < 4.5 : report.magnitudeValue >= 4.5))
+					|| (this._filterIntensity && !(report.data[0].areaIntensity == this._filterIntensityValue))) {
+					element.classList.add("hide");
+					element.style.display = "none";
+				}
+				fragment.appendChild(element);
+			}
 
 			this.reportListElement.appendChild(fragment);
 		}

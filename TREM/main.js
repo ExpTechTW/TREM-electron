@@ -395,11 +395,54 @@ function trayIcon() {
 		},
 		{
 			label : TREM.Localization.getString("Setting"),
-			type  : "normal",
-			click : () => {
-				BrowserWindow.fromId(process.env.window * 1).setAlwaysOnTop(false);
-				createSettingWindow();
-			},
+			type  : "submenu",
+			submenu: [
+				{
+					label : TREM.Localization.getString("Setting_Open"),
+					type  : "normal",
+					click : () => {
+						BrowserWindow.fromId(process.env.window * 1).setAlwaysOnTop(false);
+						ipcMain.emit("openChildWindow");
+					}
+				},
+				{
+					label: '顯示語言',
+					submenu: [
+
+						{
+							label: '繁體中文 (zh-TW)',
+							click : () => {
+								this.SelectSave('general.locale','zh-TW');
+								// ipcMain.emit("config:value", "general.locale", "zh-TW");
+							}
+						},
+						{
+							label: 'English (en)',
+							click : () => {
+								ipcMain.emit("config:value", "general.locale", "en");
+							}
+						},
+						{
+							label: '日本語 (ja)',
+							click : () => {
+								ipcMain.emit("config:value", "general.locale", "ja");
+							}
+						},
+						{
+							label: '한국어 (kr)',
+							click : () => {
+								ipcMain.emit("config:value", "general.locale", "kr");
+							}
+						},
+						{
+							label: 'Русский (ru)',
+							click : () => {
+								ipcMain.emit("config:value", "general.locale", "ru");
+							}
+						},
+					]
+				}
+			]
 		},
 		{
 			label : TREM.Localization.getString("Tray_Restart"),
