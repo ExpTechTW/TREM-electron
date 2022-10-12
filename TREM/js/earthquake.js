@@ -92,6 +92,8 @@ const ReportViewStates = {
 	ui : true,
 };
 let set_report_overview = 0;
+let rtstationzero =0;
+let rtstationzerotext = "";
 // #endregion
 
 // #region 初始化
@@ -168,6 +170,17 @@ async function init() {
 						console.log("toggleNavTime end: ", NOW.getTime());
 						toggleNavTime = 0;
 						$("#nav-rail").addClass("hide");
+					}
+					if(rtstationzero != 0){
+						document.getElementById("log").innerHTML = "";
+						const node = document.createElement("p");
+						node.setAttribute("value",rtstationzerotext);
+						node.setAttribute("id",rtstationzerotext);
+						const text = rtstationzerotext+'斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss")
+						const textnode = document.createTextNode(text);
+						node.appendChild(textnode);
+						document.getElementById("log").appendChild(node);
+						dump({ level: 3, message: ` ${text}`, origin: "rt-station-zero-log" });
 					}
 				}
 				let GetDataState = "";
@@ -545,6 +558,23 @@ async function handler(response) {
 						(amount > 2.5) ? "pga3" :
 							(amount > 2) ? "pga2" :
 								"pga1";
+
+		if(levelClass=="zero"){
+			if(!document.getElementById(station[keys[index]].Loc)){
+				rtstationzero = 1;
+				rtstationzerotext = station[keys[index]].Loc;
+			}
+			else if(document.getElementById(station[keys[index]].Loc).value == station[keys[index]].Loc){
+				rtstationzero = 0;
+				rtstationzerotext = "";
+			}
+			else
+				rtstationzero = 1;
+				rtstationzerotext = station[keys[index]].Loc;
+		}else{
+			rtstationzero = 0;
+			rtstationzerotext = "";
+		}
 
 		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 

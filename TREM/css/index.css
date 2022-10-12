@@ -261,6 +261,20 @@ kbd {
 	font-weight: 600;
 }
 
+#log {
+	user-select: none;
+	pointer-events: none;
+	z-index: 1000;
+	position: fixed;
+	left: 15px;
+	bottom: 75px;
+	color: rgba(var(--md-sys-color-on-surface-variant), .6);
+	font-size: 14px;
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
+	transition: color .1s ease-in-out;
+}
+
 #app-version {
 	user-select: none;
 	pointer-events: none;
