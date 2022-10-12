@@ -116,11 +116,23 @@ label.chip > .chip-label::after {
 }
 
 .chip.select select {
-	background-color: inherit;
+	/* background-color: inherit;
 	border: 0;
 	font: inherit;
 	color: inherit;
-    cursor: inherit;
+    cursor: inherit; */
+	user-select: none;
+    background-color: rgb(var(--md-sys-color-surface-variant));
+    border-radius: 6px 6px 0 0;
+    /* padding: 0 16px; */
+    height: 24px;
+    color: rgb(var(--md-sys-color-on-surface));
+    font-size: 16px;
+    font-family: inherit;
+    border: none;
+    border-bottom: 0px solid rgb(var(--md-sys-color-on-surface-variant));
+    outline: none;
+    cursor: pointer;
 }
 
 .chip.select select:focus-visible {
