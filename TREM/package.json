@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "5.1.4-59-pre8",
+  "version": "5.1.4-60-pre8",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "scripts": {
@@ -54,7 +54,7 @@
   "author": "whes1015",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "electron": "^18.3.15",
+    "electron": "^21.1.0",
     "electron-builder": "^23.0.3",
     "eslint": "^8.23.1",
     "eslint-plugin-require-sort": "^1.2.2"
@@ -71,12 +71,10 @@
     "electron-fcm-push-receiver": "^2.1.7",
     "electron-log": "^4.4.8",
     "electron-updater": "^5.3.0",
-    "fs": "^0.0.1-security",
     "jquery": "^3.6.0",
     "leaflet": "^1.8.0",
     "leaflet-edgebuffer": "^1.0.6",
     "leaflet-geojson-vt": "^1.1.0",
-    "lodash": "^4.17.21",
     "tinycolor2": "^1.4.2",
     "ws": "^8.8.0"
   }
