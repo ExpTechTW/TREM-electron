@@ -235,7 +235,26 @@ function SelectSave(id) {
 			option.value = key;
 			town.appendChild(option);
 		}
+
 		ipcRenderer.send("config:value", "location.town", town.options[town.selectedIndex].value);
+	}
+	if (id == "location.city" || id == "location.town") {
+		const city = document.getElementById("location.city");
+		const town = document.getElementById("location.town");
+		const Loc = TREM.Resources.region[city.options[city.selectedIndex].value][town.options[town.selectedIndex].value];
+		let stamp = 0;
+		let loc = "";
+		for (let index = 0; index < Object.keys(station).length; index++) {
+			const num = Math.abs(Loc[1] - station[Object.keys(station)[index]].Lat, 2) + Math.pow(Loc[2] - station[Object.keys(station)[index]].Long, 2);
+			if (stamp == 0) {
+				stamp = num;
+				loc = Object.keys(station)[index];
+			} else if (stamp > num) {
+				stamp = num;
+				loc = Object.keys(station)[index];
+			}
+		}
+		ipcRenderer.send("config:value", "Real-time.station", loc);
 	}
 }
 
