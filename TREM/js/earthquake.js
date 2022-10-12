@@ -28,7 +28,6 @@ let audioList = [];
 let audioList1 = [];
 let audioLock = false;
 let audioLock1 = false;
-const ReportCache = {};
 let ReportMarkID = null;
 const MarkList = [];
 const EarthquakeList = {};
@@ -94,9 +93,6 @@ const ReportViewStates = {
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
-win.on("show", () => {
-	TREM.Earthquake.emit("focus", {}, true);
-});
 
 let fullscreenTipTimeout;
 win.on("enter-full-screen", () => {
@@ -320,7 +316,7 @@ async function init() {
 				edgeBufferTiles : 2,
 				minZoom         : 4,
 				maxZoom         : 12,
-				tolerance       : 10,
+				tolerance       : 20,
 				buffer          : 256,
 				debug           : 0,
 				style           : {
@@ -335,7 +331,7 @@ async function init() {
 			mapTW_base = L.geoJson.vt(MapData.Dmap, {
 				minZoom   : 4,
 				maxZoom   : 12,
-				tolerance : 10,
+				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
 				zIndex    : 10,
@@ -351,7 +347,7 @@ async function init() {
 			mapReport_base = L.geoJson.vt(MapData.tw_county, {
 				minZoom   : 7.5,
 				maxZoom   : 10,
-				tolerance : 15,
+				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
 				zIndex    : 10,
@@ -655,7 +651,7 @@ async function handler(response) {
 				Pgeojson = L.geoJson.vt(MapData.DmapT, {
 					minZoom   : 4,
 					maxZoom   : 12,
-					tolerance : 10,
+					tolerance : 20,
 					buffer    : 256,
 					debug     : 0,
 					style     : (properties) => {
@@ -1136,7 +1132,6 @@ function addReport(report, prepend = false) {
 		ripple(Div);
 		Div.append(report_container);
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
-		ReportCache[report.originTime] = report;
 		Div.addEventListener("click", (event) => {
 			TREM.Report.setView("report-overview", report.identifier);
 			changeView("report", "#reportView_btn");
@@ -1706,7 +1701,7 @@ TREM.Earthquake.on("eew", async (data) => {
 	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.DmapT, {
 		minZoom   : 4,
 		maxZoom   : 12,
-		tolerance : 10,
+		tolerance : 20,
 		buffer    : 256,
 		debug     : 0,
 		zIndex    : 1,
@@ -1821,7 +1816,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 			TSUNAMI.E = L.geoJson.vt(MapData.E, {
 				minZoom   : 4,
 				maxZoom   : 12,
-				tolerance : 10,
+				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
 				style     : {
@@ -1843,7 +1838,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 			TSUNAMI.EN = L.geoJson.vt(MapData.EN, {
 				minZoom   : 4,
 				maxZoom   : 12,
-				tolerance : 10,
+				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
 				style     : {
@@ -1865,7 +1860,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 			TSUNAMI.ES = L.geoJson.vt(MapData.ES, {
 				minZoom   : 4,
 				maxZoom   : 12,
-				tolerance : 10,
+				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
 				style     : {
@@ -1887,7 +1882,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 			TSUNAMI.N = L.geoJson.vt(MapData.N, {
 				minZoom   : 4,
 				maxZoom   : 12,
-				tolerance : 10,
+				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
 				style     : {
@@ -1909,7 +1904,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 			TSUNAMI.WS = L.geoJson.vt(MapData.WS, {
 				minZoom   : 4,
 				maxZoom   : 12,
-				tolerance : 10,
+				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
 				style     : {
@@ -1931,7 +1926,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 			TSUNAMI.W = L.geoJson.vt(MapData.W, {
 				minZoom   : 4,
 				maxZoom   : 12,
-				tolerance : 10,
+				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
 				style     : {

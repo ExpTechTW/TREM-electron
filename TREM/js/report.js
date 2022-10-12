@@ -78,7 +78,6 @@ TREM.Report = {
 		return el;
 	},
 	/**
-	 *
 	 * @param {*} key
 	 * @param {*} value
 	 * @param {HTMLSelectElement} select
