@@ -486,9 +486,9 @@ async function handler(response) {
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.PGA);
-		if (amount > MaxPGA) MaxPGA = amount;
 		if (station[keys[index]] == undefined) continue;
 		const Alert = Sdata.alert;
+		if (amount > MaxPGA) MaxPGA = amount;
 		const Intensity = (Alert && Json.Alert) ? Sdata.I :
 			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
 				(!Alert) ? 0 :
