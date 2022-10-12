@@ -86,6 +86,7 @@ let PGACancel = false;
 let IntensityListTime = 0;
 let WarnAudio = 0;
 let reportCache = [];
+let MaxPGA = 0;
 const ReportViewStates = {
 	id : null,
 	ui : true,
@@ -176,8 +177,8 @@ async function init() {
 				}
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
-				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
-				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} | ${MaxPGA}gal | ${Delay}ms ${warn} ${GetDataState}`);
+				$("#app-version1").text(`${app.getVersion()} | ${MaxPGA}gal | ${Delay}ms ${warn} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -516,9 +517,11 @@ async function handler(response) {
 		Station[removedKey].remove();
 		delete Station[removedKey];
 	}
+	MaxPGA = 0;
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.PGA);
+		if (amount > MaxPGA) MaxPGA = amount;
 		if (station[keys[index]] == undefined) continue;
 		const Alert = Sdata.alert;
 		const Intensity = (Alert && Json.Alert) ? Sdata.I :
