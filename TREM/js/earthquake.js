@@ -84,10 +84,6 @@ let IntensityListTime = 0;
 let WarnAudio = 0;
 let reportCache = [];
 let MaxPGA = 0;
-const ReportViewStates = {
-	id : null,
-	ui : true,
-};
 // #endregion
 
 // #region 初始化
@@ -105,6 +101,7 @@ win.on("enter-full-screen", () => {
 		$("#fullscreen-notice").removeClass("show");
 	}, 3_000);
 });
+
 win.on("leave-full-screen", () => {
 	$("#fullscreen-notice").removeClass("show");
 	if (fullscreenTipTimeout) clearTimeout(fullscreenTipTimeout);
@@ -292,7 +289,7 @@ async function init() {
 	})();
 
 	await (async () => {
-		const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
+		TREM.Colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
 
 		dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
 		dump({ level: 3, message: "Starting timer...", origin: "Timer" });
@@ -322,8 +319,8 @@ async function init() {
 				debug           : 0,
 				style           : {
 					weight      : 0.8,
-					color       : colors.primary,
-					fillColor   : colors.surfaceVariant,
+					color       : TREM.Colors.primary,
+					fillColor   : TREM.Colors.surfaceVariant,
 					fillOpacity : 1,
 				},
 			}).addTo(map);
@@ -338,7 +335,7 @@ async function init() {
 				zIndex    : 10,
 				style     : {
 					weight      : 0.8,
-					color       : colors.primary,
+					color       : TREM.Colors.primary,
 					fillColor   : "transparent",
 					fillOpacity : 0,
 				},
@@ -354,8 +351,8 @@ async function init() {
 				zIndex    : 10,
 				style     : {
 					weight      : 0.8,
-					color       : colors.primary,
-					fillColor   : colors.surfaceVariant,
+					color       : TREM.Colors.primary,
+					fillColor   : TREM.Colors.surfaceVariant,
 					fillOpacity : 0,
 				},
 			}).addTo(mapReport);
@@ -472,7 +469,7 @@ function PGAMain() {
 	}, 500);
 }
 
-async function handler(response) {
+function handler(response) {
 	if (response.state != "Success") return;
 	const Json = response.response;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
@@ -650,7 +647,7 @@ async function handler(response) {
 					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
 				}
 				if (Pgeojson != null) map.removeLayer(Pgeojson);
-				const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
+
 				Pgeojson = L.geoJson.vt(MapData.DmapT, {
 					minZoom   : 4,
 					maxZoom   : 12,
@@ -669,7 +666,7 @@ async function handler(response) {
 									fillOpacity : 0,
 								};
 							return {
-								color       : colors.secondary,
+								color       : TREM.Colors.secondary,
 								weight      : 0.8,
 								fillColor   : color(PLoc[name]),
 								fillOpacity : 1,
@@ -973,7 +970,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
-		const list = await ExpTechAPI.v1.data.getEarthquakeReports(250);
+		const list = await ExpTechAPI.v0.data.getEarthquakeReports(250);
 		return list;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
@@ -1323,9 +1320,11 @@ ipcMain.on("testEEW", () => {
 			});
 	}
 });
+
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
 });
+
 const updateMapColors = async (event, value) => {
 	let accent, dark;
 	if (typeof value == "boolean") {
@@ -1335,20 +1334,21 @@ const updateMapColors = async (event, value) => {
 		accent = value;
 		dark = setting["theme.dark"];
 	}
-	const colors = await getThemeColors(accent, dark);
+
+	TREM.Colors = await getThemeColors(accent, dark);
 
 	map_base.options.style = {
 		weight      : 0.8,
-		color       : colors.primary,
-		fillColor   : colors.surfaceVariant,
+		color       : TREM.Colors.primary,
+		fillColor   : TREM.Colors.surfaceVariant,
 		fillOpacity : 1,
 	};
 	map_base.redraw();
 
 	mapTW_base.options.style = {
 		weight      : 0.8,
-		color       : colors.primary,
-		fillColor   : colors.surfaceVariant,
+		color       : TREM.Colors.primary,
+		fillColor   : TREM.Colors.surfaceVariant,
 		fillOpacity : 1,
 	};
 	mapTW_base.redraw();
@@ -1356,13 +1356,15 @@ const updateMapColors = async (event, value) => {
 
 	mapReport_base.options.style = {
 		weight      : 0.8,
-		color       : colors.primary,
-		fillColor   : colors.surfaceVariant,
+		color       : TREM.Colors.primary,
+		fillColor   : TREM.Colors.surfaceVariant,
 		fillOpacity : 1,
 	};
 	mapReport_base.redraw();
 };
+
 ipcRenderer.on("config:theme", updateMapColors);
+ipcRenderer.on("config:dark", updateMapColors);
 ipcRenderer.on("config:color", (event, key, value) => {
 	if (typeof event == "boolean") key = event;
 	if (typeof key == "boolean")
@@ -1379,11 +1381,9 @@ ipcRenderer.on("config:color", (event, key, value) => {
 			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).addClass("darkText");
 		else
 			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).removeClass("darkText");
-
 	}
 
 });
-ipcRenderer.on("config:dark", updateMapColors);
 ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
 });
@@ -1472,7 +1472,8 @@ async function FCMdata(data) {
 }
 // #endregion
 
-TREM.Earthquake.on("eew", async (data) => {
+// #region Event: eew
+TREM.Earthquake.on("eew", (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.debug(data);
 
@@ -1631,14 +1632,7 @@ TREM.Earthquake.on("eew", async (data) => {
 				}, 50);
 			}
 
-	if (ReportMarkID != null) {
-		ReportMarkID = null;
-		for (let index = 0; index < MarkList.length; index++)
-			map.removeLayer(MarkList[index]);
-
-	}
-	let speed = 500;
-	if (setting["shock.smoothing"]) speed = 100;
+	const speed = setting["shock.smoothing"] ? 100 : 500;
 	if (EarthquakeList[data.ID].Timer != undefined) clearInterval(EarthquakeList[data.ID].Timer);
 	if (EarthquakeList.ITimer != undefined) clearInterval(EarthquakeList.ITimer);
 
@@ -1708,7 +1702,6 @@ TREM.Earthquake.on("eew", async (data) => {
 		main(data);
 	}, speed);
 
-	const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
 	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.DmapT, {
 		minZoom   : 4,
 		maxZoom   : 12,
@@ -1724,7 +1717,7 @@ TREM.Earthquake.on("eew", async (data) => {
 						color       : "transparent",
 						weight      : 0.8,
 						opacity     : 0,
-						fillColor   : colors.surfaceVariant,
+						fillColor   : TREM.Colors.surfaceVariant,
 						fillOpacity : 0.6,
 					};
 				return {
@@ -1739,7 +1732,7 @@ TREM.Earthquake.on("eew", async (data) => {
 					color       : "transparent",
 					weight      : 0.8,
 					opacity     : 0,
-					fillColor   : colors.surfaceVariant,
+					fillColor   : TREM.Colors.surfaceVariant,
 					fillOpacity : 0.6,
 				};
 		},
@@ -1786,6 +1779,7 @@ TREM.Earthquake.on("eew", async (data) => {
 		}
 	}, 2000);
 });
+// #endregion
 
 TREM.Earthquake.on("tsunami", (data) => {
 	if (data.Version == 1) {
