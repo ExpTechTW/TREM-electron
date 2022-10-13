@@ -90,6 +90,7 @@ function createWindow() {
 	MainWindow.loadFile("./index.html");
 	MainWindow.setAspectRatio(16 / 9);
 	MainWindow.setMenu(null);
+	MainWindow.webContents.setFrameRate(120);
 	MainWindow.webContents.on("did-finish-load", () => {
 		MainWindow.webContents.send("setting", TREM.Configuration._data);
 		if (!_hide) setTimeout(() => MainWindow.show(), 500);
@@ -131,6 +132,7 @@ function createSettingWindow() {
 	require("@electron/remote/main").enable(SettingWindow.webContents);
 	SettingWindow.loadFile("./page/setting.html");
 	SettingWindow.setMenu(null);
+	// SettingWindow.webContents.setFrameRate(60);
 	SettingWindow.webContents.on("did-finish-load", () => {
 		SettingWindow.webContents.send("setting", TREM.Configuration._data);
 		setTimeout(() => SettingWindow.show(), 500);

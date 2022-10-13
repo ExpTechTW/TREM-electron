@@ -269,7 +269,7 @@ kbd {
 	z-index: 1000;
 	position: fixed;
 	left: 90px;
-	bottom: 75px;
+	bottom: 65px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 	font-size: 14px;
 	font-weight: 400;
@@ -279,6 +279,21 @@ kbd {
 
 #log p {
     margin: 0px;
+}
+
+#log1 {
+	overflow-y: scroll;
+	user-select: none;
+	pointer-events: none;
+	z-index: 1000;
+	position: fixed;
+	left: 90px;
+	bottom: 65px;
+	color: rgba(var(--md-sys-color-on-surface-variant), .6);
+	font-size: 14px;
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
+	transition: color .1s ease-in-out;
 }
 
 #app-version {
@@ -532,7 +547,7 @@ kbd {
 	z-index: 1000;
 	user-select: none;
 	position: fixed;
-	left: 50%;
+	left: 53%;
 	bottom: -100px;
 	height: 48px;
 	width: 732px;

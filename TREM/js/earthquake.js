@@ -172,10 +172,17 @@ async function init() {
 					GetData = false;
 					GetDataState = "✉";
 				}
+				const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
+				const formatCPUUsage = (data) => `${data} %`;
+				const memoryData = process.memoryUsage();
+				const CPUData = formatCPUUsage(process.getCPUUsage().percentCPUUsage.toString().slice(0, 3));
+				const heapUsed = formatMemoryUsage(memoryData.heapUsed);
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
-				$("#app-version").text(`${app.getVersion()} | ${MaxPGA}gal | ${Delay}ms ${warn} ${GetDataState}`);
-				$("#app-version1").text(`${app.getVersion()} | ${MaxPGA}gal | ${Delay}ms ${warn} ${GetDataState}`);
+				$("#log").text(`${MaxPGA}gal | ${CPUData} | ${heapUsed}`);
+				$("#log1").text(`${MaxPGA}gal | ${CPUData} | ${heapUsed}`);
+				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
+				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -536,19 +543,27 @@ function rtstationzerofun(num,text,key){
 			console.log(text+"首次進入斷線完成");
 		}
 	}else if(num == 0){
-		console.log(text+"進入離開斷線工作中...");
-		const node = document.createElement("p").cloneNode(true);
-		node.setAttribute("value",NOW.getTime());
-		node.setAttribute("id",key+"0");
-		const texta = text+' 離開斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss");
-		console.log(texta);
-		const textnode = document.createTextNode(texta);
-		node.appendChild(textnode);
-		document.getElementById("log").appendChild(node);
-		document.getElementById(key).setAttribute("value","2");
-		// dump({ level: 3, message: ` ${text}`, origin: "rt-station-zero-log" });
-		console.log(text+"進入離開斷線完成");
+		let elementstationid = document.getElementById(key);
+		if (elementstationid != null){
+			if (elementstationid.value != undefined) {
+				if(elementstationid.value != "2"){
+					console.log(text+"進入離開斷線工作中...");
+					const node = document.createElement("p");
+					node.setAttribute("value",NOW.getTime());
+					node.setAttribute("id",key+"0");
+					const texta = text+' 離開斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss");
+					console.log(texta);
+					const textnode = document.createTextNode(texta);
+					node.appendChild(textnode);
+					document.getElementById("log").appendChild(node);
+					document.getElementById(key).setAttribute("value","2");
+					// dump({ level: 3, message: ` ${text}`, origin: "rt-station-zero-log" });
+					console.log(text+"進入離開斷線完成");
+				}
+			}else
+				console.log(text+" undefined "+elementstationid.text);
 	}
+		}
 }
 
 function handler(response) {
@@ -590,18 +605,11 @@ function handler(response) {
 							(amount > 2) ? "pga2" :
 								"pga1";
 
-		if(levelClass=="zero"){
-			rtstationzerofun(1,station[keys[index]].Loc,keys[index]);
-		}else{
-			let elementstationid = document.getElementById(keys[index]);
-			if (elementstationid != null) {
-				if(elementstationid.value != "2"){
-					rtstationzerofun(0,station[keys[index]].Loc,keys[index]);
-				}else{
-					console.log(station[keys[index]].Loc+" 離開斷線");
-				}
-			}
-		}
+		// if(levelClass=="zero"){
+		// 	rtstationzerofun(1,station[keys[index]].Loc,keys[index]);
+		// }else{
+		// 	// rtstationzerofun(0,station[keys[index]].Loc,keys[index]);
+		// }
 
 		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 
@@ -1065,7 +1073,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
-		const list = await ExpTechAPI.v0.data.getEarthquakeReports(250);
+		const list = await ExpTechAPI.v1.data.getEarthquakeReports(250);
 		return list;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
