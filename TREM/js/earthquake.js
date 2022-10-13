@@ -87,13 +87,7 @@ let IntensityListTime = 0;
 let WarnAudio = 0;
 let reportCache = [];
 let MaxPGA = 0;
-const ReportViewStates = {
-	id : null,
-	ui : true,
-};
 let set_report_overview = 0;
-let rtstationzero =0;
-let rtstationzerotext = "";
 // #endregion
 
 // #region 初始化
@@ -111,6 +105,7 @@ win.on("enter-full-screen", () => {
 		$("#fullscreen-notice").removeClass("show");
 	}, 3_000);
 });
+
 win.on("leave-full-screen", () => {
 	$("#fullscreen-notice").removeClass("show");
 	if (fullscreenTipTimeout) clearTimeout(fullscreenTipTimeout);
@@ -170,17 +165,6 @@ async function init() {
 						console.log("toggleNavTime end: ", NOW.getTime());
 						toggleNavTime = 0;
 						$("#nav-rail").addClass("hide");
-					}
-					if(rtstationzero != 0){
-						document.getElementById("log").innerHTML = "";
-						const node = document.createElement("p");
-						node.setAttribute("value",rtstationzerotext);
-						node.setAttribute("id",rtstationzerotext);
-						const text = rtstationzerotext+'斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss")
-						const textnode = document.createTextNode(text);
-						node.appendChild(textnode);
-						document.getElementById("log").appendChild(node);
-						dump({ level: 3, message: ` ${text}`, origin: "rt-station-zero-log" });
 					}
 				}
 				let GetDataState = "";
@@ -326,7 +310,7 @@ async function init() {
 	})();
 
 	await (async () => {
-		const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
+		TREM.Colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
 
 		dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
 		dump({ level: 3, message: "Starting timer...", origin: "Timer" });
@@ -356,8 +340,8 @@ async function init() {
 				debug           : 0,
 				style           : {
 					weight      : 0.8,
-					color       : colors.primary,
-					fillColor   : colors.surfaceVariant,
+					color       : TREM.Colors.primary,
+					fillColor   : TREM.Colors.surfaceVariant,
 					fillOpacity : 1,
 				},
 			}).addTo(map);
@@ -370,8 +354,8 @@ async function init() {
 				debug           : 0,
 				style           : {
 					weight      : 0.8,
-					color       : colors.primary,
-					fillColor   : colors.surfaceVariant,
+					color       : TREM.Colors.primary,
+					fillColor   : TREM.Colors.surfaceVariant,
 					fillOpacity : 1,
 				},
 			}).addTo(map);
@@ -386,7 +370,7 @@ async function init() {
 				zIndex    : 10,
 				style     : {
 					weight      : 0.8,
-					color       : colors.primary,
+					color       : TREM.Colors.primary,
 					fillColor   : "transparent",
 					fillOpacity : 0,
 				},
@@ -402,8 +386,8 @@ async function init() {
 				zIndex    : 10,
 				style     : {
 					weight      : 0.8,
-					color       : colors.primary,
-					fillColor   : colors.surfaceVariant,
+					color       : TREM.Colors.primary,
+					fillColor   : TREM.Colors.surfaceVariant,
 					fillOpacity : 0,
 				},
 			}).addTo(mapReport);
@@ -520,7 +504,54 @@ function PGAMain() {
 	}, 500);
 }
 
-async function handler(response) {
+function rtstationzerofun(num,text,key){
+	if(num == 1){
+		let elementstationidzero = document.getElementById(key);
+		if (elementstationidzero != null) {
+			if(elementstationidzero.value != NOW.getTime()){
+				console.log(text+" 持續斷線中...");
+			}else if(elementstationidzero.value != "2"){
+				console.log(text+" 重新進入斷線中...");
+				const node = document.createElement("p").cloneNode(true);
+				node.setAttribute("value",NOW.getTime());
+				node.setAttribute("id",key);
+				const texta = text +' 斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss");
+				console.log(texta);
+				const textnode = document.createTextNode(texta);
+				node.appendChild(textnode);
+				document.getElementById("log").appendChild(node);
+			}
+		}else{
+			console.log(text+"首次進入斷線工作中...");
+			document.getElementById("log1").innerHTML = "";
+			const node = document.createElement("p").cloneNode(true);
+			node.setAttribute("value",NOW.getTime());
+			node.setAttribute("id",key);
+			const texta = text +' 斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss");
+			console.log(texta);
+			const textnode = document.createTextNode(texta);
+			node.appendChild(textnode);
+			document.getElementById("log").appendChild(node);
+			// dump({ level: 3, message: ` ${text}`, origin: "rt-station-zero-log" });
+			console.log(text+"首次進入斷線完成");
+		}
+	}else if(num == 0){
+		console.log(text+"進入離開斷線工作中...");
+		const node = document.createElement("p").cloneNode(true);
+		node.setAttribute("value",NOW.getTime());
+		node.setAttribute("id",key+"0");
+		const texta = text+' 離開斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss");
+		console.log(texta);
+		const textnode = document.createTextNode(texta);
+		node.appendChild(textnode);
+		document.getElementById("log").appendChild(node);
+		document.getElementById(key).setAttribute("value","2");
+		// dump({ level: 3, message: ` ${text}`, origin: "rt-station-zero-log" });
+		console.log(text+"進入離開斷線完成");
+	}
+}
+
+function handler(response) {
 	if (response.state != "Success") return;
 	const Json = response.response;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
@@ -560,20 +591,16 @@ async function handler(response) {
 								"pga1";
 
 		if(levelClass=="zero"){
-			if(!document.getElementById(station[keys[index]].Loc)){
-				rtstationzero = 1;
-				rtstationzerotext = station[keys[index]].Loc;
-			}
-			else if(document.getElementById(station[keys[index]].Loc).value == station[keys[index]].Loc){
-				rtstationzero = 0;
-				rtstationzerotext = "";
-			}
-			else
-				rtstationzero = 1;
-				rtstationzerotext = station[keys[index]].Loc;
+			rtstationzerofun(1,station[keys[index]].Loc,keys[index]);
 		}else{
-			rtstationzero = 0;
-			rtstationzerotext = "";
+			let elementstationid = document.getElementById(keys[index]);
+			if (elementstationid != null) {
+				if(elementstationid.value != "2"){
+					rtstationzerofun(0,station[keys[index]].Loc,keys[index]);
+				}else{
+					console.log(station[keys[index]].Loc+" 離開斷線");
+				}
+			}
 		}
 
 		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
@@ -715,7 +742,7 @@ async function handler(response) {
 					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
 				}
 				if (Pgeojson != null) map.removeLayer(Pgeojson);
-				const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
+
 				Pgeojson = L.geoJson.vt(MapData.DmapT, {
 					minZoom   : 4,
 					maxZoom   : 12,
@@ -734,7 +761,7 @@ async function handler(response) {
 									fillOpacity : 0,
 								};
 							return {
-								color       : colors.secondary,
+								color       : TREM.Colors.secondary,
 								weight      : 0.8,
 								fillColor   : color(PLoc[name]),
 								fillOpacity : 1,
@@ -1038,7 +1065,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
-		const list = await ExpTechAPI.v1.data.getEarthquakeReports(250);
+		const list = await ExpTechAPI.v0.data.getEarthquakeReports(250);
 		return list;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
@@ -1437,9 +1464,11 @@ ipcMain.on("testEEW", () => {
 			});
 	}
 });
+
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
 });
+
 const updateMapColors = async (event, value) => {
 	let accent, dark;
 	if (typeof value == "boolean") {
@@ -1449,20 +1478,21 @@ const updateMapColors = async (event, value) => {
 		accent = value;
 		dark = setting["theme.dark"];
 	}
-	const colors = await getThemeColors(accent, dark);
+
+	TREM.Colors = await getThemeColors(accent, dark);
 
 	map_base.options.style = {
 		weight      : 0.8,
-		color       : colors.primary,
-		fillColor   : colors.surfaceVariant,
+		color       : TREM.Colors.primary,
+		fillColor   : TREM.Colors.surfaceVariant,
 		fillOpacity : 1,
 	};
 	map_base.redraw();
 
 	mapTW_base.options.style = {
 		weight      : 0.8,
-		color       : colors.primary,
-		fillColor   : colors.surfaceVariant,
+		color       : TREM.Colors.primary,
+		fillColor   : TREM.Colors.surfaceVariant,
 		fillOpacity : 1,
 	};
 	mapTW_base.redraw();
@@ -1470,13 +1500,15 @@ const updateMapColors = async (event, value) => {
 
 	mapReport_base.options.style = {
 		weight      : 0.8,
-		color       : colors.primary,
-		fillColor   : colors.surfaceVariant,
+		color       : TREM.Colors.primary,
+		fillColor   : TREM.Colors.surfaceVariant,
 		fillOpacity : 1,
 	};
 	mapReport_base.redraw();
 };
+
 ipcRenderer.on("config:theme", updateMapColors);
+ipcRenderer.on("config:dark", updateMapColors);
 ipcRenderer.on("config:color", (event, key, value) => {
 	if (typeof event == "boolean") key = event;
 	if (typeof key == "boolean")
@@ -1493,11 +1525,8 @@ ipcRenderer.on("config:color", (event, key, value) => {
 			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).addClass("darkText");
 		else
 			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).removeClass("darkText");
-
 	}
-
 });
-ipcRenderer.on("config:dark", updateMapColors);
 ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
 });
@@ -1588,7 +1617,8 @@ async function FCMdata(data) {
 }
 // #endregion
 
-TREM.Earthquake.on("eew", async (data) => {
+// #region Event: eew
+TREM.Earthquake.on("eew", (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.debug(data);
 
@@ -1747,14 +1777,7 @@ TREM.Earthquake.on("eew", async (data) => {
 				}, 50);
 			}
 
-	if (ReportMarkID != null) {
-		ReportMarkID = null;
-		for (let index = 0; index < MarkList.length; index++)
-			map.removeLayer(MarkList[index]);
-
-	}
-	let speed = 500;
-	if (setting["shock.smoothing"]) speed = 100;
+	const speed = setting["shock.smoothing"] ? 100 : 500;
 	if (EarthquakeList[data.ID].Timer != undefined) clearInterval(EarthquakeList[data.ID].Timer);
 	if (EarthquakeList.ITimer != undefined) clearInterval(EarthquakeList.ITimer);
 
@@ -1824,7 +1847,6 @@ TREM.Earthquake.on("eew", async (data) => {
 		main(data);
 	}, speed);
 
-	const colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
 	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.DmapT, {
 		minZoom   : 4,
 		maxZoom   : 12,
@@ -1840,7 +1862,7 @@ TREM.Earthquake.on("eew", async (data) => {
 						color       : "transparent",
 						weight      : 0.8,
 						opacity     : 0,
-						fillColor   : colors.surfaceVariant,
+						fillColor   : TREM.Colors.surfaceVariant,
 						fillOpacity : 0.6,
 					};
 				return {
@@ -1855,7 +1877,7 @@ TREM.Earthquake.on("eew", async (data) => {
 					color       : "transparent",
 					weight      : 0.8,
 					opacity     : 0,
-					fillColor   : colors.surfaceVariant,
+					fillColor   : TREM.Colors.surfaceVariant,
 					fillOpacity : 0.6,
 				};
 		},
@@ -1903,6 +1925,7 @@ TREM.Earthquake.on("eew", async (data) => {
 	}, 2000);
 	stopReplaybtn();
 });
+// #endregion
 
 TREM.Earthquake.on("tsunami", (data) => {
 	if (data.Version == 1) {

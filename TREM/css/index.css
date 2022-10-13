@@ -232,6 +232,7 @@ kbd {
 	color: rgb(var(--md-sys-color-on-background));
 	font-size: 16px;
 	font-weight: 400;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
 	font-variant-numeric: tabular-nums;
 	transition: color .1s ease-in-out,
 				font-weight .1s ease-in-out;
@@ -262,17 +263,22 @@ kbd {
 }
 
 #log {
+	overflow-y: scroll;
 	user-select: none;
 	pointer-events: none;
 	z-index: 1000;
 	position: fixed;
-	left: 15px;
+	left: 90px;
 	bottom: 75px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 	font-size: 14px;
 	font-weight: 400;
 	font-variant-numeric: tabular-nums;
 	transition: color .1s ease-in-out;
+}
+
+#log p {
+    margin: 0px;
 }
 
 #app-version {
