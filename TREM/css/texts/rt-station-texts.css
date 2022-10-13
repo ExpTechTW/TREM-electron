@@ -22,3 +22,7 @@ html:lang(zh-TW) body {
     --rt-station-time: "時間";
     --rt-station-intensity: "震度";
 }
+html:lang(zh-CN) body {
+    --rt-station-time: "时间";
+    --rt-station-intensity: "震度";
+}

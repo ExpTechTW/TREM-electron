@@ -15,6 +15,7 @@
             <span lang="kr">전체화면에서 나갈때는<kbd>F11</kbd>키를 눌러주세요</span>
             <span lang="ru">Press<kbd>F11</kbd>again to exit fullscreen mode.</span>
             <span lang="zh-TW">再次點擊<kbd>F11</kbd>來離開全螢幕模式</span>
+            <span lang="zh-CN">再次点击<kbd>F11</kbd>来关闭全屏模式</span>
         </div>
         <div id="load">
             <div id="app-name" lang="en">Taiwan Real-time Earthquake Monitoring</div>
@@ -22,6 +23,7 @@
             <div id="app-name" lang="kr">TREM 대만 실시간 지진 모니터링</div>
             <div id="app-name" lang="ru">TREM Мониторинг землетрясений на Тайване в режиме реального времени</div>
             <div id="app-name" lang="zh-TW">TREM 臺灣即時地震監測</div>
+            <div id="app-name" lang="zh-CN">TREM 台湾即时地震监测</div>
             <progress id="loading_progress" class="progressbar" value="0" max="1"></progress>
             <div id="loading">正在等待網路連線...</div>
             <div id="footer">Powered by ExpTech</div>
@@ -69,6 +71,7 @@
                             <span lang="kr" style="font-size: 14px;">현재 위치</span>
                             <span lang="ru" style="font-size: 12px;">Местный</span>
                             <span lang="zh-TW">所在地</span>
+                            <span lang="zh-CN">所在地</span>
                             <span id="alert-local-intensity"></span>
                         </div>
                         <div class="alert-item">
@@ -77,6 +80,7 @@
                             <span lang="kr">P파</span>
                             <span lang="ru">P-волну</span>
                             <span lang="zh-TW">P波</span>
+                            <span lang="zh-CN">P波</span>
                             <span id="alert-p" class="alert-timer"></span>
                         </div>
                         <div class="alert-item">
@@ -85,6 +89,7 @@
                             <span lang="kr">S파</span>
                             <span lang="ru">S-волну</span>
                             <span lang="zh-TW">S波</span>
+                            <span lang="zh-CN">S波</span>
                             <span id="alert-s" class="alert-timer"></span>
                         </div>
                         <span id="alert-magnitude"></span>
@@ -120,6 +125,7 @@
                                     <span lang="kr">S파</span>
                                     <span lang="ru">S-волн</span>
                                     <span lang="zh-TW">S 波</span>
+                                    <span lang="zh-CN">S 波</span>
                                 </div>
                             </div>
                         </div>
@@ -135,6 +141,7 @@
                                 <span lang="kr">P파</span>
                                 <span lang="ru">P-волн</span>
                                 <span lang="zh-TW">P 波</span>
+                                <span lang="zh-CN">P 波</span>
                             </div>
                         </div>
                         <div class="map-legends-item">
@@ -147,6 +154,7 @@
                                 <span lang="kr">진원</span>
                                 <span lang="ru">Эпицентр</span>
                                 <span lang="zh-TW">震央</span>
+                                <span lang="zh-CN">震中</span>
                             </div>
                         </div>
                     </div>
@@ -190,6 +198,7 @@
                                             <span lang="kr">Numbered</span>
                                             <span lang="ru">Numbered</span>
                                             <span lang="zh-TW">編號</span>
+                                            <span lang="zh-CN">编号</span>
                                         </div>
                                     </label>
                                     <label for="report-filter-hasReplay" class="chip filter md3-ripple">
@@ -200,6 +209,7 @@
                                             <span lang="kr">Alerted</span>
                                             <span lang="ru">Alerted</span>
                                             <span lang="zh-TW">預警</span>
+                                            <span lang="zh-CN">预警</span>
                                         </div>
                                     </label>
                                     <label for="report-filter-magnitude" class="chip filter select md3-ripple">
@@ -211,6 +221,7 @@
                                                 <span lang="kr">Magnitude</span>
                                                 <span lang="ru">Magnitude</span>
                                                 <span lang="zh-TW">規模</span>
+                                                <span lang="zh-CN">规模</span>
                                             </span>
                                             <select id="report-filter-magnitude-value" onchange="TREM.Report._handleFilter('filterMagnitudeValue', this.options[this.selectedIndex].value, this)">
                                                 <option value=1>＜4.5</option>
@@ -227,6 +238,7 @@
                                                 <span lang="kr">Intensity</span>
                                                 <span lang="ru">Intensity</span>
                                                 <span lang="zh-TW">震度</span>
+                                                <span lang="zh-CN">震度</span>
                                             </span>
                                             <select id="report-filter-intensity-value" onchange="TREM.Report._handleFilter('filterIntensityValue', this.options[this.selectedIndex].value, this)">
                                                 <option value=1>1</option>
@@ -286,6 +298,7 @@
                                                 <span lang="kr">Time of occurrence</span>
                                                 <span lang="ru">Time of occurrence</span>
                                                 <span lang="zh-TW">發震時間</span>
+                                                <span lang="zh-CN">发震时间</span>
                                             </span>
                                         </div>
                                         <div class="report-overview-value">
@@ -302,6 +315,7 @@
                                                 <span lang="kr">Epicenter coordinates</span>
                                                 <span lang="ru">Epicenter coordinates</span>
                                                 <span lang="zh-TW">震央位置</span>
+                                                <span lang="zh-CN">震中位置</span>
                                             </span>
                                         </div>
                                         <div class="report-overview-value">
@@ -320,6 +334,7 @@
                                                 <span lang="kr">Max Intensity</span>
                                                 <span lang="ru">Max Intensity</span>
                                                 <span lang="zh-TW">最大震度</span>
+                                                <span lang="zh-CN">最大震度</span>
                                             </span>
                                         </div>
                                         <div class="report-overview-value">
@@ -335,6 +350,7 @@
                                                 <span lang="kr">Magnitude</span>
                                                 <span lang="ru">Magnitude</span>
                                                 <span lang="zh-TW">芮氏規模</span>
+                                                <span lang="zh-CN">里氏震级</span>
                                             </span>
                                         </div>
                                         <div class="report-overview-value">
@@ -351,6 +367,7 @@
                                                 <span lang="kr">Focal Depth</span>
                                                 <span lang="ru">Focal Depth</span>
                                                 <span lang="zh-TW">震源深度</span>
+                                                <span lang="zh-CN">震源深度</span>
                                             </span>
                                         </div>
                                         <div class="report-overview-value">
@@ -361,6 +378,7 @@
                                                 <span lang="kr">km</span>
                                                 <span lang="ru">km</span>
                                                 <span lang="zh-TW">公里</span>
+                                                <span lang="zh-CN">公里</span>
                                             </span>
                                         </div>
                                     </div>
