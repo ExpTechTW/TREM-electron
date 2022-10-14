@@ -1526,7 +1526,7 @@ TREM.Earthquake.on("eew", (data) => {
 						color       : "transparent",
 						weight      : 0.8,
 						opacity     : 0,
-						fillColor   : TREM.Colors.error,
+						fillColor   : TREM.Colors.surfaceVariant,
 						fillOpacity : 0.6,
 					};
 				return {
@@ -1542,7 +1542,7 @@ TREM.Earthquake.on("eew", (data) => {
 					color       : "transparent",
 					weight      : 0.8,
 					opacity     : 0,
-					fillColor   : TREM.Colors.primary,
+					fillColor   : TREM.Colors.surfaceVariant,
 					fillOpacity : 0.6,
 				};
 		},
