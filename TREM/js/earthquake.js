@@ -15,6 +15,7 @@ bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
 // #region 變數
 const PostAddressIP = "https://exptech.com.tw/post";
+const getAddressIP  = "https://exptech.com.tw/api/v1/trem";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -125,6 +126,7 @@ async function init() {
 
 	(() => {
 		$("#loading").text(TREM.Localization.getString("Application_Loading"));
+		progressbar.value = (1 / progressStep) * 2;
 		const time = document.getElementById("time");
 		const time1 = document.getElementById("time1");
 
@@ -173,14 +175,17 @@ async function init() {
 					GetDataState = "✉";
 				}
 				const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
-				const formatCPUUsage = (data) => `${data} %`;
+				// const formatCPUUsage = (data) => `${data} %`;
 				const memoryData = process.memoryUsage();
-				const CPUData = formatCPUUsage(process.getCPUUsage().percentCPUUsage.toString().slice(0, 3));
-				const heapUsed = formatMemoryUsage(memoryData.heapUsed);
+				// const CPUData = formatCPUUsage(process.getCPUUsage().percentCPUUsage.toString().slice(0, 3));
+				const rss = formatMemoryUsage(memoryData.rss);
+				// const heapTotal = formatMemoryUsage(memoryData.heapTotal);
+				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
+				// const external = formatMemoryUsage(memoryData.external);
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
-				$("#log").text(`${MaxPGA}gal | ${CPUData} | ${heapUsed}`);
-				$("#log1").text(`${MaxPGA}gal | ${CPUData} | ${heapUsed}`);
+				$("#log").text(`${MaxPGA}gal | ${rss}`);
+				$("#log1").text(`${MaxPGA}gal | ${rss}`);
 				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
 				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
 			}, 500);
@@ -205,6 +210,8 @@ async function init() {
 					}
 				}
 			}, 250);
+
+		progressbar.value = (1 / progressStep) * 2.5;
 
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
 		if (!map) {
@@ -308,13 +315,15 @@ async function init() {
 			mapReport._zoomAnimated = setting["map.animation"];
 		}
 
-		progressbar.value = (1 / progressStep) * 2;
 	})();
+
+	progressbar.value = (1 / progressStep) * 3;
 
 	(() => {
 		setUserLocationMarker(setting["location.town"]);
-		progressbar.value = (1 / progressStep) * 3;
 	})();
+
+	progressbar.value = (1 / progressStep) * 3.3;
 
 	await (async () => {
 		TREM.Colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
@@ -326,7 +335,7 @@ async function init() {
 			try {
 				MapData[path.parse(file).name] = require(path.join(__dirname, "js/geojson", file));
 				dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
-				progressbar.value = (1 / progressStep) * 3 + (((1 / progressStep) / arr.length) * (i + 1));
+				progressbar.value = (1 / progressStep) * 3.6 + (((1 / progressStep) / arr.length) * (i + 1));
 			} catch (error) {
 				dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
 				dump({ level: 2, message: error, origin: "ResourceLoader" });
@@ -399,15 +408,17 @@ async function init() {
 				},
 			}).addTo(mapReport);
 
-		progressbar.value = (1 / progressStep) * 4;
 	})().catch(e => dump({ level: 2, message: e }));
+
+	progressbar.value = (1 / progressStep) * 4;
 
 	await (async () => {
 		await fetchFiles();
 		if (!Timers.fetchFiles)
 			Timers.fetchFiles = setInterval(fetchFiles, 10 * 60 * 1000);
-		progressbar.value = 1;
 	})().catch(e => dump({ level: 2, message: e }));
+
+	progressbar.value = 1;
 
 	$("#loading").text(TREM.Localization.getString("Application_Welcome"));
 	$("#load").delay(1000).fadeOut(1000);
@@ -480,20 +491,14 @@ function PGAMain() {
 		PGAMainLock = true;
 		let R = 0;
 		if (replay) R = replay + (NOW.getTime() - replayT);
-		const data = {
-			Function : "data",
-			Type     : "TREM",
-			Value    : R,
-		};
 		const CancelToken = axios.CancelToken;
 		let cancel;
 		setTimeout(() => {
 			cancel();
 		}, 2500);
 		axios({
-			method      : "post",
-			url         : PostAddressIP,
-			data        : data,
+			method      : "get",
+			url         : getAddressIP,
 			cancelToken : new CancelToken((c) => {
 				cancel = c;
 			}),
@@ -567,8 +572,7 @@ function rtstationzerofun(num,text,key){
 }
 
 function handler(response) {
-	if (response.state != "Success") return;
-	const Json = response.response;
+	const Json = response;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
