@@ -161,7 +161,7 @@ async function init() {
 					investigation = false;
 					roll.removeChild(roll.children[0]);
 					if (Pgeojson != null) {
-						map.removeLayer(Pgeojson);
+						Pgeojson.remove();
 						Pgeojson = null;
 					}
 				}
@@ -633,45 +633,36 @@ function handler(response) {
 					changeView("main", "#mainView_btn");
 					if (setting["Real-time.show"]) win.showInactive();
 					if (setting["Real-time.cover"]) win.moveTop();
-					win.flashFrame(true);
+					if (!win.isFocused()) win.flashFrame(true);
 					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
 				}
-				if (Pgeojson != null) map.removeLayer(Pgeojson);
 
-				Pgeojson = L.geoJson.vt(MapData.DmapT, {
+				if (Pgeojson) Pgeojson.remove();
+				Pgeojson = L.geoJson.vt(MapData.tw_town, {
 					minZoom   : 4,
 					maxZoom   : 12,
 					tolerance : 20,
 					buffer    : 256,
 					debug     : 0,
+					zIndex    : 5,
 					style     : (properties) => {
-						if (properties.COUNTY != undefined) {
-							const name = properties.COUNTY + " " + properties.TOWN;
-							if (PLoc[name] == 0 || PLoc[name] == undefined)
-								return {
-									color       : "transparent",
-									weight      : 0,
-									opacity     : 0,
-									fillColor   : "transparent",
-									fillOpacity : 0,
-								};
-							return {
-								color       : TREM.Colors.secondary,
-								weight      : 0.8,
-								fillColor   : color(PLoc[name]),
-								fillOpacity : 1,
-							};
-						} else
+						const name = properties.COUNTY + " " + properties.TOWN;
+						if (PLoc[name] == 0 || PLoc[name] == undefined)
 							return {
 								color       : "transparent",
 								weight      : 0,
 								opacity     : 0,
-								fillColor   : "transparent",
+								fillColor   : TREM.Colors.surfaceVariant,
 								fillOpacity : 0,
 							};
+						return {
+							color       : TREM.Colors.secondary,
+							weight      : 0.8,
+							fillColor   : color(PLoc[name]),
+							fillOpacity : 1,
+						};
 					},
-				});
-				map.addLayer(Pgeojson);
+				}).addTo(Pgeojson);
 				setTimeout(() => {
 					ipcRenderer.send("screenshotEEW", {
 						Function : "palert",
@@ -754,7 +745,7 @@ function handler(response) {
 		changeView("main", "#mainView_btn");
 		if (setting["Real-time.show"]) win.showInactive();
 		if (setting["Real-time.cover"]) win.moveTop();
-		win.flashFrame(true);
+		if (!win.isFocused()) win.flashFrame(true);
 
 		PGAtag = All[0].intensity;
 	}
@@ -1423,7 +1414,7 @@ async function FCMdata(data) {
 		ReportGET();
 	} else if (json.Function == "report") {
 		if (Pgeojson != null) {
-			map.removeLayer(Pgeojson);
+			Pgeojson.remove();
 			Pgeojson = null;
 		}
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
@@ -1435,6 +1426,12 @@ async function FCMdata(data) {
 		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
 		const report = await getReportData();
 		addReport(report[0], true);
+
+		if (setting[report.changeView]) {
+			TREM.Report.setView("report-overview", report[0].identifier);
+			changeView("report", "#reportView_btn");
+		}
+
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
 				Function : "report",
@@ -1571,7 +1568,7 @@ TREM.Earthquake.on("eew", (data) => {
 			changeView("main", "#mainView_btn");
 			if (setting["eew.show"]) win.showInactive();
 			if (setting["eew.cover"]) win.moveTop();
-			win.flashFrame(true);
+			if (!win.isFocused()) win.flashFrame(true);
 		}
 
 		EEWT.id = data.ID;

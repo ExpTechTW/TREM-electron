@@ -663,6 +663,34 @@
                                             </span>
                                         </label>
                                     </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Show report</span>
+                                                <span lang="ja">地震报告を表示</span>
+                                                <span lang="kr">Show report</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="ru">Show report</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-CN">顯示報告</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-TW">顯示報告</span>
+
+                                                <span class="option-label-id">report.changeView</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Switch screen automatically upon receiving an earthquake report</span>
+                                                <span lang="ja">地震情報受信時に画面を自動で切り替えます</span>
+                                                <span lang="kr">Switch screen automatically upon receiving an earthquake report</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="ru">Switch screen automatically upon receiving an earthquake report</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-CN">在收到地震報告的時候自動切換畫面</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-TW">在收到地震報告的時候自動切換畫面</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="report.changeView" onclick="CheckSave('report.changeView')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
                                 </div>
                                 <div class="control-title">
                                     <span lang="en">Real-time station</span>
