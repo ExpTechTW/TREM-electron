@@ -79,8 +79,6 @@ const EEW = {};
 const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
 let Ping = 0;
-let GeoJson = null;
-let GeoJsonID = 0;
 let EEWAlert = false;
 let Cancel = false;
 let PGACancel = false;
@@ -377,9 +375,9 @@ async function init() {
 			}).addTo(map);
 
 		if (!mapTW_base)
-			mapTW_base = L.geoJson.vt(MapData.Dmap, {
-				minZoom   : 4,
-				maxZoom   : 12,
+			mapTW_base = L.geoJson.vt(MapData.tw_county, {
+				minZoom   : 7,
+				maxZoom   : 7,
 				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
@@ -399,12 +397,11 @@ async function init() {
 				tolerance : 20,
 				buffer    : 256,
 				debug     : 0,
-				zIndex    : 10,
 				style     : {
 					weight      : 0.8,
 					color       : TREM.Colors.primary,
 					fillColor   : TREM.Colors.surfaceVariant,
-					fillOpacity : 0,
+					fillOpacity : 1,
 				},
 			}).addTo(mapReport);
 
@@ -1675,8 +1672,45 @@ TREM.Earthquake.on("eew", (data) => {
 
 			const Intensity = IntensityN(int);
 			if (Intensity > MaxIntensity) MaxIntensity = Intensity;
-			GC[city + town] = Intensity;
+			GC[loc[0]] = Intensity;
 		}
+
+	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.tw_town, {
+		minZoom   : 7,
+		maxZoom   : 7,
+		tolerance : 20,
+		buffer    : 256,
+		debug     : 0,
+		zIndex    : 1,
+		style     : (properties) => {
+			if (properties.TOWNCODE) {
+				if (!GC[properties.TOWNCODE])
+					return {
+						stroke      : false,
+						color       : "transparent",
+						weight      : 0.8,
+						opacity     : 0,
+						fillColor   : TREM.Colors.error,
+						fillOpacity : 0.6,
+					};
+				return {
+					stroke      : false,
+					color       : "transparent",
+					weight      : 0.8,
+					opacity     : 0,
+					fillColor   : color(GC[properties.TOWNCODE]),
+					fillOpacity : 1,
+				};
+			} else
+				return {
+					color       : "transparent",
+					weight      : 0.8,
+					opacity     : 0,
+					fillColor   : TREM.Colors.primary,
+					fillOpacity : 0.6,
+				};
+		},
+	});
 
 	let Alert = true;
 	if (IntensityN(level) < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
@@ -1858,43 +1892,6 @@ TREM.Earthquake.on("eew", (data) => {
 	EarthquakeList[data.ID].Timer = setInterval(() => {
 		main(data);
 	}, speed);
-
-	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.DmapT, {
-		minZoom   : 4,
-		maxZoom   : 12,
-		tolerance : 20,
-		buffer    : 256,
-		debug     : 0,
-		zIndex    : 1,
-		style     : (properties) => {
-			if (properties.COUNTY) {
-				const name = properties.COUNTY + properties.TOWN;
-				if (!GC[name])
-					return {
-						color       : "transparent",
-						weight      : 0.8,
-						opacity     : 0,
-						fillColor   : TREM.Colors.surfaceVariant,
-						fillOpacity : 0.6,
-					};
-				return {
-					color       : "transparent",
-					weight      : 0.8,
-					opacity     : 0,
-					fillColor   : color(GC[name]),
-					fillOpacity : 1,
-				};
-			} else
-				return {
-					color       : "transparent",
-					weight      : 0.8,
-					opacity     : 0,
-					fillColor   : TREM.Colors.surfaceVariant,
-					fillOpacity : 0.6,
-				};
-		},
-	});
-	mapTW.addLayer(EarthquakeList[data.ID].geojson);
 
 	setTimeout(() => {
 		if (setting["webhook.url"] != "") {
@@ -2397,14 +2394,6 @@ function updateText() {
 	$("#alert-depth").text(INFO[TINFO].alert_depth);
 	$("#alert-box").addClass("show");
 	$("#map-legends").addClass("show");
-	if (GeoJsonID != INFO[TINFO].ID) {
-		if (GeoJson != null) mapTW.removeLayer(GeoJson);
-		if (EarthquakeList[INFO[TINFO].ID].geojson != undefined) {
-			GeoJson = EarthquakeList[INFO[TINFO].ID].geojson;
-			mapTW.addLayer(GeoJson);
-			GeoJsonID = INFO[TINFO].ID;
-		}
-	}
 
 	if (EarthquakeList[INFO[TINFO].ID].Cancel != undefined) {
 		$("#alert-p").text("X");
@@ -2430,11 +2419,14 @@ function updateText() {
 			EarthquakeList[key]?.CirclePTW?.getElement()?.classList?.add("hide");
 		if (!EarthquakeList[key]?.CircleSTW?.getElement()?.classList?.contains("hide"))
 			EarthquakeList[key]?.CircleSTW?.getElement()?.classList?.add("hide");
+		if (EarthquakeList[key]?.geojson)
+			EarthquakeList[key].geojson.remove();
 	}
 
 	if (EarthquakeList[INFO[TINFO].ID].epicenterIconTW) EarthquakeList[INFO[TINFO].ID].epicenterIconTW.getElement()?.classList?.remove("hide");
 	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.getElement()?.classList?.remove("hide");
 	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.getElement()?.classList?.remove("hide");
+	if (EarthquakeList[INFO[TINFO].ID].geojson) EarthquakeList[INFO[TINFO].ID].geojson.addTo(mapTW);
 
 	const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
 	const Catch = document.getElementById("box-10");
