@@ -438,11 +438,6 @@ function PGAMain() {
 		PGAMainLock = true;
 		let R = 0;
 		if (replay) R = replay + (NOW.getTime() - replayT);
-		const data = {
-			Function : "data",
-			Type     : "TREM",
-			Value    : R,
-		};
 		const CancelToken = axios.CancelToken;
 		let cancel;
 		setTimeout(() => {
