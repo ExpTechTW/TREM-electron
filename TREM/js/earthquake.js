@@ -2324,6 +2324,7 @@ function main(data) {
 		// remove epicenter cross icons
 		EarthquakeList[data.ID].epicenterIcon.remove();
 		EarthquakeList[data.ID].epicenterIconTW.remove();
+		EarthquakeList[data.ID].geojson.remove();
 
 		for (let index = 0; index < INFO.length; index++)
 			if (INFO[index].ID == data.ID) {
@@ -2336,8 +2337,6 @@ function main(data) {
 		delete EarthquakeList[data.ID];
 		delete EEW[data.ID];
 		if (Object.keys(EarthquakeList).length == 0) {
-			if (GeoJson != null) mapTW.removeLayer(GeoJson);
-			GeoJson = null;
 			clearInterval(t);
 			audioList = [];
 			arrive = "";
