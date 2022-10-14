@@ -449,9 +449,8 @@ function PGAMain() {
 			cancel();
 		}, 2500);
 		axios({
-			method      : "post",
-			url         : PostAddressIP,
-			data        : data,
+			method      : "get",
+			url         : "https://exptech.com.tw/api/v1/trem",
 			cancelToken : new CancelToken((c) => {
 				cancel = c;
 			}),
@@ -470,8 +469,7 @@ function PGAMain() {
 }
 
 function handler(response) {
-	if (response.state != "Success") return;
-	const Json = response.response;
+	const Json = response;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
