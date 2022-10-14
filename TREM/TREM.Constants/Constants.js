@@ -104,6 +104,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"report.changeView": {
+			type  : "toggle",
+			value : true,
+		},
 		"earthquake.siteEffect": {
 			type  : "toggle",
 			value : true,

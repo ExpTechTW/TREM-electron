@@ -90,7 +90,7 @@ function createWindow() {
 	MainWindow.loadFile("./index.html");
 	MainWindow.setAspectRatio(16 / 9);
 	MainWindow.setMenu(null);
-	MainWindow.webContents.setFrameRate(120);
+	// MainWindow.webContents.setFrameRate(120);
 	MainWindow.webContents.on("did-finish-load", () => {
 		MainWindow.webContents.send("setting", TREM.Configuration._data);
 		if (!_hide) setTimeout(() => MainWindow.show(), 500);
