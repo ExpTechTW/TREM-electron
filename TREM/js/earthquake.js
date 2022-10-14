@@ -1592,6 +1592,8 @@ async function FCMdata(data) {
 		if (setting[report.changeView]) {
 			TREM.Report.setView("report-overview", report[0].identifier);
 			changeView("report", "#reportView_btn");
+			ReportTag1 = NOW.getTime();
+			console.log("ReportTag1: ", ReportTag1);
 		}
 
 		setTimeout(() => {
