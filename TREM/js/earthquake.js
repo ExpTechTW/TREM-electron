@@ -635,9 +635,7 @@ function handler(response) {
 					if (setting["Real-time.cover"]) win.moveTop();
 					if (!win.isFocused()) win.flashFrame(true);
 					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
-				}
-
-				if (Pgeojson) Pgeojson.remove();
+				} else Pgeojson.remove();
 				Pgeojson = L.geoJson.vt(MapData.tw_town, {
 					minZoom   : 4,
 					maxZoom   : 12,
@@ -646,7 +644,7 @@ function handler(response) {
 					debug     : 0,
 					zIndex    : 5,
 					style     : (properties) => {
-						const name = properties.COUNTY + " " + properties.TOWN;
+						const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
 						if (PLoc[name] == 0 || PLoc[name] == undefined)
 							return {
 								color       : "transparent",
