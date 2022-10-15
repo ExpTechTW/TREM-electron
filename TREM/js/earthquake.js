@@ -441,9 +441,10 @@ function PGAMain() {
 			setTimeout(() => {
 				cancel();
 			}, 2500);
+			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 			axios({
 				method      : "get",
-				url         : `https://exptech.com.tw/api/v1/trem?time=${replay + (NOW.getTime() - replayT)}`,
+				url         : `https://exptech.com.tw/api/v1/trem?time=${ReplayTime}`,
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),
