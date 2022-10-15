@@ -15,7 +15,7 @@ bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
 // #region 變數
 const PostAddressIP = "https://exptech.com.tw/post";
-const getAddressIP  = "https://exptech.com.tw/api/v1/trem";
+const getAddressIP  = "https://exptech.com.tw/api/v1/trem/RTS?time=";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -497,7 +497,7 @@ function PGAMain() {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 			axios({
 				method      : "get",
-				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}`,
+				url         : getAddressIP+ReplayTime,
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),
@@ -1066,7 +1066,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
-		const list = await ExpTechAPI.v1.data.getEarthquakeReports(250);
+		const list = await ExpTechAPI.v0.data.getEarthquakeReports(250);
 		return list;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
