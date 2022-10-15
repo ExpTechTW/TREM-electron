@@ -1583,7 +1583,12 @@ async function FCMdata(data) {
 		if (setting["report.cover"]) win.moveTop();
 
 		if (setting["audio.report"]) audioPlay("./audio/Report.wav");
-		new Notification("地震報告", { body: `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`, icon: "TREM.ico" });
+		new Notification("地震報告",
+			{
+				body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
+				icon   : "TREM.ico",
+				silent : win.isFocused(),
+			});
 		const report = await getReportData();
 		addReport(report[0], true);
 
@@ -1717,7 +1722,11 @@ TREM.Earthquake.on("eew", (data) => {
 			Nmsg = `${value}秒後抵達`;
 		else
 			Nmsg = "已抵達 (預警盲區)";
-		new Notification("EEW 強震即時警報", { body: `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`, icon: "TREM.ico" });
+		new Notification("EEW 強震即時警報", {
+			body   : `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`,
+			icon   : "TREM.ico",
+			silent : win.isFocused(),
+		});
 		Info.Notify.push(data.ID);
 		// show latest eew
 		TINFO = INFO.length;
@@ -1935,7 +1944,11 @@ TREM.Earthquake.on("eew", (data) => {
 
 TREM.Earthquake.on("tsunami", (data) => {
 	if (data.Version == 1) {
-		new Notification("海嘯警報", { body: `${data["UTC+8"]} 發生 ${data.Scale} 地震\n\n東經: ${data.EastLongitude} 度\n北緯: ${data.NorthLatitude} 度`, icon: "TREM.ico" });
+		new Notification("海嘯警報", {
+			body   : `${data["UTC+8"]} 發生 ${data.Scale} 地震\n\n東經: ${data.EastLongitude} 度\n北緯: ${data.NorthLatitude} 度`,
+			icon   : "TREM.ico",
+			silent : win.isFocused(),
+		});
 
 		if (setting["report.show"]) win.showInactive();
 		if (setting["report.cover"]) win.moveTop();
