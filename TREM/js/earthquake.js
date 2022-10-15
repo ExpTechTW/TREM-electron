@@ -431,32 +431,34 @@ function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {
-		if (PGAMainLock) return;
-		PGAMainLock = true;
-		let R = 0;
-		if (replay) R = replay + (NOW.getTime() - replayT);
-		const CancelToken = axios.CancelToken;
-		let cancel;
 		setTimeout(() => {
-			cancel();
-		}, 2500);
-		axios({
-			method      : "get",
-			url         : "https://exptech.com.tw/api/v1/trem",
-			cancelToken : new CancelToken((c) => {
-				cancel = c;
-			}),
-		}).then((response) => {
-			Ping = Date.now();
-			PGAMainLock = false;
-			TimerDesynced = false;
-			Response = response.data;
-			handler(Response);
-		}).catch((err) => {
-			PGAMainLock = false;
-			TimerDesynced = true;
-			handler(Response);
-		});
+			if (PGAMainLock) return;
+			PGAMainLock = true;
+			let R = 0;
+			if (replay) R = replay + (NOW.getTime() - replayT);
+			const CancelToken = axios.CancelToken;
+			let cancel;
+			setTimeout(() => {
+				cancel();
+			}, 2500);
+			axios({
+				method      : "get",
+				url         : `https://exptech.com.tw/api/v1/trem?time=${replay + (NOW.getTime() - replayT)}`,
+				cancelToken : new CancelToken((c) => {
+					cancel = c;
+				}),
+			}).then((response) => {
+				Ping = Date.now();
+				PGAMainLock = false;
+				TimerDesynced = false;
+				Response = response.data;
+				handler(Response);
+			}).catch((err) => {
+				PGAMainLock = false;
+				TimerDesynced = true;
+				handler(Response);
+			});
+		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
 }
 
