@@ -333,6 +333,12 @@ body.settingDisabled .control-title, body.settingDisabled .option-label {
     white-space: pre-line;
 }
 
+p {
+    height: 20px;
+    margin: 0px;
+}
+
+
 .color-input {
 	opacity: 0;
 	display: block;

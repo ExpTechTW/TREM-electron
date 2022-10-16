@@ -86,6 +86,8 @@ let IntensityListTime = 0;
 let WarnAudio = 0;
 let reportCache = [];
 let MaxPGA = 0;
+let License = "";
+let Unlock = false;
 let set_report_overview = 0;
 // #endregion
 
@@ -93,6 +95,10 @@ let set_report_overview = 0;
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
+
+if (fs.existsSync(app.getPath("userData") + "/TREM.license"))
+	License = fs.readFileSync(app.getPath("userData") + "/TREM.license").toString();
+
 
 let fullscreenTipTimeout;
 win.on("enter-full-screen", () => {
@@ -182,10 +188,11 @@ async function init() {
 				// const external = formatMemoryUsage(memoryData.external);
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
+				const unlock = (!Unlock) ? "🔐" : "";
 				$("#log").text(`Max. ${MaxPGA}gal | ${rss}`);
 				$("#log1").text(`Max. ${MaxPGA}gal | ${rss}`);
-				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
-				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
+				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -194,6 +201,7 @@ async function init() {
 					investigation = false;
 					roll.removeChild(roll.children[0]);
 					if (Pgeojson != null) {
+						Maps.main.removeLayer(Pgeojson);
 						Pgeojson.remove();
 						Pgeojson = null;
 					}
@@ -505,7 +513,7 @@ function PGAMain() {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 			axios({
 				method      : "get",
-				url         : getAddressIP+ReplayTime,
+				url         : getAddressIP+ReplayTime+'&token='+localStorage.UUID+'&license='+License,
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),
@@ -581,6 +589,7 @@ function rtstationzerofun(num,text,key){
 
 function handler(response) {
 	const Json = response;
+	if (Json.Unlock) Unlock = true;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
@@ -760,59 +769,36 @@ function handler(response) {
 					if (setting["Real-time.cover"]) win.moveTop();
 					if (!win.isFocused()) win.flashFrame(true);
 					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
-					Pgeojson = L.geoJson.vt(MapData.tw_town, {
-						minZoom   : 4,
-						maxZoom   : 12,
-						tolerance : 20,
-						buffer    : 256,
-						debug     : 0,
-						zIndex    : 5,
-						style     : (properties) => {
-							const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
-							if (PLoc[name] == 0 || PLoc[name] == undefined)
-								return {
-									color       : "transparent",
-									weight      : 0,
-									opacity     : 0,
-									fillColor   : TREM.Colors.surfaceVariant,
-									fillOpacity : 0,
-								};
-							return {
-								color       : TREM.Colors.secondary,
-								weight      : 0.8,
-								fillColor   : color(PLoc[name]),
-								fillOpacity : 1,
-							};
-						},
-					}).addTo(Pgeojson);
 				} else {
+					Maps.main.removeLayer(Pgeojson);
 					Pgeojson.remove();
-					Pgeojson = L.geoJson.vt(MapData.tw_town, {
-						minZoom   : 4,
-						maxZoom   : 12,
-						tolerance : 20,
-						buffer    : 256,
-						debug     : 0,
-						zIndex    : 5,
-						style     : (properties) => {
-							const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
-							if (PLoc[name] == 0 || PLoc[name] == undefined)
-								return {
-									color       : "transparent",
-									weight      : 0,
-									opacity     : 0,
-									fillColor   : TREM.Colors.surfaceVariant,
-									fillOpacity : 0,
-								};
-							return {
-								color       : TREM.Colors.secondary,
-								weight      : 0.8,
-								fillColor   : color(PLoc[name]),
-								fillOpacity : 1,
-							};
-						},
-					}).addTo(Pgeojson);
 				}
+				Pgeojson = L.geoJson.vt(MapData.tw_town, {
+					minZoom   : 4,
+					maxZoom   : 12,
+					tolerance : 20,
+					buffer    : 256,
+					debug     : 0,
+					zIndex    : 5,
+					style     : (properties) => {
+						const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
+						if (PLoc[name] == 0 || PLoc[name] == undefined)
+							return {
+								color       : "transparent",
+								weight      : 0,
+								opacity     : 0,
+								fillColor   : TREM.Colors.surfaceVariant,
+								fillOpacity : 0,
+							};
+						return {
+							color       : TREM.Colors.secondary,
+							weight      : 0.8,
+							fillColor   : color(PLoc[name]),
+							fillOpacity : 1,
+						};
+					},
+				}).addTo(Pgeojson);
+				Maps.main.addLayer(Pgeojson);
 				setTimeout(() => {
 					ipcRenderer.send("screenshotEEW", {
 						Function : "palert",
@@ -1598,6 +1584,7 @@ async function FCMdata(data) {
 		ReportGET();
 	} else if (json.Function == "report") {
 		if (Pgeojson != null) {
+			Maps.main.removeLayer(Pgeojson);
 			Pgeojson.remove();
 			Pgeojson = null;
 		}
