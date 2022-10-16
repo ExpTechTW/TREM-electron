@@ -479,7 +479,7 @@ function PGAMain() {
 
 function handler(response) {
 	const Json = response;
-	if (Json.Unlock) Unlock = true;
+	Unlock = Json.Unlock ?? false;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
@@ -492,7 +492,7 @@ function handler(response) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.PGA);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = Sdata.alert;
+		const Alert = (!Unlock) ? (Sdata.I >= 2) : Sdata.alert;
 		if (amount > MaxPGA) MaxPGA = amount;
 		const Intensity = (Alert && Json.Alert) ? Sdata.I :
 			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
