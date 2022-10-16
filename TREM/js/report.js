@@ -350,6 +350,7 @@ TREM.Report = {
 		document.getElementById("report-overview-intensity").className = (int[1] == "+") ? "strong"
 			: (int[1] == "-") ? "weak"
 				: "";
+		document.getElementById("report-overview-intensity-location").innerText = `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`;
 		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
 		document.getElementById("report-overview-depth").innerText = report.depth;
 
