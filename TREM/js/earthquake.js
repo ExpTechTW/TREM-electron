@@ -23,7 +23,7 @@ let t = null;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let All = [];
-let AllT = 0;
+const AllT = 0;
 let arrive = "";
 let audioList = [];
 let audioList1 = [];
@@ -701,24 +701,7 @@ function handler(response) {
 
 		if (Intensity != "NA" && (Intensity != 0 || Alert)) {
 			if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
-			if (Alert) {
-				let find = -1;
-				for (let Index = 0; Index < All.length; Index++)
-					if (All[Index].loc == station[keys[index]].Loc) {
-						find = 0;
-						if (All[Index].pga < amount) {
-							All[Index].intensity = Intensity;
-							All[Index].pga = amount;
-						}
-						break;
-					}
-				if (find == -1)
-					All.push({
-						loc       : station[keys[index]].Loc,
-						intensity : Intensity,
-						pga       : amount,
-					});
-				AllT = Date.now();
+			if (Alert)
 				if (Json.Alert) {
 					if (setting["audio.realtime"])
 						if (amount > 8 && PGALimit == 0) {
@@ -730,7 +713,6 @@ function handler(response) {
 						}
 					pga[station[keys[index]].PGA].Time = NOW.getTime();
 				}
-			}
 
 			if (MAXPGA.pga < amount && Level != "NA") {
 				MAXPGA.pga = amount;
@@ -744,13 +726,6 @@ function handler(response) {
 			}
 		}
 	}
-	for (let Index = 0; Index < All.length - 1; Index++)
-		for (let index = 0; index < All.length - 1; index++)
-			if (All[index].pga < All[index + 1].pga) {
-				const Temp = All[index + 1];
-				All[index + 1] = All[index];
-				All[index] = Temp;
-			}
 	if (PAlert.data != undefined && replay == 0) {
 		if (PAlert.timestamp != PAlertT) {
 			PAlertT = PAlert.timestamp;
@@ -861,11 +836,13 @@ function handler(response) {
 		RMTlimit = [];
 		PGACancel = false;
 	}
-	if (Date.now() - AllT >= 180000) All = [];
 	if (Object.keys(PGA).length == 0) {
 		PGAtag = -1;
 		PGALimit = 0;
 	}
+	All = Json.I ?? [];
+	for (let index = 0; index < All.length; index++)
+		All[index].loc = station[All[index].uuid].Loc;
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 		if (setting["audio.realtime"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
@@ -883,12 +860,10 @@ function handler(response) {
 				Shot     : 1,
 			});
 		}, 2250);
-
 		changeView("main", "#mainView_btn");
 		if (setting["Real-time.show"]) win.showInactive();
 		if (setting["Real-time.cover"]) win.moveTop();
 		if (!win.isFocused()) win.flashFrame(true);
-
 		PGAtag = All[0].intensity;
 	}
 	let list = [];
