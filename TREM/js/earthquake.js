@@ -350,7 +350,7 @@ async function init() {
 					L.geoJson.vt(MapData[mapName], {
 						edgeBufferTiles : 2,
 						minZoom         : 4,
-						maxZoom         : 12,
+						maxZoom         : 15,
 						tolerance       : 20,
 						buffer          : 256,
 						debug           : 0,
@@ -362,20 +362,21 @@ async function init() {
 						},
 					}).addTo(Maps.main),
 				);
-			// map_base = L.geoJson.vt(MapData.S, {
-			// 	edgeBufferTiles : 2,
-			// 	minZoom         : 4,
-			// 	maxZoom         : 15,
-			// 	tolerance       : 20,
-			// 	buffer          : 256,
-			// 	debug           : 0,
-			// 	style           : {
-			// 		weight      : 0.8,
-			// 		color       : TREM.Colors.primary,
-			// 		fillColor   : TREM.Colors.surfaceVariant,
-			// 		fillOpacity : 1,
-			// 	},
-			// }).addTo(map);
+			MapBases.main.push( L.geoJson.vt(MapData.sk, {
+				edgeBufferTiles : 2,
+				minZoom         : 4,
+				maxZoom         : 15,
+				tolerance       : 20,
+				buffer          : 256,
+				debug           : 0,
+				style           : {
+					weight      : 0.8,
+					color       : TREM.Colors.primary,
+					fillColor   : TREM.Colors.surfaceVariant,
+					fillOpacity : 1,
+				},
+			}).addTo(Maps.main),
+			);
 
 		if (!MapBases.mini.length)
 			MapBases.mini.push(
