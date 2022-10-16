@@ -406,8 +406,8 @@ TREM.Report = {
 			L.marker(
 				[report.epicenterLat, report.epicenterLon],
 				{
-					icon: L.icon({
-						iconUrl   : "./image/cross.png",
+					icon: L.divIcon({
+						html      : TREM.Resources.icon.cross,
 						iconSize : [32, 32],
 					}),
 					zIndexOffset: 5000,
