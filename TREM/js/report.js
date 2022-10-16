@@ -350,9 +350,10 @@ TREM.Report = {
 	_setupReport(report) {
 		this._clearMap();
 
-		if (report.earthquakeNo == undefined ) document.getElementById("report-overview-number").innerText = "未知區域有感地震";
+		console.log(report);
 
-		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 ? report.earthquakeNo : "小區域有感地震";
+		if (!report.earthquakeNo) document.getElementById("report-overview-number").innerText = "小區域有感地震";
+		else document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 ? report.earthquakeNo : "小區域有感地震";
 		document.getElementById("report-overview-location").innerText = report.location;
 		const time = new Date(`${report.originTime} GMT+08:00`);
 		document.getElementById("report-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });

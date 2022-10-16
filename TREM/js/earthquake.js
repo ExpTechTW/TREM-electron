@@ -202,7 +202,6 @@ async function init() {
 					roll.removeChild(roll.children[0]);
 					if (Pgeojson != null) {
 						Maps.main.removeLayer(Pgeojson);
-						Pgeojson.remove();
 						Pgeojson = null;
 					}
 				}
@@ -594,8 +593,10 @@ function handler(response) {
 
 	if(Unlock){
 		ipcRenderer.send("RTSUnlock", Unlock);
+		document.getElementById("rt-station").classList.remove("hide");
 	}else{
 		ipcRenderer.send("RTSUnlock", Unlock);
+		document.getElementById("rt-station").classList.add("hide");
 	}
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
@@ -681,7 +682,7 @@ function handler(response) {
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(Sdata.T * 1000);
-		if (keys.includes(setting["Real-time.station"]) && Unlock) {
+		if (keys.includes(setting["Real-time.station"])) {
 			if (document.getElementById("rt-station").classList.contains("hide"))
 				document.getElementById("rt-station").classList.remove("hide");
 			if (keys[index] == setting["Real-time.station"]) {
@@ -750,10 +751,7 @@ function handler(response) {
 					if (setting["Real-time.cover"]) win.moveTop();
 					if (!win.isFocused()) win.flashFrame(true);
 					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
-				} else {
-					Maps.main.removeLayer(Pgeojson);
-					Pgeojson.remove();
-				}
+				} else Maps.main.removeLayer(Pgeojson);
 				Pgeojson = L.geoJson.vt(MapData.tw_town, {
 					minZoom   : 4,
 					maxZoom   : 12,
@@ -778,7 +776,7 @@ function handler(response) {
 							fillOpacity : 1,
 						};
 					},
-				}).addTo(Pgeojson);
+				});
 				Maps.main.addLayer(Pgeojson);
 				setTimeout(() => {
 					ipcRenderer.send("screenshotEEW", {
@@ -1566,7 +1564,6 @@ async function FCMdata(data) {
 	} else if (json.Function == "report") {
 		if (Pgeojson != null) {
 			Maps.main.removeLayer(Pgeojson);
-			Pgeojson.remove();
 			Pgeojson = null;
 		}
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
