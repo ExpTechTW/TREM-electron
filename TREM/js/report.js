@@ -45,10 +45,10 @@ TREM.Report = {
 					this._markers.push(L.marker(
 						[report.epicenterLat, report.epicenterLon],
 						{
-							icon: L.icon({
-								iconUrl   : "./image/cross.png",
+							icon: L.divIcon({
+								html      : TREM.Resources.icon.cross,
 								iconSize  : [report.data[0].areaIntensity * 6, report.data[0].areaIntensity * 6],
-								className : "epicenterIcon",
+								className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
 							}),
 							opacity      : (reportCache.length - reportCache.indexOf(report)) / reportCache.length,
 							zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
@@ -279,12 +279,12 @@ TREM.Report = {
 			this._markers.push(L.marker(
 				[report.epicenterLat, report.epicenterLon],
 				{
-					icon: L.icon({
-						iconUrl   : "./image/cross.png",
+					icon: L.divIcon({
+						html      : TREM.Resources.icon.cross,
 						iconSize  : [report.data[0].areaIntensity * 6, report.data[0].areaIntensity * 6],
-						className : "epicenterIcon",
+						className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
 					}),
-					opacity      : (reportCache.length - reportCache.indexOf(report)) / reportCache.length,
+					opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
 					zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
 				}));
 
@@ -390,12 +390,11 @@ TREM.Report = {
 						zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
 					}));
 
-
 		this._markers.push(L.marker(
 			[report.epicenterLat, report.epicenterLon],
 			{
 				icon: L.icon({
-					iconUrl   : "./image/cross.png",
+					iconUrl   : "./image/cross.svg",
 					iconSize  : [32, 32],
 					className : "epicenterIcon",
 				}),
