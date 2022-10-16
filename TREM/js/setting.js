@@ -58,6 +58,17 @@ ipcRenderer.on("setting", (event, data) => {
 		closeDialog({ target: { id: "dialog" } });
 });
 
+ipcMain.on("RTSUnlock", (event, Unlock) => {
+	if(Unlock){
+		document.getElementById("RTSUnlock").classList.remove("hide");
+		document.getElementById("RTSUnlock1").classList.remove("hide");
+	}
+	else{
+		document.getElementById("RTSUnlock").classList.add("hide");
+		document.getElementById("RTSUnlock1").classList.add("hide");
+	}
+});
+
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
 	showDialog(

@@ -510,7 +510,7 @@ function PGAMain() {
 			setTimeout(() => {
 				cancel();
 			}, 2500);
-			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
+			const ReplayTime = R;
 			axios({
 				method      : "get",
 				url         : getAddressIP+ReplayTime+'&token='+localStorage.UUID+'&license='+License,
@@ -589,8 +589,14 @@ function rtstationzerofun(num,text,key){
 
 function handler(response) {
 	const Json = response;
-	if (Json.Unlock) Unlock = true;
+	Unlock = Json.Unlock ?? false;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
+
+	if(Unlock){
+		ipcRenderer.send("RTSUnlock", Unlock);
+	}else{
+		ipcRenderer.send("RTSUnlock", Unlock);
+	}
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
 	for (const removedKey of removed) {
@@ -602,7 +608,7 @@ function handler(response) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.PGA);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = Sdata.alert;
+		const Alert = (!Unlock) ? (Sdata.I >= 2) : Sdata.alert;
 		if (amount > MaxPGA) MaxPGA = amount;
 		const Intensity = (Alert && Json.Alert) ? Sdata.I :
 			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
@@ -675,7 +681,7 @@ function handler(response) {
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(Sdata.T * 1000);
-		if (keys.includes(setting["Real-time.station"])) {
+		if (keys.includes(setting["Real-time.station"]) && Unlock) {
 			if (document.getElementById("rt-station").classList.contains("hide"))
 				document.getElementById("rt-station").classList.remove("hide");
 			if (keys[index] == setting["Real-time.station"]) {
