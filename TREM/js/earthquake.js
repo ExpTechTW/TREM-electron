@@ -82,12 +82,18 @@ let IntensityListTime = 0;
 let WarnAudio = 0;
 let reportCache = [];
 let MaxPGA = 0;
+let License = "";
+let Unlock = false;
 // #endregion
 
 // #region 初始化
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
+
+if (fs.existsSync(app.getPath("userData") + "/TREM.license"))
+	License = fs.readFileSync(app.getPath("userData") + "/TREM.license").toString();
+
 
 let fullscreenTipTimeout;
 win.on("enter-full-screen", () => {
@@ -152,7 +158,8 @@ async function init() {
 				}
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
-				$("#app-version").text(`${app.getVersion()} | ${MaxPGA}gal | ${Delay}ms ${warn} ${GetDataState}`);
+				const unlock = (!Unlock) ? "🔐" : "";
+				$("#app-version").text(`${app.getVersion()} | ${MaxPGA}gal | ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -451,7 +458,7 @@ function PGAMain() {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 			axios({
 				method      : "get",
-				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}`,
+				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&token=${localStorage.UUID}&license=${License}`,
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),
@@ -472,6 +479,7 @@ function PGAMain() {
 
 function handler(response) {
 	const Json = response;
+	if (Json.Unlock) Unlock = true;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
