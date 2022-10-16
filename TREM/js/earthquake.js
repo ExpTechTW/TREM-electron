@@ -33,8 +33,8 @@ let ReportMarkID = null;
 const MarkList = [];
 const EarthquakeList = {};
 let marker = null;
-let map, mapTW, mapReport;
-let map_base, mapTW_base, mapReport_base;
+const Maps = {};
+const MapBases = { main: [], mini: [], report: [] };
 let PGAMainLock = false;
 const Station = {};
 const PGA = {};
@@ -182,8 +182,8 @@ async function init() {
 				// const external = formatMemoryUsage(memoryData.external);
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
-				$("#log").text(`${MaxPGA}gal | ${rss}`);
-				$("#log1").text(`${MaxPGA}gal | ${rss}`);
+				$("#log").text(`Max. ${MaxPGA}gal | ${rss}`);
+				$("#log1").text(`Max. ${MaxPGA}gal | ${rss}`);
 				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
 				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${GetDataState}`);
 			}, 500);
@@ -203,7 +203,7 @@ async function init() {
 					if (ReportMarkID != null) {
 						ReportMarkID = null;
 						for (let index = 0; index < MarkList.length; index++)
-							map.removeLayer(MarkList[index]);
+							Maps.main.removeLayer(MarkList[index]);
 						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 					}
 				}
@@ -212,8 +212,8 @@ async function init() {
 		progressbar.value = (1 / progressStep) * 2.5;
 
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
-		if (!map) {
-			map = L.map("map",
+		if (!Maps.main) {
+			Maps.main = L.map("map",
 				{
 					edgeBufferTiles    : 1,
 					attributionControl : false,
@@ -235,7 +235,7 @@ async function init() {
 					if (ReportMarkID != null) {
 						ReportMarkID = null;
 						for (let index = 0; index < MarkList.length; index++)
-							map.removeLayer(MarkList[index]);
+							Maps.main.removeLayer(MarkList[index]);
 						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 					}
 					mapLock = false;
@@ -244,7 +244,7 @@ async function init() {
 				.on("contextmenu", () => {TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });})
 				.on("drag", () => mapLock = true)
 				.on("zoomend", () => {
-					if (map.getZoom() >= 11)
+					if (Maps.main.getZoom() >= 11)
 						for (const key in Station) {
 							const tooltip = Station[key].getTooltip();
 							if (tooltip) {
@@ -263,11 +263,11 @@ async function init() {
 							}
 						}
 				});
-			map._zoomAnimated = setting["map.animation"];
+			Maps.main._zoomAnimated = setting["map.animation"];
 		}
 
-		if (!mapTW)
-			mapTW = L.map("map-tw",
+		if (!Maps.mini)
+			Maps.mini = L.map("map-tw",
 				{
 					attributionControl : false,
 					zoomControl        : false,
@@ -283,10 +283,10 @@ async function init() {
 					keyboard           : false,
 				})
 				.setView([23.608428, 120.799168], 7)
-				.on("zoom", () => mapTW.setView([23.608428, 120.799168], 7));
+				.on("zoom", () => Maps.mini.setView([23.608428, 120.799168], 7));
 
-		if (!mapReport) {
-			mapReport = L.map("map-report",
+		if (!Maps.report) {
+			Maps.report = L.map("map-report",
 				{
 					attributionControl : false,
 					closePopupOnClick  : false,
@@ -310,7 +310,7 @@ async function init() {
 					],
 				})
 				.on("click", () => TREM.Report._focusMap());
-			mapReport._zoomAnimated = setting["map.animation"];
+			Maps.report._zoomAnimated = setting["map.animation"];
 		}
 
 	})();
@@ -344,21 +344,24 @@ async function init() {
 		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
 		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
-		if (!map_base)
-			map_base = L.geoJson.vt(MapData.Dmap, {
-				edgeBufferTiles : 2,
-				minZoom         : 4,
-				maxZoom         : 15,
-				tolerance       : 20,
-				buffer          : 256,
-				debug           : 0,
-				style           : {
-					weight      : 0.8,
-					color       : TREM.Colors.primary,
-					fillColor   : TREM.Colors.surfaceVariant,
-					fillOpacity : 1,
-				},
-			}).addTo(map);
+		if (!MapBases.main.length)
+			for (const mapName of ["cn", "jp", "tw_county"])
+				MapBases.main.push(
+					L.geoJson.vt(MapData[mapName], {
+						edgeBufferTiles : 2,
+						minZoom         : 4,
+						maxZoom         : 12,
+						tolerance       : 20,
+						buffer          : 256,
+						debug           : 0,
+						style           : {
+							weight      : 0.8,
+							color       : TREM.Colors.primary,
+							fillColor   : TREM.Colors.surfaceVariant,
+							fillOpacity : 1,
+						},
+					}).addTo(Maps.main),
+				);
 			// map_base = L.geoJson.vt(MapData.S, {
 			// 	edgeBufferTiles : 2,
 			// 	minZoom         : 4,
@@ -374,36 +377,40 @@ async function init() {
 			// 	},
 			// }).addTo(map);
 
-		if (!mapTW_base)
-			mapTW_base = L.geoJson.vt(MapData.tw_county, {
-				minZoom   : 7,
-				maxZoom   : 7,
-				tolerance : 20,
-				buffer    : 256,
-				debug     : 0,
-				zIndex    : 10,
-				style     : {
-					weight      : 0.8,
-					color       : TREM.Colors.primary,
-					fillColor   : "transparent",
-					fillOpacity : 0,
-				},
-			}).addTo(mapTW);
+		if (!MapBases.mini.length)
+			MapBases.mini.push(
+				L.geoJson.vt(MapData.tw_county, {
+					minZoom   : 7,
+					maxZoom   : 7,
+					tolerance : 20,
+					buffer    : 256,
+					debug     : 0,
+					zIndex    : 10,
+					style     : {
+						weight      : 0.8,
+						color       : TREM.Colors.primary,
+						fillColor   : "transparent",
+						fillOpacity : 0,
+					},
+				}).addTo(Maps.mini),
+			);
 
-		if (!mapReport_base)
-			mapReport_base = L.geoJson.vt(MapData.tw_county, {
-				minZoom   : 7.5,
-				maxZoom   : 10,
-				tolerance : 20,
-				buffer    : 256,
-				debug     : 0,
-				style     : {
-					weight      : 0.8,
-					color       : TREM.Colors.primary,
-					fillColor   : TREM.Colors.surfaceVariant,
-					fillOpacity : 1,
-				},
-			}).addTo(mapReport);
+		if (!MapBases.report.length)
+			MapBases.report.push(
+				L.geoJson.vt(MapData.tw_county, {
+					minZoom   : 7.5,
+					maxZoom   : 10,
+					tolerance : 20,
+					buffer    : 256,
+					debug     : 0,
+					style     : {
+						weight      : 0.8,
+						color       : TREM.Colors.primary,
+						fillColor   : TREM.Colors.surfaceVariant,
+						fillOpacity : 1,
+					},
+				}).addTo(Maps.report),
+			);
 
 	})().catch(e => dump({ level: 2, message: e }));
 
@@ -627,7 +634,7 @@ function handler(response) {
 					}),
 					keyboard: false,
 				})
-				.addTo(map)
+				.addTo(Maps.main)
 				.bindTooltip(station_tooltip, {
 					offset    : [8, 0],
 					permanent : false,
@@ -635,7 +642,7 @@ function handler(response) {
 				})
 				.on("click", () => {
 					Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
-					if (map.getZoom() < 11) {
+					if (Maps.main.getZoom() < 11) {
 						const tooltip = Station[keys[index]].getTooltip();
 						Station[keys[index]].unbindTooltip();
 						if (Station[keys[index]].keepTooltipAlive)
@@ -793,7 +800,7 @@ function handler(response) {
 			PAlert = {};
 	}
 	for (let index = 0; index < Object.keys(PGA).length; index++) {
-		if (RMT == 0) map.removeLayer(PGA[Object.keys(PGA)[index]]);
+		if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(PGA)[index]]);
 		delete PGA[Object.keys(PGA)[index]];
 		index--;
 	}
@@ -822,7 +829,7 @@ function handler(response) {
 					}
 				}
 			if (skip) continue;
-			if (RMT >= 2) map.addLayer(PGA[Object.keys(pga)[index]]);
+			if (RMT >= 2) Maps.main.addLayer(PGA[Object.keys(pga)[index]]);
 		}
 	}
 	if (RMT >= 2) RMT = 0;
@@ -943,10 +950,10 @@ async function setUserLocationMarker(town) {
 		});
 		marker = L.marker([UserLocationLat, UserLocationLon], { icon: icon })
 			.setZIndexOffset(1)
-			.addTo(map);
+			.addTo(Maps.main);
 	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
 	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
-	map.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
+	Maps.main.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
 }
 // #endregion
 
@@ -971,11 +978,11 @@ TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
 		Focus[0] = center[0];
 		Focus[1] = center[1] + X;
 		Focus[2] = size;
-		if (map.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || map.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || size != map.getZoom())
-			map.setView([center[0], center[1] + X], size);
+		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || size != Maps.main.getZoom())
+			Maps.main.setView([center[0], center[1] + X], size);
 	} else if (Focus.length != 0)
-		if (map.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || map.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != map.getZoom())
-			map.setView([Focus[0], Focus[1]], Focus[2]);
+		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != Maps.main.getZoom())
+			Maps.main.setView([Focus[0], Focus[1]], Focus[2]);
 });
 // #endregion
 
@@ -1271,7 +1278,7 @@ function addReport(report, prepend = false) {
 			if (ReportMarkID != null) {
 				ReportMarkID = null;
 				for (let index = 0; index < MarkList.length; index++)
-					map.removeLayer(MarkList[index]);
+					Maps.main.removeLayer(MarkList[index]);
 			}
 			TREM.Report.setView("report-overview", report.identifier);
 			changeView("report", "#reportView_btn");
@@ -1482,30 +1489,16 @@ const updateMapColors = async (event, value) => {
 
 	TREM.Colors = await getThemeColors(accent, dark);
 
-	map_base.options.style = {
-		weight      : 0.8,
-		color       : TREM.Colors.primary,
-		fillColor   : TREM.Colors.surfaceVariant,
-		fillOpacity : 1,
-	};
-	map_base.redraw();
-
-	mapTW_base.options.style = {
-		weight      : 0.8,
-		color       : TREM.Colors.primary,
-		fillColor   : TREM.Colors.surfaceVariant,
-		fillOpacity : 1,
-	};
-	mapTW_base.redraw();
-
-
-	mapReport_base.options.style = {
-		weight      : 0.8,
-		color       : TREM.Colors.primary,
-		fillColor   : TREM.Colors.surfaceVariant,
-		fillOpacity : 1,
-	};
-	mapReport_base.redraw();
+	for (const mapName in MapBases)
+		for (const baseMap of MapBases[mapName]) {
+			baseMap.options.style = {
+				weight      : 0.8,
+				color       : TREM.Colors.primary,
+				fillColor   : TREM.Colors.surfaceVariant,
+				fillOpacity : 1,
+			};
+			baseMap.redraw();
+		}
 };
 
 ipcRenderer.on("config:theme", updateMapColors);
@@ -1532,10 +1525,10 @@ ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
 });
 ipcRenderer.on("config:mapanimation", (event, value) => {
-	map._fadeAnimated = value;
-	map._zoomAnimated = value;
-	mapReport._fadeAnimated = value;
-	mapReport._zoomAnimated = value;
+	Maps.main._fadeAnimated = value;
+	Maps.main._zoomAnimated = value;
+	Maps.report._fadeAnimated = value;
+	Maps.report._zoomAnimated = value;
 });
 // #endregion
 
@@ -1982,7 +1975,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 				iconSize  : [30, 30],
 				className : "tsunami",
 			});
-			TSUNAMI.warnIcon = L.marker([+data.NorthLatitude, +data.EastLongitude], { icon: warnIcon }).addTo(map);
+			TSUNAMI.warnIcon = L.marker([+data.NorthLatitude, +data.EastLongitude], { icon: warnIcon }).addTo(Maps.main);
 		} else TSUNAMI.warnIcon.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
 		if (!TSUNAMI.E) {
@@ -1998,7 +1991,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 					color   : Tcolor(data.Addition[0].areaColor),
 					fill    : false,
 				},
-			}).addTo(map);
+			}).addTo(Maps.main);
 			L.DomUtil.addClass(TSUNAMI.E._container, "tsunami");
 		} else TSUNAMI.E.setStyle({
 			weight  : 10,
@@ -2020,7 +2013,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 					color   : Tcolor(data.Addition[1].areaColor),
 					fill    : false,
 				},
-			}).addTo(map);
+			}).addTo(Maps.main);
 			L.DomUtil.addClass(TSUNAMI.EN._container, "tsunami");
 		} else TSUNAMI.EN.setStyle({
 			weight  : 10,
@@ -2042,7 +2035,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 					color   : Tcolor(data.Addition[2].areaColor),
 					fill    : false,
 				},
-			}).addTo(map);
+			}).addTo(Maps.main);
 			L.DomUtil.addClass(TSUNAMI.ES._container, "tsunami");
 		} else TSUNAMI.ES.setStyle({
 			weight  : 10,
@@ -2064,7 +2057,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 					color   : Tcolor.vt(data.Addition[3].areaColor),
 					fill    : false,
 				},
-			}).addTo(map);
+			}).addTo(Maps.main);
 			L.DomUtil.addClass(TSUNAMI.N._container, "tsunami");
 		} else TSUNAMI.N.setStyle({
 			weight  : 10,
@@ -2086,7 +2079,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 					color   : Tcolor(data.Addition[4].areaColor),
 					fill    : false,
 				},
-			}).addTo(map);
+			}).addTo(Maps.main);
 			L.DomUtil.addClass(TSUNAMI.WS._container, "tsunami");
 		} else TSUNAMI.WS.setStyle({
 			weight  : 10,
@@ -2108,7 +2101,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 					color   : Tcolor(data.Addition[5].areaColor),
 					fill    : false,
 				},
-			}).addTo(map);
+			}).addTo(Maps.main);
 			L.DomUtil.addClass(TSUNAMI.W._container, "tsunami");
 		} else TSUNAMI.W.setStyle({
 			weight  : 10,
@@ -2131,7 +2124,7 @@ function main(data) {
 						radius    : kmP,
 						renderer  : L.svg(),
 						className : "p-wave",
-					}).addTo(map);
+					}).addTo(Maps.mini);
 
 				if (!EarthquakeList[data.ID].CircleP.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 					EarthquakeList[data.ID].CircleP
@@ -2147,7 +2140,7 @@ function main(data) {
 						radius    : kmP,
 						renderer  : L.svg(),
 						className : "p-wave",
-					}).addTo(mapTW);
+					}).addTo(Maps.mini);
 
 				if (!EarthquakeList[data.ID].CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 					EarthquakeList[data.ID].CirclePTW
@@ -2158,7 +2151,7 @@ function main(data) {
 			}
 		}
 		const km = Math.pow((NOW.getTime() - data.Time) * Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
-		if (EarthquakeList[data.ID].Depth != null) map.removeLayer(EarthquakeList[data.ID].Depth);
+		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 		if (km > 0) {
 			const kmS = Math.sqrt(km);
 			EEW[data.ID].km = kmS;
@@ -2170,7 +2163,7 @@ function main(data) {
 					radius      : kmS,
 					renderer    : L.svg(),
 					className   : "s-wave",
-				}).addTo(map);
+				}).addTo(Maps.main);
 
 			if (!EarthquakeList[data.ID].CircleS.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 				EarthquakeList[data.ID].CircleS
@@ -2193,7 +2186,7 @@ function main(data) {
 					radius      : kmS,
 					renderer    : L.svg(),
 					className   : "s-wave",
-				}).addTo(mapTW);
+				}).addTo(Maps.mini);
 
 			if (!EarthquakeList[data.ID].CircleSTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 				EarthquakeList[data.ID].CircleSTW
@@ -2225,7 +2218,7 @@ function main(data) {
 			});
 			const DepthM = L.marker([Number(data.NorthLatitude), Number(data.EastLongitude) + 0.15], { icon: myIcon });
 			EarthquakeList[data.ID].Depth = DepthM;
-			map.addLayer(DepthM);
+			Maps.main.addLayer(DepthM);
 			DepthM.setZIndexOffset(6000);
 		}
 
@@ -2256,7 +2249,7 @@ function main(data) {
 
 		// main map
 		if (!EarthquakeList[data.ID].epicenterIcon)
-			EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon, zIndexOffset: 6000 }).addTo(map);
+			EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon, zIndexOffset: 6000 }).addTo(Maps.main);
 
 		if (EarthquakeList[data.ID].epicenterIcon.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
 			EarthquakeList[data.ID].epicenterIcon.setIcon(epicenterIcon);
@@ -2266,7 +2259,7 @@ function main(data) {
 
 		// mini map
 		if (!EarthquakeList[data.ID].epicenterIconTW) {
-			EarthquakeList[data.ID].epicenterIconTW = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon }).addTo(mapTW);
+			EarthquakeList[data.ID].epicenterIconTW = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon }).addTo(Maps.mini);
 			EarthquakeList[data.ID].epicenterIconTW.getElement().classList.add("hide");
 		}
 
@@ -2389,10 +2382,10 @@ function Tcolor(text) {
 }
 
 function clear(ID) {
-	if (EarthquakeList[ID].CircleS != undefined) map.removeLayer(EarthquakeList[ID].CircleS);
-	if (EarthquakeList[ID].CircleP != undefined) map.removeLayer(EarthquakeList[ID].CircleP);
-	if (EarthquakeList[ID].CircleSTW != undefined) mapTW.removeLayer(EarthquakeList[ID].CircleSTW);
-	if (EarthquakeList[ID].CirclePTW != undefined) mapTW.removeLayer(EarthquakeList[ID].CirclePTW);
+	if (EarthquakeList[ID].CircleS != undefined) Maps.main.removeLayer(EarthquakeList[ID].CircleS);
+	if (EarthquakeList[ID].CircleP != undefined) Maps.main.removeLayer(EarthquakeList[ID].CircleP);
+	if (EarthquakeList[ID].CircleSTW != undefined) Maps.mini.removeLayer(EarthquakeList[ID].CircleSTW);
+	if (EarthquakeList[ID].CirclePTW != undefined) Maps.mini.removeLayer(EarthquakeList[ID].CirclePTW);
 }
 
 function updateText() {
@@ -2438,7 +2431,7 @@ function updateText() {
 	if (EarthquakeList[INFO[TINFO].ID].epicenterIconTW) EarthquakeList[INFO[TINFO].ID].epicenterIconTW.getElement()?.classList?.remove("hide");
 	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.getElement()?.classList?.remove("hide");
 	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.getElement()?.classList?.remove("hide");
-	if (EarthquakeList[INFO[TINFO].ID].geojson) EarthquakeList[INFO[TINFO].ID].geojson.addTo(mapTW);
+	if (EarthquakeList[INFO[TINFO].ID].geojson) EarthquakeList[INFO[TINFO].ID].geojson.addTo(Maps.mini);
 
 	const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
 	const Catch = document.getElementById("box-10");
@@ -2465,7 +2458,7 @@ const changeView = (args, el, event) => {
 	changeel.addClass("show");
 
 	if (changeel.attr("id") == "report")
-		mapReport.invalidateSize();
+		Maps.report.invalidateSize();
 		toggleNav(false);
 	if (changeel.attr("id") == "main")
 		reportOverviewButton();
