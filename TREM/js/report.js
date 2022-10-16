@@ -409,6 +409,7 @@ TREM.Report = {
 					icon: L.divIcon({
 						html      : TREM.Resources.icon.cross,
 						iconSize : [32, 32],
+						className : `epicenterIcon`,
 					}),
 					zIndexOffset: 5000,
 				},

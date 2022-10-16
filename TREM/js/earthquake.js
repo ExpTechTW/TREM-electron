@@ -760,32 +760,59 @@ function handler(response) {
 					if (setting["Real-time.cover"]) win.moveTop();
 					if (!win.isFocused()) win.flashFrame(true);
 					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
-				} else Pgeojson.remove();
-				Pgeojson = L.geoJson.vt(MapData.tw_town, {
-					minZoom   : 4,
-					maxZoom   : 12,
-					tolerance : 20,
-					buffer    : 256,
-					debug     : 0,
-					zIndex    : 5,
-					style     : (properties) => {
-						const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
-						if (PLoc[name] == 0 || PLoc[name] == undefined)
+					Pgeojson = L.geoJson.vt(MapData.tw_town, {
+						minZoom   : 4,
+						maxZoom   : 12,
+						tolerance : 20,
+						buffer    : 256,
+						debug     : 0,
+						zIndex    : 5,
+						style     : (properties) => {
+							const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
+							if (PLoc[name] == 0 || PLoc[name] == undefined)
+								return {
+									color       : "transparent",
+									weight      : 0,
+									opacity     : 0,
+									fillColor   : TREM.Colors.surfaceVariant,
+									fillOpacity : 0,
+								};
 							return {
-								color       : "transparent",
-								weight      : 0,
-								opacity     : 0,
-								fillColor   : TREM.Colors.surfaceVariant,
-								fillOpacity : 0,
+								color       : TREM.Colors.secondary,
+								weight      : 0.8,
+								fillColor   : color(PLoc[name]),
+								fillOpacity : 1,
 							};
-						return {
-							color       : TREM.Colors.secondary,
-							weight      : 0.8,
-							fillColor   : color(PLoc[name]),
-							fillOpacity : 1,
-						};
-					},
-				}).addTo(Pgeojson);
+						},
+					}).addTo(Pgeojson);
+				} else {
+					Pgeojson.remove();
+					Pgeojson = L.geoJson.vt(MapData.tw_town, {
+						minZoom   : 4,
+						maxZoom   : 12,
+						tolerance : 20,
+						buffer    : 256,
+						debug     : 0,
+						zIndex    : 5,
+						style     : (properties) => {
+							const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
+							if (PLoc[name] == 0 || PLoc[name] == undefined)
+								return {
+									color       : "transparent",
+									weight      : 0,
+									opacity     : 0,
+									fillColor   : TREM.Colors.surfaceVariant,
+									fillOpacity : 0,
+								};
+							return {
+								color       : TREM.Colors.secondary,
+								weight      : 0.8,
+								fillColor   : color(PLoc[name]),
+								fillOpacity : 1,
+							};
+						},
+					}).addTo(Pgeojson);
+				}
 				setTimeout(() => {
 					ipcRenderer.send("screenshotEEW", {
 						Function : "palert",
