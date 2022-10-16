@@ -1,4 +1,4 @@
-/* global IntensityToClassString: false, reportCache: false, mapReport: true, IntensityI: false, changeView: false, replay: true, replayT: true */
+/* global Maps: false, IntensityToClassString: false, reportCache: false, Maps.report: true, IntensityI: false, changeView: false, replay: true, replayT: true */
 
 TREM.Report = {
 	view                  : "report-list",
@@ -56,7 +56,7 @@ TREM.Report = {
 				fragment.appendChild(element);
 			}
 
-			this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
+			this._markersGroup = L.featureGroup(this._markers).addTo(Maps.report);
 			this.reportListElement.appendChild(fragment);
 		}
 	},
@@ -288,7 +288,7 @@ TREM.Report = {
 					zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
 				}));
 
-		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
+		this._markersGroup = L.featureGroup(this._markers).addTo(Maps.report);
 	},
 	/**
 	 * @param {HTMLElement} element
@@ -309,9 +309,9 @@ TREM.Report = {
 	_focusMap(...args) {
 		if (args.length) {
 			this._lastFocus = [...args];
-			mapReport.fitBounds(...args);
+			Maps.report.fitBounds(...args);
 		} else if (this._lastFocus.length)
-			mapReport.fitBounds(...this._lastFocus);
+			Maps.report.fitBounds(...this._lastFocus);
 		else {
 			this._lastFocus = [[[25.35, 119.4], [21.9, 122.22]], {
 				paddingTopLeft: [
@@ -319,7 +319,7 @@ TREM.Report = {
 					0,
 				],
 			}];
-			mapReport.fitBounds(...this._lastFocus);
+			Maps.report.fitBounds(...this._lastFocus);
 		}
 	},
 	_clearMap(resetFoucs = false) {
@@ -402,9 +402,9 @@ TREM.Report = {
 				zIndexOffset: 5000,
 			}));
 
-		this._markersGroup = L.featureGroup(this._markers).addTo(mapReport);
+		this._markersGroup = L.featureGroup(this._markers).addTo(Maps.report);
 
-		const zoomPredict = (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom()) / (mapReport.getMaxZoom() * (1.5 ** (mapReport.getBoundsZoom(this._markersGroup.getBounds()) - mapReport.getMinZoom())));
+		const zoomPredict = (Maps.report.getBoundsZoom(this._markersGroup.getBounds()) - Maps.report.getMinZoom()) / (Maps.report.getMaxZoom() * (1.5 ** (Maps.report.getBoundsZoom(this._markersGroup.getBounds()) - Maps.report.getMinZoom())));
 		this._focusMap(this._markersGroup.getBounds(), {
 			paddingTopLeft: [
 				document.getElementById("map-report").offsetWidth / 2,
@@ -431,7 +431,7 @@ TREM.on("viewChange", (oldView, newView) => {
 	switch (newView) {
 		case "report": {
 			TREM.Report.loadReports();
-			mapReport.invalidateSize();
+			Maps.report.invalidateSize();
 			break;
 		}
 
