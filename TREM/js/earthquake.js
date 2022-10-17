@@ -747,9 +747,11 @@ function handler(response) {
 				PalertT = PAlert.timestamp;
 				if (Pgeojson == null) {
 					changeView("main", "#mainView_btn");
-					if (setting["Real-time.show"]) win.showInactive();
-					if (setting["Real-time.cover"]) win.moveTop();
-					if (!win.isFocused()) win.flashFrame(true);
+					if(Unlock){
+						if (setting["Real-time.show"]) win.showInactive();
+						if (setting["Real-time.cover"]) win.moveTop();
+						if (!win.isFocused()) win.flashFrame(true);
+					}
 					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
 				} else Maps.main.removeLayer(Pgeojson);
 				Pgeojson = L.geoJson.vt(MapData.tw_town, {
@@ -859,9 +861,11 @@ function handler(response) {
 			});
 		}, 2250);
 		changeView("main", "#mainView_btn");
-		if (setting["Real-time.show"]) win.showInactive();
-		if (setting["Real-time.cover"]) win.moveTop();
-		if (!win.isFocused()) win.flashFrame(true);
+		if(Unlock){
+			if (setting["Real-time.show"]) win.showInactive();
+			if (setting["Real-time.cover"]) win.moveTop();
+			if (!win.isFocused()) win.flashFrame(true);
+		}
 		PGAtag = All[0].intensity;
 	}
 	let list = [];
