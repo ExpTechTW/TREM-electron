@@ -111,7 +111,7 @@ TREM.Report = {
 				return;
 
 		const oldView = document.getElementById(this.view);
-		const newView = document.getElementById(view);
+		let newView = document.getElementById(view);
 
 		document.getElementById("report-detail-body").style.height = `${oldView.offsetHeight}px`;
 		document.getElementById("report-detail-body").style.width = `${oldView.offsetWidth}px`;
@@ -133,8 +133,21 @@ TREM.Report = {
 				break;
 			}
 
+			case "eq-report-overview": {
+				if (this.view == "report-list") this.unloadReports();
+				this._setupReport(reportIdentifier);
+				document.getElementById("report-detail-back").classList.remove("hide");
+				document.getElementById("report-detail-refresh").classList.add("hide");
+				break;
+			}
+
 			default:
 				break;
+		}
+
+		if (view == "eq-report-overview"){
+			view = "report-overview";
+			newView = document.getElementById(view);
 		}
 
 		if (this.view != view) {
@@ -351,9 +364,9 @@ TREM.Report = {
 		this._clearMap();
 
 		console.log(report);
+		if(!report) return;
 
-		if (!report.earthquakeNo) document.getElementById("report-overview-number").innerText = "小區域有感地震";
-		else document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 ? report.earthquakeNo : "小區域有感地震";
+		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 ? report.earthquakeNo : "小區域有感地震";
 		document.getElementById("report-overview-location").innerText = report.location;
 		const time = new Date(`${report.originTime} GMT+08:00`);
 		document.getElementById("report-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });

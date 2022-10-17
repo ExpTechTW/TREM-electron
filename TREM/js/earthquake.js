@@ -1242,7 +1242,7 @@ function addReport(report, prepend = false) {
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
 		Div.addEventListener("click", (event) => {
 			set_report_overview = 1;
-			TREM.Report.setView("report-overview", report.identifier);
+			TREM.Report.setView("eq-report-overview", report);
 			changeView("report", "#reportView_btn");
 			ReportTag1 = NOW.getTime();
 			console.log("ReportTag1: ", ReportTag1);
@@ -1255,7 +1255,7 @@ function addReport(report, prepend = false) {
 				stopReplaybtn();
 			} else {
 				set_report_overview = 1;
-				TREM.Report.setView("report-overview", report.identifier);
+				TREM.Report.setView("eq-report-overview", report);
 				changeView("report", "#reportView_btn");
 				ReportTag1 = NOW.getTime();
 				console.log("ReportTag1: ", ReportTag1);
@@ -1277,7 +1277,7 @@ function addReport(report, prepend = false) {
 				for (let index = 0; index < MarkList.length; index++)
 					Maps.main.removeLayer(MarkList[index]);
 			}
-			TREM.Report.setView("report-overview", report.identifier);
+			TREM.Report.setView("eq-report-overview", report);
 			changeView("report", "#reportView_btn");
 			ReportTag1 = NOW.getTime();
 			console.log("ReportTag1: ", ReportTag1);
@@ -1586,7 +1586,7 @@ async function FCMdata(data) {
 		addReport(report[0], true);
 
 		if (setting[report.changeView]) {
-			TREM.Report.setView("report-overview", report[0].identifier);
+			TREM.Report.setView("eq-report-overview", report[0].identifier);
 			changeView("report", "#reportView_btn");
 			ReportTag1 = NOW.getTime();
 			console.log("ReportTag1: ", ReportTag1);
@@ -2110,6 +2110,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 });
 
 function main(data) {
+	if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (setting["shock.p"]) {
 			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
@@ -2148,7 +2149,6 @@ function main(data) {
 			}
 		}
 		const km = Math.pow((NOW.getTime() - data.Time) * Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
-		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 		if (km > 0) {
 			const kmS = Math.sqrt(km);
 			EEW[data.ID].km = kmS;
@@ -2310,9 +2310,9 @@ function main(data) {
 	if (data.Cancel && EarthquakeList[data.ID].Cancel == undefined)
 		for (let index = 0; index < INFO.length; index++)
 			if (INFO[index].ID == data.ID) {
-				INFO[index].alert_provider += " (取消)";
-				clear(data.ID);
-				data.TimeStamp = NOW.getTime() - 210000;
+				INFO[index].alert_type = "eew-cancel";
+				// clear(data.ID);
+				data.TimeStamp = NOW.getTime() - 150000;
 				EarthquakeList[data.ID].Cancel = true;
 				if (Object.keys(EarthquakeList).length == 1) {
 					clearInterval(t);
@@ -2321,13 +2321,14 @@ function main(data) {
 				}
 				break;
 			}
-	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
+	if (NOW.getTime() - data.TimeStamp > 180_000) {
 		clear(data.ID);
 
 		// remove epicenter cross icons
 		EarthquakeList[data.ID].epicenterIcon.remove();
 		EarthquakeList[data.ID].epicenterIconTW.remove();
 		EarthquakeList[data.ID].geojson.remove();
+		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
 		for (let index = 0; index < INFO.length; index++)
 			if (INFO[index].ID == data.ID) {
