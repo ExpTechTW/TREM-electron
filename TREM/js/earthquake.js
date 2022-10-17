@@ -682,7 +682,7 @@ function handler(response) {
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(Sdata.T * 1000);
-		if (keys.includes(setting["Real-time.station"])) {
+		if (keys.includes(setting["Real-time.station"]) && Unlock) {
 			if (document.getElementById("rt-station").classList.contains("hide"))
 				document.getElementById("rt-station").classList.remove("hide");
 			if (keys[index] == setting["Real-time.station"]) {
