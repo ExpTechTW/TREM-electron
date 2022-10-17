@@ -1929,6 +1929,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 });
 
 function main(data) {
+	if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (setting["shock.p"]) {
 			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
@@ -1967,7 +1968,6 @@ function main(data) {
 			}
 		}
 		const km = Math.pow((NOW.getTime() - data.Time) * Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
-		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 		if (km > 0) {
 			const kmS = Math.sqrt(km);
 			EEW[data.ID].km = kmS;
@@ -2129,9 +2129,9 @@ function main(data) {
 	if (data.Cancel && EarthquakeList[data.ID].Cancel == undefined)
 		for (let index = 0; index < INFO.length; index++)
 			if (INFO[index].ID == data.ID) {
-				INFO[index].alert_provider += " (取消)";
-				clear(data.ID);
-				data.TimeStamp = NOW.getTime() - 210000;
+				INFO[index].alert_type = "eew-cancel";
+				// clear(data.ID);
+				data.TimeStamp = NOW.getTime() - 150000;
 				EarthquakeList[data.ID].Cancel = true;
 				if (Object.keys(EarthquakeList).length == 1) {
 					clearInterval(t);
@@ -2140,13 +2140,14 @@ function main(data) {
 				}
 				break;
 			}
-	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
+	if (NOW.getTime() - data.TimeStamp > 180_000) {
 		clear(data.ID);
 
 		// remove epicenter cross icons
 		EarthquakeList[data.ID].epicenterIcon.remove();
 		EarthquakeList[data.ID].epicenterIconTW.remove();
 		EarthquakeList[data.ID].geojson.remove();
+		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
 		for (let index = 0; index < INFO.length; index++)
 			if (INFO[index].ID == data.ID) {
