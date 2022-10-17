@@ -284,6 +284,12 @@ function TextSave(id) {
 	ipcRenderer.send("config:value", id, value);
 }
 
+function KeyTextSave(id) {
+	const value = document.getElementById(id).value;
+	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+	ipcRenderer.send("config:value", id, value);
+}
+
 function ChoiceSave(id, el) {
 	const value = el.value;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });

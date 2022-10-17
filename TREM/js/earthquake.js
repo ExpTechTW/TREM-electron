@@ -97,8 +97,7 @@ const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
 
 if (fs.existsSync(app.getPath("userData") + "/TREM.license"))
-	License = fs.readFileSync(app.getPath("userData") + "/TREM.license").toString();
-
+	fs.readFileSync(app.getPath("userData") + "/TREM.license");
 
 let fullscreenTipTimeout;
 win.on("enter-full-screen", () => {
@@ -119,6 +118,8 @@ win.on("leave-full-screen", () => {
 async function init() {
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
+
+	if (setting["license.key"]) License = setting["license.key"];
 
 	// Connect to server
 	await (async () => {

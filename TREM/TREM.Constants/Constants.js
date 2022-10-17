@@ -212,6 +212,10 @@ const Constants = Object.freeze({
 			type  : "choice",
 			value : "notify",
 		},
+		"license.key": {
+			type  : "string",
+			value : "",
+		},
 	},
 });
 
