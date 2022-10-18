@@ -38,7 +38,7 @@ const Constants = Object.freeze({
 		},
 		"cache.report": {
 			type  : "select",
-			value : 50,
+			value : "25",
 		},
 		"compatibility.hwaccel": {
 			type  : "toggle",
