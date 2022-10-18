@@ -47,7 +47,7 @@ TREM.Report = {
 						{
 							icon: L.divIcon({
 								html      : TREM.Resources.icon.cross,
-								iconSize  : [report.data[0].areaIntensity * 6, report.data[0].areaIntensity * 6],
+								iconSize  : [report.magnitudeValue * 4, report.magnitudeValue * 4],
 								className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
 							}),
 							opacity      : (reportCache.length - reportCache.indexOf(report)) / reportCache.length,
@@ -281,7 +281,7 @@ TREM.Report = {
 				{
 					icon: L.divIcon({
 						html      : TREM.Resources.icon.cross,
-						iconSize  : [report.data[0].areaIntensity * 6, report.data[0].areaIntensity * 6],
+						iconSize  : [report.magnitudeValue * 4, report.magnitudeValue * 4],
 						className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
 					}),
 					opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
@@ -295,7 +295,6 @@ TREM.Report = {
 	 */
 	_hideItem(element) {
 		element.classList.add("hide");
-
 		setTimeout(() => element.style.display = "none", 200);
 	},
 	/**
