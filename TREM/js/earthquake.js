@@ -22,7 +22,6 @@ let t = null;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let All = [];
-const AllT = 0;
 let arrive = "";
 let audioList = [];
 let audioList1 = [];
@@ -77,13 +76,10 @@ const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
 let Ping = 0;
 let EEWAlert = false;
-let Cancel = false;
 let PGACancel = false;
 let IntensityListTime = 0;
 let WarnAudio = 0;
-let reportCache = [];
 let MaxPGA = 0;
-let License = "";
 let Unlock = false;
 // #endregion
 
@@ -91,10 +87,6 @@ let Unlock = false;
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
-
-if (fs.existsSync(app.getPath("userData") + "/TREM.license"))
-	License = fs.readFileSync(app.getPath("userData") + "/TREM.license").toString();
-
 
 let fullscreenTipTimeout;
 win.on("enter-full-screen", () => {
@@ -459,7 +451,7 @@ function PGAMain() {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 			axios({
 				method      : "get",
-				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&token=${localStorage.UUID}&license=${License}`,
+				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${localStorage.KEY ?? ""}`,
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),
@@ -932,7 +924,6 @@ async function ReportGET(eew) {
 	try {
 		const res = await getReportData();
 		if (!res) return setTimeout(ReportGET, 1000, eew);
-		reportCache = res;
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 		ReportList(res, eew);
 	} catch (error) {
