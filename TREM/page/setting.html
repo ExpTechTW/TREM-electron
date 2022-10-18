@@ -1,790 +1,772 @@
 <html>
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <link rel="stylesheet" href="../css/setting.css" />
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-</head>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link rel="stylesheet" href="../css/setting.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    </head>
 
-<body class="index md3-dark">
-    <div class="body">
-        <header id="titlebar">
-            <div id="drag-region">
-                <div id="window-title">
-                    <span></span>
-                </div>
-                <div id="window-controls">
-                    <div class="button" id="min-button">
-                        <span class="material-symbols-rounded">remove</span>
+    <body class="index md3-dark">
+        <div class="body">
+            <header id="titlebar">
+                <div id="drag-region">
+                    <div id="window-title">
+                        <span></span>
                     </div>
-
-                    <div class="button disabled" id="max-button">
-                        <span class="material-symbols-rounded">check_box_outline_blank</span>
-                    </div>
-
-                    <div class="button" id="restore-button">
-                        <span class="material-symbols-rounded">close_fullscreen</span>
-                    </div>
-
-                    <div class="button" id="close-button">
-                        <span class="material-symbols-rounded">close</span>
-                    </div>
-
-                </div>
-            </div>
-        </header>
-        <div id="modal-overlay"></div>
-        <div class="main" id="main">
-            <div class="titlebar">
-                <span class="material-symbols-rounded headline-medium">settings</span>
-                <span class="headline-medium">
-                    <span lang="en">Settings</span>
-                    <span lang="ja">設定</span>
-                    <span lang="kr">설정</span>
-                    <span lang="ru">Настройка</span>
-                    <span lang="zh-CN">设置</span>
-                    <span lang="zh-TW">設定</span>
-                </span>
-            </div>
-            <div class="setting-container">
-                <div class="nav">
-                    <div class="active md3-ripple" onclick="setList('EEW', this, event)"
-                        onkeydown="setList('EEW', this, event)" id="#EEW" role="button" tabindex="0">
-                        <span lang="en">Earthquake Early Warning</span>
-                        <span lang="ja">緊急地震速報</span>
-                        <span lang="kr">긴급지진속보</span>
-                        <span lang="ru">Система раннего предупреждения землетрясений</span>
-                        <span lang="zh-CN">强震及时警报</span>
-                        <span lang="zh-TW">強震即時警報</span>
-                    </div>
-                    <div class="md3-ripple" onclick="setList('Screen', this, event)"
-                        onkeydown="setList('Screen', this, event)" id="#Screen" role="button" tabindex="0">
-                        <span lang="en">Display</span>
-                        <span lang="ja">表示</span>
-                        <span lang="kr">표시</span>
-                        <span lang="ru">Пользовательский интерфейс</span>
-                        <span lang="zh-CN">视窗</span>
-                        <span lang="zh-TW">畫面</span>
-                    </div>
-                    <div class="md3-ripple" onclick="setList('Audio', this, event)"
-                        onkeydown="setList('Audio', this, event)" id="#Audio" role="button" tabindex="0">
-                        <span lang="en">Sound</span>
-                        <span lang="ja">音</span>
-                        <span lang="kr">음향</span>
-                        <span lang="ru">Звук</span>
-                        <span lang="zh-CN">音效</span>
-                        <span lang="zh-TW">音效</span>
-                    </div>
-                    <div class="md3-ripple" onclick="setList('Connection', this, event)"
-                        onkeydown="setList('Connection', this, event)" id="#Other" role="button" tabindex="0">
-                        <span lang="en">Connection</span>
-                        <span lang="ja">接続</span>
-                        <span lang="kr">연결</span>
-                        <span lang="ru">Соединения</span>
-                        <span lang="zh-CN">连接</span>
-                        <span lang="zh-TW">連接</span>
-                    </div>
-                    <div class="md3-ripple" onclick="setList('Windows', this, event)"
-                        onkeydown="setList('Windows', this, event)" id="#Windows" role="button" tabindex="0">
-                        <span lang="en">Windows</span>
-                        <span lang="ja">Windows 設定</span>
-                        <span lang="kr">Windows 설정</span>
-                        <span lang="ru">Настройки Windows</span>
-                        <span lang="zh-CN">Windows 设置</span>
-                        <span lang="zh-TW">Windows 設定</span>
-                    </div>
-                    <div class="md3-ripple" onclick="setList('Other', this, event)"
-                        onkeydown="setList('Other', this, event)" id="#Other" role="button" tabindex="0">
-                        <span lang="en">Miscellaneous</span>
-                        <span lang="ja">その他</span>
-                        <span lang="kr">기타</span>
-                        <span lang="ru">Другое</span>
-                        <span lang="zh-CN">高级</span>
-                        <span lang="zh-TW">其他</span>
-                    </div>
-                    <div class="md3-ripple" onclick="setList('About', this, event)"
-                        onkeydown="setList('About', this, event)" id="#About" role="button" tabindex="0">
-                        <span lang="en">About</span>
-                        <span lang="ja">TREM について</span>
-                        <span lang="kr">정보</span>
-                        <span lang="ru">О ПО</span>
-                        <span lang="zh-CN">关于</span>
-                        <span lang="zh-TW">關於</span>
-                    </div>
-                    <div class="client-info-container">
-                        <div id="client-version"></div>
-                        <div id="client-os"></div>
-                        <div id="client-uuid">UUID</div>
-                        <div id="client-license">Licensed under AGPL-3.0</div>
-                    </div>
-                </div>
-                <div class="right">
-                    <div class="alert-disabled">
-                        <span class="material-symbols-rounded alert-icon">block</span>
-                        <span class="alert-description">
-                            <span lang="en">Settings Disabled</span>
-                            <span lang="ja">設定は無効です。</span>
-                            <span lang="kr">설정이 중단되었습니다.</span>
-                            <span lang="ru">Настройка была деактивирована</span>
-                            <span lang="zh-CN">设定已停用</span>
-                            <span lang="zh-TW">設定已停用</span>
-                        </span>
-                        <span class="alert-moreinfo" onclick="showError()">
-                            <span lang="en">Why?</span>
-                            <span lang="ja">なんで？</span>
-                            <span lang="kr">왜인가요?</span>
-                            <span lang="ru">Узнать больше</span>
-                            <span lang="zh-CN">了解更多</span>
-                            <span lang="zh-TW">了解更多</span>
-                        </span>
-                    </div>
-                    <div class="alert-warn" lang="en">
-                        <span class="material-symbols-rounded alert-icon">warning</span>
-                        <span class="alert-description">
-                            <span>Translation (English) is still work-in-progress and there might have some
-                                mistranslated / untranslated text.</span>
-                        </span>
-                    </div>
-                    <div class="alert-warn" lang="ru">
-                        <span class="material-symbols-rounded alert-icon">warning</span>
-                        <span class="alert-description">
-                            <span>Перевод еще не завершен, поэтому возможны некоторые ошибки в переводе или
-                                непереведенный текст</span>
-                        </span>
-                    </div>
-                    <div class="alert-warn" lang="ja">
-                        <span class="material-symbols-rounded alert-icon">warning</span>
-                        <span class="alert-description">
-                            <span>翻訳（日本語）はまだ進展中の作業であり、誤訳または未翻訳のテキストがある可能性があります。</span>
-                        </span>
-                    </div>
-                    <div class="alert-warn" lang="kr">
-                        <span class="material-symbols-rounded alert-icon">warning</span>
-                        <span class="alert-description">
-                            <span>번역 (한국어)는 아직 번역 중이며, 잘못 번역되었거나 번역되지 않은 문장이 있을 수 있습니다.</span>
-                        </span>
-                    </div>
-                    <div class="alert-warn" lang="zh-CN">
-                        <span class="material-symbols-rounded alert-icon">warning</span>
-                        <span class="alert-description">
-                            <span>翻译（简体中文）正在进行中，可能会有翻译上的错误/或未翻译的文本</span>
-                        </span>
-                    </div>
-                    <div class="list" id="list">
-                        <div class="list-container show" id="EEW">
-                            <div class="control-title">
-                                <span lang="en">Earthquake Early Warning</span>
-                                <span lang="ja">緊急地震速報</span>
-                                <span lang="kr">긴급지진속보</span>
-                                <span lang="ru">Система раннего предупреждения землетрясений</span>
-                                <span lang="zh-CN">强震即时警报</span>
-                                <span lang="zh-TW">強震即時警報</span>
-                            </div>
-                            <div class="control-container">
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Location</span>
-                                            <span lang="ja">現在地</span>
-                                            <span lang="kr">위치</span>
-                                            <span lang="ru">Местонахождение</span>
-                                            <span lang="zh-CN">所在地</span>
-                                            <span lang="zh-TW">所在地</span>
-                                            <span class="option-label-id">location</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Set your current location</span>
-                                            <span lang="ja">所在地を設定する</span>
-                                            <span lang="kr">현재 지역을 설정합니다</span>
-                                            <span lang="ru">Установите свое местоположение</span>
-                                            <span lang="zh-CN">设置所在地</span>
-                                            <span lang="zh-TW">設定所在地</span>
-                                        </span>
-                                    </div>
-                                    <div class="control">
-                                        <select id="location.city" name="city" onchange="SelectSave('location.city')">
-                                        </select>
-                                        <select id="location.town" name="town" onchange="SelectSave('location.town')">
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Intensity Threshold</span>
-                                            <span lang="ja">受信震度閾値</span>
-                                            <span lang="kr">수신 진도</span>
-                                            <span lang="ru">Сейсмическая интенсивность раннего предупреждения</span>
-                                            <span lang="zh-CN">接收震度</span>
-                                            <span lang="zh-TW">接收震度</span>
-                                            <span class="option-label-id">eew.Intensity</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Minimum expected seismic intensity for EEW to be
-                                                triggered</span>
-                                            <span lang="ja">緊急地震速報を受信する最小予測震度</span>
-                                            <span lang="kr">설정 지역의 예상 진도가 "수신 진도"를 초과할 경우 긴급지진속보를 발표합니다</span>
-                                            <span lang="ru">Срабатывает, когда местоположение превышает установленное
-                                                значение сейсмической интенсивности Система раннего предупреждения
-                                                землетрясений</span>
-                                            <span lang="zh-CN">所在地超过「接收震度」时触发 强震即时警报</span>
-                                            <span lang="zh-TW">所在地超過「接收震度」時觸發 強震即時警報</span>
-                                        </span>
-                                    </div>
-                                    <div class="control">
-                                        <select id="eew.Intensity" name="city" onchange="SelectSave('eew.Intensity')">
-                                            <option value="0">0</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5-</option>
-                                            <option value="6">5+</option>
-                                            <option value="7">6-</option>
-                                            <option value="8">6+</option>
-                                            <option value="9">7</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <button class="filled-tonal-button setting-button md3-ripple" onclick="testEEW()"
-                                    style="margin-top: 10px;">
-                                    <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
-                                    <span class="filled-tonal-button-label">
-                                        <span lang="en">Test EEW</span>
-                                        <span lang="ja">速報テスト</span>
-                                        <span lang="kr">테스트</span>
-                                        <span lang="ru">Тест раннего предупреждения землетрясений</span>
-                                        <span lang="zh-CN">测试警报</span>
-                                        <span lang="zh-TW">測試警報</span>
-                                    </span>
-                                </button>
-                            </div>
-                            <div class="control-title">
-                                <span lang="en">Receiving</span>
-                                <span lang="ja">受信</span>
-                                <span lang="kr">수신중</span>
-                                <span lang="ru">Получение</span>
-                                <span lang="zh-CN">接收参数</span>
-                                <span lang="zh-TW">接收參數</span>
-                            </div>
-                            <div class="control-container">
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Central Weather Bureau</span>
-                                            <span lang="ja">中央気象局</span>
-                                            <span lang="kr">대만기상국</span>
-                                            <span lang="ru">Центральное бюро погоды</span>
-                                            <span lang="zh-CN">中央气象局（CWB）</span>
-                                            <span lang="zh-TW">中央氣象局</span>
-                                            <span class="option-label-id">accept.eew.CWB</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Receive EEW from Central Weather Bureau</span>
-                                            <span lang="ja">中央気象局 (CWB) から緊急地震速報を受け取る</span>
-                                            <span lang="kr">대만기상국 (CWB) 의 긴급지진속보를 수신합니다</span>
-                                            <span lang="ru">Получение Центрального бюро погоды (CWB) раннего
-                                                предупреждения землетрясений</span>
-                                            <span lang="zh-CN">台湾中央气象局（CWB）强震即时警报</span>
-                                            <span lang="zh-TW">接收中央氣象局 (CWB) 強震即時警報</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="accept.eew.CWB"
-                                            onclick="CheckSave('accept.eew.CWB')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">NIED</span>
-                                            <span lang="ja">防災科研</span>
-                                            <span lang="kr">NIED</span>
-                                            <span lang="ru">NIED</span>
-                                            <span lang="zh-CN">日本防灾科研</span>
-                                            <span lang="zh-TW">日本防災科研</span>
-                                            <span class="option-label-id">accept.eew.NIED</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Receive EEW from NIED</span>
-                                            <span lang="ja">防災科研 (NIED) から緊急地震速報を受け取る</span>
-                                            <span lang="kr">방재과학연구소 (NIED) 에서 긴급지진속보를 수신합니다</span>
-                                            <span lang="ru">Получение NIED раннего предупреждения землетрясений</span>
-                                            <span lang="zh-CN">接收防灾科研（NIED) 紧急地震速报</span>
-                                            <span lang="zh-TW">接收防災科研 (NIED) 緊急地震速報</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="accept.eew.NIED"
-                                            onclick="CheckSave('accept.eew.NIED')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Japan Meteorological Agency</span>
-                                            <span lang="ja">気象庁</span>
-                                            <span lang="kr">일본 기상청</span>
-                                            <span lang="ru">Японское метеорологическое агентство</span>
-                                            <span lang="zh-CN">日本气象厅</span>
-                                            <span lang="zh-TW">日本氣象廳</span>
-                                            <span class="option-label-id">accept.eew.JMA</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Receive EEW from Japan Meteorological Agency</span>
-                                            <span lang="ja">気象庁 (JMA) から緊急地震速報を受け取る</span>
-                                            <span lang="kr">일본 기상청 (JMA) 에서 긴급지진속보를 수신합니다</span>
-                                            <span lang="ru">Получение Японское метеорологическое агентство (JMA) раннего
-                                                предупреждения землетрясений</span>
-                                            <span lang="zh-CN">接收日本气象厅（JMA）强震即时警报</span>
-                                            <span lang="zh-TW">接收日本氣象廳 (JMA) 強震即時警報</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="accept.eew.JMA"
-                                            onclick="CheckSave('accept.eew.JMA')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Korea Meteorological Administration</span>
-                                            <span lang="ja">大韓民国気象庁</span>
-                                            <span lang="kr">기상청</span>
-                                            <span lang="ru">Корейская метеорологическая администрация</span>
-                                            <span lang="zh-CN">韩国气象厅</span>
-                                            <span lang="zh-TW">韓國氣象廳</span>
-                                            <span class="option-label-id">accept.eew.KMA</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Receive EEW from Korea Meteorological Administration</span>
-                                            <span lang="ja">大韓民国気象庁 (KMA) から緊急地震速報を受け取る</span>
-                                            <span lang="kr">기상청 (KMA) 에서 긴급지진속보를 수신합니다</span>
-                                            <span lang="ru">Получение Корейская метеорологическая администрация (KMA)
-                                                раннего предупреждения землетрясений</span>
-                                            <span lang="zh-CN">接收韩国气象厅（KMA）强震即时警报</span>
-                                            <span lang="zh-TW">接收韓國氣象廳 (KMA) 強震即時警報</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="accept.eew.KMA"
-                                            onclick="CheckSave('accept.eew.KMA')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Earthquake Administration of Fujian</span>
-                                            <span lang="ja">福建省地震局</span>
-                                            <span lang="kr">푸젠성 지진국</span>
-                                            <span lang="ru">Управление по борьбе с землетрясениями Фуцзянь</span>
-                                            <span lang="zh-CN">福建省地震局</span>
-                                            <span lang="zh-TW">中國福建省地震局</span>
-                                            <span class="option-label-id">accept.eew.FJDZJ</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Receive earthquake forecast from Earthquake Administration
-                                                of Fujian</span>
-                                            <span lang="ja">福建省地震局 (FJDZJ) から地震預報を受け取る</span>
-                                            <span lang="kr">푸젠성 지진국 (FJDZJ) 에서 긴급지진속보를 수신합니다</span>
-                                            <span lang="ru">Получение Управление по борьбе с землетрясениями Фуцзянь
-                                                (FJDZJ) раннего предупреждения землетрясений</span>
-                                            <span lang="zh-CN">接收福建省地震局（FJDZJ）地震预警</span>
-                                            <span lang="zh-TW">接收中國福建省地震局 (FJDZJ) 地震預警</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="accept.eew.FJDZJ"
-                                            onclick="CheckSave('accept.eew.FJDZJ')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Sichuan Earthquake Administration</span>
-                                            <span lang="ja">四川省地震局</span>
-                                            <span lang="kr">스촨성 지진국</span>
-                                            <span lang="ru">Сычуаньское управление землетрясений</span>
-                                            <span lang="zh-CN">四川省地震局</span>
-                                            <span lang="zh-TW">中國四川省地震局</span>
-                                            <span class="option-label-id">accept.eew.SCDZJ</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Receive earthquake forecast from Sichuan Earthquake
-                                                Administration</span>
-                                            <span lang="ja">四川省地震局 (SCDZJ) から地震預報を受け取る</span>
-                                            <span lang="kr">스촨성 지진국 (SCDZJ) 에서 긴급지진속보를 수신합니다</span>
-                                            <span lang="ru">Сычуаньское управление землетрясений раннего предупреждения
-                                                землетрясений</span>
-                                            <span lang="zh-TW">接收中國四川省地震局 (SCDZJ) 地震預警</span>
-                                            <span lang="zh-CN">接收四川省地震局（SCDZJ）地震预警</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="accept.eew.SCDZJ"
-                                            onclick="CheckSave('accept.eew.SCDZJ')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Calculate site effect</span>
-                                            <span lang="ja">サイト・エフェクトを計算する</span>
-                                            <span lang="kr">지반 효과 계산</span>
-                                            <span lang="ru">Расчет топографических эффектов</span>
-                                            <span lang="zh-CN">计算厂址效应</span>
-                                            <span lang="zh-TW">計算場址效應</span>
-                                            <span class="option-label-id">earthquake.siteEffect</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">A factor that affects the intensity of an earthquake
-                                                Only applies to expected intensity of earthquakes</span>
-                                            <span lang="ja">地震の予想震度に影響を与える要因
-                                                予想震度のみに適用</span>
-                                            <span lang="kr">지진의 예상진도에 영향을 줌니다
-                                                "각지의 진도 추정"에만 적용됩니다</span>
-                                            <span lang="ru">Влияние на прогнозируемую интенсивность землетрясения
-                                                Применяется только к оценка интенсивности землетрясения</span>
-                                            <span lang="zh-CN"> 一种影响地震震度的因素
-                                                仅适用于「各地预估震度」</span>
-                                            <span lang="zh-TW"> 一種影響地震震度的因素
-                                                僅適用於「各地預估震度」</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="earthquake.siteEffect"
-                                            onclick="CheckSave('earthquake.siteEffect')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Automated wave speed</span>
-                                            <span lang="ja">適応波速</span>
-                                            <span lang="kr">적응형 파속</span>
-                                            <span lang="ru">Автоматическая адаптация к скоростям волн</span>
-                                            <span lang="zh-CN">自适应波速</span>
-                                            <span lang="zh-TW">自適應波速</span>
-                                            <span class="option-label-id">auto.waveSpeed</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Calculate wave velocity using the half-space velocity
-                                                model</span>
-                                            <span lang="ja">半空間速度モデルを使用して波速度を計算する</span>
-                                            <span lang="kr">반 공간 속도 모델을 사용하여 파동 속도 계산</span>
-                                            <span lang="ru">Рассчитайте скорость волны, используя модель
-                                                полупространственной скорости</span>
-                                            <span lang="zh-CN">使用 半空间速度模型 计算波速</span>
-                                            <span lang="zh-TW">使用 半空間速度模型 計算波速</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="auto.waveSpeed"
-                                            onclick="CheckSave('auto.waveSpeed')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
+                    <div id="window-controls">
+                        <div class="button" id="min-button">
+                            <span class="material-symbols-rounded">remove</span>
                         </div>
-                        <div class="list-container" id="Screen">
-                            <div class="control-title">
-                                <span lang="en">Earthquake Early Warning</span>
-                                <span lang="ja">緊急地震速報</span>
-                                <span lang="kr">긴급지진속보</span>
-                                <span lang="ru">Система раннего предупреждения землетрясений</span>
-                                <span lang="zh-CN">强震即时警报</span>
-                                <span lang="zh-TW">強震即時警報</span>
-                            </div>
-                            <div class="control-container">
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Show window</span>
-                                            <span lang="ja">ウィンドウを表示する</span>
-                                            <span lang="kr">창 표시</span>
-                                            <span lang="ru">Окно дисплея</span>
-                                            <span lang="zh-CN">显示窗口</span>
-                                            <span lang="zh-TW">顯示視窗</span>
-                                            <span class="option-label-id">eew.show</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Show the window whenever a real-time station is
-                                                triggered</span>
-                                            <span lang="ja">リアルタイム観測所が引き起こされた時にウィンドウを表示する</span>
-                                            <span lang="kr">지진속보 수신 시 창을 표시합니다</span>
-                                            <span lang="ru">При срабатывании сейсмографа отображается окно</span>
-                                            <span lang="zh-CN">在收到地震速报时自动开启窗口</span>
-                                            <span lang="zh-TW">在收到地震速報時自動開啟視窗</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="eew.show" onclick="CheckSave('eew.show')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Move to top</span>
-                                            <span lang="ja">上の移動</span>
-                                            <span lang="kr">항상 위로 고정</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="ru">Всегда отображается на переднем плане</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="zh-CN">最上层显示</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="zh-TW">最上層顯示</span>
-                                            <span class="option-label-id">eew.cover</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Move the window to top to gain more attention</span>
-                                            <span lang="ja">ウィンドウを上に移動して、より多くの注意を喚起するようにする</span>
-                                            <span lang="kr">창을 항상 위로 고정합니다</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="ru">Всегда выносите окно на передний план</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="zh-CN">将窗口显示与最上层</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="zh-TW">將視窗移到最上層來獲得更多注意</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="eew.cover" onclick="CheckSave('eew.cover')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Seismic wave smoothing</span>
-                                            <span lang="ja">地震波の平滑化</span>
-                                            <span lang="kr">부드러운 지진파</span>
-                                            <span lang="ru">Сглаживание сейсмических волн</span>
-                                            <span lang="zh-CN">平滑震波</span>
-                                            <span lang="zh-TW">平滑震波</span>
-                                            <span class="option-label-id">shock.smoothing</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Render seismic waves at a higher frame rate.</span>
-                                            <span lang="ja">より高いフレームレートで地震波を表示する</span>
-                                            <span lang="kr">높은 갱신 속도로 지진파를 표시합니다
-                                                ※사양에 따라 표시하기 힘들 수 있습니다</span>
-                                            <span lang="ru">Рендеринг изображений за короткие промежутки времени</span>
-                                            <span lang="zh-CN">以较短的间隔对画面进行渲染</span>
-                                            <span lang="zh-TW">以較短的間隔對畫面進行渲染</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="shock.smoothing"
-                                            onclick="CheckSave('shock.smoothing')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Show P-wave</span>
-                                            <span lang="ja">Ｐ波を表示</span>
-                                            <span lang="kr">P파를 표시</span>
-                                            <span lang="ru">Показать P-волну</span>
-                                            <span lang="zh-CN">显示 P 波</span>
-                                            <span lang="zh-TW">顯示 P 波</span>
-                                            <span class="option-label-id">shock.p</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Earliest arriving seismic wave</span>
-                                            <span lang="ja">最も早く到達する地震波を表示する</span>
-                                            <span lang="kr">빠른 지진파를 표시합니다</span>
-                                            <span lang="ru">Быстрые, но менее разрушительные сейсмические волны</span>
-                                            <span lang="zh-CN">最早到达的波地震波</span>
-                                            <span lang="zh-TW">最早到達的波地震波</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="shock.p" onclick="CheckSave('shock.p')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="control-title">
-                                <span lang="en">Earthquake report</span>
-                                <span lang="ja">地震情報</span>
-                                <span lang="kr">지진정보</span>
-                                <span lang="ru">Отчет о землетрясении</span>
-                                <span lang="zh-CN">地震报告</span>
-                                <span lang="zh-TW">地震報告</span>
-                            </div>
-                            <div class="control-container">
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Show window</span>
-                                            <span lang="ja">ウィンドウを表示する</span>
-                                            <span lang="kr">창 표시</span>
-                                            <span lang="ru">Окно дисплея</span>
-                                            <span lang="zh-CN">显示窗口</span>
-                                            <span lang="zh-TW">顯示視窗</span>
-                                            <span class="option-label-id">report.show</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Show the window whenever a earthquake report is
-                                                received</span>
-                                            <span lang="ja">地震情報が受信時にウィンドウを表示する</span>
-                                            <span lang="kr">지진정보 수신 시 창을 표시합니다</span>
-                                            <span lang="ru">Автоматическое открытие окна при получении Отчет о
-                                                землетрясении</span>
-                                            <span lang="zh-CN">在收到地震报告时自动开启窗口</span>
-                                            <span lang="zh-TW">在收到地震報告時自動開啟視窗</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="report.show" onclick="CheckSave('report.show')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Move to top</span>
-                                            <span lang="ja">上の移動</span>
-                                            <span lang="kr">항상 위로 고정</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="ru">Всегда отображается на переднем плане</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="zh-CN">最上层显示</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="zh-TW">最上層顯示</span>
-                                            <span class="option-label-id">report.cover</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Move the window to top to gain more attention</span>
-                                            <span lang="ja">ウィンドウを上に移動して、より多くの注意を喚起するようにする</span>
-                                            <span lang="kr">창을 항상 위로 고정합니다</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="ru">Всегда выносите окно на передний план</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="zh-CN">将视窗显示与最上层</span>
-                                            <!-- LEGACY: Current translation needs to be updated -->
-                                            <span lang="zh-TW">將視窗移到最上層來獲得更多注意</span>
-                                        </span>
-                                    </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="report.cover" onclick="CheckSave('report.cover')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">Show report</span>
-                                            <span lang="ja">地震报告を表示</span>
-                                            <span lang="kr">Show report</span>
-                                            <!-- TODO: Untranslated, remove this comment after translation -->
-                                            <span lang="ru">Show report</span>
-                                            <!-- TODO: Untranslated, remove this comment after translation -->
-                                            <span lang="zh-CN">顯示報告</span>
-                                            <!-- TODO: Untranslated, remove this comment after translation -->
-                                            <span lang="zh-TW">顯示報告</span>
 
-                                            <span class="option-label-id">report.changeView</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">Switch screen automatically upon receiving an earthquake
-                                                report</span>
-                                            <span lang="ja">地震情報受信時に画面を自動で切り替えます</span>
-                                            <span lang="kr">Switch screen automatically upon receiving an earthquake
-                                                report</span>
-                                            <!-- TODO: Untranslated, remove this comment after translation -->
-                                            <span lang="ru">Switch screen automatically upon receiving an earthquake
-                                                report</span>
-                                            <!-- TODO: Untranslated, remove this comment after translation -->
-                                            <span lang="zh-CN">在收到地震報告的時候自動切換畫面</span>
-                                            <!-- TODO: Untranslated, remove this comment after translation -->
-                                            <span lang="zh-TW">在收到地震報告的時候自動切換畫面</span>
-                                        </span>
+                        <div class="button disabled" id="max-button">
+                            <span class="material-symbols-rounded">check_box_outline_blank</span>
+                        </div>
+
+                        <div class="button" id="restore-button">
+                            <span class="material-symbols-rounded">close_fullscreen</span>
+                        </div>
+
+                        <div class="button" id="close-button">
+                            <span class="material-symbols-rounded">close</span>
+                        </div>
+
+                    </div>
+                </div>
+            </header>
+            <div id="modal-overlay"></div>
+            <div class="main" id="main">
+                <div class="titlebar">
+                    <span class="material-symbols-rounded headline-medium">settings</span>
+                    <span class="headline-medium">
+                        <span lang="en">Settings</span>
+                        <span lang="ja">設定</span>
+                        <span lang="kr">설정</span>
+                        <span lang="ru">Настройка</span>
+                        <span lang="zh-CN">设置</span>
+                        <span lang="zh-TW">設定</span>
+                    </span>
+                </div>
+                <div class="setting-container">
+                    <div class="nav">
+                        <div class="active md3-ripple" onclick="setList('EEW', this, event)" onkeydown="setList('EEW', this, event)" id="#EEW" role="button" tabindex="0">
+                            <span lang="en">Earthquake Early Warning</span>
+                            <span lang="ja">緊急地震速報</span>
+                            <span lang="kr">긴급지진속보</span>
+                            <span lang="ru">Система раннего предупреждения землетрясений</span>
+                            <span lang="zh-CN">强震及时警报</span>
+                            <span lang="zh-TW">強震即時警報</span>
+                        </div>
+                        <div class="md3-ripple" onclick="setList('Screen', this, event)" onkeydown="setList('Screen', this, event)" id="#Screen" role="button" tabindex="0">
+                            <span lang="en">Display</span>
+                            <span lang="ja">表示</span>
+                            <span lang="kr">표시</span>
+                            <span lang="ru">Пользовательский интерфейс</span>
+                            <span lang="zh-CN">视窗</span>
+                            <span lang="zh-TW">畫面</span>
+                        </div>
+                        <div class="md3-ripple" onclick="setList('Audio', this, event)" onkeydown="setList('Audio', this, event)" id="#Audio" role="button" tabindex="0">
+                            <span lang="en">Sound</span>
+                            <span lang="ja">音</span>
+                            <span lang="kr">음향</span>
+                            <span lang="ru">Звук</span>
+                            <span lang="zh-CN">音效</span>
+                            <span lang="zh-TW">音效</span>
+                        </div>
+                        <div class="md3-ripple" onclick="setList('Connection', this, event)" onkeydown="setList('Connection', this, event)" id="#Other" role="button" tabindex="0">
+                            <span lang="en">Connection</span>
+                            <span lang="ja">接続</span>
+                            <span lang="kr">연결</span>
+                            <span lang="ru">Соединения</span>
+                            <span lang="zh-CN">连接</span>
+                            <span lang="zh-TW">連接</span>
+                        </div>
+                        <div class="md3-ripple" onclick="setList('Windows', this, event)" onkeydown="setList('Windows', this, event)" id="#Windows" role="button" tabindex="0">
+                            <span lang="en">Windows</span>
+                            <span lang="ja">Windows 設定</span>
+                            <span lang="kr">Windows 설정</span>
+                            <span lang="ru">Настройки Windows</span>
+                            <span lang="zh-CN">Windows 设置</span>
+                            <span lang="zh-TW">Windows 設定</span>
+                        </div>
+                        <div class="md3-ripple" onclick="setList('Other', this, event)" onkeydown="setList('Other', this, event)" id="#Other" role="button" tabindex="0">
+                            <span lang="en">Miscellaneous</span>
+                            <span lang="ja">その他</span>
+                            <span lang="kr">기타</span>
+                            <span lang="ru">Другое</span>
+                            <span lang="zh-CN">高级</span>
+                            <span lang="zh-TW">其他</span>
+                        </div>
+                        <div class="md3-ripple" onclick="setList('About', this, event)" onkeydown="setList('About', this, event)" id="#About" role="button" tabindex="0">
+                            <span lang="en">About</span>
+                            <span lang="ja">TREM について</span>
+                            <span lang="kr">정보</span>
+                            <span lang="ru">О ПО</span>
+                            <span lang="zh-CN">关于</span>
+                            <span lang="zh-TW">關於</span>
+                        </div>
+                        <div class="client-info-container">
+                            <div id="client-version"></div>
+                            <div id="client-os"></div>
+                            <div id="client-uuid">UUID</div>
+                            <div id="client-license">Licensed under AGPL-3.0</div>
+                        </div>
+                    </div>
+                    <div class="right">
+                        <div class="alert-disabled">
+                            <span class="material-symbols-rounded alert-icon">block</span>
+                            <span class="alert-description">
+                                <span lang="en">Settings Disabled</span>
+                                <span lang="ja">設定は無効です。</span>
+                                <span lang="kr">설정이 중단되었습니다.</span>
+                                <span lang="ru">Настройка была деактивирована</span>
+                                <span lang="zh-CN">设定已停用</span>
+                                <span lang="zh-TW">設定已停用</span>
+                            </span>
+                            <span class="alert-moreinfo" onclick="showError()">
+                                <span lang="en">Why?</span>
+                                <span lang="ja">なんで？</span>
+                                <span lang="kr">왜인가요?</span>
+                                <span lang="ru">Узнать больше</span>
+                                <span lang="zh-CN">了解更多</span>
+                                <span lang="zh-TW">了解更多</span>
+                            </span>
+                        </div>
+                        <div class="alert-warn" lang="en">
+                            <span class="material-symbols-rounded alert-icon">warning</span>
+                            <span class="alert-description">
+                                <span>Translation (English) is still work-in-progress and there might have some
+                                    mistranslated / untranslated text.</span>
+                            </span>
+                        </div>
+                        <div class="alert-warn" lang="ru">
+                            <span class="material-symbols-rounded alert-icon">warning</span>
+                            <span class="alert-description">
+                                <span>Перевод еще не завершен, поэтому возможны некоторые ошибки в переводе или
+                                    непереведенный текст</span>
+                            </span>
+                        </div>
+                        <div class="alert-warn" lang="ja">
+                            <span class="material-symbols-rounded alert-icon">warning</span>
+                            <span class="alert-description">
+                                <span>翻訳（日本語）はまだ進展中の作業であり、誤訳または未翻訳のテキストがある可能性があります。</span>
+                            </span>
+                        </div>
+                        <div class="alert-warn" lang="kr">
+                            <span class="material-symbols-rounded alert-icon">warning</span>
+                            <span class="alert-description">
+                                <span>번역 (한국어)는 아직 번역 중이며, 잘못 번역되었거나 번역되지 않은 문장이 있을 수 있습니다.</span>
+                            </span>
+                        </div>
+                        <div class="alert-warn" lang="zh-CN">
+                            <span class="material-symbols-rounded alert-icon">warning</span>
+                            <span class="alert-description">
+                                <span>翻译（简体中文）正在进行中，可能会有翻译上的错误/或未翻译的文本</span>
+                            </span>
+                        </div>
+                        <div class="list" id="list">
+                            <div class="list-container show" id="EEW">
+                                <div class="control-title">
+                                    <span lang="en">Earthquake Early Warning</span>
+                                    <span lang="ja">緊急地震速報</span>
+                                    <span lang="kr">긴급지진속보</span>
+                                    <span lang="ru">Система раннего предупреждения землетрясений</span>
+                                    <span lang="zh-CN">强震即时警报</span>
+                                    <span lang="zh-TW">強震即時警報</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Location</span>
+                                                <span lang="ja">現在地</span>
+                                                <span lang="kr">위치</span>
+                                                <span lang="ru">Местонахождение</span>
+                                                <span lang="zh-CN">所在地</span>
+                                                <span lang="zh-TW">所在地</span>
+                                                <span class="option-label-id">location</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Set your current location</span>
+                                                <span lang="ja">所在地を設定する</span>
+                                                <span lang="kr">현재 지역을 설정합니다</span>
+                                                <span lang="ru">Установите свое местоположение</span>
+                                                <span lang="zh-CN">设置所在地</span>
+                                                <span lang="zh-TW">設定所在地</span>
+                                            </span>
+                                        </div>
+                                        <div class="control">
+                                            <select id="location.city" name="city" onchange="SelectSave('location.city')">
+                                            </select>
+                                            <select id="location.town" name="town" onchange="SelectSave('location.town')">
+                                            </select>
+                                        </div>
                                     </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="report.changeView"
-                                            onclick="CheckSave('report.changeView')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Intensity Threshold</span>
+                                                <span lang="ja">受信震度閾値</span>
+                                                <span lang="kr">수신 진도</span>
+                                                <span lang="ru">Сейсмическая интенсивность раннего предупреждения</span>
+                                                <span lang="zh-CN">接收震度</span>
+                                                <span lang="zh-TW">接收震度</span>
+                                                <span class="option-label-id">eew.Intensity</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Minimum expected seismic intensity for EEW to be
+                                                    triggered</span>
+                                                <span lang="ja">緊急地震速報を受信する最小予測震度</span>
+                                                <span lang="kr">설정 지역의 예상 진도가 "수신 진도"를 초과할 경우 긴급지진속보를 발표합니다</span>
+                                                <span lang="ru">Срабатывает, когда местоположение превышает установленное
+                                                    значение сейсмической интенсивности Система раннего предупреждения
+                                                    землетрясений</span>
+                                                <span lang="zh-CN">所在地超过「接收震度」时触发 强震即时警报</span>
+                                                <span lang="zh-TW">所在地超過「接收震度」時觸發 強震即時警報</span>
+                                            </span>
+                                        </div>
+                                        <div class="control">
+                                            <select id="eew.Intensity" name="city" onchange="SelectSave('eew.Intensity')">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5-</option>
+                                                <option value="6">5+</option>
+                                                <option value="7">6-</option>
+                                                <option value="8">6+</option>
+                                                <option value="9">7</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button class="filled-tonal-button setting-button md3-ripple" onclick="testEEW()" style="margin-top: 10px;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Test EEW</span>
+                                            <span lang="ja">速報テスト</span>
+                                            <span lang="kr">테스트</span>
+                                            <span lang="ru">Тест раннего предупреждения землетрясений</span>
+                                            <span lang="zh-CN">测试警报</span>
+                                            <span lang="zh-TW">測試警報</span>
                                         </span>
-                                    </label>
+                                    </button>
+                                </div>
+                                <div class="control-title">
+                                    <span lang="en">Receiving</span>
+                                    <span lang="ja">受信</span>
+                                    <span lang="kr">수신중</span>
+                                    <span lang="ru">Получение</span>
+                                    <span lang="zh-CN">接收参数</span>
+                                    <span lang="zh-TW">接收參數</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Central Weather Bureau</span>
+                                                <span lang="ja">中央気象局</span>
+                                                <span lang="kr">대만기상국</span>
+                                                <span lang="ru">Центральное бюро погоды</span>
+                                                <span lang="zh-CN">中央气象局（CWB）</span>
+                                                <span lang="zh-TW">中央氣象局</span>
+                                                <span class="option-label-id">accept.eew.CWB</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive EEW from Central Weather Bureau</span>
+                                                <span lang="ja">中央気象局 (CWB) から緊急地震速報を受け取る</span>
+                                                <span lang="kr">대만기상국 (CWB) 의 긴급지진속보를 수신합니다</span>
+                                                <span lang="ru">Получение Центрального бюро погоды (CWB) раннего
+                                                    предупреждения землетрясений</span>
+                                                <span lang="zh-CN">台湾中央气象局（CWB）强震即时警报</span>
+                                                <span lang="zh-TW">接收中央氣象局 (CWB) 強震即時警報</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.CWB" onclick="CheckSave('accept.eew.CWB')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">NIED</span>
+                                                <span lang="ja">防災科研</span>
+                                                <span lang="kr">NIED</span>
+                                                <span lang="ru">NIED</span>
+                                                <span lang="zh-CN">日本防灾科研</span>
+                                                <span lang="zh-TW">日本防災科研</span>
+                                                <span class="option-label-id">accept.eew.NIED</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive EEW from NIED</span>
+                                                <span lang="ja">防災科研 (NIED) から緊急地震速報を受け取る</span>
+                                                <span lang="kr">방재과학연구소 (NIED) 에서 긴급지진속보를 수신합니다</span>
+                                                <span lang="ru">Получение NIED раннего предупреждения землетрясений</span>
+                                                <span lang="zh-CN">接收防灾科研（NIED) 紧急地震速报</span>
+                                                <span lang="zh-TW">接收防災科研 (NIED) 緊急地震速報</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.NIED" onclick="CheckSave('accept.eew.NIED')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Japan Meteorological Agency</span>
+                                                <span lang="ja">気象庁</span>
+                                                <span lang="kr">일본 기상청</span>
+                                                <span lang="ru">Японское метеорологическое агентство</span>
+                                                <span lang="zh-CN">日本气象厅</span>
+                                                <span lang="zh-TW">日本氣象廳</span>
+                                                <span class="option-label-id">accept.eew.JMA</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive EEW from Japan Meteorological Agency</span>
+                                                <span lang="ja">気象庁 (JMA) から緊急地震速報を受け取る</span>
+                                                <span lang="kr">일본 기상청 (JMA) 에서 긴급지진속보를 수신합니다</span>
+                                                <span lang="ru">Получение Японское метеорологическое агентство (JMA) раннего
+                                                    предупреждения землетрясений</span>
+                                                <span lang="zh-CN">接收日本气象厅（JMA）强震即时警报</span>
+                                                <span lang="zh-TW">接收日本氣象廳 (JMA) 強震即時警報</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.JMA" onclick="CheckSave('accept.eew.JMA')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Korea Meteorological Administration</span>
+                                                <span lang="ja">大韓民国気象庁</span>
+                                                <span lang="kr">기상청</span>
+                                                <span lang="ru">Корейская метеорологическая администрация</span>
+                                                <span lang="zh-CN">韩国气象厅</span>
+                                                <span lang="zh-TW">韓國氣象廳</span>
+                                                <span class="option-label-id">accept.eew.KMA</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive EEW from Korea Meteorological Administration</span>
+                                                <span lang="ja">大韓民国気象庁 (KMA) から緊急地震速報を受け取る</span>
+                                                <span lang="kr">기상청 (KMA) 에서 긴급지진속보를 수신합니다</span>
+                                                <span lang="ru">Получение Корейская метеорологическая администрация (KMA)
+                                                    раннего предупреждения землетрясений</span>
+                                                <span lang="zh-CN">接收韩国气象厅（KMA）强震即时警报</span>
+                                                <span lang="zh-TW">接收韓國氣象廳 (KMA) 強震即時警報</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.KMA" onclick="CheckSave('accept.eew.KMA')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Earthquake Administration of Fujian</span>
+                                                <span lang="ja">福建省地震局</span>
+                                                <span lang="kr">푸젠성 지진국</span>
+                                                <span lang="ru">Управление по борьбе с землетрясениями Фуцзянь</span>
+                                                <span lang="zh-CN">福建省地震局</span>
+                                                <span lang="zh-TW">中國福建省地震局</span>
+                                                <span class="option-label-id">accept.eew.FJDZJ</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive earthquake forecast from Earthquake Administration
+                                                    of Fujian</span>
+                                                <span lang="ja">福建省地震局 (FJDZJ) から地震預報を受け取る</span>
+                                                <span lang="kr">푸젠성 지진국 (FJDZJ) 에서 긴급지진속보를 수신합니다</span>
+                                                <span lang="ru">Получение Управление по борьбе с землетрясениями Фуцзянь
+                                                    (FJDZJ) раннего предупреждения землетрясений</span>
+                                                <span lang="zh-CN">接收福建省地震局（FJDZJ）地震预警</span>
+                                                <span lang="zh-TW">接收中國福建省地震局 (FJDZJ) 地震預警</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.FJDZJ" onclick="CheckSave('accept.eew.FJDZJ')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Sichuan Earthquake Administration</span>
+                                                <span lang="ja">四川省地震局</span>
+                                                <span lang="kr">스촨성 지진국</span>
+                                                <span lang="ru">Сычуаньское управление землетрясений</span>
+                                                <span lang="zh-CN">四川省地震局</span>
+                                                <span lang="zh-TW">中國四川省地震局</span>
+                                                <span class="option-label-id">accept.eew.SCDZJ</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Receive earthquake forecast from Sichuan Earthquake
+                                                    Administration</span>
+                                                <span lang="ja">四川省地震局 (SCDZJ) から地震預報を受け取る</span>
+                                                <span lang="kr">스촨성 지진국 (SCDZJ) 에서 긴급지진속보를 수신합니다</span>
+                                                <span lang="ru">Сычуаньское управление землетрясений раннего предупреждения
+                                                    землетрясений</span>
+                                                <span lang="zh-TW">接收中國四川省地震局 (SCDZJ) 地震預警</span>
+                                                <span lang="zh-CN">接收四川省地震局（SCDZJ）地震预警</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="accept.eew.SCDZJ" onclick="CheckSave('accept.eew.SCDZJ')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Calculate site effect</span>
+                                                <span lang="ja">サイト・エフェクトを計算する</span>
+                                                <span lang="kr">지반 효과 계산</span>
+                                                <span lang="ru">Расчет топографических эффектов</span>
+                                                <span lang="zh-CN">计算厂址效应</span>
+                                                <span lang="zh-TW">計算場址效應</span>
+                                                <span class="option-label-id">earthquake.siteEffect</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">A factor that affects the intensity of an earthquake
+                                                    Only applies to expected intensity of earthquakes</span>
+                                                <span lang="ja">地震の予想震度に影響を与える要因
+                                                    予想震度のみに適用</span>
+                                                <span lang="kr">지진의 예상진도에 영향을 줌니다
+                                                    "각지의 진도 추정"에만 적용됩니다</span>
+                                                <span lang="ru">Влияние на прогнозируемую интенсивность землетрясения
+                                                    Применяется только к оценка интенсивности землетрясения</span>
+                                                <span lang="zh-CN"> 一种影响地震震度的因素
+                                                    仅适用于「各地预估震度」</span>
+                                                <span lang="zh-TW"> 一種影響地震震度的因素
+                                                    僅適用於「各地預估震度」</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="earthquake.siteEffect" onclick="CheckSave('earthquake.siteEffect')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Automated wave speed</span>
+                                                <span lang="ja">適応波速</span>
+                                                <span lang="kr">적응형 파속</span>
+                                                <span lang="ru">Автоматическая адаптация к скоростям волн</span>
+                                                <span lang="zh-CN">自适应波速</span>
+                                                <span lang="zh-TW">自適應波速</span>
+                                                <span class="option-label-id">auto.waveSpeed</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Calculate wave velocity using the half-space velocity
+                                                    model</span>
+                                                <span lang="ja">半空間速度モデルを使用して波速度を計算する</span>
+                                                <span lang="kr">반 공간 속도 모델을 사용하여 파동 속도 계산</span>
+                                                <span lang="ru">Рассчитайте скорость волны, используя модель
+                                                    полупространственной скорости</span>
+                                                <span lang="zh-CN">使用 半空间速度模型 计算波速</span>
+                                                <span lang="zh-TW">使用 半空間速度模型 計算波速</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="auto.waveSpeed" onclick="CheckSave('auto.waveSpeed')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="control-title">
-                                <span lang="en">?</span>
-                                <span lang="ja">?</span>
-                                <span lang="kr">?</span>
-                                <span lang="ru">?</span>
-                                <span lang="zh-CN">?</span>
-                                <span lang="zh-TW">震度速報</span>
-                            </div>
-                            <div class="control-container">
-                                <div class="option-container">
-                                    <div class="option-label">
-                                        <span class="option-label-title">
-                                            <span lang="en">?</span>
-                                            <span lang="ja">?</span>
-                                            <span lang="kr">?</span>
-                                            <span lang="ru">?</span>
-                                            <span lang="zh-CN">?</span>
-                                            <span lang="zh-TW">開啟新視窗</span>
-                                            <span class="option-label-id">intensity.show</span>
-                                        </span>
-                                        <span class="option-label-description">
-                                            <span lang="en">?</span>
-                                            <span lang="ja">?</span>
-                                            <span lang="kr">?</span>
-                                            <span lang="ru">?</span>
-                                            <span lang="zh-CN">?</span>
-                                            <span lang="zh-TW">在收到震度速報時自動開啟新視窗</span>
-                                        </span>
+                            <div class="list-container" id="Screen">
+                                <div class="control-title">
+                                    <span lang="en">Earthquake Early Warning</span>
+                                    <span lang="ja">緊急地震速報</span>
+                                    <span lang="kr">긴급지진속보</span>
+                                    <span lang="ru">Система раннего предупреждения землетрясений</span>
+                                    <span lang="zh-CN">强震即时警报</span>
+                                    <span lang="zh-TW">強震即時警報</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Show window</span>
+                                                <span lang="ja">ウィンドウを表示する</span>
+                                                <span lang="kr">창 표시</span>
+                                                <span lang="ru">Окно дисплея</span>
+                                                <span lang="zh-CN">显示窗口</span>
+                                                <span lang="zh-TW">顯示視窗</span>
+                                                <span class="option-label-id">eew.show</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Show the window whenever a real-time station is
+                                                    triggered</span>
+                                                <span lang="ja">リアルタイム観測所が引き起こされた時にウィンドウを表示する</span>
+                                                <span lang="kr">지진속보 수신 시 창을 표시합니다</span>
+                                                <span lang="ru">При срабатывании сейсмографа отображается окно</span>
+                                                <span lang="zh-CN">在收到地震速报时自动开启窗口</span>
+                                                <span lang="zh-TW">在收到地震速報時自動開啟視窗</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="eew.show" onclick="CheckSave('eew.show')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
                                     </div>
-                                    <label class="md3 switch">
-                                        <input type="checkbox" id="intensity.show" onclick="CheckSave('intensity.show')">
-                                        <span class="slider">
-                                            <span class="material-symbols-rounded icon">done</span>
-                                        </span>
-                                    </label>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Move to top</span>
+                                                <span lang="ja">上の移動</span>
+                                                <span lang="kr">항상 위로 고정</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="ru">Всегда отображается на переднем плане</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="zh-CN">最上层显示</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="zh-TW">最上層顯示</span>
+                                                <span class="option-label-id">eew.cover</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Move the window to top to gain more attention</span>
+                                                <span lang="ja">ウィンドウを上に移動して、より多くの注意を喚起するようにする</span>
+                                                <span lang="kr">창을 항상 위로 고정합니다</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="ru">Всегда выносите окно на передний план</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="zh-CN">将窗口显示与最上层</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="zh-TW">將視窗移到最上層來獲得更多注意</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="eew.cover" onclick="CheckSave('eew.cover')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Seismic wave smoothing</span>
+                                                <span lang="ja">地震波の平滑化</span>
+                                                <span lang="kr">부드러운 지진파</span>
+                                                <span lang="ru">Сглаживание сейсмических волн</span>
+                                                <span lang="zh-CN">平滑震波</span>
+                                                <span lang="zh-TW">平滑震波</span>
+                                                <span class="option-label-id">shock.smoothing</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Render seismic waves at a higher frame rate.</span>
+                                                <span lang="ja">より高いフレームレートで地震波を表示する</span>
+                                                <span lang="kr">높은 갱신 속도로 지진파를 표시합니다
+                                                    ※사양에 따라 표시하기 힘들 수 있습니다</span>
+                                                <span lang="ru">Рендеринг изображений за короткие промежутки времени</span>
+                                                <span lang="zh-CN">以较短的间隔对画面进行渲染</span>
+                                                <span lang="zh-TW">以較短的間隔對畫面進行渲染</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="shock.smoothing" onclick="CheckSave('shock.smoothing')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Show P-wave</span>
+                                                <span lang="ja">Ｐ波を表示</span>
+                                                <span lang="kr">P파를 표시</span>
+                                                <span lang="ru">Показать P-волну</span>
+                                                <span lang="zh-CN">显示 P 波</span>
+                                                <span lang="zh-TW">顯示 P 波</span>
+                                                <span class="option-label-id">shock.p</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Earliest arriving seismic wave</span>
+                                                <span lang="ja">最も早く到達する地震波を表示する</span>
+                                                <span lang="kr">빠른 지진파를 표시합니다</span>
+                                                <span lang="ru">Быстрые, но менее разрушительные сейсмические волны</span>
+                                                <span lang="zh-CN">最早到达的波地震波</span>
+                                                <span lang="zh-TW">最早到達的波地震波</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="shock.p" onclick="CheckSave('shock.p')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="control-title">
+                                    <span lang="en">Earthquake report</span>
+                                    <span lang="ja">地震情報</span>
+                                    <span lang="kr">지진정보</span>
+                                    <span lang="ru">Отчет о землетрясении</span>
+                                    <span lang="zh-CN">地震报告</span>
+                                    <span lang="zh-TW">地震報告</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Show window</span>
+                                                <span lang="ja">ウィンドウを表示する</span>
+                                                <span lang="kr">창 표시</span>
+                                                <span lang="ru">Окно дисплея</span>
+                                                <span lang="zh-CN">显示窗口</span>
+                                                <span lang="zh-TW">顯示視窗</span>
+                                                <span class="option-label-id">report.show</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Show the window whenever a earthquake report is
+                                                    received</span>
+                                                <span lang="ja">地震情報が受信時にウィンドウを表示する</span>
+                                                <span lang="kr">지진정보 수신 시 창을 표시합니다</span>
+                                                <span lang="ru">Автоматическое открытие окна при получении Отчет о
+                                                    землетрясении</span>
+                                                <span lang="zh-CN">在收到地震报告时自动开启窗口</span>
+                                                <span lang="zh-TW">在收到地震報告時自動開啟視窗</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="report.show" onclick="CheckSave('report.show')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Move to top</span>
+                                                <span lang="ja">上の移動</span>
+                                                <span lang="kr">항상 위로 고정</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="ru">Всегда отображается на переднем плане</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="zh-CN">最上层显示</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="zh-TW">最上層顯示</span>
+                                                <span class="option-label-id">report.cover</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Move the window to top to gain more attention</span>
+                                                <span lang="ja">ウィンドウを上に移動して、より多くの注意を喚起するようにする</span>
+                                                <span lang="kr">창을 항상 위로 고정합니다</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="ru">Всегда выносите окно на передний план</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="zh-CN">将视窗显示与最上层</span>
+                                                <!-- LEGACY: Current translation needs to be updated -->
+                                                <span lang="zh-TW">將視窗移到最上層來獲得更多注意</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="report.cover" onclick="CheckSave('report.cover')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Show report</span>
+                                                <span lang="ja">地震报告を表示</span>
+                                                <span lang="kr">Show report</span>
+                                                <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="ru">Show report</span>
+                                                <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-CN">顯示報告</span>
+                                                <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-TW">顯示報告</span>
+
+                                                <span class="option-label-id">report.changeView</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Switch screen automatically upon receiving an earthquake
+                                                    report</span>
+                                                <span lang="ja">地震情報受信時に画面を自動で切り替えます</span>
+                                                <span lang="kr">Switch screen automatically upon receiving an earthquake
+                                                    report</span>
+                                                <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="ru">Switch screen automatically upon receiving an earthquake
+                                                    report</span>
+                                                <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-CN">在收到地震報告的時候自動切換畫面</span>
+                                                <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-TW">在收到地震報告的時候自動切換畫面</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="report.changeView" onclick="CheckSave('report.changeView')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="control-title">
+                                    <span lang="en">?</span>
+                                    <span lang="ja">?</span>
+                                    <span lang="kr">?</span>
+                                    <span lang="ru">?</span>
+                                    <span lang="zh-CN">?</span>
+                                    <span lang="zh-TW">震度速報</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">開啟新視窗</span>
+                                                <span class="option-label-id">intensity.show</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">在收到震度速報時自動開啟新視窗</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="intensity.show" onclick="CheckSave('intensity.show')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
                                 </div>
 
                                 <div class="control-title">
@@ -817,8 +799,7 @@
                                             </span>
                                         </div>
                                         <div class="control">
-                                            <select id="Real-time.station" name="town"
-                                                onchange="SelectSave('Real-time.station')">
+                                            <select id="Real-time.station" name="town" onchange="SelectSave('Real-time.station')">
                                             </select>
                                         </div>
                                     </div>
@@ -844,8 +825,7 @@
                                             </span>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="Real-time.show"
-                                                onclick="CheckSave('Real-time.show')">
+                                            <input type="checkbox" id="Real-time.show" onclick="CheckSave('Real-time.show')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -878,8 +858,7 @@
                                             </span>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="Real-time.cover"
-                                                onclick="CheckSave('Real-time.cover')">
+                                            <input type="checkbox" id="Real-time.cover" onclick="CheckSave('Real-time.cover')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -916,8 +895,7 @@
                                             </span>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="map.autoZoom"
-                                                onclick="CheckSave('map.autoZoom')">
+                                            <input type="checkbox" id="map.autoZoom" onclick="CheckSave('map.autoZoom')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -956,8 +934,7 @@
                                             </span>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="map.animation"
-                                                onclick="CheckSave('map.animation')">
+                                            <input type="checkbox" id="map.animation" onclick="CheckSave('map.animation')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -1009,10 +986,8 @@
                                         <input type="range" id="audio.eew.volume" min="0" max="1" step="0.01" onchange="RangeSave('audio.eew.volume')">
                                         <span class="slider-value percentage"></span>
                                     </label> -->
-                                    <button class="filled-tonal-button setting-button md3-ripple"
-                                        onclick="testAudio('EEW', this)" style="margin: 5px 0 16px 0;">
-                                        <span
-                                            class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                                    <button class="filled-tonal-button setting-button md3-ripple" onclick="testAudio('EEW', this)" style="margin: 5px 0 16px 0;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
                                         <span class="filled-tonal-button-label">
                                             <span lang="en">Test</span>
                                             <span lang="ja">音テスト</span>
@@ -1044,8 +1019,7 @@
                                             </span>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="audio.report"
-                                                onclick="CheckSave('audio.report')">
+                                            <input type="checkbox" id="audio.report" onclick="CheckSave('audio.report')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -1056,10 +1030,8 @@
                                         <input type="range" id="audio.report.volume" min="0" max="1" step="0.01" onchange="RangeSave('audio.report.volume')">
                                         <span class="slider-value percentage"></span>
                                     </label> -->
-                                    <button class="filled-tonal-button setting-button md3-ripple"
-                                        onclick="testAudio('Report', this)" style="margin: 5px 0 16px 0;">
-                                        <span
-                                            class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                                    <button class="filled-tonal-button setting-button md3-ripple" onclick="testAudio('Report', this)" style="margin: 5px 0 16px 0;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
                                         <span class="filled-tonal-button-label">
                                             <span lang="en">Test</span>
                                             <span lang="ja">音テスト</span>
@@ -1091,8 +1063,7 @@
                                             </span>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="audio.realtime"
-                                                onclick="CheckSave('audio.realtime')">
+                                            <input type="checkbox" id="audio.realtime" onclick="CheckSave('audio.realtime')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -1103,10 +1074,8 @@
                                         <input type="range" id="audio.realtime.volume" min="0" max="1" step="0.01" onchange="RangeSave('audio.realtime.volume')">
                                         <span class="slider-value percentage"></span>
                                     </label> -->
-                                    <button class="filled-tonal-button setting-button md3-ripple"
-                                        onclick="testAudio('PGA1', this)" style="margin: 5px 0 16px 0;">
-                                        <span
-                                            class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                                    <button class="filled-tonal-button setting-button md3-ripple" onclick="testAudio('PGA1', this)" style="margin: 5px 0 16px 0;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
                                         <span class="filled-tonal-button-label">
                                             <span lang="en">Test</span>
                                             <span lang="ja">音テスト</span>
@@ -1152,9 +1121,7 @@
                                                     重播模式可以檢視發送訊息</span>
                                             </span>
                                         </div>
-                                        <input class="input-field" id="webhook.url" type="url"
-                                            onchange="TextSave('webhook.url')"
-                                            placeholder="https://discord.com/api/webhooks/..." />
+                                        <input class="input-field" id="webhook.url" type="url" onchange="TextSave('webhook.url')" placeholder="https://discord.com/api/webhooks/..." />
                                     </div>
                                     <div class="option-container input-field">
                                         <div class="option-label">
@@ -1374,10 +1341,8 @@
                                                 </span>
                                             </span>
                                         </div>
-                                        <input class="input-field" id="webhook.body" type="text"
-                                            onchange="TextSave('webhook.body')" />
-                                        <button class="filled-tonal-button setting-button md3-ripple"
-                                            onclick="webhook()" style="margin-top: 16px;">
+                                        <input class="input-field" id="webhook.body" type="text" onchange="TextSave('webhook.body')" />
+                                        <button class="filled-tonal-button setting-button md3-ripple" onclick="webhook()" style="margin-top: 16px;">
                                             <span class="filled-tonal-button-label">
                                                 <span lang="en">Test Webhook</span>
                                                 <span lang="ja">ウェブフックテスト</span>
@@ -1427,8 +1392,7 @@
                                             </div>
                                         </div>
                                         <div class="control">
-                                            <select id="general.locale" name="locale"
-                                                onchange="SelectSave('general.locale')">
+                                            <select id="general.locale" name="locale" onchange="SelectSave('general.locale')">
                                                 <option value="en">English (en)</option>
                                                 <option value="ja">日本語 (ja)</option>
                                                 <option value="kr">한국어 (kr)</option>
@@ -1472,8 +1436,7 @@
                                         </div>
                                         <div id="update.mode" class="control segmented-button">
                                             <label>
-                                                <input type="radio" name="update.mode" value="install"
-                                                    onclick="ChoiceSave('update.mode', this)">
+                                                <input type="radio" name="update.mode" value="install" onclick="ChoiceSave('update.mode', this)">
                                                 <div class="button-label">
                                                     <span lang="en">Install</span>
                                                     <span lang="ja">インストール</span>
@@ -1484,8 +1447,7 @@
                                                 </div>
                                             </label>
                                             <label>
-                                                <input type="radio" name="update.mode" value="download"
-                                                    onclick="ChoiceSave('update.mode', this)">
+                                                <input type="radio" name="update.mode" value="download" onclick="ChoiceSave('update.mode', this)">
                                                 <div class="button-label">
                                                     <span lang="en">Download</span>
                                                     <span lang="ja">ダウンロード</span>
@@ -1496,8 +1458,7 @@
                                                 </div>
                                             </label>
                                             <label>
-                                                <input type="radio" name="update.mode" value="notify"
-                                                    onclick="ChoiceSave('update.mode', this)">
+                                                <input type="radio" name="update.mode" value="notify" onclick="ChoiceSave('update.mode', this)">
                                                 <div class="button-label">
                                                     <span lang="en">Notify</span>
                                                     <span lang="ja">通知</span>
@@ -1508,8 +1469,7 @@
                                                 </div>
                                             </label>
                                             <label>
-                                                <input type="radio" name="update.mode" value="never"
-                                                    onclick="ChoiceSave('update.mode', this)">
+                                                <input type="radio" name="update.mode" value="never" onclick="ChoiceSave('update.mode', this)">
                                                 <div class="button-label">
                                                     <span lang="en">Disable</span>
                                                     <span lang="ja">無効</span>
@@ -1556,8 +1516,7 @@
                                         </div>
                                         <div class="control">
                                             <div id="theme-color" class="color-input-wrapper">
-                                                <input class="color-input" type="color" id="theme.color" name="color"
-                                                    oninput="colorUpdate(this);" onchange="TextSave('theme.color');">
+                                                <input class="color-input" type="color" id="theme.color" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.color');">
                                             </div>
                                         </div>
                                     </div>
@@ -1610,8 +1569,7 @@
                                             </div>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="theme.customColor"
-                                                onclick="CheckSave('theme.customColor')">
+                                            <input type="checkbox" id="theme.customColor" onclick="CheckSave('theme.customColor')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -1637,9 +1595,7 @@
                                             </div>
                                             <div class="control">
                                                 <div id="theme-int-1" class="color-input-wrapper">
-                                                    <input class="color-input" type="color" id="theme.int.1"
-                                                        name="color" oninput="colorUpdate(this);"
-                                                        onchange="TextSave('theme.int.1');">
+                                                    <input class="color-input" type="color" id="theme.int.1" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.1');">
                                                 </div>
                                             </div>
                                         </div>
@@ -1652,9 +1608,7 @@
                                             </div>
                                             <div class="control">
                                                 <div id="theme-int-2" class="color-input-wrapper">
-                                                    <input class="color-input" type="color" id="theme.int.2"
-                                                        name="color" oninput="colorUpdate(this);"
-                                                        onchange="TextSave('theme.int.2');">
+                                                    <input class="color-input" type="color" id="theme.int.2" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.2');">
                                                 </div>
                                             </div>
                                         </div>
@@ -1667,9 +1621,7 @@
                                             </div>
                                             <div class="control">
                                                 <div id="theme-int-3" class="color-input-wrapper">
-                                                    <input class="color-input" type="color" id="theme.int.3"
-                                                        name="color" oninput="colorUpdate(this);"
-                                                        onchange="TextSave('theme.int.3');">
+                                                    <input class="color-input" type="color" id="theme.int.3" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.3');">
                                                 </div>
                                             </div>
                                         </div>
@@ -1682,9 +1634,7 @@
                                             </div>
                                             <div class="control">
                                                 <div id="theme-int-4" class="color-input-wrapper">
-                                                    <input class="color-input" type="color" id="theme.int.4"
-                                                        name="color" oninput="colorUpdate(this);"
-                                                        onchange="TextSave('theme.int.4');">
+                                                    <input class="color-input" type="color" id="theme.int.4" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.4');">
                                                 </div>
                                             </div>
                                         </div>
@@ -1697,9 +1647,7 @@
                                             </div>
                                             <div class="control">
                                                 <div id="theme-int-5" class="color-input-wrapper">
-                                                    <input class="color-input" type="color" id="theme.int.5"
-                                                        name="color" oninput="colorUpdate(this);"
-                                                        onchange="TextSave('theme.int.5');">
+                                                    <input class="color-input" type="color" id="theme.int.5" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.5');">
                                                 </div>
                                             </div>
                                         </div>
@@ -1712,9 +1660,7 @@
                                             </div>
                                             <div class="control">
                                                 <div id="theme-int-6" class="color-input-wrapper">
-                                                    <input class="color-input" type="color" id="theme.int.6"
-                                                        name="color" oninput="colorUpdate(this);"
-                                                        onchange="TextSave('theme.int.6');">
+                                                    <input class="color-input" type="color" id="theme.int.6" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.6');">
                                                 </div>
                                             </div>
                                         </div>
@@ -1727,9 +1673,7 @@
                                             </div>
                                             <div class="control">
                                                 <div id="theme-int-7" class="color-input-wrapper">
-                                                    <input class="color-input" type="color" id="theme.int.7"
-                                                        name="color" oninput="colorUpdate(this);"
-                                                        onchange="TextSave('theme.int.7');">
+                                                    <input class="color-input" type="color" id="theme.int.7" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.7');">
                                                 </div>
                                             </div>
                                         </div>
@@ -1742,9 +1686,7 @@
                                             </div>
                                             <div class="control">
                                                 <div id="theme-int-8" class="color-input-wrapper">
-                                                    <input class="color-input" type="color" id="theme.int.8"
-                                                        name="color" oninput="colorUpdate(this);"
-                                                        onchange="TextSave('theme.int.8');">
+                                                    <input class="color-input" type="color" id="theme.int.8" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.8');">
                                                 </div>
                                             </div>
                                         </div>
@@ -1757,9 +1699,7 @@
                                             </div>
                                             <div class="control">
                                                 <div id="theme-int-9" class="color-input-wrapper">
-                                                    <input class="color-input" type="color" id="theme.int.9"
-                                                        name="color" oninput="colorUpdate(this);"
-                                                        onchange="TextSave('theme.int.9');">
+                                                    <input class="color-input" type="color" id="theme.int.9" name="color" oninput="colorUpdate(this);" onchange="TextSave('theme.int.9');">
                                                 </div>
                                             </div>
                                         </div>
@@ -1805,15 +1745,13 @@
                                             </div>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="compatibility.hwaccel"
-                                                onclick="CheckSave('compatibility.hwaccel')">
+                                            <input type="checkbox" id="compatibility.hwaccel" onclick="CheckSave('compatibility.hwaccel')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
                                         </label>
                                     </div>
-                                    <button id="HAReloadButton" class="filled-tonal-button setting-button md3-ripple"
-                                        onclick="restart()" style="display:none; margin-top: 4px;">
+                                    <button id="HAReloadButton" class="filled-tonal-button setting-button md3-ripple" onclick="restart()" style="display:none; margin-top: 4px;">
                                         <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
                                         <span class="filled-tonal-button-label">重新啟動</span>
                                     </button>
@@ -1852,8 +1790,7 @@
                                             </div>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="windows.startup"
-                                                onclick="CheckSave('windows.startup')">
+                                            <input type="checkbox" id="windows.startup" onclick="CheckSave('windows.startup')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -1880,8 +1817,7 @@
                                             </div>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="windows.minimize"
-                                                onclick="CheckSave('windows.minimize')">
+                                            <input type="checkbox" id="windows.minimize" onclick="CheckSave('windows.minimize')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -1910,8 +1846,7 @@
                                             </div>
                                         </div>
                                         <label class="md3 switch">
-                                            <input type="checkbox" id="windows.tray"
-                                                onclick="CheckSave('windows.tray')">
+                                            <input type="checkbox" id="windows.tray" onclick="CheckSave('windows.tray')">
                                             <span class="slider">
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
@@ -1921,9 +1856,7 @@
                             </div>
                             <div class="list-container" id="About">
                                 <div class="control-title">Taiwan Real-time Earthquake Monitoring</div>
-                                <div class="external-link" role="link"
-                                    onclick="openURL('https:\/\/github.com/ExpTechTW/TREM')">GitHub<span
-                                        class="material-symbols-rounded">open_in_new</span></div>
+                                <div class="external-link" role="link" onclick="openURL('https:\/\/github.com/ExpTechTW/TREM')">GitHub<span class="material-symbols-rounded">open_in_new</span></div>
                                 <div class="control-title">更多資訊請見 GitHub 頁面</div>
                                 <button class="flat-button md3-ripple" onclick="dumpUpload()">DUMP</button>
                                 <button class="flat-button md3-ripple" onclick="reset()">
@@ -1963,6 +1896,6 @@
         <script src="../js/dump.js"></script>
         <script src="../js/ripple.js"></script>
         <script src="../js/setting.js"></script>
-</body>
+    </body>
 
 </html>
