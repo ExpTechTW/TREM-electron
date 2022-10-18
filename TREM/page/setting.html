@@ -217,9 +217,7 @@
                                                 <span lang="en">Minimum expected seismic intensity for EEW to be triggered</span>
                                                 <span lang="ja">緊急地震速報を受信する最小予測震度</span>
                                                 <span lang="kr">설정 지역의 예상 진도가 "수신 진도"를 초과할 경우 긴급지진속보를 발표합니다</span>
-                                                <span lang="ru">Срабатывает, когда местоположение превышает установленное
-                                                    значение сейсмической интенсивности Система раннего предупреждения
-                                                    землетрясений</span>
+                                                <span lang="ru">Срабатывает, когда местоположение превышает установленное значение сейсмической интенсивности Система раннего предупреждения землетрясений</span>
                                                 <span lang="zh-CN">所在地超过「接收震度」时触发 强震即时警报</span>
                                                 <span lang="zh-TW">所在地超過「接收震度」時觸發 強震即時警報</span>
                                             </span>
@@ -383,8 +381,7 @@
                                                 <span lang="en">Receive earthquake forecast from Earthquake Administration of Fujian</span>
                                                 <span lang="ja">福建省地震局 (FJDZJ) から地震預報を受け取る</span>
                                                 <span lang="kr">푸젠성 지진국 (FJDZJ) 에서 긴급지진속보를 수신합니다</span>
-                                                <span lang="ru">Получение Управление по борьбе с землетрясениями Фуцзянь
-                                                    (FJDZJ) раннего предупреждения землетрясений</span>
+                                                <span lang="ru">Получение Управление по борьбе с землетрясениями Фуцзянь (FJDZJ) раннего предупреждения землетрясений</span>
                                                 <span lang="zh-CN">接收福建省地震局（FJDZJ）地震预警</span>
                                                 <span lang="zh-TW">接收中國福建省地震局 (FJDZJ) 地震預警</span>
                                             </span>
@@ -1655,15 +1652,55 @@
                                 </div>
                                 <div class="control-title">
                                     <div>
-                                        <span lang="en">Compatibility</span>
-                                        <span lang="ja">互換性</span>
-                                        <span lang="kr">호환성</span>
-                                        <span lang="ru">Совместимость</span>
-                                        <span lang="zh-CN">相容性</span>
-                                        <span lang="zh-TW">相容性</span>
+                                        <span lang="en">Performance</span>
+                                        <span lang="ja">パフォーマンス</span>
+                                        <span lang="kr">호환성</span> <!-- LEGACY: Current translation needs to be updated -->
+                                        <span lang="ru">Совместимость</span> <!-- LEGACY: Current translation needs to be updated -->
+                                        <span lang="zh-CN">相容性</span> <!-- LEGACY: Current translation needs to be updated -->
+                                        <span lang="zh-TW">效能</span>
                                     </div>
                                 </div>
                                 <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Report Cache Size</span>
+                                                <span lang="ja">地震情報のキャッシュ件数</span>
+                                                <span lang="kr">Report Cache Size</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="ru">Report Cache Size</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-CN">地震報告緩存數量</span>
+                                                <span lang="zh-TW">地震報告快取數量</span>
+                                                <span class="option-label-id">cache.report</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Defines the number of earthquake reports that should be cached internally.
+                                                    Having a large number of cache might result in poor performance.
+                                                </span>
+                                                <span lang="ja">内部でキャッシュされる地震情報の数を指定する。
+                                                    キャッシュ数が多い場合は、パフォーマンスが低下する可能性があります。</span>
+                                                <span lang="kr">Defines the number of earthquake reports that should be cached internally.
+                                                    Having a large number of cache might result in poor performance.</span>
+                                                <span lang="ru">Defines the number of earthquake reports that should be cached internally.
+                                                    Having a large number of cache might result in poor performance.</span>
+                                                <span lang="zh-CN">定义应在内部缓存的地震报告数。
+                                                    拥有大量缓存可能会导致性能下降。</span>
+                                                <span lang="zh-TW">在內部快取的地震報告的數量。
+                                                    擁有大量的快取可能會導致效能下降。</span>
+                                            </span>
+                                        </div>
+                                        <div class="control">
+                                            <select id="cache.report" name="cache.report" onchange="SelectSave('cache.report')">
+                                                <option value=10>10</option>
+                                                <option value=25>25</option>
+                                                <option value=50>50</option>
+                                                <option value=75>75</option>
+                                                <option value=100>100</option>
+                                                <option value=150>150</option>
+                                                <option value=200>200</option>
+                                                <option value=250>250</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <div class="option-container">
                                         <div class="option-label">
                                             <div class="option-label-title">

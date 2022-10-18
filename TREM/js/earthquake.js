@@ -943,7 +943,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
-		const list = await ExpTechAPI.v0.data.getEarthquakeReports(250);
+		const list = await ExpTechAPI.v0.data.getEarthquakeReports(+setting["cache.report"]);
 		return list;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
