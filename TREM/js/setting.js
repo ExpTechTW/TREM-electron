@@ -142,11 +142,11 @@ function init() {
 							$("#intensity-palette-container").removeClass("hide");
 						else
 							$("#intensity-palette-container").addClass("hide");
-					if (id == "license.key.Hide")
+					if (id == "trem.key.Hide")
 						if (setting[id])
-							document.getElementById("license.key").type = "password";
+							document.getElementById("trem.key").type = "password";
 						else
-							document.getElementById("license.key").type = "text";
+							document.getElementById("trem.key").type = "text";
 				}
 				break;
 			}
@@ -286,9 +286,9 @@ function CheckSave(id) {
 function CheckHide(id) {
 	const value = document.getElementById(id).checked;
 	if (value)
-		document.getElementById("license.key").type = "password";
+		document.getElementById("trem.key").type = "password";
 	else
-		document.getElementById("license.key").type = "text";
+		document.getElementById("trem.key").type = "text";
 	ipcRenderer.send("config:value", id, value);
 }
 

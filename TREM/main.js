@@ -307,8 +307,8 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
-		case "license.key": {
-			emitAllWindow("licensekeyupdate", value);
+		case "trem.key": {
+			emitAllWindow("tremkeyupdate", value);
 			break;
 		}
 

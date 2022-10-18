@@ -36,6 +36,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"cache.report": {
+			type  : "select",
+			value : "25",
+		},
 		"compatibility.hwaccel": {
 			type  : "toggle",
 			value : true,
@@ -216,11 +220,11 @@ const Constants = Object.freeze({
 			type  : "choice",
 			value : "notify",
 		},
-		"license.key": {
+		"trem.key": {
 			type  : "string",
 			value : "",
 		},
-		"license.key.Hide": {
+		"trem.key.Hide": {
 			type  : "toggle",
 			value : true,
 		},

@@ -23,7 +23,6 @@ let t = null;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let All = [];
-const AllT = 0;
 let arrive = "";
 let audioList = [];
 let audioList1 = [];
@@ -81,13 +80,10 @@ const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
 let Ping = 0;
 let EEWAlert = false;
-let Cancel = false;
 let PGACancel = false;
 let IntensityListTime = 0;
 let WarnAudio = 0;
-let reportCache = [];
 let MaxPGA = 0;
-let License = "";
 let Unlock = false;
 let set_report_overview = 0;
 // #endregion
@@ -96,9 +92,6 @@ let set_report_overview = 0;
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
-
-if (fs.existsSync(app.getPath("userData") + "/TREM.license"))
-	ipcRenderer.send("config:value", 'license.key', fs.readFileSync(app.getPath("userData") + "/TREM.license").toString());
 
 let fullscreenTipTimeout;
 win.on("enter-full-screen", () => {
@@ -119,8 +112,6 @@ win.on("leave-full-screen", () => {
 async function init() {
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
-
-	if (setting["license.key"]) License = setting["license.key"];
 
 	// Connect to server
 	await (async () => {
@@ -190,7 +181,7 @@ async function init() {
 				// const external = formatMemoryUsage(memoryData.external);
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
-				const unlock = (!Unlock) ? "🔐" : "";
+				const unlock = (Unlock) ? "⚡" : "";
 				$("#log").text(`Max. ${MaxPGA}gal | ${rss}`);
 				$("#log1").text(`Max. ${MaxPGA}gal | ${rss}`);
 				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
@@ -514,7 +505,7 @@ function PGAMain() {
 			const ReplayTime = R;
 			axios({
 				method      : "get",
-				url         : getAddressIP+ReplayTime+'&token='+localStorage.UUID+'&license='+License,
+				url         : getAddressIP+ReplayTime+'&key='+setting["trem.key"] ?? "",
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),
@@ -1061,7 +1052,6 @@ async function ReportGET(eew) {
 	try {
 		const res = await getReportData();
 		if (!res) return setTimeout(ReportGET, 1000, eew);
-		reportCache = res;
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 		ReportList(res, eew);
 	} catch (error) {
@@ -1072,7 +1062,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
-		const list = await ExpTechAPI.v0.data.getEarthquakeReports(250);
+		const list = await ExpTechAPI.v0.data.getEarthquakeReports(+setting["cache.report"]);
 		return list;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
@@ -1477,7 +1467,7 @@ ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
 });
 
-ipcRenderer.on("licensekeyupdate", (event, key) => {
+ipcRenderer.on("tremkeyupdate", (event, key) => {
 	License = key;
 });
 
@@ -2159,7 +2149,7 @@ function main(data) {
 						radius    : kmP,
 						renderer  : L.svg(),
 						className : "p-wave",
-					}).addTo(Maps.mini);
+					}).addTo(Maps.main);
 
 				if (!EarthquakeList[data.ID].CircleP.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 					EarthquakeList[data.ID].CircleP
