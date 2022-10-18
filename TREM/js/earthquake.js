@@ -1355,8 +1355,6 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 
 // #region EEW
 async function FCMdata(data) {
-	// json.Function == "PWS"
-	// json.Function == "intensity"
 	const json = JSON.parse(data);
 	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	Server.push(json.TimeStamp);
@@ -1387,7 +1385,11 @@ async function FCMdata(data) {
 		PAlert = json.Data;
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
-	else if (json.Function == "Replay") {
+	else if (json.Function == "PWS") {
+
+	} else if (json.Function == "intensity") {
+
+	} else if (json.Function == "Replay") {
 		replay = json.timestamp;
 		replayT = NOW.getTime();
 		ReportGET();
