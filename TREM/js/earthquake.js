@@ -451,7 +451,7 @@ function PGAMain() {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 			axios({
 				method      : "get",
-				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${localStorage.KEY ?? ""}`,
+				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["trem.key"] ?? ""}`,
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),

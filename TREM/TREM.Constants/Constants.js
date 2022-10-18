@@ -220,6 +220,10 @@ const Constants = Object.freeze({
 			type  : "choice",
 			value : "notify",
 		},
+		"trem.key": {
+			type  : "string",
+			value : "",
+		},
 	},
 });
 
