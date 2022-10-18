@@ -2347,7 +2347,7 @@ function main(data) {
 	if (data.Cancel && EarthquakeList[data.ID].Cancel == undefined)
 		for (let index = 0; index < INFO.length; index++)
 			if (INFO[index].ID == data.ID) {
-				INFO[index].alert_type = "eew-cancel";
+				INFO[index].alert_type = "alert-box eew-cancel";
 				// clear(data.ID);
 				data.TimeStamp = NOW.getTime() - 150000;
 				EarthquakeList[data.ID].Cancel = true;
