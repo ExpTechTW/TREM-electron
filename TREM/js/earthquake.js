@@ -97,7 +97,7 @@ const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
 
 if (fs.existsSync(app.getPath("userData") + "/TREM.license"))
-	fs.readFileSync(app.getPath("userData") + "/TREM.license");
+	ipcRenderer.send("config:value", 'license.key', fs.readFileSync(app.getPath("userData") + "/TREM.license").toString());
 
 let fullscreenTipTimeout;
 win.on("enter-full-screen", () => {
@@ -1293,6 +1293,7 @@ function addReport(report, prepend = false) {
 function openSettingWindow() {
 	win.setAlwaysOnTop(false);
 	ipcRenderer.send("openChildWindow");
+	toggleNav(false);
 }
 // #endregion
 
@@ -1473,6 +1474,10 @@ ipcMain.on("testEEW", () => {
 
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
+});
+
+ipcRenderer.on("licensekeyupdate", (event, key) => {
+	License = key;
 });
 
 const updateMapColors = async (event, value) => {

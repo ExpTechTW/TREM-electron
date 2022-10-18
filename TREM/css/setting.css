@@ -300,6 +300,17 @@ body.settingDisabled .control-title, body.settingDisabled .option-label {
     justify-self: right;
 }
 
+.licensekey{
+    width: 100%;
+    display: flex;
+}
+.left{
+    width: 90%;
+}
+.right{
+    width: 10%;
+}
+
 .option-label {
     user-select: none;
     display: flex;

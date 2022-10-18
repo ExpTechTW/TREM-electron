@@ -135,3 +135,6 @@ TREM/js/compiled
 # Settings files
 TREM/Data
 TREM/js/server.js
+
+TREM/dev
+TREM/node_modules

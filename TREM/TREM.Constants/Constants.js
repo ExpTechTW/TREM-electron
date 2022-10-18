@@ -216,6 +216,10 @@ const Constants = Object.freeze({
 			type  : "string",
 			value : "",
 		},
+		"license.key.Hide": {
+			type  : "toggle",
+			value : true,
+		},
 	},
 });
 

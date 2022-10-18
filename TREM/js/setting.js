@@ -142,6 +142,11 @@ function init() {
 							$("#intensity-palette-container").removeClass("hide");
 						else
 							$("#intensity-palette-container").addClass("hide");
+					if (id == "license.key.Hide")
+						if (setting[id])
+							document.getElementById("license.key").type = "password";
+						else
+							document.getElementById("license.key").type = "text";
 				}
 				break;
 			}
@@ -276,6 +281,15 @@ function CheckSave(id) {
 			$("#intensity-palette-container").fadeIn(100).removeClass("hide");
 		else
 			$("#intensity-palette-container").fadeOut(100).addClass("hide");
+}
+
+function CheckHide(id) {
+	const value = document.getElementById(id).checked;
+	if (value)
+		document.getElementById("license.key").type = "password";
+	else
+		document.getElementById("license.key").type = "text";
+	ipcRenderer.send("config:value", id, value);
 }
 
 function TextSave(id) {

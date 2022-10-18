@@ -307,6 +307,11 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
+		case "license.key": {
+			emitAllWindow("licensekeyupdate", value);
+			break;
+		}
+
 		default:
 			break;
 	}
