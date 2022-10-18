@@ -159,7 +159,7 @@ async function init() {
 				}
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
-				const unlock = (!Unlock) ? "🔐" : "";
+				const unlock = (Unlock) ? "⚡" : "";
 				$("#app-version").text(`${app.getVersion()} | ${MaxPGA}gal | ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
 			}, 500);
 
