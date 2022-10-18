@@ -874,7 +874,7 @@ kbd {
 	background-color: var(--custom-int-1);
 }
 
-.alert-box.two .alert-box-body, .alert-box.eew-test .alert-notch,
+.alert-box.two .alert-box-body,
 .rt-intensity-container.two,
 #alert-local.two,
 #rt-list div.two,
@@ -1509,6 +1509,7 @@ button.hide + #report-detail-header-title {
 
 .report-list-item {
 	position: relative;
+	min-width: 480px;
 	overflow: hidden;
 	margin-bottom: 8px;
 	transform: translateZ(0);
