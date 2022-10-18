@@ -1355,6 +1355,8 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 
 // #region EEW
 async function FCMdata(data) {
+	// json.Function == "PWS"
+	// json.Function == "intensity"
 	const json = JSON.parse(data);
 	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	Server.push(json.TimeStamp);
