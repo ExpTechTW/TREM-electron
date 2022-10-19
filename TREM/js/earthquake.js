@@ -28,8 +28,6 @@ let audioList = [];
 let audioList1 = [];
 let audioLock = false;
 let audioLock1 = false;
-let ReportMarkID = null;
-const MarkList = [];
 const EarthquakeList = {};
 let marker = null;
 const Maps = {};
@@ -38,6 +36,7 @@ let PGAMainLock = false;
 const Station = {};
 const PGA = {};
 const pga = {};
+let Cancel = false;
 let RMT = 1;
 let PGALimit = 0;
 let PGAtag = -1;
@@ -199,12 +198,8 @@ async function init() {
 				}
 				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
 					ReportTag = 0;
-					if (ReportMarkID != null) {
-						ReportMarkID = null;
-						for (let index = 0; index < MarkList.length; index++)
-							Maps.main.removeLayer(MarkList[index]);
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-					}
+					TREM.Report.setView("report-list");
+					changeView("main");
 				}
 			}, 250);
 
@@ -231,12 +226,6 @@ async function init() {
 				})
 				.fitBounds([[25.35, 119.65], [21.85, 124.05]])
 				.on("click", () => {
-					if (ReportMarkID != null) {
-						ReportMarkID = null;
-						for (let index = 0; index < MarkList.length; index++)
-							Maps.main.removeLayer(MarkList[index]);
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-					}
 					mapLock = false;
 					TREM.Earthquake.emit("focus", {}, true);
 				})
@@ -763,7 +752,7 @@ function handler(response) {
 								color       : "transparent",
 								weight      : 0,
 								opacity     : 0,
-								fillColor   : TREM.Colors.surfaceVariant,
+								fillColor   : "transparent",
 								fillOpacity : 0,
 							};
 						return {
@@ -1268,14 +1257,10 @@ function addReport(report, prepend = false) {
 				}
 				roll.prepend(Div);
 			}
-			if (ReportMarkID != null) {
-				ReportMarkID = null;
-				for (let index = 0; index < MarkList.length; index++)
-					Maps.main.removeLayer(MarkList[index]);
-			}
 			TREM.Report.setView("eq-report-overview", report);
 			changeView("report", "#reportView_btn");
 			ReportTag1 = NOW.getTime();
+			// ReportTag = NOW.getTime();
 			console.log("ReportTag1: ", ReportTag1);
 		} else
 			roll.append(Div);
@@ -2345,7 +2330,7 @@ function main(data) {
 				}
 				break;
 			}
-	if (NOW.getTime() - data.TimeStamp > 180_000) {
+	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
 		clear(data.ID);
 
 		// remove epicenter cross icons
