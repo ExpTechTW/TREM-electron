@@ -504,7 +504,7 @@ function PGAMain() {
 			const ReplayTime = R;
 			axios({
 				method      : "get",
-				url         : getAddressIP+ReplayTime+'&key='+setting["trem.key"] ?? "",
+				url         : getAddressIP+ReplayTime+'&key='+setting["api.key"] ?? "",
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),
@@ -1061,6 +1061,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
+		console.log(document.cookie);
 		const list = await ExpTechAPI.v0.data.getEarthquakeReports(+setting["cache.report"]);
 		TREM.Report.cache = new Map(list.map(v => [v.identifier, v]));
 		return list;
@@ -1465,7 +1466,7 @@ ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
 });
 
-ipcRenderer.on("tremkeyupdate", (event, key) => {
+ipcRenderer.on("apikeyupdate", (event, key) => {
 	License = key;
 });
 

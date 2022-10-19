@@ -287,7 +287,7 @@ TREM.Report = {
 	_updateReports(oldlist, newlist) {
 		const removed = oldlist.filter(v => !newlist.includes(v));
 		const added = newlist.filter(v => !oldlist.includes(v));
-		const keys = this.cache.keys();
+		const keys = [...this.cache.keys()];
 
 		this._clearMap();
 

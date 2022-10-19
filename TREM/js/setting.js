@@ -142,11 +142,11 @@ function init() {
 							$("#intensity-palette-container").removeClass("hide");
 						else
 							$("#intensity-palette-container").addClass("hide");
-					if (id == "trem.key.Hide")
+					if (id == "api.key.Hide")
 						if (setting[id])
-							document.getElementById("trem.key").type = "password";
+							document.getElementById("api.key").type = "password";
 						else
-							document.getElementById("trem.key").type = "text";
+							document.getElementById("api.key").type = "text";
 				}
 				break;
 			}
@@ -154,6 +154,9 @@ function init() {
 			case "string": {
 				const element = document.getElementById(id);
 				if (element) {
+					// if (id == "api.key")
+					// 	element.placeholder = "•".repeat(setting[id].length);
+					// else
 					element.value = setting[id];
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
@@ -286,15 +289,18 @@ function CheckSave(id) {
 function CheckHide(id) {
 	const value = document.getElementById(id).checked;
 	if (value)
-		document.getElementById("trem.key").type = "password";
+		document.getElementById("api.key").type = "password";
 	else
-		document.getElementById("trem.key").type = "text";
+		document.getElementById("api.key").type = "text";
 	ipcRenderer.send("config:value", id, value);
 }
 
 function TextSave(id) {
 	const value = document.getElementById(id).value;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+	if (id == "api.key")
+		if (value.length <= 0)
+			return;
 	ipcRenderer.send("config:value", id, value);
 }
 
