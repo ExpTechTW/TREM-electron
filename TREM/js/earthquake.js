@@ -35,6 +35,7 @@ let PGAMainLock = false;
 const Station = {};
 const PGA = {};
 const pga = {};
+let Cancel = false;
 let RMT = 1;
 let PGALimit = 0;
 let PGAtag = -1;
@@ -166,7 +167,7 @@ async function init() {
 				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
 					ReportTag = 0;
 					TREM.Report.setView("report-list");
-					changeView("main", this, event);
+					changeView("main");
 				}
 			}, 250);
 
@@ -2148,7 +2149,7 @@ function main(data) {
 				}
 				break;
 			}
-	if (NOW.getTime() - data.TimeStamp > 180_000) {
+	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
 		clear(data.ID);
 
 		// remove epicenter cross icons
