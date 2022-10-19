@@ -150,17 +150,16 @@ async function init() {
 						time.classList.remove("desynced");
 					time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 					time1.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
-					if (NOW.getTime() - replaytestEEW > 180_000) {
+					if (replaytestEEW != 0 && NOW.getTime() - replaytestEEW > 180_000) {
+						replaytestEEW = 0;
 						unstopReplaybtn();
 					}
-					if (ReportTag1 != 0 && NOW.getTime() - ReportTag1 > 30_000) {
+					if (ReportTag1 != 0 && NOW.getTime() - ReportTag1 > 60_000) {
 						console.log("ReportTag1 end: ", NOW.getTime());
 						ReportTag1 = 0;
-						reportOverviewButton();
-						toggleNav(false);
 						changeView("main", "#mainView_btn");
 					}
-					if (toggleNavTime != 0 && NOW.getTime() - toggleNavTime > 10_000) {
+					if (toggleNavTime != 0 && NOW.getTime() - toggleNavTime > 5_000) {
 						console.log("toggleNavTime end: ", NOW.getTime());
 						toggleNavTime = 0;
 						$("#nav-rail").addClass("hide");
@@ -1063,6 +1062,7 @@ async function ReportGET(eew) {
 async function getReportData() {
 	try {
 		const list = await ExpTechAPI.v0.data.getEarthquakeReports(+setting["cache.report"]);
+		TREM.Report.cache = new Map(list.map(v => [v.identifier, v]));
 		return list;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
@@ -1403,7 +1403,6 @@ function unstopReplaybtn(){
 }
 
 function stopReplaybtn(){
-	toggleNav(false);
 	changeView("main", "#mainView_btn");
 	document.getElementById("togglenav_btn").classList.add("hide");
 	document.getElementById("stopReplay").classList.remove("hide");
@@ -1421,7 +1420,6 @@ function replayOverviewButton(report){
 
 function backindexButton(){
 	ReportTag1 = 0;
-	toggleNav(false);
 	changeView("main", "#mainView_btn");
 }
 

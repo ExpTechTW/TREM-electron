@@ -1,6 +1,7 @@
-/* global Maps: false, IntensityToClassString: false, reportCache: false, Maps.report: true, IntensityI: false, changeView: false, replay: true, replayT: true */
+/* global Maps: false, IntensityToClassString: false, Maps.report: true, IntensityI: false, changeView: false, replay: true, replayT: true */
 
 TREM.Report = {
+	cache                 : new Map(),
 	view                  : "report-list",
 	reportList            : [],
 	reportListElement     : document.getElementById("report-list-container"),
@@ -26,13 +27,14 @@ TREM.Report = {
 	loadReports(skipCheck = false) {
 		if (this.view == "report-list" || skipCheck) {
 			const fragment = new DocumentFragment();
-			this.reportList = reportCache
+			const reports = Array.from(this.cache, ([k, v]) => v);
+				this.reportList = reports
 				.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 				.filter(v => this._filterHasReplay ? v.ID?.length : true)
 				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 				.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
 
-			for (const report of reportCache) {
+			for (const report of reports) {
 				const element = this._createReportItem(report);
 				if (
 					(this._filterHasNumber && !(report.earthquakeNo % 1000))
@@ -50,8 +52,8 @@ TREM.Report = {
 								iconSize  : [report.magnitudeValue * 4, report.magnitudeValue * 4],
 								className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
 							}),
-							opacity      : (reportCache.length - reportCache.indexOf(report)) / reportCache.length,
-							zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
+							opacity      : (reports.length - reports.indexOf(report)) / reports.length,
+							zIndexOffset : 1000 + reports.length - reports.indexOf(report),
 						}
 					).bindPopup().on('popupopen', function(e) {
 						set_report_overview = 0;
@@ -97,7 +99,7 @@ TREM.Report = {
 				return parent.click();
 		}
 
-		this.reportList = reportCache
+		this.reportList = Array.from(this.cache, ([k, v]) => v)
 			.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 			.filter(v => this._filterHasReplay ? v.ID?.length : true)
 			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
@@ -127,7 +129,7 @@ TREM.Report = {
 
 			case "report-overview": {
 				if (this.view == "report-list") this.unloadReports();
-				this._setupReport(reportCache.find(v => v.identifier == reportIdentifier));
+				this._setupReport(this.cache.get(reportIdentifier));
 				document.getElementById("report-detail-back").classList.remove("hide");
 				document.getElementById("report-detail-refresh").classList.add("hide");
 				break;
@@ -171,7 +173,7 @@ TREM.Report = {
 		this.view = view;
 	},
 	replay(id) {
-		const report = reportCache.find(v => v.identifier == id);
+		const report = this.cache.get(id);
 		if (replay != 0) return;
 		changeView("main", "#mainView_btn");
 		if (report.ID.length != 0) {
@@ -202,7 +204,7 @@ TREM.Report = {
 	},
 	copyReport(id) {
 		const { clipboard, shell } = require("electron");
-		const report = reportCache.find(v => v.identifier == id);
+		const report = this.cache.get(id);
 		const string = [];
 		string.push(`　　　　　　　　　　中央氣象局地震測報中心　${report.earthquakeNo % 1000 ? `第${report.earthquakeNo - 111000}號` : "小區域"}有感地震報告`);
 		const time = new Date(report.originTime);
@@ -285,6 +287,7 @@ TREM.Report = {
 	_updateReports(oldlist, newlist) {
 		const removed = oldlist.filter(v => !newlist.includes(v));
 		const added = newlist.filter(v => !oldlist.includes(v));
+		const keys = this.cache.keys();
 
 		this._clearMap();
 
@@ -304,7 +307,7 @@ TREM.Report = {
 						className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
 					}),
 					opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
-					zIndexOffset : 1000 + reportCache.length - reportCache.indexOf(report),
+					zIndexOffset : 1000 + this.cache.size - keys.indexOf(report.identifier),
 				}
 			).bindPopup().on('popupopen', function(e) {
 				set_report_overview = 0;
