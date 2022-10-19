@@ -27,8 +27,6 @@ let audioList = [];
 let audioList1 = [];
 let audioLock = false;
 let audioLock1 = false;
-let ReportMarkID = null;
-const MarkList = [];
 const EarthquakeList = {};
 let marker = null;
 const Maps = {};
@@ -167,12 +165,8 @@ async function init() {
 				}
 				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
 					ReportTag = 0;
-					if (ReportMarkID != null) {
-						ReportMarkID = null;
-						for (let index = 0; index < MarkList.length; index++)
-							Maps.main.removeLayer(MarkList[index]);
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-					}
+					TREM.Report.setView("report-list");
+					changeView("main", this, event);
 				}
 			}, 250);
 
@@ -197,12 +191,6 @@ async function init() {
 				})
 				.fitBounds([[25.35, 119.65], [21.85, 124.05]])
 				.on("click", () => {
-					if (ReportMarkID != null) {
-						ReportMarkID = null;
-						for (let index = 0; index < MarkList.length; index++)
-							Maps.main.removeLayer(MarkList[index]);
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-					}
 					mapLock = false;
 					TREM.Earthquake.emit("focus", {}, true);
 				})
@@ -1121,11 +1109,8 @@ function addReport(report, prepend = false) {
 				}
 				roll.prepend(Div);
 			}
-			if (ReportMarkID != null) {
-				ReportMarkID = null;
-				for (let index = 0; index < MarkList.length; index++)
-					Maps.main.removeLayer(MarkList[index]);
-			}
+			TREM.Report.setView("report-overview", report.identifier);
+			changeView("report", "#reportView_btn");
 			ReportTag = NOW.getTime();
 		} else
 			roll.append(Div);
