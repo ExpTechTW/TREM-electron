@@ -636,7 +636,7 @@ function handler(response) {
 								color       : "transparent",
 								weight      : 0,
 								opacity     : 0,
-								fillColor   : TREM.Colors.surfaceVariant,
+								fillColor   : "transparent",
 								fillOpacity : 0,
 							};
 						return {
