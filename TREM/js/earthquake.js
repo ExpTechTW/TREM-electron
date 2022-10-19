@@ -935,6 +935,7 @@ async function ReportGET(eew) {
 async function getReportData() {
 	try {
 		const list = await ExpTechAPI.v0.data.getEarthquakeReports(+setting["cache.report"]);
+		TREM.Report.cache = new Map(list.map(v => [v.identifier, v]));
 		return list;
 	} catch (error) {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
