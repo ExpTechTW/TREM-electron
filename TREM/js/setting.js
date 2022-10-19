@@ -143,7 +143,10 @@ function init() {
 			case "string": {
 				const element = document.getElementById(id);
 				if (element) {
-					element.value = setting[id];
+					if (id == "api.key")
+						element.placeholder = "•".repeat(setting[id].length);
+					else
+						element.value = setting[id];
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
@@ -274,6 +277,9 @@ function CheckSave(id) {
 function TextSave(id) {
 	const value = document.getElementById(id).value;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+	if (id == "api.key")
+		if (value.length <= 0)
+			return;
 	ipcRenderer.send("config:value", id, value);
 }
 

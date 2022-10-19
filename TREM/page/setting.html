@@ -1738,6 +1738,34 @@
                                         <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
                                         <span class="filled-tonal-button-label">重新啟動</span>
                                     </button>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">API Key</span>
+                                                <span lang="ja">API キー</span>
+                                                <span lang="kr">API Key</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="ru">API Key</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-CN">API 密钥</span>
+                                                <span lang="zh-TW">API 金鑰</span>
+                                                <span class="option-label-id">api.key</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">With a personal API Key, you can have elevated access to more content and avoid being rate-limited from using a public key.
+                                                    Personal API Keys can be obtained by making applications to ExpTech.</span>
+                                                <span lang="ja">個人用 API キーを使用すると、より多くのコンテンツへのアクセスが可能になり、公開APIキーの使用によるレートリミットを回避できます。
+                                                    個人用APIキーは、 ExpTech に申請することで取得できます。</span>
+                                                <span lang="kr">With a personal API Key, you can have elevated access to more content and avoid being rate-limited from using a public key.
+                                                    Personal API Keys can be obtained by making applications to ExpTech.</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="ru">With a personal API Key, you can have elevated access to more content and avoid being rate-limited from using a public key.
+                                                    Personal API Keys can be obtained by making applications to ExpTech.</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-CN">使用个人 API 密钥，您可以提升对更多内容的访问权限，并避免因使用公钥而受到速率限制。
+                                                    个人 API Keys 可以通过向 ExpTech 申请获得。</span>
+                                                <span lang="zh-TW">使用私有 API 金鑰，你將可以獲得對更多內容的權限，並可避免因使用公共金鑰而受到速率限制。
+                                                    私有 API 金鑰可以通過向 ExpTech 提出申請來獲得。</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="api.key" type="password" onchange="TextSave('api.key')" />
+                                    </div>
                                 </div>
                             </div>
                             <div class="list-container" id="Windows">
@@ -1864,45 +1892,6 @@
                                     <span lang="zh-CN">开启日志资料夹</span>
                                     <span lang="zh-TW">開啟日誌資料夾</span>
                                 </button>
-                                <div class="control-title">
-                                    <span lang="en">License</span>
-                                    <span lang="ja">ライセンス</span>
-                                    <span lang="kr">특허</span>
-                                    <span lang="ru">лицензия(License)</span>
-                                    <span lang="zh-CN">许可</span>
-                                    <span lang="zh-TW">許可</span>
-                                </div>
-                                <div class="control-container">
-                                    <div class="option-container input-field">
-                                        <div class="option-label">
-                                            <span class="option-label-title">
-                                                <span lang="en">Key</span>
-                                                <span lang="ja">鍵</span>
-                                                <span lang="kr">열쇠</span>
-                                                <span lang="ru">ключ(Key)</span>
-                                                <span lang="zh-CN">金钥</span>
-                                                <span lang="zh-TW">金鑰</span>
-                                                <span class="option-label-id">trem.key</span>
-                                            </span>
-                                            <span class="option-label-description">
-                                                <span lang="en"></span>
-                                                <span lang="ja"></span>
-                                                <span lang="kr"></span>
-                                                <span lang="ru"></span>
-                                                <span lang="zh-CN"></span>
-                                                <span lang="zh-TW">輸入金鑰啟用進階功能
-                                                    例如: 震度列表、檢測方框、檢測音效...
-                                                    金鑰啟用成功時間旁邊會有 ⚡ 符號
-                                                </span>
-                                            </span>
-                                        </div>
-                                        <div class="tremkey">
-                                            <div class="left">
-                                                <input class="input-field" id="trem.key" type="text" onchange="TextSave('trem.key')" placeholder="46XXXX95-XXXX-XXXX-8XX3-XXXXX..." style="width: 510px;" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

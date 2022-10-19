@@ -451,7 +451,7 @@ function PGAMain() {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 			axios({
 				method      : "get",
-				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["trem.key"] ?? ""}`,
+				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["api.key"] ?? ""}`,
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),
@@ -934,6 +934,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
+		console.log(document.cookie);
 		const list = await ExpTechAPI.v0.data.getEarthquakeReports(+setting["cache.report"]);
 		TREM.Report.cache = new Map(list.map(v => [v.identifier, v]));
 		return list;

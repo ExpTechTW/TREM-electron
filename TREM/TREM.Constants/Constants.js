@@ -220,7 +220,7 @@ const Constants = Object.freeze({
 			type  : "choice",
 			value : "notify",
 		},
-		"trem.key": {
+		"api.key": {
 			type  : "string",
 			value : "",
 		},
