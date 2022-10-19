@@ -584,7 +584,10 @@ function handler(response) {
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
 	if(Unlock){
-		ipcRenderer.send("RTSUnlock", Unlock);
+		if (replay != 0)
+			ipcRenderer.send("RTSUnlock", !Unlock);
+		else
+			ipcRenderer.send("RTSUnlock", Unlock);
 		document.getElementById("rt-station").classList.remove("hide");
 	}else{
 		ipcRenderer.send("RTSUnlock", Unlock);
@@ -1464,10 +1467,6 @@ ipcMain.on("testEEW", () => {
 
 ipcRenderer.on("settingError", (event, error) => {
 	is_setting_disabled = error;
-});
-
-ipcRenderer.on("apikeyupdate", (event, key) => {
-	License = key;
 });
 
 const updateMapColors = async (event, value) => {

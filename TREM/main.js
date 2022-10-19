@@ -307,11 +307,6 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
-		case "api.key": {
-			emitAllWindow("apikeyupdate", value);
-			break;
-		}
-
 		default:
 			break;
 	}

@@ -157,7 +157,7 @@ function init() {
 					// if (id == "api.key")
 					// 	element.placeholder = "•".repeat(setting[id].length);
 					// else
-					element.value = setting[id];
+						element.value = setting[id];
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
