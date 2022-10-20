@@ -1,11 +1,11 @@
 {
-    "name": "trem_web",
-    "short_name": "trem_web",
+    "name": "TREM | 臺灣即時地震監測",
+    "short_name": "TREM",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "TREM | 臺灣即時地震監測",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
