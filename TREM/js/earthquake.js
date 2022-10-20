@@ -542,12 +542,10 @@ function handler(response) {
 		const Level = IntensityI(Intensity);
 		const now = new Date(Sdata.T * 1000);
 		if (keys.includes(setting["Real-time.station"])) {
-			if (document.getElementById("rt-station").classList.contains("hide"))
-				document.getElementById("rt-station").classList.remove("hide");
 			if (keys[index] == setting["Real-time.station"]) {
+				document.getElementById("rt-station-intensity").className = IntensityToClassString(Intensity);
 				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
 				document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
-				document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity);
 				document.getElementById("rt-station-pga").innerText = amount;
 			}
 		} else if (!document.getElementById("rt-station").classList.contains("hide"))
