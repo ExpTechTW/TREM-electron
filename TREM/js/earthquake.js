@@ -85,6 +85,7 @@ let WarnAudio = 0;
 let MaxPGA = 0;
 let Unlock = false;
 let set_report_overview = 0;
+let rtstation1 = "";
 // #endregion
 
 // #region 初始化
@@ -365,6 +366,21 @@ async function init() {
 				},
 			}).addTo(Maps.main),
 			);
+			MapBases.main.push( L.geoJson.vt(MapData.nk, {
+				edgeBufferTiles : 2,
+				minZoom         : 4,
+				maxZoom         : 15,
+				tolerance       : 20,
+				buffer          : 256,
+				debug           : 0,
+				style           : {
+					weight      : 0.8,
+					color       : TREM.Colors.primary,
+					fillColor   : TREM.Colors.surfaceVariant,
+					fillOpacity : 1,
+				},
+			}).addTo(Maps.main),
+			);
 
 		if (!MapBases.mini.length)
 			MapBases.mini.push(
@@ -623,7 +639,7 @@ function handler(response) {
 		// 	// rtstationzerofun(0,station[keys[index]].Loc,keys[index]);
 		// }
 
-		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
+		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 
 		if (!Station[keys[index]])
 			Station[keys[index]] = L.marker(
@@ -636,21 +652,28 @@ function handler(response) {
 					keyboard: false,
 				})
 				.addTo(Maps.main)
-				.bindTooltip(station_tooltip, {
-					offset    : [8, 0],
-					permanent : false,
-					className : "rt-station-tooltip",
-				})
+				// .bindTooltip(station_tooltip, {
+				// 	offset    : [8, 0],
+				// 	permanent : false,
+				// 	className : "rt-station-tooltip",
+				// })
 				.on("click", () => {
-					Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
-					if (Maps.main.getZoom() < 11) {
-						const tooltip = Station[keys[index]].getTooltip();
-						Station[keys[index]].unbindTooltip();
-						if (Station[keys[index]].keepTooltipAlive)
-							tooltip.options.permanent = true;
-						else
-							tooltip.options.permanent = false;
-						Station[keys[index]].bindTooltip(tooltip);
+					// Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
+					// if (Maps.main.getZoom() < 11) {
+					// 	const tooltip = Station[keys[index]].getTooltip();
+					// 	Station[keys[index]].unbindTooltip();
+					// 	if (Station[keys[index]].keepTooltipAlive)
+					// 		tooltip.options.permanent = true;
+					// 	else
+					// 		tooltip.options.permanent = false;
+					// 	Station[keys[index]].bindTooltip(tooltip);
+					// }
+					if (rtstation1 == ""){
+						rtstation1 = keys[index];
+					}else if (rtstation1 == keys[index]){
+						rtstation1 = "";
+					}else if (rtstation1 != keys[index]){
+						rtstation1 = keys[index];
 					}
 				});
 
@@ -660,23 +683,60 @@ function handler(response) {
 				className : `map-intensity-icon rt-icon ${levelClass}`,
 			}));
 
-		Station[keys[index]]
-			.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
-			.setTooltipContent(station_tooltip);
+		// Station[keys[index]]
+		// 	.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
+		// 	.setTooltipContent(station_tooltip);
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(Sdata.T * 1000);
-		if (keys.includes(setting["Real-time.station"]) && Unlock) {
-			if (document.getElementById("rt-station").classList.contains("hide"))
-				document.getElementById("rt-station").classList.remove("hide");
-			if (keys[index] == setting["Real-time.station"]) {
+
+		if (Unlock){
+			if (rtstation1 == "") {
+				if (keys.includes(setting["Real-time.station"])){
+					if (document.getElementById("rt-station").classList.contains("hide"))
+						document.getElementById("rt-station").classList.remove("hide");
+					if (keys[index] == setting["Real-time.station"]) {
+						document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
+						document.getElementById("rt-station-id").innerText = keys[index];
+						document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
+						document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
+						document.getElementById("rt-station-pga").innerText = amount;
+					}
+				} else if (!document.getElementById("rt-station").classList.contains("hide"))
+					document.getElementById("rt-station").classList.add("hide");
+			} else if (rtstation1 == keys[index]){
+				if (document.getElementById("rt-station").classList.contains("hide"))
+					document.getElementById("rt-station").classList.remove("hide");
+				document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
+				document.getElementById("rt-station-id").innerText = keys[index];
 				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
 				document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
-				document.getElementById("rt-station-intensity").innerText = IntensityI(Intensity);
 				document.getElementById("rt-station-pga").innerText = amount;
 			}
-		} else if (!document.getElementById("rt-station").classList.contains("hide"))
-			document.getElementById("rt-station").classList.add("hide");
+		}else if (!Unlock){
+			if (rtstation1 == "") {
+				if (keys.includes(setting["Real-time.station"])){
+					if (document.getElementById("rt-station").classList.contains("hide"))
+						document.getElementById("rt-station").classList.remove("hide");
+					if (keys[index] == setting["Real-time.station"]) {
+						document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
+						document.getElementById("rt-station-id").innerText = keys[index];
+						document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
+						document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
+						document.getElementById("rt-station-pga").innerText = amount;
+					}
+				} else if (!document.getElementById("rt-station").classList.contains("hide"))
+					document.getElementById("rt-station").classList.add("hide");
+			} else if (rtstation1 == keys[index]){
+				if (document.getElementById("rt-station").classList.contains("hide"))
+					document.getElementById("rt-station").classList.remove("hide");
+				document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
+				document.getElementById("rt-station-id").innerText = keys[index];
+				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
+				document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
+				document.getElementById("rt-station-pga").innerText = amount;
+			}
+		}
 
 		if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
 			pga[station[keys[index]].PGA] = {
