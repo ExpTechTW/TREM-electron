@@ -973,6 +973,17 @@ kbd {
 	background-color: var(--custom-int-9);
 }
 
+#rt-station-intensity.na {
+	background-color: transparent;
+	color: rgb(var(--md-sys-color-error));
+	outline: 2px solid rgb(var(--md-sys-color-error));
+}
+
+#rt-station-intensity.na + div {
+	opacity: .8;
+	font-style: italic;
+}
+
 .alert-box.zero .alert-box-body #alert-intensity::before,
 .rt-intensity-container.zero span:last-child::before,
 #alert-local.zero #alert-local-intensity::before,
@@ -1049,6 +1060,10 @@ kbd {
 .report-list-item.seven .report-list-item-intensity::before,
 #rt-station-intensity.seven::before {
 	content: "7";
+}
+
+#rt-station-intensity.na::before {
+	content: "-"
 }
 
 .alert-box.five .alert-box-body #alert-intensity::before,
