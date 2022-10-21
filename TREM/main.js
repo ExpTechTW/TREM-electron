@@ -307,6 +307,13 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
+		case "cache.report": {
+			TREM.Configuration.data["cache.report"] = value;
+			emitAllWindow("setting", TREM.Configuration._data);
+			ipcMain.emit("ReportGET");
+			break;
+		}
+
 		default:
 			break;
 	}

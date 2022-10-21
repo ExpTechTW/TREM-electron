@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+require("expose-gc");
 require("leaflet");
 require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
@@ -87,6 +88,15 @@ let Unlock = false;
 let set_report_overview = 0;
 let rtstation1 = "";
 // #endregion
+
+function Gc() {
+	global.gc();
+}
+Gc();
+
+setInterval(() => {
+	Gc();
+}, 60_000);
 
 // #region 初始化
 const win = BrowserWindow.fromId(process.env.window * 1);
@@ -1126,6 +1136,9 @@ async function getReportData() {
 		console.error(error);
 	}
 }
+ipcMain.on("ReportGET", () => {
+	ReportGET();
+});
 // #endregion
 
 // #region Report 點擊
