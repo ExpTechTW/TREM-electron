@@ -11,15 +11,15 @@ TREM.Utils = require(path.resolve(__dirname, "./TREM.Utils/Utils.js"));
 TREM.Earthquake = new EventEmitter();
 localStorage.dirname = __dirname;
 
-if (fs.existsSync("./js/server.js")) {
-	const vm = require("vm");
-	const v8 = require("v8");
-	v8.setFlagsFromString("--no-lazy");
-	const code = fs.readFileSync("./js/server.js", "utf-8");
-	const script = new vm.Script(code);
-	const bytecode = script.createCachedData();
-	fs.writeFileSync("./js/server.jar", bytecode);
-}
+// if (fs.existsSync("./js/server.js")) {
+// 	const vm = require("vm");
+// 	const v8 = require("v8");
+// 	v8.setFlagsFromString("--no-lazy");
+// 	const code = fs.readFileSync("./js/server.js", "utf-8");
+// 	const script = new vm.Script(code);
+// 	const bytecode = script.createCachedData();
+// 	fs.writeFileSync("./js/server.jar", bytecode);
+// }
 bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
 // #region 變數
