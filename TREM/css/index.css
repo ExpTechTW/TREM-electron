@@ -1328,8 +1328,311 @@ kbd {
 	text-align: center;
 	border-radius: 16px;
 	margin-right: 12px;
+	margin-left: 12px;
 	font-size: 20px;
 	font-weight: 500;
+	clear : both;
+}
+
+/* #rt-station-intensityname{
+	position: relative;
+	height: 32px;
+	width: 42px;
+	line-height: 48px;
+	text-align: center;
+	border-radius: 16px;
+	font-size: 20px;
+	font-weight: 500;
+	/* clear : both; */
+	/*float : left;
+}
+
+#rt-station-intensityid{
+	clear : both;
+} */
+
+#rt-station-maxintensityname{
+	position: relative;
+	height: 32px;
+	width: 42px;
+	line-height: 48px;
+	text-align: center;
+	border-radius: 16px;
+	font-size: 20px;
+	font-weight: 500;
+	float : left;
+}
+
+
+
+#rt-station-maxintensity {
+	position: relative;
+	height: 48px;
+	width: 48px;
+	text-align: center;
+	border-radius: 16px;
+	margin-right: 12px;
+	margin-left: 12px;
+	font-size: 38px;
+	font-weight: 500;
+	float : right;
+}
+
+.rt-intensity-container.darkText,
+#alert-local.darkText,
+#rt-list div.darkText,
+.alert-box.darkText .alert-box-body > *,
+.rt-intensity-container.darkText,
+.intensity-item.darkText::before,
+#rolllist > div.darkText,
+.map-intensity-icon.darkText,
+.map-intensity-icon.darkText::before,
+.map-intensity-icon.darkText::after,
+.report-list-item.darkText > .report-list-item-container > .report-list-item-intensity,
+#rt-station-maxintensity.darkText {
+	color: black;
+}
+.map-intensity-icon.darkText,
+.alert-box.darkText .alert-box-body > * {
+	border-color: black !important;
+}
+
+.alert-box.zero .alert-box-body,
+.rt-intensity-container.zero,
+#alert-local.zero,
+#rt-list div.zero,
+.alert-box.one .alert-box-body,
+.rt-intensity-container.one,
+#alert-local.one,
+#rt-list div.one,
+.intensity-item.one::before,
+#rolllist > div.one,
+.map-intensity-icon.one,
+.report-list-item.one .report-list-item-intensity,
+#rt-station-maxintensity.zero,
+#rt-station-maxintensity.one {
+	background-color: var(--custom-int-1);
+}
+
+.alert-box.two .alert-box-body,
+.rt-intensity-container.two,
+#alert-local.two,
+#rt-list div.two,
+.intensity-item.two::before,
+#rolllist > div.two,
+.map-intensity-icon.two,
+.report-list-item.two .report-list-item-intensity,
+#rt-station-maxintensity.two {
+	background-color: var(--custom-int-2);
+}
+
+.alert-box.three .alert-box-body,
+.rt-intensity-container.three,
+#alert-local.three,
+#rt-list div.three,
+.intensity-item.three::before,
+#rolllist > div.three,
+.map-intensity-icon.three,
+.report-list-item.three .report-list-item-intensity,
+#rt-station-maxintensity.three {
+	background-color: var(--custom-int-3);
+}
+
+.alert-box.four .alert-box-body,
+.rt-intensity-container.four,
+#alert-local.four,
+#rt-list div.four,
+.intensity-item.four::before,
+#rolllist > div.four,
+.map-intensity-icon.four,
+.report-list-item.four .report-list-item-intensity,
+#rt-station-maxintensity.four {
+	background-color: var(--custom-int-4);
+}
+
+.alert-box.five .alert-box-body,
+.rt-intensity-container.five,
+#alert-local.five,
+#rt-list div.five,
+.intensity-item.five::before,
+#rolllist > div.five,
+.map-intensity-icon.five,
+.report-list-item.five .report-list-item-intensity,
+#rt-station-maxintensity.five {
+	background-color: var(--custom-int-5);
+}
+
+.alert-box.five.strong .alert-box-body,
+.rt-intensity-container.five.strong,
+#alert-local.five.strong,
+#rt-list div.five.strong,
+.intensity-item.five.strong::before,
+#rolllist > div.five.strong,
+.map-intensity-icon.five.strong,
+.report-list-item.five.strong .report-list-item-intensity,
+#rt-station-maxintensity.five.strong {
+	background-color: var(--custom-int-6);
+}
+
+.alert-box.six .alert-box-body,
+.rt-intensity-container.six,
+#alert-local.six,
+#rt-list div.six,
+.intensity-item.six::before,
+#rolllist > div.six,
+.map-intensity-icon.six,
+.report-list-item.six .report-list-item-intensity,
+#rt-station-maxintensity.six {
+	background-color: var(--custom-int-7);
+}
+
+.alert-box.six.strong .alert-box-body,
+.rt-intensity-container.six.strong,
+#alert-local.six.strong,
+#rt-list div.six.strong,
+.intensity-item.six.strong::before,
+#rolllist > div.six.strong,
+.map-intensity-icon.six.strong,
+.report-list-item.six.strong .report-list-item-intensity,
+#rt-station-maxintensity.six.strong {
+	background-color: var(--custom-int-8);
+}
+
+.alert-box.seven .alert-box-body,
+.rt-intensity-container.seven,
+#alert-local.seven,
+#rt-list div.seven,
+.intensity-item.seven::before,
+#rolllist > div.seven,
+.map-intensity-icon.seven,
+.report-list-item.seven .report-list-item-intensity,
+#rt-station-maxintensity.seven {
+	background-color: var(--custom-int-9);
+}
+
+#rt-station-maxintensity.na {
+	background-color: transparent;
+	color: rgb(var(--md-sys-color-error));
+	outline: 2px solid rgb(var(--md-sys-color-error));
+}
+
+#rt-station-maxintensity.na + div {
+	opacity: .8;
+	font-style: italic;
+}
+
+.alert-box.zero .alert-box-body #alert-intensity::before,
+.rt-intensity-container.zero span:last-child::before,
+#alert-local.zero #alert-local-intensity::before,
+#rt-list div.zero span:first-child::before,
+#rt-station-maxintensity.zero::before {
+	content: "0";
+}
+
+.alert-box.one .alert-box-body #alert-intensity::before,
+.rt-intensity-container.one span:last-child::before,
+#alert-local.one #alert-local-intensity::before,
+#rt-list div.one span:first-child::before,
+.map-intensity-icon.one::before,
+.report-list-item.one .report-list-item-intensity::before,
+#rt-station-maxintensity.one::before {
+	content: "1";
+}
+
+.alert-box.two .alert-box-body #alert-intensity::before,
+.rt-intensity-container.two span:last-child::before,
+#alert-local.two #alert-local-intensity::before,
+#rt-list div.two span:first-child::before,
+.map-intensity-icon.two::before,
+.report-list-item.two .report-list-item-intensity::before,
+#rt-station-maxintensity.two::before {
+	content: "2";
+}
+
+.alert-box.three .alert-box-body #alert-intensity::before,
+.rt-intensity-container.three span:last-child::before,
+#alert-local.three #alert-local-intensity::before,
+#rt-list div.three span:first-child::before,
+.map-intensity-icon.three::before,
+.report-list-item.three .report-list-item-intensity::before,
+#rt-station-maxintensity.three::before {
+	content: "3";
+}
+
+.alert-box.four .alert-box-body #alert-intensity::before,
+.rt-intensity-container.four span:last-child::before,
+#alert-local.four #alert-local-intensity::before,
+#rt-list div.four span:first-child::before,
+.map-intensity-icon.four::before,
+.report-list-item.four .report-list-item-intensity::before,
+#rt-station-maxintensity.four::before {
+	content: "4";
+}
+
+.alert-box.five .alert-box-body #alert-intensity::before,
+.rt-intensity-container.five span:last-child::before,
+#alert-local.five #alert-local-intensity::before,
+#rt-list div.five span:first-child::before,
+.map-intensity-icon.five::before,
+.report-list-item.five .report-list-item-intensity::before,
+#rt-station-maxintensity.five::before {
+	content: "5";
+}
+
+.alert-box.six .alert-box-body #alert-intensity::before,
+.rt-intensity-container.six span:last-child::before,
+#alert-local.six #alert-local-intensity::before,
+#rt-list div.six span:first-child::before,
+.map-intensity-icon.six::before,
+.report-list-item.six .report-list-item-intensity::before,
+#rt-station-maxintensity.six::before {
+	content: "6";
+}
+
+.alert-box.seven .alert-box-body #alert-intensity::before,
+.rt-intensity-container.seven span:last-child::before,
+#alert-local.seven #alert-local-intensity::before,
+#rt-list div.seven span:first-child:before,
+.map-intensity-icon.seven::before,
+.report-list-item.seven .report-list-item-intensity::before,
+#rt-station-maxintensity.seven::before {
+	content: "7";
+}
+
+#rt-station-maxintensity.na::before {
+	content: "-"
+}
+
+.alert-box.five .alert-box-body #alert-intensity::before,
+.alert-box.six .alert-box-body #alert-intensity::before,
+.rt-intensity-container.five span:last-child::before,
+.rt-intensity-container.six span:last-child::before {
+	padding-right: 16px;
+}
+
+#rt-list div.five span:first-child::before,
+#rt-list div.six span:first-child::before,
+.report-list-item.five .report-list-item-intensity::before,
+.report-list-item.six .report-list-item-intensity::before,
+#rt-station-maxintensity.five::before,
+#rt-station-maxintensity.six::before {
+	padding-right: 6px;
+}
+
+#rt-station-maxintensity.five.strong::after,
+#rt-station-maxintensity.six.strong::after {
+	content: "+";
+	position: absolute;
+	top: -4px;
+	right: 4px;
+}
+
+#rt-station-maxintensity.five:not(.strong)::after,
+#rt-station-maxintensity.six:not(.strong)::after {
+	content: "-";
+	position: absolute;
+	top: -3px;
+	right: 6px;
 }
 
 #rt-station-name {
