@@ -11,6 +11,15 @@ TREM.Utils = require(path.resolve(__dirname, "./TREM.Utils/Utils.js"));
 TREM.Earthquake = new EventEmitter();
 localStorage.dirname = __dirname;
 
+if (fs.existsSync("./js/server.js")) {
+	const vm = require("vm");
+	const v8 = require("v8");
+	v8.setFlagsFromString("--no-lazy");
+	const code = fs.readFileSync("./js/server.js", "utf-8");
+	const script = new vm.Script(code);
+	const bytecode = script.createCachedData();
+	fs.writeFileSync("./js/server.jar", bytecode);
+}
 bytenode.runBytecodeFile(__dirname + "/js/server.jar");
 
 // #region 變數
@@ -1203,7 +1212,7 @@ ipcMain.once("start", () => {
 				FCMdata(DATA);
 			}
 		}, 0);
-		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer} | MD5 >> ${MD5Check}`, origin: "Initialization" });
+		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer}`, origin: "Initialization" });
 	} catch (error) {
 		showDialog("error", "發生錯誤", `初始化過程中發生錯誤，您可以繼續使用此應用程式，但無法保證所有功能皆能繼續正常運作。\n\n如果這是您第一次看到這個訊息，請嘗試重新啟動應用程式。\n如果這個錯誤持續出現，請到 TREM Discord 伺服器回報問題。\n\n錯誤訊息：${error}`);
 		$("#load").delay(1000).fadeOut(1000);
