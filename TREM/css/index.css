@@ -1369,13 +1369,13 @@ kbd {
 	font-weight: 500;
 }
 
-.rt-station-tooltip > div:nth-child(2)::before {
+.rt-station-tooltip > div:nth-child(3)::before {
 	content: "PGA";
 	font-weight: 400;
 	padding-right: 8px;
 }
 
-.rt-station-tooltip > div:nth-child(2)::after {
+.rt-station-tooltip > div:nth-child(3)::after {
 	content: "gal";
 	padding-left: 4px;
 }

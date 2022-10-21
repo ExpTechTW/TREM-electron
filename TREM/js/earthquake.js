@@ -233,24 +233,24 @@ async function init() {
 				.on("contextmenu", () => {TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });})
 				.on("drag", () => mapLock = true)
 				.on("zoomend", () => {
-					if (Maps.main.getZoom() >= 11)
-						for (const key in Station) {
-							const tooltip = Station[key].getTooltip();
-							if (tooltip) {
-								Station[key].unbindTooltip();
-								tooltip.options.permanent = true;
-								Station[key].bindTooltip(tooltip);
-							}
-						}
-					else
-						for (const key in Station) {
-							const tooltip = Station[key].getTooltip();
-							if (tooltip && !Station[key].keepTooltipAlive) {
-								Station[key].unbindTooltip();
-								tooltip.options.permanent = false;
-								Station[key].bindTooltip(tooltip);
-							}
-						}
+					// if (Maps.main.getZoom() >= 11)
+					// 	for (const key in Station) {
+					// 		const tooltip = Station[key].getTooltip();
+					// 		if (tooltip) {
+					// 			Station[key].unbindTooltip();
+					// 			tooltip.options.permanent = true;
+					// 			Station[key].bindTooltip(tooltip);
+					// 		}
+					// 	}
+					// else
+					// 	for (const key in Station) {
+					// 		const tooltip = Station[key].getTooltip();
+					// 		if (tooltip && !Station[key].keepTooltipAlive) {
+					// 			Station[key].unbindTooltip();
+					// 			tooltip.options.permanent = false;
+					// 			Station[key].bindTooltip(tooltip);
+					// 		}
+					// 	}
 				});
 			Maps.main._zoomAnimated = setting["map.animation"];
 		}
@@ -639,7 +639,7 @@ function handler(response) {
 		// 	// rtstationzerofun(0,station[keys[index]].Loc,keys[index]);
 		// }
 
-		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
+		const station_tooltip = `<div>${keys[index]}</div><div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 
 		if (!Station[keys[index]])
 			Station[keys[index]] = L.marker(
@@ -652,11 +652,11 @@ function handler(response) {
 					keyboard: false,
 				})
 				.addTo(Maps.main)
-				// .bindTooltip(station_tooltip, {
-				// 	offset    : [8, 0],
-				// 	permanent : false,
-				// 	className : "rt-station-tooltip",
-				// })
+				.bindTooltip(station_tooltip, {
+					offset    : [8, 0],
+					permanent : false,
+					className : "rt-station-tooltip",
+				})
 				.on("click", () => {
 					// Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
 					// if (Maps.main.getZoom() < 11) {
@@ -675,6 +675,10 @@ function handler(response) {
 					}else if (rtstation1 != keys[index]){
 						rtstation1 = keys[index];
 					}
+				})
+				.on("mouseover", () => {
+					const tooltip = Station[keys[index]].getTooltip();
+					tooltip.options.permanent = true;
 				});
 
 		if (Station[keys[index]].getIcon()?.options?.className != `map-intensity-icon rt-icon ${levelClass}`)
@@ -683,9 +687,9 @@ function handler(response) {
 				className : `map-intensity-icon rt-icon ${levelClass}`,
 			}));
 
-		// Station[keys[index]]
-		// 	.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
-		// 	.setTooltipContent(station_tooltip);
+		Station[keys[index]]
+			.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
+			.setTooltipContent(station_tooltip)
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(Sdata.T * 1000);
