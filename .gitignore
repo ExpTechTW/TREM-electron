@@ -136,5 +136,8 @@ TREM/js/compiled
 TREM/Data
 TREM/js/server.js
 
+# wip
+TREM.MAUI
+
 TREM/dev
 TREM/node_modules
