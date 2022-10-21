@@ -627,9 +627,9 @@ function handler(response) {
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.PGA);
+		let MaxIntensity = 0;
 		if (station[keys[index]] == undefined) continue;
 		const Alert = (!Unlock) ? (Sdata.I >= 2) : Sdata.alert;
-		if (amount > MaxPGA) MaxPGA = amount;
 		const Intensity = (Alert && Json.Alert) ? Sdata.I :
 			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
 				(!Alert) ? 0 :
@@ -643,6 +643,7 @@ function handler(response) {
 												(amount >= 5) ? 2 :
 													(amount >= 2.2) ? 1 :
 														0;
+		if (amount > MaxPGA) {MaxPGA = amount;MaxIntensity = Intensity;}
 		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
 		const levelClass = (Intensity != 0) ? IntensityToClassString(Intensity) :
 			(amount == 999) ? "pga6" :
@@ -719,7 +720,7 @@ function handler(response) {
 					if (keys[index] == setting["Real-time.station"]) {
 						if (document.getElementById("rt-station").classList.contains("hide"))
 							document.getElementById("rt-station").classList.remove("hide");
-						document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(Intensity) : "na";
+						document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 						document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 						document.getElementById("rt-station-id").innerText = keys[index];
 						document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
@@ -731,7 +732,7 @@ function handler(response) {
 			} else if (rtstation1 == keys[index]){
 				if (document.getElementById("rt-station").classList.contains("hide"))
 					document.getElementById("rt-station").classList.remove("hide");
-				document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(Intensity) : "na";
+				document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 				document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 				document.getElementById("rt-station-id").innerText = keys[index];
 				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
@@ -744,7 +745,7 @@ function handler(response) {
 					if (keys[index] == setting["Real-time.station"]) {
 						if (document.getElementById("rt-station").classList.contains("hide"))
 							document.getElementById("rt-station").classList.remove("hide");
-						document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(Intensity) : "na";
+						document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 						document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 						document.getElementById("rt-station-id").innerText = keys[index];
 						document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
@@ -756,7 +757,7 @@ function handler(response) {
 			} else if (rtstation1 == keys[index]){
 				if (document.getElementById("rt-station").classList.contains("hide"))
 					document.getElementById("rt-station").classList.remove("hide");
-				document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(Intensity) : "na";
+				document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 				document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 				document.getElementById("rt-station-id").innerText = keys[index];
 				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
