@@ -556,7 +556,7 @@ function handler(response) {
 					document.getElementById("rt-station").classList.remove("hide");
 				document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
-				document.getElementById("rt-station-time").innerText = now.format("MM/DD HH:mm:ss");
+				document.getElementById("rt-station-time").innerText = now.format("HH:mm:ss");
 				document.getElementById("rt-station-pga").innerText = amount;
 			}
 		} else if (!document.getElementById("rt-station").classList.contains("hide"))
