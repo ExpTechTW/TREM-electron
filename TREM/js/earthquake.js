@@ -96,6 +96,7 @@ let MaxPGA = 0;
 let Unlock = false;
 let set_report_overview = 0;
 let rtstation1 = "";
+let MaxIntensity = 0;
 // #endregion
 
 function Gc() {
@@ -159,7 +160,6 @@ async function init() {
 					time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 					if (NOW.getTime() - replayT > 180_000) {
 						replay = 0;
-						unstopReplaybtn();
 						ReportGET();
 					}
 				} else {
@@ -171,7 +171,6 @@ async function init() {
 					time1.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 					if (replaytestEEW != 0 && NOW.getTime() - replaytestEEW > 180_000) {
 						replaytestEEW = 0;
-						unstopReplaybtn();
 					}
 					if (ReportTag1 != 0 && NOW.getTime() - ReportTag1 > 60_000) {
 						console.log("ReportTag1 end: ", NOW.getTime());
@@ -200,8 +199,8 @@ async function init() {
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
 				const unlock = (Unlock) ? "⚡" : "";
-				$("#log").text(`Max. ${MaxPGA}gal | ${rss}`);
-				$("#log1").text(`Max. ${MaxPGA}gal | ${rss}`);
+				$("#log").text(`${MaxPGA}gal | ${rss}`);
+				$("#log1").text(`${MaxPGA}gal | ${rss}`);
 				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
 				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
 			}, 500);
@@ -604,6 +603,7 @@ function rtstationzerofun(num,text,key){
 
 function handler(response) {
 	const Json = response;
+	// console.log(Json);
 	Unlock = Json.Unlock ?? false;
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
@@ -627,9 +627,9 @@ function handler(response) {
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.PGA);
-		let MaxIntensity = 0;
 		if (station[keys[index]] == undefined) continue;
 		const Alert = (!Unlock) ? (Sdata.I >= 2) : Sdata.alert;
+		if (amount > MaxPGA) MaxPGA = amount;
 		const Intensity = (Alert && Json.Alert) ? Sdata.I :
 			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
 				(!Alert) ? 0 :
@@ -643,7 +643,6 @@ function handler(response) {
 												(amount >= 5) ? 2 :
 													(amount >= 2.2) ? 1 :
 														0;
-		if (amount > MaxPGA) {MaxPGA = amount;MaxIntensity = Intensity;}
 		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
 		const levelClass = (Intensity != 0) ? IntensityToClassString(Intensity) :
 			(amount == 999) ? "pga6" :
@@ -720,7 +719,6 @@ function handler(response) {
 					if (keys[index] == setting["Real-time.station"]) {
 						if (document.getElementById("rt-station").classList.contains("hide"))
 							document.getElementById("rt-station").classList.remove("hide");
-						document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 						document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 						document.getElementById("rt-station-id").innerText = keys[index];
 						document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
@@ -732,7 +730,6 @@ function handler(response) {
 			} else if (rtstation1 == keys[index]){
 				if (document.getElementById("rt-station").classList.contains("hide"))
 					document.getElementById("rt-station").classList.remove("hide");
-				document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 				document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 				document.getElementById("rt-station-id").innerText = keys[index];
 				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
@@ -745,7 +742,6 @@ function handler(response) {
 					if (keys[index] == setting["Real-time.station"]) {
 						if (document.getElementById("rt-station").classList.contains("hide"))
 							document.getElementById("rt-station").classList.remove("hide");
-						document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 						document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 						document.getElementById("rt-station-id").innerText = keys[index];
 						document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
@@ -757,7 +753,6 @@ function handler(response) {
 			} else if (rtstation1 == keys[index]){
 				if (document.getElementById("rt-station").classList.contains("hide"))
 					document.getElementById("rt-station").classList.remove("hide");
-				document.getElementById("rt-station-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 				document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 				document.getElementById("rt-station-id").innerText = keys[index];
 				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
@@ -913,8 +908,12 @@ function handler(response) {
 		PGALimit = 0;
 	}
 	All = Json.I ?? [];
-	for (let index = 0; index < All.length; index++)
+	// console.log(Json.I);
+	MaxIntensity = 0;
+	for (let index = 0; index < All.length; index++){
 		All[index].loc = station[All[index].uuid].Loc;
+		if (All[index].intensity > MaxIntensity) MaxIntensity = All[index].intensity;
+	}
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 		if (setting["audio.realtime"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
@@ -985,7 +984,7 @@ function handler(response) {
 			audioPlay("audio/Warn.wav");
 		}
 
-
+	document.getElementById("rt-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 	document.getElementById("rt-list").replaceChildren(...list);
 }
 
@@ -1461,6 +1460,7 @@ const stopReplay = function() {
 		replay = 0;
 		ReportGET();
 	}
+	WarnAudio = Date.now()+3000;
 	IntensityListTime = 0;
 	All = [];
 	const data = {
@@ -1711,7 +1711,7 @@ async function FCMdata(data) {
 			if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
 			if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
 			if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
-			stopReplaybtn();
+			// stopReplaybtn();
 			TREM.Earthquake.emit("eew", json);
 		} else
 			// if (json.Function != "earthquake") return;
@@ -2032,7 +2032,6 @@ TREM.Earthquake.on("eew", (data) => {
 				});
 		}
 	}, 2000);
-	stopReplaybtn();
 });
 // #endregion
 
@@ -2452,7 +2451,6 @@ function main(data) {
 			Cancel = false;
 			if (replay != 0) {
 				replay = 0;
-				unstopReplaybtn();
 				ReportGET();
 			}
 			INFO = [];
@@ -2468,6 +2466,7 @@ function main(data) {
 			delete Timers.epicenterBlinker;
 			clearInterval(ITimer);
 			ITimer = null;
+			unstopReplaybtn();
 		}
 	}
 }
