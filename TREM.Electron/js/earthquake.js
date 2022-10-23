@@ -103,7 +103,7 @@ let EEWAlert = false;
 let PGACancel = false;
 let IntensityListTime = 0;
 let WarnAudio = 0;
-const MaxPGA = 0;
+let MaxPGA = 0;
 let Unlock = false;
 let set_report_overview = 0;
 let rtstation1 = "";
@@ -592,6 +592,7 @@ function handler(response) {
 		Station[removedKey].remove();
 		delete Station[removedKey];
 	}
+	MaxPGA = 0;
 	MaxIntensity = 0;
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const stationData = Json[keys[index]];
@@ -599,6 +600,7 @@ function handler(response) {
 		const amountI = Number(stationData.I);
 		if (station[keys[index]] == undefined) continue;
 		const Alert = (!Unlock) ? (amountI >= 2) : stationData.alert;
+		if (amount > MaxPGA) MaxPGA = amount;
 		const Intensity = (Alert && Json.Alert) ? amountI :
 			(NOW.getTime() - stationData.TS * 1000 > 15000) ? "NA" :
 				(!Alert) ? 0 :
