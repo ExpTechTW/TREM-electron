@@ -1385,7 +1385,7 @@ async function FCMdata(data) {
 		dump({ level: 0, message: `Latency: ${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
 	if (json.Function == "tsunami") {
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-		new Notification("海嘯資訊", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "TREM.ico" });
+		new Notification("海嘯資訊", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "../TREM.ico" });
 	} else if (json.Function == "TSUNAMI")
 		TREM.Earthquake.emit("tsunami", json);
 	else if (json.Function == "palert")
@@ -1440,7 +1440,7 @@ async function FCMdata(data) {
 		new Notification("地震報告",
 			{
 				body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
-				icon   : "TREM.ico",
+				icon   : "../TREM.ico",
 				silent : win.isFocused(),
 			});
 		const report = await getReportData();
@@ -1574,7 +1574,7 @@ TREM.Earthquake.on("eew", (data) => {
 			Nmsg = "已抵達 (預警盲區)";
 		new Notification("EEW 強震即時警報", {
 			body   : `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`,
-			icon   : "TREM.ico",
+			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});
 		Info.Notify.push(data.ID);
@@ -1795,7 +1795,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 	if (data.Version == 1) {
 		new Notification("海嘯警報", {
 			body   : `${data["UTC+8"]} 發生 ${data.Scale} 地震\n\n東經: ${data.EastLongitude} 度\n北緯: ${data.NorthLatitude} 度`,
-			icon   : "TREM.ico",
+			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});
 
