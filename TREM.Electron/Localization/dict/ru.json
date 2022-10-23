@@ -25,6 +25,7 @@
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": null,
     "Notification_Update_Body": null,
+    "Realtime_No_Data": null,
     "Setting": "Параметр",
     "Setting_Open": "Открыть настройки",
     "general_locale": "Язык дисплея",

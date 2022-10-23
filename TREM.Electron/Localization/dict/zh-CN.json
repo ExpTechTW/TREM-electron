@@ -25,6 +25,7 @@
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": ":arrow_up: 有可用的更新",
     "Notification_Update_Body": "v{0} → v{1}\n单击下载最新版本",
+    "Realtime_No_Data": "无资料",
     "Setting": "设置",
     "Setting_Open": "开启设置",
     "general_locale": "显示语言",

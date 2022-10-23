@@ -25,6 +25,7 @@
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": "⬆ 新しいバージョン",
     "Notification_Update_Body": "v{0} → v{1}\nここをクリック して、最新バージョンのダウンロードを開始します",
+    "Realtime_No_Data": "データなし",
     "Setting": "設定",
     "Setting_Open": "設定を開く",
     "general_locale": "表示言語",
