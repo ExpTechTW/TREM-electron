@@ -1640,6 +1640,7 @@ async function FCMdata(data) {
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
 	else if (json.Function == "PWS") {
+		return;
 		if (PWS != null) PWS.remove();
 		PWS = L.geoJson.vt(MapData.tw_town, {
 			minZoom   : 4,
