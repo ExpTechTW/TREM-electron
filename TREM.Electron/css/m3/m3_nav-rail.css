@@ -1,0 +1,45 @@
+.nav-rail {
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 80px;
+    background-color: transparent;
+}
+
+.nav-rail .nav-rail-button {
+    all: unset;
+	position: relative;
+    height: 56px;
+    width: 56px;
+    margin: 6px 12px;
+    border-radius: 28px;
+    transition: .1s ease-in-out;
+}
+
+.nav-rail .nav-rail-button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: transparent;
+    border-radius: 28px;
+    transition: background-color .1s ease-in-out;
+}
+
+.nav-rail .nav-rail-button:hover::after {
+    background-color: rgba(var(--md-sys-color-on-surface), .08);
+}
+
+.nav-rail .nav-rail-button:focus::after {
+    background-color: rgba(var(--md-sys-color-on-surface), .12);
+}
+
+.nav-rail .nav-rail-button span {
+    width: 54px;
+    line-height: 54px;
+    text-align: center;
+    color: rgb(var(--md-sys-color-on-surface-variant));
+}

@@ -1,0 +1,38 @@
+html:lang(en) body {
+    --alert-body-timer-arrive: "Arrived";
+    --alert-body-timer-second: "s";
+}
+
+html:lang(ja) body {
+    --alert-body-timer-arrive: "到着";
+    --alert-body-timer-second: "秒";
+}
+
+html:lang(kr) body {
+    --alert-body-timer-arrive: "도달";
+    --alert-body-timer-second: "초";
+}
+
+html:lang(ru) body {
+    --alert-body-timer-arrive: "Прибытие";
+    --alert-body-timer-second: "с";
+}
+
+html:lang(zh-TW) body {
+    --alert-body-timer-arrive: "抵達";
+    --alert-body-timer-second: "秒";
+}
+
+/* fitting adjustments */
+
+html:lang(ja) .alert-timer:empty:after {
+	font-size: 26px;
+}
+
+html:lang(ru) .alert-timer:empty:after {
+	font-size: 15px;
+}
+
+html:lang(zh-TW) .alert-timer:empty:after {
+	font-size: 26px;
+}

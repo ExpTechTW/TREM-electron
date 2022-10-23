@@ -1,0 +1,29 @@
+button.flat-button {
+    all: unset;
+    position: relative;
+    align-self: end;
+    width: fit-content;
+    height: 40px;
+    padding: 0 12px;
+    color: rgb(var(--md-sys-color-primary));
+    line-height: 40px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+button.flat-button.icon {
+    width: 40px;
+    padding: 0;
+    text-align: center;
+}
+
+button.flat-button:hover {
+    background-color: rgba(var(--md-sys-color-primary), .08);
+}
+
+button.flat-button:focus-visible {
+    outline: 2px solid rgb(var(--md-sys-color-primary));
+}

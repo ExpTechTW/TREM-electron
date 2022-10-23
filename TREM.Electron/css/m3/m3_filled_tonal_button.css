@@ -1,0 +1,60 @@
+button.filled-tonal-button {
+    all: unset;
+    user-select: none;
+    position: relative;
+    width: fit-content;
+    height: 40px;
+    background-color: rgb(var(--md-sys-color-secondary-container));
+    border-radius: 20px;
+    transition: background .1s ease-in-out;
+    padding-left: 16px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+button:disabled.filled-tonal-button {
+    cursor: not-allowed;
+}
+
+button.filled-tonal-button .filled-tonal-button-icon {
+    color: rgb(var(--md-sys-color-on-secondary-container));
+}
+
+button.filled-tonal-button .filled-tonal-button-label {
+    all: unset;
+    position: relative;
+    display: inline-block;
+    color: rgb(var(--md-sys-color-on-secondary-container));
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    padding-left: 8px;
+    padding-right: 24px;
+}
+
+button.filled-tonal-button:disabled {
+    opacity: .6;
+}
+
+button.filled-tonal-button:hover:not(:disabled) {
+    background: linear-gradient(0deg, rgba(var(--md-sys-color-on-secondary-container), .08) 0%, rgba(var(--md-sys-color-on-secondary-container), .08) 100%),
+                rgb(var(--md-sys-color-secondary-container));
+}
+
+button.filled-tonal-button:focus-visible:not(:disabled) {
+    outline: 2px solid rgb(var(--md-sys-color-primary));
+}
+
+button.filled-tonal-button::after {
+    content:"";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 40px;
+    width: calc(var(--progress) * 100%);
+    background-color: rgba(var(--md-sys-color-on-secondary-container), .4);
+}
+
+button.filled-tonal-button.icon {
+    padding: 0 8px;
+}
