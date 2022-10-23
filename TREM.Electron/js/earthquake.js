@@ -1374,9 +1374,8 @@ async function FCMdata(data) {
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
 	else if (json.Function == "PWS") {
-		return;
 		if (PWS != null) PWS.remove();
-		PWS = L.geoJson.vt(MapData.tw_town, {
+		PWS = L.geoJson.vt(MapData.tw_county, {
 			minZoom   : 4,
 			maxZoom   : 12,
 			tolerance : 20,
@@ -1394,7 +1393,7 @@ async function FCMdata(data) {
 						fillOpacity : 0,
 					};
 				return {
-					color       : "white",
+					color       : TREM.Colors.error,
 					weight      : 3,
 					fillColor   : TREM.Colors.surfaceVariant,
 					fillOpacity : 0,
