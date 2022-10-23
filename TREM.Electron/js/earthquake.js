@@ -98,7 +98,7 @@ let EEWAlert = false;
 let PGACancel = false;
 let IntensityListTime = 0;
 let WarnAudio = 0;
-let MaxPGA = 0;
+const MaxPGA = 0;
 let Unlock = false;
 // #endregion
 
@@ -172,7 +172,7 @@ async function init() {
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
 				const unlock = (Unlock) ? "⚡" : "";
-				$("#app-version").text(`${app.getVersion()} | ${MaxPGA}gal | ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -490,6 +490,7 @@ function PGAMain() {
 function handler(response) {
 	const Json = response;
 	Unlock = Json.Unlock ?? false;
+
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
@@ -497,15 +498,14 @@ function handler(response) {
 		Station[removedKey].remove();
 		delete Station[removedKey];
 	}
-	MaxPGA = 0;
+
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
-		const Sdata = Json[keys[index]];
-		const amount = Number(Sdata.PGA);
+		const stationData = Json[keys[index]];
+		const amount = Number(stationData.PGA);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = (!Unlock) ? (Sdata.I >= 2) : Sdata.alert;
-		if (amount > MaxPGA) MaxPGA = amount;
-		const Intensity = (Alert && Json.Alert) ? Sdata.I :
-			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
+		const Alert = (!Unlock) ? (stationData.I >= 2) : stationData.alert;
+		const Intensity = (Alert && Json.Alert) ? stationData.I :
+			(NOW.getTime() - stationData.TS * 1000 > 15000) ? "NA" :
 				(!Alert) ? 0 :
 					(amount >= 800) ? 9 :
 						(amount >= 440) ? 8 :
@@ -517,6 +517,7 @@ function handler(response) {
 												(amount >= 5) ? 2 :
 													(amount >= 2.2) ? 1 :
 														0;
+
 		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
 		const levelClass = (Intensity != 0) ? IntensityToClassString(Intensity) :
 			(amount == 999) ? "pga6" :
@@ -568,18 +569,21 @@ function handler(response) {
 			.setTooltipContent(station_tooltip);
 
 		const Level = IntensityI(Intensity);
-		const now = new Date(Sdata.T * 1000);
+		const now = new Date(stationData.T * 1000);
+
 		if (keys.includes(setting["Real-time.station"])) {
 			if (keys[index] == setting["Real-time.station"]) {
-				if (document.getElementById("rt-station").classList.contains("hide"))
-					document.getElementById("rt-station").classList.remove("hide");
-				document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
-				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;
-				document.getElementById("rt-station-time").innerText = now.format("HH:mm:ss");
-				document.getElementById("rt-station-pga").innerText = amount;
+				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
+				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
+				document.getElementById("rt-station-local-pga").innerText = amount;
 			}
-		} else if (!document.getElementById("rt-station").classList.contains("hide"))
-			document.getElementById("rt-station").classList.add("hide");
+		} else {
+			document.getElementById("rt-station-local-intensity").className = "rt-station-intensity na";
+			document.getElementById("rt-station-local-name").innerText = TREM.Localization.getString("Realtime_No_Data");
+			document.getElementById("rt-station-local-time").innerText = "--:--:--";
+			document.getElementById("rt-station-local-pga").innerText = "--";
+		}
 
 		if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
 			pga[station[keys[index]].PGA] = {
@@ -601,19 +605,32 @@ function handler(response) {
 						}
 					pga[station[keys[index]].PGA].Time = NOW.getTime();
 				}
+		}
 
-			if (MAXPGA.pga < amount && Level != "NA") {
-				MAXPGA.pga = amount;
-				MAXPGA.station = keys[index];
-				MAXPGA.level = Level;
-				MAXPGA.lat = station[keys[index]].Lat;
-				MAXPGA.long = station[keys[index]].Long;
-				MAXPGA.loc = station[keys[index]].Loc;
-				MAXPGA.intensity = Intensity;
-				MAXPGA.ms = NOW.getTime() - Sdata.TS * 1000;
-			}
+		if (MAXPGA.pga < amount && amount < 999 && Level != "NA") {
+			MAXPGA.pga = amount;
+			MAXPGA.station = keys[index];
+			MAXPGA.level = Level;
+			MAXPGA.lat = station[keys[index]].Lat;
+			MAXPGA.long = station[keys[index]].Long;
+			MAXPGA.loc = station[keys[index]].Loc;
+			MAXPGA.intensity = Intensity;
+			MAXPGA.time = new Date(stationData.T * 1000);
 		}
 	}
+
+	if (MAXPGA.station != "NA") {
+		document.getElementById("rt-station-max-intensity").className = `rt-station-intensity ${(MAXPGA.pga < 999) ? IntensityToClassString(MAXPGA.intensity) : "na"}`;
+		document.getElementById("rt-station-max-name").innerText = MAXPGA.loc;
+		document.getElementById("rt-station-max-time").innerText = MAXPGA.time.format("HH:mm:ss");
+		document.getElementById("rt-station-max-pga").innerText = MAXPGA.pga;
+	} else {
+		document.getElementById("rt-station-max-intensity").className = "rt-station-intensity na";
+		document.getElementById("rt-station-max-name").innerText = TREM.Localization.getString("Realtime_No_Data");
+		document.getElementById("rt-station-max-time").innerText = "--:--:--";
+		document.getElementById("rt-station-max-pga").innerText = "--";
+	}
+
 	if (PAlert.data != undefined && replay == 0) {
 		if (PAlert.timestamp != PAlertT) {
 			PAlertT = PAlert.timestamp;

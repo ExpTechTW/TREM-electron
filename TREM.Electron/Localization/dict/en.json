@@ -24,5 +24,6 @@
     "Dialog_Button_Cancel": "Cancel",
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": "⬆ Update Available",
-    "Notification_Update_Body": "v{0} → v{1}\nClick here to download the latest version."
+    "Notification_Update_Body": "v{0} → v{1}\nClick here to download the latest version.",
+    "Realtime_No_Data": "No Data"
 }
