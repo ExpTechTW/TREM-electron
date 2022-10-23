@@ -558,15 +558,12 @@ function handler(response) {
 		else
 			ipcRenderer.send("RTSUnlock", Unlock);
 		document.getElementById("rt-station").classList.remove("hide");
-		document.getElementById("rt-station").classList.add("right");
-		if (!document.getElementById("nav-rail").classList.contains("hide"))
-			document.getElementById("rt-maxintensitynum").classList.add("hide");
-		else
-			document.getElementById("rt-maxintensitynum").classList.remove("hide");
+		document.getElementById("rt-station").classList.add("left");
+		document.getElementById("rt-maxintensitynum").classList.remove("hide");
 	}else{
 		ipcRenderer.send("RTSUnlock", Unlock);
 		document.getElementById("rt-station").classList.add("hide");
-		document.getElementById("rt-station").classList.remove("right");
+		document.getElementById("rt-station").classList.remove("left");
 		document.getElementById("rt-maxintensitynum").classList.add("hide");
 	}
 
@@ -677,8 +674,6 @@ function handler(response) {
 				} else if (!document.getElementById("rt-station").classList.contains("hide"))
 					document.getElementById("rt-station").classList.add("hide");
 			} else if (rtstation1 == keys[index]){
-				if (document.getElementById("rt-station").classList.contains("hide"))
-					document.getElementById("rt-station").classList.remove("hide");
 				document.getElementById("rt-station-intensity").className = amount < 999 ? IntensityToClassString(Intensity) : "na";
 				document.getElementById("rt-station-id").innerText = keys[index];
 				document.getElementById("rt-station-name").innerText = station[keys[index]].Loc;

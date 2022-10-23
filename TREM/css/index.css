@@ -1316,8 +1316,8 @@ kbd {
 	display: none;
 }
 
-#rt-station.right {
-	right: 933.5px;
+#rt-station.left {
+	left: 100px;
 }
 
 #rt-maxintensitynum {
