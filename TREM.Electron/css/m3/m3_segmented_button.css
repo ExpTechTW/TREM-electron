@@ -1,0 +1,60 @@
+.segmented-button {
+    display: grid;
+	width: fit-content;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(48px,1fr);
+    user-select: none
+}
+
+.segmented-button>label>input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0
+}
+
+.segmented-button>label:first-child>.button-label {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px
+}
+
+.segmented-button>label:last-child>.button-label {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border: 1px solid rgb(var(--md-sys-color-outline))
+}
+
+.segmented-button>label>.button-label {
+    height: 40px;
+    padding: 0 22.65px;
+    text-align: center;
+    color: rgb(var(--md-sys-color-on-surface));
+    border: 1px solid rgb(var(--md-sys-color-outline));
+    border-right: 0;
+    line-height: 40px;
+    font-size: 14px;
+    letter-spacing: .1px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: background-color .1s ease-in-out,color .1s ease-in-out
+}
+
+.segmented-button>label>input:checked+.button-label {
+    color: rgb(var(--md-sys-color-on-secondary-container));
+    background-color: rgb(var(--md-sys-color-secondary-container));
+    padding: 0 12px
+}
+
+.segmented-button>label>.button-label::before {
+    display: inline-block;
+    font-family: "Material Symbols Rounded";
+    font-size: 18px;
+    width: 18px;
+    vertical-align: middle
+}
+
+.segmented-button>label>input:checked+.button-label::before {
+    content: "done"
+}

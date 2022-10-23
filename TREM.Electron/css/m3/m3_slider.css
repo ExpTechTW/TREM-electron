@@ -1,0 +1,44 @@
+.slider {
+    user-select: none;
+}
+
+.slider input[type='range'] {
+    -webkit-appearance: none;
+    overflow: hidden;
+    width: 200px;
+    border-radius: 4px;
+    accent-color: rgb(var(--md-sys-color-primary));
+    background-color: rgb(var(--md-sys-color-surface-variant));
+}
+
+.slider input[type='range']:focus-visible {
+    outline: none;
+}
+
+.slider input[type='range']::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgb(var(--md-sys-color-surface-variant));
+}
+
+.slider input[type='range']::-webkit-slider-thumb {
+    position: relative;
+    -webkit-appearance: none;
+    width: 8px;
+    height: 8px;
+    cursor: ew-resize;
+    background: rgb(var(--md-sys-color-primary));
+    box-shadow: -200px 0 0 200px rgb(var(--md-sys-color-primary));
+}
+
+.slider .slider-icon, .slider .slider-value {
+    color: rgb(var(--md-sys-color-on-surface-variant));
+    font-variant-numeric: tabular-nums;
+}
+
+.slider .slider-value.percentage::after {
+    content:"%";
+    padding-left: 2px;
+    color: rgb(var(--md-sys-color-on-surface-variant));
+}

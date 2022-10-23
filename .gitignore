@@ -141,3 +141,5 @@ TREM.MAUI
 
 TREM/dev
 TREM/node_modules
+
+TREM.Electron/node_modules

@@ -1,0 +1,130 @@
+#titlebar {
+    z-index: 25565;
+	display: block;
+	position: fixed;
+	height: 28px;
+	width: calc(100% - 2px); /*Compensate for body 1px border*/
+	background-color: transparent;
+	padding: 4px;
+	color: rgb(var(--md-sys-color-on-background));
+	transition: background-color .1s ease-in-out,
+				color .1s ease-in-out;
+}
+
+#titlebar #drag-region {
+	width: 100%;
+	height: 100%;
+	-webkit-app-region: drag;
+	display: grid;
+	grid-template-columns: auto 138px;
+}
+
+#window-controls {
+	display: grid;
+	grid-template-columns: repeat(3, 46px);
+	position: absolute;
+	top: 0;
+	right: 8px;
+	height: 100%;
+}
+
+#window-controls .button {
+	grid-row: 1 / span 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	color:  rgb(var(--md-sys-color-primary));;
+}
+
+#window-controls .button span {
+	font-size: 16px;
+}
+
+#min-button {
+	grid-column: 1;
+}
+
+#max-button, #restore-button {
+	grid-column: 2;
+}
+
+#close-button {
+	grid-column: 3;
+	border-top-right-radius: 16px;
+}
+
+#window-controls {
+	-webkit-app-region: no-drag;
+}
+
+#window-controls .button {
+	user-select: none;
+	transition: background-color .1s ease-in-out,
+				color .1s ease-in-out;
+}
+#window-controls .button.disabled {
+	pointer-events: none;
+	cursor: not-allowed;
+	opacity: .2;
+}
+#window-controls .button:not(.disabled):hover {
+	background-color: rgba(var(--md-sys-color-on-background),0.08);
+}
+#window-controls .button:not(.disabled):active {
+	background-color: rgba(var(--md-sys-color-on-background),0.16);
+}
+
+#close-button:hover {
+	background-color: rgba(var(--md-sys-color-error), 1) !important;
+	color: rgb(var(--md-sys-color-on-error));
+}
+#close-button:active {
+	background-color: rgba(var(--md-sys-color-error), .6) !important;
+	color: rgb(var(--md-sys-color-on-error));
+}
+
+#restore-button {
+	display: none !important;
+}
+
+#window-title {
+	grid-column: 1;
+	display: flex;
+	align-items: center;
+	margin-left: 8px;
+	overflow: hidden;
+	font-family: inherit;
+	font-size: 14px;
+}
+
+#window-title span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	line-height: 1.5;
+}
+body {
+	border: 1px solid rgb(var(--md-sys-color-outline));
+}
+body.maximized {
+	border: 1px solid transparent;
+
+}
+.maximized #titlebar {
+	width: 100%;
+	padding: 0;
+}
+
+.maximized #window-title {
+	margin-left: 12px;
+}
+
+.maximized #restore-button {
+	display: flex !important;
+}
+
+.maximized #max-button {
+	display: none;
+}

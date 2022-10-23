@@ -1,0 +1,458 @@
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link id="css-index" rel="stylesheet" href="../css/index.css" />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    </head>
+
+    <body class="index md3-dark">
+        <div id="fullscreen-notice">
+            <span lang="en">Press<kbd>F11</kbd>again to exit fullscreen mode</span>
+            <span lang="ja">フルスクリーンモードを終了するには、もう一度<kbd>F11</kbd>キーを押してください</span>
+            <span lang="kr">전체화면에서 나갈때는<kbd>F11</kbd>키를 눌러주세요</span>
+            <span lang="ru">Press<kbd>F11</kbd>again to exit fullscreen mode.</span>
+            <span lang="zh-TW">再次點擊<kbd>F11</kbd>來離開全螢幕模式</span>
+            <span lang="zh-CN">再次点击<kbd>F11</kbd>来关闭全屏模式</span>
+        </div>
+        <div id="load">
+            <div id="app-name" lang="en">Taiwan Real-time Earthquake Monitoring</div>
+            <div id="app-name" lang="ja">TREM 台湾リアルタイム地震モニタリング</div>
+            <div id="app-name" lang="kr">TREM 대만 실시간 지진 모니터링</div>
+            <div id="app-name" lang="ru">TREM Мониторинг землетрясений на Тайване в режиме реального времени</div>
+            <div id="app-name" lang="zh-TW">TREM 臺灣即時地震監測</div>
+            <div id="app-name" lang="zh-CN">TREM 台湾即时地震监测</div>
+            <progress id="loading_progress" class="progressbar" value="0" max="1"></progress>
+            <div id="loading">正在等待網路連線...</div>
+            <div id="footer">Powered by ExpTech</div>
+        </div>
+        <div id="modal-overlay">
+        </div>
+        <button id="togglenav_btn" class="fab secondary elevate md3-ripple" onclick="toggleNav()">
+            <span class="material-symbols-rounded">start</span>
+        </button>
+        <button id="stopReplay" class="fab secondary elevate md3-ripple hide" onclick="stopReplay()">
+            <span class="material-symbols-rounded">stop</span>
+        </button>
+        <div id="nav-rail" class="nav-rail hide">
+            <button id="mainView_btn" class="nav-rail-button md3-ripple active" onclick="changeView('main', this, event)">
+                <span class="material-symbols-rounded">map</span>
+            </button>
+            <button id="reportView_btn" class="nav-rail-button md3-ripple" onclick="changeView('report', this, event)">
+                <span class="material-symbols-rounded">info</span>
+            </button>
+            <button id="setting_btn" class="nav-rail-button md3-ripple" onclick="openSettingWindow()">
+                <span class="material-symbols-rounded">settings</span>
+            </button>
+        </div>
+        <div id="view">
+            <div class="view main show" id="main">
+                <div id="log"></div>
+                <div id="time"></div>
+                <div id="app-version"></div>
+                <div id="box-10" class="box-10"></div>
+                <div id="rolllist" class="roll"></div>
+                <div id="alert-box" class="alert-box eew-test five strong">
+                    <div class="alert-notch">
+                        <span id="alert-type"></span>
+                        <span id="alert-provider"></span>
+                        <span id="alert-number"></span>
+                    </div>
+                    <div class="alert-box-body">
+                        <span id="alert-intensity"></span>
+                        <div class="alert-item">
+                            <span id="alert-location"></span>
+                            <span id="alert-time"></span>
+                        </div>
+                        <div id="alert-local" class="alert-item">
+                            <span lang="en">Local</span>
+                            <span lang="ja">現在地</span>
+                            <span lang="kr" style="font-size: 14px;">현재 위치</span>
+                            <span lang="ru" style="font-size: 12px;">Местный</span>
+                            <span lang="zh-TW">所在地</span>
+                            <span lang="zh-CN">所在地</span>
+                            <span id="alert-local-intensity"></span>
+                        </div>
+                        <div class="alert-item">
+                            <span lang="en">P-wave</span>
+                            <span lang="ja">Ｐ波</span>
+                            <span lang="kr">P파</span>
+                            <span lang="ru">P-волну</span>
+                            <span lang="zh-TW">P波</span>
+                            <span lang="zh-CN">P波</span>
+                            <span id="alert-p" class="alert-timer"></span>
+                        </div>
+                        <div class="alert-item">
+                            <span lang="en">S-wave</span>
+                            <span lang="ja">Ｓ波</span>
+                            <span lang="kr">S파</span>
+                            <span lang="ru">S-волну</span>
+                            <span lang="zh-TW">S波</span>
+                            <span lang="zh-CN">S波</span>
+                            <span id="alert-s" class="alert-timer"></span>
+                        </div>
+                        <span id="alert-magnitude"></span>
+                        <span id="alert-depth"></span>
+                    </div>
+                </div>
+                <div id="map-legends" class="map-legends-container">
+                    <div class="map-legends-column">
+                        <div class="intensity-bar">
+                            <div class="intensity-item seven">7</div>
+                            <div class="intensity-item six strong">6+</div>
+                            <div class="intensity-item six">6-</div>
+                            <div class="intensity-item five strong">5+</div>
+                            <div class="intensity-item five">5-</div>
+                            <div class="intensity-item four">4</div>
+                            <div class="intensity-item three">3</div>
+                            <div class="intensity-item two">2</div>
+                            <div class="intensity-item one">1</div>
+                        </div>
+                    </div>
+                    <div class="map-legends-column">
+                        <div class="map-legends-item">
+                            <div class="map-legends-item-icon">
+                                <svg viewBox="0 0 48 36" xmlns="http://www.w3.org/2000/svg">
+                                    <ellipse style="fill: url(#alert-gradient); stroke: red; stroke-width: 2px;" cx="16" cy="18" rx="14" ry="14"></ellipse>
+                                    <ellipse style="fill: url(#pred-gradient); stroke: orange; stroke-width: 2px;" cx="32" cy="18" rx="14" ry="14"></ellipse>
+                                </svg>
+                            </div>
+                            <div class="map-legends-item-label">
+                                <div class="map-legends-item-label">
+                                    <span lang="en">S-wave</span>
+                                    <span lang="ja">Ｓ波</span>
+                                    <span lang="kr">S파</span>
+                                    <span lang="ru">S-волн</span>
+                                    <span lang="zh-TW">S 波</span>
+                                    <span lang="zh-CN">S 波</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="map-legends-item">
+                            <div class="map-legends-item-icon">
+                                <svg viewBox="0 0 48 36" xmlns="http://www.w3.org/2000/svg">
+                                    <ellipse style="fill: transparent; stroke: #6FB7B7; stroke-width: 2px;" cx="24" cy="18" rx="14" ry="14"></ellipse>
+                                </svg>
+                            </div>
+                            <div class="map-legends-item-label">
+                                <span lang="en">P-wave</span>
+                                <span lang="ja">Ｐ波</span>
+                                <span lang="kr">P파</span>
+                                <span lang="ru">P-волн</span>
+                                <span lang="zh-TW">P 波</span>
+                                <span lang="zh-CN">P 波</span>
+                            </div>
+                        </div>
+                        <div class="map-legends-item">
+                            <div class="map-legends-item-icon">
+                                <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76 76">
+                                    <path class="cross-inner" d="M59.33,73a3,3,0,0,1-2.12-.88L38,52.92,18.78,72.13a3,3,0,0,1-4.24,0L3.88,61.46a3,3,0,0,1,0-4.24L23.09,38,3.88,18.8a3,3,0,0,1,0-4.25L14.54,3.88a3,3,0,0,1,4.25,0L38,23.1,57.21,3.88A3,3,0,0,1,59.33,3h0a3,3,0,0,1,2.13.88L72.12,14.55a3,3,0,0,1,0,4.25L52.91,38,72.12,57.22a3,3,0,0,1,0,4.24L61.45,72.12A3,3,0,0,1,59.33,73Z" />
+                                    <path class="cross-outer" d="M59.33,6,70,16.68,48.67,38,70,59.34,59.33,70,38,48.68,16.66,70,6,59.34,27.33,38,6,16.68,16.66,6,38,27.34,59.33,6m0-6a6,6,0,0,0-4.24,1.76L38,18.85,20.91,1.76A6,6,0,0,0,16.66,0h0a6,6,0,0,0-4.24,1.76L1.75,12.43a6,6,0,0,0,0,8.49L18.84,38,1.76,55.1a6,6,0,0,0,0,8.48L12.42,74.25a6,6,0,0,0,8.49,0L38,57.16,55.09,74.25a6,6,0,0,0,8.49,0L74.24,63.58a6,6,0,0,0,0-8.48L57.15,38,74.24,20.92a6,6,0,0,0,0-8.49L63.58,1.76A6,6,0,0,0,59.33,0Z" />
+                                </svg> -->
+                                <img src="../image/cross.png" alt="epicenter" height="36" width="36" />
+                            </div>
+                            <div class="map-legends-item-label">
+                                <span lang="en">Epicenter</span>
+                                <span lang="ja">震央</span>
+                                <span lang="kr">진원</span>
+                                <span lang="ru">Эпицентр</span>
+                                <span lang="zh-TW">震央</span>
+                                <span lang="zh-CN">震中</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="rt-intensity" class="rt-intensity-container">
+                    <span>即時震度</span>
+                    <span></span>
+                </div>
+                <div id="rt-maxintensitynum">
+                    <div>
+                        <div id="rt-maxintensityname">
+                            <span id="rt-maxintensity-name"></span>
+                        </div>
+                        <!-- <div id="rt-maxintensity-id"></div> -->
+                        <div id="rt-maxintensity"></div>
+                    </div>
+                </div>
+                <div id="rt-station">
+                    <div id="rt-station-intensity"></div>
+                    <div class="rt-station-detail-container">
+                        <span id="rt-station-id"></span>
+                        <span id="rt-station-name"></span>
+                        <span id="rt-station-time"></span>
+                        <span id="rt-station-pga"></span>
+                    </div>
+                </div>
+                <div id="rt-list">
+                    <span id="intensity-3"></span>
+                </div>
+                <div id="map"></div>
+                <div id="map-tw"></div>
+            </div>
+            <div class="view info" id="report">
+                <div id="log1"></div>
+                <div id="time1"></div>
+                <div id="app-version1"></div>
+                <div id="report-detail">
+                    <div id="report-detail-container">
+                        <div id="report-detail-header">
+                            <button id="report-detail-back" class="flat-button icon md3-ripple hide" onclick="TREM.Report.back()">
+                                <span class="material-symbols-rounded">arrow_back</span>
+                            </button>
+                            <span id="report-detail-header-title">地震報告</span>
+                            <button id="report-detail-refresh" class="flat-button icon md3-ripple" onclick="TREM.Report.refreshList()">
+                                <span class="material-symbols-rounded">refresh</span>
+                            </button>
+                        </div>
+                        <div id="report-detail-body">
+                            <div id="report-list" class="report-detail-panel show">
+                                <div id="report-list-filter">
+                                    <label for="report-filter-hasNumber" class="chip filter md3-ripple">
+                                        <input type="checkbox" id="report-filter-hasNumber" onclick="TREM.Report._handleFilter('filterHasNumber', this.checked)">
+                                        <div class="chip-label">
+                                            <span lang="en">Numbered</span>
+                                            <span lang="ja">番号付き</span>
+                                            <span lang="kr">Numbered</span>
+                                            <span lang="ru">Numbered</span>
+                                            <span lang="zh-TW">編號</span>
+                                            <span lang="zh-CN">编号</span>
+                                        </div>
+                                    </label>
+                                    <label for="report-filter-hasReplay" class="chip filter md3-ripple">
+                                        <input type="checkbox" id="report-filter-hasReplay" onclick="TREM.Report._handleFilter('filterHasReplay', this.checked)">
+                                        <div class="chip-label">
+                                            <span lang="en">Alerted</span>
+                                            <span lang="ja">アラートあり</span>
+                                            <span lang="kr">Alerted</span>
+                                            <span lang="ru">Alerted</span>
+                                            <span lang="zh-TW">預警</span>
+                                            <span lang="zh-CN">预警</span>
+                                        </div>
+                                    </label>
+                                    <label for="report-filter-magnitude" class="chip filter select md3-ripple">
+                                        <input type="checkbox" id="report-filter-magnitude" onclick="TREM.Report._handleFilter('filterMagnitude', this.checked)">
+                                        <div class="chip-label">
+                                            <span>
+                                                <span lang="en">Magnitude</span>
+                                                <span lang="ja">マグニチュード</span>
+                                                <span lang="kr">Magnitude</span>
+                                                <span lang="ru">Magnitude</span>
+                                                <span lang="zh-TW">規模</span>
+                                                <span lang="zh-CN">规模</span>
+                                            </span>
+                                            <select id="report-filter-magnitude-value" onchange="TREM.Report._handleFilter('filterMagnitudeValue', this.options[this.selectedIndex].value, this)">
+                                                <option value=1>＜4.5</option>
+                                                <option value=2 selected>≥4.5</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                    <label for="report-filter-intensity" class="chip filter select md3-ripple">
+                                        <input type="checkbox" id="report-filter-intensity" onclick="TREM.Report._handleFilter('filterIntensity', this.checked)">
+                                        <div class="chip-label">
+                                            <span>
+                                                <span lang="en">Intensity</span>
+                                                <span lang="ja">震度</span>
+                                                <span lang="kr">Intensity</span>
+                                                <span lang="ru">Intensity</span>
+                                                <span lang="zh-TW">震度</span>
+                                                <span lang="zh-CN">震度</span>
+                                            </span>
+                                            <select id="report-filter-intensity-value" onchange="TREM.Report._handleFilter('filterIntensityValue', this.options[this.selectedIndex].value, this)">
+                                                <option value=1>1</option>
+                                                <option value=2>2</option>
+                                                <option value=3>3</option>
+                                                <option value=4 selected>4</option>
+                                                <option value=5>5-</option>
+                                                <option value=6>5+</option>
+                                                <option value=7>6-</option>
+                                                <option value=8>6+</option>
+                                                <option value=9>7</option>
+                                            </select>
+                                        </div>
+                                    </label>
+                                </div>
+                                <hr class="divider">
+                                <div id="report-list-container"></div>
+                            </div>
+                            <div id="report-overview" class="report-detail-panel">
+                                <div id="report-overview-header">
+                                    <div class="report-overview-item">
+                                        <span id="report-overview-number"></span>
+                                        <button id="report-detail-copy" class="flat-button icon md3-ripple hide" onclick="TREM.Report.copyReport(this.value)">
+                                            <span class="material-symbols-rounded">content_copy</span>
+                                        </button>
+                                    </div>
+                                    <div class="report-overview-item">
+                                        <span class="report-overview-item-icon material-symbols-rounded">pin_drop</span>
+                                        <span id="report-overview-location"></span>
+                                    </div>
+                                </div>
+                                <div id="report-overview-actions">
+                                    <button id="report-replay" class="chip assist md3-ripple" onclick="TREM.Report.replay(this.value)">
+                                        <span class="chip-icon material-symbols-rounded">replay</span>
+                                        <span class="chip-label">重播</span>
+                                        <span class="chip-icon material-symbols-rounded"></span>
+                                    </button>
+                                    <button id="report-cwb" class="chip assist md3-ripple" onclick="openURL(this.value)">
+                                        <span class="chip-icon material-symbols-rounded">description</span>
+                                        <span class="chip-label">報告頁面</span>
+                                        <span class="chip-icon material-symbols-rounded">open_in_new</span>
+                                    </button>
+                                    <button id="report-scweb" class="chip assist md3-ripple" onclick="openURL(this.value)">
+                                        <span class="chip-icon material-symbols-rounded">description</span>
+                                        <span class="chip-label">地震測報中心</span>
+                                        <span class="chip-icon material-symbols-rounded">open_in_new</span>
+                                    </button>
+                                </div>
+                                <hr class="divider">
+                                <div id="report-overview-body">
+                                    <div class="report-overview-item">
+                                        <div class="report-overview-item-label">
+                                            <span class="report-overview-item-icon material-symbols-rounded">schedule</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Time of Occurrence</span>
+                                                <span lang="ja">発生日時</span>
+                                                <span lang="kr">Time of occurrence</span>
+                                                <span lang="ru">Time of occurrence</span>
+                                                <span lang="zh-TW">發震時間</span>
+                                                <span lang="zh-CN">发震时间</span>
+                                            </span>
+                                        </div>
+                                        <div class="report-overview-value">
+                                            <span id="report-overview-time"></span>
+                                            <span class="report-overview-unit">GMT+8</span>
+                                        </div>
+                                    </div>
+                                    <div class="report-overview-item">
+                                        <div class="report-overview-item-label">
+                                            <span class="report-overview-item-icon material-symbols-rounded">my_location</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Epicenter Coordinate</span>
+                                                <span lang="ja">震央座標</span>
+                                                <span lang="kr">Epicenter coordinates</span>
+                                                <span lang="ru">Epicenter coordinates</span>
+                                                <span lang="zh-TW">震央位置</span>
+                                                <span lang="zh-CN">震中位置</span>
+                                            </span>
+                                        </div>
+                                        <div class="report-overview-value">
+                                            <span id="report-overview-latitude"></span>
+                                            <span class="report-overview-unit">°N</span>
+                                            <span id="report-overview-longitude"></span>
+                                            <span class="report-overview-unit">°E</span>
+                                        </div>
+                                    </div>
+                                    <div class="report-overview-item">
+                                        <div class="report-overview-item-label">
+                                            <span class="report-overview-item-icon material-symbols-rounded">tag</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Max Intensity</span>
+                                                <span lang="ja">最大震度</span>
+                                                <span lang="kr">Max Intensity</span>
+                                                <span lang="ru">Max Intensity</span>
+                                                <span lang="zh-TW">最大震度</span>
+                                                <span lang="zh-CN">最大震度</span>
+                                            </span>
+                                        </div>
+                                        <div class="report-overview-value">
+                                            <span id="report-overview-intensity"></span>
+                                            <span id="report-overview-intensity-location" class="report-overview-unit"></span>
+                                        </div>
+                                    </div>
+                                    <div class="report-overview-item">
+                                        <div class="report-overview-item-label">
+                                            <span class="report-overview-item-icon material-symbols-rounded">crisis_alert</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Magnitude</span>
+                                                <span lang="ja">マグニチュード</span>
+                                                <span lang="kr">Magnitude</span>
+                                                <span lang="ru">Magnitude</span>
+                                                <span lang="zh-TW">芮氏規模</span>
+                                                <span lang="zh-CN">里氏震级</span>
+                                            </span>
+                                        </div>
+                                        <div class="report-overview-value">
+                                            <span class="report-overview-unit">M<sub>L</sub></span>
+                                            <span id="report-overview-magnitude"></span>
+                                        </div>
+                                    </div>
+                                    <div class="report-overview-item">
+                                        <div class="report-overview-item-label">
+                                            <span class="report-overview-item-icon material-symbols-rounded">keyboard_double_arrow_down</span>
+                                            <span class="report-overview-item-label-text">
+                                                <span lang="en">Focal Depth</span>
+                                                <span lang="ja">深さ</span>
+                                                <span lang="kr">Focal Depth</span>
+                                                <span lang="ru">Focal Depth</span>
+                                                <span lang="zh-TW">震源深度</span>
+                                                <span lang="zh-CN">震源深度</span>
+                                            </span>
+                                        </div>
+                                        <div class="report-overview-value">
+                                            <span id="report-overview-depth"></span>
+                                            <span class="report-overview-unit">
+                                                <span lang="en">km</span>
+                                                <span lang="ja">km</span>
+                                                <span lang="kr">km</span>
+                                                <span lang="ru">km</span>
+                                                <span lang="zh-TW">公里</span>
+                                                <span lang="zh-CN">公里</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="map-report"></div>
+            </div>
+        </div>
+
+        <svg id="svg-defs">
+            <defs>
+                <radialGradient id="pred-gradient">
+                    <stop offset="0%" class="pred-start"></stop>
+                    <stop offset="100%" class="pred-stop"></stop>
+                </radialGradient>
+                <radialGradient id="alert-gradient">
+                    <stop offset="0%" class="alert-start"></stop>
+                    <stop offset="100%" class="alert-stop"></stop>
+                </radialGradient>
+            </defs>
+        </svg>
+
+        <template id="template-report-list-item">
+            <div class="report-list-item">
+                <div class="report-list-item-container">
+                    <div class="report-list-item-intensity"></div>
+                    <div class="report-list-item-label">
+                        <span class="report-list-item-location"></span>
+                        <span class="report-list-item-description">
+                            <span class="report-list-item-icon material-symbols-rounded">schedule</span><span class="report-list-item-time"></span>
+                            <span class="report-list-item-icon material-symbols-rounded">tag</span><span class="report-list-item-id"></span>
+                        </span>
+                    </div>
+                    <div class="report-list-item-button">
+                        <button class="filled-tonal-button icon md3-ripple">
+                            <span class="material-symbols-rounded filled-tonal-button-icon">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <script src="../js/theme.js"></script>
+        <script src="../js/locale.js"></script>
+        <script src="../js/globals.js"></script>
+        <script src="../js/ui.js"></script>
+        <script src="../js/dump.js"></script>
+        <script src="../js/ripple.js"></script>
+        <script src="../js/earthquake.js"></script>
+        <script src="../js/report.js"></script>
+    </body>
+
+</html>

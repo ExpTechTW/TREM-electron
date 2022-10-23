@@ -1,0 +1,35 @@
+:lang(en) input, :lang(en) input::placeholder {
+    font-family: "Google Sans",  "Noto Sans TC", "Noto Sans JP", "Arial", sans-serif;
+}
+:lang(ja) input, :lang(ja) input::placeholder {
+    font-family: "Google Sans", "Noto Sans JP", "Meiryo", "MS PGothic", sans-serif;
+}
+:lang(ru) input, :lang(ru) input::placeholder,
+:lang(zh-TW) input, :lang(zh-TW) input::placeholder {
+    font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Microsoft JhengHei", sans-serif;
+}
+
+input.input-field {
+    background-color: rgb(var(--md-sys-color-surface-variant));
+    border-radius: 6px 6px 0 0;
+    padding: 0 16px;
+    height: 50px;
+    color: rgb(var(--md-sys-color-on-surface));
+    font-size: 16px;
+    border: none;
+    border-bottom: 2px solid rgb(var(--md-sys-color-on-surface-variant));
+    outline: none;
+}
+
+input.input-field::placeholder {
+    color: rgb(var(--md-sys-color-on-surface-variant));
+    font-size: 16px;
+}
+
+input.input-field:focus {
+    border-bottom: 2px solid rgb(var(--md-sys-color-primary));
+}
+
+input.input-field:focus-visible {
+    outline: 2px solid rgb(var(--md-sys-color-primary));
+}
