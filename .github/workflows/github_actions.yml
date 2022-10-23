@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: TREM
+        working-directory: TREM.Electron
 
     steps:
     - uses: actions/checkout@v2
