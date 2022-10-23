@@ -7,8 +7,19 @@ const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
-TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 TREM.Earthquake = new EventEmitter();
+TREM.Audios = {
+	pga1   : new Audio("../audio/PGA1.wav"),
+	pga2   : new Audio("../audio/PGA2.wav"),
+	int0   : new Audio("../audio/Shindo0.wav"),
+	int1   : new Audio("../audio/Shindo1.wav"),
+	int2   : new Audio("../audio/Shindo2.wav"),
+	eew    : new Audio("../audio/EEW.wav"),
+	update : new Audio("../audio/Update.wav"),
+	palert : new Audio("../audio/palert.wav"),
+};
+TREM.AudioContext = new AudioContext({});
+TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
 // if (fs.existsSync("./js/server.js")) {
@@ -124,6 +135,7 @@ async function init() {
 		progressbar.value = (1 / progressStep) * 1;
 	})().catch(e => dump({ level: 2, message: e }));
 
+	// Timers
 	(() => {
 		$("#loading").text(TREM.Localization.getString("Application_Loading"));
 		const time = document.getElementById("time");
@@ -279,11 +291,17 @@ async function init() {
 		progressbar.value = (1 / progressStep) * 2;
 	})();
 
+	// Audios
 	(() => {
-		setUserLocationMarker(setting["location.town"]);
+		const gainNode = TREM.AudioContext.createGain();
+		for (const key in TREM.Audios) {
+			const audioSource = TREM.AudioContext.createMediaElementSource(TREM.Audios[key]);
+			audioSource.connect(gainNode).connect(TREM.AudioContext.destination);
+		}
 		progressbar.value = (1 / progressStep) * 3;
 	})();
 
+	// Colors and Map
 	await (async () => {
 		TREM.Colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
 
@@ -358,10 +376,11 @@ async function init() {
 					},
 				}).addTo(Maps.report),
 			);
-
+		setUserLocationMarker(setting["location.town"]);
 		progressbar.value = (1 / progressStep) * 4;
 	})().catch(e => dump({ level: 2, message: e }));
 
+	// Files
 	await (async () => {
 		await fetchFiles();
 		if (!Timers.fetchFiles)
@@ -575,10 +594,10 @@ function handler(response) {
 					if (setting["audio.realtime"])
 						if (amount > 8 && PGALimit == 0) {
 							PGALimit = 1;
-							audioPlay("./audio/PGA1.wav");
+							TREM.Audios.pga1.play();
 						} else if (amount > 250 && PGALimit != 2) {
 							PGALimit = 2;
-							audioPlay("./audio/PGA2.wav");
+							TREM.Audios.pga2.play();
 						}
 					pga[station[keys[index]].PGA].Time = NOW.getTime();
 				}
@@ -618,7 +637,7 @@ function handler(response) {
 					if (setting["Real-time.show"]) win.showInactive();
 					if (setting["Real-time.cover"]) win.moveTop();
 					if (!win.isFocused()) win.flashFrame(true);
-					if (setting["audio.realtime"]) audioPlay("./audio/palert.wav");
+					if (setting["audio.realtime"]) TREM.Audios.palert.play();
 				} else Pgeojson.remove();
 				Pgeojson = L.geoJson.vt(MapData.tw_town, {
 					minZoom   : 4,
@@ -711,11 +730,11 @@ function handler(response) {
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 		if (setting["audio.realtime"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
-				audioPlay("./audio/Shindo2.wav");
+				TREM.Audios.int2.play();
 			else if (All[0].intensity >= 2 && PGAtag < 2)
-				audioPlay("./audio/Shindo1.wav");
+				TREM.Audios.int1.play();
 			else if (PGAtag == -1)
-				audioPlay("./audio/Shindo0.wav");
+				TREM.Audios.int0.play();
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
 				Function : "station",
@@ -894,10 +913,10 @@ function playNextAudio() {
 	audioLock = true;
 	const nextAudioPath = audioList.shift();
 	audioDOM.src = nextAudioPath;
-	if (nextAudioPath.startsWith("./audio/1/") && setting["audio.eew"]) {
+	if (nextAudioPath.startsWith("../audio/1/") && setting["audio.eew"]) {
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM.play();
-	} else if (!nextAudioPath.startsWith("./audio/1/")) {
+	} else if (!nextAudioPath.startsWith("../audio/1/")) {
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM.play();
 	}
@@ -907,10 +926,10 @@ function playNextAudio1() {
 	const nextAudioPath = audioList1.shift();
 	audioDOM1.src = nextAudioPath;
 	audioDOM1.playbackRate = 1.1;
-	if (nextAudioPath.startsWith("./audio/1/") && setting["audio.eew"]) {
+	if (nextAudioPath.startsWith("../audio/1/") && setting["audio.eew"]) {
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
-	} else if (!nextAudioPath.startsWith("./audio/1/")) {
+	} else if (!nextAudioPath.startsWith("../audio/1/")) {
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
 	}
@@ -1417,7 +1436,7 @@ async function FCMdata(data) {
 		if (setting["report.show"]) win.showInactive();
 		if (setting["report.cover"]) win.moveTop();
 
-		if (setting["audio.report"]) audioPlay("./audio/Report.wav");
+		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
 		new Notification("地震報告",
 			{
 				body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
@@ -1577,25 +1596,25 @@ TREM.Earthquake.on("eew", (data) => {
 
 		EEWT.id = data.ID;
 		if (setting["audio.eew"] && Alert) {
-			audioPlay("./audio/EEW.wav");
-			audioPlay1(`./audio/1/${level.replace("+", "").replace("-", "")}.wav`);
+			TREM.Audios.eew.play();
+			audioPlay1(`../audio/1/${level.replace("+", "").replace("-", "")}.wav`);
 			if (level.includes("+"))
-				audioPlay1("./audio/1/intensity-strong.wav");
+				audioPlay1("../audio/1/intensity-strong.wav");
 			else if (level.includes("-"))
-				audioPlay1("./audio/1/intensity-weak.wav");
+				audioPlay1("../audio/1/intensity-weak.wav");
 			else
-				audioPlay1("./audio/1/intensity.wav");
+				audioPlay1("../audio/1/intensity.wav");
 
 			if (value > 0 && value < 100) {
 				if (value <= 10)
-					audioPlay1(`./audio/1/${value.toString()}.wav`);
+					audioPlay1(`../audio/1/${value.toString()}.wav`);
 				else if (value < 20)
-					audioPlay1(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
+					audioPlay1(`../audio/1/x${value.toString().substring(1, 2)}.wav`);
 				else {
-					audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
-					audioPlay1(`./audio/1/x${value.toString().substring(1, 2)}.wav`);
+					audioPlay1(`../audio/1/${value.toString().substring(0, 1)}x.wav`);
+					audioPlay1(`../audio/1/x${value.toString().substring(1, 2)}.wav`);
 				}
-				audioPlay1("./audio/1/second.wav");
+				audioPlay1("../audio/1/second.wav");
 			}
 		}
 	}
@@ -1607,7 +1626,7 @@ TREM.Earthquake.on("eew", (data) => {
 				EEWAlert = true;
 				if (setting["audio.eew"] && Alert)
 					for (let index = 0; index < 5; index++)
-						audioPlay("./audio/Alert.wav");
+						audioPlay("../audio/Alert.wav");
 			}
 		}
 	} else
@@ -1616,7 +1635,7 @@ TREM.Earthquake.on("eew", (data) => {
 	let _time = -1;
 	let stamp = 0;
 	if (EEW[data.ID] != undefined)
-		if (setting["audio.eew"] && Alert) audioPlay("./audio/Update.wav");
+		if (setting["audio.eew"] && Alert) TREM.Audios.update.play();
 	EEW[data.ID] = {
 		lon  : Number(data.EastLongitude),
 		lat  : Number(data.NorthLatitude),
@@ -1637,23 +1656,23 @@ TREM.Earthquake.on("eew", (data) => {
 					if (stamp != value && !audioLock1) {
 						stamp = value;
 						if (_time >= 0) {
-							audioPlay("./audio/1/ding.wav");
+							audioPlay("../audio/1/ding.wav");
 							_time++;
 							if (_time >= 10)
 								clearInterval(t);
 						} else if (value < 100)
 							if (value > 10)
 								if (value.toString().substring(1, 2) == "0") {
-									audioPlay1(`./audio/1/${value.toString().substring(0, 1)}x.wav`);
-									audioPlay1("./audio/1/x0.wav");
+									audioPlay1(`../audio/1/${value.toString().substring(0, 1)}x.wav`);
+									audioPlay1("../audio/1/x0.wav");
 								} else
-									audioPlay("./audio/1/ding.wav");
+									audioPlay("../audio/1/ding.wav");
 
 							else if (value > 0)
-								audioPlay1(`./audio/1/${value.toString()}.wav`);
+								audioPlay1(`../audio/1/${value.toString()}.wav`);
 							else {
 								arrive = data.ID;
-								audioPlay1("./audio/1/arrive.wav");
+								audioPlay1("../audio/1/arrive.wav");
 								_time = 0;
 							}
 					}
@@ -1783,7 +1802,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 		if (setting["report.show"]) win.showInactive();
 		if (setting["report.cover"]) win.moveTop();
 
-		if (setting["audio.report"]) audioPlay("./audio/Water.wav");
+		if (setting["audio.report"]) audioPlay("../audio/Water.wav");
 		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 	}
 	if (data.Cancel) {
@@ -1805,7 +1824,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 	} else {
 		if (!TSUNAMI.warnIcon) {
 			const warnIcon = L.icon({
-				iconUrl   : "./image/warn.png",
+				iconUrl   : "../image/warn.png",
 				iconSize  : [30, 30],
 				className : "tsunami",
 			});
@@ -2047,7 +2066,7 @@ function main(data) {
 			if (num > 85) Progress = 8;
 			if (num > 98) Progress = 9;
 			const myIcon = L.icon({
-				iconUrl  : `./image/progress${Progress}.png`,
+				iconUrl  : `../image/progress${Progress}.png`,
 				iconSize : [50, 50],
 			});
 			const DepthM = L.marker([Number(data.NorthLatitude), Number(data.EastLongitude) + 0.15], { icon: myIcon });
@@ -2066,7 +2085,7 @@ function main(data) {
 		const cursor = INFO.findIndex((v) => v.ID == data.ID) + 1;
 		if (cursor <= 4 && INFO.length > 1) {
 			epicenterIcon = L.icon({
-				iconUrl   : `./image/cross${cursor}.png`,
+				iconUrl   : `../image/cross${cursor}.png`,
 				iconSize  : [40, 40],
 				className : "epicenterIcon",
 			});
@@ -2076,7 +2095,7 @@ function main(data) {
 			if (cursor == 4) offsetX = -0.03;
 		} else
 			epicenterIcon = L.icon({
-				iconUrl   : "./image/cross.png",
+				iconUrl   : "../image/cross.png",
 				iconSize  : [30, 30],
 				className : "epicenterIcon",
 			});
