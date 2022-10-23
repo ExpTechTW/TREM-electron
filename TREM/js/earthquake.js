@@ -546,61 +546,6 @@ function PGAMain() {
 	}, 500);
 }
 
-function rtstationzerofun(num,text,key){
-	if(num == 1){
-		let elementstationidzero = document.getElementById(key);
-		if (elementstationidzero != null) {
-			if(elementstationidzero.value != NOW.getTime()){
-				console.log(text+" 持續斷線中...");
-			}else if(elementstationidzero.value != "2"){
-				console.log(text+" 重新進入斷線中...");
-				const node = document.createElement("p").cloneNode(true);
-				node.setAttribute("value",NOW.getTime());
-				node.setAttribute("id",key);
-				const texta = text +' 斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss");
-				console.log(texta);
-				const textnode = document.createTextNode(texta);
-				node.appendChild(textnode);
-				document.getElementById("log").appendChild(node);
-			}
-		}else{
-			console.log(text+"首次進入斷線工作中...");
-			document.getElementById("log1").innerHTML = "";
-			const node = document.createElement("p").cloneNode(true);
-			node.setAttribute("value",NOW.getTime());
-			node.setAttribute("id",key);
-			const texta = text +' 斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss");
-			console.log(texta);
-			const textnode = document.createTextNode(texta);
-			node.appendChild(textnode);
-			document.getElementById("log").appendChild(node);
-			// dump({ level: 3, message: ` ${text}`, origin: "rt-station-zero-log" });
-			console.log(text+"首次進入斷線完成");
-		}
-	}else if(num == 0){
-		let elementstationid = document.getElementById(key);
-		if (elementstationid != null){
-			if (elementstationid.value != undefined) {
-				if(elementstationid.value != "2"){
-					console.log(text+"進入離開斷線工作中...");
-					const node = document.createElement("p");
-					node.setAttribute("value",NOW.getTime());
-					node.setAttribute("id",key+"0");
-					const texta = text+' 離開斷線時間 : '+new Date(NOW.getTime()).format("YYYY/MM/DD HH:mm:ss");
-					console.log(texta);
-					const textnode = document.createTextNode(texta);
-					node.appendChild(textnode);
-					document.getElementById("log").appendChild(node);
-					document.getElementById(key).setAttribute("value","2");
-					// dump({ level: 3, message: ` ${text}`, origin: "rt-station-zero-log" });
-					console.log(text+"進入離開斷線完成");
-				}
-			}else
-				console.log(text+" undefined "+elementstationid.text);
-	}
-		}
-}
-
 function handler(response) {
 	const Json = response;
 	// console.log(Json);
@@ -658,12 +603,6 @@ function handler(response) {
 						(amount > 2.5) ? "pga3" :
 							(amount > 2) ? "pga2" :
 								"pga1";
-
-		// if(levelClass=="zero"){
-		// 	rtstationzerofun(1,station[keys[index]].Loc,keys[index]);
-		// }else{
-		// 	// rtstationzerofun(0,station[keys[index]].Loc,keys[index]);
-		// }
 
 		const station_tooltip = `<div>${keys[index]}</div><div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 

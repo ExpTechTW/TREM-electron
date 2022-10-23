@@ -277,10 +277,6 @@ kbd {
 	transition: color .1s ease-in-out;
 }
 
-#log p {
-    margin: 0px;
-}
-
 #log1 {
 	overflow-y: scroll;
 	user-select: none;
@@ -1321,7 +1317,7 @@ kbd {
 }
 
 #rt-station.right {
-	right: 922.5px;
+	right: 933.5px;
 }
 
 #rt-maxintensitynum {
