@@ -571,19 +571,13 @@ function handler(response) {
 		const Level = IntensityI(Intensity);
 		const now = new Date(stationData.T * 1000);
 
-		if (keys.includes(setting["Real-time.station"])) {
+		if (keys.includes(setting["Real-time.station"]))
 			if (keys[index] == setting["Real-time.station"]) {
 				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
 				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
 				document.getElementById("rt-station-local-pga").innerText = amount;
 			}
-		} else {
-			document.getElementById("rt-station-local-intensity").className = "rt-station-intensity na";
-			document.getElementById("rt-station-local-name").innerText = TREM.Localization.getString("Realtime_No_Data");
-			document.getElementById("rt-station-local-time").innerText = "--:--:--";
-			document.getElementById("rt-station-local-pga").innerText = "--";
-		}
 
 		if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
 			pga[station[keys[index]].PGA] = {
@@ -629,6 +623,10 @@ function handler(response) {
 		document.getElementById("rt-station-max-name").innerText = TREM.Localization.getString("Realtime_No_Data");
 		document.getElementById("rt-station-max-time").innerText = "--:--:--";
 		document.getElementById("rt-station-max-pga").innerText = "--";
+		document.getElementById("rt-station-local-intensity").className = "rt-station-intensity na";
+		document.getElementById("rt-station-local-name").innerText = TREM.Localization.getString("Realtime_No_Data");
+		document.getElementById("rt-station-local-time").innerText = "--:--:--";
+		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
 	if (PAlert.data != undefined && replay == 0) {
