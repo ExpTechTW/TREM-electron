@@ -332,7 +332,7 @@ function restart() {
 }
 
 ipcMain.on("screenshotEEW", async (event, json) => {
-	// return;
+	return;
 	const folder = path.join(TREM.getPath("userData"), "EEW");
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);
