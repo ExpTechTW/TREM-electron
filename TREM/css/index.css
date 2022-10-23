@@ -1309,7 +1309,6 @@ kbd {
 	font-variant-numeric: tabular-nums;
 	pointer-events: none;
 	white-space: nowrap;
-	right: 922.5px;
 }
 
 .rt-station-detail-container {
@@ -1319,6 +1318,10 @@ kbd {
 
 #rt-station.hide {
 	display: none;
+}
+
+#rt-station.right {
+	right: 922.5px;
 }
 
 #rt-maxintensitynum {
@@ -1352,10 +1355,15 @@ kbd {
 	text-align: center;
 	border-radius: 16px;
 	margin-right: 12px;
-	margin-left: 12px;
-	font-size: 24px;
+	margin-left: 0px;
+	margin-bottom: 6px;
+	font-size: 12px;
 	font-weight: 500;
 	float : left;
+}
+
+#rt-maxintensity-name::before{
+	content: var(--rt-maxintensity);
 }
 
 #rt-maxintensity-id{
@@ -1383,7 +1391,7 @@ kbd {
 	border-radius: 16px;
 	margin-right: 12px;
 	margin-left: 12px;
-	margin-bottom: 12px;
+	margin-bottom: 6px;
 	font-size: 38px;
 	font-weight: 500;
 	clear: left;

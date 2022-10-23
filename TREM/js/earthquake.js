@@ -613,9 +613,13 @@ function handler(response) {
 		else
 			ipcRenderer.send("RTSUnlock", Unlock);
 		document.getElementById("rt-station").classList.remove("hide");
+		document.getElementById("rt-station").classList.add("right");
+		document.getElementById("rt-maxintensitynum").classList.remove("hide");
 	}else{
 		ipcRenderer.send("RTSUnlock", Unlock);
 		document.getElementById("rt-station").classList.add("hide");
+		document.getElementById("rt-station").classList.remove("right");
+		document.getElementById("rt-maxintensitynum").classList.add("hide");
 	}
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
@@ -624,13 +628,15 @@ function handler(response) {
 		delete Station[removedKey];
 	}
 	MaxPGA = 0;
+	MaxIntensity = 0;
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const Sdata = Json[keys[index]];
 		const amount = Number(Sdata.PGA);
+		const amountI = Number(Sdata.I);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = (!Unlock) ? (Sdata.I >= 2) : Sdata.alert;
+		const Alert = (!Unlock) ? (amountI >= 2) : Sdata.alert;
 		if (amount > MaxPGA) MaxPGA = amount;
-		const Intensity = (Alert && Json.Alert) ? Sdata.I :
+		const Intensity = (Alert && Json.Alert) ? amountI :
 			(NOW.getTime() - Sdata.TS * 1000 > 15000) ? "NA" :
 				(!Alert) ? 0 :
 					(amount >= 800) ? 9 :
@@ -643,6 +649,7 @@ function handler(response) {
 												(amount >= 5) ? 2 :
 													(amount >= 2.2) ? 1 :
 														0;
+		if (Intensity > MaxIntensity) MaxIntensity = Intensity;
 		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
 		const levelClass = (Intensity != 0) ? IntensityToClassString(Intensity) :
 			(amount == 999) ? "pga6" :
@@ -909,10 +916,10 @@ function handler(response) {
 	}
 	All = Json.I ?? [];
 	// console.log(Json.I);
-	MaxIntensity = 0;
+	// MaxIntensity = 0;
 	for (let index = 0; index < All.length; index++){
 		All[index].loc = station[All[index].uuid].Loc;
-		if (All[index].intensity > MaxIntensity) MaxIntensity = All[index].intensity;
+		// if (All[index].intensity > MaxIntensity) MaxIntensity = All[index].intensity;
 	}
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 		if (setting["audio.realtime"])
