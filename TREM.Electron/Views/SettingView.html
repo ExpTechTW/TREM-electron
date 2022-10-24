@@ -73,7 +73,7 @@
                             <span lang="zh-CN">音效</span>
                             <span lang="zh-TW">音效</span>
                         </div>
-                        <div class="md3-ripple" onclick="setList('Connection', this, event)" onkeydown="setList('Connection', this, event)" id="#Other" role="button" tabindex="0">
+                        <div class="md3-ripple" onclick="setList('Connection', this, event)" onkeydown="setList('Connection', this, event)" id="#Connection" role="button" tabindex="0">
                             <span lang="en">Connection</span>
                             <span lang="ja">接続</span>
                             <span lang="kr">연결</span>
@@ -96,6 +96,14 @@
                             <span lang="ru">Другое</span>
                             <span lang="zh-CN">高级</span>
                             <span lang="zh-TW">其他</span>
+                        </div>
+                        <div class="md3-ripple" onclick="setList('Test1', this, event)" onkeydown="setList('Test1', this, event)" id="Test" role="button" tabindex="0">
+                            <span lang="en">Test</span>
+                            <span lang="ja">Test</span>
+                            <span lang="kr">Test</span>
+                            <span lang="ru">Test</span>
+                            <span lang="zh-CN">測試</span>
+                            <span lang="zh-TW">測試</span>
                         </div>
                         <div class="md3-ripple" onclick="setList('About', this, event)" onkeydown="setList('About', this, event)" id="#About" role="button" tabindex="0">
                             <span lang="en">About</span>
@@ -1872,6 +1880,149 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="list-container" id="Test1">
+                                <div class="control-title">
+                                    <div>
+                                        <span lang="en">Test EEW</span>
+                                        <span lang="ja">速報テスト</span>
+                                        <span lang="kr">테스트</span>
+                                        <span lang="ru">Тест раннего предупреждения землетрясений</span>
+                                        <span lang="zh-CN">测试警报</span>
+                                        <span lang="zh-TW">測試警報</span>
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="zh-TW">地震編號</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="zh-TW">地震編號</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="ID" type="text" value="111000">
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="zh-TW">發震時間</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="zh-TW">發震時間</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="Time" type="text">
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="zh-TW">發報時間</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="zh-TW">發報時間</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="TimeStamp" type="text">
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="zh-TW">經度</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="zh-TW">經度</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="EastLongitude" type="text" value="120.7">
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="zh-TW">緯度</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="zh-TW">緯度</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="NorthLatitude" type="text" value="22.2">
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="zh-TW">深度</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="zh-TW">深度</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="Depth" type="text" value="10">
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="zh-TW">規模</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="zh-TW">規模</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="Scale" type="text" value="5.0">
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="zh-TW">報</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="zh-TW">報</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="Version" type="text" value="1">
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="zh-TW">UUID</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="zh-TW">UUID</span>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="UUID" type="text" value="">
+                                    </div>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container">
+                                        <button class="filled-tonal-button setting-button md3-ripple" id="sendbutton" type="button" onclick="send()" style="margin-top: 16px;">
+                                            <span class="filled-tonal-button-label">
+                                                <span lang="zh-TW">發送</span>
+                                            </span>
+                                        </button>
+                                        <button class="filled-tonal-button setting-button md3-ripple" id="resendbutton" type="button" onclick="resend()" style="margin-top: 16px; left: 30px;">
+                                            <span class="filled-tonal-button-label">
+                                                <span lang="zh-TW">重置</span>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="list-container" id="About">
                                 <div class="control-title">Taiwan Real-time Earthquake Monitoring</div>
                                 <div class="external-link" role="link" onclick="openURL('https:\/\/github.com/ExpTechTW/TREM')">GitHub<span class="material-symbols-rounded">open_in_new</span></div>
@@ -1915,6 +2066,26 @@
         <script src="../js/ripple.js"></script>
         <script src="../js/setting.js"></script>
         <script src="../js/ui.js"></script>
+        <script>
+            let utc = new Date()
+            let NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000)
+            const now = new Date(NOW.getTime() - 20000);
+            const Now = now.getFullYear() +
+                "-" + (now.getMonth() + 1) +
+                "-" + now.getDate() +
+                " " + now.getHours() +
+                ":" + now.getMinutes() +
+                ":" + now.getSeconds();
+            document.getElementById("Time").value = Now
+            const now1 = new Date(NOW.getTime());
+            const Now1 = now1.getFullYear() +
+                "-" + (now1.getMonth() + 1) +
+                "-" + now1.getDate() +
+                " " + now1.getHours() +
+                ":" + now1.getMinutes() +
+                ":" + now1.getSeconds();
+            document.getElementById("TimeStamp").value = Now1
+        </script>
     </body>
 
 </html>

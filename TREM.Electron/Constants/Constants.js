@@ -224,6 +224,10 @@ const Constants = Object.freeze({
 			type  : "string",
 			value : "",
 		},
+		"dev.mode": {
+			type  : "toggle",
+			value : false,
+		},
 	},
 });
 

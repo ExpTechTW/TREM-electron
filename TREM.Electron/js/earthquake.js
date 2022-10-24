@@ -733,6 +733,16 @@ function handler(response) {
 			MAXPGA.intensity = Intensity;
 			MAXPGA.time = new Date(stationData.T * 1000);
 		}
+		if (MaxIntensity > MAXPGA.intensity){
+			MAXPGA.pga = amount;
+			MAXPGA.station = keys[index];
+			MAXPGA.level = Level;
+			MAXPGA.lat = station[keys[index]].Lat;
+			MAXPGA.long = station[keys[index]].Long;
+			MAXPGA.loc = station[keys[index]].Loc;
+			MAXPGA.intensity = MaxIntensity;
+			MAXPGA.time = new Date(stationData.T * 1000);
+		}
 	}
 	if (MAXPGA.station != "NA") {
 		document.getElementById("rt-station-max-intensity").className = `rt-station-intensity ${(MAXPGA.pga < 999) ? IntensityToClassString(MAXPGA.intensity) : "na"}`;
@@ -1283,6 +1293,7 @@ function addReport(report, prepend = false) {
 			if (report.ID.length != 0) {
 				localStorage.TestID = report.ID;
 				ipcRenderer.send("testEEW");
+				toggleNav(false);
 				stopReplaybtn();
 			} else {
 				set_report_overview = 1;

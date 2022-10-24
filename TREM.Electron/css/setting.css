@@ -404,3 +404,7 @@ code {
 ::selection {
     background-color: rgb(var(--md-sys-color-outline));
 }
+
+#Test.hide {
+	display: none;
+}
