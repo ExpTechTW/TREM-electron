@@ -1241,6 +1241,10 @@ function color(Intensity) {
 // #region IPC
 ipcMain.once("start", () => {
 	try {
+		if (localStorage.TOS_v1 == undefined) {
+			localStorage.TOS_v1 = true;
+			showDialog("warn", "使用條款 1.0", "• 使用本服務應視為用戶同意使用條款\n• TREM 是一款提供 地震檢知、地震預警、海嘯警報、震度速報、地震報告 的軟體\n• 禁止在未經允許的情況下二次分發 TREM 軟體內的任何資訊\n• 禁止違反 法律、公共秩序 或 道德 的行為\n• 禁止任何 開發團隊 合理認為不適當的行為\n• 如違反上述規定，則服務可能會暫停或終止");
+		}
 		setInterval(() => {
 			if (DATAstamp != 0 && Stamp != DATAstamp) {
 				Stamp = DATAstamp;
