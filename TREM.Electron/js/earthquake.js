@@ -201,7 +201,7 @@ async function init() {
 					GetDataState = "✉";
 				}
 				const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
-				// const formatCPUUsage = (data) => `${data} %`;
+				const formatCPUUsage = (data) => `${data} %`;
 				const memoryData = process.memoryUsage();
 				const CPUData = formatCPUUsage(process.getCPUUsage().percentCPUUsage.toString().slice(0, 3));
 				const rss = formatMemoryUsage(memoryData.rss);
@@ -211,8 +211,8 @@ async function init() {
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
 				const unlock = (Unlock) ? "⚡" : "";
-				$("#log").text(`${CPUData}% | ${rss}`);
-				$("#log1").text(`${CPUData}% | ${rss}`);
+				$("#log").text(`${CPUData} | ${rss}`);
+				$("#log1").text(`${CPUData} | ${rss}`);
 				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
 				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
 			}, 500);
