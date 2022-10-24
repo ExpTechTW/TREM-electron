@@ -130,6 +130,25 @@ function init() {
 		document.body.classList.remove("settingDisabled");
 	}
 
+	let utc = new Date();
+	let NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
+	const now = new Date(NOW.getTime() - 20000);
+	const Now = now.getFullYear() +
+	"-" + (now.getMonth() + 1) +
+	"-" + now.getDate() +
+	" " + now.getHours() +
+	":" + now.getMinutes() +
+	":" + now.getSeconds();
+	document.getElementById("Time").value = Now
+	const now1 = new Date(NOW.getTime());
+	const Now1 = now1.getFullYear() +
+	"-" + (now1.getMonth() + 1) +
+	"-" + now1.getDate() +
+	" " + now1.getHours() +
+	":" + now1.getMinutes() +
+	":" + now1.getSeconds();
+	document.getElementById("TimeStamp").value = Now1;
+
 	Object.keys(setting).forEach(id => {
 		switch (TREM.Constants.Default_Configurations[id].type) {
 			case "toggle": {
@@ -448,6 +467,24 @@ function send(){
 				console.log("發送成功 請刷新網頁")
 			}
 			document.getElementById("Version").value = Number(document.getElementById("Version").value) + 1
+			let utc = new Date();
+			let NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
+			const now = new Date(NOW.getTime() - 20000);
+			const Now = now.getFullYear() +
+			"-" + (now.getMonth() + 1) +
+			"-" + now.getDate() +
+			" " + now.getHours() +
+			":" + now.getMinutes() +
+			":" + now.getSeconds();
+			document.getElementById("Time").value = Now
+			const now1 = new Date(NOW.getTime());
+			const Now1 = now1.getFullYear() +
+			"-" + (now1.getMonth() + 1) +
+			"-" + now1.getDate() +
+			" " + now1.getHours() +
+			":" + now1.getMinutes() +
+			":" + now1.getSeconds();
+			document.getElementById("TimeStamp").value = Now1;
 		}).catch(function (error) {
 
 		})
