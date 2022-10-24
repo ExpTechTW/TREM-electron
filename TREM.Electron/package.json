@@ -54,7 +54,7 @@
   "author": "whes1015",
   "license": "AGPL-3.0",
   "devDependencies": {
-    "electron": "^21.1.1",
+    "electron": "^21.2.0",
     "electron-builder": "^23.6.0",
     "eslint": "^8.23.1",
     "eslint-plugin-require-sort": "^1.2.2"
