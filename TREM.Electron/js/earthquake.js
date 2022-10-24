@@ -324,7 +324,7 @@ async function init() {
 		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
 		if (!MapBases.main.length)
-			for (const mapName of ["cn", "jp", "tw_county"])
+			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
 				MapBases.main.push(
 					L.geoJson.vt(MapData[mapName], {
 						edgeBufferTiles : 2,
