@@ -1306,13 +1306,22 @@ kbd {
 }
 
 .rt-station-label {
-	writing-mode: vertical-lr;
-	/* text-orientation: sideways; */
-	transform: rotate(0deg);
-	font-size: 12px;
-	font-weight: 300;
+	/* writing-mode: vertical-lr;
+	text-orientation: sideways;
+	transform: rotate(0deg); */
+	font-size: 16px;
+	font-weight: 500;
 	text-rendering: optimizeLegibility;
 	color: rgb(var(--md-sys-color-on-surface-variant));
+	position: relative;
+	height: 32px;
+	width: 32px;
+	line-height: 32px;
+	text-align: center;
+	border-radius: 16px;
+	margin: 8px;
+	margin-bottom: 0px;
+    margin-top: 0px;
 }
 
 .rt-station-detail-container {
@@ -1374,8 +1383,24 @@ kbd {
 	content: var(--rt-maxintensity);
 }
 
+#rt-station-max-label{
+	float : left;
+}
+
+#rt-station-max-intensity{
+	clear: left;
+}
+
 #rt-station-max-label::before{
 	content: var(--rt-station-max);
+}
+
+#rt-station-local-label{
+	float : left;
+}
+
+#rt-station-local-intensity{
+	clear: left;
 }
 
 #rt-station-local-label::before{

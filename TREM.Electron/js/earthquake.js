@@ -687,7 +687,7 @@ function handler(response) {
 						if (document.getElementById("rt-station").classList.contains("hide"))
 							document.getElementById("rt-station").classList.remove("hide");
 						document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
-						document.getElementById("rt-station-local-id").innerText = keys[index];
+						// document.getElementById("rt-station-local-id").innerText = keys[index];
 						document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 						document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
 						document.getElementById("rt-station-local-pga").innerText = amount;
@@ -746,7 +746,7 @@ function handler(response) {
 	}
 	if (MAXPGA.station != "NA") {
 		document.getElementById("rt-station-max-intensity").className = `rt-station-intensity ${(MAXPGA.pga < 999) ? IntensityToClassString(MAXPGA.intensity) : "na"}`;
-		document.getElementById("rt-station-max-id").innerText = MAXPGA.station;
+		// document.getElementById("rt-station-max-id").innerText = MAXPGA.station;
 		document.getElementById("rt-station-max-name").innerText = MAXPGA.loc;
 		document.getElementById("rt-station-max-time").innerText = MAXPGA.time.format("HH:mm:ss");
 		document.getElementById("rt-station-max-pga").innerText = MAXPGA.pga;

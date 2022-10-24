@@ -31,8 +31,8 @@ html:lang(ru) body {
 }
 
 html:lang(zh-TW) body {
-    --rt-station-max: "最大測站";
-    --rt-station-local: "目前測站";
+    --rt-station-max: "最大";
+    --rt-station-local: "當前";
     --rt-station-time: "時間";
     --rt-station-intensity: "震度";
     --rt-maxintensity: "最大震度";
