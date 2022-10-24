@@ -370,7 +370,7 @@ async function init() {
 		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
 		if (!MapBases.main.length)
-			for (const mapName of ["cn", "jp", "tw_county"])
+			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
 				MapBases.main.push(
 					L.geoJson.vt(MapData[mapName], {
 						edgeBufferTiles : 2,
@@ -387,36 +387,6 @@ async function init() {
 						},
 					}).addTo(Maps.main),
 				);
-			MapBases.main.push( L.geoJson.vt(MapData.sk, {
-				edgeBufferTiles : 2,
-				minZoom         : 4,
-				maxZoom         : 15,
-				tolerance       : 20,
-				buffer          : 256,
-				debug           : 0,
-				style           : {
-					weight      : 0.8,
-					color       : TREM.Colors.primary,
-					fillColor   : TREM.Colors.surfaceVariant,
-					fillOpacity : 1,
-				},
-			}).addTo(Maps.main),
-			);
-			MapBases.main.push( L.geoJson.vt(MapData.nk, {
-				edgeBufferTiles : 2,
-				minZoom         : 4,
-				maxZoom         : 15,
-				tolerance       : 20,
-				buffer          : 256,
-				debug           : 0,
-				style           : {
-					weight      : 0.8,
-					color       : TREM.Colors.primary,
-					fillColor   : TREM.Colors.surfaceVariant,
-					fillOpacity : 1,
-				},
-			}).addTo(Maps.main),
-			);
 
 		if (!MapBases.mini.length)
 			MapBases.mini.push(
