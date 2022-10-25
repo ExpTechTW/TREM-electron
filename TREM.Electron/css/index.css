@@ -1299,7 +1299,7 @@ kbd {
 
 .rt-station {
 	padding: 8px;
-	min-width: 140px;
+	min-width: 210px;
 	display: flex;
 	align-items: center;
 	white-space: nowrap;

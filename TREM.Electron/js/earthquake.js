@@ -547,14 +547,14 @@ function handler(response) {
 			ipcRenderer.send("RTSUnlock", !Unlock);
 		else
 			ipcRenderer.send("RTSUnlock", Unlock);
-		document.getElementById("rt-station").classList.remove("hide");
-		document.getElementById("rt-station").classList.add("left");
-		document.getElementById("rt-maxintensitynum").classList.remove("hide");
+		// document.getElementById("rt-station").classList.remove("hide");
+		// document.getElementById("rt-station").classList.add("left");
+		// document.getElementById("rt-maxintensitynum").classList.remove("hide");
 	}else{
 		ipcRenderer.send("RTSUnlock", Unlock);
-		document.getElementById("rt-station").classList.add("hide");
-		document.getElementById("rt-station").classList.remove("left");
-		document.getElementById("rt-maxintensitynum").classList.add("hide");
+		// document.getElementById("rt-station").classList.add("hide");
+		// document.getElementById("rt-station").classList.remove("left");
+		// document.getElementById("rt-maxintensitynum").classList.add("hide");
 	}
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
@@ -669,6 +669,25 @@ function handler(response) {
 				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
 				document.getElementById("rt-station-local-pga").innerText = amount;
 			}
+		}else{
+			if (rtstation1 == "") {
+				if (keys.includes(setting["Real-time.station"]))
+					if (keys[index] == setting["Real-time.station"]) {
+						if (document.getElementById("rt-station").classList.contains("hide"))
+							document.getElementById("rt-station").classList.remove("hide");
+						document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+						document.getElementById("rt-station-local-id").innerText = keys[index];
+						document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
+						document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
+						document.getElementById("rt-station-local-pga").innerText = amount;
+					}
+			} else if (rtstation1 == keys[index]){
+				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+				document.getElementById("rt-station-local-id").innerText = keys[index];
+				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
+				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
+				document.getElementById("rt-station-local-pga").innerText = amount;
+			}
 		}
 
 		if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
@@ -703,16 +722,16 @@ function handler(response) {
 			MAXPGA.intensity = Intensity;
 			MAXPGA.time = new Date(stationData.T * 1000);
 		}
-		if (MaxIntensity > MAXPGA.intensity){
-			MAXPGA.pga = amount;
-			MAXPGA.station = keys[index];
-			MAXPGA.level = Level;
-			MAXPGA.lat = station[keys[index]].Lat;
-			MAXPGA.long = station[keys[index]].Long;
-			MAXPGA.loc = station[keys[index]].Loc;
-			MAXPGA.intensity = MaxIntensity;
-			MAXPGA.time = new Date(stationData.T * 1000);
-		}
+		// if (MaxIntensity > MAXPGA.intensity){
+		// 	MAXPGA.pga = amount;
+		// 	MAXPGA.station = keys[index];
+		// 	MAXPGA.level = Level;
+		// 	MAXPGA.lat = station[keys[index]].Lat;
+		// 	MAXPGA.long = station[keys[index]].Long;
+		// 	MAXPGA.loc = station[keys[index]].Loc;
+		// 	MAXPGA.intensity = MaxIntensity;
+		// 	MAXPGA.time = new Date(stationData.T * 1000);
+		// }
 	}
 	if (MAXPGA.station != "NA") {
 		document.getElementById("rt-station-max-intensity").className = `rt-station-intensity ${(MAXPGA.pga < 999) ? IntensityToClassString(MAXPGA.intensity) : "na"}`;
@@ -920,7 +939,7 @@ function handler(response) {
 			audioPlay("../audio/Warn.wav");
 		}
 
-	document.getElementById("rt-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
+	// document.getElementById("rt-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 	document.getElementById("rt-list").replaceChildren(...list);
 }
 
@@ -1259,19 +1278,25 @@ function addReport(report, prepend = false) {
 			console.log("ReportTag1: ", ReportTag1);
 		});
 		Div.addEventListener("contextmenu", (event) => {
+			console.log(report);
 			if (replay != 0) return;
 			if (report.ID.length != 0) {
 				localStorage.TestID = report.ID;
 				ipcRenderer.send("testEEW");
-				toggleNav(false);
-				stopReplaybtn();
 			} else {
-				set_report_overview = 1;
-				TREM.Report.setView("eq-report-overview", report);
-				changeView("report", "#reportView_btn");
-				ReportTag1 = NOW.getTime();
-				console.log("ReportTag1: ", ReportTag1);
+			// } else if (report.data.length != 0) {
+				replay = new Date(report.originTime).getTime() - 25000;
+				replayT = NOW.getTime();
 			}
+			// else {
+			// 	set_report_overview = 1;
+			// 	TREM.Report.setView("eq-report-overview", report);
+			// 	changeView("report", "#reportView_btn");
+			// 	ReportTag1 = NOW.getTime();
+			// 	console.log("ReportTag1: ", ReportTag1);
+			// }
+			toggleNav(false);
+			stopReplaybtn();
 		});
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
@@ -1444,6 +1469,11 @@ function backindexButton(){
 	changeView("main", "#mainView_btn");
 }
 
+ipcMain.on("testoldtimeEEW", async (event, oldtime) => {
+	replay = oldtime - 25000;
+	replayT = NOW.getTime();
+});
+
 ipcMain.on("testEEW", () => {
 	replaytestEEW = NOW.getTime();
 	stopReplaybtn();
@@ -1467,7 +1497,7 @@ ipcMain.on("testEEW", () => {
 			}, 100);
 		delete localStorage.TestID;
 	} else {
-		dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+		dump({ level: 0, message: "Start EEW NO TestID Test", origin: "EEW" });
 		const data = {
 			Function      : "earthquake",
 			Type          : "test",
@@ -1544,6 +1574,7 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 // #region EEW
 async function FCMdata(data) {
 	const json = JSON.parse(data);
+	console.log(json);
 	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	Server.push(json.TimeStamp);
 	if (Server.length > 5) Server.splice(0, 1);

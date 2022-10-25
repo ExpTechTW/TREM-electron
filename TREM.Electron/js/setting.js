@@ -523,6 +523,11 @@ function testEEW() {
 	ipcRenderer.send("closeChildWindow");
 }
 
+function testoldtimeEEW() {
+	const oldtime = new Date(document.getElementById("oldtime").value).getTime();
+	ipcRenderer.send("testoldtimeEEW",oldtime);
+}
+
 function reset() {
 	showDialog("warn",
 		TREM.Localization.getString("Setting_Dialog_Reset_Title"),

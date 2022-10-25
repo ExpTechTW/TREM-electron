@@ -224,6 +224,10 @@ const Constants = Object.freeze({
 			type  : "string",
 			value : "",
 		},
+		"api.key.Hide": {
+			type  : "toggle",
+			value : true,
+		},
 		"dev.mode": {
 			type  : "toggle",
 			value : false,

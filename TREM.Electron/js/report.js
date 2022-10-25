@@ -457,9 +457,21 @@ TREM.Report = {
 			document.getElementById("report-replay").onclick = function(){
 				replayOverviewButton(report);
 			};
-		}else{
+		}
+		if(report.data == undefined){
 			document.getElementById("report-replay").style.display = "none"
 		}
+		if (report.data.length != 0) {
+			document.getElementById("report-replay").style.display = "block"
+			document.getElementById("report-replay").onclick = function(){
+				replay = new Date(report.originTime).getTime() - 25000;
+				replayT = NOW.getTime();
+				stopReplaybtn();
+			};
+		}
+		// else{
+		// 	document.getElementById("report-replay").style.display = "none"
+		// }
 	},
 };
 
