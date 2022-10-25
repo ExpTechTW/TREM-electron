@@ -1,6 +1,13 @@
-hr.divider {
+hr.divider:not(.vertical) {
     display: block;
     height: 1px;
     border: 0;
     border-top: 1px solid rgb(var(--md-sys-color-outline-variant));
+}
+
+hr.divider.vertical {
+    display: block;
+    width: 1px;
+    border: 0;
+    border-left: 1px solid rgb(var(--md-sys-color-outline-variant));
 }
