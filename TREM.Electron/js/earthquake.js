@@ -518,8 +518,9 @@ function handler(response) {
 													(amount >= 2.2) ? 1 :
 														0;
 
-		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
-		const levelClass = (Intensity != 0) ? IntensityToClassString(Intensity) :
+		const NA999 = (Intensity == 9 && amount == 999) ? "Y" : "NA";
+		const size = (Intensity == 0 || Intensity == "NA" || NA999 == "Y") ? 8 : 16;
+		const levelClass = (Intensity != 0 && NA999 != "Y") ? IntensityToClassString(Intensity) :
 			(amount == 999) ? "pga6" :
 				(amount > 3.5) ? "pga5" :
 					(amount > 3) ? "pga4" :
