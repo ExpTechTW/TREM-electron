@@ -586,8 +586,9 @@ function handler(response) {
 														0;
 
 		if (Intensity > MaxIntensity) MaxIntensity = Intensity;
-		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
-		const levelClass = (Intensity != 0) ? IntensityToClassString(Intensity) :
+		const NA999 = (Intensity == 9 && amount == 999) ? "Y" : "NA";
+		const size = (Intensity == 0 || Intensity == "NA" || NA999 == "Y") ? 8 : 16;
+		const levelClass = (Intensity != 0 && NA999 != "Y") ? IntensityToClassString(Intensity) :
 			(amount == 999) ? "pga6" :
 				(amount > 3.5) ? "pga5" :
 					(amount > 3) ? "pga4" :
@@ -1278,7 +1279,6 @@ function addReport(report, prepend = false) {
 			console.log("ReportTag1: ", ReportTag1);
 		});
 		Div.addEventListener("contextmenu", (event) => {
-			console.log(report);
 			if (replay != 0) return;
 			if (report.ID.length != 0) {
 				localStorage.TestID = report.ID;
@@ -1574,7 +1574,6 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 // #region EEW
 async function FCMdata(data) {
 	const json = JSON.parse(data);
-	console.log(json);
 	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	Server.push(json.TimeStamp);
 	if (Server.length > 5) Server.splice(0, 1);
