@@ -373,13 +373,12 @@ function changelocale(value){
 	TREM.Localization.setLocale(value);
 	if (MainWindow){
 		MainWindow.setTitle(TREM.Localization.getString("Application_Title"));
-		MainWindow.reload();
 	}
 	if (SettingWindow){
 		SettingWindow.setTitle(TREM.Localization.getString("Setting_Title"));
-		SettingWindow.reload();
 	}
 	trayIcon();
+	emitAllWindow("config:locale", value);
 }
 
 function trayIcon() {

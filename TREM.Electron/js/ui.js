@@ -7,8 +7,10 @@ document.addEventListener("keydown", (event) => {
 
 const toggleNav = state => {
 	ReportTag1 = 0;
-	toggleNavTime = NOW.getTime();
-	console.log("toggleNavTime: ", toggleNavTime);
+	if (setting["nav.ui.autoclose"]) {
+		toggleNavTime = NOW.getTime();
+		console.log("toggleNavTime: ", toggleNavTime);
+	}
 	if (state == undefined) {
 		$("#nav-rail").toggleClass("hide");
 		state = !$("#nav-rail").hasClass("hide");

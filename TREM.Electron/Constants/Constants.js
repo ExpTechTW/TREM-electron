@@ -232,6 +232,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"nav.ui.autoclose": {
+			type  : "toggle",
+			value : true,
+		},
 	},
 });
 
