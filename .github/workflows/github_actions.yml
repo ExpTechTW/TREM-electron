@@ -23,5 +23,5 @@ jobs:
       run: npm ci
     - name: Lint
       run: npm run lint
-    - name: Build
-      run: npm run dist
+    # - name: Build
+    #   run: npm run dist
