@@ -26,7 +26,7 @@ jobs:
     - name: Build
       run: npm run dist
       env:
-          GH_TOKEN: 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
+          GH_TOKEN: 8rE9clwugmjC0jT9y0flFgBMlYoeTY2IkQm6
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
