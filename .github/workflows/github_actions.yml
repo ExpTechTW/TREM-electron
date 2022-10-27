@@ -25,7 +25,8 @@ jobs:
       run: npm run lint
     - name: Build
       run: npm run dist
-    - uses: actions/upload-artifact@v3
+    - name: Upload Artifact
+      uses: actions/upload-artifact@master
       with:
-        name: '/home/runner/work/TREM/TREM'
-        path: TREM.zip
+        name: "TREM.zip"
+        path: dev
