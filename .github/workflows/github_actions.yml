@@ -28,5 +28,5 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
-        name: "TREM.zip"
+        name: "TREM_Linux.zip"
         path: /home/runner/work/TREM/TREM/TREM.Electron/dev/*.deb
