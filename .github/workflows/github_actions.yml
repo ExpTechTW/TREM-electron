@@ -7,7 +7,7 @@ on:
     branches: [ "Release" ]
 
 jobs:
-  Windows:
+  Windows_x64:
     runs-on: windows-latest
     defaults:
       run:
@@ -27,10 +27,10 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
-        name: "TREM.Windows.64bit.exe"
-        path: /home/runner/work/TREM/TREM/TREM.Electron/dev/*.exe
+        name: "TREM.Windows_x64.exe"
+        path: D:/a/TREM/TREM/TREM.Electron/dev/*.exe
   
-  Linux:
+  Linux_amd64:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -50,10 +50,10 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
-        name: "TREM.Windows.64bit.deb"
-        path: D:/a/TREM/TREM/TREM.Electron/dev/*.deb
+        name: "TREM.Linux_amd64.deb"
+        path: /home/runner/work/TREM/TREM/TREM.Electron/dev/*.deb
 
-  MacOS:
+  macOS_x64:
     runs-on: macos-latest
     defaults:
       run:
@@ -73,5 +73,5 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
-        name: "TREM.Windows.64bit.dmg"
+        name: "TREM.macOS_x64.dmg"
         path: D:/a/TREM/TREM/TREM.Electron/dev/*.dmg
