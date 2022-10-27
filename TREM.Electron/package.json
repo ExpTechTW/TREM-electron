@@ -39,7 +39,9 @@
         "snap",
         "AppImage"
       ],
-      "category": "Development"
+      "category": "Development",
+      "name": "ExpTechTW",
+      "email": "ExpTech.tw@gmail.com"
     },
     "directories": {
       "buildResources": "resources",
