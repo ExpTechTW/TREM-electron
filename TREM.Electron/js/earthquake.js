@@ -108,6 +108,7 @@ let Unlock = false;
 let set_report_overview = 0;
 let rtstation1 = "";
 let MaxIntensity = 0;
+let testEEWerror = false;
 // #endregion
 
 function Gc() {
@@ -182,6 +183,7 @@ async function init() {
 					time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 					time1.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 					if (replaytestEEW != 0 && NOW.getTime() - replaytestEEW > 180_000) {
+						testEEWerror = false;
 						replaytestEEW = 0;
 					}
 					if (ReportTag1 != 0 && NOW.getTime() - ReportTag1 > 60_000) {
@@ -203,18 +205,19 @@ async function init() {
 				const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
 				const formatCPUUsage = (data) => `${data} %`;
 				const memoryData = process.memoryUsage();
-				const CPUData = formatCPUUsage(process.getCPUUsage().percentCPUUsage.toString().slice(0, 3));
+				const CPUData = formatCPUUsage(process.getCPUUsage().percentCPUUsage.toString().slice(0, 5));
 				const rss = formatMemoryUsage(memoryData.rss);
 				// const heapTotal = formatMemoryUsage(memoryData.heapTotal);
 				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
 				// const external = formatMemoryUsage(memoryData.external);
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
+				const error = (testEEWerror) ? "❌" : "";
 				const unlock = (Unlock) ? "⚡" : "";
 				$("#log").text(`${CPUData} | ${rss}`);
 				$("#log1").text(`${CPUData} | ${rss}`);
-				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
-				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
+				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -1283,20 +1286,14 @@ function addReport(report, prepend = false) {
 			if (report.ID.length != 0) {
 				localStorage.TestID = report.ID;
 				ipcRenderer.send("testEEW");
-			} else {
-			// } else if (report.data.length != 0) {
-				replay = new Date(report.originTime).getTime() - 25000;
-				replayT = NOW.getTime();
 			}
-			// else {
-			// 	set_report_overview = 1;
-			// 	TREM.Report.setView("eq-report-overview", report);
-			// 	changeView("report", "#reportView_btn");
-			// 	ReportTag1 = NOW.getTime();
-			// 	console.log("ReportTag1: ", ReportTag1);
-			// }
-			toggleNav(false);
-			stopReplaybtn();
+			else {
+				set_report_overview = 1;
+				TREM.Report.setView("eq-report-overview", report);
+				changeView("report", "#reportView_btn");
+				ReportTag1 = NOW.getTime();
+				console.log("ReportTag1: ", ReportTag1);
+			}
 		});
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
@@ -1461,7 +1458,6 @@ function reportOverviewButton(){
 function replayOverviewButton(report){
 	localStorage.TestID = report.ID;
 	ipcRenderer.send("testEEW");
-	stopReplaybtn();
 }
 
 function backindexButton(){
@@ -1475,8 +1471,9 @@ ipcMain.on("testoldtimeEEW", async (event, oldtime) => {
 });
 
 ipcMain.on("testEEW", () => {
-	replaytestEEW = NOW.getTime();
+	toggleNav(false);
 	stopReplaybtn();
+	replaytestEEW = NOW.getTime();
 	if (localStorage.TestID != undefined) {
 		const list = localStorage.TestID.split(",");
 		for (let index = 0; index < list.length; index++)
@@ -1491,7 +1488,11 @@ ipcMain.on("testEEW", () => {
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 				axios.post(PostAddressIP, data)
+					.then(async function () {
+						testEEWerror = false;
+					})
 					.catch((error) => {
+						testEEWerror = true;
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
 			}, 100);
@@ -1506,7 +1507,11 @@ ipcMain.on("testEEW", () => {
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 		axios.post(PostAddressIP, data)
+			.then(async function () {
+				testEEWerror = false;
+			})
 			.catch((error) => {
+				testEEWerror = true;
 				dump({ level: 2, message: error, origin: "Verbose" });
 			});
 	}

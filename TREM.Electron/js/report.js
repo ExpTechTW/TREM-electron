@@ -183,7 +183,6 @@ TREM.Report = {
 			replay = new Date(report.originTime).getTime() - 25000;
 			replayT = NOW.getTime();
 		}
-		stopReplaybtn();
 	},
 	back() {
 		if (set_report_overview != 0) {
@@ -458,20 +457,20 @@ TREM.Report = {
 				replayOverviewButton(report);
 			};
 		}
-		if(report.data == undefined){
-			document.getElementById("report-replay").style.display = "none"
-		}
-		if (report.data.length != 0) {
-			document.getElementById("report-replay").style.display = "block"
-			document.getElementById("report-replay").onclick = function(){
-				replay = new Date(report.originTime).getTime() - 25000;
-				replayT = NOW.getTime();
-				stopReplaybtn();
-			};
-		}
-		// else{
+		// if(report.data == undefined){
 		// 	document.getElementById("report-replay").style.display = "none"
 		// }
+		// if (report.data.length != 0) {
+		// 	document.getElementById("report-replay").style.display = "block"
+		// 	document.getElementById("report-replay").onclick = function(){
+		// 		replay = new Date(report.originTime).getTime() - 25000;
+		// 		replayT = NOW.getTime();
+		// 		stopReplaybtn();
+		// 	};
+		// }
+		else{
+			document.getElementById("report-replay").style.display = "none"
+		}
 	},
 };
 
