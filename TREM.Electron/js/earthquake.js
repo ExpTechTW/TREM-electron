@@ -78,7 +78,7 @@ let PGAjson = {};
 let PalertT = 0;
 let PGAMainClock = null;
 let Pgeojson = null;
-let PWS = null;
+const PWS = null;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -1413,32 +1413,32 @@ async function FCMdata(data) {
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
 	else if (json.Function == "PWS") {
-		if (PWS != null) PWS.remove();
-		PWS = L.geoJson.vt(MapData.tw_county, {
-			minZoom   : 4,
-			maxZoom   : 12,
-			tolerance : 20,
-			buffer    : 256,
-			debug     : 0,
-			zIndex    : 5,
-			style     : (properties) => {
-				const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
-				if (!name.includes("臺南市"))
-					return {
-						color       : "transparent",
-						weight      : 0,
-						opacity     : 0,
-						fillColor   : "transparent",
-						fillOpacity : 0,
-					};
-				return {
-					color       : TREM.Colors.error,
-					weight      : 3,
-					fillColor   : TREM.Colors.surfaceVariant,
-					fillOpacity : 0,
-				};
-			},
-		}).addTo(Maps.main);
+		// if (PWS != null) PWS.remove();
+		// PWS = L.geoJson.vt(MapData.tw_county, {
+		// 	minZoom   : 4,
+		// 	maxZoom   : 12,
+		// 	tolerance : 20,
+		// 	buffer    : 256,
+		// 	debug     : 0,
+		// 	zIndex    : 5,
+		// 	style     : (properties) => {
+		// 		const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
+		// 		if (!name.includes("臺南市"))
+		// 			return {
+		// 				color       : "transparent",
+		// 				weight      : 0,
+		// 				opacity     : 0,
+		// 				fillColor   : "transparent",
+		// 				fillOpacity : 0,
+		// 			};
+		// 		return {
+		// 			color       : TREM.Colors.error,
+		// 			weight      : 3,
+		// 			fillColor   : TREM.Colors.surfaceVariant,
+		// 			fillOpacity : 0,
+		// 		};
+		// 	},
+		// }).addTo(Maps.main);
 	} else if (json.Function == "intensity") {
 		console.log("intensity");
 		console.log(json);
