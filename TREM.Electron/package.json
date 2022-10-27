@@ -30,6 +30,7 @@
       ]
     },
     "win": {
+      "publish": "github",
       "target": [],
       "icon": "TREM.ico"
     },

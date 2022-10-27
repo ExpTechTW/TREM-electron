@@ -12,7 +12,6 @@ jobs:
     defaults:
       run:
         working-directory: TREM.Electron
-
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
@@ -26,9 +25,34 @@ jobs:
     - name: Build
       run: npm run dist
       env:
-          GH_TOKEN: 8rE9clwugmjC0jT9y0flFgBMlYoeTY2IkQm6
+          GH_TOKEN: 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
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
         name: "TREM.Windows.64bit.exe"
         path: /home/runner/work/TREM/TREM/TREM.Electron/dev/*.exe
+  
+  build_node:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: TREM.Electron
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Restore dependencies
+      run: npm ci
+    - name: Lint
+      run: npm run lint
+    - name: Build
+      run: npm run dist
+      env:
+          GH_TOKEN: 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
+    - name: Upload Artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: "TREM.Windows.64bit.deb"
+        path: /home/runner/work/TREM/TREM/TREM.Electron/dev/*.deb
