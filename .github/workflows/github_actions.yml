@@ -29,4 +29,4 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: "TREM.zip"
-        path: /home/runner/work/TREM/TREM
+        path: /home/runner/work/TREM/TREM/TREM.Electron/dev/*.deb
