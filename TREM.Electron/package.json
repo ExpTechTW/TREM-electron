@@ -33,15 +33,8 @@
       "icon": "TREM.ico"
     },
     "linux": {
-      "target": [
-        "deb",
-        "rpm",
-        "snap",
-        "AppImage"
-      ],
-      "category": "Development",
-      "name": "ExpTechTW",
-      "email": "ExpTech.tw@gmail.com"
+      "target": "deb",
+      "category": "Development"
     },
     "directories": {
       "buildResources": "resources",
