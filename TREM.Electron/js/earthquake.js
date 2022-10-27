@@ -50,7 +50,7 @@ let audioLock1 = false;
 const EarthquakeList = {};
 let marker = null;
 const Maps = {};
-const MapBases = { main: [], mini: [], report: [] };
+const MapBases = { main: [], mini: [], report: [], intensity: [] };
 let PGAMainLock = false;
 const Station = {};
 const PGA = {};
@@ -287,6 +287,33 @@ async function init() {
 				.on("click", () => TREM.Report._focusMap());
 			Maps.report._zoomAnimated = setting["map.animation"];
 		}
+		if (!Maps.intensity) {
+			Maps.intensity = L.map("map-intensity",
+				{
+					attributionControl : false,
+					closePopupOnClick  : false,
+					maxBounds          : [
+						[30, 130],
+						[10, 100],
+					],
+					preferCanvas    : true,
+					zoomSnap        : 0.25,
+					zoomDelta       : 0.5,
+					zoomAnimation   : true,
+					fadeAnimation   : setting["map.animation"],
+					zoomControl     : false,
+					doubleClickZoom : false,
+					keyboard        : false,
+				})
+				.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
+					paddingTopLeft: [
+						document.getElementById("map-intensity").offsetWidth / 2,
+						0,
+					],
+				})
+				.on("click", () => TREM.Report._focusMap());
+			Maps.intensity._zoomAnimated = setting["map.animation"];
+		}
 
 		progressbar.value = (1 / progressStep) * 2;
 	})();
@@ -375,6 +402,22 @@ async function init() {
 						fillOpacity : 1,
 					},
 				}).addTo(Maps.report),
+			);
+		if (!MapBases.intensity.length)
+			MapBases.intensity.push(
+				L.geoJson.vt(MapData.tw_county, {
+					minZoom   : 7.5,
+					maxZoom   : 10,
+					tolerance : 20,
+					buffer    : 256,
+					debug     : 0,
+					style     : {
+						weight      : 0.8,
+						color       : TREM.Colors.primary,
+						fillColor   : TREM.Colors.surfaceVariant,
+						fillOpacity : 1,
+					},
+				}).addTo(Maps.intensity),
 			);
 		setUserLocationMarker(setting["location.town"]);
 		progressbar.value = (1 / progressStep) * 4;
@@ -2333,6 +2376,8 @@ const changeView = (args, el, event) => {
 
 	if (changeel.attr("id") == "report")
 		Maps.report.invalidateSize();
+	if (changeel.attr("id") == "intensity")
+		Maps.intensity.invalidateSize();
 
 	TREM.emit("viewChange", currentel.attr("id"), changeel.attr("id"));
 };
