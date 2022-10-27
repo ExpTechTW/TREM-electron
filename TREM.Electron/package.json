@@ -36,7 +36,8 @@
     },
     "linux": {
       "target": "deb",
-      "category": "Development"
+      "category": "Development",
+      "maintainer":"ExpTechTW"
     },
     "directories": {
       "buildResources": "resources",
