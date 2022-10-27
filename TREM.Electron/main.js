@@ -144,6 +144,7 @@ function createSettingWindow() {
 		setTimeout(() => SettingWindow.show(), 500);
 	});
 	SettingWindow.on("close", () => {
+		// ipcMain.emit("setting_btn_remove_hide");
 		SettingWindow = null;
 	});
 }

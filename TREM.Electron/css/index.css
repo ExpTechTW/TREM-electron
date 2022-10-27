@@ -98,6 +98,10 @@ kbd {
 	width: 0;
 }
 
+/* #setting_btn.hide{
+	display: none;
+} */
+
 #nav-rail.hide + #view {
 	margin: 0;
 	border-radius: 0;
@@ -148,6 +152,14 @@ kbd {
 }
 
 #map, #map-report {
+	border-radius: 16px 0;
+	background: linear-gradient(0deg, rgba(var(--md-sys-color-primary), .05) 0%, rgba(var(--md-sys-color-primary), .05) 100%), rgb(var(--md-sys-color-surface));
+	height: 100%;
+	outline: none;
+	transition: border-radius .5s ease-in-out;
+}
+
+#map, #map-intensity {
 	border-radius: 16px 0;
 	background: linear-gradient(0deg, rgba(var(--md-sys-color-primary), .05) 0%, rgba(var(--md-sys-color-primary), .05) 100%), rgb(var(--md-sys-color-surface));
 	height: 100%;
