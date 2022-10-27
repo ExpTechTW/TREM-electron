@@ -3,8 +3,7 @@
   "version": "6.0.0-beta.2",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
-  "author": "ExpTechTW",
-  "email" : "ExpTech.tw@gmail.com",
+  "author": "ExpTechTW <ExpTech.tw@gmail.com>",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
