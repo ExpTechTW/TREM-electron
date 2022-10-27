@@ -24,8 +24,6 @@ jobs:
       run: npm run lint
     - name: Build
       run: npm run dist
-      env:
-          GH_TOKEN: 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
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
@@ -49,8 +47,6 @@ jobs:
       run: npm run lint
     - name: Build
       run: npm run dist
-      env:
-          GH_TOKEN: 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
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
