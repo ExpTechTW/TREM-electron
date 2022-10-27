@@ -43,6 +43,9 @@
             <button id="reportView_btn" class="nav-rail-button md3-ripple" onclick="changeView('report', this, event)">
                 <span class="material-symbols-rounded">info</span>
             </button>
+            <!-- <button id="intensityView_btn" class="nav-rail-button md3-ripple" onclick="changeView('intensity', this, event)">
+                <span class="material-symbols-rounded">info</span>
+            </button> -->
             <button id="setting_btn" class="nav-rail-button md3-ripple" onclick="openSettingWindow()">
                 <span class="material-symbols-rounded">settings</span>
             </button>
@@ -432,6 +435,12 @@
                 </div>
                 <div id="map-report"></div>
             </div>
+            <div class="view info" id="intensity">
+                <div id="log2"></div>
+                <div id="time2"></div>
+                <div id="app-version2"></div>
+                <div id="map-intensity"></div>
+            </div>
         </div>
 
         <svg id="svg-defs">
@@ -475,6 +484,7 @@
         <script src="../js/ripple.js"></script>
         <script src="../js/earthquake.js"></script>
         <script src="../js/report.js"></script>
+        <!-- <script src="../js/intensity.js"></script> -->
     </body>
 
 </html>
