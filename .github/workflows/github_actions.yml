@@ -25,8 +25,6 @@ jobs:
       run: npm run lint
     - name: Build
       run: npm run dist
-      env:
-          GH_TOKEN: ZVzDsdNCjD4vU9OYc8UqhaL0gY6kBu121TTY
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
