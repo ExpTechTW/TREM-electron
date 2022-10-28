@@ -8,7 +8,6 @@
 	"parserOptions": {
 		"ecmaVersion": "latest"
 	},
-	"plugins": ["require-sort"],
 	"globals": {
 		"$": "readonly",
 		"app": "readonly",
@@ -36,7 +35,6 @@
 		"TREM": "readonly"
 	},
 	"rules": {
-		"require-sort/require-sort": "warn",
 		"arrow-body-style": "warn",
 		"arrow-spacing": ["warn", { "before": true, "after": true }],
 		"brace-style": ["error", "1tbs", { "allowSingleLine": true }],

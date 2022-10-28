@@ -1448,12 +1448,14 @@ stop.pred-stop {
 }
 
 .map-intensity-icon {
-	position: relative;
+	position: absolute !important;
 	color: white;
 	font-weight: 500;
 	font-family: "Google Sans", sans-serif;
 	font-variant-numeric: tabular-nums;
-	border-radius: 4px;
+	border-radius: 8px;
+	height: 16px;
+	width: 16px;
 }
 
 .map-intensity-icon:not([class*=pga]) {
@@ -1485,6 +1487,17 @@ stop.pred-stop {
 .map-intensity-icon.pga4 { background-color: #00FF89; }
 .map-intensity-icon.pga5 { background-color: #09FF01; }
 .map-intensity-icon.pga6 { background-color: #ff0000; }
+
+.map-intensity-icon.zero,
+.map-intensity-icon.pga1,
+.map-intensity-icon.pga2,
+.map-intensity-icon.pga3,
+.map-intensity-icon.pga4,
+.map-intensity-icon.pga5,
+.map-intensity-icon.pga6 {
+	height: 8px;
+	width: 8px;
+}
 
 #report-detail {
 	user-select: none;

@@ -3,9 +3,12 @@ require("leaflet");
 require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
 const { BrowserWindow, shell } = require("@electron/remote");
+const { default: turfCircle } = require("@turf/circle");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
+const { ModalSubmitFieldsResolver } = require("discord.js");
+const maplibregl = require("maplibre-gl");
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -49,8 +52,11 @@ let audioLock = false;
 let audioLock1 = false;
 const EarthquakeList = {};
 let marker = null;
-const Maps = {};
-const MapBases = { main: [], mini: [], report: [], intensity: [] };
+/**
+ * @type {{main: maplibregl.Map}}
+ */
+const Maps = { main: null, mini: null, report: null };
+const MapBases = { main: [], mini: [], report: [] };
 let PGAMainLock = false;
 const Station = {};
 const PGA = {};
@@ -87,7 +93,7 @@ let Response = {};
 let replay = 0;
 let replayT = 0;
 let Second = -1;
-let mapLock = false;
+const mapLock = false;
 let PAlertT = 0;
 let auto = false;
 const EEW = {};
@@ -101,6 +107,58 @@ let WarnAudio = 0;
 const MaxPGA = 0;
 let Unlock = false;
 // #endregion
+
+class WaveCircle {
+	/**
+	 * @param {string} id
+	 * @param {maplibregl.Map} map
+	 * @param {maplibregl.LngLatLike} lnglat
+	 * @param {number} radius
+	 * @param {maplibregl.LayerSpecification} layerOptions
+	 */
+	constructor(id, map, lnglat, radius, layerOptions) {
+		this.map = map;
+		this.lnglat = lnglat;
+		this.radius = radius;
+		/**
+		 * @type {maplibregl.GeoJSONSource}
+		 */
+		this.source = map.addSource(`Source_${id}`, {
+			type : "geojson",
+			data : turfCircle(lnglat, radius, { units: "meters" }),
+		}).getSource(`Source_${id}`);
+		this.layer = map.addLayer({
+			...layerOptions,
+			id     : `Layer_${id}`,
+			source : `Source_${id}`,
+		}).getLayer(`Layer_${id}`);
+	}
+
+	setLngLat(lnglat) {
+		if (this.lnglat[0] == lnglat[0] && this.lnglat[1] == lnglat[1]) return;
+		this.lnglat = lnglat;
+		this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
+	}
+
+	setRadius(radius) {
+		if (this.radius == radius) return;
+		this.radius = radius;
+		this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
+	}
+
+	setStyle(id, value) {
+		if (this.layer.paint[id] == value) return;
+		this.layer.setPaintProperty(id, value);
+	}
+
+	remove() {
+		this.map.removeLayer(this.layer.id);
+		this.map.removeSource(this.source.id);
+		delete this.layer;
+		delete this.source;
+		return null;
+	}
+}
 
 // #region 初始化
 const win = BrowserWindow.fromId(process.env.window * 1);
@@ -193,6 +251,7 @@ async function init() {
 			}, 250);
 
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
+		/*
 		if (!Maps.main) {
 			Maps.main = L.map("map",
 				{
@@ -240,6 +299,49 @@ async function init() {
 				});
 			Maps.main._zoomAnimated = setting["map.animation"];
 		}
+		*/
+
+		if (!Maps.main)
+			Maps.main = new maplibregl.Map(
+				{
+					container         : "map",
+					maxPitch          : 0,
+					maxBounds         : [50, 10, 180, 60],
+					zoom              : 6.8,
+					center            : [121.596, 23.612],
+					renderWorldCopies : false,
+				})
+				.on("click", () => Maps.main.flyTo({
+					center  : [121.596, 23.612],
+					zoom    : 6.8,
+					bearing : 0,
+					speed   : 2,
+					curve   : 1,
+					easing  : (e) => Math.sin(e * Math.PI / 2),
+				}));
+			/*
+			const canvas = document.getElementById("map-waves");
+			canvas.height = Maps.main.getCanvas().clientHeight;
+			canvas.width = Maps.main.getCanvas().clientWidth;
+
+			Maps.main.addSource("map-waves", {
+				type        : "canvas",
+				canvas      : "map-waves",
+				coordinates : [
+					Maps.main.getBounds().getNorthWest().toArray(),
+					Maps.main.getBounds().getNorthEast().toArray(),
+					Maps.main.getBounds().getSouthEast().toArray(),
+					Maps.main.getBounds().getSouthWest().toArray(),
+				],
+				animate: true,
+			});
+			Maps.main.addLayer({
+				id     : "map-waves-layer",
+				type   : "raster",
+				source : "map-waves",
+			});
+			*/
+
 
 		if (!Maps.mini)
 			Maps.mini = L.map("map-tw",
@@ -350,6 +452,7 @@ async function init() {
 		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
 		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
+		/*
 		if (!MapBases.main.length)
 			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
 				MapBases.main.push(
@@ -368,6 +471,24 @@ async function init() {
 						},
 					}).addTo(Maps.main),
 				);
+*/
+		if (!MapBases.main.length)
+			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
+				MapBases.main.push(Maps.main.addLayer({
+					id     : `geojson-${mapName}`,
+					type   : "fill",
+					source : {
+						type : "geojson",
+						data : MapData[mapName],
+					},
+					layout : {},
+					paint  : {
+						"fill-color"         : TREM.Colors.surfaceVariant,
+						"fill-outline-color" : TREM.Colors.primary,
+						"fill-opacity"       : 0.8,
+					},
+				}));
+
 
 		if (!MapBases.mini.length)
 			MapBases.mini.push(
@@ -571,8 +692,9 @@ function handler(response) {
 							(amount > 2) ? "pga2" :
 								"pga1";
 
-		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
-
+		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
+		const station_tooltip = `<div class="rt-station-tooltip">${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
+		/*
 		if (!Station[keys[index]])
 			Station[keys[index]] = L.marker(
 				[station[keys[index]].Lat, station[keys[index]].Long],
@@ -611,6 +733,32 @@ function handler(response) {
 		Station[keys[index]]
 			.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
 			.setTooltipContent(station_tooltip);
+*/
+
+		if (!Station[keys[index]])
+			Station[keys[index]] = new maplibregl.Marker(
+				{
+					element: $(`<div class="map-intensity-icon rt-icon ${levelClass}"></div>`)[0],
+				})
+				.setLngLat([station[keys[index]].Long, station[keys[index]].Lat])
+				.setPopup(new maplibregl.Popup().setHTML(station_tooltip))
+				.addTo(Maps.main);
+		/*
+				.on("click", () => {
+					Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
+					if (Maps.main.getZoom() < 11) {
+						const tooltip = Station[keys[index]].getTooltip();
+						Station[keys[index]].unbindTooltip();
+						if (Station[keys[index]].keepTooltipAlive)
+							tooltip.options.permanent = true;
+						else
+							tooltip.options.permanent = false;
+						Station[keys[index]].bindTooltip(tooltip);
+					}
+				});*/
+
+		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
+			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(stationData.T * 1000);
@@ -880,7 +1028,7 @@ async function setUserLocationMarker(town) {
 	}
 
 	[, UserLocationLat, UserLocationLon] = Location[setting["location.city"]][town];
-
+	/*
 	if (!marker) {
 		const icon = L.icon({
 			iconUrl  : "../image/here.png",
@@ -892,6 +1040,13 @@ async function setUserLocationMarker(town) {
 	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
 	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
 	Maps.main.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
+	*/
+
+	if (!marker)
+		marker = new maplibregl.Marker()
+			.setLngLat([UserLocationLon, UserLocationLat])
+			.addTo(Maps.main);
+	else marker.setLngLat([UserLocationLon, UserLocationLat]);
 }
 // #endregion
 
@@ -2035,20 +2190,22 @@ function main(data) {
 			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
 			if (kmP > 0) {
 				if (!EarthquakeList[data.ID].CircleP)
-					EarthquakeList[data.ID].CircleP = L.circle([+data.NorthLatitude, +data.EastLongitude], {
-						color     : "#6FB7B7",
-						fillColor : "transparent",
-						radius    : kmP,
-						renderer  : L.svg(),
-						className : "p-wave",
-					}).addTo(Maps.main);
-
-				if (!EarthquakeList[data.ID].CircleP.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
-					EarthquakeList[data.ID].CircleP
-						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
-
-				EarthquakeList[data.ID].CircleP
-					.setRadius(kmP);
+					EarthquakeList[data.ID].CircleP = new WaveCircle(
+						`${data.ID}-p`,
+						Maps.main,
+						[+data.EastLongitude, +data.NorthLatitude],
+						kmP,
+						{
+							type  : "line",
+							paint : {
+								"line-width" : 3,
+								"line-color" : "#6FB7B7",
+							},
+						});
+				else {
+					EarthquakeList[data.ID].CircleP.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+					EarthquakeList[data.ID].CircleP.setRadius(kmP);
+				}
 
 				if (!EarthquakeList[data.ID].CirclePTW)
 					EarthquakeList[data.ID].CirclePTW = L.circle([data.NorthLatitude, data.EastLongitude], {
@@ -2058,7 +2215,7 @@ function main(data) {
 						renderer  : L.svg(),
 						className : "p-wave",
 					}).addTo(Maps.mini);
-
+				console.log("kmP", kmP);
 				if (!EarthquakeList[data.ID].CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 					EarthquakeList[data.ID].CirclePTW
 						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
@@ -2072,27 +2229,25 @@ function main(data) {
 			const kmS = Math.sqrt(km);
 			EEW[data.ID].km = kmS;
 			if (!EarthquakeList[data.ID].CircleS)
-				EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
-					color       : data.Alert ? "red" : "orange",
-					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-					fillOpacity : 1,
-					radius      : kmS,
-					renderer    : L.svg(),
-					className   : "s-wave",
-				}).addTo(Maps.main);
-
-			if (!EarthquakeList[data.ID].CircleS.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
-				EarthquakeList[data.ID].CircleS
-					.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
-
-			EarthquakeList[data.ID].CircleS
-				.setRadius(kmS)
-				.setStyle(
+				EarthquakeList[data.ID].CircleS = new WaveCircle(
+					`${data.ID}-s`,
+					Maps.main,
+					[+data.EastLongitude, +data.NorthLatitude],
+					kmS,
 					{
-						color     : data.Alert ? "red" : "orange",
-						fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-					},
-				);
+						type  : "fill",
+						paint : {
+							"fill-opacity"       : 0.2,
+							"fill-outline-color" : data.Alert ? "#FF0000" : "#FFA500",
+							"fill-color"         : data.Alert ? "#FF0000" : "#FFA500",
+						},
+					});
+			else {
+				EarthquakeList[data.ID].CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+				EarthquakeList[data.ID].CircleS.setRadius(kmS);
+				EarthquakeList[data.ID].CircleS.setStyle("fill-outline-color", data.Alert ? "#FF0000" : "#FFA500");
+				EarthquakeList[data.ID].CircleS.setStyle("fill-color", data.Alert ? "#FF0000" : "#FFA500");
+			}
 
 			if (!EarthquakeList[data.ID].CircleSTW)
 				EarthquakeList[data.ID].CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
@@ -2146,9 +2301,10 @@ function main(data) {
 		let offsetY = 0;
 
 		const cursor = INFO.findIndex((v) => v.ID == data.ID) + 1;
+		const iconUrl = cursor <= 4 && INFO.length > 1 ? "../image/cross.png" : "../image/cross.png";
 		if (cursor <= 4 && INFO.length > 1) {
 			epicenterIcon = L.icon({
-				iconUrl   : `../image/cross${cursor}.png`,
+				iconUrl,
 				iconSize  : [40, 40],
 				className : "epicenterIcon",
 			});
@@ -2158,20 +2314,24 @@ function main(data) {
 			if (cursor == 4) offsetX = -0.03;
 		} else
 			epicenterIcon = L.icon({
-				iconUrl   : "../image/cross.png",
+				iconUrl,
 				iconSize  : [30, 30],
 				className : "epicenterIcon",
 			});
 
 		// main map
 		if (!EarthquakeList[data.ID].epicenterIcon)
-			EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon, zIndexOffset: 6000 }).addTo(Maps.main);
+			EarthquakeList[data.ID].epicenterIcon = new maplibregl.Marker(
+				{
+					element: $(`<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>`)[0],
+				})
+				.setLngLat([+data.EastLongitude, +data.NorthLatitude])
+				.addTo(Maps.main);
 
-		if (EarthquakeList[data.ID].epicenterIcon.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
-			EarthquakeList[data.ID].epicenterIcon.setIcon(epicenterIcon);
+		if (EarthquakeList[data.ID].epicenterIcon.getElement().src != iconUrl)
+			EarthquakeList[data.ID].epicenterIcon.getElement().src = iconUrl;
 
-		if (!EarthquakeList[data.ID].epicenterIcon.getLatLng().equals([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]))
-			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
+		EarthquakeList[data.ID].epicenterIcon.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
 
 		// mini map
 		if (!EarthquakeList[data.ID].epicenterIconTW) {
@@ -2299,8 +2459,8 @@ function Tcolor(text) {
 }
 
 function clear(ID) {
-	if (EarthquakeList[ID].CircleS != undefined) Maps.main.removeLayer(EarthquakeList[ID].CircleS);
-	if (EarthquakeList[ID].CircleP != undefined) Maps.main.removeLayer(EarthquakeList[ID].CircleP);
+	if (EarthquakeList[ID].CircleS != undefined) EarthquakeList[ID].CircleS = EarthquakeList[ID].CircleS.remove();
+	if (EarthquakeList[ID].CircleP != undefined) EarthquakeList[ID].CircleP = EarthquakeList[ID].CircleP.remove();
 	if (EarthquakeList[ID].CircleSTW != undefined) Maps.mini.removeLayer(EarthquakeList[ID].CircleSTW);
 	if (EarthquakeList[ID].CirclePTW != undefined) Maps.mini.removeLayer(EarthquakeList[ID].CirclePTW);
 }
@@ -2331,8 +2491,8 @@ function updateText() {
 	}
 
 	// bring waves to front
-	if (EarthquakeList[INFO[TINFO].ID].CircleP) EarthquakeList[INFO[TINFO].ID].CircleP.bringToFront();
-	if (EarthquakeList[INFO[TINFO].ID].CircleS) EarthquakeList[INFO[TINFO].ID].CircleS.bringToFront();
+	// if (EarthquakeList[INFO[TINFO].ID].CircleP) EarthquakeList[INFO[TINFO].ID].CircleP.bringToFront();
+	// if (EarthquakeList[INFO[TINFO].ID].CircleS) EarthquakeList[INFO[TINFO].ID].CircleS.bringToFront();
 
 	for (const key in EarthquakeList) {
 		if (!EarthquakeList[key]?.epicenterIconTW?.getElement()?.classList?.contains("hide"))
