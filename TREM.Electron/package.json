@@ -75,7 +75,6 @@
     "leaflet": "^1.9.2",
     "leaflet-edgebuffer": "^1.0.6",
     "leaflet-geojson-vt": "^1.1.0",
-    "npm": "^8.19.2",
     "tinycolor2": "^1.4.2",
     "ws": "^8.8.0"
   }
