@@ -3,6 +3,8 @@
   "version": "6.0.0-8-pre3",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
+  "homepage": "https://exptech.com.tw/",
+  "author": "ExpTechTW <ExpTech.tw@gmail.com>",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
@@ -28,18 +30,15 @@
       ]
     },
     "win": {
-      "publish": "github",
+      "publish": null,
       "target": [],
       "icon": "TREM.ico"
     },
     "linux": {
-      "target": [
-        "deb",
-        "rpm",
-        "snap",
-        "AppImage"
-      ],
-      "category": "Development"
+      "publish": null,
+      "target": "deb",
+      "category": "Development",
+      "maintainer": "ExpTechTW"
     },
     "directories": {
       "buildResources": "resources",
