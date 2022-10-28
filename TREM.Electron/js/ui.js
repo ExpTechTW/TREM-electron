@@ -6,10 +6,10 @@ document.addEventListener("keydown", (event) => {
 });
 
 const toggleNav = state => {
-	ReportTag1 = 0;
+	TREM.ReportTag1 = 0;
 	if (setting["nav.ui.autoclose"]) {
-		toggleNavTime = NOW.getTime();
-		console.log("toggleNavTime: ", toggleNavTime);
+		TREM.toggleNavTime = NOW.getTime();
+		console.log("toggleNavTime: ", TREM.toggleNavTime);
 	}
 	if (state == undefined) {
 		$("#nav-rail").toggleClass("hide");
