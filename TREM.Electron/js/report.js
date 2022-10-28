@@ -1,5 +1,4 @@
 /* global Maps: false, IntensityToClassString: false, Maps.report: true, IntensityI: false, changeView: false, replay: true, replayT: true */
-TREM.Earthquake = require(path.resolve(__dirname, "../Constants/Constants.js"));
 
 TREM.Report = {
 	cache                 : new Map(),
@@ -16,7 +15,6 @@ TREM.Report = {
 	_filterIntensity      : false,
 	_filterIntensityValue : 4,
 	_reportItemTemplate   : document.getElementById("template-report-list-item"),
-	set_report_overview   : 0,
 	get _mapPaddingLeft() {
 		return document.getElementById("map-report").offsetWidth / 2;
 	},
@@ -30,7 +28,7 @@ TREM.Report = {
 		if (this.view == "report-list" || skipCheck) {
 			const fragment = new DocumentFragment();
 			const reports = Array.from(this.cache, ([k, v]) => v);
-			this.reportList = reports
+				this.reportList = reports
 				.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 				.filter(v => this._filterHasReplay ? v.ID?.length : true)
 				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
@@ -56,9 +54,9 @@ TREM.Report = {
 							}),
 							opacity      : (reports.length - reports.indexOf(report)) / reports.length,
 							zIndexOffset : 1000 + reports.length - reports.indexOf(report),
-						},
-					).bindPopup().on("popupopen", (e) => {
-						this.set_report_overview = 0;
+						}
+					).bindPopup().on('popupopen', function(e) {
+						set_report_overview = 0;
 						TREM.Report.setView("report-overview", report.identifier);
 					}));
 				fragment.appendChild(element);
@@ -80,7 +78,7 @@ TREM.Report = {
 		el.querySelector(".report-list-item-time").innerText = data.originTime.replace(/-/g, "/");
 		el.querySelector("button").value = data.identifier;
 		el.querySelector("button").addEventListener("click", function() {
-			this.set_report_overview = 0;
+			set_report_overview = 0;
 			TREM.Report.setView("report-overview", this.value);
 		});
 		ripple(el.querySelector("button"));
@@ -149,7 +147,7 @@ TREM.Report = {
 				break;
 		}
 
-		if (view == "eq-report-overview") {
+		if (view == "eq-report-overview"){
 			view = "report-overview";
 			newView = document.getElementById(view);
 		}
@@ -187,9 +185,9 @@ TREM.Report = {
 		}
 	},
 	back() {
-		if (this.set_report_overview != 0)
-			TREM.backindexButton();
-
+		if (set_report_overview != 0) {
+			backindexButton();
+		}
 		switch (this.view) {
 			case "report-overview":
 				this.setView("report-list");
@@ -309,9 +307,9 @@ TREM.Report = {
 					}),
 					opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
 					zIndexOffset : 1000 + this.cache.size - keys.indexOf(report.identifier),
-				},
-			).bindPopup().on("popupopen", (e) => {
-				this.set_report_overview = 0;
+				}
+			).bindPopup().on('popupopen', function(e) {
+				set_report_overview = 0;
 				TREM.Report.setView("report-overview", report.identifier);
 			}));
 
@@ -367,7 +365,7 @@ TREM.Report = {
 		this._clearMap();
 
 		console.log(report);
-		if (!report) return;
+		if(!report) return;
 
 		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 ? report.earthquakeNo : "小區域有感地震";
 		document.getElementById("report-overview-location").innerText = report.location;
@@ -419,7 +417,7 @@ TREM.Report = {
 							className : `map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}`,
 						}),
 						zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
-					},
+					}
 				));
 
 		this._markers.push(
@@ -428,12 +426,12 @@ TREM.Report = {
 				{
 					icon: L.divIcon({
 						html      : TREM.Resources.icon.cross,
-						iconSize  : [32, 32],
-						className : "epicenterIcon",
+						iconSize : [32, 32],
+						className : `epicenterIcon`,
 					}),
 					zIndexOffset: 5000,
 				},
-			),
+			)
 		);
 
 		this._markersGroup = L.featureGroup(this._markers).addTo(Maps.report);
@@ -450,14 +448,15 @@ TREM.Report = {
 			],
 		});
 
-		if (report.ID == undefined)
-			document.getElementById("report-replay").style.display = "none";
-
-		if (report.ID.length != 0)
-			document.getElementById("report-replay").style.display = "block";
-			// document.getElementById("report-replay").onclick = function() {
-			// 	TREM.replayOverviewButton(report);
-			// };
+		if(report.ID == undefined){
+			document.getElementById("report-replay").style.display = "none"
+		}
+		if (report.ID.length != 0) {
+			document.getElementById("report-replay").style.display = "block"
+			document.getElementById("report-replay").onclick = function(){
+				replayOverviewButton(report);
+			};
+		}
 		// if(report.data == undefined){
 		// 	document.getElementById("report-replay").style.display = "none"
 		// }
@@ -469,9 +468,9 @@ TREM.Report = {
 		// 		stopReplaybtn();
 		// 	};
 		// }
-		else
-			document.getElementById("report-replay").style.display = "none";
-
+		else{
+			document.getElementById("report-replay").style.display = "none"
+		}
 	},
 };
 

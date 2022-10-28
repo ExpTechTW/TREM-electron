@@ -1,8 +1,8 @@
 const { getCurrentWindow, shell } = require("@electron/remote");
-const axios = require("axios");
 const os = require("node:os");
 const win = getCurrentWindow();
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
+const axios = require("axios");
 
 document.onreadystatechange = () => {
 	if (document.readyState == "complete")
@@ -60,10 +60,11 @@ ipcRenderer.on("setting", (event, data) => {
 });
 
 ipcMain.on("RTSUnlock", (event, Unlock) => {
-	if (Unlock) {
+	if(Unlock){
 		document.getElementById("RTSUnlock").classList.remove("hide");
 		document.getElementById("RTSUnlock1").classList.remove("hide");
-	} else {
+	}
+	else{
 		document.getElementById("RTSUnlock").classList.add("hide");
 		document.getElementById("RTSUnlock1").classList.add("hide");
 	}
@@ -129,8 +130,8 @@ function init() {
 		document.body.classList.remove("settingDisabled");
 	}
 
-	const utc = new Date();
-	const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
+	let utc = new Date();
+	let NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
 	const now = new Date(NOW.getTime() - 20000);
 	const Now = now.getFullYear() +
 	"-" + (now.getMonth() + 1) +
@@ -138,7 +139,7 @@ function init() {
 	" " + now.getHours() +
 	":" + now.getMinutes() +
 	":" + now.getSeconds();
-	document.getElementById("Time").value = Now;
+	document.getElementById("Time").value = Now
 	const now1 = new Date(NOW.getTime());
 	const Now1 = now1.getFullYear() +
 	"-" + (now1.getMonth() + 1) +
@@ -181,7 +182,7 @@ function init() {
 					// if (id == "api.key")
 					// 	element.placeholder = "•".repeat(setting[id].length);
 					// else
-					element.value = setting[id];
+						element.value = setting[id];
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
@@ -405,69 +406,69 @@ function setList(args, el, event) {
 	}
 }
 
-function send() {
+function send(){
 	let data = {};
-	if (document.getElementById("UUID").value != "")
+	if(document.getElementById("UUID").value != ""){
 		data = {
-			APIkey        : "https://github.com/ExpTechTW",
-			Function      : "Send",
-			Type          : "test",
-			FormatVersion : 1,
-			UUID          : document.getElementById("UUID").value,
-			Value         : {
-				Function      : "earthquake",
-				Type          : "data",
-				Time          : new Date(document.getElementById("Time").value).getTime(),
-				EastLongitude : document.getElementById("EastLongitude").value,
-				NorthLatitude : document.getElementById("NorthLatitude").value,
-				Depth         : document.getElementById("Depth").value,
-				Scale         : document.getElementById("Scale").value,
-				FormatVersion : 1,
-				TimeStamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
-				"UTC+8"       : document.getElementById("Time").value,
-				Version       : document.getElementById("Version").value,
-				ID            : document.getElementById("ID").value,
-				Test          : true,
-				Unit          : "測試模式",
-			},
-		};
-	else
+			"APIkey": "https://github.com/ExpTechTW",
+			"Function": "Send",
+			"Type": "test",
+			"FormatVersion": 1,
+			"UUID": document.getElementById("UUID").value,
+			"Value": {
+				"Function": "earthquake",
+				"Type": "data",
+				"Time": new Date(document.getElementById("Time").value).getTime(),
+				"EastLongitude": document.getElementById("EastLongitude").value,
+				"NorthLatitude": document.getElementById("NorthLatitude").value,
+				"Depth": document.getElementById("Depth").value,
+				"Scale": document.getElementById("Scale").value,
+				"FormatVersion": 1,
+				"TimeStamp": new Date(document.getElementById("TimeStamp").value).getTime(),
+				"UTC+8": document.getElementById("Time").value,
+				"Version": document.getElementById("Version").value,
+				"ID": document.getElementById("ID").value,
+				"Test": true,
+				"Unit": "測試模式"
+			}
+		}
+	}else{
 		data = {
-			APIkey        : "https://github.com/ExpTechTW",
-			Function      : "Send",
-			Type          : "test",
-			FormatVersion : 1,
-			UUID          : localStorage.UUID,
-			Value         : {
-				Function      : "earthquake",
-				Type          : "data",
-				Time          : new Date(document.getElementById("Time").value).getTime(),
-				EastLongitude : document.getElementById("EastLongitude").value,
-				NorthLatitude : document.getElementById("NorthLatitude").value,
-				Depth         : document.getElementById("Depth").value,
-				Scale         : document.getElementById("Scale").value,
-				FormatVersion : 1,
-				TimeStamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
-				"UTC+8"       : document.getElementById("Time").value,
-				Version       : document.getElementById("Version").value,
-				ID            : document.getElementById("ID").value,
-				Test          : true,
-				Unit          : "測試模式",
-			},
-		};
-
-	axios.post("https://exptech.com.tw/post", data)
-		.then((response) => {
-			if (response.data.response == "State Close")
-				console.log("設備未連接至伺服器");
-			else if (response.data.response == "Device Not Found")
-				console.log("找不到此 UUID 的設備");
-			else
-				console.log("發送成功 請刷新網頁");
-
-			document.getElementById("Version").value = Number(document.getElementById("Version").value) + 1;
-			const utc = new Date();
-			const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
+			"APIkey": "https://github.com/ExpTechTW",
+			"Function": "Send",
+			"Type": "test",
+			"FormatVersion": 1,
+			"UUID": localStorage.UUID,
+			"Value": {
+				"Function": "earthquake",
+				"Type": "data",
+				"Time": new Date(document.getElementById("Time").value).getTime(),
+				"EastLongitude": document.getElementById("EastLongitude").value,
+				"NorthLatitude": document.getElementById("NorthLatitude").value,
+				"Depth": document.getElementById("Depth").value,
+				"Scale": document.getElementById("Scale").value,
+				"FormatVersion": 1,
+				"TimeStamp": new Date(document.getElementById("TimeStamp").value).getTime(),
+				"UTC+8": document.getElementById("Time").value,
+				"Version": document.getElementById("Version").value,
+				"ID": document.getElementById("ID").value,
+				"Test": true,
+				"Unit": "測試模式"
+			}
+		}
+	}
+	axios.post('https://exptech.com.tw/post', data)
+		.then(async function (response) {
+			if (response.data.response == "State Close") {
+				console.log("設備未連接至伺服器")
+			} else if (response.data.response == "Device Not Found") {
+				console.log("找不到此 UUID 的設備")
+			}else{
+				console.log("發送成功 請刷新網頁")
+			}
+			document.getElementById("Version").value = Number(document.getElementById("Version").value) + 1
+			let utc = new Date();
+			let NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
 			const now = new Date(NOW.getTime() - 20000);
 			const Now = now.getFullYear() +
 			"-" + (now.getMonth() + 1) +
@@ -475,7 +476,7 @@ function send() {
 			" " + now.getHours() +
 			":" + now.getMinutes() +
 			":" + now.getSeconds();
-			document.getElementById("Time").value = Now;
+			document.getElementById("Time").value = Now
 			const now1 = new Date(NOW.getTime());
 			const Now1 = now1.getFullYear() +
 			"-" + (now1.getMonth() + 1) +
@@ -484,13 +485,15 @@ function send() {
 			":" + now1.getMinutes() +
 			":" + now1.getSeconds();
 			document.getElementById("TimeStamp").value = Now1;
-		});
+		}).catch(function (error) {
+
+		})
 }
 
-function resend() {
-	document.getElementById("ID").value = "111000";
-	const utc = new Date();
-	const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
+function resend(){
+	document.getElementById("ID").value="111000";
+	let utc = new Date();
+	let NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
 	const now = new Date(NOW.getTime() - 20000);
 	const Now = now.getFullYear() +
 		"-" + (now.getMonth() + 1) +
@@ -498,7 +501,7 @@ function resend() {
 		" " + now.getHours() +
 		":" + now.getMinutes() +
 		":" + now.getSeconds();
-	document.getElementById("Time").value = Now;
+	document.getElementById("Time").value = Now
 	const now1 = new Date(NOW.getTime());
 	const Now1 = now1.getFullYear() +
 		"-" + (now1.getMonth() + 1) +
@@ -507,12 +510,12 @@ function resend() {
 		":" + now1.getMinutes() +
 		":" + now1.getSeconds();
 	document.getElementById("TimeStamp").value = Now1;
-	document.getElementById("EastLongitude").value = "120.7";
-	document.getElementById("NorthLatitude").value = "22.2";
-	document.getElementById("Depth").value = "10";
-	document.getElementById("Scale").value = "5.0";
-	document.getElementById("Version").value = "1";
-	document.getElementById("UUID").value = "";
+	document.getElementById("EastLongitude").value="120.7";
+	document.getElementById("NorthLatitude").value="22.2";
+	document.getElementById("Depth").value="10";
+	document.getElementById("Scale").value="5.0";
+	document.getElementById("Version").value="1";
+	document.getElementById("UUID").value="";
 }
 
 function testEEW() {
@@ -522,7 +525,7 @@ function testEEW() {
 
 function testoldtimeEEW() {
 	const oldtime = new Date(document.getElementById("oldtime").value).getTime();
-	ipcRenderer.send("testoldtimeEEW", oldtime);
+	ipcRenderer.send("testoldtimeEEW",oldtime);
 }
 
 function reset() {

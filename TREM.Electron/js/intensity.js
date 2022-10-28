@@ -17,5 +17,5 @@ TREM.intensity = {
 	_reportItemTemplate   : document.getElementById("template-intensity-list-item"),
 	get _mapPaddingLeft() {
 		return document.getElementById("map-intensity").offsetWidth / 2;
-	},
-};
+	}
+}

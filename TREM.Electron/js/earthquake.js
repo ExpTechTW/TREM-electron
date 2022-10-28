@@ -36,7 +36,7 @@ bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
 const PostAddressIP = "https://exptech.com.tw/post";
-const getAddressIP = "https://exptech.com.tw/api/v1/trem/RTS?time=";
+const getAddressIP  = "https://exptech.com.tw/api/v1/trem/RTS?time=";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -105,8 +105,9 @@ let IntensityListTime = 0;
 let WarnAudio = 0;
 let MaxPGA = 0;
 let Unlock = false;
+let set_report_overview = 0;
 let rtstation1 = "";
-let MaxIntensity1 = 0;
+let MaxIntensity = 0;
 let testEEWerror = false;
 // #endregion
 
@@ -561,7 +562,7 @@ function PGAMain() {
 			const ReplayTime = R;
 			axios({
 				method      : "get",
-				url         : getAddressIP + ReplayTime + "&key=" + setting["api.key"] ?? "",
+				url         : getAddressIP+ReplayTime+'&key='+setting["api.key"] ?? "",
 				cancelToken : new CancelToken((c) => {
 					cancel = c;
 				}),
@@ -587,20 +588,20 @@ function handler(response) {
 
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
-	if (Unlock)
+	if(Unlock){
 		if (replay != 0)
 			ipcRenderer.send("RTSUnlock", !Unlock);
 		else
 			ipcRenderer.send("RTSUnlock", Unlock);
-	// document.getElementById("rt-station").classList.remove("hide");
-	// document.getElementById("rt-station").classList.add("left");
-	// document.getElementById("rt-maxintensitynum").classList.remove("hide");
-	else
+		// document.getElementById("rt-station").classList.remove("hide");
+		// document.getElementById("rt-station").classList.add("left");
+		// document.getElementById("rt-maxintensitynum").classList.remove("hide");
+	}else{
 		ipcRenderer.send("RTSUnlock", Unlock);
 		// document.getElementById("rt-station").classList.add("hide");
 		// document.getElementById("rt-station").classList.remove("left");
 		// document.getElementById("rt-maxintensitynum").classList.add("hide");
-
+	}
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
 	for (const removedKey of removed) {
@@ -608,7 +609,7 @@ function handler(response) {
 		delete Station[removedKey];
 	}
 	MaxPGA = 0;
-	MaxIntensity1 = 0;
+	MaxIntensity = 0;
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const stationData = Json[keys[index]];
 		const amount = Number(stationData.PGA);
@@ -630,7 +631,7 @@ function handler(response) {
 													(amount >= 2.2) ? 1 :
 														0;
 
-		if (Intensity > MaxIntensity1) MaxIntensity1 = Intensity;
+		if (Intensity > MaxIntensity) MaxIntensity = Intensity;
 		const NA999 = (Intensity == 9 && amount == 999) ? "Y" : "NA";
 		const size = (Intensity == 0 || Intensity == "NA" || NA999 == "Y") ? 8 : 16;
 		const levelClass = (Intensity != 0 && NA999 != "Y") ? IntensityToClassString(Intensity) :
@@ -670,13 +671,13 @@ function handler(response) {
 					// 		tooltip.options.permanent = false;
 					// 	Station[keys[index]].bindTooltip(tooltip);
 					// }
-					if (rtstation1 == "")
+					if (rtstation1 == ""){
 						rtstation1 = keys[index];
-					else if (rtstation1 == keys[index])
+					}else if (rtstation1 == keys[index]){
 						rtstation1 = "";
-					else if (rtstation1 != keys[index])
+					}else if (rtstation1 != keys[index]){
 						rtstation1 = keys[index];
-
+					}
 				})
 				.on("mouseover", () => {
 					const tooltip = Station[keys[index]].getTooltip();
@@ -691,12 +692,12 @@ function handler(response) {
 
 		Station[keys[index]]
 			.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
-			.setTooltipContent(station_tooltip);
+			.setTooltipContent(station_tooltip)
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(stationData.T * 1000);
 
-		if (Unlock) {
+		if (Unlock){
 			if (rtstation1 == "") {
 				if (keys.includes(setting["Real-time.station"]))
 					if (keys[index] == setting["Real-time.station"]) {
@@ -708,33 +709,33 @@ function handler(response) {
 						document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
 						document.getElementById("rt-station-local-pga").innerText = amount;
 					}
-			} else if (rtstation1 == keys[index]) {
+			} else if (rtstation1 == keys[index]){
 				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
 				document.getElementById("rt-station-local-id").innerText = keys[index];
 				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
 				document.getElementById("rt-station-local-pga").innerText = amount;
 			}
-		} else
-		if (rtstation1 == "") {
-			if (keys.includes(setting["Real-time.station"]))
-				if (keys[index] == setting["Real-time.station"]) {
-					if (document.getElementById("rt-station").classList.contains("hide"))
-						document.getElementById("rt-station").classList.remove("hide");
-					document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
-					document.getElementById("rt-station-local-id").innerText = keys[index];
-					document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
-					document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
-					document.getElementById("rt-station-local-pga").innerText = amount;
-				}
-		} else if (rtstation1 == keys[index]) {
-			document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
-			document.getElementById("rt-station-local-id").innerText = keys[index];
-			document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
-			document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
-			document.getElementById("rt-station-local-pga").innerText = amount;
+		}else{
+			if (rtstation1 == "") {
+				if (keys.includes(setting["Real-time.station"]))
+					if (keys[index] == setting["Real-time.station"]) {
+						if (document.getElementById("rt-station").classList.contains("hide"))
+							document.getElementById("rt-station").classList.remove("hide");
+						document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+						document.getElementById("rt-station-local-id").innerText = keys[index];
+						document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
+						document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
+						document.getElementById("rt-station-local-pga").innerText = amount;
+					}
+			} else if (rtstation1 == keys[index]){
+				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+				document.getElementById("rt-station-local-id").innerText = keys[index];
+				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
+				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
+				document.getElementById("rt-station-local-pga").innerText = amount;
+			}
 		}
-
 
 		if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
 			pga[station[keys[index]].PGA] = {
@@ -768,14 +769,14 @@ function handler(response) {
 			MAXPGA.intensity = Intensity;
 			MAXPGA.time = new Date(stationData.T * 1000);
 		}
-		// if (MaxIntensity1 > MAXPGA.intensity){
+		// if (MaxIntensity > MAXPGA.intensity){
 		// 	MAXPGA.pga = amount;
 		// 	MAXPGA.station = keys[index];
 		// 	MAXPGA.level = Level;
 		// 	MAXPGA.lat = station[keys[index]].Lat;
 		// 	MAXPGA.long = station[keys[index]].Long;
 		// 	MAXPGA.loc = station[keys[index]].Loc;
-		// 	MAXPGA.intensity = MaxIntensity1;
+		// 	MAXPGA.intensity = MaxIntensity;
 		// 	MAXPGA.time = new Date(stationData.T * 1000);
 		// }
 	}
@@ -818,7 +819,7 @@ function handler(response) {
 				PalertT = PAlert.timestamp;
 				if (Pgeojson == null) {
 					changeView("main", "#mainView_btn");
-					if (Unlock) {
+					if(Unlock){
 						if (setting["Real-time.show"]) win.showInactive();
 						if (setting["Real-time.cover"]) win.moveTop();
 						if (!win.isFocused()) win.flashFrame(true);
@@ -912,9 +913,9 @@ function handler(response) {
 		PGALimit = 0;
 	}
 	All = Json.I ?? [];
-	for (let index = 0; index < All.length; index++)
+	for (let index = 0; index < All.length; index++){
 		All[index].loc = station[All[index].uuid].Loc;
-
+	}
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 		if (setting["audio.realtime"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
@@ -933,7 +934,7 @@ function handler(response) {
 			});
 		}, 2250);
 		changeView("main", "#mainView_btn");
-		if (Unlock) {
+		if(Unlock){
 			if (setting["Real-time.show"]) win.showInactive();
 			if (setting["Real-time.cover"]) win.moveTop();
 			if (!win.isFocused()) win.flashFrame(true);
@@ -985,7 +986,7 @@ function handler(response) {
 			audioPlay("../audio/Warn.wav");
 		}
 
-	// document.getElementById("rt-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity1) : "na";
+	// document.getElementById("rt-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity) : "na";
 	document.getElementById("rt-list").replaceChildren(...list);
 }
 
@@ -1317,7 +1318,7 @@ function addReport(report, prepend = false) {
 		Div.append(report_container);
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
 		Div.addEventListener("click", (event) => {
-			TREM.Report.set_report_overview = 1;
+			set_report_overview = 1;
 			TREM.Report.setView("eq-report-overview", report);
 			changeView("report", "#reportView_btn");
 			ReportTag1 = NOW.getTime();
@@ -1325,12 +1326,12 @@ function addReport(report, prepend = false) {
 		});
 		Div.addEventListener("contextmenu", (event) => {
 			if (replay != 0) return;
-			if (report.ID.length != 0)
-				TREM.replayOverviewButton = new replayOverviewButton(report);
-				// localStorage.TestID = report.ID;
-				// ipcRenderer.send("testEEW");
+			if (report.ID.length != 0) {
+				localStorage.TestID = report.ID;
+				ipcRenderer.send("testEEW");
+			}
 			else {
-				TREM.Report.set_report_overview = 1;
+				set_report_overview = 1;
 				TREM.Report.setView("eq-report-overview", report);
 				changeView("report", "#reportView_btn");
 				ReportTag1 = NOW.getTime();
@@ -1469,7 +1470,7 @@ const stopReplay = function() {
 		replay = 0;
 		ReportGET();
 	}
-	WarnAudio = Date.now() + 3000;
+	WarnAudio = Date.now()+3000;
 	IntensityListTime = 0;
 	All = [];
 	const data = {
@@ -1486,32 +1487,32 @@ const stopReplay = function() {
 	unstopReplaybtn();
 };
 
-function unstopReplaybtn() {
+function unstopReplaybtn(){
 	document.getElementById("togglenav_btn").classList.remove("hide");
 	document.getElementById("stopReplay").classList.add("hide");
 }
 
-function stopReplaybtn() {
+function stopReplaybtn(){
 	changeView("main", "#mainView_btn");
 	document.getElementById("togglenav_btn").classList.add("hide");
 	document.getElementById("stopReplay").classList.remove("hide");
 }
 
-function reportOverviewButton() {
+function reportOverviewButton(){
 	TREM.Report.setView("report-list");
 }
 
-function replayOverviewButton(report) {
+function replayOverviewButton(report){
 	localStorage.TestID = report.ID;
 	ipcRenderer.send("testEEW");
 }
 
-function backindexButton() {
+function backindexButton(){
 	ReportTag1 = 0;
 	changeView("main", "#mainView_btn");
 }
 
-ipcMain.on("testoldtimeEEW", (event, oldtime) => {
+ipcMain.on("testoldtimeEEW", async (event, oldtime) => {
 	replay = oldtime - 25000;
 	replayT = NOW.getTime();
 });
@@ -1534,7 +1535,7 @@ ipcMain.on("testEEW", () => {
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 				axios.post(PostAddressIP, data)
-					.then(() => {
+					.then(async function () {
 						testEEWerror = false;
 					})
 					.catch((error) => {
@@ -1553,7 +1554,7 @@ ipcMain.on("testEEW", () => {
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 		axios.post(PostAddressIP, data)
-			.then(() => {
+			.then(async function () {
 				testEEWerror = false;
 			})
 			.catch((error) => {
@@ -1654,35 +1655,35 @@ async function FCMdata(data) {
 		PAlert = json.Data;
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
-	// else if (json.Function == "PWS")
-	// 	return;
-		// if (PWS != null) PWS.remove();
-		// PWS = L.geoJson.vt(MapData.tw_county, {
-		// 	minZoom   : 4,
-		// 	maxZoom   : 12,
-		// 	tolerance : 20,
-		// 	buffer    : 256,
-		// 	debug     : 0,
-		// 	zIndex    : 5,
-		// 	style     : (properties) => {
-		// 		const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
-		// 		if (!name.includes("臺南市"))
-		// 			return {
-		// 				color       : "transparent",
-		// 				weight      : 0,
-		// 				opacity     : 0,
-		// 				fillColor   : "transparent",
-		// 				fillOpacity : 0,
-		// 			};
-		// 		return {
-		// 			color       : TREM.Colors.error,
-		// 			weight      : 3,
-		// 			fillColor   : TREM.Colors.surfaceVariant,
-		// 			fillOpacity : 0,
-		// 		};
-		// 	},
-		// }).addTo(Maps.main);
-	else if (json.Function == "intensity") {
+	else if (json.Function == "PWS") {
+		return;
+		if (PWS != null) PWS.remove();
+		PWS = L.geoJson.vt(MapData.tw_county, {
+			minZoom   : 4,
+			maxZoom   : 12,
+			tolerance : 20,
+			buffer    : 256,
+			debug     : 0,
+			zIndex    : 5,
+			style     : (properties) => {
+				const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
+				if (!name.includes("臺南市"))
+					return {
+						color       : "transparent",
+						weight      : 0,
+						opacity     : 0,
+						fillColor   : "transparent",
+						fillOpacity : 0,
+					};
+				return {
+					color       : TREM.Colors.error,
+					weight      : 3,
+					fillColor   : TREM.Colors.surfaceVariant,
+					fillOpacity : 0,
+				};
+			},
+		}).addTo(Maps.main);
+	} else if (json.Function == "intensity") {
 		console.log("intensity");
 		console.log(json);
 	} else if (json.Function == "Replay") {
@@ -1739,7 +1740,7 @@ async function FCMdata(data) {
 		} else
 			// if (json.Function != "earthquake") return;
 			stopReplaybtn();
-		TREM.Earthquake.emit("eew", json);
+			TREM.Earthquake.emit("eew", json);
 
 	}
 }
@@ -1897,7 +1898,7 @@ TREM.Earthquake.on("eew", (data) => {
 			}
 		}
 	} else
-		data.Alert = false;
+	data.Alert = false;
 
 	let _time = -1;
 	let stamp = 0;
@@ -2579,14 +2580,13 @@ const changeView = (args, el, event) => {
 
 	if (changeel.attr("id") == "report")
 		Maps.report.invalidateSize();
-	toggleNav(false);
+		toggleNav(false);
 	if (changeel.attr("id") == "intensity")
 		Maps.intensity.invalidateSize();
-	toggleNav(false);
+		toggleNav(false);
 	if (changeel.attr("id") == "main")
 		reportOverviewButton();
-	toggleNav(false);
+		toggleNav(false);
 
 	TREM.emit("viewChange", currentel.attr("id"), changeel.attr("id"));
 };
-TREM.backindexButton = new backindexButton();

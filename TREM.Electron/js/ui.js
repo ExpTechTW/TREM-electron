@@ -5,7 +5,7 @@ document.addEventListener("keydown", (event) => {
 		ipcRenderer.send("openDevtool");
 });
 
-const toggleNav = (state, ReportTag1 = 0, toggleNavTime = 0) => {
+const toggleNav = state => {
 	ReportTag1 = 0;
 	if (setting["nav.ui.autoclose"]) {
 		toggleNavTime = NOW.getTime();
