@@ -53,10 +53,13 @@ let audioLock1 = false;
 const EarthquakeList = {};
 let marker = null;
 /**
- * @type {{main: maplibregl.Map}}
+ * @type {{main: maplibregl.Map, report: maplibregl.Map}}
  */
 const Maps = { main: null, mini: null, report: null };
-const MapBases = { main: [], mini: [], report: [] };
+/**
+ * @type { {[key: string]: Map<string, maplibregl.StyleLayer>} }
+ */
+const MapBases = { main: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
 let PGAMainLock = false;
 const Station = {};
 const PGA = {};
@@ -319,29 +322,6 @@ async function init() {
 					curve   : 1,
 					easing  : (e) => Math.sin(e * Math.PI / 2),
 				}));
-			/*
-			const canvas = document.getElementById("map-waves");
-			canvas.height = Maps.main.getCanvas().clientHeight;
-			canvas.width = Maps.main.getCanvas().clientWidth;
-
-			Maps.main.addSource("map-waves", {
-				type        : "canvas",
-				canvas      : "map-waves",
-				coordinates : [
-					Maps.main.getBounds().getNorthWest().toArray(),
-					Maps.main.getBounds().getNorthEast().toArray(),
-					Maps.main.getBounds().getSouthEast().toArray(),
-					Maps.main.getBounds().getSouthWest().toArray(),
-				],
-				animate: true,
-			});
-			Maps.main.addLayer({
-				id     : "map-waves-layer",
-				type   : "raster",
-				source : "map-waves",
-			});
-			*/
-
 
 		if (!Maps.mini)
 			Maps.mini = L.map("map-tw",
@@ -362,33 +342,26 @@ async function init() {
 				.setView([23.608428, 120.799168], 7)
 				.on("zoom", () => Maps.mini.setView([23.608428, 120.799168], 7));
 
-		if (!Maps.report) {
-			Maps.report = L.map("map-report",
+		if (!Maps.report)
+			Maps.report = new maplibregl.Map(
 				{
+					container          : "map-report",
+					maxPitch           : 0,
+					maxBounds          : [100, 10, 130, 30],
+					maxZoom            : 10,
+					minZoom            : 6,
+					zoom               : 6.8,
+					center             : [121.596, 23.612],
+					renderWorldCopies  : false,
 					attributionControl : false,
-					closePopupOnClick  : false,
-					maxBounds          : [
-						[30, 130],
-						[10, 100],
-					],
-					preferCanvas    : true,
-					zoomSnap        : 0.25,
-					zoomDelta       : 0.5,
-					zoomAnimation   : true,
-					fadeAnimation   : setting["map.animation"],
-					zoomControl     : false,
-					doubleClickZoom : false,
-					keyboard        : false,
+					doubleClickZoom    : false,
+					keyboard           : false,
 				})
-				.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
-					paddingTopLeft: [
-						document.getElementById("map-report").offsetWidth / 2,
-						0,
-					],
+				.fitBounds([119.8, 21.82, 122.18, 25.42], {
+					padding: { left: document.getElementById("map-report").offsetWidth / 2 },
 				})
 				.on("click", () => TREM.Report._focusMap());
-			Maps.report._zoomAnimated = setting["map.animation"];
-		}
+
 		if (!Maps.intensity) {
 			Maps.intensity = L.map("map-intensity",
 				{
@@ -472,9 +445,9 @@ async function init() {
 					}).addTo(Maps.main),
 				);
 */
-		if (!MapBases.main.length)
+		if (!MapBases.main.size)
 			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
-				MapBases.main.push(Maps.main.addLayer({
+				MapBases.main.set(mapName, Maps.main.addLayer({
 					id     : `geojson-${mapName}`,
 					type   : "fill",
 					source : {
@@ -487,11 +460,11 @@ async function init() {
 						"fill-outline-color" : TREM.Colors.primary,
 						"fill-opacity"       : 0.8,
 					},
-				}));
+				}).getLayer(`geojson-${mapName}`));
 
 
 		if (!MapBases.mini.length)
-			MapBases.mini.push(
+			MapBases.mini.set("tw_county",
 				L.geoJson.vt(MapData.tw_county, {
 					minZoom   : 7,
 					maxZoom   : 7,
@@ -505,27 +478,26 @@ async function init() {
 						fillColor   : "transparent",
 						fillOpacity : 0,
 					},
-				}).addTo(Maps.mini),
-			);
+				}).addTo(Maps.mini));
 
 		if (!MapBases.report.length)
-			MapBases.report.push(
-				L.geoJson.vt(MapData.tw_county, {
-					minZoom   : 7.5,
-					maxZoom   : 10,
-					tolerance : 20,
-					buffer    : 256,
-					debug     : 0,
-					style     : {
-						weight      : 0.8,
-						color       : TREM.Colors.primary,
-						fillColor   : TREM.Colors.surfaceVariant,
-						fillOpacity : 1,
-					},
-				}).addTo(Maps.report),
-			);
+			MapBases.report.set("tw_county", Maps.report.addLayer({
+				id     : "Layer_tw_county",
+				type   : "fill",
+				source : {
+					type : "geojson",
+					data : MapData.tw_county,
+				},
+				layout : {},
+				paint  : {
+					"fill-color"         : TREM.Colors.surfaceVariant,
+					"fill-outline-color" : TREM.Colors.primary,
+					"fill-opacity"       : 0.8,
+				},
+			}).getLayer("Layer_tw_county"));
+
 		if (!MapBases.intensity.length)
-			MapBases.intensity.push(
+			MapBases.intensity.set("tw_county",
 				L.geoJson.vt(MapData.tw_county, {
 					minZoom   : 7.5,
 					maxZoom   : 10,
@@ -538,8 +510,8 @@ async function init() {
 						fillColor   : TREM.Colors.surfaceVariant,
 						fillOpacity : 1,
 					},
-				}).addTo(Maps.intensity),
-			);
+				}).addTo(Maps.intensity));
+
 		setUserLocationMarker(setting["location.town"]);
 		progressbar.value = (1 / progressStep) * 4;
 	})().catch(e => dump({ level: 2, message: e }));
@@ -743,19 +715,6 @@ function handler(response) {
 				.setLngLat([station[keys[index]].Long, station[keys[index]].Lat])
 				.setPopup(new maplibregl.Popup().setHTML(station_tooltip))
 				.addTo(Maps.main);
-		/*
-				.on("click", () => {
-					Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
-					if (Maps.main.getZoom() < 11) {
-						const tooltip = Station[keys[index]].getTooltip();
-						Station[keys[index]].unbindTooltip();
-						if (Station[keys[index]].keepTooltipAlive)
-							tooltip.options.permanent = true;
-						else
-							tooltip.options.permanent = false;
-						Station[keys[index]].bindTooltip(tooltip);
-					}
-				});*/
 
 		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
 			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
@@ -1028,22 +987,11 @@ async function setUserLocationMarker(town) {
 	}
 
 	[, UserLocationLat, UserLocationLon] = Location[setting["location.city"]][town];
-	/*
-	if (!marker) {
-		const icon = L.icon({
-			iconUrl  : "../image/here.png",
-			iconSize : [20, 20],
-		});
-		marker = L.marker([UserLocationLat, UserLocationLon], { icon: icon })
-			.setZIndexOffset(1)
-			.addTo(Maps.main);
-	} else marker.setLatLng([UserLocationLat, UserLocationLon]);
-	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
-	Maps.main.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
-	*/
 
 	if (!marker)
-		marker = new maplibregl.Marker()
+		marker = new maplibregl.Marker({
+			element: $("<img src=\"../image/here.png\" height=\"20\" width=\"20\"></img>")[0],
+		})
 			.setLngLat([UserLocationLon, UserLocationLat])
 			.addTo(Maps.main);
 	else marker.setLngLat([UserLocationLon, UserLocationLat]);
@@ -1072,10 +1020,16 @@ TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
 		Focus[1] = center[1] + X;
 		Focus[2] = size;
 		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || size != Maps.main.getZoom())
-			Maps.main.setView([center[0], center[1] + X], size);
+			Maps.main.jumpTo({
+				center : [center[1] + X, center[0]],
+				zoom   : size,
+			});
 	} else if (Focus.length != 0)
 		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != Maps.main.getZoom())
-			Maps.main.setView([Focus[0], Focus[1]], Focus[2]);
+			Maps.main.jumpTo({
+				center : [Focus[1], Focus[0]],
+				zoom   : Focus[2],
+			});
 });
 // #endregion
 
@@ -2534,8 +2488,6 @@ const changeView = (args, el, event) => {
 	currentel.removeClass("show");
 	changeel.addClass("show");
 
-	if (changeel.attr("id") == "report")
-		Maps.report.invalidateSize();
 	if (changeel.attr("id") == "intensity")
 		Maps.intensity.invalidateSize();
 
