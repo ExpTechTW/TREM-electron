@@ -329,18 +329,22 @@ async function init() {
 					center            : [121.596, 23.612],
 					renderWorldCopies : false,
 					keyboard          : false,
+					doubleClickZoom   : false,
 				})
-				.on("click", () => Maps.main.flyTo({
-					center   : [121.596, 23.612],
-					zoom     : 6.8,
-					bearing  : 0,
-					speed    : 2,
-					curve    : 1,
-					easing   : (e) => Math.sin(e * Math.PI / 2),
-					duration : 1000,
-				}))
+				.on("click", (ev) => {
+					if (ev.originalEvent.target.tagName == "CANVAS")
+						Maps.main.flyTo({
+							center   : [121.596, 23.612],
+							zoom     : 6.8,
+							bearing  : 0,
+							speed    : 2,
+							curve    : 1,
+							easing   : (e) => Math.sin(e * Math.PI / 2),
+							duration : 1000,
+						});
+				})
 				.on("zoom", () => {
-					if (Maps.main.getZoom() >= 12) {
+					if (Maps.main.getZoom() >= 11.5) {
 						for (const key in Station)
 							if (!Station[key].getPopup().isOpen())
 								Station[key].togglePopup();
@@ -692,49 +696,9 @@ function handler(response) {
 								"pga1";
 
 		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
-		const station_tooltip = `<div class="rt-station-tooltip">${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
-		/*
-		if (!Station[keys[index]])
-			Station[keys[index]] = L.marker(
-				[station[keys[index]].Lat, station[keys[index]].Long],
-				{
-					icon: L.divIcon({
-						iconSize  : [size, size],
-						className : `map-intensity-icon rt-icon ${levelClass}`,
-					}),
-					keyboard: false,
-				})
-				.addTo(Maps.main)
-				.bindTooltip(station_tooltip, {
-					offset    : [8, 0],
-					permanent : false,
-					className : "rt-station-tooltip",
-				})
-				.on("click", () => {
-					Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
-					if (Maps.main.getZoom() < 11) {
-						const tooltip = Station[keys[index]].getTooltip();
-						Station[keys[index]].unbindTooltip();
-						if (Station[keys[index]].keepTooltipAlive)
-							tooltip.options.permanent = true;
-						else
-							tooltip.options.permanent = false;
-						Station[keys[index]].bindTooltip(tooltip);
-					}
-				});
+		const station_tooltip = `<div class="rt-station-tooltip"><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(Intensity)}</div></div>`;
 
-		if (Station[keys[index]].getIcon()?.options?.className != `map-intensity-icon rt-icon ${levelClass}`)
-			Station[keys[index]].setIcon(L.divIcon({
-				iconSize  : [size, size],
-				className : `map-intensity-icon rt-icon ${levelClass}`,
-			}));
-
-		Station[keys[index]]
-			.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
-			.setTooltipContent(station_tooltip);
-*/
-
-		if (!Station[keys[index]])
+		if (!Station[keys[index]]) {
 			Station[keys[index]] = new maplibregl.Marker(
 				{
 					element: $(`<div class="map-intensity-icon rt-icon ${levelClass}"></div>`)[0],
@@ -742,21 +706,28 @@ function handler(response) {
 				.setLngLat([station[keys[index]].Long, station[keys[index]].Lat])
 				.setPopup(new maplibregl.Popup({ closeOnClick: false, closeButton: false }).setHTML(station_tooltip))
 				.addTo(Maps.main);
+			Station[keys[index]].getElement().addEventListener("click", () => Station[keys[index]].getPopup().persist = !Station[keys[index]].getPopup().persist);
+		} else Station[keys[index]].getPopup().setHTML(station_tooltip);
 
-		else Station[keys[index]].getPopup().setHTML(station_tooltip);
 		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
 			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
 
 		const Level = IntensityI(Intensity);
 		const now = new Date(stationData.T * 1000);
 
-		if (keys.includes(setting["Real-time.station"]))
+		if (keys.includes(setting["Real-time.station"])) {
 			if (keys[index] == setting["Real-time.station"]) {
 				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
 				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
 				document.getElementById("rt-station-local-pga").innerText = amount;
 			}
+		} else {
+			document.getElementById("rt-station-local-intensity").className = "rt-station-intensity na";
+			document.getElementById("rt-station-local-name").innerText = TREM.Localization.getString("Realtime_No_Data");
+			document.getElementById("rt-station-local-time").innerText = "--:--:--";
+			document.getElementById("rt-station-local-pga").innerText = "--";
+		}
 
 		if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
 			pga[station[keys[index]].PGA] = {

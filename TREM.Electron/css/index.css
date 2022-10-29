@@ -1307,6 +1307,17 @@ kbd {
 	font-weight: 300;
 }
 
+.mapboxgl-popup-tip, .maplibregl-popup-tip {
+	opacity: 0;
+    pointer-events: none;
+}
+
+.mapboxgl-popup-content, .maplibregl-popup-content {
+    background: transparent;
+    padding: 0;
+    pointer-events: none;
+}
+
 .rt-station-tooltip {
 	background-color: rgb(var(--md-sys-color-surface-variant)) !important;
 	border: none !important;
