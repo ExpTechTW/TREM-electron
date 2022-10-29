@@ -534,7 +534,7 @@ async function init() {
 		if (!MapBases.main.size)
 			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
 				MapBases.main.set(mapName, Maps.main.addLayer({
-					id     : `geojson-${mapName}`,
+					id     : `Layer_${mapName}`,
 					type   : "fill",
 					source : {
 						type : "geojson",
@@ -546,7 +546,7 @@ async function init() {
 						"fill-outline-color" : TREM.Colors.primary,
 						"fill-opacity"       : 0.8,
 					},
-				}).getLayer(`geojson-${mapName}`));
+				}).getLayer(`Layer_${mapName}`));
 
 		if (!MapBases.mini.length)
 			MapBases.mini.set("tw_county",
@@ -1739,17 +1739,12 @@ const updateMapColors = async (event, value) => {
 	}
 
 	TREM.Colors = await getThemeColors(accent, dark);
-
 	for (const mapName in MapBases)
-		for (const baseMap of MapBases[mapName]) {
-			baseMap.options.style = {
-				weight      : 0.8,
-				color       : TREM.Colors.primary,
-				fillColor   : TREM.Colors.surfaceVariant,
-				fillOpacity : 1,
-			};
-			baseMap.redraw();
-		}
+		for (const layer of MapBases[mapName].values())
+			if (Maps[mapName] instanceof maplibregl.Map) {
+				Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
+				Maps[mapName].setPaintProperty(layer.id, "fill-outline-color", TREM.Colors.primary);
+			}
 };
 
 ipcRenderer.on("config:theme", updateMapColors);
