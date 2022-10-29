@@ -135,6 +135,17 @@ class WaveCircle {
 			id     : `Layer_${id}`,
 			source : `Source_${id}`,
 		}).getLayer(`Layer_${id}`);
+		if (layerOptions.type == "fill")
+			this.layerBorder = map.addLayer({
+				...layerOptions,
+				type   : "line",
+				id     : `Layer_${id}_Border`,
+				source : `Source_${id}`,
+				paint  : {
+					"line-width" : 3,
+					"line-color" : layerOptions.paint["fill-color"],
+				},
+			}).getLayer(`Layer_${id}_Border`);
 	}
 
 	setLngLat(lnglat) {
@@ -156,8 +167,12 @@ class WaveCircle {
 
 	remove() {
 		this.map.removeLayer(this.layer.id);
-		this.map.removeSource(this.source.id);
 		delete this.layer;
+		if (this.layerBorder) {
+			this.map.removeLayer(this.layerBorder.id);
+			delete this.layerBorder;
+		}
+		this.map.removeSource(this.source.id);
 		delete this.source;
 		return null;
 	}
@@ -2191,7 +2206,7 @@ function main(data) {
 					{
 						type  : "fill",
 						paint : {
-							"fill-opacity"       : 0.2,
+							"fill-opacity"       : 0.15,
 							"fill-outline-color" : data.Alert ? "#FF0000" : "#FFA500",
 							"fill-color"         : data.Alert ? "#FF0000" : "#FFA500",
 						},
