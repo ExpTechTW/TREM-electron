@@ -112,7 +112,7 @@ let WarnAudio = 0;
 let MaxPGA = 0;
 let Unlock = false;
 TREM.set_report_overview = 0;
-let rtstation1 = "";
+const rtstation1 = "";
 let MaxIntensity1 = 0;
 let testEEWerror = false;
 // #endregion
@@ -826,7 +826,7 @@ function handler(response) {
 
 		*/
 
-		const a = new maplibregl.Popup()
+		const a = new maplibregl.Popup();
 		if (!Station[keys[index]])
 			Station[keys[index]] = new maplibregl.Marker(
 				{
