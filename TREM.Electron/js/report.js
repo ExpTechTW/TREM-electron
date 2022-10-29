@@ -27,6 +27,7 @@ TREM.Report = {
 		if (this.view == "report-list" || skipCheck) {
 			const fragment = new DocumentFragment();
 			const reports = Array.from(this.cache, ([k, v]) => v);
+			let reports_marker = new maplibregl.Marker();
 			this.reportList = reports
 				.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 				.filter(v => this._filterHasReplay ? v.ID?.length : true)
@@ -42,9 +43,9 @@ TREM.Report = {
 					|| (this._filterIntensity && !(report.data[0].areaIntensity == this._filterIntensityValue))) {
 					element.classList.add("hide");
 					element.style.display = "none";
-				} else
+				} else {
 					this._markers.push(
-						new maplibregl.Marker({
+						reports_marker = new maplibregl.Marker({
 							element: $(TREM.Resources.icon.cross(
 								{
 									size         : report.magnitudeValue * 4,
@@ -54,6 +55,11 @@ TREM.Report = {
 								}))[0],
 						}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report),
 					);
+					reports_marker.getElement().addEventListener("click", () => {
+						TREM.set_report_overview = 0;
+						TREM.Report.setView("report-overview", report.identifier);
+					});
+				}
 				fragment.appendChild(element);
 			}
 
@@ -289,9 +295,10 @@ TREM.Report = {
 		for (const report of added)
 			this._showItem(document.getElementById(report.identifier));
 
-		for (const report of newlist)
+		let newlist_marker = new maplibregl.Marker();
+		for (const report of newlist) {
 			this._markers.push(
-				new maplibregl.Marker({
+				newlist_marker = new maplibregl.Marker({
 					element: $(TREM.Resources.icon.cross(
 						{
 							size         : report.magnitudeValue * 4,
@@ -301,6 +308,11 @@ TREM.Report = {
 						}))[0],
 				}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report),
 			);
+			newlist_marker.getElement().addEventListener("click", () => {
+				TREM.set_report_overview = 0;
+				TREM.Report.setView("report-overview", report.identifier);
+			});
+		}
 	},
 	/**
 	 * @param {HTMLElement} element
