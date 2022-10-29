@@ -25,5 +25,5 @@
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": "⬆ 업데이트가 가능합니다",
     "Notification_Update_Body": "v{0} → v{1}\n여기를 눌러 최신 버전을 다운로드 합니다.",
-    "Realtime_No_Data": "미수신중"
+    "Realtime_No_Data": null
 }
