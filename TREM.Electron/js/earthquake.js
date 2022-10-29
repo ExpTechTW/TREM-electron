@@ -112,7 +112,7 @@ let WarnAudio = 0;
 let MaxPGA = 0;
 let Unlock = false;
 TREM.set_report_overview = 0;
-const rtstation1 = "";
+let rtstation1 = "";
 let MaxIntensity1 = 0;
 let testEEWerror = false;
 // #endregion
@@ -826,28 +826,44 @@ function handler(response) {
 
 		*/
 
-		const a = new maplibregl.Popup();
-		if (!Station[keys[index]])
+		const station_tooltip_popup = new maplibregl.Popup();
+		if (!Station[keys[index]]) {
 			Station[keys[index]] = new maplibregl.Marker(
 				{
 					element: $(`<div class="map-intensity-icon rt-icon ${levelClass}"></div>`)[0],
 				})
 				.setLngLat([station[keys[index]].Long, station[keys[index]].Lat])
-				.setPopup(a.setHTML(station_tooltip))
+				.setPopup(station_tooltip_popup.setHTML(station_tooltip))
 				.addTo(Maps.main);
+			station_tooltip_popup.on("open", () => {
+				if (rtstation1 == "")
+					rtstation1 = keys[index];
+				else if (rtstation1 == keys[index])
+					rtstation1 = "";
+				else if (rtstation1 != keys[index])
+					rtstation1 = keys[index];
+			}).on("close", () => {
+				if (rtstation1 == "")
+					rtstation1 = keys[index];
+				else if (rtstation1 == keys[index])
+					rtstation1 = "";
+				else if (rtstation1 != keys[index])
+					rtstation1 = keys[index];
+			});
+		}
 		/*
-				.on("click", () => {
-					Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
-					if (Maps.main.getZoom() < 11) {
-						const tooltip = Station[keys[index]].getTooltip();
-						Station[keys[index]].unbindTooltip();
-						if (Station[keys[index]].keepTooltipAlive)
-							tooltip.options.permanent = true;
-						else
-							tooltip.options.permanent = false;
-						Station[keys[index]].bindTooltip(tooltip);
-					}
-				});*/
+		.on("click", () => {
+			Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
+			if (Maps.main.getZoom() < 11) {
+				const tooltip = Station[keys[index]].getTooltip();
+				Station[keys[index]].unbindTooltip();
+				if (Station[keys[index]].keepTooltipAlive)
+					tooltip.options.permanent = true;
+				else
+					tooltip.options.permanent = false;
+				Station[keys[index]].bindTooltip(tooltip);
+			}
+		});*/
 
 		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
 			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
