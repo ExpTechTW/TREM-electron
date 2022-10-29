@@ -1892,6 +1892,7 @@ stop.pred-stop {
 
 .map-intensity-icon.rt-icon {
 	border-radius: 8px;
+	cursor: pointer;
 }
 
 .map-intensity-icon.pga1 { background-color: #0500A3; }

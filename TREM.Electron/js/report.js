@@ -1,4 +1,4 @@
-/* global Maps: false, IntensityToClassString: false, Maps.report: true, IntensityI: false, changeView: false, replay: true, replayT: true */
+/* global maplibregl:false, Maps: false, IntensityToClassString: false, Maps.report: true, IntensityI: false, changeView: false, replay: true, replayT: true */
 
 TREM.Report = {
 	cache                 : new Map(),
@@ -6,7 +6,6 @@ TREM.Report = {
 	reportList            : [],
 	reportListElement     : document.getElementById("report-list-container"),
 	_markers              : [],
-	_markersGroup         : null,
 	_lastFocus            : [],
 	_filterHasReplay      : false,
 	_filterHasNumber      : false,
@@ -44,25 +43,20 @@ TREM.Report = {
 					element.classList.add("hide");
 					element.style.display = "none";
 				} else
-					this._markers.push(L.marker(
-						[report.epicenterLat, report.epicenterLon],
-						{
-							icon: L.divIcon({
-								html      : TREM.Resources.icon.cross,
-								iconSize  : [report.magnitudeValue * 4, report.magnitudeValue * 4],
-								className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
-							}),
-							opacity      : (reports.length - reports.indexOf(report)) / reports.length,
-							zIndexOffset : 1000 + reports.length - reports.indexOf(report),
-						},
-					).bindPopup().on("popupopen", () => {
-						TREM.set_report_overview = 0;
-						TREM.Report.setView("report-overview", report.identifier);
-					}));
+					this._markers.push(
+						new maplibregl.Marker({
+							element: $(TREM.Resources.icon.cross(
+								{
+									size         : report.magnitudeValue * 4,
+									className    : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
+									opacity      : (reports.length - reports.indexOf(report)) / reports.length,
+									zIndexOffset : 1000 + reports.length - reports.indexOf(report),
+								}))[0],
+						}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report),
+					);
 				fragment.appendChild(element);
 			}
 
-			this._markersGroup = L.featureGroup(this._markers).addTo(Maps.report);
 			this.reportListElement.appendChild(fragment);
 		}
 	},
@@ -296,23 +290,17 @@ TREM.Report = {
 			this._showItem(document.getElementById(report.identifier));
 
 		for (const report of newlist)
-			this._markers.push(L.marker(
-				[report.epicenterLat, report.epicenterLon],
-				{
-					icon: L.divIcon({
-						html      : TREM.Resources.icon.cross,
-						iconSize  : [report.magnitudeValue * 4, report.magnitudeValue * 4],
-						className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
-					}),
-					opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
-					zIndexOffset : 1000 + this.cache.size - keys.indexOf(report.identifier),
-				},
-			).bindPopup().on("popupopen", () => {
-				TREM.set_report_overview = 0;
-				TREM.Report.setView("report-overview", report.identifier);
-			}));
-
-		this._markersGroup = L.featureGroup(this._markers).addTo(Maps.report);
+			this._markers.push(
+				new maplibregl.Marker({
+					element: $(TREM.Resources.icon.cross(
+						{
+							size         : report.magnitudeValue * 4,
+							className    : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
+							opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
+							zIndexOffset : 1000 + this.cache.size - keys.indexOf(report.identifier),
+						}))[0],
+				}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report),
+			);
 	},
 	/**
 	 * @param {HTMLElement} element
@@ -337,19 +325,16 @@ TREM.Report = {
 		} else if (this._lastFocus.length)
 			Maps.report.fitBounds(...this._lastFocus);
 		else {
-			this._lastFocus = [[[25.35, 119.4], [21.9, 122.22]], {
-				paddingTopLeft: [
-					this._mapPaddingLeft,
-					0,
-				],
+			this._lastFocus = [[119.8, 21.82, 122.18, 25.42], {
+				padding: { left: this._mapPaddingLeft },
 			}];
 			Maps.report.fitBounds(...this._lastFocus);
 		}
 	},
 	_clearMap(resetFoucs = false) {
-		if (this._markersGroup) {
-			this._markersGroup.remove();
-			this._markersGroup = null;
+		if (this._markers.length) {
+			for (const marker of this._markers)
+				marker.remove();
 			this._markers = [];
 		}
 		if (resetFoucs) {
@@ -408,43 +393,35 @@ TREM.Report = {
 
 		for (const data of report.data)
 			for (const eqStation of data.eqStation)
-				this._markers.push(L.marker(
-					[eqStation.stationLat, eqStation.stationLon],
-					{
-						icon: L.divIcon({
-							iconSize  : [16, 16],
-							className : `map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}`,
-						}),
-						zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
-					},
-				));
+				this._markers.push(
+					new maplibregl.Marker({
+						element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + IntensityToClassString(eqStation.stationIntensity)};"></div>`)[0],
+					}).setLngLat([eqStation.stationLon, eqStation.stationLat]).addTo(Maps.report),
+				);
 
 		this._markers.push(
-			L.marker(
-				[report.epicenterLat, report.epicenterLon],
-				{
-					icon: L.divIcon({
-						html      : TREM.Resources.icon.cross,
-						iconSize  : [32, 32],
-						className : "epicenterIcon",
-					}),
-					zIndexOffset: 5000,
-				},
-			),
+			new maplibregl.Marker({
+				element: $(TREM.Resources.icon.cross(
+					{ size: 32, className: "epicenterIcon", zIndexOffset: 5000 },
+				))[0],
+			}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report),
 		);
 
-		this._markersGroup = L.featureGroup(this._markers).addTo(Maps.report);
+		const bounds = new maplibregl.LngLatBounds();
+		for (const marker of this._markers)
+			bounds.extend(marker.getLngLat());
 
-		const zoomPredict = (Maps.report.getBoundsZoom(this._markersGroup.getBounds()) - Maps.report.getMinZoom()) / (Maps.report.getMaxZoom() * (1.5 ** (Maps.report.getBoundsZoom(this._markersGroup.getBounds()) - Maps.report.getMinZoom())));
-		this._focusMap(this._markersGroup.getBounds(), {
-			paddingTopLeft: [
-				document.getElementById("map-report").offsetWidth / 2,
-				document.getElementById("map-report").offsetHeight * zoomPredict,
-			],
-			paddingBottomRight: [
-				document.getElementById("map-report").offsetWidth * zoomPredict,
-				document.getElementById("map-report").offsetHeight * zoomPredict,
-			],
+		const camera = Maps.report.cameraForBounds(bounds);
+		const zoomPredict = (camera.zoom - Maps.report.getMinZoom()) / (Maps.report.getMaxZoom() * (1.5 ** (camera.zoom - Maps.report.getMinZoom())));
+		const canvasHeight = Maps.report.getCanvas().height;
+		const canvasWidth = Maps.report.getCanvas().width;
+		this._focusMap(bounds, {
+			padding: {
+				top    : canvasHeight * zoomPredict,
+				left   : this._mapPaddingLeft + canvasWidth * zoomPredict,
+				bottom : canvasHeight * zoomPredict,
+				right  : canvasWidth * zoomPredict,
+			},
 		});
 
 		if (report.ID == undefined)
@@ -483,7 +460,6 @@ TREM.on("viewChange", (oldView, newView) => {
 	switch (newView) {
 		case "report": {
 			TREM.Report.loadReports();
-			Maps.report.invalidateSize();
 			break;
 		}
 		case "intensity": {
