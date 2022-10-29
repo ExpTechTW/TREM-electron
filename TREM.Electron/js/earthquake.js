@@ -328,15 +328,27 @@ async function init() {
 					zoom              : 6.8,
 					center            : [121.596, 23.612],
 					renderWorldCopies : false,
+					keyboard          : false,
 				})
 				.on("click", () => Maps.main.flyTo({
-					center  : [121.596, 23.612],
-					zoom    : 6.8,
-					bearing : 0,
-					speed   : 2,
-					curve   : 1,
-					easing  : (e) => Math.sin(e * Math.PI / 2),
-				}));
+					center   : [121.596, 23.612],
+					zoom     : 6.8,
+					bearing  : 0,
+					speed    : 2,
+					curve    : 1,
+					easing   : (e) => Math.sin(e * Math.PI / 2),
+					duration : 1000,
+				}))
+				.on("zoom", () => {
+					if (Maps.main.getZoom() >= 12) {
+						for (const key in Station)
+							if (!Station[key].getPopup().isOpen())
+								Station[key].togglePopup();
+					} else for (const key in Station)
+						if (Station[key].getPopup().isOpen())
+							if (!Station[key].getPopup().persist)
+								Station[key].togglePopup();
+				});
 
 		if (!Maps.mini)
 			Maps.mini = L.map("map-tw",
@@ -728,9 +740,10 @@ function handler(response) {
 					element: $(`<div class="map-intensity-icon rt-icon ${levelClass}"></div>`)[0],
 				})
 				.setLngLat([station[keys[index]].Long, station[keys[index]].Lat])
-				.setPopup(new maplibregl.Popup().setHTML(station_tooltip))
+				.setPopup(new maplibregl.Popup({ closeOnClick: false, closeButton: false }).setHTML(station_tooltip))
 				.addTo(Maps.main);
 
+		else Station[keys[index]].getPopup().setHTML(station_tooltip);
 		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
 			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
 
