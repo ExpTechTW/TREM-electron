@@ -375,23 +375,35 @@ async function init() {
 					zoom              : 6.8,
 					center            : [121.596, 23.612],
 					renderWorldCopies : false,
-					keyboard          : true,
+					keyboard          : false,
 				})
 				.on("click", () => Maps.main.flyTo({
-					center  : [121.596, 23.612],
-					zoom    : 6.8,
-					bearing : 0,
-					speed   : 2,
-					curve   : 1,
-					easing  : (e) => Math.sin(e * Math.PI / 2),
+					center   : [121.596, 23.612],
+					zoom     : 6.8,
+					bearing  : 0,
+					speed    : 2,
+					curve    : 1,
+					easing   : (e) => Math.sin(e * Math.PI / 2),
+					duration : 1000,
 				}))
+				.on("zoom", () => {
+					if (Maps.main.getZoom() >= 12) {
+						for (const key in Station)
+							if (!Station[key].getPopup().isOpen())
+								Station[key].togglePopup();
+					} else for (const key in Station)
+						if (Station[key].getPopup().isOpen())
+							if (!Station[key].getPopup().persist)
+								Station[key].togglePopup();
+				})
 				.on("contextmenu", () => Maps.main.flyTo({
-					center  : [121.596, 23.612],
-					zoom    : 6.8,
-					bearing : 0,
-					speed   : 2,
-					curve   : 1,
-					easing  : (e) => Math.sin(e * Math.PI / 2),
+					center   : [121.596, 23.612],
+					zoom     : 6.8,
+					bearing  : 0,
+					speed    : 2,
+					curve    : 1,
+					easing   : (e) => Math.sin(e * Math.PI / 2),
+					duration : 1000,
 				}));
 
 		if (!Maps.mini)
@@ -812,7 +824,7 @@ function handler(response) {
 
 		*/
 
-		const station_tooltip_popup = new maplibregl.Popup();
+		const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
 		if (!Station[keys[index]]) {
 			Station[keys[index]] = new maplibregl.Marker(
 				{
@@ -836,7 +848,7 @@ function handler(response) {
 				else if (rtstation1 != keys[index])
 					rtstation1 = keys[index];
 			});
-		}
+		} else Station[keys[index]].getPopup().setHTML(station_tooltip);
 
 		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
 			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
