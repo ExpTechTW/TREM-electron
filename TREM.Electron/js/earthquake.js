@@ -777,7 +777,7 @@ function handler(response) {
 								"pga1";
 
 		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
-		const station_tooltip = `<div class="rt-station-tooltip"><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(Intensity)}</div></div>`;
+		const station_tooltip = `<div class="rt-station-tooltip"><div class="rt-station-id">${keys[index]}</div><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(Intensity)}</div></div>`;
 
 		const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
 		if (!Station[keys[index]]) {
@@ -789,7 +789,7 @@ function handler(response) {
 				.setPopup(station_tooltip_popup.setHTML(station_tooltip))
 				.addTo(Maps.main);
 			Station[keys[index]].getElement().addEventListener("click", () => {
-				Station[keys[index]].getPopup().persist = !Station[keys[index]].getPopup().persist
+				// Station[keys[index]].getPopup().persist = !Station[keys[index]].getPopup().persist;
 				if (rtstation1 == "")
 					rtstation1 = keys[index];
 				else if (rtstation1 == keys[index])
@@ -798,7 +798,10 @@ function handler(response) {
 					rtstation1 = keys[index];
 			});
 			Station[keys[index]].getElement().addEventListener("mouseover", () => {
-				Station[keys[index]].getPopup().persist = !Station[keys[index]].getPopup().persist
+				station_tooltip_popup.setLngLat([station[keys[index]].Long, station[keys[index]].Lat]).setHTML(station_tooltip).addTo(Maps.main);
+			});
+			Station[keys[index]].getElement().addEventListener("mouseleave", () => {
+				station_tooltip_popup.remove();
 			});
 			// station_tooltip_popup.on("open", () => {
 			// 	if (rtstation1 == "")
@@ -824,7 +827,7 @@ function handler(response) {
 		const now = new Date(stationData.T * 1000);
 
 		if (Unlock) {
-			if (rtstation1 == "") {
+			if (rtstation1 == "")
 				if (keys.includes(setting["Real-time.station"])) {
 					if (keys[index] == setting["Real-time.station"]) {
 						if (document.getElementById("rt-station").classList.contains("hide"))
@@ -842,14 +845,14 @@ function handler(response) {
 					document.getElementById("rt-station-local-time").innerText = "--:--:--";
 					document.getElementById("rt-station-local-pga").innerText = "--";
 				}
-			} else if (rtstation1 == keys[index]) {
+			else if (rtstation1 == keys[index]) {
 				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
 				document.getElementById("rt-station-local-id").innerText = keys[index];
 				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
 				document.getElementById("rt-station-local-pga").innerText = amount;
 			}
-		} else if (rtstation1 == "") {
+		} else if (rtstation1 == "")
 			if (keys.includes(setting["Real-time.station"])) {
 				if (keys[index] == setting["Real-time.station"]) {
 					if (document.getElementById("rt-station").classList.contains("hide"))
@@ -867,7 +870,7 @@ function handler(response) {
 				document.getElementById("rt-station-local-time").innerText = "--:--:--";
 				document.getElementById("rt-station-local-pga").innerText = "--";
 			}
-		} else if (rtstation1 == keys[index]) {
+		else if (rtstation1 == keys[index]) {
 			document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
 			document.getElementById("rt-station-local-id").innerText = keys[index];
 			document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
@@ -2719,14 +2722,10 @@ const changeView = (args, el, event) => {
 	currentel.removeClass("show");
 	changeel.addClass("show");
 
-	// if (changeel.attr("id") == "report") {
-	// 	Maps.report.invalidateSize();
-	// 	toggleNav(false);
-	// }
-	if (changeel.attr("id") == "intensity") {
-		Maps.intensity.invalidateSize();
+	if (changeel.attr("id") == "report")
 		toggleNav(false);
-	}
+	if (changeel.attr("id") == "intensity")
+		toggleNav(false);
 	if (changeel.attr("id") == "main") {
 		reportOverviewButton();
 		toggleNav(false);

@@ -462,10 +462,6 @@ TREM.on("viewChange", (oldView, newView) => {
 			TREM.Report.loadReports();
 			break;
 		}
-		case "intensity": {
-			Maps.intensity.invalidateSize();
-			break;
-		}
 
 		default:
 			break;
