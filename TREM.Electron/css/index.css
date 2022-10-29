@@ -1790,16 +1790,18 @@ stop.pred-stop {
 	stop-color: rgba(255, 165, 0, 0.2);
 }
 
-.epicenterIcon.one .inner { fill: var(--custom-int-1); }
-.epicenterIcon.two .inner { fill: var(--custom-int-2); }
-.epicenterIcon.three .inner { fill: var(--custom-int-3); }
-.epicenterIcon.four .inner { fill: var(--custom-int-4); }
-.epicenterIcon.five .inner { fill: var(--custom-int-5); }
-.epicenterIcon.five.strong .inner { fill: var(--custom-int-6); }
-.epicenterIcon.six .inner { fill: var(--custom-int-7); }
-.epicenterIcon.six.strong .inner { fill: var(--custom-int-8); }
-.epicenterIcon.seven .inner { fill: var(--custom-int-9); }
-.epicenterIcon.darkText .outer { fill: #000; }
+.cross-inner { fill: #f34336; }
+.cross-outer { fill: #fff; }
+.epicenterIcon.one .cross-inner { fill: var(--custom-int-1); }
+.epicenterIcon.two .cross-inner { fill: var(--custom-int-2); }
+.epicenterIcon.three .cross-inner { fill: var(--custom-int-3); }
+.epicenterIcon.four .cross-inner { fill: var(--custom-int-4); }
+.epicenterIcon.five .cross-inner { fill: var(--custom-int-5); }
+.epicenterIcon.five.strong .cross-inner { fill: var(--custom-int-6); }
+.epicenterIcon.six .cross-inner { fill: var(--custom-int-7); }
+.epicenterIcon.six.strong .cross-inner { fill: var(--custom-int-8); }
+.epicenterIcon.seven .cross-inner { fill: var(--custom-int-9); }
+.epicenterIcon.darkText .cross-outer { fill: #000; }
 
 #map-legends {
 	position: fixed;
