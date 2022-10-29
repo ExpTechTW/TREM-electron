@@ -15,7 +15,7 @@ TREM.Report = {
 	_filterIntensityValue : 4,
 	_reportItemTemplate   : document.getElementById("template-report-list-item"),
 	get _mapPaddingLeft() {
-		return document.getElementById("map-report").offsetWidth / 2;
+		return document.getElementById("map-report").offsetWidth / 2 - 50;
 	},
 	unloadReports(skipCheck = false) {
 		if (this.view == "report-list" || skipCheck) {
@@ -401,7 +401,7 @@ TREM.Report = {
 		this._focusMap(bounds, {
 			padding: {
 				top    : canvasHeight * zoomPredict,
-				left   : this._mapPaddingLeft + canvasWidth * zoomPredict,
+				left   : canvasWidth / 2 - 50,
 				bottom : canvasHeight * zoomPredict,
 				right  : canvasWidth * zoomPredict,
 			},
