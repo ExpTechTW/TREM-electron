@@ -967,6 +967,20 @@ function handler(response) {
 					}
 					if (setting["audio.realtime"]) TREM.Audios.palert.play();
 				} else Maps.main.removeLayer(Pgeojson);
+				// MapBases.main.set(MapData.tw_town, Maps.main.addLayer({
+				// 	id     : "Layer_tw_town",
+				// 	type   : "fill",
+				// 	source : {
+				// 		type : "geojson",
+				// 		data : MapData[MapData.tw_town],
+				// 	},
+				// 	layout : {},
+				// 	paint  : {
+				// 		"fill-color"         : TREM.Colors.surfaceVariant,
+				// 		"fill-outline-color" : TREM.Colors.primary,
+				// 		"fill-opacity"       : 0.8,
+				// 	},
+				// }).getLayer("Layer_tw_town"));
 				Pgeojson = L.geoJson.vt(MapData.tw_town, {
 					minZoom   : 4,
 					maxZoom   : 12,
