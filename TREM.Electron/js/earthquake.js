@@ -61,7 +61,7 @@ const Maps = { main: null, mini: null, report: null, intensity: null };
 /**
  * @type { {[key: string]: Map<string, maplibregl.StyleLayer>} }
  */
-const MapBases = { main: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
+const MapBases = { mainFill: new Map(), mainBorder: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
 let PGAMainLock = false;
 const Station = {};
 const PGA = {};
@@ -82,7 +82,7 @@ let Report = 0;
 let Sspeed = 3.5;
 let Pspeed = 6.5;
 const Server = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
-let PAlert = {};
+let rawPalertData = {};
 let Location;
 let station = {};
 let PGAjson = {};
@@ -450,7 +450,8 @@ async function init() {
 				.fitBounds([119.8, 21.82, 122.18, 25.42], {
 					padding: { left: document.getElementById("map-report").offsetWidth / 2 },
 				})
-				.on("click", () => TREM.Report._focusMap());
+				.on("click", () => TREM.Report._focusMap())
+				.on("contextmenu", () => TREM.Report._focusMap());
 
 		if (!Maps.intensity) {
 			Maps.intensity = L.map("map-intensity",
@@ -518,9 +519,9 @@ async function init() {
 		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
 		/*
-		if (!MapBases.main.length)
+		if (!MapBases.mainFill.length)
 			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
-				MapBases.main.push(
+				MapBases.mainFill.push(
 					L.geoJson.vt(MapData[mapName], {
 						edgeBufferTiles : 2,
 						minZoom         : 4,
@@ -538,22 +539,100 @@ async function init() {
 				);
 		*/
 
-		if (!MapBases.main.size)
-			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
-				MapBases.main.set(mapName, Maps.main.addLayer({
-					id     : `Layer_${mapName}`,
+		if (!MapBases.mainFill.size) {
+			for (const mapName of ["cn", "jp", "sk", "nk"]) {
+				Maps.main.addSource(`Source_${mapName}`, {
+					type : "geojson",
+					data : MapData[mapName],
+				});
+				MapBases.mainFill.set(mapName, Maps.main.addLayer({
+					id     : `Layer_${mapName}_Fill`,
 					type   : "fill",
-					source : {
-						type : "geojson",
-						data : MapData[mapName],
-					},
-					layout : {},
+					source : `Source_${mapName}`,
 					paint  : {
-						"fill-color"         : TREM.Colors.surfaceVariant,
-						"fill-outline-color" : TREM.Colors.primary,
-						"fill-opacity"       : 0.8,
+						"fill-color"   : TREM.Colors.surfaceVariant,
+						"fill-opacity" : 0.5,
 					},
-				}).getLayer(`Layer_${mapName}`));
+				}).getLayer(`Layer_${mapName}_Fill`));
+				MapBases.mainBorder.set(mapName, Maps.main.addLayer({
+					id     : `Layer_${mapName}_Line`,
+					type   : "line",
+					source : `Source_${mapName}`,
+					paint  : {
+						"line-color"   : TREM.Colors.secondary,
+						"line-width"   : 0.6,
+						"line-opacity" : 0.5,
+					},
+				}).getLayer(`Layer_${mapName}_Line`));
+			}
+			Maps.main.addSource("Source_tw_county", {
+				type : "geojson",
+				data : MapData.tw_county,
+			});
+			Maps.main.addSource("Source_tw_town", {
+				type : "geojson",
+				data : MapData.tw_town,
+			});
+			MapBases.mainFill.set("tw_county", Maps.main.addLayer({
+				id     : "Layer_tw_county_Fill",
+				type   : "fill",
+				source : "Source_tw_county",
+				paint  : {
+					"fill-color"   : TREM.Colors.surfaceVariant,
+					"fill-opacity" : 1,
+				},
+			}).getLayer("Layer_tw_county_Fill"));
+			Maps.main.addLayer({
+				id     : "Layer_intensity",
+				type   : "fill",
+				source : "Source_tw_town",
+				paint  : {
+					"fill-color": [
+						"match",
+						["feature-state", "intensity"],
+						9,
+						setting["theme.customColor"] ? setting["theme.int.9"]
+							: "#862DB3",
+						8,
+						setting["theme.customColor"] ? setting["theme.int.8"]
+							: "#DB1F1F",
+						7,
+						setting["theme.customColor"] ? setting["theme.int.7"]
+							: "#F55647",
+						6,
+						setting["theme.customColor"] ? setting["theme.int.6"]
+							: "#DB641F",
+						5,
+						setting["theme.customColor"] ? setting["theme.int.5"]
+							: "#E68439",
+						4,
+						setting["theme.customColor"] ? setting["theme.int.4"]
+							: "#E8D630",
+						3,
+						setting["theme.customColor"] ? setting["theme.int.3"]
+							: "#7BA822",
+						2,
+						setting["theme.customColor"] ? setting["theme.int.2"]
+							: "#2774C2",
+						1,
+						setting["theme.customColor"] ? setting["theme.int.1"]
+							: "#757575",
+						"transparent",
+					],
+					"fill-opacity": 1,
+				},
+			});
+			MapBases.mainBorder.set("tw_county", Maps.main.addLayer({
+				id     : "Layer_tw_county_Line",
+				type   : "line",
+				source : "Source_tw_county",
+				paint  : {
+					"line-color"   : TREM.Colors.primary,
+					"line-width"   : 1,
+					"line-opacity" : 1,
+				},
+			}).getLayer("Layer_tw_county_Line"));
+		}
 
 		if (!MapBases.mini.length)
 			MapBases.mini.set("tw_county",
@@ -940,15 +1019,24 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	if (PAlert.data != undefined && replay == 0) {
-		if (PAlert.timestamp != PAlertT) {
-			PAlertT = PAlert.timestamp;
-			const PLoc = {};
+	if (rawPalertData.data != undefined && replay == 0) {
+		if (rawPalertData.timestamp != PAlertT) {
+			PAlertT = rawPalertData.timestamp;
+			const palertIntensities = {};
 			let MaxI = 0;
-			for (let index = 0; index < PAlert.data.length; index++) {
-				PLoc[PAlert.data[index].loc] = PAlert.data[index].intensity;
-				if (PAlert.data[index].intensity > MaxI) {
-					MaxI = PAlert.data[index].intensity;
+			for (const palertEntry of rawPalertData.data) {
+				const [countyName, townName] = palertEntry.loc.split(" ");
+				const towncode = TREM.Resources.region[countyName]?.[townName]?.[0];
+				if (!towncode) continue;
+				palertIntensities[towncode] = palertEntry.intensity;
+				Maps.main.setFeatureState({
+					source : "Source_tw_town",
+					id     : towncode,
+				}, {
+					intensity: palertEntry.intensity,
+				});
+				if (palertEntry.intensity > MaxI) {
+					MaxI = palertEntry.intensity;
 					Report = NOW.getTime();
 					ReportGET({
 						Max  : MaxI,
@@ -956,8 +1044,8 @@ function handler(response) {
 					});
 				}
 			}
-			if (PalertT != PAlert.timestamp && Object.keys(PLoc).length != 0) {
-				PalertT = PAlert.timestamp;
+			if (PalertT != rawPalertData.timestamp && Object.keys(palertIntensities).length != 0) {
+				PalertT = rawPalertData.timestamp;
 				if (Pgeojson == null) {
 					changeView("main", "#mainView_btn");
 					if (Unlock) {
@@ -990,7 +1078,7 @@ function handler(response) {
 					zIndex    : 5,
 					style     : (properties) => {
 						const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
-						if (PLoc[name] == 0 || PLoc[name] == undefined)
+						if (palertIntensities[name] == 0 || palertIntensities[name] == undefined)
 							return {
 								color       : "transparent",
 								weight      : 0,
@@ -1001,7 +1089,7 @@ function handler(response) {
 						return {
 							color       : TREM.Colors.secondary,
 							weight      : 0.8,
-							fillColor   : color(PLoc[name]),
+							fillColor   : color(palertIntensities[name]),
 							fillOpacity : 1,
 						};
 					},
@@ -1018,8 +1106,8 @@ function handler(response) {
 				}, 1250);
 			}
 		}
-		if (NOW.getTime() - PAlert.timestamp > 630000)
-			PAlert = {};
+		if (NOW.getTime() - rawPalertData.timestamp > 630000)
+			rawPalertData = {};
 	}
 	for (let index = 0; index < Object.keys(PGA).length; index++) {
 		if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(PGA)[index]]);
@@ -1805,7 +1893,7 @@ async function FCMdata(data) {
 	} else if (json.Function == "TSUNAMI")
 		TREM.Earthquake.emit("tsunami", json);
 	else if (json.Function == "palert")
-		PAlert = json.Data;
+		rawPalertData = json.Data;
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
 	// else if (json.Function == "PWS") {
