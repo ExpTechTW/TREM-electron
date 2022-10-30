@@ -59,7 +59,7 @@ const Maps = { main: null, mini: null, report: null };
 /**
  * @type { {[key: string]: Map<string, maplibregl.StyleLayer>} }
  */
-const MapBases = { mainFill: new Map(), mainBorder: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
+const MapBases = { main: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
 let PGAMainLock = false;
 const Station = {};
 const PGA = {};
@@ -476,13 +476,13 @@ async function init() {
 					}).addTo(Maps.main),
 				);
 */
-		if (!MapBases.mainFill.size) {
+		if (!MapBases.main.size) {
 			for (const mapName of ["cn", "jp", "sk", "nk"]) {
 				Maps.main.addSource(`Source_${mapName}`, {
 					type : "geojson",
 					data : MapData[mapName],
 				});
-				MapBases.mainFill.set(mapName, Maps.main.addLayer({
+				MapBases.main.set(`${mapName}_fill`, Maps.main.addLayer({
 					id     : `Layer_${mapName}_Fill`,
 					type   : "fill",
 					source : `Source_${mapName}`,
@@ -491,7 +491,7 @@ async function init() {
 						"fill-opacity" : 0.5,
 					},
 				}).getLayer(`Layer_${mapName}_Fill`));
-				MapBases.mainBorder.set(mapName, Maps.main.addLayer({
+				MapBases.main.set(`${mapName}_line`, Maps.main.addLayer({
 					id     : `Layer_${mapName}_Line`,
 					type   : "line",
 					source : `Source_${mapName}`,
@@ -510,7 +510,7 @@ async function init() {
 				type : "geojson",
 				data : MapData.tw_town,
 			});
-			MapBases.mainFill.set("tw_county", Maps.main.addLayer({
+			MapBases.main.set("tw_county_fill", Maps.main.addLayer({
 				id     : "Layer_tw_county_Fill",
 				type   : "fill",
 				source : "Source_tw_county",
@@ -559,7 +559,7 @@ async function init() {
 					"fill-opacity": 1,
 				},
 			});
-			MapBases.mainBorder.set("tw_county", Maps.main.addLayer({
+			MapBases.main.set("tw_county_line", Maps.main.addLayer({
 				id     : "Layer_tw_county_Line",
 				type   : "line",
 				source : "Source_tw_county",
@@ -1573,10 +1573,15 @@ const updateMapColors = async (event, value) => {
 
 	TREM.Colors = await getThemeColors(accent, dark);
 	for (const mapName in MapBases)
-		for (const layer of MapBases[mapName].values())
+		for (const [key, layer] of MapBases[mapName])
 			if (Maps[mapName] instanceof maplibregl.Map) {
-				Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
-				Maps[mapName].setPaintProperty(layer.id, "fill-outline-color", TREM.Colors.primary);
+				console.log(layer.id, layer.type, key);
+				if (layer.type == "fill")
+					Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
+				else if (layer.type == "line" && key != "tw_county_line")
+					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.secondary);
+				else if (layer.type == "line" && key == "tw_county_line")
+					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
 			}
 };
 
@@ -1599,7 +1604,39 @@ ipcRenderer.on("config:color", (event, key, value) => {
 		else
 			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).removeClass("darkText");
 	}
-
+	if (Maps.main)
+		Maps.main.setPaintProperty("Layer_intensity", "fill-color", [
+			"match",
+			["feature-state", "intensity"],
+			9,
+			setting["theme.customColor"] ? setting["theme.int.9"]
+				: "#862DB3",
+			8,
+			setting["theme.customColor"] ? setting["theme.int.8"]
+				: "#DB1F1F",
+			7,
+			setting["theme.customColor"] ? setting["theme.int.7"]
+				: "#F55647",
+			6,
+			setting["theme.customColor"] ? setting["theme.int.6"]
+				: "#DB641F",
+			5,
+			setting["theme.customColor"] ? setting["theme.int.5"]
+				: "#E68439",
+			4,
+			setting["theme.customColor"] ? setting["theme.int.4"]
+				: "#E8D630",
+			3,
+			setting["theme.customColor"] ? setting["theme.int.3"]
+				: "#7BA822",
+			2,
+			setting["theme.customColor"] ? setting["theme.int.2"]
+				: "#2774C2",
+			1,
+			setting["theme.customColor"] ? setting["theme.int.1"]
+				: "#757575",
+			"transparent",
+		]);
 });
 ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
