@@ -482,25 +482,16 @@ async function init() {
 					type : "geojson",
 					data : MapData[mapName],
 				});
-				MapBases.main.set(`${mapName}_fill`, Maps.main.addLayer({
-					id     : `Layer_${mapName}_Fill`,
+				MapBases.main.set(`${mapName}`, Maps.main.addLayer({
+					id     : `Layer_${mapName}`,
 					type   : "fill",
 					source : `Source_${mapName}`,
 					paint  : {
-						"fill-color"   : TREM.Colors.surfaceVariant,
-						"fill-opacity" : 0.5,
+						"fill-color"         : TREM.Colors.surfaceVariant,
+						"fill-outline-color" : TREM.Colors.secondary,
+						"fill-opacity"       : 0.5,
 					},
-				}).getLayer(`Layer_${mapName}_Fill`));
-				MapBases.main.set(`${mapName}_line`, Maps.main.addLayer({
-					id     : `Layer_${mapName}_Line`,
-					type   : "line",
-					source : `Source_${mapName}`,
-					paint  : {
-						"line-color"   : TREM.Colors.secondary,
-						"line-width"   : 0.6,
-						"line-opacity" : 0.5,
-					},
-				}).getLayer(`Layer_${mapName}_Line`));
+				}).getLayer(`Layer_${mapName}`));
 			}
 			Maps.main.addSource("Source_tw_county", {
 				type : "geojson",
@@ -1574,15 +1565,14 @@ const updateMapColors = async (event, value) => {
 	TREM.Colors = await getThemeColors(accent, dark);
 	for (const mapName in MapBases)
 		for (const [key, layer] of MapBases[mapName])
-			if (Maps[mapName] instanceof maplibregl.Map) {
-				console.log(layer.id, layer.type, key);
-				if (layer.type == "fill")
+			if (Maps[mapName] instanceof maplibregl.Map)
+				if (layer.type == "fill" && key != "tw_county_fill") {
 					Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
-				else if (layer.type == "line" && key != "tw_county_line")
-					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.secondary);
+					Maps[mapName].setPaintProperty(layer.id, "fill-outline-color", TREM.Colors.secondary);
+				} else if (layer.type == "fill" && key == "tw_county_fill")
+					Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
 				else if (layer.type == "line" && key == "tw_county_line")
 					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
-			}
 };
 
 ipcRenderer.on("config:theme", updateMapColors);
