@@ -2,12 +2,12 @@
 require("leaflet");
 require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
+require("expose-gc");
 const { BrowserWindow, shell } = require("@electron/remote");
 const { default: turfCircle } = require("@turf/circle");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
-const { ModalSubmitFieldsResolver } = require("discord.js");
 const maplibregl = require("maplibre-gl");
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
@@ -428,7 +428,7 @@ async function init() {
 							speed    : 2,
 							curve    : 1,
 							easing   : (e) => Math.sin(e * Math.PI / 2),
-							duration : 1000,
+							duration : 500,
 						});
 				})
 				.on("zoom", () => {
@@ -648,7 +648,7 @@ async function init() {
 				source : "Source_tw_county",
 				paint  : {
 					"line-color"   : TREM.Colors.primary,
-					"line-width"   : 1,
+					"line-width"   : 0.75,
 					"line-opacity" : 1,
 				},
 			}).getLayer("Layer_tw_county_Line"));
@@ -774,6 +774,7 @@ async function init() {
 			TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 		}
 	}, 500);
+	global.gc();
 }
 // #endregion
 

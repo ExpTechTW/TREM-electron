@@ -1387,6 +1387,12 @@ stop.pred-stop {
 .epicenterIcon.six.strong .cross-inner { fill: var(--custom-int-8); }
 .epicenterIcon.seven .cross-inner { fill: var(--custom-int-9); }
 .epicenterIcon.darkText .cross-outer { fill: #000; }
+.epicenterIcon.clickable { cursor: pointer; }
+.epicenterIcon.raise-on-hover:hover {
+	opacity: 1 !important;
+	z-index: 1000000 !important;
+	cursor: pointer;
+ }
 
 #map-legends {
 	position: fixed;
