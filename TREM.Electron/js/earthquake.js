@@ -1474,7 +1474,7 @@ function addReport(report, prepend = false) {
 		report_detail_container.className = "report-detail-container";
 
 		const report_PAlert = document.createElement("span");
-		report_PAlert.className = "report-location";
+		report_PAlert.className = "report-PAlert";
 		report_PAlert.innerText = "來源 P-Alert";
 		const report_location = document.createElement("span");
 		report_location.className = "report-location";
