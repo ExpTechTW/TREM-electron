@@ -80,13 +80,10 @@ let Report = 0;
 let Sspeed = 3.5;
 let Pspeed = 6.5;
 const Server = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
-let rawPalertData = {};
 let Location;
 let station = {};
 let PGAjson = {};
-let PalertT = 0;
 let PGAMainClock = null;
-let Pgeojson = null;
 const PWS = null;
 let investigation = false;
 let ReportTag = 0;
@@ -97,7 +94,6 @@ let replay = 0;
 let replayT = 0;
 let Second = -1;
 const mapLock = false;
-let PAlertT = 0;
 let auto = false;
 const EEW = {};
 const EEWT = { id: 0, time: 0 };
@@ -178,6 +174,92 @@ class WaveCircle {
 	}
 }
 
+TREM.Palert = {
+	isTriggered : false,
+	alertTime   : 0,
+	intensities : new Map(),
+	handle(rawPalertData) {
+		if (rawPalertData.data?.length && !replay) {
+			if (rawPalertData.timestamp != this.alertTime) {
+				this.alertTime = rawPalertData.timestamp;
+				let MaxI = 0;
+				const int = new Map();
+				for (const palertEntry of rawPalertData.data) {
+					const [countyName, townName] = palertEntry.loc.split(" ");
+					const towncode = TREM.Resources.region[countyName]?.[townName]?.[0];
+					if (!towncode) continue;
+					int.set(towncode, palertEntry.intensity);
+					if (palertEntry.intensity > MaxI) {
+						MaxI = palertEntry.intensity;
+						Report = NOW.getTime();
+						ReportGET({
+							Max  : MaxI,
+							Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
+						});
+					}
+				}
+
+				if (this.intensities.size)
+					for (const [towncode, intensity] of this.intensities)
+						if (int.get(towncode) != intensity) {
+							this.intensities.delete(towncode);
+							Maps.main.setFeatureState({
+								source : "Source_tw_town",
+								id     : towncode,
+							}, { intensity: 0 });
+						}
+
+				if (int.size) {
+					dump({ level: 0, message: `Total ${int.size} triggered stations`, origin: "P-Alert" });
+
+					for (const [towncode, intensity] of int)
+						if (this.intensities.get(towncode) != intensity)
+							Maps.main.setFeatureState({
+								source : "Source_tw_town",
+								id     : towncode,
+							}, { intensity });
+					this.intensities = int;
+
+					if (!this.isTriggered) {
+						this.isTriggered = true;
+						changeView("main", "#mainView_btn");
+						if (setting["Real-time.show"]) win.showInactive();
+						if (setting["Real-time.cover"]) win.moveTop();
+						if (!win.isFocused()) win.flashFrame(true);
+						if (setting["audio.realtime"]) TREM.Audios.palert.play();
+					}
+					setTimeout(() => {
+						ipcRenderer.send("screenshotEEW", {
+							Function : "palert",
+							ID       : 1,
+							Version  : 1,
+							Time     : NOW.getTime(),
+							Shot     : 1,
+						});
+					}, 1250);
+				}
+			}
+
+			if (this.timer)
+				clearTimeout(this.timer);
+
+			this.timer = setTimeout(() => this.clear, 600_000);
+		}
+	},
+	clear() {
+		dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
+		if (this.intensities.size) {
+			for (const [towncode] of this.intensities)
+				Maps.main.setFeatureState({
+					source : "Source_tw_town",
+					id     : towncode,
+				}, { intensity: 0 });
+			this.intensities = new Map();
+			this.isTriggered = false;
+		}
+	},
+};
+
 // #region 初始化
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
@@ -256,10 +338,8 @@ async function init() {
 				if (investigation && NOW.getTime() - Report > 600000) {
 					investigation = false;
 					roll.removeChild(roll.children[0]);
-					if (Pgeojson != null) {
-						Pgeojson.remove();
-						Pgeojson = null;
-					}
+					if (TREM.Palert.isTriggered)
+						TREM.Palert.clear();
 				}
 				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
 					ReportTag = 0;
@@ -479,8 +559,9 @@ async function init() {
 		if (!MapBases.main.size) {
 			for (const mapName of ["cn", "jp", "sk", "nk"]) {
 				Maps.main.addSource(`Source_${mapName}`, {
-					type : "geojson",
-					data : MapData[mapName],
+					type      : "geojson",
+					data      : MapData[mapName],
+					tolerance : 1,
 				});
 				MapBases.main.set(`${mapName}`, Maps.main.addLayer({
 					id     : `Layer_${mapName}`,
@@ -847,79 +928,6 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	if (rawPalertData.data != undefined && replay == 0) {
-		if (rawPalertData.timestamp != PAlertT) {
-			PAlertT = rawPalertData.timestamp;
-			const palertIntensities = {};
-			let MaxI = 0;
-			for (const palertEntry of rawPalertData.data) {
-				const [countyName, townName] = palertEntry.loc.split(" ");
-				const towncode = TREM.Resources.region[countyName]?.[townName]?.[0];
-				if (!towncode) continue;
-				palertIntensities[towncode] = palertEntry.intensity;
-				Maps.main.setFeatureState({
-					source : "Source_tw_town",
-					id     : towncode,
-				}, {
-					intensity: palertEntry.intensity,
-				});
-				if (palertEntry.intensity > MaxI) {
-					MaxI = palertEntry.intensity;
-					Report = NOW.getTime();
-					ReportGET({
-						Max  : MaxI,
-						Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
-					});
-				}
-			}
-			if (PalertT != rawPalertData.timestamp && Object.keys(palertIntensities).length != 0) {
-				PalertT = rawPalertData.timestamp;
-				if (Pgeojson == null) {
-					changeView("main", "#mainView_btn");
-					if (setting["Real-time.show"]) win.showInactive();
-					if (setting["Real-time.cover"]) win.moveTop();
-					if (!win.isFocused()) win.flashFrame(true);
-					if (setting["audio.realtime"]) TREM.Audios.palert.play();
-				} else Pgeojson.remove();
-				Pgeojson = L.geoJson.vt(MapData.tw_town, {
-					minZoom   : 4,
-					maxZoom   : 12,
-					tolerance : 20,
-					buffer    : 256,
-					debug     : 0,
-					zIndex    : 5,
-					style     : (properties) => {
-						const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
-						if (palertIntensities[name] == 0 || palertIntensities[name] == undefined)
-							return {
-								color       : "transparent",
-								weight      : 0,
-								opacity     : 0,
-								fillColor   : "transparent",
-								fillOpacity : 0,
-							};
-						return {
-							color       : TREM.Colors.secondary,
-							weight      : 0.8,
-							fillColor   : color(palertIntensities[name]),
-							fillOpacity : 1,
-						};
-					},
-				}).addTo(Maps.main);
-				setTimeout(() => {
-					ipcRenderer.send("screenshotEEW", {
-						Function : "palert",
-						ID       : 1,
-						Version  : 1,
-						Time     : NOW.getTime(),
-						Shot     : 1,
-					});
-				}, 1250);
-			}
-		}
-		if (NOW.getTime() - rawPalertData.timestamp > 630000)
-			rawPalertData = {};
-	}
 	for (let index = 0; index < Object.keys(PGA).length; index++) {
 		if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(PGA)[index]]);
 		delete PGA[Object.keys(PGA)[index]];
@@ -1668,7 +1676,7 @@ async function FCMdata(data) {
 	} else if (json.Function == "TSUNAMI")
 		TREM.Earthquake.emit("tsunami", json);
 	else if (json.Function == "palert")
-		rawPalertData = json.Data;
+		TREM.Palert.handle(json.Data);
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
 	else if (json.Function == "PWS") {
@@ -1706,10 +1714,9 @@ async function FCMdata(data) {
 		replayT = NOW.getTime();
 		ReportGET();
 	} else if (json.Function == "report") {
-		if (Pgeojson != null) {
-			Pgeojson.remove();
-			Pgeojson = null;
-		}
+		if (TREM.Palert.isTriggered)
+			TREM.Palert.clear();
+
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
 
 		if (setting["report.show"]) win.showInactive();
