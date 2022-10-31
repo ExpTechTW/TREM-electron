@@ -1818,14 +1818,14 @@ const updateMapColors = async (event, value) => {
 	TREM.Colors = await getThemeColors(accent, dark);
 	for (const mapName in MapBases)
 		for (const [key, layer] of MapBases[mapName])
-		if (Maps[mapName] instanceof maplibregl.Map)
-		if (layer.type == "fill" && key != "tw_county_fill") {
-			Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
-			Maps[mapName].setPaintProperty(layer.id, "fill-outline-color", TREM.Colors.secondary);
-		} else if (layer.type == "fill" && key == "tw_county_fill")
-			Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
-		else if (layer.type == "line" && key == "tw_county_line")
-			Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
+			if (Maps[mapName] instanceof maplibregl.Map)
+				if (layer.type == "fill" && key != "tw_county_fill") {
+					Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
+					Maps[mapName].setPaintProperty(layer.id, "fill-outline-color", TREM.Colors.secondary);
+				} else if (layer.type == "fill" && key == "tw_county_fill")
+					Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
+				else if (layer.type == "line" && key == "tw_county_line")
+					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
 };
 
 ipcRenderer.on("config:theme", updateMapColors);
