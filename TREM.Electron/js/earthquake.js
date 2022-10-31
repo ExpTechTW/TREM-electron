@@ -218,6 +218,9 @@ TREM.Palert = {
 								source : "Source_tw_town",
 								id     : towncode,
 							}, { intensity });
+
+					Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
+
 					this.intensities = int;
 
 					if (!this.isTriggered) {
@@ -254,8 +257,13 @@ TREM.Palert = {
 					source : "Source_tw_town",
 					id     : towncode,
 				}, { intensity: 0 });
+			Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
 			this.intensities = new Map();
 			this.isTriggered = false;
+			if (this.timer) {
+				clearTimeout(this.timer);
+				delete this.timer;
+			}
 		}
 	},
 };
@@ -630,6 +638,9 @@ async function init() {
 					],
 					"fill-opacity": 1,
 				},
+				layout: {
+					visibility: "none",
+				},
 			});
 			MapBases.main.set("tw_county_line", Maps.main.addLayer({
 				id     : "Layer_tw_county_Line",
@@ -758,8 +769,7 @@ async function init() {
 				TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
 			}
 			auto = true;
-		} else
-		if (auto) {
+		} else if (auto) {
 			auto = false;
 			TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 		}
