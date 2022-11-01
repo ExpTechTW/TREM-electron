@@ -278,19 +278,24 @@ TREM.MapIntensity = {
 TREM.PWS = {
 	cache: new Map(),
 	addPWS(rawPWSData) {
-		const id = rawPWSData.Link.slice(15);
+		const id = rawPWSData.link.href.slice(15);
 		if (!id.length) return;
 		const pws = {
 			id,
-			title       : rawPWSData.Title,
-			description : rawPWSData.Description,
-			detail      : rawPWSData.Msg,
-			area        : rawPWSData.Area,
-			areaCodes   : TREM.Utils.findRegions(rawPWSData.Area),
-			time        : new Date(rawPWSData.TimeStamp),
+			title       : rawPWSData.title,
+			sender      : rawPWSData.sender.value,
+			description : rawPWSData.description.$t,
+			area        : rawPWSData.area.areaDesc,
+			areaCodes   : TREM.Utils.findRegions(rawPWSData.area.areaDesc),
+			sentTime    : new Date(rawPWSData.sent.slice(0, rawPWSData.sent.length - 3)),
+			expireTime  : new Date(rawPWSData.expires.slice(0, rawPWSData.expires.length - 3)),
+			url         : rawPWSData.link.href,
 			timer       : null,
 		};
 		dump({ level: 0, message: `${pws.description}`, origin: "PWS" });
+
+		console.log(pws.expireTime.getTime() - Date.now());
+		if (Date.now() > pws.expireTime.getTime()) return;
 
 		for (const area of pws.areaCodes)
 			if (area.town) {
@@ -307,7 +312,7 @@ TREM.PWS = {
 					element: $("<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>")[0],
 				})
 					.setLngLat([area.longitude, area.latitude])
-					.setPopup(new maplibregl.Popup().setHTML(`<div class="marker-popup pws-popup">${pws.detail}</div>`))
+					.setPopup(new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: 360 }).setHTML(`<div class="marker-popup pws-popup"><strong>${pws.title}</strong>\n發報單位：${pws.sender}\n內文：${pws.description}\n發報時間：${pws.sentTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n失效時間：${pws.expireTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n\n<span class="url" onclick="openURL('${pws.url}')">報告連結</span></div>`))
 					.addTo(Maps.main);
 			} else {
 				const { pws: pwsCount } = Maps.main.getFeatureState({
@@ -321,7 +326,7 @@ TREM.PWS = {
 				Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "visible");
 			}
 
-		pws.timer = setTimeout(() => this.clear, 600_000, id);
+		pws.timer = setTimeout(this.clear, pws.expireTime.getTime() - Date.now(), id);
 
 		this.cache.set(id, pws);
 	},
@@ -1876,7 +1881,7 @@ function FCMdata(data) {
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
 	else if (json.Function == "PWS")
-		TREM.PWS.addPWS(json);
+		TREM.PWS.addPWS(json.raw);
 	else if (json.Function == "intensity") {
 		console.log("intensity");
 		console.log(json);
@@ -1903,7 +1908,7 @@ function FCMdata(data) {
 					silent : win.isFocused(),
 				});
 
-		const report = json.Body;
+		const report = json.raw;
 		addReport(report, true);
 		TREM.Report.cache.set(report.identifier, report);
 
