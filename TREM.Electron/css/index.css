@@ -1318,34 +1318,39 @@ kbd {
     pointer-events: none;
 }
 
-.rt-station-tooltip {
+.marker-popup {
 	background-color: rgb(var(--md-sys-color-surface-variant)) !important;
-	border: none !important;
+	border: none;
 	border-radius: 8px !important;
 	color: rgb(var(--md-sys-color-on-surface-variant)) !important;
 	padding: 8px !important;
 }
 
-.rt-station-tooltip::before {
+.pws-popup {
+	border: 2px solid #efcc00;
+	white-space: pre-line;
+}
+
+.rt-station-popup::before {
 	display: none !important;
 }
 
-.rt-station-tooltip > div:first-child {
+.rt-station-popup > div:first-child {
 	font-weight: 500;
 }
 
-.rt-station-tooltip > div:nth-child(2)::before {
+.rt-station-popup > div:nth-child(2)::before {
 	content: "PGA";
 	font-weight: 400;
 	padding-right: 8px;
 }
 
-.rt-station-tooltip > div:nth-child(2)::after {
+.rt-station-popup > div:nth-child(2)::after {
 	content: "gal";
 	padding-left: 4px;
 }
 
-.rt-station-tooltip > div:last-child::before {
+.rt-station-popup > div:last-child::before {
 	content: var(--rt-station-intensity);
 	font-weight: 400;
 	padding-right: 8px;

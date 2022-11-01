@@ -1,5 +1,3 @@
-const parser = new DOMParser();
-
 module.exports = {
 	region : require("./region.json"),
 	icon   : {

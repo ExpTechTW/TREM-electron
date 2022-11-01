@@ -92,7 +92,6 @@ let Location;
 let station = {};
 let PGAjson = {};
 let PGAMainClock = null;
-const PWS = null;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -276,6 +275,127 @@ TREM.MapIntensity = {
 	},
 };
 
+TREM.PWS = {
+	cache: new Map(),
+	addPWS(rawPWSData) {
+		const id = rawPWSData.Link.slice(15);
+		if (!id.length) return;
+		const pws = {
+			id,
+			title       : rawPWSData.Title,
+			description : rawPWSData.Description,
+			detail      : rawPWSData.Msg,
+			area        : rawPWSData.Area,
+			areaCodes   : TREM.Utils.findRegions(rawPWSData.Area),
+			time        : new Date(rawPWSData.TimeStamp),
+			timer       : null,
+		};
+		dump({ level: 0, message: `${pws.description}`, origin: "PWS" });
+
+		for (const area of pws.areaCodes)
+			if (area.town) {
+				const { pws: pwsCount } = Maps.main.getFeatureState({
+					source : "Source_tw_town",
+					id     : area.code,
+				});
+				Maps.main.setFeatureState({
+					source : "Source_tw_town",
+					id     : area.code,
+				}, { pws: (pwsCount ?? 0) + 1 });
+				Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "visible");
+				pws.marker = new maplibregl.Marker({
+					element: $("<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>")[0],
+				})
+					.setLngLat([area.longitude, area.latitude])
+					.setPopup(new maplibregl.Popup().setHTML(`<div class="marker-popup pws-popup">${pws.detail}</div>`))
+					.addTo(Maps.main);
+			} else {
+				const { pws: pwsCount } = Maps.main.getFeatureState({
+					source : "Source_tw_county",
+					id     : area.code,
+				});
+				Maps.main.setFeatureState({
+					source : "Source_tw_county",
+					id     : area.code,
+				}, { pws: (pwsCount ?? 0) + 1 });
+				Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "visible");
+			}
+
+		pws.timer = setTimeout(() => this.clear, 600_000, id);
+
+		this.cache.set(id, pws);
+	},
+	clear(pwsId) {
+		if (pwsId) {
+			const pws = this.cache.get(pwsId);
+			if (!pws) return;
+			dump({ level: 0, message: `Clearing PWS id ${pwsId}`, origin: "PWS" });
+			for (const area of pws.areaCodes)
+				if (area.town) {
+					const { pws: pwsCount } = Maps.main.getFeatureState({
+						source : "Source_tw_town",
+						id     : area.code,
+					});
+					Maps.main.setFeatureState({
+						source : "Source_tw_town",
+						id     : area.code,
+					}, { pws: pwsCount - 1 });
+					if (pws.marker) {
+						pws.marker.remove();
+						delete pws.marker;
+					}
+					if (!(pwsCount - 1))
+						Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
+				} else {
+					const { pws: pwsCount } = Maps.main.getFeatureState({
+						source : "Source_tw_county",
+						id     : area.code,
+					});
+					Maps.main.setFeatureState({
+						source : "Source_tw_county",
+						id     : area.code,
+					}, { pws: pwsCount - 1 });
+					if (pws.marker) {
+						pws.marker.remove();
+						delete pws.marker;
+					}
+					if (!(pwsCount - 1))
+						Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
+				}
+
+			if (pws.timer) {
+				clearTimeout(pws.timer);
+				delete pws.timer;
+			}
+
+			this.cache.delete(pwsId);
+		}
+
+		if (this.cache.size) {
+			dump({ level: 0, message: "Clearing PWS map", origin: "PWS" });
+			for (const [id, pws] of this.cache) {
+				for (const area of pws.areaCodes)
+					if (area.town)
+						Maps.main.setFeatureState({
+							source : "Source_tw_town",
+							id     : area.code,
+						}, { pws: 0 });
+					else
+						Maps.main.setFeatureState({
+							source : "Source_tw_county",
+							id     : area.code,
+						}, { pws: 0 });
+
+				if (pws.timer) {
+					clearTimeout(pws.timer);
+					delete pws.timer;
+				}
+			}
+
+			Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
+			Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
+			this.cache = new Map();
+		}
 	},
 };
 
@@ -668,6 +788,52 @@ async function init() {
 					"line-opacity" : 1,
 				},
 			}).getLayer("Layer_tw_county_Line"));
+			Maps.main.addLayer({
+				id     : "Layer_pws_town",
+				type   : "line",
+				source : "Source_tw_town",
+				paint  : {
+					"line-color": [
+						"case",
+						[">", ["coalesce", ["feature-state", "pws"], 0], 0],
+						"#efcc00",
+						"transparent",
+					],
+					"line-width"   : 2,
+					"line-opacity" : [
+						"case",
+						[">", ["coalesce", ["feature-state", "pws"], 0], 0],
+						1,
+						0,
+					],
+				},
+				layout: {
+					visibility: "none",
+				},
+			});
+			Maps.main.addLayer({
+				id     : "Layer_pws_county",
+				type   : "line",
+				source : "Source_tw_county",
+				paint  : {
+					"line-color": [
+						"case",
+						[">", ["coalesce", ["feature-state", "pws"], 0], 0],
+						"#efcc00",
+						"transparent",
+					],
+					"line-width"   : 2,
+					"line-opacity" : [
+						"case",
+						[">", ["coalesce", ["feature-state", "pws"], 0], 0],
+						1,
+						0,
+					],
+				},
+				layout: {
+					visibility: "none",
+				},
+			});
 		}
 
 		if (!MapBases.mini.length)
@@ -872,7 +1038,7 @@ function handler(response) {
 								"pga1";
 
 		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
-		const station_tooltip = `<div class="rt-station-tooltip"><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(Intensity)}</div></div>`;
+		const station_tooltip = `<div class="marker-popup rt-station-popup"><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(Intensity)}</div></div>`;
 
 		if (!Station[keys[index]]) {
 			Station[keys[index]] = new maplibregl.Marker(
@@ -1709,34 +1875,9 @@ function FCMdata(data) {
 		TREM.MapIntensity.palert(json.Data);
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
-	else if (json.Function == "PWS") {
-		// if (PWS != null) PWS.remove();
-		// PWS = L.geoJson.vt(MapData.tw_county, {
-		// 	minZoom   : 4,
-		// 	maxZoom   : 12,
-		// 	tolerance : 20,
-		// 	buffer    : 256,
-		// 	debug     : 0,
-		// 	zIndex    : 5,
-		// 	style     : (properties) => {
-		// 		const name = properties.COUNTYNAME + " " + properties.TOWNNAME;
-		// 		if (!name.includes("臺南市"))
-		// 			return {
-		// 				color       : "transparent",
-		// 				weight      : 0,
-		// 				opacity     : 0,
-		// 				fillColor   : "transparent",
-		// 				fillOpacity : 0,
-		// 			};
-		// 		return {
-		// 			color       : TREM.Colors.error,
-		// 			weight      : 3,
-		// 			fillColor   : TREM.Colors.surfaceVariant,
-		// 			fillOpacity : 0,
-		// 		};
-		// 	},
-		// }).addTo(Maps.main);
-	} else if (json.Function == "intensity") {
+	else if (json.Function == "PWS")
+		TREM.PWS.addPWS(json);
+	else if (json.Function == "intensity") {
 		console.log("intensity");
 		console.log(json);
 		TREM.Intensity.handle(json);
