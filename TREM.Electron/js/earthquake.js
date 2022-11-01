@@ -1400,13 +1400,16 @@ function addReport(report, prepend = false) {
 		const report_detail_container = document.createElement("div");
 		report_detail_container.className = "report-detail-container";
 
+		const report_PAlert = document.createElement("span");
+		report_PAlert.className = "report-PAlert";
+		report_PAlert.innerText = "來源 P-Alert";
 		const report_location = document.createElement("span");
 		report_location.className = "report-location";
 		report_location.innerText = "震源 調查中";
 		const report_time = document.createElement("span");
 		report_time.className = "report-time";
 		report_time.innerText = report.Time.replace(/-/g, "/");
-		report_detail_container.append(report_location, report_time);
+		report_detail_container.append(report_PAlert, report_location, report_time);
 
 		report_container.append(report_intensity_container, report_detail_container);
 		Div.prepend(report_container);

@@ -389,7 +389,7 @@ kbd {
 #rolllist > div:first-child > .report-container.locating > .report-detail-container {
 	grid-template-columns: auto;
 	grid-template-rows: repeat(2, 1fr);
-  height: 60px;
+  height: 90px;
   margin: auto 0;
 }
 
