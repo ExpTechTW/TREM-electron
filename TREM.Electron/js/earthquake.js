@@ -1757,7 +1757,7 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 // #endregion
 
 // #region EEW
-async function FCMdata(data) {
+function FCMdata(data) {
 	const json = JSON.parse(data);
 	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	Server.push(json.TimeStamp);
@@ -1833,14 +1833,17 @@ async function FCMdata(data) {
 		if (setting["report.cover"]) win.moveTop();
 
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
-		new Notification("地震報告",
-			{
-				body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
-				icon   : "../TREM.ico",
-				silent : win.isFocused(),
-			});
-		const report = await getReportData();
-		addReport(report[0], true);
+		if (!win.isFocused())
+			new Notification("地震報告",
+				{
+					body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
+					icon   : "../TREM.ico",
+					silent : win.isFocused(),
+				});
+
+		const report = json.Body;
+		addReport(report, true);
+		TREM.Report.cache.set(report.identifier, report);
 
 		if (setting["report.changeView"]) {
 			TREM.Report.setView("report-overview", report.identifier);
