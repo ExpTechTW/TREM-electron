@@ -217,7 +217,7 @@ TREM.Palert = {
 							Maps.main.setFeatureState({
 								source : "Source_tw_town",
 								id     : towncode,
-							}, { intensity });
+							}, { intensity, intensity_outline: 1 });
 
 					Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
 
@@ -257,6 +257,96 @@ TREM.Palert = {
 					source : "Source_tw_town",
 					id     : towncode,
 				}, { intensity: 0 });
+			Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
+			this.intensities = new Map();
+			this.isTriggered = false;
+			if (this.timer) {
+				clearTimeout(this.timer);
+				delete this.timer;
+			}
+		}
+	},
+};
+
+TREM.Intensity = {
+	isTriggered : false,
+	alertTime   : 0,
+	intensities : new Map(),
+	handle(rawIntensityData) {
+		if (rawIntensityData.TimeStamp != this.alertTime) {
+			rawIntensityData = rawIntensityData.Body.intensity;
+			this.alertTime = rawIntensityData.TimeStamp;
+			const int = new Map();
+			for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
+				const towncode = keys[index] + "0";
+				const intensity = rawIntensityData[keys[index]];
+				if (!towncode) continue;
+				if (intensity == 0) continue;
+				int.set(towncode, intensity);
+			}
+
+			if (this.intensities.size)
+				for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
+					const towncode = keys[index] + "0";
+					const intensity = rawIntensityData[keys[index]];
+					if (int.get(towncode) != intensity) {
+						this.intensities.delete(towncode);
+						Maps.main.setFeatureState({
+							source : "Source_tw_town",
+							id     : towncode,
+						}, { intensity: 0 });
+					}
+				}
+
+			if (int.size) {
+				dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
+
+				for (const [towncode, intensity] of int)
+					if (this.intensities.get(towncode) != intensity)
+						Maps.main.setFeatureState({
+							source : "Source_tw_town",
+							id     : towncode,
+						}, { intensity, intensity_outline: 1 });
+
+				Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
+
+				this.intensities = int;
+
+				if (!this.isTriggered) {
+					this.isTriggered = true;
+					changeView("main", "#mainView_btn");
+					if (setting["Real-time.show"]) win.showInactive();
+					if (setting["Real-time.cover"]) win.moveTop();
+					if (!win.isFocused()) win.flashFrame(true);
+					if (setting["audio.realtime"]) TREM.Audios.palert.play();
+				}
+				setTimeout(() => {
+					ipcRenderer.send("screenshotEEW", {
+						Function : "palert",
+						ID       : 1,
+						Version  : 1,
+						Time     : NOW.getTime(),
+						Shot     : 1,
+					});
+				}, 1250);
+			}
+
+			if (this.timer)
+				clearTimeout(this.timer);
+
+			this.timer = setTimeout(() => this.clear, 120_000);
+
+		}
+
+	},
+	clear() {
+		dump({ level: 0, message: "Clearing Intensity map", origin: "Intensity" });
+		if (this.intensities.size) {
+			for (const [towncode] of this.intensities)
+				Maps.main.removeFeatureState({
+					source : "Source_tw_town",
+					id     : towncode,
+				});
 			Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
 			this.intensities = new Map();
 			this.isTriggered = false;
@@ -635,6 +725,11 @@ async function init() {
 						setting["theme.customColor"] ? setting["theme.int.1"]
 							: "#757575",
 						"transparent",
+					],
+					"fill-outline-color": [
+						"match",
+						["feature-state", "intensity_outline"],
+						1, TREM.Colors.secondary, "rgba(0, 0, 0, 0)",
 					],
 					"fill-opacity": 1,
 				},
@@ -1720,6 +1815,7 @@ async function FCMdata(data) {
 	} else if (json.Function == "intensity") {
 		console.log("intensity");
 		console.log(json);
+		TREM.Intensity.handle(json);
 	} else if (json.Function == "Replay") {
 		replay = json.timestamp;
 		replayT = NOW.getTime();
