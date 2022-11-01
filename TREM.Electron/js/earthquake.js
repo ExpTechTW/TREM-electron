@@ -174,11 +174,11 @@ class WaveCircle {
 	}
 }
 
-TREM.Palert = {
+TREM.MapIntensity = {
 	isTriggered : false,
 	alertTime   : 0,
 	intensities : new Map(),
-	handle(rawPalertData) {
+	palert(rawPalertData) {
 		if (rawPalertData.data?.length && !replay) {
 			if (rawPalertData.timestamp != this.alertTime) {
 				this.alertTime = rawPalertData.timestamp;
@@ -268,93 +268,6 @@ TREM.Palert = {
 	},
 };
 
-TREM.Intensity = {
-	isTriggered : false,
-	alertTime   : 0,
-	intensities : new Map(),
-	handle(rawIntensityData) {
-		if (rawIntensityData.TimeStamp != this.alertTime) {
-			rawIntensityData = rawIntensityData.Body.intensity;
-			this.alertTime = rawIntensityData.TimeStamp;
-			const int = new Map();
-			for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
-				const towncode = keys[index] + "0";
-				const intensity = rawIntensityData[keys[index]];
-				if (!towncode) continue;
-				if (intensity == 0) continue;
-				int.set(towncode, intensity);
-			}
-
-			if (this.intensities.size)
-				for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
-					const towncode = keys[index] + "0";
-					const intensity = rawIntensityData[keys[index]];
-					if (int.get(towncode) != intensity) {
-						this.intensities.delete(towncode);
-						Maps.main.setFeatureState({
-							source : "Source_tw_town",
-							id     : towncode,
-						}, { intensity: 0 });
-					}
-				}
-
-			if (int.size) {
-				dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
-
-				for (const [towncode, intensity] of int)
-					if (this.intensities.get(towncode) != intensity)
-						Maps.main.setFeatureState({
-							source : "Source_tw_town",
-							id     : towncode,
-						}, { intensity, intensity_outline: 1 });
-
-				Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
-
-				this.intensities = int;
-
-				if (!this.isTriggered) {
-					this.isTriggered = true;
-					changeView("main", "#mainView_btn");
-					if (setting["Real-time.show"]) win.showInactive();
-					if (setting["Real-time.cover"]) win.moveTop();
-					if (!win.isFocused()) win.flashFrame(true);
-					if (setting["audio.realtime"]) TREM.Audios.palert.play();
-				}
-				setTimeout(() => {
-					ipcRenderer.send("screenshotEEW", {
-						Function : "palert",
-						ID       : 1,
-						Version  : 1,
-						Time     : NOW.getTime(),
-						Shot     : 1,
-					});
-				}, 1250);
-			}
-
-			if (this.timer)
-				clearTimeout(this.timer);
-
-			this.timer = setTimeout(() => this.clear, 120_000);
-
-		}
-
-	},
-	clear() {
-		dump({ level: 0, message: "Clearing Intensity map", origin: "Intensity" });
-		if (this.intensities.size) {
-			for (const [towncode] of this.intensities)
-				Maps.main.removeFeatureState({
-					source : "Source_tw_town",
-					id     : towncode,
-				});
-			Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
-			this.intensities = new Map();
-			this.isTriggered = false;
-			if (this.timer) {
-				clearTimeout(this.timer);
-				delete this.timer;
-			}
-		}
 	},
 };
 
@@ -436,8 +349,8 @@ async function init() {
 				if (investigation && NOW.getTime() - Report > 600000) {
 					investigation = false;
 					roll.removeChild(roll.children[0]);
-					if (TREM.Palert.isTriggered)
-						TREM.Palert.clear();
+					if (TREM.MapIntensity.isTriggered)
+						TREM.MapIntensity.clear();
 				}
 				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
 					ReportTag = 0;
@@ -1785,7 +1698,7 @@ function FCMdata(data) {
 	} else if (json.Function == "TSUNAMI")
 		TREM.Earthquake.emit("tsunami", json);
 	else if (json.Function == "palert")
-		TREM.Palert.handle(json.Data);
+		TREM.MapIntensity.palert(json.Data);
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
 	else if (json.Function == "PWS") {
@@ -1824,8 +1737,8 @@ function FCMdata(data) {
 		replayT = NOW.getTime();
 		ReportGET();
 	} else if (json.Function == "report") {
-		if (TREM.Palert.isTriggered)
-			TREM.Palert.clear();
+		if (TREM.MapIntensity.isTriggered)
+			TREM.MapIntensity.clear();
 
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
 
