@@ -35,6 +35,14 @@ localStorage.dirname = __dirname;
 // 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
 // }
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+setInterval(async () => {
+	try {
+		const ans = await axios.get("http://rexisstudio.tplinkdns.com:8787/getPGA.php");
+		console.log(ans.data);
+	} catch (err) {
+		console.log(err);
+	}
+}, 500);
 
 // #region 變數
 const PostAddressIP = "https://exptech.com.tw/post";
