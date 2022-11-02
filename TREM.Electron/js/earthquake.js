@@ -39,7 +39,7 @@ bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 setInterval(async () => {
 	try {
 		const ans = await axios.get("http://rexisstudio.tplinkdns.com:8787/getPGA.php");
-		console.log(ans.data);
+		// console.log(ans.data);
 	} catch (err) {
 		console.log(err);
 	}
@@ -97,6 +97,7 @@ let PGAMainClock = null;
 let investigation = false;
 let ReportTag = 0;
 TREM.ReportTag1 = 0;
+TREM.IntensityTag1 = 0;
 let EEWshot = 0;
 let EEWshotC = 0;
 let Response = {};
@@ -121,6 +122,7 @@ TREM.set_report_overview = 0;
 let rtstation1 = "";
 let MaxIntensity1 = 0;
 let testEEWerror = false;
+TREM.win = BrowserWindow.fromId(process.env.window * 1);
 // #endregion
 
 class WaveCircle {
@@ -422,96 +424,6 @@ TREM.PWS = {
 	},
 };
 
-TREM.Intensity = {
-	isTriggered : false,
-	alertTime   : 0,
-	intensities : new Map(),
-	handle(rawIntensityData) {
-		if (rawIntensityData.TimeStamp != this.alertTime) {
-			rawIntensityData = rawIntensityData.Body.intensity;
-			this.alertTime = rawIntensityData.TimeStamp;
-			const int = new Map();
-			for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
-				const towncode = keys[index] + "0";
-				const intensity = rawIntensityData[keys[index]];
-				if (!towncode) continue;
-				if (intensity == 0) continue;
-				int.set(towncode, intensity);
-			}
-
-			if (this.intensities.size)
-				for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
-					const towncode = keys[index] + "0";
-					const intensity = rawIntensityData[keys[index]];
-					if (int.get(towncode) != intensity) {
-						this.intensities.delete(towncode);
-						Maps.main.setFeatureState({
-							source : "Source_tw_town",
-							id     : towncode,
-						}, { intensity: 0 });
-					}
-				}
-
-			if (int.size) {
-				dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
-
-				for (const [towncode, intensity] of int)
-					if (this.intensities.get(towncode) != intensity)
-						Maps.main.setFeatureState({
-							source : "Source_tw_town",
-							id     : towncode,
-						}, { intensity, intensity_outline: 1 });
-
-				Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
-
-				this.intensities = int;
-
-				if (!this.isTriggered) {
-					this.isTriggered = true;
-					changeView("main", "#mainView_btn");
-					if (setting["Real-time.show"]) win.showInactive();
-					if (setting["Real-time.cover"]) win.moveTop();
-					if (!win.isFocused()) win.flashFrame(true);
-					if (setting["audio.realtime"]) TREM.Audios.palert.play();
-				}
-				setTimeout(() => {
-					ipcRenderer.send("screenshotEEW", {
-						Function : "palert",
-						ID       : 1,
-						Version  : 1,
-						Time     : NOW.getTime(),
-						Shot     : 1,
-					});
-				}, 1250);
-			}
-
-			if (this.timer)
-				clearTimeout(this.timer);
-
-			this.timer = setTimeout(() => this.clear, 120_000);
-
-		}
-
-	},
-	clear() {
-		dump({ level: 0, message: "Clearing Intensity map", origin: "Intensity" });
-		if (this.intensities.size) {
-			for (const [towncode] of this.intensities)
-				Maps.main.removeFeatureState({
-					source : "Source_tw_town",
-					id     : towncode,
-				});
-			Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
-			this.intensities = new Map();
-			this.isTriggered = false;
-			if (this.timer) {
-				clearTimeout(this.timer);
-				delete this.timer;
-			}
-		}
-	},
-};
-
 // #region 初始化
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
@@ -551,6 +463,7 @@ async function init() {
 		progressbar.value = (1 / progressStep) * 2;
 		const time = document.getElementById("time");
 		const time1 = document.getElementById("time1");
+		const time2 = document.getElementById("time2");
 
 		// clock
 		dump({ level: 3, message: "Initializing clock", origin: "Clock" });
@@ -574,6 +487,7 @@ async function init() {
 						time.classList.remove("desynced");
 					time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 					time1.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
+					time2.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 					if (replaytestEEW != 0 && NOW.getTime() - replaytestEEW > 180_000) {
 						testEEWerror = false;
 						replaytestEEW = 0;
@@ -581,6 +495,11 @@ async function init() {
 					if (TREM.ReportTag1 != 0 && NOW.getTime() - TREM.ReportTag1 > 60_000) {
 						console.log("ReportTag1 end: ", NOW.getTime());
 						TREM.ReportTag1 = 0;
+						changeView("main", "#mainView_btn");
+					}
+					if (TREM.IntensityTag1 != 0 && NOW.getTime() - TREM.IntensityTag1 > 30_000) {
+						console.log("IntensityTag1 end: ", NOW.getTime());
+						TREM.IntensityTag1 = 0;
 						changeView("main", "#mainView_btn");
 					}
 					if (TREM.toggleNavTime != 0 && NOW.getTime() - TREM.toggleNavTime > 5_000) {
@@ -608,8 +527,10 @@ async function init() {
 				const unlock = (Unlock) ? "⚡" : "";
 				$("#log").text(`${CPUData} | ${rss}`);
 				$("#log1").text(`${CPUData} | ${rss}`);
+				$("#log2").text(`${CPUData} | ${rss}`);
 				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
 				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
+				$("#app-version2").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -767,34 +688,52 @@ async function init() {
 				.on("click", () => TREM.Report._focusMap())
 				.on("contextmenu", () => TREM.Report._focusMap());
 
-		if (!Maps.intensity) {
-			Maps.intensity = L.map("map-intensity",
+		if (!Maps.intensity)
+			Maps.intensity = new maplibregl.Map(
 				{
-					attributionControl : false,
-					closePopupOnClick  : false,
-					maxBounds          : [
-						[30, 130],
-						[10, 100],
-					],
-					preferCanvas    : true,
-					zoomSnap        : 0.25,
-					zoomDelta       : 0.5,
-					zoomAnimation   : true,
-					fadeAnimation   : setting["map.animation"],
-					zoomControl     : false,
-					doubleClickZoom : false,
-					keyboard        : false,
+					container         : "map-intensity",
+					maxPitch          : 0,
+					maxBounds         : [50, 10, 180, 60],
+					zoom              : 6.5,
+					center            : [119, 24.132],
+					renderWorldCopies : false,
+					keyboard          : false,
+					doubleClickZoom   : false,
 				})
-				.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
-					paddingTopLeft: [
-						document.getElementById("map-intensity").offsetWidth / 2,
-						0,
-					],
+				.on("click", (ev) => {
+					if (ev.originalEvent.target.tagName == "CANVAS")
+						Maps.intensity.flyTo({
+							center   : [119, 24.132],
+							zoom     : 6.5,
+							bearing  : 0,
+							speed    : 2,
+							curve    : 1,
+							easing   : (e) => Math.sin(e * Math.PI / 2),
+							duration : 500,
+						});
 				})
-				.on("click", () => TREM.Report._focusMap());
-			Maps.intensity._zoomAnimated = setting["map.animation"];
-		}
-
+				.on("zoom", () => {
+					if (Maps.intensity.getZoom() >= 11.5) {
+						for (const key in Station)
+							if (!Station[key].getPopup().isOpen())
+								Station[key].togglePopup();
+					} else for (const key in Station)
+						if (Station[key].getPopup().isOpen())
+							if (!Station[key].getPopup().persist)
+								Station[key].togglePopup();
+				})
+				.on("contextmenu", (ev) => {
+					if (ev.originalEvent.target.tagName == "CANVAS")
+						Maps.intensity.flyTo({
+							center   : [119, 24.132],
+							zoom     : 6.5,
+							bearing  : 0,
+							speed    : 2,
+							curve    : 1,
+							easing   : (e) => Math.sin(e * Math.PI / 2),
+							duration : 1000,
+						});
+				});
 	})();
 
 	progressbar.value = (1 / progressStep) * 3;
@@ -1027,21 +966,83 @@ async function init() {
 				},
 			}).getLayer("Layer_tw_county"));
 
-		if (!MapBases.intensity.length)
-			MapBases.intensity.set("tw_county",
-				L.geoJson.vt(MapData.tw_county, {
-					minZoom   : 7.5,
-					maxZoom   : 10,
-					tolerance : 20,
-					buffer    : 256,
-					debug     : 0,
-					style     : {
-						weight      : 0.8,
-						color       : TREM.Colors.primary,
-						fillColor   : TREM.Colors.surfaceVariant,
-						fillOpacity : 1,
-					},
-				}).addTo(Maps.intensity));
+		if (!MapBases.intensity.length) {
+			Maps.intensity.addSource("Source_tw_county", {
+				type : "geojson",
+				data : MapData.tw_county,
+			});
+			Maps.intensity.addSource("Source_tw_town", {
+				type : "geojson",
+				data : MapData.tw_town,
+			});
+			MapBases.intensity.set("tw_county_fill", Maps.intensity.addLayer({
+				id     : "Layer_tw_county_Fill",
+				type   : "fill",
+				source : "Source_tw_county",
+				paint  : {
+					"fill-color"   : TREM.Colors.surfaceVariant,
+					"fill-opacity" : 1,
+				},
+			}).getLayer("Layer_tw_county_Fill"));
+			Maps.intensity.addLayer({
+				id     : "Layer_intensity",
+				type   : "fill",
+				source : "Source_tw_town",
+				paint  : {
+					"fill-color": [
+						"match",
+						["feature-state", "intensity"],
+						9,
+						setting["theme.customColor"] ? setting["theme.int.9"]
+							: "#862DB3",
+						8,
+						setting["theme.customColor"] ? setting["theme.int.8"]
+							: "#DB1F1F",
+						7,
+						setting["theme.customColor"] ? setting["theme.int.7"]
+							: "#F55647",
+						6,
+						setting["theme.customColor"] ? setting["theme.int.6"]
+							: "#DB641F",
+						5,
+						setting["theme.customColor"] ? setting["theme.int.5"]
+							: "#E68439",
+						4,
+						setting["theme.customColor"] ? setting["theme.int.4"]
+							: "#E8D630",
+						3,
+						setting["theme.customColor"] ? setting["theme.int.3"]
+							: "#7BA822",
+						2,
+						setting["theme.customColor"] ? setting["theme.int.2"]
+							: "#2774C2",
+						1,
+						setting["theme.customColor"] ? setting["theme.int.1"]
+							: "#757575",
+						"transparent",
+					],
+					"fill-outline-color": [
+						"match",
+						["feature-state", "intensity_outline"],
+						1, TREM.Colors.secondary, "rgba(0, 0, 0, 0)",
+					],
+					"fill-opacity": 1,
+				},
+				layout: {
+					visibility: "none",
+				},
+			});
+			MapBases.intensity.set("tw_county_line", Maps.intensity.addLayer({
+				id     : "Layer_tw_county_Line",
+				type   : "line",
+				source : "Source_tw_county",
+				paint  : {
+					"line-color"   : TREM.Colors.primary,
+					"line-width"   : 0.75,
+					"line-opacity" : 1,
+				},
+			}).getLayer("Layer_tw_county_Line"));
+		}
 
 	})().catch(e => dump({ level: 2, message: e }));
 	setUserLocationMarker(setting["location.town"]);
@@ -1116,6 +1117,10 @@ async function init() {
 		}
 	}, 500);
 	global.gc();
+	// const userJSON = require(path.resolve(__dirname, "../js/1667291675675.json"));
+	// TREM.Intensity.handle(userJSON);
+	// const userJSON1 = require(path.resolve(__dirname, "../js/1667356513251.json"));
+	// TREM.MapIntensity.palert(userJSON1.Data);
 }
 // #endregion
 
@@ -1834,14 +1839,14 @@ function addReport(report, prepend = false) {
 		ripple(Div);
 		Div.append(report_container);
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
-		Div.addEventListener("click", (event) => {
+		Div.addEventListener("click", () => {
 			TREM.set_report_overview = 1;
 			TREM.Report.setView("eq-report-overview", report);
 			changeView("report", "#reportView_btn");
 			TREM.ReportTag1 = NOW.getTime();
 			console.log("ReportTag1: ", TREM.ReportTag1);
 		});
-		Div.addEventListener("contextmenu", (event) => {
+		Div.addEventListener("contextmenu", () => {
 			if (replay != 0) return;
 			if (report.ID.length != 0)
 				TREM.replayOverviewButton(report);
@@ -2211,6 +2216,8 @@ function FCMdata(data) {
 		TREM.PWS.addPWS(json.raw);
 	else if (json.Function == "intensity") {
 		console.log("intensity");
+		if (TREM.Intensity.isTriggered)
+			TREM.Intensity.clear();
 		TREM.Intensity.handle(json);
 		// console.log(json);
 	} else if (json.Function == "Replay") {
@@ -2265,9 +2272,13 @@ function FCMdata(data) {
 			if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
 			if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
 			// stopReplaybtn();
+			if (TREM.Intensity.isTriggered)
+				TREM.Intensity.clear();
 			TREM.Earthquake.emit("eew", json);
 		} else {
 			// if (json.Function != "earthquake") return;
+			if (TREM.Intensity.isTriggered)
+				TREM.Intensity.clear();
 			stopReplaybtn();
 			TREM.Earthquake.emit("eew", json);
 		}

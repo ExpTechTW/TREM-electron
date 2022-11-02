@@ -260,6 +260,21 @@ kbd {
 				font-weight .1s ease-in-out;
 }
 
+#time2 {
+	user-select: none;
+	pointer-events: none;
+	z-index: 1000;
+	position: fixed;
+	left: 90px;
+	bottom: 22px;
+	color: rgb(var(--md-sys-color-on-background));
+	font-size: 16px;
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
+	transition: color .1s ease-in-out,
+				font-weight .1s ease-in-out;
+}
+
 #time.desynced {
 	color: rgb(var(--md-sys-color-error));
 	font-weight: 600;
@@ -300,6 +315,21 @@ kbd {
 	transition: color .1s ease-in-out;
 }
 
+#log2 {
+	overflow-y: scroll;
+	user-select: none;
+	pointer-events: none;
+	z-index: 1000;
+	position: fixed;
+	left: 90px;
+	bottom: 65px;
+	color: rgba(var(--md-sys-color-on-surface-variant), .6);
+	font-size: 14px;
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
+	transition: color .1s ease-in-out;
+}
+
 #app-version {
 	user-select: none;
 	pointer-events: none;
@@ -313,7 +343,22 @@ kbd {
 	font-variant-numeric: tabular-nums;
 	transition: color .1s ease-in-out;
 }
+
 #app-version1 {
+	user-select: none;
+	pointer-events: none;
+	z-index: 1000;
+	position: fixed;
+	left: 90px;
+	bottom: 45px;
+	color: rgba(var(--md-sys-color-on-surface-variant), .6);
+	font-size: 14px;
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
+	transition: color .1s ease-in-out;
+}
+
+#app-version2 {
 	user-select: none;
 	pointer-events: none;
 	z-index: 1000;
@@ -2180,4 +2225,45 @@ button.hide + #report-detail-header-title {
 	top: -4px;
 	right: -8px;
 	font-size: 20px;
+}
+
+#intensity-detail {
+	user-select: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 16px;
+	border-radius: 16px;
+	background-color: rgb(var(--md-sys-color-background));
+	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+	color: rgb(var(--md-sys-color-on-surface));
+	font-size: 14px;
+	font-variant-numeric: tabular-nums;
+	z-index: 100000;
+	overflow: hidden;
+}
+
+#intensity-detail-container {
+	padding: 12px;
+	background-color: rgba(var(--md-sys-color-primary), 0.11);
+}
+
+#intensity-detail-header {
+	display: flex;
+	align-items: center;
+	line-height: 24px;
+}
+
+#intensity-detail-header-title {
+	font-size: 18px;
+	letter-spacing: 0;
+	font-weight: 400;
+	flex: 1;
+	transition: margin .1s ease-in-out;
+}
+
+#intensity-detail-body {
+	position: relative;
+	transition: height .5s cubic-bezier(0.45, -0.05, 0.58, 0.8),
+				width .5s cubic-bezier(0.45, -0.05, 0.58, 0.8);
 }
