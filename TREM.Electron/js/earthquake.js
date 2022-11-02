@@ -964,7 +964,7 @@ function PGAMain() {
 	PGAMainClock = setInterval(() => {
 		setTimeout(() => {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-			workers_rts(`https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["api.key"] ?? ""}`, (err, Res) => {
+			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res, url) => {
 				if (!err) {
 					Ping = Date.now();
 					TimerDesynced = false;
