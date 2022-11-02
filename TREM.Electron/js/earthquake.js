@@ -204,7 +204,7 @@ TREM.Palert = {
 				const int = new Map();
 				for (const palertEntry of rawPalertData.data) {
 					const [countyName, townName] = palertEntry.loc.split(" ");
-					const towncode = TREM.Resources.region[countyName]?.[townName]?.[0];
+					const towncode = TREM.Resources.region[countyName]?.[townName]?.code;
 					if (!towncode) continue;
 					int.set(towncode, palertEntry.intensity);
 					if (palertEntry.intensity > MaxI) {
@@ -2080,8 +2080,8 @@ async function FCMdata(data) {
 		const report = await getReportData();
 		addReport(report[0], true);
 
-		if (setting[report.changeView]) {
-			TREM.Report.setView("eq-report-overview", report[0].identifier);
+		if (setting["report.changeView"]) {
+			TREM.Report.setView("report-overview", report.identifier);
 			changeView("report", "#reportView_btn");
 			TREM.ReportTag1 = NOW.getTime();
 			console.log("ReportTag1: ", TREM.ReportTag1);
@@ -2136,7 +2136,7 @@ TREM.Earthquake.on("eew", (data) => {
 			const loc = TREM.Resources.region[city][town];
 			const d = TREM.Utils.twoSideDistance(
 				TREM.Utils.twoPointDistance(
-					{ lat: loc[1], lon: loc[2] },
+					{ lat: loc.latitude, lon: loc.longitude },
 					{ lat: data.NorthLatitude, lon: data.EastLongitude },
 				),
 				data.Depth,
@@ -2146,7 +2146,7 @@ TREM.Earthquake.on("eew", (data) => {
 				TREM.Utils.pga(
 					data.Scale,
 					d,
-					setting["earthquake.siteEffect"] ? loc[3] : undefined,
+					setting["earthquake.siteEffect"] ? loc.siteEffect : undefined,
 				),
 			);
 
@@ -2162,7 +2162,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 			const Intensity = IntensityN(int);
 			if (Intensity > MaxIntensity) MaxIntensity = Intensity;
-			GC[loc[0]] = Intensity;
+			GC[loc.code] = Intensity;
 		}
 
 	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.tw_town, {
@@ -2635,7 +2635,7 @@ function main(data) {
 						renderer  : L.svg(),
 						className : "p-wave",
 					}).addTo(Maps.mini);
-				console.log("kmP", kmP);
+				// console.log("kmP", kmP);
 				if (!EarthquakeList[data.ID].CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 					EarthquakeList[data.ID].CirclePTW
 						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
