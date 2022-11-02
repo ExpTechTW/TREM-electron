@@ -192,11 +192,11 @@ setInterval(() => {
 	Gc();
 }, 60_000);
 
-TREM.Palert = {
+TREM.MapIntensity = {
 	isTriggered : false,
 	alertTime   : 0,
 	intensities : new Map(),
-	handle(rawPalertData) {
+	palert(rawPalertData) {
 		if (rawPalertData.data?.length && !replay) {
 			if (rawPalertData.timestamp != this.alertTime) {
 				this.alertTime = rawPalertData.timestamp;
@@ -481,8 +481,8 @@ async function init() {
 				if (investigation && NOW.getTime() - Report > 600000) {
 					investigation = false;
 					roll.removeChild(roll.children[0]);
-					if (TREM.Palert.isTriggered)
-						TREM.Palert.clear();
+					if (TREM.MapIntensity.isTriggered)
+						TREM.MapIntensity.clear();
 				}
 				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
 					ReportTag = 0;
@@ -1993,7 +1993,7 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 // #endregion
 
 // #region EEW
-async function FCMdata(data) {
+function FCMdata(data) {
 	const json = JSON.parse(data);
 	console.log(json);
 	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
@@ -2022,7 +2022,7 @@ async function FCMdata(data) {
 	} else if (json.Function == "TSUNAMI")
 		TREM.Earthquake.emit("tsunami", json);
 	else if (json.Function == "palert")
-		TREM.Palert.handle(json.Data);
+		TREM.MapIntensity.palert(json.Data);
 	else if (json.Function == "TREM_earthquake")
 		trem_alert = json;
 	// else if (json.Function == "PWS") {
@@ -2062,8 +2062,8 @@ async function FCMdata(data) {
 		replayT = NOW.getTime();
 		ReportGET();
 	} else if (json.Function == "report") {
-		if (TREM.Palert.isTriggered)
-			TREM.Palert.clear();
+		if (TREM.MapIntensity.isTriggered)
+			TREM.MapIntensity.clear();
 
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
 
@@ -2071,14 +2071,17 @@ async function FCMdata(data) {
 		if (setting["report.cover"]) win.moveTop();
 
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
-		new Notification("地震報告",
-			{
-				body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
-				icon   : "../TREM.ico",
-				silent : win.isFocused(),
-			});
-		const report = await getReportData();
-		addReport(report[0], true);
+		if (!win.isFocused())
+			new Notification("地震報告",
+				{
+					body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
+					icon   : "../TREM.ico",
+					silent : win.isFocused(),
+				});
+
+		const report = json.Body;
+		addReport(report, true);
+		TREM.Report.cache.set(report.identifier, report);
 
 		if (setting["report.changeView"]) {
 			TREM.Report.setView("report-overview", report.identifier);
