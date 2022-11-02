@@ -2413,8 +2413,12 @@ TREM.Earthquake.on("eew", (data) => {
 
 	let _time = -1;
 	let stamp = 0;
-	if (EEW[data.ID] != undefined)
+
+	if ((EarthquakeList[data.ID].Version ?? 1) < data.Version) {
 		if (setting["audio.eew"] && Alert) TREM.Audios.update.play();
+		EarthquakeList[data.ID].Version = data.Version;
+	}
+
 	EEW[data.ID] = {
 		lon  : Number(data.EastLongitude),
 		lat  : Number(data.NorthLatitude),
