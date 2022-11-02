@@ -73,6 +73,7 @@ TREM 是一款開源地震速報軟體，提供給您即時的地震資訊，利
 - M789 `圖形設計`
 - JQuake `音效`
 - 地牛Wake Up! `音效`
+- pisces_ `設備提供`
 
 ## 如何貢獻
 點擊 [Repo](https://github.com/ExpTechTW/TREM) 主頁右上角的 Code 按鈕後點擊 Download ZIP 來下載原始碼壓縮檔\
