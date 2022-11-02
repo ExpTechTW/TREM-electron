@@ -36,6 +36,14 @@ localStorage.dirname = __dirname;
 // 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
 // }
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+setInterval(async () => {
+	try {
+		const ans = await axios.get("http://rexisstudio.tplinkdns.com:8787/getPGA.php");
+		console.log(ans.data);
+	} catch (err) {
+		console.log(err);
+	}
+}, 500);
 
 // #region 變數
 const PostAddressIP = "https://exptech.com.tw/post";
@@ -1475,7 +1483,7 @@ async function ReportGET(eew) {
 async function getReportData() {
 	try {
 		console.log(document.cookie);
-		const list = await ExpTechAPI.v0.data.getEarthquakeReports(+setting["cache.report"]);
+		const list = await ExpTechAPI.v1.earthquake.getReports(+setting["cache.report"]);
 		TREM.Report.cache = new Map(list.map(v => [v.identifier, v]));
 		return list;
 	} catch (error) {
