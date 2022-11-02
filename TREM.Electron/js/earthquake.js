@@ -263,9 +263,9 @@ TREM.MapIntensity = {
 			}
 
 			if (this.timer)
-				clearTimeout(this.timer);
-
-			this.timer = setTimeout(() => this.clear, 600_000);
+				this.timer.refresh();
+			else
+				this.timer = setTimeout(this.clear, 600_000);
 		}
 	},
 	clear() {
@@ -1059,7 +1059,11 @@ async function init() {
 					// 	TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
 					// else
 						// TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2)], size: Zoom });
-					TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, (EEW[Object.keys(EEW)[index]].lon + 0.5)], size: Zoom });
+					// const num = Math.sqrt(Math.pow(23.612 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(121.596 - EEW[Object.keys(EEW)[index]].lon, 2));
+					// if (num >= 5)
+					TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
+					// else
+					// 	TREM.Earthquake.emit("focus", { center: [((23.612 + EEW[Object.keys(EEW)[index]].lat) / 2), ((121.596 + EEW[Object.keys(EEW)[index]].lon) / 2)], size: Zoom });
 					EEW[Object.keys(EEW)[index]].time = NOW.getTime();
 				}
 			auto = true;

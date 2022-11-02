@@ -1086,7 +1086,7 @@ kbd {
 }
 
 .rt-station-intensity.na + div {
-	opacity: .8;
+	opacity: .6;
 	font-style: italic;
 }
 

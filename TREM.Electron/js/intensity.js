@@ -74,9 +74,9 @@ TREM.Intensity = {
 			}
 
 			if (this.timer)
-				clearTimeout(this.timer);
-
-			this.timer = setTimeout(() => this.clear, 120_000);
+				this.timer.refresh();
+			else
+				this.timer = setTimeout(this.clear, 120_000);
 
 		}
 
