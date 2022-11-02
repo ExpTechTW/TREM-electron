@@ -29,12 +29,16 @@ TREM 是一款開源地震速報軟體，提供給您即時的地震資訊，利
 * 自訂義主題顏色
 
 ## 安裝
-### Windows
+### 官方 | 官方推出的版本 較為穩定
+#### Windows
 到我們的 [Release](https://github.com/ExpTechTW/TREM/releases/latest) 頁面下載 TREM.Setup\
 下載完成後執行，就會開始安裝，安裝完成後會自動開啟 TREM
 
-### MacOS
+#### MacOS
 目前還沒有提供 MacOS 支援，敬請期待 :3
+
+### 社區 | 由開源社區維護的版本 適合嘗鮮
+- [yayacat](https://github.com/yayacat/TREM/releases)
 
 ## 文檔
 * [TREM](https://hackmd.io/@n5w-HNYMQUmvhV6t1kor5g/Bkqtwduo9)
@@ -62,10 +66,14 @@ TREM 是一款開源地震速報軟體，提供給您即時的地震資訊，利
 - whes1015 `程式開發` `文檔`
 - Kamiya `介面設計` `程式開發` `日文翻譯` `英文翻譯`
 - Yowoapple `俄文翻譯`
+- NYJ36 `韓文翻譯`
+- PGpenguin72 `簡體中文翻譯`
+- yayacat `簡體中文翻譯` `社區`
 - eggrollpvp `資料處理` `文檔`
 - M789 `圖形設計`
 - JQuake `音效`
 - 地牛Wake Up! `音效`
+- pisces_ `設備提供`
 
 ## 如何貢獻
 點擊 [Repo](https://github.com/ExpTechTW/TREM) 主頁右上角的 Code 按鈕後點擊 Download ZIP 來下載原始碼壓縮檔\

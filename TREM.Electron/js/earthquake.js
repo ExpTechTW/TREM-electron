@@ -10,6 +10,8 @@ const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
+const workerFarm = require("worker-farm"),
+	workers_rts = workerFarm(require.resolve("../js/core/rts"));
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -36,18 +38,9 @@ localStorage.dirname = __dirname;
 // 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
 // }
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
-setInterval(async () => {
-	try {
-		const ans = await axios.get("http://rexisstudio.tplinkdns.com:8787/getPGA.php");
-		// console.log(ans.data);
-	} catch (err) {
-		console.log(err);
-	}
-}, 500);
 
 // #region 變數
 const PostAddressIP = "https://exptech.com.tw/post";
-const getAddressIP = "https://exptech.com.tw/api/v1/trem/RTS?time=";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -70,7 +63,6 @@ const Maps = { main: null, mini: null, report: null, intensity: null };
  * @type { {[key: string]: Map<string, maplibregl.StyleLayer>} }
  */
 const MapBases = { main: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
-let PGAMainLock = false;
 const Station = {};
 const PGA = {};
 const pga = {};
@@ -1129,32 +1121,17 @@ function PGAMain() {
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {
 		setTimeout(() => {
-			if (PGAMainLock) return;
-			PGAMainLock = true;
-			let R = 0;
-			if (replay) R = replay + (NOW.getTime() - replayT);
-			const CancelToken = axios.CancelToken;
-			let cancel;
-			setTimeout(() => {
-				cancel();
-			}, 2500);
-			const ReplayTime = R;
-			axios({
-				method      : "get",
-				url         : getAddressIP + ReplayTime + "&key=" + setting["api.key"] ?? "",
-				cancelToken : new CancelToken((c) => {
-					cancel = c;
-				}),
-			}).then((response) => {
-				Ping = Date.now();
-				PGAMainLock = false;
-				TimerDesynced = false;
-				Response = response.data;
-				handler(Response);
-			}).catch((err) => {
-				PGAMainLock = false;
-				TimerDesynced = true;
-				handler(Response);
+			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
+			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res, url) => {
+				if (!err) {
+					Ping = Date.now();
+					TimerDesynced = false;
+					Response = Res;
+					handler(Response);
+				} else {
+					TimerDesynced = true;
+					handler(Response);
+				}
 			});
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
@@ -2264,24 +2241,16 @@ function FCMdata(data) {
 		}, 5000);
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
 		if (replay != 0 && !json.Replay) return;
-		if (!json.Replay && !json.Test) {
-			if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
-			if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
-			if (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"]) return;
-			if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
-			if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
-			if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
-			// stopReplaybtn();
-			if (TREM.Intensity.isTriggered)
-				TREM.Intensity.clear();
-			TREM.Earthquake.emit("eew", json);
-		} else {
-			// if (json.Function != "earthquake") return;
-			if (TREM.Intensity.isTriggered)
-				TREM.Intensity.clear();
-			stopReplaybtn();
-			TREM.Earthquake.emit("eew", json);
-		}
+		if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
+		if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
+		if (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"]) return;
+		if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
+		if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
+		if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
+		if (TREM.Intensity.isTriggered)
+			TREM.Intensity.clear();
+		stopReplaybtn();
+		TREM.Earthquake.emit("eew", json);
 	}
 }
 // #endregion
