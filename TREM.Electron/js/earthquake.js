@@ -244,9 +244,9 @@ TREM.MapIntensity = {
 			}
 
 			if (this.timer)
-				clearTimeout(this.timer);
-
-			this.timer = setTimeout(() => this.clear, 600_000);
+				this.timer.refresh();
+			else
+				this.timer = setTimeout(this.clear, 600_000);
 		}
 	},
 	clear() {
