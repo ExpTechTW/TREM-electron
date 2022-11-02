@@ -483,6 +483,7 @@ async function init() {
 					if (replaytestEEW != 0 && NOW.getTime() - replaytestEEW > 180_000) {
 						testEEWerror = false;
 						replaytestEEW = 0;
+						Mapsmainfocus();
 					}
 					if (TREM.ReportTag1 != 0 && NOW.getTime() - TREM.ReportTag1 > 60_000) {
 						console.log("ReportTag1 end: ", NOW.getTime());
@@ -607,15 +608,7 @@ async function init() {
 				})
 				.on("click", (ev) => {
 					if (ev.originalEvent.target.tagName == "CANVAS")
-						Maps.main.flyTo({
-							center   : [121.596, 23.612],
-							zoom     : 6.8,
-							bearing  : 0,
-							speed    : 2,
-							curve    : 1,
-							easing   : (e) => Math.sin(e * Math.PI / 2),
-							duration : 500,
-						});
+						Mapsmainfocus();
 				})
 				.on("zoom", () => {
 					if (Maps.main.getZoom() >= 11.5) {
@@ -629,15 +622,7 @@ async function init() {
 				})
 				.on("contextmenu", (ev) => {
 					if (ev.originalEvent.target.tagName == "CANVAS")
-						Maps.main.flyTo({
-							center   : [121.596, 23.612],
-							zoom     : 6.8,
-							bearing  : 0,
-							speed    : 2,
-							curve    : 1,
-							easing   : (e) => Math.sin(e * Math.PI / 2),
-							duration : 1000,
-						});
+						Mapsmainfocus();
 				});
 
 		if (!Maps.mini)
@@ -1058,7 +1043,6 @@ async function init() {
 				if (EEWT.id == 0 || EEWT.id == EEW[Object.keys(EEW)[index]].id || NOW.getTime() - EEW[Object.keys(EEW)[index]].time >= 10000) {
 					EEWT.id = EEW[Object.keys(EEW)[index]].id;
 					let Zoom = 9;
-					const X = 0;
 					const km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
 					if (km > 100000)
 						Zoom = 8;
@@ -1070,43 +1054,43 @@ async function init() {
 						Zoom = 6.5;
 					if (km > 300000)
 						Zoom = 6;
-					const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
-					if (num >= 5)
-						TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
-					else
-						TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], size: Zoom });
+					// const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
+					// if (num >= 5)
+					// 	TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
+					// else
+						// TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2)], size: Zoom });
+					TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, (EEW[Object.keys(EEW)[index]].lon + 0.5)], size: Zoom });
 					EEW[Object.keys(EEW)[index]].time = NOW.getTime();
 				}
 			auto = true;
-		} else if (Object.keys(PGA).length >= 1) {
-			if (Object.keys(PGA).length == 1) {
-				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
-				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
-				TREM.Earthquake.emit("focus", { center: [X1, Y1], size: 9.5 });
-			} else if (Object.keys(PGA).length >= 2) {
-				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
-				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
-				const X2 = (PGAjson[Object.keys(pga)[1].toString()][0][0] + (PGAjson[Object.keys(pga)[1].toString()][2][0] - PGAjson[Object.keys(pga)[1].toString()][0][0]) / 2);
-				const Y2 = (PGAjson[Object.keys(pga)[1].toString()][0][1] + (PGAjson[Object.keys(pga)[1].toString()][1][1] - PGAjson[Object.keys(pga)[1].toString()][0][1]) / 2);
-				let focusScale = 9;
-				if (Object.keys(PGA).length == 2) {
-					const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
-					if (num > 0.6) focusScale = 9;
-					if (num > 1) focusScale = 8.5;
-					if (num > 1.5) focusScale = 8;
-					if (num > 2.8) focusScale = 7;
-				} else {
-					if (Object.keys(PGA).length >= 4) focusScale = 8;
-					if (Object.keys(PGA).length >= 6) focusScale = 7.5;
-					if (Object.keys(PGA).length >= 8) focusScale = 7;
-				}
-				TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
-			}
+		} else if (Object.keys(PGA).length >= 1)
+			// if (Object.keys(PGA).length == 1) {
+			// 	const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
+			// 	const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
+			// 	TREM.Earthquake.emit("focus", { center: [X1, Y1], size: 9.5 });
+			// } else if (Object.keys(PGA).length >= 2) {
+			// 	const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
+			// 	const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
+			// 	const X2 = (PGAjson[Object.keys(pga)[1].toString()][0][0] + (PGAjson[Object.keys(pga)[1].toString()][2][0] - PGAjson[Object.keys(pga)[1].toString()][0][0]) / 2);
+			// 	const Y2 = (PGAjson[Object.keys(pga)[1].toString()][0][1] + (PGAjson[Object.keys(pga)[1].toString()][1][1] - PGAjson[Object.keys(pga)[1].toString()][0][1]) / 2);
+			// 	let focusScale = 9;
+			// 	if (Object.keys(PGA).length == 2) {
+			// 		const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
+			// 		if (num > 0.6) focusScale = 9;
+			// 		if (num > 1) focusScale = 8.5;
+			// 		if (num > 1.5) focusScale = 8;
+			// 		if (num > 2.8) focusScale = 7;
+			// 	} else {
+			// 		if (Object.keys(PGA).length >= 4) focusScale = 8;
+			// 		if (Object.keys(PGA).length >= 6) focusScale = 7.5;
+			// 		if (Object.keys(PGA).length >= 8) focusScale = 7;
+			// 	}
+			// 	TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
+			// }
 			auto = true;
-		} else if (auto) {
+		else if (auto)
 			auto = false;
-			TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-		}
+			// TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 	}, 500);
 	global.gc();
 	// const userJSON = require(path.resolve(__dirname, "../js/1667291675675.json"));
@@ -1130,7 +1114,7 @@ function PGAMain() {
 					handler(Response);
 				} else {
 					TimerDesynced = true;
-					handler(Response);
+					PGAMain();
 				}
 			});
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
@@ -1361,12 +1345,12 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	for (let index = 0; index < Object.keys(PGA).length; index++) {
-		if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(PGA)[index]]);
-		delete PGA[Object.keys(PGA)[index]];
-		index--;
-	}
-	RMT++;
+	// for (let index = 0; index < Object.keys(PGA).length; index++) {
+	// 	if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(PGA)[index]]);
+	// 	delete PGA[Object.keys(PGA)[index]];
+	// 	index--;
+	// }
+	// RMT++;
 	for (let index = 0; index < Object.keys(pga).length; index++) {
 		const Intensity = pga[Object.keys(pga)[index]].Intensity;
 		if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000 || PGACancel) {
@@ -1539,17 +1523,30 @@ TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
 		Focus[1] = center[1] + X;
 		Focus[2] = size;
 		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || size != Maps.main.getZoom())
-			Maps.main.jumpTo({
+			Maps.main.flyTo({
 				center : [center[1] + X, center[0]],
 				zoom   : size,
 			});
 	} else if (Focus.length != 0)
 		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != Maps.main.getZoom())
-			Maps.main.jumpTo({
+			Maps.main.flyTo({
 				center : [Focus[1], Focus[0]],
 				zoom   : Focus[2],
 			});
 });
+
+function Mapsmainfocus() {
+	Maps.main.flyTo({
+		center   : [121.596, 23.612],
+		zoom     : 6.8,
+		bearing  : 0,
+		speed    : 2,
+		curve    : 1,
+		easing   : (e) => Math.sin(e * Math.PI / 2),
+		duration : 500,
+	});
+}
+
 // #endregion
 
 // #region 音頻播放
@@ -1638,7 +1635,7 @@ async function ReportGET(eew) {
 }
 async function getReportData() {
 	try {
-		console.log(document.cookie);
+		// console.log(document.cookie);
 		const list = await ExpTechAPI.v1.earthquake.getReports(+setting["cache.report"]);
 		TREM.Report.cache = new Map(list.map(v => [v.identifier, v]));
 		return list;
@@ -1983,6 +1980,7 @@ const stopReplay = function() {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
 
+	Mapsmainfocus();
 	testEEWerror = false;
 	unstopReplaybtn();
 };

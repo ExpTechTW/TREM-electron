@@ -379,7 +379,12 @@ function changelocale(value){
 		SettingWindow.setTitle(TREM.Localization.getString("Setting_Title"));
 	}
 	trayIcon();
-	emitAllWindow("config:locale", value);
+	if (!SettingWindow) {
+		createSettingWindow();
+		emitAllWindow("config:locale", value);
+		SettingWindow.close();
+	} else
+		emitAllWindow("config:locale", value);
 }
 
 function trayIcon() {

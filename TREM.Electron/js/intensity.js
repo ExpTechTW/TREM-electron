@@ -23,7 +23,7 @@ TREM.Intensity = {
 	intensities : new Map(),
 	handle(rawIntensityData) {
 		if (rawIntensityData.TimeStamp != this.alertTime) {
-			rawIntensityData = rawIntensityData.Body.intensity;
+			rawIntensityData = rawIntensityData.raw.intensity;
 			this.alertTime = rawIntensityData.TimeStamp;
 			const int = new Map();
 			for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
