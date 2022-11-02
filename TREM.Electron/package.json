@@ -50,7 +50,6 @@
     "url": "https://github.com/ExpTechTW/TREM.git"
   },
   "keywords": [],
-  "author": "whes1015",
   "license": "AGPL-3.0",
   "devDependencies": {
     "electron": "^21.2.0",
@@ -77,6 +76,7 @@
     "leaflet-geojson-vt": "1.1.0",
     "maplibre-gl": "^2.4.0",
     "tinycolor2": "^1.4.2",
+    "worker-farm": "^1.7.0",
     "ws": "^8.8.0"
   }
 }
