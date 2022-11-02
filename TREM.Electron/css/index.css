@@ -1733,34 +1733,51 @@ kbd {
     pointer-events: none;
 }
 
-.rt-station-tooltip {
-	background-color: rgb(var(--md-sys-color-surface-variant)) !important;
-	border: none !important;
-	border-radius: 8px !important;
-	color: rgb(var(--md-sys-color-on-surface-variant)) !important;
-	padding: 8px !important;
+.marker-popup {
+	background-color: rgb(var(--md-sys-color-surface-variant));
+	border: none;
+	border-radius: 8px;
+	color: rgb(var(--md-sys-color-on-surface-variant));
+	padding: 8px;
 }
 
-.rt-station-tooltip::before {
+.pws-popup {
+	margin: 8px;
+	border: 2px solid #efcc00;
+	white-space: pre-line;
+	pointer-events: all;
+}
+
+.pws-popup strong {
+	color: rgb(var(--md-sys-color-on-surface));
+}
+
+.pws-popup .url {
+	color: rgb(var(--md-sys-color-secondary));
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.rt-station-popup::before {
 	display: none !important;
 }
 
-.rt-station-tooltip > div:first-child {
+.rt-station-popup > div:first-child {
 	font-weight: 500;
 }
 
-.rt-station-tooltip > div:nth-child(3)::before {
+.rt-station-popup > div:nth-child(3)::before {
 	content: "PGA";
 	font-weight: 400;
 	padding-right: 8px;
 }
 
-.rt-station-tooltip > div:nth-child(3)::after {
+.rt-station-popup > div:nth-child(3)::after {
 	content: "gal";
 	padding-left: 4px;
 }
 
-.rt-station-tooltip > div:last-child::before {
+.rt-station-popup > div:last-child::before {
 	content: var(--rt-station-intensity);
 	font-weight: 400;
 	padding-right: 8px;
