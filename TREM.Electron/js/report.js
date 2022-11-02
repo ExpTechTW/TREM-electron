@@ -404,7 +404,7 @@ TREM.Report = {
 		this._focusMap(bounds, {
 			padding: {
 				top    : canvasHeight * zoomPredict,
-				left   : canvasWidth / 2 - 50,
+				left   : canvasWidth / 2 - 75,
 				bottom : canvasHeight * zoomPredict,
 				right  : canvasWidth * zoomPredict,
 			},
