@@ -1906,18 +1906,13 @@ function FCMdata(data) {
 		}, 5000);
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
 		if (replay != 0 && !json.Replay) return;
-		if (!json.Replay && !json.Test) {
-			if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
-			if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
-			if (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"]) return;
-			if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
-			if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
-			if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
-			TREM.Earthquake.emit("eew", json);
-		} else
-			// if (json.Function != "earthquake") return;
-			TREM.Earthquake.emit("eew", json);
-
+		if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
+		if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
+		if (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"]) return;
+		if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
+		if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
+		if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
+		TREM.Earthquake.emit("eew", json);
 	}
 }
 // #endregion
