@@ -303,6 +303,11 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
+		case "windows.tray": {
+			TREM.isQuiting = value;
+			break;
+		}
+
 		case "map.animation": {
 			emitAllWindow("config:mapanimation", value);
 			break;
