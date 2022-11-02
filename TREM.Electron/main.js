@@ -11,6 +11,7 @@ TREM.Configuration = new Configuration(TREM);
 TREM.Utils = require("./Utils/Utils.js");
 TREM.Localization = new (require("./Localization/Localization"))(TREM.Configuration.data["general.locale"], TREM.getLocale());
 TREM.Window = new Map();
+TREM.isQuiting = !TREM.Configuration.data["windows.tray"];
 
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
@@ -109,11 +110,12 @@ function createWindow() {
 		MainWindow.webContents.invalidate();
 	});
 	MainWindow.on("close", (event) => {
-		if (TREM.Configuration.data["windows.tray"]) {
+		if (!TREM.isQuiting) {
 			event.preventDefault();
 			MainWindow.hide();
 			if (SettingWindow)
 				SettingWindow.close();
+			event.returnValue = false;
 		} else
 			TREM.quit();
 	});
@@ -217,6 +219,7 @@ autoUpdater.on("update-downloaded", (info) => {
 });
 
 TREM.on("before-quit", () => {
+	TREM.isQuiting = true;
 	if (tray)
 		tray.destroy();
 });
@@ -239,7 +242,8 @@ ipcMain.on("openChildWindow", async (event, arg) => {
 });
 
 ipcMain.on("reset", (event, arg) => {
-	TREM.exit(0);
+	TREM.isQuiting = true;
+	TREM.quit();
 });
 
 ipcMain.on("restart", () => {
@@ -501,6 +505,7 @@ function trayIcon() {
 			label : TREM.Localization.getString("Tray_Exit"),
 			type  : "normal",
 			click : () => {
+				TREM.isQuiting = true;
 				TREM.exit(0);
 			},
 		},
