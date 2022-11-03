@@ -1,5 +1,5 @@
 {
-  "name": "trem",
+  "name": "tremtest",
   "version": "6.0.0-53-pre3",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
