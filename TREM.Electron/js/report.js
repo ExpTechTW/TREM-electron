@@ -421,13 +421,13 @@ TREM.Report = {
 			bounds.extend(marker.getLngLat());
 
 		const camera = Maps.report.cameraForBounds(bounds);
-		const zoomPredict = (camera.zoom - Maps.report.getMinZoom()) / (Maps.report.getMaxZoom() * (1.5 ** (camera.zoom - Maps.report.getMinZoom())));
+		const zoomPredict = (1 / (Maps.report.getMaxZoom() * (camera.zoom ** ((2 * Maps.report.getMaxZoom() - (Maps.report.getMinZoom() + camera.zoom)) / camera.zoom)))) * (camera.zoom - Maps.report.getMinZoom());
 		const canvasHeight = Maps.report.getCanvas().height;
 		const canvasWidth = Maps.report.getCanvas().width;
 		this._focusMap(bounds, {
 			padding: {
 				top    : canvasHeight * zoomPredict,
-				left   : canvasWidth / 2 - 50,
+				left   : canvasWidth / 2 - 75,
 				bottom : canvasHeight * zoomPredict,
 				right  : canvasWidth * zoomPredict,
 			},
