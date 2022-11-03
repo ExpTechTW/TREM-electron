@@ -1,12 +1,11 @@
 /* eslint-disable no-empty-function */
-const axios = require("axios");
 const fetch = require("node-fetch");
 
 module.exports = async function([ReplayTime, key], cb) {
 	const controller = new AbortController();
 	setTimeout(() => {
 		controller.abort();
-	}, 3000);
+	}, 1000);
 	let ans = await fetch(`https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${key}`, { signal: controller.signal }).catch((err) => {});
 	if (controller.signal.aborted || ans == undefined) {
 		cb(true);
