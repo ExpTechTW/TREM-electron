@@ -474,7 +474,7 @@ async function init() {
 					if (replaytestEEW != 0 && NOW.getTime() - replaytestEEW > 180_000) {
 						testEEWerror = false;
 						replaytestEEW = 0;
-						Mapsmainfocus();
+						stopReplay();
 					}
 					if (TREM.ReportTag1 != 0 && NOW.getTime() - TREM.ReportTag1 > 60_000) {
 						console.log("ReportTag1 end: ", NOW.getTime());
@@ -1055,29 +1055,29 @@ async function init() {
 				}
 			auto = true;
 		} else if (Object.keys(PGA).length >= 1) {
-			if (Object.keys(PGA).length == 1) {
-				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
-				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
-				TREM.Earthquake.emit("focus", { center: [X1, Y1], size: 9.5 });
-			} else if (Object.keys(PGA).length >= 2) {
-				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
-				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
-				const X2 = (PGAjson[Object.keys(pga)[1].toString()][0][0] + (PGAjson[Object.keys(pga)[1].toString()][2][0] - PGAjson[Object.keys(pga)[1].toString()][0][0]) / 2);
-				const Y2 = (PGAjson[Object.keys(pga)[1].toString()][0][1] + (PGAjson[Object.keys(pga)[1].toString()][1][1] - PGAjson[Object.keys(pga)[1].toString()][0][1]) / 2);
-				let focusScale = 9;
-				if (Object.keys(PGA).length == 2) {
-					const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
-					if (num > 0.6) focusScale = 9;
-					if (num > 1) focusScale = 8.5;
-					if (num > 1.5) focusScale = 8;
-					if (num > 2.8) focusScale = 7;
-				} else {
-					if (Object.keys(PGA).length >= 4) focusScale = 8;
-					if (Object.keys(PGA).length >= 6) focusScale = 7.5;
-					if (Object.keys(PGA).length >= 8) focusScale = 7;
-				}
-				TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
-			}
+			// if (Object.keys(PGA).length == 1) {
+			// 	const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
+			// 	const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
+			// 	TREM.Earthquake.emit("focus", { center: [X1, Y1], size: 9.5 });
+			// } else if (Object.keys(PGA).length >= 2) {
+			// 	const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
+			// 	const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
+			// 	const X2 = (PGAjson[Object.keys(pga)[1].toString()][0][0] + (PGAjson[Object.keys(pga)[1].toString()][2][0] - PGAjson[Object.keys(pga)[1].toString()][0][0]) / 2);
+			// 	const Y2 = (PGAjson[Object.keys(pga)[1].toString()][0][1] + (PGAjson[Object.keys(pga)[1].toString()][1][1] - PGAjson[Object.keys(pga)[1].toString()][0][1]) / 2);
+			// 	let focusScale = 9;
+			// 	if (Object.keys(PGA).length == 2) {
+			// 		const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
+			// 		if (num > 0.6) focusScale = 9;
+			// 		if (num > 1) focusScale = 8.5;
+			// 		if (num > 1.5) focusScale = 8;
+			// 		if (num > 2.8) focusScale = 7;
+			// 	} else {
+			// 		if (Object.keys(PGA).length >= 4) focusScale = 8;
+			// 		if (Object.keys(PGA).length >= 6) focusScale = 7.5;
+			// 		if (Object.keys(PGA).length >= 8) focusScale = 7;
+			// 	}
+			// 	TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
+			// }
 			auto = true;
 		} else if (auto) {
 			auto = false;
@@ -1339,41 +1339,22 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	for (let index = 0; index < Object.keys(PGA).length; index++) {
-		if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(PGA)[index]]);
-		delete PGA[Object.keys(PGA)[index]];
-		index--;
-	}
-	RMT++;
+	// for (let index = 0; index < Object.keys(PGA).length; index++) {
+	// 	if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(pga)[index]]);
+	// 	delete PGA[Object.keys(PGA)[index]];
+	// 	index--;
+	// }
+	// RMT++;
 	for (let index = 0; index < Object.keys(pga).length; index++) {
 		const Intensity = pga[Object.keys(pga)[index]].Intensity;
 		if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000 || PGACancel) {
 			delete pga[Object.keys(pga)[index]];
 			index--;
 		} else {
-			Maps.main.addSource("Source_PGA_json", {
-				type : "geojson",
-				data : {
-					type     : "Feature",
-					geometry : {
-						type        : "Polygon",
-						coordinates : [[PGAjson[Object.keys(pga)[index].toString()]]],
-					},
-				},
+			PGA[Object.keys(pga)[index]] = L.polygon(PGAjson[Object.keys(pga)[index].toString()], {
+				color     : color(Intensity),
+				fillColor : "transparent",
 			});
-			Maps.main.addLayer({
-				id     : PGA[Object.keys(pga)[index]],
-				type   : "fill",
-				source : "Source_PGA_json",
-				paint  : {
-					color     : color(Intensity),
-					fillColor : "transparent",
-				},
-			});
-			// PGA[Object.keys(pga)[index]] = L.polygon(PGAjson[Object.keys(pga)[index].toString()], {
-			// 	color     : color(Intensity),
-			// 	fillColor : "transparent",
-			// });
 			let skip = false;
 			if (Object.keys(EEW).length != 0)
 				for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
@@ -1388,16 +1369,7 @@ function handler(response) {
 					}
 				}
 			if (skip) continue;
-			if (RMT >= 2)
-				Maps.main.addLayer({
-					id     : PGA[Object.keys(pga)[index]],
-					type   : "fill",
-					source : "Source_PGA_json",
-					paint  : {
-						color     : color(Intensity),
-						fillColor : "transparent",
-					},
-				});
+			if (RMT >= 2) Maps.main.addLayer(PGA[Object.keys(pga)[index]]);
 		}
 	}
 	if (RMT >= 2) RMT = 0;
