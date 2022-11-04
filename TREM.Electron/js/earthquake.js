@@ -253,11 +253,9 @@ TREM.MapIntensity = {
 		dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
 		if (this.intensities.size) {
 			for (const [towncode] of this.intensities)
-				Maps.main.setFeatureState({
-					source : "Source_tw_town",
-					id     : towncode,
-				}, { intensity: 0 });
+				Maps.main.removeFeatureState({ source: "Source_tw_town" });
 			Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
+			delete this.intensities;
 			this.intensities = new Map();
 			this.isTriggered = false;
 			if (this.timer) {
@@ -394,6 +392,40 @@ TREM.PWS = {
 			Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
 			this.cache = new Map();
 		}
+	},
+};
+
+TREM.MapArea = {
+	cache     : new Map(),
+	isVisible : false,
+	setArea(id, intensity) {
+		if (this.cache.get(id) == intensity) return;
+		Maps.main.setFeatureState({
+			source: "Source_area",
+			id,
+		}, { intensity });
+		this.cache.set(id, intensity);
+		this.show();
+	},
+	clear(id) {
+		if (id) {
+			Maps.main.removeFeatureState({ source: "Source_area", id });
+			this.cache.delete(id);
+		} else {
+			Maps.main.removeFeatureState({ source: "Source_area" });
+			delete this.cache;
+			this.cache = new Map();
+		}
+		if (!this.cache.size)
+			this.hide();
+	},
+	show() {
+		Maps.main.setLayoutProperty("Layer_area", "visibility", "visible");
+		this.isVisible = true;
+	},
+	hide() {
+		Maps.main.setLayoutProperty("Layer_area", "visibility", "none");
+		this.isVisible = false;
 	},
 };
 
@@ -719,6 +751,10 @@ async function init() {
 				type : "geojson",
 				data : MapData.tw_town,
 			});
+			Maps.main.addSource("Source_area", {
+				type : "geojson",
+				data : MapData.area,
+			});
 			MapBases.main.set("tw_county_fill", Maps.main.addLayer({
 				id     : "Layer_tw_county_Fill",
 				type   : "fill",
@@ -771,7 +807,12 @@ async function init() {
 						TREM.Colors.onSurfaceVariant,
 						"transparent",
 					],
-					"fill-opacity": 1,
+					"fill-opacity": [
+						"case",
+						[">", ["coalesce", ["feature-state", "intensity"], 0], 0],
+						1,
+						0,
+					],
 				},
 				layout: {
 					visibility: "none",
@@ -825,6 +866,55 @@ async function init() {
 					"line-opacity" : [
 						"case",
 						[">", ["coalesce", ["feature-state", "pws"], 0], 0],
+						1,
+						0,
+					],
+				},
+				layout: {
+					visibility: "none",
+				},
+			});
+			Maps.main.addLayer({
+				id     : "Layer_area",
+				type   : "line",
+				source : "Source_area",
+				paint  : {
+					"line-color": [
+						"match",
+						["feature-state", "intensity"],
+						9,
+						setting["theme.customColor"] ? setting["theme.int.9"]
+							: "#862DB3",
+						8,
+						setting["theme.customColor"] ? setting["theme.int.8"]
+							: "#DB1F1F",
+						7,
+						setting["theme.customColor"] ? setting["theme.int.7"]
+							: "#F55647",
+						6,
+						setting["theme.customColor"] ? setting["theme.int.6"]
+							: "#DB641F",
+						5,
+						setting["theme.customColor"] ? setting["theme.int.5"]
+							: "#E68439",
+						4,
+						setting["theme.customColor"] ? setting["theme.int.4"]
+							: "#E8D630",
+						3,
+						setting["theme.customColor"] ? setting["theme.int.3"]
+							: "#7BA822",
+						2,
+						setting["theme.customColor"] ? setting["theme.int.2"]
+							: "#2774C2",
+						1,
+						setting["theme.customColor"] ? setting["theme.int.1"]
+							: "#757575",
+						"transparent",
+					],
+					"line-width"   : 3,
+					"line-opacity" : [
+						"case",
+						[">=", ["coalesce", ["feature-state", "intensity"], -1], 0],
 						1,
 						0,
 					],
@@ -996,7 +1086,7 @@ function handler(response) {
 		const stationData = Json[keys[index]];
 		const amount = Number(stationData.PGA);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = (!Unlock) ? (stationData.I >= 2) : stationData.alert;
+		const Alert = (!Unlock) ? stationData.I >= 2 : stationData.alert;
 		const Intensity = (Alert && Json.Alert) ? stationData.I :
 			(NOW.getTime() - stationData.TS * 1000 > 15000) ? "NA" :
 				(!Alert) ? 0 :
@@ -1055,26 +1145,21 @@ function handler(response) {
 			document.getElementById("rt-station-local-pga").innerText = "--";
 		}
 
-		if (pga[station[keys[index]].PGA] == undefined && Intensity != "NA")
-			pga[station[keys[index]].PGA] = {
-				Intensity : Intensity,
-				Time      : 0,
-			};
+		if (Intensity != "NA" && ((Intensity > 0 && amount < 999) || Alert)) {
+			pga[station[keys[index]].PGA] ??= {};
+			pga[station[keys[index]].PGA].intensity = Intensity;
 
-		if (Intensity != "NA" && (Intensity != 0 || Alert)) {
-			if (Intensity > pga[station[keys[index]].PGA].Intensity) pga[station[keys[index]].PGA].Intensity = Intensity;
-			if (Alert)
-				if (Json.Alert) {
-					if (setting["audio.realtime"])
-						if (amount > 8 && PGALimit == 0) {
-							PGALimit = 1;
-							TREM.Audios.pga1.play();
-						} else if (amount > 250 && PGALimit != 2) {
-							PGALimit = 2;
-							TREM.Audios.pga2.play();
-						}
-					pga[station[keys[index]].PGA].Time = NOW.getTime();
-				}
+			if (Alert && Json.Alert) {
+				if (setting["audio.realtime"])
+					if (amount > 8 && PGALimit == 0) {
+						PGALimit = 1;
+						TREM.Audios.pga1.play();
+					} else if (amount > 250 && PGALimit > 1) {
+						PGALimit = 2;
+						TREM.Audios.pga2.play();
+					}
+				pga[station[keys[index]].PGA].time = NOW.getTime();
+			}
 		}
 
 		if (MAXPGA.pga < amount && amount < 999 && Level != "NA") {
@@ -1105,62 +1190,61 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	/**
-	 * pga << 保存該框最後觸發時間及最大震度 現在時間-最後觸發時間>30秒 則不顯示
-	 * PGA << 保存創建的框框物件 供removeLayer使用
-	 */
-	// #region 移除所有框框
-	for (let index = 0; index < Object.keys(PGA).length; index++) {
-		if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(PGA)[index]]);
-		delete PGA[Object.keys(PGA)[index]];
-		index--;
-	}
-	// #endregion
-	RMT++; // 閃爍 判斷這次要不要顯示 (週期 0.5秒)
-	for (let index = 0; index < Object.keys(pga).length; index++) {
-		const Intensity = pga[Object.keys(pga)[index]].Intensity;
-		if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000 || PGACancel) {
-			delete pga[Object.keys(pga)[index]];
-			index--;
-		} else {
-			PGA[Object.keys(pga)[index]] = L.polygon(PGAjson[Object.keys(pga)[index].toString()], {
-				color     : color(Intensity),
-				fillColor : "transparent",
-			}); // 震度框
-			// #region 判斷震度框4角是否全部位於S波範圍內 如為 true 則不顯示
-			let skip = false;
-			if (Object.keys(EEW).length != 0)
-				for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
-					let SKIP = 0;
-					for (let i = 0; i < 4; i++) {
-						const dis = Math.sqrt(Math.pow((PGAjson[Object.keys(pga)[index].toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((PGAjson[Object.keys(pga)[index].toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
-						if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
+	if (Object.keys(pga).length) {
+		// 閃爍
+		if (RMT == 0) TREM.MapArea.hide();
+		else TREM.MapArea.show();
+
+		PGAmark = true;
+
+		for (let index = 0, pgaKeys = Object.keys(pga); index < pgaKeys.length; index++) {
+			const Intensity = pga[pgaKeys[index]]?.intensity;
+			if (Intensity == undefined) continue;
+			if (NOW.getTime() - pga[pgaKeys[index]].time > 30_000 || PGACancel) {
+				TREM.MapArea.clear(pgaKeys[index]);
+				delete pga[pgaKeys[index]];
+				delete pgaKeys[index];
+				index--;
+			} else if (!pga[pgaKeys[index]].passed) {
+				// #region 判斷震度框4角是否全部位於S波範圍內 如為 true 則不顯示
+				let skip = false;
+				if (Object.keys(EEW).length)
+					for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
+						let SKIP = 0;
+						for (let i = 0; i < 4; i++) {
+							const dis = Math.sqrt(Math.pow((PGAjson[pgaKeys[index].toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((PGAjson[pgaKeys[index].toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
+							if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
+						}
+						if (SKIP >= 4) {
+							skip = true;
+							break;
+						}
 					}
-					if (SKIP >= 4) {
-						skip = true;
-						break;
-					}
-				}
-			if (skip) continue;
+
+				if (skip) {
+					pga[pgaKeys[index]].passed = true;
+					TREM.MapArea.clear(pgaKeys[index]);
+				} else
+					TREM.MapArea.setArea(pgaKeys[index], Intensity);
+			}
 			// #endregion
-			if (RMT >= 2) Maps.main.addLayer(PGA[Object.keys(pga)[index]]); // 將震度框加到地圖
+		}
+		RMT++;
+		if (RMT > 1) RMT = 0;
+	} else {
+		if (PGAmark) {
+			PGAmark = false;
+			RMTlimit = [];
+			PGACancel = false;
+		}
+		if (TREM.MapArea.isVisible) {
+			TREM.MapArea.hide();
+			RMT = 0;
+			PGAtag = -1;
+			PGALimit = 0;
 		}
 	}
-	if (RMT >= 2) RMT = 0; // 閃爍計算歸零
-	// #region 結束顯示
-	if (Object.keys(pga).length != 0 && !PGAmark)
-		PGAmark = true;
-	if (PGAmark && Object.keys(pga).length == 0) {
-		PGAmark = false;
-		RMT = 1;
-		RMTlimit = [];
-		PGACancel = false;
-	}
-	// #endregion
-	if (Object.keys(PGA).length == 0) {// 當所有框框均顯示完畢
-		PGAtag = -1;
-		PGALimit = 0;
-	}
+
 	All = Json.I ?? []; // 來自伺服器給的震度列表
 	for (let index = 0; index < All.length; index++)
 		All[index].loc = station[All[index].uuid].Loc;
