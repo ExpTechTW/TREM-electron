@@ -1105,12 +1105,18 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
+	/**
+	 * pga << 保存該框最後觸發時間及最大震度 現在時間-最後觸發時間>30秒 則不顯示
+	 * PGA << 保存創建的框框物件 供removeLayer使用
+	 */
+	// #region 移除所有框框
 	for (let index = 0; index < Object.keys(PGA).length; index++) {
 		if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(PGA)[index]]);
 		delete PGA[Object.keys(PGA)[index]];
 		index--;
 	}
-	RMT++;
+	// #endregion
+	RMT++; // 閃爍 判斷這次要不要顯示 (週期 0.5秒)
 	for (let index = 0; index < Object.keys(pga).length; index++) {
 		const Intensity = pga[Object.keys(pga)[index]].Intensity;
 		if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000 || PGACancel) {
@@ -1120,7 +1126,8 @@ function handler(response) {
 			PGA[Object.keys(pga)[index]] = L.polygon(PGAjson[Object.keys(pga)[index].toString()], {
 				color     : color(Intensity),
 				fillColor : "transparent",
-			});
+			}); // 震度框
+			// #region 判斷震度框4角是否全部位於S波範圍內 如為 true 則不顯示
 			let skip = false;
 			if (Object.keys(EEW).length != 0)
 				for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
@@ -1135,10 +1142,12 @@ function handler(response) {
 					}
 				}
 			if (skip) continue;
-			if (RMT >= 2) Maps.main.addLayer(PGA[Object.keys(pga)[index]]);
+			// #endregion
+			if (RMT >= 2) Maps.main.addLayer(PGA[Object.keys(pga)[index]]); // 將震度框加到地圖
 		}
 	}
-	if (RMT >= 2) RMT = 0;
+	if (RMT >= 2) RMT = 0; // 閃爍計算歸零
+	// #region 結束顯示
 	if (Object.keys(pga).length != 0 && !PGAmark)
 		PGAmark = true;
 	if (PGAmark && Object.keys(pga).length == 0) {
@@ -1147,11 +1156,12 @@ function handler(response) {
 		RMTlimit = [];
 		PGACancel = false;
 	}
-	if (Object.keys(PGA).length == 0) {
+	// #endregion
+	if (Object.keys(PGA).length == 0) {// 當所有框框均顯示完畢
 		PGAtag = -1;
 		PGALimit = 0;
 	}
-	All = Json.I ?? [];
+	All = Json.I ?? []; // 來自伺服器給的震度列表
 	for (let index = 0; index < All.length; index++)
 		All[index].loc = station[All[index].uuid].Loc;
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
