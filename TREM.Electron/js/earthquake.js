@@ -786,6 +786,10 @@ async function init() {
 				type : "geojson",
 				data : MapData.tw_town,
 			});
+			Maps.main.addSource("Source_tw_pga", {
+				type : "geojson",
+				data : MapData.pga,
+			});
 			MapBases.main.set("tw_county_fill", Maps.main.addLayer({
 				id     : "Layer_tw_county_Fill",
 				type   : "fill",
@@ -894,6 +898,49 @@ async function init() {
 						1,
 						0,
 					],
+				},
+				layout: {
+					visibility: "none",
+				},
+			});
+			Maps.main.addLayer({
+				id     : "Layer_tw_pga",
+				type   : "line",
+				source : "Source_tw_pga",
+				paint  : {
+					"line-color": [
+						"match",
+						["feature-state", "Intensity"],
+						9,
+						setting["theme.customColor"] ? setting["theme.int.9"]
+							: "#862DB3",
+						8,
+						setting["theme.customColor"] ? setting["theme.int.8"]
+							: "#DB1F1F",
+						7,
+						setting["theme.customColor"] ? setting["theme.int.7"]
+							: "#F55647",
+						6,
+						setting["theme.customColor"] ? setting["theme.int.6"]
+							: "#DB641F",
+						5,
+						setting["theme.customColor"] ? setting["theme.int.5"]
+							: "#E68439",
+						4,
+						setting["theme.customColor"] ? setting["theme.int.4"]
+							: "#E8D630",
+						3,
+						setting["theme.customColor"] ? setting["theme.int.3"]
+							: "#7BA822",
+						2,
+						setting["theme.customColor"] ? setting["theme.int.2"]
+							: "#2774C2",
+						1,
+						setting["theme.customColor"] ? setting["theme.int.1"]
+							: "#757575",
+						"transparent",
+					],
+					"line-opacity": 1,
 				},
 				layout: {
 					visibility: "none",
@@ -1339,12 +1386,19 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	// for (let index = 0; index < Object.keys(PGA).length; index++) {
-	// 	if (RMT == 0) Maps.main.removeLayer(PGA[Object.keys(pga)[index]]);
-	// 	delete PGA[Object.keys(PGA)[index]];
-	// 	index--;
-	// }
-	// RMT++;
+	for (let index = 0; index < Object.keys(PGA).length; index++) {
+		if (RMT == 0) {
+			// Maps.main.removeFeatureState({
+			// 	source : "Source_tw_pga",
+			// 	id     : Object.keys(PGA)[index],
+			// });
+			// Maps.main.setLayoutProperty("Layer_tw_pga", "visibility", "none");
+			// Maps.main.removeLayer(PGA[Object.keys(pga)[index]]);
+		}
+		delete PGA[Object.keys(PGA)[index]];
+		index--;
+	}
+	RMT++;
 	for (let index = 0; index < Object.keys(pga).length; index++) {
 		const Intensity = pga[Object.keys(pga)[index]].Intensity;
 		if (NOW.getTime() - pga[Object.keys(pga)[index]].Time > 30000 || PGACancel) {
@@ -1369,9 +1423,79 @@ function handler(response) {
 					}
 				}
 			if (skip) continue;
-			if (RMT >= 2) Maps.main.addLayer(PGA[Object.keys(pga)[index]]);
+			// if (RMT >= 2) Maps.main.addLayer(PGA[Object.keys(pga)[index]]);
 		}
 	}
+
+	const int0 = new Map();
+	for (let index = 0; index < Object.keys(PGA).length; index++) {
+		const Intensity = PGA[Object.keys(PGA)[index]].Intensity;
+		const pgaid = Object.keys(PGA)[index];
+		int0.set(pgaid, Intensity);
+	}
+
+	if (int0.size)
+		for (const [pgaid] of int0)
+			if (RMT == 0) {
+				Maps.main.removeFeatureState({
+					source : "Source_tw_pga",
+					id     : pgaid,
+				});
+				Maps.main.setLayoutProperty("Layer_tw_pga", "visibility", "none");
+			}
+
+	const int = new Map();
+	for (let index = 0; index < Object.keys(pga).length; index++) {
+		const Intensity = pga[Object.keys(pga)[index]].Intensity;
+		const pgaid = Object.keys(pga)[index];
+		int.set(pgaid, Intensity);
+	}
+
+	if (int.size)
+		for (const [pgaid, Intensity] of int)
+			if (NOW.getTime() - pga[pgaid].Time > 30000 || PGACancel) {
+				Maps.main.removeFeatureState({
+					source : "Source_tw_pga",
+					id     : pgaid,
+				});
+				Maps.main.setLayoutProperty("Layer_tw_pga", "visibility", "none");
+			} else {
+				// console.log(pgaid);
+				// Maps.main.setFeatureState({
+				// 	source : "Source_tw_pga",
+				// 	id     : pgaid,
+				// }, { Intensity });
+				let skip = false;
+				if (Object.keys(EEW).length != 0)
+					for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
+						let SKIP = 0;
+						for (let i = 0; i < 4; i++) {
+							const dis = Math.sqrt(Math.pow((PGAjson[pgaid.toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((PGAjson[pgaid.toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
+							if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
+						}
+						if (SKIP >= 4) {
+							skip = true;
+							break;
+						}
+					}
+				if (skip) continue;
+				if (RMT >= 2) {
+					Maps.main.setFeatureState({
+						source : "Source_tw_pga",
+						id     : pgaid,
+					}, { Intensity });
+					Maps.main.setLayoutProperty("Layer_tw_pga", "visibility", "visible");
+				}
+				if (RMT == 0) {
+					Maps.main.removeFeatureState({
+						source : "Source_tw_pga",
+						id     : pgaid,
+					});
+					Maps.main.setLayoutProperty("Layer_tw_pga", "visibility", "none");
+				}
+			}
+
+
 	if (RMT >= 2) RMT = 0;
 	if (Object.keys(pga).length != 0 && !PGAmark)
 		PGAmark = true;
@@ -2295,7 +2419,10 @@ TREM.Earthquake.on("eew", (data) => {
 			if (Intensity > MaxIntensity) MaxIntensity = Intensity;
 			GC[loc.code] = Intensity;
 		}
-
+	if (EarthquakeList[data.ID].geojson != undefined) {
+		EarthquakeList[data.ID].geojson.remove();
+		delete EarthquakeList[data.ID].geojson;
+	}
 	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.tw_town, {
 		minZoom   : 7,
 		maxZoom   : 7,
@@ -2960,7 +3087,6 @@ function main(data) {
 		// remove epicenter cross icons
 		EarthquakeList[data.ID].epicenterIcon.remove();
 		EarthquakeList[data.ID].epicenterIconTW.remove();
-		EarthquakeList[data.ID].geojson.remove();
 		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
 		for (let index = 0; index < INFO.length; index++)
