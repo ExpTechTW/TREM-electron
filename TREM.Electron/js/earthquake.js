@@ -1240,9 +1240,9 @@ function handler(response) {
 		if (TREM.MapArea.isVisible) {
 			TREM.MapArea.hide();
 			RMT = 0;
-			PGAtag = -1;
-			PGALimit = 0;
 		}
+		PGAtag = -1;
+		PGALimit = 0;
 	}
 
 	All = Json.I ?? []; // 來自伺服器給的震度列表
