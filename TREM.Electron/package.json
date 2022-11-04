@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "6.0.0-56-pre3",
+  "version": "6.0.0-58-pre3",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "homepage": "https://exptech.com.tw/",
@@ -76,7 +76,7 @@
     "leaflet-geojson-vt": "1.1.0",
     "maplibre-gl": "^2.4.0",
     "tinycolor2": "^1.4.2",
-    "worker-farm": "^1.7.0",
+    "worker-farm": "github:ExpTechTW/node-worker-farm",
     "ws": "^8.8.0"
   }
 }

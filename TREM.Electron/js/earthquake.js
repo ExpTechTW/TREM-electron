@@ -11,7 +11,6 @@ const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
 const workerFarm = require("worker-farm"),
 	workers_rts = workerFarm(require.resolve("../js/core/rts"));
-const { setTimeout } = require("timers");
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
