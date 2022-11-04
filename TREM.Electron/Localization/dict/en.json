@@ -25,5 +25,15 @@
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": "⬆ Update Available",
     "Notification_Update_Body": "v{0} → v{1}\nClick here to download the latest version.",
-    "Realtime_No_Data": "No Data"
+    "Realtime_No_Data": "No Data",
+    "Intensity_Zero": "0",
+    "Intensity_One": "1",
+    "Intensity_Two": "2",
+    "Intensity_Three": "3",
+    "Intensity_Four": "4",
+    "Intensity_Five_Weak": "5-",
+    "Intensity_Five_strong": "5+",
+    "Intensity_Six_Weak": "6-",
+    "Intensity_Six_Strong": "6+",
+    "Intensity_Seven": "7",
 }

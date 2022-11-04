@@ -25,5 +25,15 @@
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": "⬆ 有可用的更新",
     "Notification_Update_Body": "v{0} → v{1}\n點擊來下載最新版本",
-    "Realtime_No_Data": "無資料"
+    "Realtime_No_Data": "無資料",
+    "Intensity_Zero": "０級",
+    "Intensity_One": "１級",
+    "Intensity_Two": "２級",
+    "Intensity_Three": "３級",
+    "Intensity_Four": "４級",
+    "Intensity_Five_Weak": "５弱",
+    "Intensity_Five_strong": "５強",
+    "Intensity_Six_Weak": "６弱",
+    "Intensity_Six_Strong": "６強",
+    "Intensity_Seven": "７級"
 }

@@ -25,5 +25,15 @@
     "Dialog_Button_OK": "OK",
     "Notification_Update_Title": ":arrow_up: 有可用的更新",
     "Notification_Update_Body": "v{0} → v{1}\n单击下载最新版本",
-    "Realtime_No_Data": "无资料"
+    "Realtime_No_Data": "无资料",
+    "Intensity_Zero": null,
+    "Intensity_One": null,
+    "Intensity_Two": null,
+    "Intensity_Three": null,
+    "Intensity_Four": null,
+    "Intensity_Five_Weak": null,
+    "Intensity_Five_strong": null,
+    "Intensity_Six_Weak": null,
+    "Intensity_Six_Strong": null,
+    "Intensity_Seven": null
 }
