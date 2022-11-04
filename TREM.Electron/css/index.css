@@ -226,12 +226,14 @@ kbd {
 	margin: auto 0 32px 0;
 }
 
-#time {
+.time-container {
 	user-select: none;
 	pointer-events: none;
 	z-index: 1000;
 	position: fixed;
-	left: 90px;
+	display: flex;
+	flex-direction: column;
+	left: 84px;
 	bottom: 22px;
 	color: rgb(var(--md-sys-color-on-background));
 	font-size: 16px;
@@ -253,17 +255,7 @@ kbd {
 }
 
 #app-version {
-	user-select: none;
-	pointer-events: none;
-	z-index: 1000;
-	position: fixed;
-	left: 90px;
-	bottom: 45px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
-	font-size: 14px;
-	font-weight: 400;
-	font-variant-numeric: tabular-nums;
-	transition: color .1s ease-in-out;
 }
 
 #rolllist {
