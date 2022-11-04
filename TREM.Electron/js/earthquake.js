@@ -217,7 +217,7 @@ TREM.MapIntensity = {
 							Maps.main.setFeatureState({
 								source : "Source_tw_town",
 								id     : towncode,
-							}, { intensity, intensity_outline: 1 });
+							}, { intensity });
 
 					Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
 
@@ -766,9 +766,10 @@ async function init() {
 						"transparent",
 					],
 					"fill-outline-color": [
-						"match",
-						["feature-state", "intensity_outline"],
-						1, TREM.Colors.secondary, "rgba(0, 0, 0, 0)",
+						"case",
+						[">", ["feature-state", "intensity"], 0 ],
+						TREM.Colors.onSurfaceVariant,
+						"transparent",
 					],
 					"fill-opacity": 1,
 				},
@@ -782,7 +783,7 @@ async function init() {
 				source : "Source_tw_county",
 				paint  : {
 					"line-color"   : TREM.Colors.primary,
-					"line-width"   : 0.75,
+					"line-width"   : 1,
 					"line-opacity" : 1,
 				},
 			}).getLayer("Layer_tw_county_Line"));
@@ -1961,14 +1962,14 @@ TREM.Earthquake.on("eew", (data) => {
 				distance = d;
 			}
 
-			const Intensity = IntensityN(int);
-			if (Intensity > MaxIntensity) MaxIntensity = Intensity;
-			GC[loc.code] = Intensity;
+			if (int.value > MaxIntensity.value) MaxIntensity = int;
+			GC[loc.code] = int.value;
 		}
 	if (EarthquakeList[data.ID].geojson != undefined) {
 		EarthquakeList[data.ID].geojson.remove();
 		delete EarthquakeList[data.ID].geojson;
 	}
+
 	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.tw_town, {
 		minZoom   : 7,
 		maxZoom   : 7,
@@ -2007,7 +2008,7 @@ TREM.Earthquake.on("eew", (data) => {
 	});
 
 	let Alert = true;
-	if (IntensityN(level) < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
+	if (level.value < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
 	if (!Info.Notify.includes(data.ID)) {
 		let Nmsg = "";
 		if (value > 0)
@@ -2015,7 +2016,7 @@ TREM.Earthquake.on("eew", (data) => {
 		else
 			Nmsg = "已抵達 (預警盲區)";
 		new Notification("EEW 強震即時警報", {
-			body   : `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`,
+			body   : `${level.text}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`,
 			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});
@@ -2039,10 +2040,10 @@ TREM.Earthquake.on("eew", (data) => {
 		EEWT.id = data.ID;
 		if (setting["audio.eew"] && Alert) {
 			TREM.Audios.eew.play();
-			audioPlay1(`../audio/1/${level.replace("+", "").replace("-", "")}.wav`);
-			if (level.includes("+"))
+			audioPlay1(`../audio/1/${level.label.replace("+", "").replace("-", "")}.wav`);
+			if (level.label.includes("+"))
 				audioPlay1("../audio/1/intensity-strong.wav");
-			else if (level.includes("-"))
+			else if (level.label.includes("-"))
 				audioPlay1("../audio/1/intensity-weak.wav");
 			else
 				audioPlay1("../audio/1/intensity.wav");
@@ -2060,7 +2061,7 @@ TREM.Earthquake.on("eew", (data) => {
 			}
 		}
 	}
-	if (MaxIntensity >= 5) {
+	if (MaxIntensity.value >= 5) {
 		data.Alert = true;
 		if (!Info.Warn.includes(data.ID)) {
 			Info.Warn.push(data.ID);
@@ -2149,16 +2150,16 @@ TREM.Earthquake.on("eew", (data) => {
 	INFO[find] = {
 		ID              : data.ID,
 		alert_number    : data.Version,
-		alert_intensity : MaxIntensity,
+		alert_intensity : MaxIntensity.value,
 		alert_location  : data.Location ?? "未知區域",
 		alert_time      : new Date(data["UTC+8"]),
 		alert_sTime     : new Date(data.Time),
-		alert_local     : IntensityN(level),
+		alert_local     : level.value,
 		alert_magnitude : data.Scale,
 		alert_depth     : data.Depth,
 		alert_provider  : data.Unit,
 		alert_type      : classString,
-		"intensity-1"   : `<font color="white" size="7"><b>${IntensityI(MaxIntensity)}</b></font>`,
+		"intensity-1"   : `<font color="white" size="7"><b>${MaxIntensity.label}</b></font>`,
 		"time-1"        : `<font color="white" size="2"><b>${data["UTC+8"]}</b></font>`,
 		"info-1"        : `<font color="white" size="4"><b>M ${data.Scale} </b></font><font color="white" size="3"><b> 深度: ${data.Depth} km</b></font>`,
 		distance,
