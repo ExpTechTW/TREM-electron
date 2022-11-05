@@ -38,7 +38,7 @@ TREM.Intensity = {
 						Maps.intensity.setFeatureState({
 							source : "Source_tw_town",
 							id     : towncode,
-						}, { intensity, intensity_outline: 1 });
+						}, { intensity });
 
 				Maps.intensity.setLayoutProperty("Layer_intensity", "visibility", "visible");
 
@@ -67,12 +67,9 @@ TREM.Intensity = {
 	clear() {
 		dump({ level: 0, message: "Clearing Intensity map", origin: "Intensity" });
 		if (this.intensities.size) {
-			for (const [towncode] of this.intensities)
-				Maps.intensity.removeFeatureState({
-					source : "Source_tw_town",
-					id     : towncode,
-				});
+			Maps.intensity.removeFeatureState({ source: "Source_tw_town" });
 			Maps.intensity.setLayoutProperty("Layer_intensity", "visibility", "none");
+			delete this.intensities;
 			this.intensities = new Map();
 			this.isTriggered = false;
 			if (this.timer) {

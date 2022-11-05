@@ -42,7 +42,6 @@ function handleWindowControls() {
 			document.body.classList.add("maximized");
 		else
 			document.body.classList.remove("maximized");
-
 	}
 }
 
@@ -383,12 +382,12 @@ function setList(args, el, event) {
 
 	let delay = 0;
 	for (let i = 0; i < changeelchild.length; i++) {
-		$(changeelchild[i]).delay(delay + 40 * i).fadeTo(100, is_setting_disabled ? 0.6 : 1).delay(100)
+		$(changeelchild[i]).delay(delay + 30 * i).fadeTo(100, is_setting_disabled ? 0.6 : 1).delay(100)
 			.queue(function(next) {
 				$(this).css("opacity", "");
 				next();
 			});
-		delay += 20;
+		delay += 15;
 		const child = changeelchild[i].children;
 		if (child.length)
 			for (let j = 0; j < child.length; j++)
@@ -399,7 +398,7 @@ function setList(args, el, event) {
 								$(this).css("opacity", "");
 								next();
 							});
-					delay += 20;
+					delay += 15;
 				}
 
 	}
