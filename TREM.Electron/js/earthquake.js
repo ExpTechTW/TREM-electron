@@ -114,12 +114,14 @@ class WaveCircle {
 	 * @param {maplibregl.Map} map
 	 * @param {maplibregl.LngLatLike} lnglat
 	 * @param {number} radius
+	 * @param {boolean} alert
 	 * @param {maplibregl.LayerSpecification} layerOptions
 	 */
-	constructor(id, map, lnglat, radius, layerOptions) {
+	constructor(id, map, lnglat, radius, alert, layerOptions) {
 		this.map = map;
 		this.lnglat = lnglat;
 		this.radius = radius;
+		this.alert = alert;
 		/**
 		 * @type {maplibregl.GeoJSONSource}
 		 */
@@ -155,6 +157,14 @@ class WaveCircle {
 		if (this.radius == radius) return;
 		this.radius = radius;
 		this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
+	}
+
+	setAlert(state) {
+		if (this.alert == state) return;
+		this.alert = state;
+		this.source();
+		this.layer.setPaintProperty("fill-color", this.alert ? "#FF0000" : "#FFA500");
+		this.layerBorder.setPaintProperty("line-color", this.alert ? "#FF0000" : "#FFA500");
 	}
 
 	setStyle(id, value) {
@@ -2582,6 +2592,7 @@ function main(data) {
 						Maps.main,
 						[+data.EastLongitude, +data.NorthLatitude],
 						kmP,
+						data.Alert,
 						{
 							type  : "line",
 							paint : {
@@ -2621,19 +2632,18 @@ function main(data) {
 					Maps.main,
 					[+data.EastLongitude, +data.NorthLatitude],
 					kmS,
+					data.Alert,
 					{
 						type  : "fill",
 						paint : {
-							"fill-opacity"       : 0.15,
-							"fill-outline-color" : data.Alert ? "#FF0000" : "#FFA500",
-							"fill-color"         : data.Alert ? "#FF0000" : "#FFA500",
+							"fill-opacity" : 0.15,
+							"fill-color"   : data.Alert ? "#FF0000" : "#FFA500",
 						},
 					});
 			else {
 				EarthquakeList[data.ID].CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
 				EarthquakeList[data.ID].CircleS.setRadius(kmS);
-				EarthquakeList[data.ID].CircleS.setStyle("fill-outline-color", data.Alert ? "#FF0000" : "#FFA500");
-				EarthquakeList[data.ID].CircleS.setStyle("fill-color", data.Alert ? "#FF0000" : "#FFA500");
+				EarthquakeList[data.ID].CircleS.setAlert(data.Alert);
 			}
 
 			if (!EarthquakeList[data.ID].CircleSTW)
@@ -2679,7 +2689,6 @@ function main(data) {
 			Maps.main.addLayer(DepthM);
 			DepthM.setZIndexOffset(6000);
 		}
-
 
 		// #region Epicenter Cross Icon
 
