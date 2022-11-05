@@ -5,7 +5,7 @@ require("leaflet-geojson-vt");
 require("expose-gc");
 const { BrowserWindow, shell } = require("@electron/remote");
 const { default: turfCircle } = require("@turf/circle");
-const { setTimeout, setInterval } = require("node:timers");
+const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:timers");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
