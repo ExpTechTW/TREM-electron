@@ -832,7 +832,7 @@ async function init() {
 					],
 					"fill-outline-color": [
 						"case",
-						[">", ["feature-state", "intensity"], 0 ],
+						[">", ["coalesce", ["feature-state", "intensity"], 0], 0 ],
 						TREM.Colors.onSurfaceVariant,
 						"transparent",
 					],
@@ -1881,7 +1881,7 @@ const updateMapColors = async (event, value) => {
 					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
 	Maps.main.setPaintProperty("Layer_intensity", "fill-outline-color", [
 		"case",
-		[">", ["feature-state", "intensity"], 0 ],
+		[">", ["coalesce", ["feature-state", "intensity"], 0], 0 ],
 		TREM.Colors.onSurfaceVariant,
 		"transparent",
 	]);
