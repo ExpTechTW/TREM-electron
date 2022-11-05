@@ -253,11 +253,10 @@ TREM.MapIntensity = {
 	clear() {
 		dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
 		if (this.intensities.size) {
-			for (const [towncode] of this.intensities)
-				Maps.main.removeFeatureState({ source: "Source_tw_town" });
+			Maps.main.removeFeatureState({ source: "Source_tw_town" });
 			Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
-			delete this.intensities;
 			this.intensities = new Map();
+			this.alertTime = 0;
 			this.isTriggered = false;
 			if (this.timer) {
 				clearTimeout(this.timer);
