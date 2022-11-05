@@ -1697,8 +1697,6 @@ function addReport(report, prepend = false) {
 				}
 				roll.prepend(Div);
 			}
-			TREM.Report.setView("report-overview", report.identifier);
-			changeView("report", "#reportView_btn");
 			ReportTag = NOW.getTime();
 		} else
 			roll.append(Div);
@@ -2047,15 +2045,18 @@ function FCMdata(data) {
 		if (setting["report.cover"]) win.moveTop();
 
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
+
+		const report = json.raw;
+		const location = report.location.match(/(?<=位於).+(?=\))/);
+
 		if (!win.isFocused())
 			new Notification("地震報告",
 				{
-					body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
+					body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
 					icon   : "../TREM.ico",
 					silent : win.isFocused(),
 				});
 
-		const report = json.raw;
 		addReport(report, true);
 		TREM.Report.cache.set(report.identifier, report);
 
