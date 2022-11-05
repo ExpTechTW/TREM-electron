@@ -1174,10 +1174,13 @@ function handler(response) {
 
 		if (intensity != "NA" && (intensity > 0 || Alert) && amount < 999) {
 			pga[station[keys[index]].PGA] ??= { intensity };
+
 			if ((pga[station[keys[index]].PGA].intensity ?? 0) < intensity)
 				pga[station[keys[index]].PGA].intensity = intensity;
 
-			if (Alert && Json.Alert) {
+			pga[station[keys[index]].PGA].time = NOW.getTime();
+
+			if (Alert && Json.Alert)
 				if (setting["audio.realtime"])
 					if (amount > 8 && PGALimit == 0) {
 						PGALimit = 1;
@@ -1186,8 +1189,6 @@ function handler(response) {
 						PGALimit = 2;
 						TREM.Audios.pga2.play();
 					}
-				pga[station[keys[index]].PGA].time = NOW.getTime();
-			}
 		}
 
 		if (MAXPGA.pga < amount && amount < 999 && Level != "NA") {
@@ -1231,7 +1232,7 @@ function handler(response) {
 				index--;
 			} else if (!pga[pgaKeys[index]].passed) {
 				// #region 判斷震度框4角是否全部位於S波範圍內 如為 true 則不顯示
-				let skip = false;
+				let passed = false;
 				if (Object.keys(EEW).length)
 					for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
 						let SKIP = 0;
@@ -1240,12 +1241,12 @@ function handler(response) {
 							if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
 						}
 						if (SKIP >= 4) {
-							skip = true;
+							passed = true;
 							break;
 						}
 					}
 
-				if (skip) {
+				if (passed) {
 					pga[pgaKeys[index]].passed = true;
 					TREM.MapArea.clear(pgaKeys[index]);
 				} else
