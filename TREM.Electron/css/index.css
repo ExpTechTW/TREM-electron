@@ -255,6 +255,7 @@ kbd {
 }
 
 #app-version {
+	font-size: 14px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 }
 
@@ -1626,6 +1627,7 @@ button.hide + #report-detail-header-title {
 
 .report-list-item {
 	position: relative;
+	height: 42px;
 	min-width: 480px;
 	overflow: hidden;
 	margin-bottom: 8px;
