@@ -5,6 +5,7 @@ require("leaflet-geojson-vt");
 require("expose-gc");
 const { BrowserWindow, shell } = require("@electron/remote");
 const { default: turfCircle } = require("@turf/circle");
+const { setTimeout, setInterval } = require("node:timers");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
@@ -586,8 +587,8 @@ async function init() {
 					container         : "map",
 					maxPitch          : 0,
 					maxBounds         : [50, 10, 180, 60],
-					zoom              : 6.8,
-					center            : [121.596, 23.612],
+					zoom              : 6.895604243192027,
+					center            : [120.99401979478893, 23.633067293391818],
 					renderWorldCopies : false,
 					keyboard          : false,
 					doubleClickZoom   : false,
@@ -595,7 +596,7 @@ async function init() {
 				.on("click", (ev) => {
 					if (ev.originalEvent.target.tagName == "CANVAS")
 						Maps.main.fitBounds([118.25, 21.77, 122.18, 25.47], {
-							padding  : { right: Maps.report.getCanvas().width / 8 },
+							padding  : { right: Maps.report.getCanvas().width / 6 },
 							speed    : 2,
 							curve    : 1,
 							easing   : (e) => Math.sin(e * Math.PI / 2),
@@ -612,6 +613,7 @@ async function init() {
 							if (!Station[key].getPopup().persist)
 								Station[key].togglePopup();
 				});
+
 
 		if (!Maps.mini)
 			Maps.mini = L.map("map-tw",
@@ -677,23 +679,26 @@ async function init() {
 			Maps.intensity._zoomAnimated = setting["map.animation"];
 		}
 
-		document.getElementById("view").addEventListener("transitionend", (ev) => {
-			if (e.propertyName == "margin-top") {
-				console.log(ev);
-				Maps.main
-					.resize()
-					.fitBounds([118.25, 21.77, 122.18, 25.47], {
-						padding  : { right: Maps.report.getCanvas().width / 8 },
-						speed    : 2,
-						curve    : 1,
-						easing   : (e) => Math.sin(e * Math.PI / 2),
-						duration : 1000,
-					});
+		const resizeHandler = (ev) => {
+			if (ev && ev.propertyName != "margin-top") return;
+			Maps.main.resize().fitBounds([118.25, 21.77, 122.18, 25.47], {
+				padding  : { right: Maps.report.getCanvas().width / 8 },
+				speed    : 2,
+				curve    : 1,
+				easing   : (e) => Math.sin(e * Math.PI / 2),
+				duration : 1000,
+			});
 
-				Maps.report.resize();
-				TREM.Report._focusMap();
-			}
+			Maps.report.resize();
+			TREM.Report._focusMap();
+		};
+
+		document.getElementById("view").addEventListener("transitionend", resizeHandler);
+		window.addEventListener("resize", () => {
+			if (Timers.resize) Timers.resize.refresh();
+			else Timers.resize = setTimeout(resizeHandler, 100);
 		});
+
 		progressbar.value = (1 / progressStep) * 2;
 	})();
 
