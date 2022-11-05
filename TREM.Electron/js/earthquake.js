@@ -1111,23 +1111,22 @@ function handler(response) {
 		const amount = Number(stationData.PGA);
 		if (station[keys[index]] == undefined) continue;
 		const Alert = (!Unlock) ? stationData.I >= 2 : stationData.alert;
-		const Intensity = (Alert && Json.Alert) ? stationData.I :
-			(NOW.getTime() - stationData.TS * 1000 > 15000) ? "NA" :
-				(!Alert) ? 0 :
-					(amount >= 800) ? 9 :
-						(amount >= 440) ? 8 :
-							(amount >= 250) ? 7 :
-								(amount >= 140) ? 6 :
-									(amount >= 80) ? 5 :
-										(amount >= 25) ? 4 :
-											(amount >= 8) ? 3 :
-												(amount >= 5) ? 2 :
-													(amount >= 2.2) ? 1 :
-														0;
+		const intensity =
+			(Alert && Json.Alert) ? stationData.I :
+				(NOW.getTime() - stationData.TS * 1000 > 5000) ? "NA" :
+					(!Alert) ? 0 :
+						(amount >= 800) ? 9 :
+							(amount >= 440) ? 8 :
+								(amount >= 250) ? 7 :
+									(amount >= 140) ? 6 :
+										(amount >= 80) ? 5 :
+											(amount >= 25) ? 4 :
+												(amount >= 8) ? 3 :
+													(amount >= 5) ? 2 :
+														(amount >= 2.2) ? 1 :
+															0;
 
-		const NA999 = (Intensity == 9 && amount == 999) ? "Y" : "NA";
-		const size = (Intensity == 0 || Intensity == "NA" || NA999 == "Y") ? 8 : 16;
-		const levelClass = (Intensity != 0 && NA999 != "Y") ? IntensityToClassString(Intensity) :
+		const levelClass = (intensity != 0 && amount < 999) ? IntensityToClassString(intensity) :
 			(amount == 999) ? "pga6" :
 				(amount > 3.5) ? "pga5" :
 					(amount > 3) ? "pga4" :
@@ -1136,7 +1135,7 @@ function handler(response) {
 								"pga1";
 
 		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
-		const station_tooltip = `<div class="marker-popup rt-station-popup"><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(Intensity)}</div></div>`;
+		const station_tooltip = `<div class="marker-popup rt-station-popup"><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(intensity)}</div></div>`;
 
 		if (!Station[keys[index]]) {
 			Station[keys[index]] = new maplibregl.Marker(
@@ -1152,12 +1151,12 @@ function handler(response) {
 		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
 			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
 
-		const Level = IntensityI(Intensity);
+		const Level = IntensityI(intensity);
 		const now = new Date(stationData.T * 1000);
 
 		if (keys.includes(setting["Real-time.station"])) {
 			if (keys[index] == setting["Real-time.station"]) {
-				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
 				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
 				document.getElementById("rt-station-local-pga").innerText = amount;
@@ -1169,10 +1168,10 @@ function handler(response) {
 			document.getElementById("rt-station-local-pga").innerText = "--";
 		}
 
-		if (Intensity != "NA" && (Intensity > 0 || Alert) && amount < 999) {
-			pga[station[keys[index]].PGA] ??= {};
-			if ((pga[station[keys[index]].PGA].intensity ?? 0) < Intensity)
-				pga[station[keys[index]].PGA].intensity = Intensity;
+		if (intensity != "NA" && (intensity > 0 || Alert) && amount < 999) {
+			pga[station[keys[index]].PGA] ??= { intensity };
+			if ((pga[station[keys[index]].PGA].intensity ?? 0) < intensity)
+				pga[station[keys[index]].PGA].intensity = intensity;
 
 			if (Alert && Json.Alert) {
 				if (setting["audio.realtime"])
@@ -1194,7 +1193,7 @@ function handler(response) {
 			MAXPGA.lat = station[keys[index]].Lat;
 			MAXPGA.long = station[keys[index]].Long;
 			MAXPGA.loc = station[keys[index]].Loc;
-			MAXPGA.intensity = Intensity;
+			MAXPGA.intensity = intensity;
 			MAXPGA.time = new Date(stationData.T * 1000);
 		}
 	}
@@ -1264,7 +1263,8 @@ function handler(response) {
 		PGALimit = 0;
 	}
 
-	All = Json.I ?? []; // 來自伺服器給的震度列表
+	// 來自伺服器給的震度列表
+	All = Json.I ?? [];
 	for (let index = 0; index < All.length; index++)
 		All[index].loc = station[All[index].uuid].Loc;
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
