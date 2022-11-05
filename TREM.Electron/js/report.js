@@ -17,9 +17,6 @@ TREM.Report = {
 	_filterIntensity      : false,
 	_filterIntensityValue : 4,
 	_reportItemTemplate   : document.getElementById("template-report-list-item"),
-	get _mapPaddingLeft() {
-		return document.getElementById("map-report").offsetWidth / 2 - 50;
-	},
 	unloadReports(skipCheck = false) {
 		if (this.view == "report-list" || skipCheck) {
 			this.reportListElement.replaceChildren();
@@ -334,7 +331,7 @@ TREM.Report = {
 			Maps.report.fitBounds(...this._lastFocus);
 		else {
 			this._lastFocus = [[119.8, 21.82, 122.18, 25.42], {
-				padding  : { left: this._mapPaddingLeft },
+				padding  : { left: (Maps.report.getCanvas().width / 2) * 0.8 },
 				duration : 1000,
 			}];
 			Maps.report.fitBounds(...this._lastFocus);
@@ -427,7 +424,7 @@ TREM.Report = {
 		this._focusMap(bounds, {
 			padding: {
 				top    : canvasHeight * zoomPredict,
-				left   : canvasWidth / 2 - 75,
+				left   : (canvasWidth / 2) * 0.8,
 				bottom : canvasHeight * zoomPredict,
 				right  : canvasWidth * zoomPredict,
 			},
@@ -470,6 +467,7 @@ TREM.on("viewChange", (oldView, newView) => {
 	switch (newView) {
 		case "report": {
 			TREM.Report.loadReports();
+			TREM.Report._focusMap();
 			break;
 		}
 

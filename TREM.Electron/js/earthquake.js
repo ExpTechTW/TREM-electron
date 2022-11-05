@@ -5,13 +5,13 @@ require("leaflet-geojson-vt");
 require("expose-gc");
 const { BrowserWindow, shell } = require("@electron/remote");
 const { default: turfCircle } = require("@turf/circle");
+const { setTimeout, setInterval } = require("node:timers");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
 const workerFarm = require("worker-farm"),
 	workers_rts = workerFarm(require.resolve("../js/core/rts"));
-const { setTimeout } = require("timers");
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -634,8 +634,8 @@ async function init() {
 					container         : "map",
 					maxPitch          : 0,
 					maxBounds         : [50, 10, 180, 60],
-					zoom              : 6.8,
-					center            : [121.596, 23.612],
+					zoom              : 6.895604243192027,
+					center            : [120.99401979478893, 23.633067293391818],
 					renderWorldCopies : false,
 					keyboard          : false,
 					doubleClickZoom   : false,
@@ -658,6 +658,7 @@ async function init() {
 					if (ev.originalEvent.target.tagName == "CANVAS")
 						Mapsmainfocus();
 				});
+
 
 		if (!Maps.mini)
 			Maps.mini = L.map("map-tw",
@@ -692,9 +693,6 @@ async function init() {
 					attributionControl : false,
 					doubleClickZoom    : false,
 					keyboard           : false,
-				})
-				.fitBounds([119.8, 21.82, 122.18, 25.42], {
-					padding: { left: document.getElementById("map-report").offsetWidth / 2 },
 				})
 				.on("click", () => TREM.Report._focusMap())
 				.on("contextmenu", () => TREM.Report._focusMap());
@@ -745,6 +743,26 @@ async function init() {
 							duration : 1000,
 						});
 				});
+
+		const resizeHandler = (ev) => {
+			if (ev && ev.propertyName != "margin-top") return;
+			Maps.main.resize().fitBounds([118.25, 21.77, 122.18, 25.47], {
+				padding  : { right: Maps.report.getCanvas().width / 8 },
+				speed    : 2,
+				curve    : 1,
+				easing   : (e) => Math.sin(e * Math.PI / 2),
+				duration : 1000,
+			});
+			Maps.report.resize();
+			TREM.Report._focusMap();
+		};
+
+		document.getElementById("view").addEventListener("transitionend", resizeHandler);
+		window.addEventListener("resize", () => {
+			if (Timers.resize) Timers.resize.refresh();
+			else Timers.resize = setTimeout(resizeHandler, 100);
+		});
+
 	})();
 
 	progressbar.value = (1 / progressStep) * 3;
@@ -1258,24 +1276,25 @@ function handler(response) {
 		if (station[keys[index]] == undefined) continue;
 		const Alert = (!Unlock) ? amountI >= 2 : stationData.alert;
 		if (amount > MaxPGA) MaxPGA = amount;
-		const Intensity = (Alert && Json.Alert) ? amountI :
-			(NOW.getTime() - stationData.TS * 1000 > 15000) ? "NA" :
-				(!Alert) ? 0 :
-					(amount >= 800) ? 9 :
-						(amount >= 440) ? 8 :
-							(amount >= 250) ? 7 :
-								(amount >= 140) ? 6 :
-									(amount >= 80) ? 5 :
-										(amount >= 25) ? 4 :
-											(amount >= 8) ? 3 :
-												(amount >= 5) ? 2 :
-													(amount >= 2.2) ? 1 :
-														0;
+		const intensity =
+			(Alert && Json.Alert) ? amountI :
+				(NOW.getTime() - stationData.TS * 1000 > 5000) ? "NA" :
+					(!Alert) ? 0 :
+						(amount >= 800) ? 9 :
+							(amount >= 440) ? 8 :
+								(amount >= 250) ? 7 :
+									(amount >= 140) ? 6 :
+										(amount >= 80) ? 5 :
+											(amount >= 25) ? 4 :
+												(amount >= 8) ? 3 :
+													(amount >= 5) ? 2 :
+														(amount >= 2.2) ? 1 :
+															0;
 
-		if (Intensity > MaxIntensity1) MaxIntensity1 = Intensity;
-		const NA999 = (Intensity == 9 && amount == 999) ? "Y" : "NA";
-		const size = (Intensity == 0 || Intensity == "NA" || NA999 == "Y") ? 8 : 16;
-		const levelClass = (Intensity != 0 && NA999 != "Y") ? IntensityToClassString(Intensity) :
+		if (intensity > MaxIntensity1) MaxIntensity1 = intensity;
+		const NA999 = (intensity == 9 && amount == 999) ? "Y" : "NA";
+		const size = (intensity == 0 || intensity == "NA" || NA999 == "Y") ? 8 : 16;
+		const levelClass = (intensity != 0 && NA999 != "Y") ? IntensityToClassString(intensity) :
 			(amount == 999) ? "pga6" :
 				(amount > 3.5) ? "pga5" :
 					(amount > 3) ? "pga4" :
@@ -1284,7 +1303,7 @@ function handler(response) {
 								"pga1";
 
 		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
-		const station_tooltip = `<div class="marker-popup rt-station-popup"><div class="rt-station-id">${keys[index]}</div><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(Intensity)}</div></div>`;
+		const station_tooltip = `<div class="marker-popup rt-station-popup"><div class="rt-station-id">${keys[index]}</div><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(intensity)}</div></div>`;
 
 		const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
 		if (!Station[keys[index]]) {
@@ -1330,7 +1349,7 @@ function handler(response) {
 		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
 			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
 
-		const Level = IntensityI(Intensity);
+		const Level = IntensityI(intensity);
 		const now = new Date(stationData.T * 1000);
 
 		if (Unlock) {
@@ -1339,7 +1358,7 @@ function handler(response) {
 					if (keys[index] == setting["Real-time.station"]) {
 						if (document.getElementById("rt-station").classList.contains("hide"))
 							document.getElementById("rt-station").classList.remove("hide");
-						document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+						document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
 						document.getElementById("rt-station-local-id").innerText = keys[index];
 						document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 						document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
@@ -1353,7 +1372,7 @@ function handler(response) {
 					document.getElementById("rt-station-local-pga").innerText = "--";
 				}
 			else if (rtstation1 == keys[index]) {
-				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
 				document.getElementById("rt-station-local-id").innerText = keys[index];
 				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
@@ -1364,7 +1383,7 @@ function handler(response) {
 				if (keys[index] == setting["Real-time.station"]) {
 					if (document.getElementById("rt-station").classList.contains("hide"))
 						document.getElementById("rt-station").classList.remove("hide");
-					document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+					document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
 					document.getElementById("rt-station-local-id").innerText = keys[index];
 					document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 					document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
@@ -1378,17 +1397,17 @@ function handler(response) {
 				document.getElementById("rt-station-local-pga").innerText = "--";
 			}
 		else if (rtstation1 == keys[index]) {
-			document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && Intensity != "NA") ? IntensityToClassString(Intensity) : "na"}`;
+			document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
 			document.getElementById("rt-station-local-id").innerText = keys[index];
 			document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
 			document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
 			document.getElementById("rt-station-local-pga").innerText = amount;
 		}
 
-		if (Intensity != "NA" && NA999 != "Y" && (Intensity > 0 || Alert) && amount < 999) {
-			pga[station[keys[index]].PGA] ??= {};
-			if ((pga[station[keys[index]].PGA].intensity ?? 0) < Intensity)
-				pga[station[keys[index]].PGA].intensity = Intensity;
+		if (intensity != "NA" && NA999 != "Y" && (intensity > 0 || Alert) && amount < 999) {
+			pga[station[keys[index]].PGA] ??= { intensity };
+			if ((pga[station[keys[index]].PGA].intensity ?? 0) < intensity)
+				pga[station[keys[index]].PGA].intensity = intensity;
 
 			if (Alert && Json.Alert) {
 				if (setting["audio.realtime"])
@@ -1410,7 +1429,7 @@ function handler(response) {
 			MAXPGA.lat = station[keys[index]].Lat;
 			MAXPGA.long = station[keys[index]].Long;
 			MAXPGA.loc = station[keys[index]].Loc;
-			MAXPGA.intensity = Intensity;
+			MAXPGA.intensity = intensity;
 			MAXPGA.time = new Date(stationData.T * 1000);
 		}
 		// if (MaxIntensity1 > MAXPGA.intensity){
@@ -1638,14 +1657,12 @@ TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
 });
 
 function Mapsmainfocus() {
-	Maps.main.flyTo({
-		center   : [121.596, 23.612],
-		zoom     : 6.8,
-		bearing  : 0,
+	Maps.main.fitBounds([118.25, 21.77, 122.18, 25.47], {
+		padding  : { right: Maps.report.getCanvas().width / 8 },
 		speed    : 2,
 		curve    : 1,
 		easing   : (e) => Math.sin(e * Math.PI / 2),
-		duration : 500,
+		duration : 1000,
 	});
 }
 
