@@ -158,7 +158,7 @@ TREM.Report = {
 			localStorage.TestID = report.ID;
 			ipcRenderer.send("testEEW");
 		} else {
-			replay = new Date(report.originTime).getTime() - 25000;
+			replay = new Date(`${report.originTime} GMT+08:00`).getTime() - 15000;
 			replayT = NOW.getTime();
 		}
 		toggleNav(false);
