@@ -405,8 +405,9 @@ TREM.PWS = {
 };
 
 TREM.MapArea = {
-	cache     : new Map(),
-	isVisible : false,
+	cache      : new Map(),
+	isVisible  : false,
+	blinkTimer : null,
 	setArea(id, intensity) {
 		if (this.cache.get(id) == intensity) return;
 		Maps.main.setFeatureState({
@@ -415,6 +416,13 @@ TREM.MapArea = {
 		}, { intensity });
 		this.cache.set(id, intensity);
 		this.show();
+		if (!this.blinkTimer)
+			this.blinkTimer = setInterval(() => {
+				if (this.isVisible)
+					this.hide();
+				else
+					this.show();
+			}, 1000);
 	},
 	clear(id) {
 		if (id) {
@@ -425,8 +433,12 @@ TREM.MapArea = {
 			delete this.cache;
 			this.cache = new Map();
 		}
-		if (!this.cache.size)
+		if (!this.cache.size) {
+			if (this.blinkTimer)
+				clearTimeout(this.blinkTimer);
+			delete this.blinkTimer;
 			this.hide();
+		}
 	},
 	show() {
 		Maps.main.setLayoutProperty("Layer_area", "visibility", "visible");
@@ -1181,8 +1193,8 @@ async function init() {
 		}
 	}, 500);
 	global.gc();
-	const userJSON = require(path.resolve(__dirname, "../js/1667617730118.json"));
-	TREM.Intensity.handle(userJSON);
+	// const userJSON = require(path.resolve(__dirname, "../js/1667617730118.json"));
+	// TREM.Intensity.handle(userJSON);
 	// const userJSON1 = require(path.resolve(__dirname, "../js/1667356513251.json"));
 	// TREM.MapIntensity.palert(userJSON1.Data);
 	// const userJSON2 = require(path.resolve(__dirname, "../js/1667356513251.json"));
@@ -1373,9 +1385,10 @@ function handler(response) {
 			document.getElementById("rt-station-local-pga").innerText = amount;
 		}
 
-		if (Intensity != "NA" && NA999 != "Y" && ((Intensity > 0 && amount < 999) || Alert)) {
+		if (Intensity != "NA" && NA999 != "Y" && (Intensity > 0 || Alert) && amount < 999) {
 			pga[station[keys[index]].PGA] ??= {};
-			pga[station[keys[index]].PGA].intensity = Intensity;
+			if ((pga[station[keys[index]].PGA].intensity ?? 0) < Intensity)
+				pga[station[keys[index]].PGA].intensity = Intensity;
 
 			if (Alert && Json.Alert) {
 				if (setting["audio.realtime"])
@@ -1431,10 +1444,6 @@ function handler(response) {
 	}
 
 	if (Object.keys(pga).length) {
-		// 閃爍
-		if (RMT == 0) TREM.MapArea.hide();
-		else TREM.MapArea.show();
-
 		PGAmark = true;
 
 		for (let index = 0, pgaKeys = Object.keys(pga); index < pgaKeys.length; index++) {
@@ -1469,8 +1478,6 @@ function handler(response) {
 			}
 			// #endregion
 		}
-		RMT++;
-		if (RMT > 1) RMT = 0;
 	} else {
 		if (PGAmark) {
 			PGAmark = false;
