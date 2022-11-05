@@ -1145,7 +1145,7 @@ function handler(response) {
 			document.getElementById("rt-station-local-pga").innerText = "--";
 		}
 
-		if (Intensity != "NA" && ((Intensity > 0 && amount < 999) || Alert)) {
+		if (Intensity != "NA" && (Intensity > 0 || Alert) && amount < 999) {
 			pga[station[keys[index]].PGA] ??= {};
 			pga[station[keys[index]].PGA].intensity = Intensity;
 
