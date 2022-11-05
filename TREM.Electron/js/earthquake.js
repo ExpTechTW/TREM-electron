@@ -594,14 +594,12 @@ async function init() {
 				})
 				.on("click", (ev) => {
 					if (ev.originalEvent.target.tagName == "CANVAS")
-						Maps.main.flyTo({
-							center   : [121.596, 23.612],
-							zoom     : 6.8,
-							bearing  : 0,
+						Maps.main.fitBounds([118.25, 21.77, 122.18, 25.47], {
+							padding  : { right: Maps.report.getCanvas().width / 8 },
 							speed    : 2,
 							curve    : 1,
 							easing   : (e) => Math.sin(e * Math.PI / 2),
-							duration : 500,
+							duration : 1000,
 						});
 				})
 				.on("zoom", () => {
@@ -649,9 +647,6 @@ async function init() {
 					doubleClickZoom    : false,
 					keyboard           : false,
 				})
-				.fitBounds([119.8, 21.82, 122.18, 25.42], {
-					padding: { left: document.getElementById("map-report").offsetWidth / 2 },
-				})
 				.on("click", () => TREM.Report._focusMap());
 
 		if (!Maps.intensity) {
@@ -682,6 +677,23 @@ async function init() {
 			Maps.intensity._zoomAnimated = setting["map.animation"];
 		}
 
+		document.getElementById("view").addEventListener("transitionend", (ev) => {
+			if (e.propertyName == "margin-top") {
+				console.log(ev);
+				Maps.main
+					.resize()
+					.fitBounds([118.25, 21.77, 122.18, 25.47], {
+						padding  : { right: Maps.report.getCanvas().width / 8 },
+						speed    : 2,
+						curve    : 1,
+						easing   : (e) => Math.sin(e * Math.PI / 2),
+						duration : 1000,
+					});
+
+				Maps.report.resize();
+				TREM.Report._focusMap();
+			}
+		});
 		progressbar.value = (1 / progressStep) * 2;
 	})();
 
