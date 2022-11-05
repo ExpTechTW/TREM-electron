@@ -71,6 +71,7 @@ TREM.Intensity = {
 			Maps.intensity.setLayoutProperty("Layer_intensity", "visibility", "none");
 			delete this.intensities;
 			this.intensities = new Map();
+			this.alertTime = 0;
 			this.isTriggered = false;
 			if (this.timer) {
 				clearTimeout(this.timer);

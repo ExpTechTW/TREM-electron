@@ -264,8 +264,8 @@ TREM.MapIntensity = {
 		if (this.intensities.size) {
 			Maps.main.removeFeatureState({ source: "Source_tw_town" });
 			Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
-			delete this.intensities;
 			this.intensities = new Map();
+			this.alertTime = 0;
 			this.isTriggered = false;
 			if (this.timer) {
 				clearTimeout(this.timer);
@@ -899,13 +899,13 @@ async function init() {
 					],
 					"fill-outline-color": [
 						"case",
-						[">", ["coalesce", ["feature-state", "intensity"], 0], 0],
+						[">", ["coalesce", ["feature-state", "intensity"], 0], 0 ],
 						TREM.Colors.onSurfaceVariant,
 						"transparent",
 					],
 					"fill-opacity": [
 						"case",
-						[">", ["coalesce", ["feature-state", "intensity"], 0], 0],
+						[">", ["coalesce", ["feature-state", "intensity"], 0], 0 ],
 						1,
 						0,
 					],
@@ -1111,13 +1111,13 @@ async function init() {
 					],
 					"fill-outline-color": [
 						"case",
-						[">", ["coalesce", ["feature-state", "intensity"], 0], 0],
+						[">", ["coalesce", ["feature-state", "intensity"], 0], 0 ],
 						TREM.Colors.onSurfaceVariant,
 						"transparent",
 					],
 					"fill-opacity": [
 						"case",
-						[">", ["coalesce", ["feature-state", "intensity"], 0], 0],
+						[">", ["coalesce", ["feature-state", "intensity"], 0], 0 ],
 						1,
 						0,
 					],
@@ -2209,7 +2209,7 @@ const updateMapColors = async (event, value) => {
 					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
 	Maps.main.setPaintProperty("Layer_intensity", "fill-outline-color", [
 		"case",
-		[">", ["feature-state", "intensity"], 0 ],
+		[">", ["coalesce", ["feature-state", "intensity"], 0], 0 ],
 		TREM.Colors.onSurfaceVariant,
 		"transparent",
 	]);
