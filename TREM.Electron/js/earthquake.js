@@ -682,7 +682,7 @@ async function init() {
 		const resizeHandler = (ev) => {
 			if (ev && ev.propertyName != "margin-top") return;
 			Maps.main.resize().fitBounds([118.25, 21.77, 122.18, 25.47], {
-				padding  : { right: Maps.report.getCanvas().width / 8 },
+				padding  : { right: Maps.report.getCanvas().width / 6 },
 				speed    : 2,
 				curve    : 1,
 				easing   : (e) => Math.sin(e * Math.PI / 2),
@@ -1879,6 +1879,12 @@ const updateMapColors = async (event, value) => {
 					Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
 				else if (layer.type == "line" && key == "tw_county_line")
 					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
+	Maps.main.setPaintProperty("Layer_intensity", "fill-outline-color", [
+		"case",
+		[">", ["feature-state", "intensity"], 0 ],
+		TREM.Colors.onSurfaceVariant,
+		"transparent",
+	]);
 };
 
 ipcRenderer.on("config:theme", updateMapColors);
@@ -1900,7 +1906,7 @@ ipcRenderer.on("config:color", (event, key, value) => {
 		else
 			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).removeClass("darkText");
 	}
-	if (Maps.main)
+	if (Maps.main) {
 		Maps.main.setPaintProperty("Layer_intensity", "fill-color", [
 			"match",
 			["feature-state", "intensity"],
@@ -1933,6 +1939,39 @@ ipcRenderer.on("config:color", (event, key, value) => {
 				: "#757575",
 			"transparent",
 		]);
+		Maps.main.setPaintProperty("Layer_area", "fill-color", [
+			"match",
+			["feature-state", "intensity"],
+			9,
+			setting["theme.customColor"] ? setting["theme.int.9"]
+				: "#862DB3",
+			8,
+			setting["theme.customColor"] ? setting["theme.int.8"]
+				: "#DB1F1F",
+			7,
+			setting["theme.customColor"] ? setting["theme.int.7"]
+				: "#F55647",
+			6,
+			setting["theme.customColor"] ? setting["theme.int.6"]
+				: "#DB641F",
+			5,
+			setting["theme.customColor"] ? setting["theme.int.5"]
+				: "#E68439",
+			4,
+			setting["theme.customColor"] ? setting["theme.int.4"]
+				: "#E8D630",
+			3,
+			setting["theme.customColor"] ? setting["theme.int.3"]
+				: "#7BA822",
+			2,
+			setting["theme.customColor"] ? setting["theme.int.2"]
+				: "#2774C2",
+			1,
+			setting["theme.customColor"] ? setting["theme.int.1"]
+				: "#757575",
+			"transparent",
+		]);
+	}
 });
 ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
@@ -1992,6 +2031,7 @@ function FCMdata(data) {
 			TREM.MapIntensity.clear();
 
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
+		console.debug(json);
 
 		if (setting["report.show"]) win.showInactive();
 		if (setting["report.cover"]) win.moveTop();
