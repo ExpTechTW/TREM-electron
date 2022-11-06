@@ -41,6 +41,7 @@ bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
 const PostAddressIP = "https://exptech.com.tw/post";
+const getAddressIP = "https://exptech.com.tw/api/v1/trem/RTS?time=";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -1245,7 +1246,39 @@ function PGAMain() {
 				} else {
 					TimerDesynced = true;
 					handler(Response);
+					PGAMain1();
 				}
+			});
+		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
+	}, 500);
+}
+
+function PGAMain1() {
+	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer1" });
+	if (PGAMainClock) clearInterval(PGAMainClock);
+	PGAMainClock = setInterval(() => {
+		setTimeout(() => {
+			const CancelToken = axios.CancelToken;
+			let cancel;
+			setTimeout(() => {
+				cancel();
+			}, 2500);
+			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
+			axios({
+				method      : "get",
+				url         : getAddressIP + ReplayTime + "&key=" + setting["api.key"] ?? "",
+				cancelToken : new CancelToken((c) => {
+					cancel = c;
+				}),
+			}).then((response) => {
+				Ping = Date.now();
+				TimerDesynced = false;
+				Response = response.data;
+				handler(Response);
+			}).catch((err) => {
+				TimerDesynced = true;
+				handler(Response);
+				PGAMain();
 			});
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
