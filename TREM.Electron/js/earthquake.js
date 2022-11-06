@@ -68,13 +68,11 @@ const Station = {};
 const PGA = {};
 const pga = {};
 let Cancel = false;
-let RMT = 1;
 let PGALimit = 0;
 let PGAtag = -1;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 let Info = { Notify: [], Warn: [], Focus: [] };
 const Focus = [23.608428, 121.699168, 7.75];
-let PGAmark = false;
 let INFO = [];
 let TINFO = 0;
 let ticker = null;
@@ -107,14 +105,13 @@ let TSUNAMI = {};
 let Ping = 0;
 let EEWAlert = false;
 let PGACancel = false;
-let IntensityListTime = 0;
-let WarnAudio = 0;
-let MaxPGA = 0;
 let Unlock = false;
 TREM.set_report_overview = 0;
 let rtstation1 = "";
 let MaxIntensity1 = 0;
 let testEEWerror = false;
+let PGAMainerror = 0;
+let PGAMainerrortime = NOW.getTime();
 TREM.win = BrowserWindow.fromId(process.env.window * 1);
 // #endregion
 
@@ -433,7 +430,7 @@ TREM.MapArea = {
 					this.hide();
 				else
 					this.show();
-			}, 1000);
+			}, 500);
 	},
 	clear(id) {
 		if (id) {
@@ -560,15 +557,16 @@ async function init() {
 				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
 				// const external = formatMemoryUsage(memoryData.external);
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
+				const PGAerr = (PGAMainerror / (PGAMainerrortime / 1000)).toString().slice(0, 5);
 				const warn = (Warn) ? "⚠️" : "";
 				const error = (testEEWerror) ? "❌" : "";
 				const unlock = (Unlock) ? "⚡" : "";
 				$("#log").text(`${CPUData} | ${rss}`);
 				$("#log1").text(`${CPUData} | ${rss}`);
-				$("#log2").text(`${CPUData} | ${rss}`);
-				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
-				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
-				$("#app-version2").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
+				$("#log2").text(`${CPUData} | ${rss}}`);
+				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState} err:${PGAerr}`);
+				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState} err:${PGAerr}`);
+				$("#app-version2").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState} err:${PGAerr}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -1246,6 +1244,8 @@ function PGAMain() {
 				} else {
 					TimerDesynced = true;
 					handler(Response);
+					PGAMainerrortime = NOW.getTime() - PGAMainerrortime;
+					PGAMainerror += 1;
 					PGAMain1();
 				}
 			});
@@ -1278,6 +1278,8 @@ function PGAMain1() {
 			}).catch((err) => {
 				TimerDesynced = true;
 				handler(Response);
+				PGAMainerrortime = NOW.getTime() - PGAMainerrortime;
+				PGAMainerror += 1;
 				PGAMain();
 			});
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
@@ -1317,6 +1319,7 @@ function handler(response) {
 		const amount = Number(stationData.PGA);
 		const amountI = Number(stationData.I);
 		if (station[keys[index]] == undefined) continue;
+		// stationData.alert = true;
 		const Alert = (!Unlock) ? amountI >= 2 : stationData.alert;
 		if (amount > MaxPGA) MaxPGA = amount;
 		const intensity =
@@ -1509,8 +1512,7 @@ function handler(response) {
 	}
 
 	if (Object.keys(pga).length) {
-		PGAmark = true;
-
+		let x_s = 0, y_s = 0, x_m = 0, y_m = 0;
 		for (let index = 0, pgaKeys = Object.keys(pga); index < pgaKeys.length; index++) {
 			const Intensity = pga[pgaKeys[index]]?.intensity;
 			if (Intensity == undefined) continue;
@@ -1520,7 +1522,6 @@ function handler(response) {
 				delete pgaKeys[index];
 				index--;
 			} else if (!pga[pgaKeys[index]].passed) {
-				// #region 判斷震度框4角是否全部位於S波範圍內 如為 true 則不顯示
 				let passed = false;
 				if (Object.keys(EEW).length)
 					for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
@@ -1534,59 +1535,63 @@ function handler(response) {
 							break;
 						}
 					}
-
 				if (passed) {
 					pga[pgaKeys[index]].passed = true;
 					TREM.MapArea.clear(pgaKeys[index]);
-				} else
+				} else {
 					TREM.MapArea.setArea(pgaKeys[index], Intensity);
+					const cache = Maps.main.getSource("Source_area")._data.features[pgaKeys[index] - 1].geometry.coordinates[0];
+					const x = cache[0][0], y = cache[2][1];
+					if (x_s == 0) x_s = x;
+					else if (x < x_s) x_s = x;
+					if (y_s == 0) y_s = y;
+					else if (y < y_s) y_s = y;
+					if (y_m == 0) y_m = y;
+					else if (y > y_m) y_m = y;
+					if (x_m == 0) x_m = x;
+					else if (x > x_m) x_m = x;
+				}
 			}
-			// #endregion
 		}
-	} else {
-		if (PGAmark) {
-			PGAmark = false;
-			RMTlimit = [];
-			PGACancel = false;
-		}
-		if (TREM.MapArea.isVisible) {
-			TREM.MapArea.hide();
-			RMT = 0;
-		}
+		console.log([x_s, y_m, x_m, y_s]);
+		Maps.main.fitBounds([x_s, y_m, x_m, y_s], { padding: { top: 100, bottom: 100, right: 100, left: 100 } });
+	} else
+	if (TREM.MapArea.isVisible)
+		TREM.MapArea.hide();
+	if (!Object.keys(pga).length) {
 		PGAtag = -1;
 		PGALimit = 0;
+		PGACancel = false;
 	}
-
-	// 來自伺服器給的震度列表
 	All = Json.I ?? [];
-	for (let index = 0; index < All.length; index++)
-		All[index].loc = station[All[index].uuid].Loc;
-	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
-		if (setting["audio.realtime"])
-			if (All[0].intensity >= 5 && PGAtag < 5)
-				TREM.Audios.int2.play();
-			else if (All[0].intensity >= 2 && PGAtag < 2)
-				TREM.Audios.int1.play();
-			else if (PGAtag == -1)
-				TREM.Audios.int0.play();
-		setTimeout(() => {
-			ipcRenderer.send("screenshotEEW", {
-				Function : "station",
-				ID       : 1,
-				Version  : 1,
-				Time     : NOW.getTime(),
-				Shot     : 1,
-			});
-		}, 2250);
-		changeView("main", "#mainView_btn");
-		if (Unlock) {
+	if (All.length) {
+		for (let index = 0; index < All.length; index++)
+			All[index].loc = station[All[index].uuid].Loc;
+		if (All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
+			if (setting["audio.realtime"])
+				if (All[0].intensity >= 5 && PGAtag < 5)
+					TREM.Audios.int2.play();
+				else if (All[0].intensity >= 2 && PGAtag < 2)
+					TREM.Audios.int1.play();
+				else if (PGAtag == -1)
+					TREM.Audios.int0.play();
+			setTimeout(() => {
+				ipcRenderer.send("screenshotEEW", {
+					Function : "station",
+					ID       : 1,
+					Version  : 1,
+					Time     : NOW.getTime(),
+					Shot     : 1,
+				});
+			}, 2250);
+			changeView("main", "#mainView_btn");
 			if (setting["Real-time.show"]) win.showInactive();
 			if (setting["Real-time.cover"]) win.moveTop();
 			if (!win.isFocused()) win.flashFrame(true);
+			PGAtag = All[0].intensity;
 		}
-		PGAtag = All[0].intensity;
 	}
-	let list = [];
+	const list = [];
 	let count = 0;
 	if (All.length <= 8)
 		for (let Index = 0; Index < All.length; Index++, count++) {
@@ -1621,16 +1626,6 @@ function handler(response) {
 			list.push(container);
 		}
 	}
-	if (Json.Alert) IntensityListTime = Date.now();
-	if (Date.now() - IntensityListTime > 180000)
-		list = [];
-	else
-	if (Object.keys(EEW).length == 0)
-		if (Date.now() - WarnAudio > 1500 && audioList.length == 0) {
-			WarnAudio = Date.now();
-			audioPlay("../audio/Warn.wav");
-		}
-
 	// document.getElementById("rt-maxintensity").className = MaxPGA < 999 ? IntensityToClassString(MaxIntensity1) : "na";
 	document.getElementById("rt-list").replaceChildren(...list);
 }
