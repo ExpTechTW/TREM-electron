@@ -1260,7 +1260,7 @@ body:not(.darkmode) #here-marker {
 	font-size: 12px;
 	font-weight: 300;
 	text-rendering: optimizeLegibility;
-	color: rgb(var(--md-sys-color-on-surface-variant));
+	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 }
 
 .rt-station-detail-container {
