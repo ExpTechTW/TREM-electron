@@ -1286,7 +1286,7 @@ body:not(.darkmode) #here-marker {
 	font-size: 16px;
 	font-weight: 500;
 	text-rendering: optimizeLegibility;
-	color: rgb(var(--md-sys-color-on-surface-variant));
+	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 	position: relative;
 	/* height: 32px;
 	width: 32px;
