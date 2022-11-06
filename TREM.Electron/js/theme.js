@@ -13,10 +13,21 @@ const setThemeColor = (color, dark) => {
 
 		// Apply the theme to the body by updating custom properties for material tokens
 		// document.body.style = "";
-		if (typeof color == "boolean")
+		if (typeof color == "boolean") {
 			m.applyTheme(theme, { target: document.body, dark: color });
-		else
+			if (color) {
+				if (!document.body.classList.contains("darkmode"))
+					document.body.classList.add("darkmode");
+			} else if (document.body.classList.contains("darkmode"))
+				document.body.classList.remove("darkmode");
+		} else {
 			m.applyTheme(theme, { target: document.body, dark: dark ?? is_dark });
+			if (dark ?? is_dark) {
+				if (!document.body.classList.contains("darkmode"))
+					document.body.classList.add("darkmode");
+			} else if (document.body.classList.contains("darkmode"))
+				document.body.classList.remove("darkmode");
+		}
 	});
 };
 

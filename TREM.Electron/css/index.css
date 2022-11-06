@@ -182,6 +182,13 @@ kbd {
 	opacity: 1;
 }
 
+#here-marker {
+	transition: filter .1s ease-in-out;
+}
+body:not(.darkmode) #here-marker {
+	filter: invert(1)
+}
+
 .p-wave.hide, .s-wave.hide, .epicenterIcon.hide, .tsunami.hide {
 	visibility: hidden;
 }
@@ -269,7 +276,7 @@ kbd {
     height: 98%;
     width: 340px;
     white-space: nowrap;
-    transition: height 0.4s ease-in-out;
+    transition: height .4s ease-in-out;
 }
 
 #rolllist * {
@@ -283,8 +290,8 @@ kbd {
 	margin: 8px 0;
 	opacity: 0.5;
 	color: white;
-	transition: background-color 0.1s ease-in-out,
-				opacity 0.1s ease-in-out;
+	transition: background-color .1s ease-in-out,
+				opacity .1s ease-in-out;
 	cursor: pointer;
 }
 
