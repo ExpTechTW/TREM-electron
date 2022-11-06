@@ -1230,6 +1230,7 @@ kbd {
 	user-select: none;
 	/* pointer-events: none; */
 	background: linear-gradient(0deg, rgba(var(--md-sys-color-primary), .14) 0%, rgba(var(--md-sys-color-primary), .14) 100%), rgb(var(--md-sys-color-background));
+	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 	color: rgb(var(--md-sys-color-on-surface));
 	font-size: 14px;
 	font-weight: 300;
