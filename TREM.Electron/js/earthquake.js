@@ -123,12 +123,14 @@ class WaveCircle {
 	 * @param {maplibregl.Map} map
 	 * @param {maplibregl.LngLatLike} lnglat
 	 * @param {number} radius
+	 * @param {boolean} alert
 	 * @param {maplibregl.LayerSpecification} layerOptions
 	 */
-	constructor(id, map, lnglat, radius, layerOptions) {
+	constructor(id, map, lnglat, radius, alert, layerOptions) {
 		this.map = map;
 		this.lnglat = lnglat;
 		this.radius = radius;
+		this.alert = alert;
 		/**
 		 * @type {maplibregl.GeoJSONSource}
 		 */
@@ -164,6 +166,14 @@ class WaveCircle {
 		if (this.radius == radius) return;
 		this.radius = radius;
 		this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
+	}
+
+	setAlert(state) {
+		if (this.alert == state) return;
+		this.alert = state;
+		this.source();
+		this.layer.setPaintProperty("fill-color", this.alert ? "#FF0000" : "#FFA500");
+		this.layerBorder.setPaintProperty("line-color", this.alert ? "#FF0000" : "#FFA500");
 	}
 
 	setStyle(id, value) {
@@ -1303,13 +1313,13 @@ function handler(response) {
 								"pga1";
 
 		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
-		const station_tooltip = `<div class="marker-popup rt-station-popup"><div class="rt-station-id">${keys[index]}</div><div class="rt-station-name">${station[keys[index]].Loc}</div><div class="rt-station-pga">${amount}</div><div>${IntensityI(intensity)}</div></div>`;
+		const station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-id">${keys[index]}</span><span class="rt-station-name">${station[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
 
 		const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
 		if (!Station[keys[index]]) {
 			Station[keys[index]] = new maplibregl.Marker(
 				{
-					element: $(`<div class="map-intensity-icon rt-icon ${levelClass}"></div>`)[0],
+					element: $(`<div class="map-intensity-icon rt-icon ${levelClass}" style="z-index: ${50 + (amount < 999 ? amount : 0) * 10};"></div>`)[0],
 				})
 				.setLngLat([station[keys[index]].Long, station[keys[index]].Lat])
 				.setPopup(station_tooltip_popup.setHTML(station_tooltip))
@@ -1348,6 +1358,8 @@ function handler(response) {
 
 		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
 			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
+
+		Station[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
 
 		const Level = IntensityI(intensity);
 		const now = new Date(stationData.T * 1000);
@@ -1615,7 +1627,7 @@ async function setUserLocationMarker(town) {
 
 	if (!marker)
 		marker = new maplibregl.Marker({
-			element: $("<img src=\"../image/here.png\" height=\"20\" width=\"20\"></img>")[0],
+			element: $("<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>")[0],
 		})
 			.setLngLat([UserLocationLon, UserLocationLat])
 			.addTo(Maps.main);
@@ -1965,8 +1977,6 @@ function addReport(report, prepend = false) {
 				}
 				roll.prepend(Div);
 			}
-			TREM.Report.setView("eq-report-overview", report);
-			changeView("report", "#reportView_btn");
 			TREM.ReportTag1 = NOW.getTime();
 			// ReportTag = NOW.getTime();
 			console.log("ReportTag1: ", TREM.ReportTag1);
@@ -2369,15 +2379,18 @@ function FCMdata(data) {
 		if (setting["report.cover"]) win.moveTop();
 
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
+
+		const report = json.raw;
+		const location = report.location.match(/(?<=位於).+(?=\))/);
+
 		if (!win.isFocused())
 			new Notification("地震報告",
 				{
-					body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
+					body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
 					icon   : "../TREM.ico",
 					silent : win.isFocused(),
 				});
 
-		const report = json.raw;
 		addReport(report, true);
 		TREM.Report.cache.set(report.identifier, report);
 
@@ -2919,6 +2932,7 @@ function main(data) {
 						Maps.main,
 						[+data.EastLongitude, +data.NorthLatitude],
 						kmP,
+						data.Alert,
 						{
 							type  : "line",
 							paint : {
@@ -2958,19 +2972,18 @@ function main(data) {
 					Maps.main,
 					[+data.EastLongitude, +data.NorthLatitude],
 					kmS,
+					data.Alert,
 					{
 						type  : "fill",
 						paint : {
-							"fill-opacity"       : 0.15,
-							"fill-outline-color" : data.Alert ? "#FF0000" : "#FFA500",
-							"fill-color"         : data.Alert ? "#FF0000" : "#FFA500",
+							"fill-opacity" : 0.15,
+							"fill-color"   : data.Alert ? "#FF0000" : "#FFA500",
 						},
 					});
 			else {
 				EarthquakeList[data.ID].CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
 				EarthquakeList[data.ID].CircleS.setRadius(kmS);
-				EarthquakeList[data.ID].CircleS.setStyle("fill-outline-color", data.Alert ? "#FF0000" : "#FFA500");
-				EarthquakeList[data.ID].CircleS.setStyle("fill-color", data.Alert ? "#FF0000" : "#FFA500");
+				EarthquakeList[data.ID].CircleS.setAlert(data.Alert);
 			}
 
 			if (!EarthquakeList[data.ID].CircleSTW)
@@ -3016,7 +3029,6 @@ function main(data) {
 			Maps.main.addLayer(DepthM);
 			DepthM.setZIndexOffset(6000);
 		}
-
 
 		// #region Epicenter Cross Icon
 

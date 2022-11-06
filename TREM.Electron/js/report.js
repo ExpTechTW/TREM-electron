@@ -175,7 +175,7 @@ TREM.Report = {
 			localStorage.TestID = report.ID;
 			ipcRenderer.send("testEEW");
 		} else {
-			replay = new Date(report.originTime).getTime() - 25000;
+			replay = new Date(`${report.originTime} GMT+08:00`).getTime() - 15000;
 			replayT = NOW.getTime();
 		}
 	},
@@ -401,7 +401,7 @@ TREM.Report = {
 			for (const eqStation of data.eqStation)
 				this._markers.push(
 					new maplibregl.Marker({
-						element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + IntensityToClassString(eqStation.stationIntensity)};"></div>`)[0],
+						element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
 					}).setLngLat([eqStation.stationLon, eqStation.stationLat]).addTo(Maps.report),
 				);
 

@@ -13,24 +13,24 @@
 @import url("./texts/alert-box-texts.css");
 @import url("./texts/rt-station-texts.css");
 
-html:lang(en), html:lang(en) .leaflet-tooltip {
+html:lang(en), html:lang(en) .marker-popup {
     font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", sans-serif;
 }
 
-html:lang(ja), html:lang(ja) .leaflet-tooltip {
+html:lang(ja), html:lang(ja) .marker-popup {
     font-family: "Google Sans", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", sans-serif;
 }
 
-html:lang(kr), html:lang(kr) .leaflet-tooltip {
+html:lang(kr), html:lang(kr) .marker-popup {
     font-family: "Google Sans", "Noto Sans KR", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", sans-serif;
 }
 
-html:lang(ru), html:lang(ru) .leaflet-tooltip,
-html:lang(zh-TW), html:lang(zh-TW) .leaflet-tooltip {
+html:lang(ru), html:lang(ru) .marker-popup,
+html:lang(zh-TW), html:lang(zh-TW) .marker-popup {
     font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", sans-serif;
 }
 
-html:lang(zh-CN), html:lang(zh-CN) .leaflet-tooltip {
+html:lang(zh-CN), html:lang(zh-CN) .marker-popup {
     font-family: "Google Sans", "Noto Sans SC", "Noto Sans TC", "Noto Sans JP", sans-serif;
 }
 
@@ -186,6 +186,13 @@ kbd {
 	opacity: 1;
 }
 
+#here-marker {
+	transition: filter .1s ease-in-out;
+}
+body:not(.darkmode) #here-marker {
+	filter: invert(1)
+}
+
 .p-wave.hide, .s-wave.hide, .epicenterIcon.hide, .tsunami.hide {
 	visibility: hidden;
 }
@@ -271,14 +278,17 @@ kbd {
 }
 
 #app-version {
+	font-size: 14px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 }
 
 #app-version1 {
+	font-size: 14px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 }
 
 #app-version2 {
+	font-size: 14px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 }
 
@@ -292,7 +302,7 @@ kbd {
     height: 98%;
     width: 340px;
     white-space: nowrap;
-    transition: height 0.4s ease-in-out;
+    transition: height .4s ease-in-out;
 }
 
 #rolllist * {
@@ -306,8 +316,8 @@ kbd {
 	margin: 8px 0;
 	opacity: 0.5;
 	color: white;
-	transition: background-color 0.1s ease-in-out,
-				opacity 0.1s ease-in-out;
+	transition: background-color .1s ease-in-out,
+				opacity .1s ease-in-out;
 	cursor: pointer;
 }
 
@@ -1253,6 +1263,7 @@ kbd {
 	user-select: none;
 	/* pointer-events: none; */
 	background: linear-gradient(0deg, rgba(var(--md-sys-color-primary), .14) 0%, rgba(var(--md-sys-color-primary), .14) 100%), rgb(var(--md-sys-color-background));
+	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 	color: rgb(var(--md-sys-color-on-surface));
 	font-size: 14px;
 	font-weight: 300;
@@ -1653,28 +1664,36 @@ kbd {
 	right: 6px;
 }
 
-.rt-station-name {
+.rt-station-name, .rt-station-id {
 	font-weight: 500;
+}
+
+.rt-station-time::before, .rt-station-pga::before, .rt-station-int::before {
+	font-weight: 400;
+	padding-right: 4px;
+	color: rgb(var(--md-sys-color-on-surface-variant));
 }
 
 .rt-station-time::before {
 	content: var(--rt-station-time);
-	font-weight: 400;
-	padding-right: 4px;
-	color: rgb(var(--md-sys-color-on-surface-variant));
 }
 
 .rt-station-pga::before {
 	content: "PGA";
-	font-weight: 400;
-	padding-right: 4px;
-	color: rgb(var(--md-sys-color-on-surface-variant));
 }
 
 .rt-station-pga::after {
 	content: "gal";
 	padding-left: 4px;
 	font-weight: 300;
+}
+
+.rt-station-int::before {
+	content: var(--rt-station-intensity);
+}
+
+.mapboxgl-popup, .maplibregl-popup {
+	z-index: 10000;
 }
 
 .mapboxgl-popup-tip, .maplibregl-popup-tip {
@@ -1690,10 +1709,15 @@ kbd {
 
 .marker-popup {
 	background-color: rgb(var(--md-sys-color-surface-variant));
+	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 	border: none;
 	border-radius: 8px;
 	color: rgb(var(--md-sys-color-on-surface-variant));
 	padding: 8px;
+}
+
+.marker-popup .rt-station-id::before, .marker-popup .rt-station-name::before, .marker-popup .rt-station-pga::before, .marker-popup .rt-station-int::before {
+	color: rgb(var(--md-sys-color-on-surface-variant));
 }
 
 .pws-popup {
@@ -1711,31 +1735,6 @@ kbd {
 	color: rgb(var(--md-sys-color-secondary));
 	text-decoration: underline;
 	cursor: pointer;
-}
-
-.rt-station-popup::before {
-	display: none !important;
-}
-
-.rt-station-popup > div:first-child {
-	font-weight: 500;
-}
-
-.rt-station-popup > div:nth-child(3)::before {
-	content: "PGA";
-	font-weight: 400;
-	padding-right: 8px;
-}
-
-.rt-station-popup > div:nth-child(3)::after {
-	content: "gal";
-	padding-left: 4px;
-}
-
-.rt-station-popup > div:last-child::before {
-	content: var(--rt-station-intensity);
-	font-weight: 400;
-	padding-right: 8px;
 }
 
 svg#svg-defs {
@@ -2004,6 +2003,7 @@ button.hide + #report-detail-header-title {
 
 .report-list-item {
 	position: relative;
+	height: 42px;
 	min-width: 480px;
 	overflow: hidden;
 	margin-bottom: 8px;
