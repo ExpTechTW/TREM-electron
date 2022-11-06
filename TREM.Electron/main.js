@@ -45,6 +45,13 @@ if (fs.existsSync(latestLog)) {
 if (!fs.existsSync(path.join(TREM.getPath("userData"), "server.json")))
 	fs.writeFileSync(path.join(TREM.getPath("userData"), "server.json"), JSON.stringify([]));
 
+fs.readFile(path.join(TREM.getPath("userData"), "server.json"), function (err, data) {
+	if (err) throw err;
+	console.log(data.toString());
+	if (data.toString() == "")
+		fs.writeFileSync(path.join(TREM.getPath("userData"), "server.json"), JSON.stringify([]));
+});
+
 if (!TREM.Configuration.data["compatibility.hwaccel"]) {
 	TREM.disableHardwareAcceleration();
 	logger.info("Hardware Acceleration is disabled.");
