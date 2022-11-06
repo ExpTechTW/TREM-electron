@@ -1119,6 +1119,7 @@ function handler(response) {
 		const stationData = Json[keys[index]];
 		const amount = Number(stationData.PGA);
 		if (station[keys[index]] == undefined) continue;
+		// stationData.alert = true;
 		const Alert = (!Unlock) ? stationData.I >= 2 : stationData.alert;
 		const intensity =
 			(Alert && Json.Alert) ? stationData.I :
@@ -1226,7 +1227,8 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	if (Object.keys(pga).length)
+	if (Object.keys(pga).length) {
+		let x_s = 0, y_s = 0, x_m = 0, y_m = 0;
 		for (let index = 0, pgaKeys = Object.keys(pga); index < pgaKeys.length; index++) {
 			const Intensity = pga[pgaKeys[index]]?.intensity;
 			if (Intensity == undefined) continue;
@@ -1252,11 +1254,24 @@ function handler(response) {
 				if (passed) {
 					pga[pgaKeys[index]].passed = true;
 					TREM.MapArea.clear(pgaKeys[index]);
-				} else
+				} else {
 					TREM.MapArea.setArea(pgaKeys[index], Intensity);
+					const cache = Maps.main.getSource("Source_area")._data.features[pgaKeys[index] - 1].geometry.coordinates[0];
+					const x = cache[0][0], y = cache[2][1];
+					if (x_s == 0) x_s = x;
+					else if (x < x_s) x_s = x;
+					if (y_s == 0) y_s = y;
+					else if (y < y_s) y_s = y;
+					if (y_m == 0) y_m = y;
+					else if (y > y_m) y_m = y;
+					if (x_m == 0) x_m = x;
+					else if (x > x_m) x_m = x;
+				}
 			}
 		}
-	else
+		console.log([x_s, y_m, x_m, y_s]);
+		Maps.main.fitBounds([x_s, y_m, x_m, y_s], { padding: { top: 100, bottom: 100, right: 100, left: 100 } });
+	} else
 	if (TREM.MapArea.isVisible)
 		TREM.MapArea.hide();
 	if (!Object.keys(pga).length) {
