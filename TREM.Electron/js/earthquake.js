@@ -1154,7 +1154,7 @@ function handler(response) {
 		if (!Station[keys[index]]) {
 			Station[keys[index]] = new maplibregl.Marker(
 				{
-					element: $(`<div class="map-intensity-icon rt-icon ${levelClass}" style="z-index: ${1000 + (amount < 999 ? amount : 0) * 10};"></div>`)[0],
+					element: $(`<div class="map-intensity-icon rt-icon ${levelClass}" style="z-index: ${50 + (amount < 999 ? amount : 0) * 10};"></div>`)[0],
 				})
 				.setLngLat([station[keys[index]].Long, station[keys[index]].Lat])
 				.setPopup(new maplibregl.Popup({ closeOnClick: false, closeButton: false }).setHTML(station_tooltip))
@@ -1165,7 +1165,7 @@ function handler(response) {
 		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
 			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
 
-		Station[keys[index]].getElement().style.zIndex = 1000 + (amount < 999 ? amount : 0) * 10;
+		Station[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
 
 		const Level = IntensityI(intensity);
 		const now = new Date(stationData.T * 1000);
@@ -1381,7 +1381,7 @@ async function setUserLocationMarker(town) {
 
 	if (!marker)
 		marker = new maplibregl.Marker({
-			element: $("<img src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>")[0],
+			element: $("<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>")[0],
 		})
 			.setLngLat([UserLocationLon, UserLocationLat])
 			.addTo(Maps.main);
