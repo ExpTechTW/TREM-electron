@@ -13,24 +13,24 @@
 @import url("./texts/alert-box-texts.css");
 @import url("./texts/rt-station-texts.css");
 
-html:lang(en), html:lang(en) .leaflet-tooltip {
+html:lang(en), html:lang(en) .marker-popup {
     font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", sans-serif;
 }
 
-html:lang(ja), html:lang(ja) .leaflet-tooltip {
+html:lang(ja), html:lang(ja) .marker-popup {
     font-family: "Google Sans", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", sans-serif;
 }
 
-html:lang(kr), html:lang(kr) .leaflet-tooltip {
+html:lang(kr), html:lang(kr) .marker-popup {
     font-family: "Google Sans", "Noto Sans KR", "Noto Sans JP", "Noto Sans TC", "Noto Sans SC", sans-serif;
 }
 
-html:lang(ru), html:lang(ru) .leaflet-tooltip,
-html:lang(zh-TW), html:lang(zh-TW) .leaflet-tooltip {
+html:lang(ru), html:lang(ru) .marker-popup,
+html:lang(zh-TW), html:lang(zh-TW) .marker-popup {
     font-family: "Google Sans", "Noto Sans TC", "Noto Sans JP", "Noto Sans SC", sans-serif;
 }
 
-html:lang(zh-CN), html:lang(zh-CN) .leaflet-tooltip {
+html:lang(zh-CN), html:lang(zh-CN) .marker-popup {
     font-family: "Google Sans", "Noto Sans SC", "Noto Sans TC", "Noto Sans JP", sans-serif;
 }
 
@@ -1281,24 +1281,32 @@ kbd {
 	font-weight: 500;
 }
 
-.rt-station-time::before {
-	content: var(--rt-station-time);
+.rt-station-time::before, .rt-station-pga::before, .rt-station-int::before {
 	font-weight: 400;
 	padding-right: 4px;
 	color: rgb(var(--md-sys-color-on-surface-variant));
 }
 
+.rt-station-time::before {
+	content: var(--rt-station-time);
+}
+
 .rt-station-pga::before {
 	content: "PGA";
-	font-weight: 400;
-	padding-right: 4px;
-	color: rgb(var(--md-sys-color-on-surface-variant));
 }
 
 .rt-station-pga::after {
 	content: "gal";
 	padding-left: 4px;
 	font-weight: 300;
+}
+
+.rt-station-int::before {
+	content: var(--rt-station-intensity);
+}
+
+.mapboxgl-popup, .maplibregl-popup {
+	z-index: 10000;
 }
 
 .mapboxgl-popup-tip, .maplibregl-popup-tip {
@@ -1313,11 +1321,16 @@ kbd {
 }
 
 .marker-popup {
-	background-color: rgb(var(--md-sys-color-surface-variant));
+	background-color: rgb(var(--md-sys-color-inverse-surface));
+	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
 	border: none;
 	border-radius: 8px;
-	color: rgb(var(--md-sys-color-on-surface-variant));
+	color: rgb(var(--md-sys-color-inverse-on-surface));
 	padding: 8px;
+}
+
+.marker-popup .rt-station-time::before, .marker-popup .rt-station-pga::before, .marker-popup .rt-station-int::before {
+	color: rgb(var(--md-sys-color-inverse-on-surface));
 }
 
 .pws-popup {
@@ -1335,31 +1348,6 @@ kbd {
 	color: rgb(var(--md-sys-color-secondary));
 	text-decoration: underline;
 	cursor: pointer;
-}
-
-.rt-station-popup::before {
-	display: none !important;
-}
-
-.rt-station-popup > div:first-child {
-	font-weight: 500;
-}
-
-.rt-station-popup > div:nth-child(2)::before {
-	content: "PGA";
-	font-weight: 400;
-	padding-right: 8px;
-}
-
-.rt-station-popup > div:nth-child(2)::after {
-	content: "gal";
-	padding-left: 4px;
-}
-
-.rt-station-popup > div:last-child::before {
-	content: var(--rt-station-intensity);
-	font-weight: 400;
-	padding-right: 8px;
 }
 
 svg#svg-defs {
