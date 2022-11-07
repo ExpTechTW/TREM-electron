@@ -11,7 +11,8 @@ const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
 const workerFarm = require("worker-farm"),
-	workers_rts = workerFarm(require.resolve("../js/core/rts"));
+	workers_rts = workerFarm(require.resolve("../js/core/rts")),
+	workers_rf = workerFarm(require.resolve("../js/core/rf"));
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -91,6 +92,7 @@ let Location;
 let station = {};
 let PGAjson = {};
 let PGAMainClock = null;
+let RFClock = null;
 let investigation = false;
 let ReportTag = 0;
 TREM.ReportTag1 = 0;
@@ -1439,11 +1441,17 @@ async function init() {
 function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 
+	if (RFClock) clearInterval(RFClock);
+	RFClock = setInterval(() => {
+		// eslint-disable-next-line no-empty-function
+		workers_rf([Math.round(NOW.getTime() / 1000)], (err, Res) => {});
+	}, 100);
+
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {
 		setTimeout(() => {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res, url) => {
+			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res) => {
 				if (!err) {
 					Ping = Date.now();
 					TimerDesynced = false;
