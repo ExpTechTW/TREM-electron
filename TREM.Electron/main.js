@@ -25,9 +25,11 @@ let _hide = TREM.Configuration.data["windows.minimize"];
 let _devMode = false;
 
 if (process.argv.includes("--start")) _hide = true;
+
 if (process.argv.includes("--dev")) _devMode = true;
 
 const latestLog = path.join(TREM.getPath("logs"), "latest.log");
+
 if (fs.existsSync(latestLog)) {
 	const filetime = fs.statSync(latestLog).mtime;
 	const filename = (new Date(filetime.getTime() - (filetime.getTimezoneOffset() * 60000))).toISOString().slice(0, -1).replace(/:+|\.+/g, "-");
@@ -46,6 +48,7 @@ if (!TREM.Configuration.data["compatibility.hwaccel"]) {
  * @type {BrowserWindow}
  */
 let MainWindow = TREM.Window.get("main");
+
 /**
  * @type {BrowserWindow}
  */
@@ -93,9 +96,11 @@ function createWindow() {
 	MainWindow.setMenu(null);
 	MainWindow.webContents.on("did-finish-load", () => {
 		MainWindow.webContents.send("setting", TREM.Configuration._data);
+
 		if (!_hide) setTimeout(() => MainWindow.show(), 500);
 	});
 	pushReceiver.setup(MainWindow.webContents);
+
 	if (process.platform === "win32")
 		TREM.setAppUserModelId("TREM | 臺灣即時地震監測");
 	MainWindow.on("resize", () => {
@@ -105,11 +110,13 @@ function createWindow() {
 		if (!TREM.isQuiting) {
 			event.preventDefault();
 			MainWindow.hide();
+
 			if (SettingWindow)
 				SettingWindow.close();
 			event.returnValue = false;
-		} else
+		} else {
 			TREM.quit();
+		}
 	});
 }
 
@@ -143,9 +150,10 @@ function createSettingWindow() {
 }
 
 const shouldQuit = TREM.requestSingleInstanceLock();
-if (!shouldQuit)
+
+if (!shouldQuit) {
 	TREM.quit();
-else {
+} else {
 	TREM.on("second-instance", (event, argv, cwd) => {
 		if (MainWindow != null) MainWindow.show();
 	});
@@ -205,12 +213,14 @@ autoUpdater.on("download-progress", (progressObj) => {
 autoUpdater.on("update-downloaded", (info) => {
 	if (MainWindow)
 		MainWindow.setProgressBar(0);
+
 	if (TREM.Configuration.data["update.mode"] == "install")
 		autoUpdater.quitAndInstall();
 });
 
 TREM.on("before-quit", () => {
 	TREM.isQuiting = true;
+
 	if (tray)
 		tray.destroy();
 });
@@ -223,6 +233,7 @@ ipcMain.on("toggleFullscreen", () => {
 ipcMain.on("openDevtool", () => {
 	if (_devMode) {
 		const currentWindow = BrowserWindow.getFocusedWindow();
+
 		if (currentWindow)
 			currentWindow.webContents.openDevTools({ mode: "detach" });
 	}
@@ -273,7 +284,9 @@ ipcMain.on("config:value", (event, key, value) => {
 
 		case "general.locale": {
 			TREM.Localization.setLocale(value);
+
 			if (MainWindow) MainWindow.setTitle(TREM.Localization.getString("Application_Title"));
+
 			if (SettingWindow) SettingWindow.setTitle(TREM.Localization.getString("Setting_Title"));
 			trayIcon();
 			emitAllWindow("config:locale", value);
@@ -316,6 +329,7 @@ ipcMain.on("config:value", (event, key, value) => {
 		default:
 			break;
 	}
+
 	if (key.startsWith("theme.int"))
 		emitAllWindow("config:color", key, value);
 
@@ -336,19 +350,24 @@ function restart() {
 ipcMain.on("screenshotEEW", async (event, json) => {
 	// return;
 	const folder = path.join(TREM.getPath("userData"), "EEW");
+
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);
 	const list = fs.readdirSync(folder);
+
 	for (let index = 0; index < list.length; index++) {
 		const date = fs.statSync(`${folder}/${list[index]}`);
+
 		if (Date.now() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
 	}
+
 	const filename = `${json.Function}_${json.ID}_${json.Version}_${json.Time}_${json.Shot}.png`;
 	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
 });
 
 ipcMain.on("screenshot", async () => {
 	const folder = path.join(TREM.getPath("userData"), "Screenshots");
+
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);
 	const filename = "screenshot" + Date.now() + ".png";
@@ -367,6 +386,7 @@ function trayIcon() {
 		tray.destroy();
 		tray = null;
 	}
+
 	const iconPath = path.join(__dirname, "TREM.ico");
 	tray = new Tray(nativeImage.createFromPath(iconPath));
 	tray.setIgnoreDoubleClickEvents(true);
@@ -425,47 +445,49 @@ function trayIcon() {
 
 // #region override prototype
 if (!Date.prototype.format)
-	Date.prototype.format =
+	Date.prototype.format
+
 	/**
 	 * Format DateTime into string with provided formatting string.
 	 * @param {string} format The formatting string to use.
 	 * @returns {string} The formatted string.
 	 */
-	function(format) {
-		/**
+	= function(format) {
+
+			/**
 		 * @type {Date}
 		 */
-		const me = this;
-		return format.replace(/a|A|Z|S(SS)?|ss?|mm?|HH?|hh?|D{1,2}|M{1,2}|YY(YY)?|'([^']|'')*'/g, (str) => {
-			let c1 = str.charAt(0);
-			const ret = str.charAt(0) == "'"
-				? (c1 = 0) || str.slice(1, -1).replace(/''/g, "'")
-				: str == "a"
-					? (me.getHours() < 12 ? "am" : "pm")
-					: str == "A"
-						? (me.getHours() < 12 ? "AM" : "PM")
-						: str == "Z"
-							? (("+" + -me.getTimezoneOffset() / 60).replace(/^\D?(\D)/, "$1").replace(/^(.)(.)$/, "$10$2") + "00")
-							: c1 == "S"
-								? me.getMilliseconds()
-								: c1 == "s"
-									? me.getSeconds()
-									: c1 == "H"
-										? me.getHours()
-										: c1 == "h"
-											? (me.getHours() % 12) || 12
-											: c1 == "D"
-												? me.getDate()
-												: c1 == "m"
-													? me.getMinutes()
-													: c1 == "M"
-														? me.getMonth() + 1
-														: ("" + me.getFullYear()).slice(-str.length);
-			return c1 && str.length < 4 && ("" + ret).length < str.length
-				? ("00" + ret).slice(-str.length)
-				: ret;
-		});
-	};
+			const me = this;
+			return format.replace(/a|A|Z|S(SS)?|ss?|mm?|HH?|hh?|D{1,2}|M{1,2}|YY(YY)?|'([^']|'')*'/g, (str) => {
+				let c1 = str.charAt(0);
+				const ret = str.charAt(0) == "'"
+					? (c1 = 0) || str.slice(1, -1).replace(/''/g, "'")
+					: str == "a"
+						? (me.getHours() < 12 ? "am" : "pm")
+						: str == "A"
+							? (me.getHours() < 12 ? "AM" : "PM")
+							: str == "Z"
+								? (("+" + -me.getTimezoneOffset() / 60).replace(/^\D?(\D)/, "$1").replace(/^(.)(.)$/, "$10$2") + "00")
+								: c1 == "S"
+									? me.getMilliseconds()
+									: c1 == "s"
+										? me.getSeconds()
+										: c1 == "H"
+											? me.getHours()
+											: c1 == "h"
+												? (me.getHours() % 12) || 12
+												: c1 == "D"
+													? me.getDate()
+													: c1 == "m"
+														? me.getMinutes()
+														: c1 == "M"
+															? me.getMonth() + 1
+															: ("" + me.getFullYear()).slice(-str.length);
+				return c1 && str.length < 4 && ("" + ret).length < str.length
+					? ("00" + ret).slice(-str.length)
+					: ret;
+			});
+		};
 
 if (!String.prototype.format)
 	String.prototype.format = function() {

@@ -3,6 +3,7 @@ const tinycolor = require("tinycolor2");
 
 const setThemeColor = (color, dark) => {
 	if (typeof color == "string") accent = color;
+
 	if (dark != undefined) is_dark = dark;
 	import("../node_modules/@material/material-color-utilities/dist/index.js").then(m => {
 		// Get the theme from a hex color
@@ -15,18 +16,22 @@ const setThemeColor = (color, dark) => {
 		// document.body.style = "";
 		if (typeof color == "boolean") {
 			m.applyTheme(theme, { target: document.body, dark: color });
+
 			if (color) {
 				if (!document.body.classList.contains("darkmode"))
 					document.body.classList.add("darkmode");
-			} else if (document.body.classList.contains("darkmode"))
+			} else if (document.body.classList.contains("darkmode")) {
 				document.body.classList.remove("darkmode");
+			}
 		} else {
 			m.applyTheme(theme, { target: document.body, dark: dark ?? is_dark });
+
 			if (dark ?? is_dark) {
 				if (!document.body.classList.contains("darkmode"))
 					document.body.classList.add("darkmode");
-			} else if (document.body.classList.contains("darkmode"))
+			} else if (document.body.classList.contains("darkmode")) {
 				document.body.classList.remove("darkmode");
+			}
 		}
 	});
 };
