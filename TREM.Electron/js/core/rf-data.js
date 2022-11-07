@@ -2,7 +2,7 @@
 const axios = require("axios");
 const fetch = require("node-fetch");
 
-module.exports = async function([args], cb) {
+module.exports = async function(cb) {
 	const controller = new AbortController();
 	setTimeout(() => {
 		controller.abort();
