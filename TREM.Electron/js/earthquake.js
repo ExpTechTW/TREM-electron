@@ -13,7 +13,6 @@ const maplibregl = require("maplibre-gl");
 const workerFarm = require("worker-farm"),
 	workers_rts = workerFarm(require.resolve("../js/core/rts")),
 	workers_rf = workerFarm(require.resolve("../js/core/rf"));
-workers_rf_data = workerFarm(require.resolve("../js/core/rf-data"));
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -1812,9 +1811,6 @@ function handler(response) {
 		PGAtag = -1;
 		PGALimit = 0;
 		PGACancel = false;
-	} else {
-		// eslint-disable-next-line no-empty-function
-		workers_rf_data([], (err, Res) => {});
 	}
 
 	All = Json.I ?? [];
