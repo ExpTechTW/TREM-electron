@@ -284,6 +284,35 @@ TREM.MapIntensity = {
 				this.timer = setTimeout(this.clear, 600_000);
 		}
 	},
+	expected(data) {
+		const int = new Map();
+
+		for (const towncode in data)
+			int.set(towncode, data[towncode]);
+
+		if (this.intensities.size)
+			for (const [towncode, intensity] of this.intensities)
+				if (int.get(towncode) != intensity) {
+					this.intensities.delete(towncode);
+					Maps.main.setFeatureState({
+						source : "Source_tw_town",
+						id     : towncode,
+					}, { intensity: 0 });
+				}
+
+		if (int.size) {
+			for (const [towncode, intensity] of int)
+				if (this.intensities.get(towncode) != intensity)
+					Maps.main.setFeatureState({
+						source : "Source_tw_town",
+						id     : towncode,
+					}, { intensity });
+
+			Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
+
+			this.intensities = int;
+		}
+	},
 	clear() {
 		dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
 
@@ -824,7 +853,7 @@ async function init() {
 				122.18,
 				25.47,
 			], {
-				padding  : { right: Maps.report.getCanvas().width / 6 },
+				padding  : { right: Maps.main.getCanvas().width / 6 },
 				speed    : 2,
 				curve    : 1,
 				easing   : (e) => Math.sin(e * Math.PI / 2),
@@ -898,6 +927,29 @@ async function init() {
 					}).addTo(Maps.main),
 				);
 		*/
+
+		TREM.MapBounds = {};
+
+		for (const feature of MapData.tw_town.features) {
+			const bounds = new maplibregl.LngLatBounds();
+
+			for (const coordinate of feature.geometry.coordinates)
+				for (const coords of coordinate)
+					if (!Array.isArray(coords[0])) {
+						if (coords[0] > 118 && coords[1] > 21.5)
+							if (coords[0] < 122.5 && coords[1] < 25.5)
+								bounds.extend(coords);
+					} else {
+						for (const coord of coords)
+							if (Array.isArray(coord))
+								if (coord[0] > 118 && coord[1] > 21.5)
+									if (coord[0] < 122.5 && coord[1] < 26.5)
+										bounds.extend(coord);
+					}
+
+			if (feature.properties.TOWNCODE == "09007010") console.log(feature.properties.COUNTYNAME, feature.properties.TOWNNAME, feature.geometry.coordinates);
+			TREM.MapBounds[feature.properties.TOWNCODE] = bounds;
+		}
 
 		if (!MapBases.main.size) {
 			for (const mapName of [
@@ -1734,10 +1786,17 @@ function handler(response) {
 			x_m,
 			y_s,
 		]);
-		// Maps.main.fitBounds([x_s, y_m, x_m, y_s], { padding: { top: 100, bottom: 100, right: 100, left: 100 } });
-	} else
-	if (TREM.MapArea.isVisible) {
-		TREM.MapArea.hide();
+
+		/*
+		Maps.main.fitBounds([
+			x_s,
+			y_m,
+			x_m,
+			y_s,
+		], { padding: { top: 100, bottom: 100, right: 100, left: 100 } });
+		*/
+	} else if (TREM.MapArea.isVisible) {
+		TREM.MapArea.clear();
 	}
 
 	if (!Object.keys(pga).length) {
@@ -2744,17 +2803,14 @@ function FCMdata(data) {
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
 		if (replay != 0 && !json.Replay) return;
 
-		if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
-
-		if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
-
-		if (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"]) return;
-
-		if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
-
-		if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
-
-		if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
+		if (
+			(json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"])
+			|| (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"])
+			|| (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"])
+			|| (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"])
+			|| (json.Function == "earthquake" && !setting["accept.eew.CWB"])
+			|| (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"])
+		) return;
 
 		if (TREM.Intensity.isTriggered)
 			TREM.Intensity.clear();
@@ -2771,14 +2827,20 @@ TREM.Earthquake.on("eew", (data) => {
 
 	// handler
 	if (EarthquakeList[data.ID] == undefined) EarthquakeList[data.ID] = {};
+	EarthquakeList[data.ID].epicenter = [+data.EastLongitude, +data.NorthLatitude];
 	EarthquakeList[data.ID].Time = data.Time;
 	EarthquakeList[data.ID].ID = data.ID;
+
 	let value = 0;
 	let distance = 0;
 
 	const GC = {};
 	let level;
 	let MaxIntensity = 0;
+	const focusBounds = new maplibregl.LngLatBounds();
+
+	for (const eewid in EarthquakeList)
+		focusBounds.extend(EarthquakeList[eewid].epicenter);
 
 	for (const city in TREM.Resources.region)
 		for (const town in TREM.Resources.region[city]) {
@@ -2799,6 +2861,9 @@ TREM.Earthquake.on("eew", (data) => {
 				),
 			);
 
+			if (int.value >= 2)
+				focusBounds.extend(TREM.MapBounds[loc.code]);
+
 			if (setting["location.city"] == city && setting["location.town"] == town) {
 				if (setting["auto.waveSpeed"] && data.Speed != undefined) {
 					Pspeed = data.Speed.Pv;
@@ -2814,7 +2879,17 @@ TREM.Earthquake.on("eew", (data) => {
 			GC[loc.code] = int.value;
 		}
 
-	if (EarthquakeList[data.ID].geojson != undefined) {
+		TREM.MapIntensity.expected(GC);
+
+		const focusCamera = Maps.main.cameraForBounds(focusBounds);
+
+		Maps.main.easeTo({
+			center  : focusCamera.center,
+			zoom    : focusCamera.zoom > 7.5 ? 7.5 : focusCamera.zoom,
+			padding : { bottom: 100, right: 100 },
+		});
+
+		if (EarthquakeList[data.ID].geojson != undefined) {
 		EarthquakeList[data.ID].geojson.remove();
 		delete EarthquakeList[data.ID].geojson;
 	}
@@ -3562,6 +3637,8 @@ function main(data) {
 
 	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
 		clear(data.ID);
+
+		TREM.MapIntensity.clear();
 
 		// remove epicenter cross icons
 		EarthquakeList[data.ID].epicenterIcon.remove();
