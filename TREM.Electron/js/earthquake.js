@@ -91,7 +91,6 @@ let Location;
 let station = {};
 let PGAjson = {};
 let PGAMainClock = null;
-let RFClock = null;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -1279,12 +1278,6 @@ async function init() {
 function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 
-	if (RFClock) clearInterval(RFClock);
-	RFClock = setInterval(() => {
-		// eslint-disable-next-line no-empty-function
-		workers_rf([Math.round(NOW.getTime() / 1000)], (err, Res) => {});
-	}, 100);
-
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {
 		setTimeout(() => {
@@ -1510,6 +1503,9 @@ function handler(response) {
 		PGAtag = -1;
 		PGALimit = 0;
 		PGACancel = false;
+	} else {
+		// eslint-disable-next-line no-empty-function
+		workers_rf([Math.round(NOW.getTime() / 1000)], (err, Res) => {});
 	}
 
 	All = Json.I ?? [];
