@@ -2165,6 +2165,7 @@ button.hide + #report-detail-header-title {
 }
 
 #intensity-detail-header-title {
+	margin: 8px;
 	font-size: 18px;
 	letter-spacing: 0;
 	font-weight: 400;
@@ -2176,4 +2177,19 @@ button.hide + #report-detail-header-title {
 	position: relative;
 	transition: height .5s cubic-bezier(0.45, -0.05, 0.58, 0.8),
 				width .5s cubic-bezier(0.45, -0.05, 0.58, 0.8);
+}
+
+.intensity-detail-panel {
+	margin: 8px;
+	position: absolute;
+	transform: translate3d(-50%, 0, 0);
+	opacity: 0;
+	transition: transform .25s ease-in-out,
+				opacity .25s ease-in-out;
+}
+
+.intensity-detail-panel.show {
+	position: relative;
+	transform: translateZ(0);
+	opacity: 1;
 }

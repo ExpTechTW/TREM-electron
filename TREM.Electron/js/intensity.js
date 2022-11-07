@@ -1,12 +1,17 @@
-/* global Maps: false, IntensityToClassString: false, Maps.intensity: true, IntensityI: false, changeView: false, replay: true, replayT: true */
+/* global maplibregl:false, Maps: false, IntensityToClassString: false, Maps.report: true, IntensityI: false, changeView: false, replay: true, replayT: true */
 
 TREM.Intensity = {
 	isTriggered : false,
 	alertTime   : 0,
 	intensities : new Map(),
+	/**
+	 * @type {maplibregl.Marker[]}
+	 */
+	_markers    : [],
 	handle(rawIntensityData) {
 		if (rawIntensityData.TimeStamp != this.alertTime) {
-			rawIntensityData = rawIntensityData.raw.intensity;
+			const raw = rawIntensityData.raw;
+			rawIntensityData = raw.intensity;
 			this.alertTime = rawIntensityData.TimeStamp;
 			const int = new Map();
 			for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
@@ -44,6 +49,24 @@ TREM.Intensity = {
 
 				this.intensities = int;
 
+				document.getElementById("intensity-overview").style.visibility = "visible";
+				document.getElementById("intensity-overview").classList.add("show");
+				const time = new Date(`${raw.originTime}`);
+				document.getElementById("intensity-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
+				document.getElementById("intensity-overview-latitude").innerText = raw.epicenter.epicenterLat.$t;
+				document.getElementById("intensity-overview-longitude").innerText = raw.epicenter.epicenterLon.$t;
+				document.getElementById("intensity-overview-magnitude").innerText = raw.magnitude.magnitudeValue;
+				document.getElementById("intensity-overview-depth").innerText = raw.depth.$t;
+
+				this._markers.push(
+					new maplibregl.Marker({
+						element: $(TREM.Resources.icon.cross(
+							{ size: 32, className: "epicenterIcon", zIndexOffset: 5000 },
+						))[0],
+					}).setLngLat([raw.epicenter.epicenterLon.$t, raw.epicenter.epicenterLat.$t]).addTo(Maps.intensity),
+				);
+
+
 				if (!this.isTriggered) {
 					this.isTriggered = true;
 					changeView("intensity", "#mainView_btn");
@@ -69,6 +92,8 @@ TREM.Intensity = {
 		if (this.intensities.size) {
 			Maps.intensity.removeFeatureState({ source: "Source_tw_town" });
 			Maps.intensity.setLayoutProperty("Layer_intensity", "visibility", "none");
+			document.getElementById("intensity-overview").style.visibility = "none";
+			document.getElementById("intensity-overview").classList.remove("show");
 			delete this.intensities;
 			this.intensities = new Map();
 			this.alertTime = 0;

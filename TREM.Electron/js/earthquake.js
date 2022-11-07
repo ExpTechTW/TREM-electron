@@ -110,9 +110,6 @@ TREM.set_report_overview = 0;
 let rtstation1 = "";
 let MaxIntensity1 = 0;
 let testEEWerror = false;
-let PGAMainerror = 0;
-let PGAMainerrortime = NOW.getTime();
-let PGAMainerrorruntime = NOW.getTime();
 TREM.win = BrowserWindow.fromId(process.env.window * 1);
 // #endregion
 
@@ -558,16 +555,15 @@ async function init() {
 				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
 				// const external = formatMemoryUsage(memoryData.external);
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
-				const PGAerr = ((PGAMainerror / (PGAMainerrortime / 1000)) * 100);
 				const warn = (Warn) ? "⚠️" : "";
 				const error = (testEEWerror) ? "❌" : "";
 				const unlock = (Unlock) ? "⚡" : "";
 				$("#log").text(`${CPUData} | ${rss}`);
 				$("#log1").text(`${CPUData} | ${rss}`);
-				$("#log2").text(`${CPUData} | ${rss}}`);
-				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState} err:${PGAerr}`);
-				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState} err:${PGAerr}`);
-				$("#app-version2").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState} err:${PGAerr}`);
+				$("#log2").text(`${CPUData} | ${rss}`);
+				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
+				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
+				$("#app-version2").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -1221,7 +1217,7 @@ async function init() {
 		}
 	}, 500);
 	global.gc();
-	// const userJSON = require(path.resolve(__dirname, "../js/1667617730118.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1667291675675.json"));
 	// TREM.Intensity.handle(userJSON);
 	// const userJSON1 = require(path.resolve(__dirname, "../js/1667356513251.json"));
 	// TREM.MapIntensity.palert(userJSON1.Data);
@@ -1245,8 +1241,6 @@ function PGAMain() {
 				} else {
 					TimerDesynced = true;
 					handler(Response);
-					PGAMainerrortime = NOW.getTime() - PGAMainerrorruntime;
-					PGAMainerror += 1;
 					PGAMain1();
 				}
 			});
@@ -1279,8 +1273,6 @@ function PGAMain1() {
 			}).catch((err) => {
 				TimerDesynced = true;
 				handler(Response);
-				PGAMainerrortime = NOW.getTime() - PGAMainerrorruntime;
-				PGAMainerror += 1;
 				PGAMain();
 			});
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
@@ -1555,7 +1547,7 @@ function handler(response) {
 			}
 		}
 		console.log([x_s, y_m, x_m, y_s]);
-		Maps.main.fitBounds([x_s, y_m, x_m, y_s], { padding: { top: 100, bottom: 100, right: 100, left: 100 } });
+		// Maps.main.fitBounds([x_s, y_m, x_m, y_s], { padding: { top: 100, bottom: 100, right: 100, left: 100 } });
 	} else
 	if (TREM.MapArea.isVisible)
 		TREM.MapArea.hide();
