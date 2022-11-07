@@ -92,7 +92,6 @@ let Location;
 let station = {};
 let PGAjson = {};
 let PGAMainClock = null;
-let RFClock = null;
 let investigation = false;
 let ReportTag = 0;
 TREM.ReportTag1 = 0;
@@ -1441,12 +1440,6 @@ async function init() {
 function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 
-	if (RFClock) clearInterval(RFClock);
-	RFClock = setInterval(() => {
-		// eslint-disable-next-line no-empty-function
-		workers_rf([Math.round(NOW.getTime() / 1000)], (err, Res) => {});
-	}, 100);
-
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {
 		setTimeout(() => {
@@ -1811,6 +1804,9 @@ function handler(response) {
 		PGAtag = -1;
 		PGALimit = 0;
 		PGACancel = false;
+	} else {
+		// eslint-disable-next-line no-empty-function
+		workers_rf([Math.round(NOW.getTime() / 1000)], (err, Res) => {});
 	}
 
 	All = Json.I ?? [];
@@ -2887,17 +2883,17 @@ TREM.Earthquake.on("eew", (data) => {
 			GC[loc.code] = int.value;
 		}
 
-		TREM.MapIntensity.expected(GC);
+	TREM.MapIntensity.expected(GC);
 
-		const focusCamera = Maps.main.cameraForBounds(focusBounds);
+	const focusCamera = Maps.main.cameraForBounds(focusBounds);
 
-		Maps.main.easeTo({
-			center  : focusCamera.center,
-			zoom    : focusCamera.zoom > 7.5 ? 7.5 : focusCamera.zoom,
-			padding : { bottom: 100, right: 100 },
-		});
+	Maps.main.easeTo({
+		center  : focusCamera.center,
+		zoom    : focusCamera.zoom > 7.5 ? 7.5 : focusCamera.zoom,
+		padding : { bottom: 100, right: 100 },
+	});
 
-		if (EarthquakeList[data.ID].geojson != undefined) {
+	if (EarthquakeList[data.ID].geojson != undefined) {
 		EarthquakeList[data.ID].geojson.remove();
 		delete EarthquakeList[data.ID].geojson;
 	}
