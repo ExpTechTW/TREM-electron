@@ -7,9 +7,11 @@ const path = require("node:path");
 class Configuration extends EventEmitter {
 	constructor(app) {
 		super();
+
 		try {
 			this._folder = path.join(app.getPath("userData"));
 			this._path = path.join(app.getPath("userData"), "settings.json");
+
 			if (!fs.existsSync(this._path)) {
 				fs.writeFileSync(this._path, JSON.stringify(Object.keys(Constants.Default_Configurations).reduce((acc, key) => {
 					acc[key] = Constants.Default_Configurations[key].value;
@@ -35,9 +37,12 @@ class Configuration extends EventEmitter {
 				n = dk.length; i < n; i++)
 				if (k.includes(dk[i])) {
 					const ki = k.indexOf(dk[i]);
+
 					if (typeof this._data[k[ki]] != typeof Constants.Default_Configurations[dk[i]].value)
 						this._data[k[ki]] = Constants.Default_Configurations[dk[i]].value;
-				} else this._data[dk[i]] = Constants.Default_Configurations[dk[i]].value;
+				} else {
+					this._data[dk[i]] = Constants.Default_Configurations[dk[i]].value;
+				}
 
 			this.save();
 
@@ -54,6 +59,7 @@ class Configuration extends EventEmitter {
 			this._watcher = chokidar.watch(this._path).on("change", () => {
 				try {
 					const _newData = fs.readFileSync(this._path, { encoding: "utf-8" });
+
 					if (JSON.stringify(this._data, null, 2) == _newData) return;
 					this._data = JSON.parse(_newData);
 					this.emit("update", this._data);
@@ -77,6 +83,7 @@ class Configuration extends EventEmitter {
 
 	backup() {
 		const files = fs.readdirSync(this._folder).filter(filename => filename.startsWith("backup~") && filename.endsWith(".json"));
+
 		if (files.length)
 			for (const file of files)
 				fs.rmSync(path.join(this._folder, file));

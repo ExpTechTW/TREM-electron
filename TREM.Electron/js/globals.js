@@ -46,6 +46,7 @@ const lockScroll = state => {
 
 const closeDialog = event => {
 	const container = document.getElementById("modal-overlay");
+
 	if (!event.target.id.includes("dialog"))
 		if (event.target != container)
 			return;
@@ -53,7 +54,8 @@ const closeDialog = event => {
 	$("#modal-overlay").fadeOut({ duration: 100, complete: () => container.replaceChildren() }).delay(100).show();
 };
 
-const showDialog =
+const showDialog
+
 /**
  * Callback for dialogs
  * @callback dialogCallback
@@ -67,7 +69,7 @@ const showDialog =
  * @param {?string} customIcon The icon of the dialog
  * @param {?dialogCallback} callback The callback function to run when the user omitted the dialog
  */
-(type, title, message, button = 0, customIcon, callback = () => void 0) => {
+= (type, title, message, button = 0, customIcon, callback = () => void 0) => {
 	const container = document.getElementById("modal-overlay");
 	const icon = document.createElement("span");
 	icon.classList.add("material-symbols-rounded");
@@ -92,15 +94,18 @@ const showDialog =
 
 	const buttons = document.createElement("div");
 	buttons.classList.add("dialog-button");
+
 	if (button == 1) {
 		const Accept = document.createElement("button");
 		Accept.classList.add("flat-button");
 		Accept.id = "dialog-Accept";
 		Accept.textContent = TREM.Localization.getString("Dialog_Button_Confirm");
+
 		Accept.onclick = (...args) => {
 			closeDialog(...args);
 			callback();
 		};
+
 		buttons.appendChild(Accept);
 
 		const Cancel = document.createElement("button");
@@ -136,47 +141,49 @@ const showDialog =
 
 // #region override prototype
 if (!Date.prototype.format)
-	Date.prototype.format =
+	Date.prototype.format
+
 	/**
 	 * Format DateTime into string with provided formatting string.
 	 * @param {string} format The formatting string to use.
 	 * @returns {string} The formatted string.
 	 */
-	function(format) {
-		/**
+	= function(format) {
+
+			/**
 		 * @type {Date}
 		 */
-		const me = this;
-		return format.replace(/a|A|Z|S(SS)?|ss?|mm?|HH?|hh?|D{1,2}|M{1,2}|YY(YY)?|'([^']|'')*'/g, (str) => {
-			let c1 = str.charAt(0);
-			const ret = str.charAt(0) == "'"
-				? (c1 = 0) || str.slice(1, -1).replace(/''/g, "'")
-				: str == "a"
-					? (me.getHours() < 12 ? "am" : "pm")
-					: str == "A"
-						? (me.getHours() < 12 ? "AM" : "PM")
-						: str == "Z"
-							? (("+" + -me.getTimezoneOffset() / 60).replace(/^\D?(\D)/, "$1").replace(/^(.)(.)$/, "$10$2") + "00")
-							: c1 == "S"
-								? me.getMilliseconds()
-								: c1 == "s"
-									? me.getSeconds()
-									: c1 == "H"
-										? me.getHours()
-										: c1 == "h"
-											? (me.getHours() % 12) || 12
-											: c1 == "D"
-												? me.getDate()
-												: c1 == "m"
-													? me.getMinutes()
-													: c1 == "M"
-														? me.getMonth() + 1
-														: ("" + me.getFullYear()).slice(-str.length);
-			return c1 && str.length < 4 && ("" + ret).length < str.length
-				? ("00" + ret).slice(-str.length)
-				: ret;
-		});
-	};
+			const me = this;
+			return format.replace(/a|A|Z|S(SS)?|ss?|mm?|HH?|hh?|D{1,2}|M{1,2}|YY(YY)?|'([^']|'')*'/g, (str) => {
+				let c1 = str.charAt(0);
+				const ret = str.charAt(0) == "'"
+					? (c1 = 0) || str.slice(1, -1).replace(/''/g, "'")
+					: str == "a"
+						? (me.getHours() < 12 ? "am" : "pm")
+						: str == "A"
+							? (me.getHours() < 12 ? "AM" : "PM")
+							: str == "Z"
+								? (("+" + -me.getTimezoneOffset() / 60).replace(/^\D?(\D)/, "$1").replace(/^(.)(.)$/, "$10$2") + "00")
+								: c1 == "S"
+									? me.getMilliseconds()
+									: c1 == "s"
+										? me.getSeconds()
+										: c1 == "H"
+											? me.getHours()
+											: c1 == "h"
+												? (me.getHours() % 12) || 12
+												: c1 == "D"
+													? me.getDate()
+													: c1 == "m"
+														? me.getMinutes()
+														: c1 == "M"
+															? me.getMonth() + 1
+															: ("" + me.getFullYear()).slice(-str.length);
+				return c1 && str.length < 4 && ("" + ret).length < str.length
+					? ("00" + ret).slice(-str.length)
+					: ret;
+			});
+		};
 
 if (!String.prototype.format)
 	String.prototype.format = function() {

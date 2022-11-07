@@ -83,6 +83,7 @@ let station;
 // #region 選單
 (() => {
 	const el = document.getElementById("location.city");
+
 	for (const key of Object.keys(TREM.Resources.region)) {
 		const option = document.createElement("option");
 		option.text = key;
@@ -95,19 +96,23 @@ let station;
 	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
 	const el = document.getElementById("Real-time.station");
 	const stations = {};
+
 	for (const key of Object.keys(station)) {
 		if (!stations[station[key].Loc.split(" ")[0]]) stations[station[key].Loc.split(" ")[0]] = {};
 		stations[station[key].Loc.split(" ")[0]][key] = station[key].Loc;
 	}
+
 	for (const city of Object.keys(stations)) {
 		const optgroup = document.createElement("optgroup");
 		optgroup.label = city;
+
 		for (const stationKey of Object.keys(stations[city])) {
 			const option = document.createElement("option");
 			option.text = `${stations[city][stationKey]} ${stationKey}`;
 			option.value = stationKey;
 			optgroup.appendChild(option);
 		}
+
 		el.appendChild(optgroup);
 	}
 })();
@@ -118,6 +123,7 @@ let station;
  */
 function init() {
 	dump({ level: 0, message: "Initializing", origin: "Setting" });
+
 	if (is_setting_disabled) {
 		win.flashFrame(true);
 		document.querySelectorAll(".setting-button").forEach((node) => node.disabled = true);
@@ -131,41 +137,46 @@ function init() {
 	const utc = new Date();
 	const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
 	const now = new Date(NOW.getTime() - 20000);
-	const Now = now.getFullYear() +
-	"-" + (now.getMonth() + 1) +
-	"-" + now.getDate() +
-	" " + now.getHours() +
-	":" + now.getMinutes() +
-	":" + now.getSeconds();
+	const Now = now.getFullYear()
+	+ "-" + (now.getMonth() + 1)
+	+ "-" + now.getDate()
+	+ " " + now.getHours()
+	+ ":" + now.getMinutes()
+	+ ":" + now.getSeconds();
 	document.getElementById("Time").value = Now;
 	const now1 = new Date(NOW.getTime());
-	const Now1 = now1.getFullYear() +
-	"-" + (now1.getMonth() + 1) +
-	"-" + now1.getDate() +
-	" " + now1.getHours() +
-	":" + now1.getMinutes() +
-	":" + now1.getSeconds();
+	const Now1 = now1.getFullYear()
+	+ "-" + (now1.getMonth() + 1)
+	+ "-" + now1.getDate()
+	+ " " + now1.getHours()
+	+ ":" + now1.getMinutes()
+	+ ":" + now1.getSeconds();
 	document.getElementById("TimeStamp").value = Now1;
 
 	Object.keys(setting).forEach(id => {
 		switch (TREM.Constants.Default_Configurations[id].type) {
 			case "toggle": {
 				const element = document.getElementById(id);
+
 				if (element) {
 					element.checked = setting[id];
+
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
+
 					if (id == "theme.customColor")
 						if (setting[id])
 							$("#intensity-palette-container").removeClass("hide");
 						else
 							$("#intensity-palette-container").addClass("hide");
+
 					if (id == "api.key.Hide")
 						if (setting[id])
 							document.getElementById("api.key").type = "password";
 						else
 							document.getElementById("api.key").type = "text";
 				}
+
 				if (id == "dev.mode")
 					if (setting[id])
 						document.getElementById("Test").classList.remove("hide");
@@ -176,26 +187,32 @@ function init() {
 
 			case "string": {
 				const element = document.getElementById(id);
+
 				if (element) {
 					// if (id == "api.key")
 					// 	element.placeholder = "•".repeat(setting[id].length);
 					// else
 					element.value = setting[id];
+
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
+
 				break;
 			}
 
 			case "select": {
+
 				/**
 				 * @type {HTMLSelectElement}
 				 */
 				const element = document.getElementById(id);
+
 				if (element) {
 					if (id == "location.town") {
 						const town = document.getElementById("location.town");
 						town.replaceChildren();
+
 						for (const key of Object.keys(TREM.Resources.region[setting["location.city"]])) {
 							const option = document.createElement("option");
 							option.text = key;
@@ -207,24 +224,31 @@ function init() {
 					for (let i = 0; i < element.options.length; i++)
 						if (element.options[i].value == setting[id])
 							element.options[i].selected = true;
+
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
+
 				break;
 			}
 
 			case "color": {
+
 				/**
 				 * @type {HTMLSelectElement}
 				 */
 				const element = document.getElementById(id);
+
 				if (element) {
 					element.value = setting[id];
+
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
+
 				const wrapper = document.getElementById(id.replace(/\./g, "-"));
 				console.log(wrapper);
+
 				if (wrapper)
 					wrapper.style.backgroundColor = setting[id];
 				break;
@@ -232,22 +256,28 @@ function init() {
 
 			case "range": {
 				const element = document.getElementById(id);
+
 				if (element) {
 					element.value = setting[id];
 					$(element).siblings("span.slider-value").text(() => ~~(setting[id] * 100));
+
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
+
 				break;
 			}
 
 			case "choice": {
 				const element = document.getElementById(id);
+
 				if (element) {
 					$(element).children("label").children(`input[value=${setting[id]}]`)[0].checked = true;
+
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 				}
+
 				break;
 			}
 
@@ -276,14 +306,17 @@ function SelectSave(id) {
 
 		ipcRenderer.send("config:value", "location.town", town.options[town.selectedIndex].value);
 	}
+
 	if (id == "location.city" || id == "location.town") {
 		const city = document.getElementById("location.city");
 		const town = document.getElementById("location.town");
 		const Loc = TREM.Resources.region[city.options[city.selectedIndex].value][town.options[town.selectedIndex].value];
 		let stamp = 0;
 		let loc = "";
+
 		for (let index = 0; index < Object.keys(station).length; index++) {
 			const num = Math.abs(Loc[1] - station[Object.keys(station)[index]].Lat, 2) + Math.pow(Loc[2] - station[Object.keys(station)[index]].Long, 2);
+
 			if (stamp == 0) {
 				stamp = num;
 				loc = Object.keys(station)[index];
@@ -292,6 +325,7 @@ function SelectSave(id) {
 				loc = Object.keys(station)[index];
 			}
 		}
+
 		ipcRenderer.send("config:value", "Real-time.station", loc);
 	}
 }
@@ -300,8 +334,10 @@ function CheckSave(id) {
 	const value = document.getElementById(id).checked;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
+
 	if (id == "compatibility.hwaccel")
 		$("#HAReloadButton").fadeIn(100);
+
 	if (id == "theme.customColor")
 		if (value)
 			$("#intensity-palette-container").fadeIn(100).removeClass("hide");
@@ -311,6 +347,7 @@ function CheckSave(id) {
 
 function CheckHide(id) {
 	const value = document.getElementById(id).checked;
+
 	if (value)
 		document.getElementById("api.key").type = "password";
 	else
@@ -321,6 +358,7 @@ function CheckHide(id) {
 function TextSave(id) {
 	const value = document.getElementById(id).value;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
+
 	if (id == "api.key")
 		if (value.length <= 0)
 			return;
@@ -381,6 +419,7 @@ function setList(args, el, event) {
 	const changeelchild = $(`#${args} > div`);
 
 	let delay = 0;
+
 	for (let i = 0; i < changeelchild.length; i++) {
 		$(changeelchild[i]).delay(delay + 30 * i).fadeTo(100, is_setting_disabled ? 0.6 : 1).delay(100)
 			.queue(function(next) {
@@ -389,6 +428,7 @@ function setList(args, el, event) {
 			});
 		delay += 15;
 		const child = changeelchild[i].children;
+
 		if (child.length)
 			for (let j = 0; j < child.length; j++)
 				if (child[j].id != "HAReloadButton") {
@@ -406,6 +446,7 @@ function setList(args, el, event) {
 
 function send() {
 	let data = {};
+
 	if (document.getElementById("UUID").value != "")
 		data = {
 			APIkey        : "https://github.com/ExpTechTW",
@@ -466,20 +507,20 @@ function send() {
 			const utc = new Date();
 			const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
 			const now = new Date(NOW.getTime() - 20000);
-			const Now = now.getFullYear() +
-			"-" + (now.getMonth() + 1) +
-			"-" + now.getDate() +
-			" " + now.getHours() +
-			":" + now.getMinutes() +
-			":" + now.getSeconds();
+			const Now = now.getFullYear()
+			+ "-" + (now.getMonth() + 1)
+			+ "-" + now.getDate()
+			+ " " + now.getHours()
+			+ ":" + now.getMinutes()
+			+ ":" + now.getSeconds();
 			document.getElementById("Time").value = Now;
 			const now1 = new Date(NOW.getTime());
-			const Now1 = now1.getFullYear() +
-			"-" + (now1.getMonth() + 1) +
-			"-" + now1.getDate() +
-			" " + now1.getHours() +
-			":" + now1.getMinutes() +
-			":" + now1.getSeconds();
+			const Now1 = now1.getFullYear()
+			+ "-" + (now1.getMonth() + 1)
+			+ "-" + now1.getDate()
+			+ " " + now1.getHours()
+			+ ":" + now1.getMinutes()
+			+ ":" + now1.getSeconds();
 			document.getElementById("TimeStamp").value = Now1;
 		});
 }
@@ -489,20 +530,20 @@ function resend() {
 	const utc = new Date();
 	const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
 	const now = new Date(NOW.getTime() - 20000);
-	const Now = now.getFullYear() +
-		"-" + (now.getMonth() + 1) +
-		"-" + now.getDate() +
-		" " + now.getHours() +
-		":" + now.getMinutes() +
-		":" + now.getSeconds();
+	const Now = now.getFullYear()
+		+ "-" + (now.getMonth() + 1)
+		+ "-" + now.getDate()
+		+ " " + now.getHours()
+		+ ":" + now.getMinutes()
+		+ ":" + now.getSeconds();
 	document.getElementById("Time").value = Now;
 	const now1 = new Date(NOW.getTime());
-	const Now1 = now1.getFullYear() +
-		"-" + (now1.getMonth() + 1) +
-		"-" + now1.getDate() +
-		" " + now1.getHours() +
-		":" + now1.getMinutes() +
-		":" + now1.getSeconds();
+	const Now1 = now1.getFullYear()
+		+ "-" + (now1.getMonth() + 1)
+		+ "-" + now1.getDate()
+		+ " " + now1.getHours()
+		+ ":" + now1.getMinutes()
+		+ ":" + now1.getSeconds();
 	document.getElementById("TimeStamp").value = Now1;
 	document.getElementById("EastLongitude").value = "120.7";
 	document.getElementById("NorthLatitude").value = "22.2";
@@ -574,7 +615,9 @@ const testAudio = (audioString, el) => {
 		testAudioBtn.childNodes[1].textContent = "play_arrow";
 		testAudioBtn.childNodes[3].textContent = TREM.Localization.getString("Audio_Test");
 	}
+
 	testAudioBtn = el;
+
 	if (!testAudioState.is_playing) {
 		testAudioState.audio.src = `../Audio/${audioString}.wav`;
 		testAudioState.audio.load();
@@ -643,7 +686,9 @@ const showError = () => {
 
 $("input[type=range]").on("input", function() {
 	const value = this.value;
-	$(this).siblings("span.slider-value").text(function() {return this.className.includes("percentage") ? ~~(value * 100) : value;});
+	$(this).siblings("span.slider-value").text(function() {
+		return this.className.includes("percentage") ? ~~(value * 100) : value;
+	});
 })
 	.on("mousedown", () => window.getSelection().removeAllRanges());
 
