@@ -1,12 +1,13 @@
 /* eslint-disable no-empty-function */
+const axios = require("axios");
 const fetch = require("node-fetch");
 
-module.exports = async function([args], cb) {
+module.exports = async function(cb) {
 	const controller = new AbortController();
 	setTimeout(() => {
 		controller.abort();
 	}, 500);
-	let ans = await fetch("http://rexisstudio.tplinkdns.com:8787/cgi-bin/get_TWEEW.py", { signal: controller.signal }).catch((err) => {});
+	let ans = await fetch("http://rexisstudio.tplinkdns.com:8787/cgi-bin/get_typhoon.py", { signal: controller.signal }).catch((err) => {});
 
 	if (controller.signal.aborted || ans == undefined) {
 		cb(true);
