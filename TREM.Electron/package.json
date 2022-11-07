@@ -1,6 +1,6 @@
 {
   "name": "tremtest",
-  "version": "6.0.0-85-pre5",
+  "version": "6.0.0-86-pre5",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "homepage": "https://exptech.com.tw/",

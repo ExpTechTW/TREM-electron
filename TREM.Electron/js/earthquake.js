@@ -112,6 +112,7 @@ let MaxIntensity1 = 0;
 let testEEWerror = false;
 let PGAMainerror = 0;
 let PGAMainerrortime = NOW.getTime();
+let PGAMainerrorruntime = NOW.getTime();
 TREM.win = BrowserWindow.fromId(process.env.window * 1);
 // #endregion
 
@@ -557,7 +558,7 @@ async function init() {
 				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
 				// const external = formatMemoryUsage(memoryData.external);
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
-				const PGAerr = (PGAMainerror / (PGAMainerrortime / 1000)).toString().slice(0, 5);
+				const PGAerr = ((PGAMainerror / (PGAMainerrortime / 1000)) * 100);
 				const warn = (Warn) ? "⚠️" : "";
 				const error = (testEEWerror) ? "❌" : "";
 				const unlock = (Unlock) ? "⚡" : "";
@@ -1244,7 +1245,7 @@ function PGAMain() {
 				} else {
 					TimerDesynced = true;
 					handler(Response);
-					PGAMainerrortime = NOW.getTime() - PGAMainerrortime;
+					PGAMainerrortime = NOW.getTime() - PGAMainerrorruntime;
 					PGAMainerror += 1;
 					PGAMain1();
 				}
@@ -1278,7 +1279,7 @@ function PGAMain1() {
 			}).catch((err) => {
 				TimerDesynced = true;
 				handler(Response);
-				PGAMainerrortime = NOW.getTime() - PGAMainerrortime;
+				PGAMainerrortime = NOW.getTime() - PGAMainerrorruntime;
 				PGAMainerror += 1;
 				PGAMain();
 			});
