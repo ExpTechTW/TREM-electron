@@ -1,0 +1,30 @@
+# This workflow warns and then closes issues and PRs that have had no activity for a specified amount of time.
+#
+# You can adjust the behavior by modifying this file.
+# For more information, see:
+# https://github.com/actions/stale
+name: Mark stale issues and pull requests
+
+on:
+  schedule:
+  - cron: '0 */2 * * *'
+
+jobs:
+  stale:
+
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+    - uses: actions/stale@v5
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: |
+          '這個問題已經被標記為過時，因為它已有 7 天沒有任何更新。您可以藉由刪除過時標籤或留言來更新它，否則將在 5 天內被關閉。'
+          'This issue is marked as stale because it has been open 7 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
+        days-before-stale: 7
+        days-before-close: 3
+        stale-issue-label: '過時 stale'
+        exempt-issue-labels: 'blocked,must,should,keep'
