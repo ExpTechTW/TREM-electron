@@ -1460,15 +1460,15 @@ function PGAMain() {
 				} else {
 					TimerDesynced = true;
 					handler(Response);
-					PGAMain1();
+					PGAMainbkup();
 				}
 			});
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
 }
 
-function PGAMain1() {
-	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer1" });
+function PGAMainbkup() {
+	dump({ level: 0, message: "Starting PGA timer backup", origin: "PGATimerbkup" });
 
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {

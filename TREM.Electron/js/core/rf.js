@@ -13,6 +13,6 @@ module.exports = async function([args], cb) {
 		return;
 	}
 
-	ans = await ans.json();
-	cb(false, ans);
+	// ans = await ans.json();
+	// cb(false, ans);
 };
