@@ -6,12 +6,12 @@ module.exports = async function([args], cb) {
 	setTimeout(() => {
 		controller.abort();
 	}, 500);
-	let ans = await fetch("http://rexisstudio.tplinkdns.com:8787/cgi-bin/get_TWEEW.py", { signal: controller.signal }).catch((err) => {});
+	const ans = await fetch("http://rexisstudio.tplinkdns.com:8787/cgi-bin/get_TWEEW.py", { signal: controller.signal }).catch((err) => {});
 
-	if (controller.signal.aborted || ans == undefined) {
+	if (controller.signal.aborted || ans == undefined)
 		cb(true);
-		return;
-	}
+		// return;
+
 
 	// ans = await ans.json();
 	// cb(false, ans);
