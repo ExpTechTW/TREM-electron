@@ -35,13 +35,15 @@
 		"TREM": "readonly"
 	},
 	"rules": {
+		"array-bracket-newline": ["warn", { "multiline": true, "minItems": 3 }],
+		"array-element-newline": ["warn", { "multiline": true, "minItems": 3 }],
 		"arrow-body-style": "warn",
 		"arrow-spacing": ["warn", { "before": true, "after": true }],
-		"brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+		"brace-style": ["error", "1tbs", { "allowSingleLine": false }],
 		"comma-dangle": ["error", "always-multiline"],
 		"comma-spacing": "error",
 		"comma-style": "error",
-		"curly": ["error", "multi"],
+		"curly": ["error", "multi", "consistent"],
 		"dot-location": ["error", "property"],
 		"dot-notation": "error",
 		"handle-callback-err": "off",
@@ -57,6 +59,7 @@
             }
         }],
 		"keyword-spacing": "error",
+		"lines-around-comment": "warn",
 		"max-nested-callbacks": ["error", { "max": 4 }],
 		"max-statements-per-line": ["error", { "max": 2 }],
 		"no-console": "off",
@@ -74,6 +77,12 @@
 		"no-useless-return": "warn",
 		"no-var": "error",
 		"object-curly-spacing": ["warn", "always"],
+		"operator-linebreak": ["warn", "before"],
+		"padding-line-between-statements": [
+			"warn",
+			{ "blankLine": "always", "prev": "*", "next": ["block-like","if","while"] },
+			{ "blankLine": "always", "prev": "block-like", "next": "*" }
+		],
 		"prefer-const": "error",
 		"prefer-arrow-callback": "error",
 		"quotes": ["warn", "double"],

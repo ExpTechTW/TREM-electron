@@ -1,10 +1,11 @@
 /* global maplibregl:false, Maps: false, IntensityToClassString: false, Maps.report: true, IntensityI: false, changeView: false, replay: true, replayT: true */
 
 TREM.Report = {
-	cache                 : new Map(),
-	view                  : "report-list",
-	reportList            : [],
-	reportListElement     : document.getElementById("report-list-container"),
+	cache             : new Map(),
+	view              : "report-list",
+	reportList        : [],
+	reportListElement : document.getElementById("report-list-container"),
+
 	/**
 	 * @type {maplibregl.Marker[]}
 	 */
@@ -35,6 +36,7 @@ TREM.Report = {
 
 			for (const report of reports) {
 				const element = this._createReportItem(report);
+
 				if (
 					(this._filterHasNumber && !(report.earthquakeNo % 1000))
 					|| (this._filterHasReplay && !(report.ID?.length))
@@ -55,6 +57,7 @@ TREM.Report = {
 					marker.getElement().addEventListener("click", () => this.setView("report-overview", report.identifier));
 					this._markers.push(marker);
 				}
+
 				fragment.appendChild(element);
 			}
 
@@ -75,6 +78,7 @@ TREM.Report = {
 		ripple(el.querySelector("button"));
 		return el;
 	},
+
 	/**
 	 * @param {*} key
 	 * @param {*} value
@@ -86,6 +90,7 @@ TREM.Report = {
 
 		if (select) {
 			const parent = document.getElementById(select.id.slice(0, select.id.length - 6));
+
 			if (!parent.checked)
 				return parent.click();
 		}
@@ -152,8 +157,10 @@ TREM.Report = {
 	},
 	replay(id) {
 		const report = this.cache.get(id);
+
 		if (replay != 0) return;
 		changeView("main", "#mainView_btn");
+
 		if (report.ID.length != 0) {
 			localStorage.TestID = report.ID;
 			ipcRenderer.send("testEEW");
@@ -161,6 +168,7 @@ TREM.Report = {
 			replay = new Date(`${report.originTime} GMT+08:00`).getTime() - 15000;
 			replayT = NOW.getTime();
 		}
+
 		toggleNav(false);
 		document.getElementById("togglenav_btn").classList.add("hide");
 		document.getElementById("stopReplay").classList.remove("hide");
@@ -209,16 +217,23 @@ TREM.Report = {
 		}
 
 		let count = areas.length;
+
 		if (count > 2)
 			while (count > 0) {
-				const threeAreas = [ areas.shift(), areas.shift(), areas.shift() ];
+				const threeAreas = [
+					areas.shift(),
+					areas.shift(),
+					areas.shift(),
+				];
 				const whichToLoop = threeAreas[threeAreas.reduce((p, c, i, a) => a[p]?.length > c?.length ? p : i, 0)];
 				const theLine = [];
+
 				for (const index in whichToLoop) {
 					const a = threeAreas[0][index];
 					const b = threeAreas[1][index];
 					const c = threeAreas[2][index];
 					let strToPush = "";
+
 					if (a)
 						strToPush += a;
 					else
@@ -235,6 +250,7 @@ TREM.Report = {
 						strToPush += "　　　　　　　　　　　";
 					theLine.push(strToPush.trimEnd());
 				}
+
 				string.push(theLine.join("\n"));
 				count -= 3;
 				continue;
@@ -242,13 +258,16 @@ TREM.Report = {
 		else
 			for (const area of areas) {
 				const theLine = [];
+
 				for (const str of area) {
 					let strToPush = "";
+
 					if (str)
 						strToPush += `　　　　　　　　　　　　　　${str}`;
 
 					theLine.push(strToPush.trimEnd());
 				}
+
 				string.push(theLine.join("\n"));
 			}
 
@@ -257,6 +276,7 @@ TREM.Report = {
 		shell.openPath(filepath);
 		setTimeout(() => fs.rmSync(filepath), 500);
 	},
+
 	/**
 	 * @param {EarthquakeReport[]} oldlist
 	 * @param {EarthquakeReport[]} newlist
@@ -288,6 +308,7 @@ TREM.Report = {
 			this._markers.push(marker);
 		}
 	},
+
 	/**
 	 * @param {HTMLElement} element
 	 */
@@ -295,6 +316,7 @@ TREM.Report = {
 		element.classList.add("hide");
 		setTimeout(() => element.style.display = "none", 200);
 	},
+
 	/**
 	 * @param {HTMLElement} element
 	 * @param {HTMLElement} reference
@@ -307,13 +329,21 @@ TREM.Report = {
 		if (args.length) {
 			this._lastFocus = [...args];
 			Maps.report.fitBounds(...args);
-		} else if (this._lastFocus.length)
+		} else if (this._lastFocus.length) {
 			Maps.report.fitBounds(...this._lastFocus);
-		else {
-			this._lastFocus = [[119.8, 21.82, 122.18, 25.42], {
-				padding  : { left: (Maps.report.getCanvas().width / 2) * 0.8 },
-				duration : 1000,
-			}];
+		} else {
+			this._lastFocus = [
+				[
+					119.8,
+					21.82,
+					122.18,
+					25.42,
+				],
+				{
+					padding  : { left: (Maps.report.getCanvas().width / 2) * 0.8 },
+					duration : 1000,
+				},
+			];
 			Maps.report.fitBounds(...this._lastFocus);
 		}
 	},
@@ -323,11 +353,13 @@ TREM.Report = {
 				marker.remove();
 			this._markers = [];
 		}
+
 		if (resetFoucs) {
 			this._lastFocus = [];
 			this._focusMap();
 		}
 	},
+
 	/**
 	 * @param {EarthquakeReport} report
 	 */
@@ -420,12 +452,14 @@ TREM.on("viewChange", (oldView, newView) => {
 		default:
 			break;
 	}
+
 	switch (newView) {
 		case "report": {
 			TREM.Report.loadReports();
 			TREM.Report._focusMap();
 			break;
 		}
+
 		case "intensity": {
 			Maps.intensity.invalidateSize();
 			break;

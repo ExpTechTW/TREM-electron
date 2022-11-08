@@ -2,12 +2,12 @@
 const axios = require("axios");
 const fetch = require("node-fetch");
 
-module.exports = async function([ReplayTime, key], cb) {
+module.exports = async function([args], cb) {
 	const controller = new AbortController();
 	setTimeout(() => {
 		controller.abort();
-	}, 1500);
-	let ans = await fetch(`https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${key}`, { signal: controller.signal }).catch((err) => {});
+	}, 500);
+	let ans = await fetch("http://rexisstudio.tplinkdns.com:8787/cgi-bin/get_TWEEW.py", { signal: controller.signal }).catch((err) => {});
 
 	if (controller.signal.aborted || ans == undefined) {
 		cb(true);
