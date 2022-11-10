@@ -1564,6 +1564,7 @@ function handler(response) {
 
 		if (intensity > MaxIntensity1) MaxIntensity1 = intensity;
 		const NA999 = (intensity == 9 && amount == 999) ? "Y" : "NA";
+		const NA0999 = (intensity == 0 && amount == 999) ? "Y" : "NA";
 		const levelClass = (intensity != 0 && NA999 != "Y") ? IntensityToClassString(intensity)
 			: (amount == 999) ? "pga6"
 				: (amount > 3.5) ? "pga5"
@@ -1572,7 +1573,7 @@ function handler(response) {
 							: (amount > 2) ? "pga2"
 								: "pga1";
 
-		if (intensity != "NA" && NA999 != "Y") {
+		if (intensity != "NA" && NA999 != "Y" && NA0999 != "Y") {
 			stationnowindex += 1;
 			stationnow = stationnowindex;
 		}
