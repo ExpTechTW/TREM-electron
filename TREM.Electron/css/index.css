@@ -266,14 +266,17 @@ body:not(.darkmode) #here-marker {
 }
 
 #log {
+	font-size: 14px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 }
 
 #log1 {
+	font-size: 14px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 }
 
 #log2 {
+	font-size: 14px;
 	color: rgba(var(--md-sys-color-on-surface-variant), .6);
 }
 

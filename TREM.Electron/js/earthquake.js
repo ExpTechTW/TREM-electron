@@ -119,6 +119,7 @@ let rtstation1 = "";
 let MaxIntensity1 = 0;
 let testEEWerror = false;
 TREM.win = BrowserWindow.fromId(process.env.window * 1);
+let stationnow = 0;
 // #endregion
 
 class WaveCircle {
@@ -621,6 +622,8 @@ async function init() {
 					GetDataState = "✉";
 				}
 
+				const stationall = Object.keys(station).length;
+
 				const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
 				const formatCPUUsage = (data) => `${data} %`;
 				const memoryData = process.memoryUsage();
@@ -633,9 +636,9 @@ async function init() {
 				const warn = (Warn) ? "⚠️" : "";
 				const error = (testEEWerror) ? "❌" : "";
 				const unlock = (Unlock) ? "⚡" : "";
-				$("#log").text(`${CPUData} | ${rss}`);
-				$("#log1").text(`${CPUData} | ${rss}`);
-				$("#log2").text(`${CPUData} | ${rss}`);
+				$("#log").text(`${stationnow}/${stationall} | ${CPUData} | ${rss}`);
+				$("#log1").text(`${stationnow}/${stationall} | ${CPUData} | ${rss}`);
+				$("#log2").text(`${stationnow}/${stationall} | ${CPUData} | ${rss}`);
 				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
 				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
 				$("#app-version2").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
@@ -1460,6 +1463,7 @@ function PGAMain() {
 				} else {
 					TimerDesynced = true;
 					handler(Response);
+					stationnow = 0;
 					PGAMainbkup();
 				}
 			});
@@ -1468,7 +1472,7 @@ function PGAMain() {
 }
 
 function PGAMainbkup() {
-	dump({ level: 0, message: "Starting PGA timer backup", origin: "PGATimerbkup" });
+	dump({ level: 0, message: "Starting PGA timer backup", origin: "PGATimer" });
 
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {
@@ -1493,6 +1497,7 @@ function PGAMainbkup() {
 			}).catch((err) => {
 				TimerDesynced = true;
 				handler(Response);
+				stationnow = 0;
 				PGAMain();
 			});
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
@@ -1502,6 +1507,7 @@ function PGAMainbkup() {
 function handler(response) {
 	const Json = response;
 	// console.log(Json);
+	// console.log(station);
 	Unlock = Json.Unlock ?? false;
 
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
@@ -1529,6 +1535,7 @@ function handler(response) {
 
 	MaxPGA = 0;
 	MaxIntensity1 = 0;
+	let stationnowindex = 0;
 
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const stationData = Json[keys[index]];
@@ -1557,7 +1564,6 @@ function handler(response) {
 
 		if (intensity > MaxIntensity1) MaxIntensity1 = intensity;
 		const NA999 = (intensity == 9 && amount == 999) ? "Y" : "NA";
-		const size = (intensity == 0 || intensity == "NA" || NA999 == "Y") ? 8 : 16;
 		const levelClass = (intensity != 0 && NA999 != "Y") ? IntensityToClassString(intensity)
 			: (amount == 999) ? "pga6"
 				: (amount > 3.5) ? "pga5"
@@ -1565,6 +1571,11 @@ function handler(response) {
 						: (amount > 2.5) ? "pga3"
 							: (amount > 2) ? "pga2"
 								: "pga1";
+
+		if (intensity != "NA" && NA999 != "Y") {
+			stationnowindex += 1;
+			stationnow = stationnowindex;
+		}
 
 		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 		const station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-id">${keys[index]}</span><span class="rt-station-name">${station[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
