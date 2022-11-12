@@ -1545,7 +1545,10 @@ TREM.Earthquake.on("eew", (data) => {
 			if (Intensity > MaxIntensity) MaxIntensity = Intensity;
 			GC[loc[0]] = Intensity;
 		}
-
+	if (EarthquakeList[data.ID].geojson != undefined) {
+		EarthquakeList[data.ID].geojson.remove();
+		delete EarthquakeList[data.ID].geojson;
+	}
 	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.tw_town, {
 		minZoom   : 7,
 		maxZoom   : 7,
@@ -2201,7 +2204,6 @@ function main(data) {
 		// remove epicenter cross icons
 		EarthquakeList[data.ID].epicenterIcon.remove();
 		EarthquakeList[data.ID].epicenterIconTW.remove();
-		EarthquakeList[data.ID].geojson.remove();
 		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
 		for (let index = 0; index < INFO.length; index++)
