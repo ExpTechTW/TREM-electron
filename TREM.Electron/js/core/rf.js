@@ -14,6 +14,6 @@ module.exports = async function([args], cb) {
 		return;
 	}
 
-	ans = await ans.json();
+	ans = await ans.text();
 	cb(false, ans);
 };
