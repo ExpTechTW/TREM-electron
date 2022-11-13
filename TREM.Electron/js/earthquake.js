@@ -205,7 +205,6 @@ async function init() {
 					doubleClickZoom : false,
 					zoomControl     : false,
 				})
-				.fitBounds([[25.35, 119.65], [21.85, 124.05]])
 				.on("click", () => {
 					mapLock = false;
 					TREM.Earthquake.emit("focus", {}, true);
@@ -381,7 +380,7 @@ async function init() {
 			Timers.fetchFiles = setInterval(fetchFiles, 10 * 60 * 1000);
 		progressbar.value = 1;
 	})().catch(e => dump({ level: 2, message: e }));
-
+	TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
 	$("#loading").text(TREM.Localization.getString("Application_Welcome"));
 	$("#load").delay(1000).fadeOut(1000);
 	setInterval(() => {
