@@ -730,8 +730,10 @@ function handler(response) {
 		PGALimit = 0;
 	}
 	All = Json.I ?? [];
-	for (let index = 0; index < All.length; index++)
+	for (let index = 0; index < All.length; index++) {
+		if (station[All[index].uuid] == undefined) continue;
 		All[index].loc = station[All[index].uuid].Loc;
+	}
 	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
 		if (setting["audio.realtime"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
