@@ -727,32 +727,34 @@ function handler(response) {
 		PGALimit = 0;
 	}
 	All = Json.I ?? [];
-	for (let index = 0; index < All.length; index++) {
-		if (station[All[index].uuid] == undefined) continue;
-		All[index].loc = station[All[index].uuid].Loc;
-	}
-	if (All[0].intensity > PGAtag) {
-		if (setting["audio.realtime"])
-			if (All[0].intensity >= 5 && PGAtag < 5)
-				TREM.Audios.int2.play();
-			else if (All[0].intensity >= 2 && PGAtag < 2)
-				TREM.Audios.int1.play();
-			else if (PGAtag == -1)
-				TREM.Audios.int0.play();
-		setTimeout(() => {
-			ipcRenderer.send("screenshotEEW", {
-				Function : "station",
-				ID       : 1,
-				Version  : 1,
-				Time     : NOW.getTime(),
-				Shot     : 1,
-			});
-		}, 2250);
-		changeView("main", "#mainView_btn");
-		if (setting["Real-time.show"]) win.showInactive();
-		if (setting["Real-time.cover"]) win.moveTop();
-		if (!win.isFocused()) win.flashFrame(true);
-		PGAtag = All[0].intensity;
+	if (All.length) {
+		for (let index = 0; index < All.length; index++) {
+			if (station[All[index].uuid] == undefined) continue;
+			All[index].loc = station[All[index].uuid].Loc;
+		}
+		if (All[0].intensity > PGAtag) {
+			if (setting["audio.realtime"])
+				if (All[0].intensity >= 5 && PGAtag < 5)
+					TREM.Audios.int2.play();
+				else if (All[0].intensity >= 2 && PGAtag < 2)
+					TREM.Audios.int1.play();
+				else if (PGAtag == -1)
+					TREM.Audios.int0.play();
+			setTimeout(() => {
+				ipcRenderer.send("screenshotEEW", {
+					Function : "station",
+					ID       : 1,
+					Version  : 1,
+					Time     : NOW.getTime(),
+					Shot     : 1,
+				});
+			}, 2250);
+			changeView("main", "#mainView_btn");
+			if (setting["Real-time.show"]) win.showInactive();
+			if (setting["Real-time.cover"]) win.moveTop();
+			if (!win.isFocused()) win.flashFrame(true);
+			PGAtag = All[0].intensity;
+		}
 	}
 	const list = [];
 	let count = 0;
