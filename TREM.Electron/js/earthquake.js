@@ -3260,6 +3260,8 @@ function main(data) {
 
 		clearInterval(EarthquakeList[data.ID].Timer);
 		document.getElementById("box-10").innerHTML = "";
+
+		if (EarthquakeList[data.ID].geojson != undefined) EarthquakeList[data.ID].geojson.remove();
 		delete EarthquakeList[data.ID];
 		delete EEW[data.ID];
 
