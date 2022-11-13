@@ -3293,6 +3293,7 @@ function main(data) {
 			delete Timers.epicenterBlinker;
 			clearInterval(ITimer);
 			ITimer = null;
+			global.gc();
 		}
 	}
 }
