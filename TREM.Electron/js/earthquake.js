@@ -1374,14 +1374,15 @@ function handler(response) {
 		}
 
 		if (intensity != "NA" && (intensity > 0 || Alert) && amount < 999) {
-			detected_list[station[keys[index]].PGA] ??= { intensity };
+			detected_list[station[keys[index]].PGA] ??= {
+				intensity : intensity,
+				time      : 0,
+			};
 
 			if ((detected_list[station[keys[index]].PGA].intensity ?? 0) < intensity)
 				detected_list[station[keys[index]].PGA].intensity = intensity;
 
-			detected_list[station[keys[index]].PGA].time = NOW.getTime();
-
-			if (Alert && Json.Alert)
+			if (Alert && Json.Alert) {
 				if (setting["audio.realtime"])
 					if (amount > 8 && PGALimit == 0) {
 						PGALimit = 1;
@@ -1390,6 +1391,9 @@ function handler(response) {
 						PGALimit = 2;
 						TREM.Audios.pga2.play();
 					}
+
+				detected_list[station[keys[index]].PGA].time = NOW.getTime();
+			}
 		}
 
 		if (MAXPGA.pga < amount && amount < 999 && Level != "NA") {
@@ -1475,12 +1479,12 @@ function handler(response) {
 			}
 		}
 
-		console.log([
-			x_s,
-			y_m,
-			x_m,
-			y_s,
-		]);
+		// console.log([
+		// 	x_s,
+		// 	y_m,
+		// 	x_m,
+		// 	y_s,
+		// ]);
 
 		/*
 		Maps.main.fitBounds([
@@ -2074,7 +2078,7 @@ ipcMain.once("start", () => {
 const stopReplay = function() {
 	if (Object.keys(EarthquakeList).length != 0) Cancel = true;
 
-	if (Object.keys(pga).length != 0) PGACancel = true;
+	if (Object.keys(detected_list).length != 0) PGACancel = true;
 
 	if (replay != 0) {
 		replay = 0;
