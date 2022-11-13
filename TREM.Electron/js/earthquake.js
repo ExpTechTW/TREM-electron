@@ -40,7 +40,7 @@ localStorage.dirname = __dirname;
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
-const PostAddressIP = "https://exptech.com.tw/post";
+const url = "https://exptech.com.tw/post";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -48,10 +48,7 @@ let t = null;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let arrive = "";
-let audioList = [];
-let audioList1 = [];
-let audioLock = false;
-let audioLock1 = false;
+const audio = { main: [], minor: [], main_lock: false, minor_lock: false };
 const EarthquakeList = {};
 let marker = null;
 
@@ -65,8 +62,8 @@ const Maps = { main: null, mini: null, report: null };
  */
 const MapBases = { main: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
 const Station = {};
-const PGA = {};
-const pga = {};
+const detected_box_list = {};
+const detected_list = {};
 let Cancel = false;
 let PGALimit = 0;
 let PGAtag = -1;
@@ -79,14 +76,11 @@ const Focus = [
 ];
 let INFO = [];
 let TINFO = 0;
-let ticker = null;
-let ITimer = null;
 let Report = 0;
-const Server = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
+const server_timestamp = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
 let Location;
 let station = {};
-let PGAjson = {};
-let PGAMainClock = null;
+let detected_box_location = {};
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -1234,19 +1228,19 @@ async function init() {
 				}
 
 			auto = true;
-		} else if (Object.keys(PGA).length >= 1) {
-			if (Object.keys(PGA).length == 1) {
-				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
-				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
+		} else if (Object.keys(detected_box_list).length >= 1) {
+			if (Object.keys(detected_box_list).length == 1) {
+				const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
+				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
 				TREM.Earthquake.emit("focus", { center: [X1, Y1], size: 9.5 });
-			} else if (Object.keys(PGA).length >= 2) {
-				const X1 = (PGAjson[Object.keys(pga)[0].toString()][0][0] + (PGAjson[Object.keys(pga)[0].toString()][2][0] - PGAjson[Object.keys(pga)[0].toString()][0][0]) / 2);
-				const Y1 = (PGAjson[Object.keys(pga)[0].toString()][0][1] + (PGAjson[Object.keys(pga)[0].toString()][1][1] - PGAjson[Object.keys(pga)[0].toString()][0][1]) / 2);
-				const X2 = (PGAjson[Object.keys(pga)[1].toString()][0][0] + (PGAjson[Object.keys(pga)[1].toString()][2][0] - PGAjson[Object.keys(pga)[1].toString()][0][0]) / 2);
-				const Y2 = (PGAjson[Object.keys(pga)[1].toString()][0][1] + (PGAjson[Object.keys(pga)[1].toString()][1][1] - PGAjson[Object.keys(pga)[1].toString()][0][1]) / 2);
+			} else if (Object.keys(detected_box_list).length >= 2) {
+				const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
+				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
+				const X2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[1].toString()][2][0] - detected_box_location[Object.keys(detected_list)[1].toString()][0][0]) / 2);
+				const Y2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[1].toString()][1][1] - detected_box_location[Object.keys(detected_list)[1].toString()][0][1]) / 2);
 				let focusScale = 9;
 
-				if (Object.keys(PGA).length == 2) {
+				if (Object.keys(detected_box_list).length == 2) {
 					const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
 
 					if (num > 0.6) focusScale = 9;
@@ -1257,11 +1251,11 @@ async function init() {
 
 					if (num > 2.8) focusScale = 7;
 				} else {
-					if (Object.keys(PGA).length >= 4) focusScale = 8;
+					if (Object.keys(detected_box_list).length >= 4) focusScale = 8;
 
-					if (Object.keys(PGA).length >= 6) focusScale = 7.5;
+					if (Object.keys(detected_box_list).length >= 6) focusScale = 7.5;
 
-					if (Object.keys(PGA).length >= 8) focusScale = 7;
+					if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
 				}
 
 				TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
@@ -1280,8 +1274,8 @@ async function init() {
 function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 
-	if (PGAMainClock) clearInterval(PGAMainClock);
-	PGAMainClock = setInterval(() => {
+	if (Timers.rts) clearInterval(Timers.rts);
+	Timers.rts = setInterval(() => {
 		setTimeout(() => {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res) => {
@@ -1317,7 +1311,6 @@ function handler(response) {
 		const amount = Number(stationData.PGA);
 
 		if (station[keys[index]] == undefined) continue;
-		// stationData.alert = true;
 		const Alert = (!Unlock) ? stationData.I >= 2 : stationData.alert;
 		const intensity
 			= (Alert && Json.Alert) ? stationData.I
@@ -1381,12 +1374,12 @@ function handler(response) {
 		}
 
 		if (intensity != "NA" && (intensity > 0 || Alert) && amount < 999) {
-			pga[station[keys[index]].PGA] ??= { intensity };
+			detected_list[station[keys[index]].PGA] ??= { intensity };
 
-			if ((pga[station[keys[index]].PGA].intensity ?? 0) < intensity)
-				pga[station[keys[index]].PGA].intensity = intensity;
+			if ((detected_list[station[keys[index]].PGA].intensity ?? 0) < intensity)
+				detected_list[station[keys[index]].PGA].intensity = intensity;
 
-			pga[station[keys[index]].PGA].time = NOW.getTime();
+			detected_list[station[keys[index]].PGA].time = NOW.getTime();
 
 			if (Alert && Json.Alert)
 				if (setting["audio.realtime"])
@@ -1427,20 +1420,20 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	if (Object.keys(pga).length) {
+	if (Object.keys(detected_list).length) {
 		let x_s = 0, y_s = 0, x_m = 0, y_m = 0;
 
-		for (let index = 0, pgaKeys = Object.keys(pga); index < pgaKeys.length; index++) {
-			const Intensity = pga[pgaKeys[index]]?.intensity;
+		for (let index = 0, pgaKeys = Object.keys(detected_list); index < pgaKeys.length; index++) {
+			const Intensity = detected_list[pgaKeys[index]]?.intensity;
 
 			if (Intensity == undefined) continue;
 
-			if (NOW.getTime() - pga[pgaKeys[index]].time > 30_000 || PGACancel) {
+			if (NOW.getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
 				TREM.MapArea.clear(pgaKeys[index]);
-				delete pga[pgaKeys[index]];
+				delete detected_list[pgaKeys[index]];
 				delete pgaKeys[index];
 				index--;
-			} else if (!pga[pgaKeys[index]].passed) {
+			} else if (!detected_list[pgaKeys[index]].passed) {
 				let passed = false;
 
 				if (Object.keys(EEW).length)
@@ -1448,7 +1441,7 @@ function handler(response) {
 						let SKIP = 0;
 
 						for (let i = 0; i < 4; i++) {
-							const dis = Math.sqrt(Math.pow((PGAjson[pgaKeys[index].toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((PGAjson[pgaKeys[index].toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
+							const dis = Math.sqrt(Math.pow((detected_box_location[pgaKeys[index].toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((detected_box_location[pgaKeys[index].toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
 
 							if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
 						}
@@ -1460,7 +1453,7 @@ function handler(response) {
 					}
 
 				if (passed) {
-					pga[pgaKeys[index]].passed = true;
+					detected_list[pgaKeys[index]].passed = true;
 					TREM.MapArea.clear(pgaKeys[index]);
 				} else {
 					TREM.MapArea.setArea(pgaKeys[index], Intensity);
@@ -1593,7 +1586,7 @@ async function fetchFiles() {
 	dump({ level: 0, message: "Get Location File", origin: "Location" });
 	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
 	dump({ level: 0, message: "Get Station File", origin: "Location" });
-	PGAjson = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
+	detected_box_location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
 	dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
 	PGAMain();
 }
@@ -1678,25 +1671,25 @@ let AudioT1;
 const audioDOM = new Audio();
 const audioDOM1 = new Audio();
 audioDOM.addEventListener("ended", () => {
-	audioLock = false;
+	audio.main_lock = false;
 });
 audioDOM1.addEventListener("ended", () => {
-	audioLock1 = false;
+	audio.minor_lock = false;
 });
 
 function audioPlay(src) {
-	audioList.push(src);
+	audio.main.push(src);
 
 	if (!AudioT)
 		AudioT = setInterval(() => {
-			if (!audioLock) {
-				audioLock = true;
+			if (!audio.main_lock) {
+				audio.main_lock = true;
 
-				if (audioList.length) {
+				if (audio.main.length) {
 					playNextAudio();
 				} else {
 					clearInterval(AudioT);
-					audioLock = false;
+					audio.main_lock = false;
 					AudioT = null;
 				}
 			}
@@ -1704,18 +1697,18 @@ function audioPlay(src) {
 }
 
 function audioPlay1(src) {
-	audioList1.push(src);
+	audio.minor.push(src);
 
 	if (!AudioT1)
 		AudioT1 = setInterval(() => {
-			if (!audioLock1) {
-				audioLock1 = true;
+			if (!audio.minor_lock) {
+				audio.minor_lock = true;
 
-				if (audioList1.length) {
+				if (audio.minor.length) {
 					playNextAudio1();
 				} else {
 					clearInterval(AudioT1);
-					audioLock1 = false;
+					audio.minor_lock = false;
 					AudioT1 = null;
 				}
 			}
@@ -1723,8 +1716,8 @@ function audioPlay1(src) {
 }
 
 function playNextAudio() {
-	audioLock = true;
-	const nextAudioPath = audioList.shift();
+	audio.main_lock = true;
+	const nextAudioPath = audio.main.shift();
 	audioDOM.src = nextAudioPath;
 
 	if (nextAudioPath.startsWith("../audio/1/") && setting["audio.eew"]) {
@@ -1737,8 +1730,8 @@ function playNextAudio() {
 }
 
 function playNextAudio1() {
-	audioLock1 = true;
-	const nextAudioPath = audioList1.shift();
+	audio.minor_lock = true;
+	const nextAudioPath = audio.minor.shift();
 	audioDOM1.src = nextAudioPath;
 	audioDOM1.playbackRate = 1.1;
 
@@ -1986,26 +1979,6 @@ function openSettingWindow() {
 }
 // #endregion
 
-// #region PGA
-function PGAcount(Scale, distance, Si) {
-	let S = Si ?? 1;
-
-	if (!setting["earthquake.siteEffect"]) S = 1;
-	// eslint-disable-next-line no-shadow
-	const PGA = (1.657 * Math.pow(Math.E, (1.533 * Scale)) * Math.pow(distance, -1.607) * S).toFixed(3);
-	return PGA >= 800 ? "7"
-		: PGA <= 800 && PGA > 440 ? "6+"
-			: PGA <= 440 && PGA > 250 ? "6-"
-				: PGA <= 250 && PGA > 140 ? "5+"
-					: PGA <= 140 && PGA > 80 ? "5-"
-						: PGA <= 80 && PGA > 25 ? "4"
-							: PGA <= 25 && PGA > 8 ? "3"
-								: PGA <= 8 && PGA > 2.5 ? "2"
-									: PGA <= 2.5 && PGA > 0.8 ? "1"
-										: "0";
-}
-// #endregion
-
 // #region Number >> Intensity
 function IntensityI(Intensity) {
 	return Intensity == 5 ? "5-"
@@ -2114,7 +2087,7 @@ const stopReplay = function() {
 		FormatVersion : 3,
 		UUID          : localStorage.UUID,
 	};
-	axios.post(PostAddressIP, data)
+	axios.post(url, data)
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
@@ -2137,7 +2110,7 @@ ipcMain.on("testEEW", () => {
 					ID            : list[index],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				axios.post(PostAddressIP, data)
+				axios.post(url, data)
 					.catch((error) => {
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
@@ -2152,7 +2125,7 @@ ipcMain.on("testEEW", () => {
 			UUID          : localStorage.UUID,
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		axios.post(PostAddressIP, data)
+		axios.post(url, data)
 			.catch((error) => {
 				dump({ level: 2, message: error, origin: "Verbose" });
 			});
@@ -2319,12 +2292,12 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 function FCMdata(data) {
 	const json = JSON.parse(data);
 
-	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
-	Server.push(json.TimeStamp);
+	if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
+	server_timestamp.push(json.TimeStamp);
 
-	if (Server.length > 5) Server.splice(0, 1);
+	if (server_timestamp.length > 5) server_timestamp.splice(0, 1);
 	// eslint-disable-next-line no-empty-function
-	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(Server), () => {});
+	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
 	GetData = true;
 
 	if (json.response != "You have successfully subscribed to earthquake information" && json.FormatVersion == 1) {
@@ -2557,8 +2530,8 @@ TREM.Earthquake.on("eew", (data) => {
 		Info.Notify.push(data.ID);
 		// show latest eew
 		TINFO = INFO.length;
-		clearInterval(ticker);
-		ticker = setInterval(() => {
+		clearInterval(Timers.ticker);
+		Timers.ticker = setInterval(() => {
 			if (TINFO + 1 >= INFO.length)
 				TINFO = 0;
 			else TINFO++;
@@ -2648,7 +2621,7 @@ TREM.Earthquake.on("eew", (data) => {
 					value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * EarthquakeList[data.ID].Sspeed) / EarthquakeList[data.ID].Sspeed);
 					Second = value;
 
-					if (stamp != value && !audioLock1) {
+					if (stamp != value && !audio.minor_lock) {
 						stamp = value;
 
 						if (_time >= 0) {
@@ -2735,12 +2708,12 @@ TREM.Earthquake.on("eew", (data) => {
 
 	updateText();
 
-	if (ITimer == null)
-		ITimer = setInterval(() => {
+	if (Timers.eew == null)
+		Timers.eew = setInterval(() => {
 			updateText();
 
-			if (ticker == null)
-				ticker = setInterval(() => {
+			if (Timers.ticker == null)
+				Timers.ticker = setInterval(() => {
 					if (TINFO + 1 >= INFO.length)
 						TINFO = 0;
 					else TINFO++;
@@ -3233,8 +3206,8 @@ function main(data) {
 
 				if (Object.keys(EarthquakeList).length == 1) {
 					clearInterval(t);
-					audioList = [];
-					audioList1 = [];
+					audio.main = [];
+					audio.minor = [];
 				}
 
 				break;
@@ -3267,13 +3240,13 @@ function main(data) {
 
 		if (Object.keys(EarthquakeList).length == 0) {
 			clearInterval(t);
-			audioList = [];
+			audio.main = [];
 			arrive = "";
-			audioList1 = [];
+			audio.minor = [];
 			Second = -1;
 			EEWAlert = false;
 			// hide eew alert
-			ticker = null;
+			Timers.ticker = null;
 			Cancel = false;
 
 			if (replay != 0) {
@@ -3293,8 +3266,8 @@ function main(data) {
 			$(roll).fadeIn(200);
 			clearInterval(Timers.epicenterBlinker);
 			delete Timers.epicenterBlinker;
-			clearInterval(ITimer);
-			ITimer = null;
+			clearInterval(Timers.eew);
+			Timers.eew = null;
 			global.gc();
 		}
 	}
@@ -3333,12 +3306,12 @@ function updateText() {
 		$("#alert-p").text("X");
 		$("#alert-s").text("X");
 	} else {
-		let num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * EarthquakeList[INFO[TINFO].ID].Sspeed) / Sspeed);
+		let num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * EarthquakeList[INFO[TINFO].ID].Sspeed) / EarthquakeList[INFO[TINFO].ID].Sspeed);
 
 		if (num <= 0) num = "";
 		$("#alert-s").text(num);
 
-		num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * EarthquakeList[INFO[TINFO].ID].Pspeed) / Pspeed);
+		num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * EarthquakeList[INFO[TINFO].ID].Pspeed) / EarthquakeList[INFO[TINFO].ID].Pspeed);
 
 		if (num <= 0) num = "";
 		$("#alert-p").text(num);
