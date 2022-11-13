@@ -2190,6 +2190,7 @@ function main(data) {
 			if (INFO[index].ID == data.ID) {
 				INFO[index].alert_type = "alert-box eew-cancel";
 				data.TimeStamp = NOW.getTime() - 150000;
+				clear(data.ID);
 				EarthquakeList[data.ID].Cancel = true;
 				if (Object.keys(EarthquakeList).length == 1) {
 					clearInterval(t);
@@ -2204,7 +2205,6 @@ function main(data) {
 		// remove epicenter cross icons
 		EarthquakeList[data.ID].epicenterIcon.remove();
 		EarthquakeList[data.ID].epicenterIconTW.remove();
-		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
 		for (let index = 0; index < INFO.length; index++)
 			if (INFO[index].ID == data.ID) {
