@@ -106,6 +106,7 @@ let Ping = 0;
 let EEWAlert = false;
 let PGACancel = false;
 let Unlock = false;
+let report_get_timestamp = 0;
 // #endregion
 
 class WaveCircle {
@@ -589,20 +590,25 @@ async function init() {
 
 		if (!Timers.tsunami)
 			Timers.tsunami = setInterval(() => {
-				if (investigation && NOW.getTime() - Report > 600000) {
-					investigation = false;
-					roll.removeChild(roll.children[0]);
+				if (investigation) {
+					if (NOW.getTime() - Report > 600_000) {
+						investigation = false;
+						roll.removeChild(roll.children[0]);
 
-					if (TREM.MapIntensity.isTriggered)
-						TREM.MapIntensity.clear();
+						if (TREM.MapIntensity.isTriggered)
+							TREM.MapIntensity.clear();
+					}
+				} else
+				if (Date.now() - report_get_timestamp > 600_000) {
+					ReportGET();
 				}
 
-				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
+				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30_000) {
 					ReportTag = 0;
 					TREM.Report.setView("report-list");
 					changeView("main");
 				}
-			}, 250);
+			}, 1_000);
 
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
 
@@ -1752,6 +1758,7 @@ function playNextAudio1() {
 async function ReportGET(eew) {
 	try {
 		const res = await getReportData();
+		report_get_timestamp = Date.now();
 
 		if (!res) return setTimeout(ReportGET, 1000, eew);
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
