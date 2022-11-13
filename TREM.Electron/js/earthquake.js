@@ -412,25 +412,25 @@ async function init() {
 			auto = true;
 		} else if (Object.keys(detected_box_list).length >= 1) {
 			if (Object.keys(detected_box_list).length == 1) {
-				const X1 = (detected_box_location[Object.keys(pga)[0].toString()][0][0] + (detected_box_location[Object.keys(pga)[0].toString()][2][0] - detected_box_location[Object.keys(pga)[0].toString()][0][0]) / 2);
-				const Y1 = (detected_box_location[Object.keys(pga)[0].toString()][0][1] + (detected_box_location[Object.keys(pga)[0].toString()][1][1] - detected_box_location[Object.keys(pga)[0].toString()][0][1]) / 2);
+				const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
+				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
 				TREM.Earthquake.emit("focus", { center: [X1, Y1], size: 9.5 });
 			} else if (Object.keys(detected_box_list).length >= 2) {
-				const X1 = (detected_box_location[Object.keys(pga)[0].toString()][0][0] + (detected_box_location[Object.keys(pga)[0].toString()][2][0] - detected_box_location[Object.keys(pga)[0].toString()][0][0]) / 2);
-				const Y1 = (detected_box_location[Object.keys(pga)[0].toString()][0][1] + (detected_box_location[Object.keys(pga)[0].toString()][1][1] - detected_box_location[Object.keys(pga)[0].toString()][0][1]) / 2);
-				const X2 = (detected_box_location[Object.keys(pga)[1].toString()][0][0] + (detected_box_location[Object.keys(pga)[1].toString()][2][0] - detected_box_location[Object.keys(pga)[1].toString()][0][0]) / 2);
-				const Y2 = (detected_box_location[Object.keys(pga)[1].toString()][0][1] + (detected_box_location[Object.keys(pga)[1].toString()][1][1] - detected_box_location[Object.keys(pga)[1].toString()][0][1]) / 2);
+				const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
+				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
+				const X2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[1].toString()][2][0] - detected_box_location[Object.keys(detected_list)[1].toString()][0][0]) / 2);
+				const Y2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[1].toString()][1][1] - detected_box_location[Object.keys(detected_list)[1].toString()][0][1]) / 2);
 				let focusScale = 9;
-				if (Object.keys(PGA).length == 2) {
+				if (Object.keys(detected_box_list).length == 2) {
 					const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
 					if (num > 0.6) focusScale = 9;
 					if (num > 1) focusScale = 8.5;
 					if (num > 1.5) focusScale = 8;
 					if (num > 2.8) focusScale = 7;
 				} else {
-					if (Object.keys(PGA).length >= 4) focusScale = 8;
-					if (Object.keys(PGA).length >= 6) focusScale = 7.5;
-					if (Object.keys(PGA).length >= 8) focusScale = 7;
+					if (Object.keys(detected_box_list).length >= 4) focusScale = 8;
+					if (Object.keys(detected_box_list).length >= 6) focusScale = 7.5;
+					if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
 				}
 				TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
 			}
@@ -706,16 +706,13 @@ function handler(response) {
 		}
 	}
 	if (RMT >= 2) RMT = 0;
-	if (Object.keys(detected_list).length == 0) {
-		RMT = 1;
-		PGACancel = false;
-	}
-	if (Object.keys(detected_box_list).length == 0) {
+	const All = (Json.Alert) ? Json.I : [];
+	const list = [];
+	if (!All.length) {
 		PGAtag = -1;
 		PGALimit = 0;
-	}
-	const All = Json.I ?? [];
-	if (All.length) {
+		PGACancel = false;
+	} else {
 		for (let index = 0; index < All.length; index++) {
 			if (station[All[index].uuid] == undefined) continue;
 			All[index].loc = station[All[index].uuid].Loc;
@@ -743,40 +740,41 @@ function handler(response) {
 			if (!win.isFocused()) win.flashFrame(true);
 			PGAtag = All[0].intensity;
 		}
-	}
-	const list = [];
-	let count = 0;
-	if (All.length <= 8)
-		for (let Index = 0; Index < All.length; Index++, count++) {
-			if (count >= 8) break;
-			const container = document.createElement("DIV");
-			container.className = IntensityToClassString(All[Index].intensity);
-			const location = document.createElement("span");
-			location.innerText = `${All[Index].loc}\n${All[Index].pga} gal`;
-			container.appendChild(document.createElement("span"));
-			container.appendChild(location);
-			list.push(container);
-		}
-	else {
-		const Idata = {};
-		for (let Index = 0; Index < All.length; Index++, count++) {
-			if (Object.keys(Idata).length >= 8) break;
-			const city = All[Index].loc.split(" ")[0];
-			const CPGA = (Idata[city] == undefined) ? 0 : Idata[city];
-			if (All[Index].pga > CPGA) {
-				if (Idata[city] == undefined)Idata[city] = {};
-				Idata[city].pga = All[Index].pga;
-				Idata[city].intensity = All[Index].intensity;
+		let count = 0;
+		if (All.length <= 8)
+			for (let Index = 0; Index < All.length; Index++, count++) {
+				if (All[Index].loc == undefined) continue;
+				if (count >= 8) break;
+				const container = document.createElement("DIV");
+				container.className = IntensityToClassString(All[Index].intensity);
+				const location = document.createElement("span");
+				location.innerText = `${All[Index].loc}\n${All[Index].pga} gal`;
+				container.appendChild(document.createElement("span"));
+				container.appendChild(location);
+				list.push(container);
 			}
-		}
-		for (let index = 0; index < Object.keys(Idata).length; index++) {
-			const container = document.createElement("DIV");
-			container.className = IntensityToClassString(Idata[Object.keys(Idata)[index]].intensity);
-			const location = document.createElement("span");
-			location.innerText = `${Object.keys(Idata)[index]}\n${Idata[Object.keys(Idata)[index]].pga} gal`;
-			container.appendChild(document.createElement("span"));
-			container.appendChild(location);
-			list.push(container);
+		else {
+			const Idata = {};
+			for (let Index = 0; Index < All.length; Index++, count++) {
+				if (All[Index].loc == undefined) continue;
+				if (Object.keys(Idata).length >= 8) break;
+				const city = All[Index].loc.split(" ")[0];
+				const CPGA = (Idata[city] == undefined) ? 0 : Idata[city];
+				if (All[Index].pga > CPGA) {
+					if (Idata[city] == undefined)Idata[city] = {};
+					Idata[city].pga = All[Index].pga;
+					Idata[city].intensity = All[Index].intensity;
+				}
+			}
+			for (let index = 0; index < Object.keys(Idata).length; index++) {
+				const container = document.createElement("DIV");
+				container.className = IntensityToClassString(Idata[Object.keys(Idata)[index]].intensity);
+				const location = document.createElement("span");
+				location.innerText = `${Object.keys(Idata)[index]}\n${Idata[Object.keys(Idata)[index]].pga} gal`;
+				container.appendChild(document.createElement("span"));
+				container.appendChild(location);
+				list.push(container);
+			}
 		}
 	}
 	document.getElementById("rt-list").replaceChildren(...list);
@@ -1211,13 +1209,11 @@ ipcMain.once("start", () => {
 
 const stopReplay = function() {
 	if (Object.keys(EarthquakeList).length != 0) Cancel = true;
-	if (Object.keys(pga).length != 0) PGACancel = true;
+	if (Object.keys(detected_list).length != 0) PGACancel = true;
 	if (replay != 0) {
 		replay = 0;
 		ReportGET();
 	}
-	IntensityListTime = 0;
-	All = [];
 	const data = {
 		Function      : "earthquake",
 		Type          : "cancel",
@@ -1228,7 +1224,6 @@ const stopReplay = function() {
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
-
 	document.getElementById("togglenav_btn").classList.remove("hide");
 	document.getElementById("stopReplay").classList.add("hide");
 };
@@ -1431,18 +1426,13 @@ async function FCMdata(data) {
 		}, 5000);
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
 		if (replay != 0 && !json.Replay) return;
-		if (!json.Replay && !json.Test) {
-			if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
-			if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
-			if (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"]) return;
-			if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
-			if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
-			if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
-			TREM.Earthquake.emit("eew", json);
-		} else
-			// if (json.Function != "earthquake") return;
-			TREM.Earthquake.emit("eew", json);
-
+		if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
+		if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
+		if (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"]) return;
+		if (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"]) return;
+		if (json.Function == "earthquake" && !setting["accept.eew.CWB"]) return;
+		if (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"]) return;
+		TREM.Earthquake.emit("eew", json);
 	}
 }
 // #endregion
