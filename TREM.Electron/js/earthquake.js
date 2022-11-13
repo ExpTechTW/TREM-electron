@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+require("expose-gc");
 require("leaflet");
 require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
@@ -2188,6 +2189,7 @@ function main(data) {
 			delete Timers.epicenterBlinker;
 			clearInterval(Timers.eew_clock);
 			Timers.eew_clock = null;
+			global.gc();
 		}
 	}
 }
