@@ -4,8 +4,11 @@ require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
 const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
+
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
+const workerFarm = require("worker-farm"),
+	workers_rts = workerFarm(require.resolve("../js/core/rts"));
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -34,7 +37,7 @@ localStorage.dirname = __dirname;
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
-const PostAddressIP = "https://exptech.com.tw/post";
+const url = "https://exptech.com.tw/post";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -51,7 +54,7 @@ const EarthquakeList = {};
 let marker = null;
 const Maps = {};
 const MapBases = { main: [], mini: [], report: [] };
-let PGAMainLock = false;
+const PGAMainLock = false;
 const Station = {};
 const PGA = {};
 const pga = {};
@@ -70,7 +73,7 @@ let ITimer = null;
 let Report = 0;
 let Sspeed = 3.5;
 let Pspeed = 6.5;
-const Server = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
+const server_timestamp = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
 let PAlert = {};
 let Location;
 let station = {};
@@ -98,8 +101,8 @@ let EEWAlert = false;
 let PGACancel = false;
 let IntensityListTime = 0;
 let WarnAudio = 0;
-const MaxPGA = 0;
 let Unlock = false;
+let report_get_timestamp = 0;
 // #endregion
 
 // #region 初始化
@@ -131,7 +134,7 @@ async function init() {
 	await (async () => {
 		$("#loading").text(TREM.Localization.getString("Application_Connecting"));
 		dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
-		await ReportGET({});
+		await ReportGET();
 		progressbar.value = (1 / progressStep) * 1;
 	})().catch(e => dump({ level: 2, message: e }));
 
@@ -177,20 +180,23 @@ async function init() {
 
 		if (!Timers.tsunami)
 			Timers.tsunami = setInterval(() => {
-				if (investigation && NOW.getTime() - Report > 600000) {
-					investigation = false;
-					roll.removeChild(roll.children[0]);
-					if (Pgeojson != null) {
-						Pgeojson.remove();
-						Pgeojson = null;
+				if (investigation) {
+					if (NOW.getTime() - Report > 600_000) {
+						investigation = false;
+						roll.removeChild(roll.children[0]);
+						if (Pgeojson != null) {
+							Pgeojson.remove();
+							Pgeojson = null;
+						}
 					}
-				}
-				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30000) {
+				} else
+				if (Date.now() - report_get_timestamp > 600_000) ReportGET();
+				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30_000) {
 					ReportTag = 0;
 					TREM.Report.setView("report-list");
 					changeView("main");
 				}
-			}, 250);
+			}, 1_000);
 
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
 		if (!Maps.main) {
@@ -456,32 +462,17 @@ function PGAMain() {
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {
 		setTimeout(() => {
-			if (PGAMainLock) return;
-			PGAMainLock = true;
-			let R = 0;
-			if (replay) R = replay + (NOW.getTime() - replayT);
-			const CancelToken = axios.CancelToken;
-			let cancel;
-			setTimeout(() => {
-				cancel();
-			}, 2500);
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-			axios({
-				method      : "get",
-				url         : `https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["api.key"] ?? ""}`,
-				cancelToken : new CancelToken((c) => {
-					cancel = c;
-				}),
-			}).then((response) => {
-				Ping = Date.now();
-				PGAMainLock = false;
-				TimerDesynced = false;
-				Response = response.data;
-				handler(Response);
-			}).catch((err) => {
-				PGAMainLock = false;
-				TimerDesynced = true;
-				handler(Response);
+			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res) => {
+				if (!err) {
+					Ping = Date.now();
+					TimerDesynced = false;
+					Response = Res;
+					handler(Response);
+				} else {
+					TimerDesynced = true;
+					handler(Response);
+				}
 			});
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
@@ -653,7 +644,8 @@ function handler(response) {
 					if (setting["Real-time.cover"]) win.moveTop();
 					if (!win.isFocused()) win.flashFrame(true);
 					if (setting["audio.realtime"]) TREM.Audios.palert.play();
-				} else Pgeojson.remove();
+				} else
+					Pgeojson.remove();
 				Pgeojson = L.geoJson.vt(MapData.tw_town, {
 					minZoom   : 4,
 					maxZoom   : 12,
@@ -820,7 +812,7 @@ async function fetchFiles() {
 	PGAjson = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
 	dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
 	station_data();
-	setInterval(() => {station_data();}, 300_000);
+	setInterval(() => {station_data();}, 600_000);
 	PGAMain();
 
 	async function station_data() {
@@ -960,6 +952,7 @@ function playNextAudio1() {
 async function ReportGET(eew) {
 	try {
 		const res = await getReportData();
+		report_get_timestamp = Date.now();
 		if (!res) return setTimeout(ReportGET, 1000, eew);
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 		ReportList(res, eew);
@@ -1279,7 +1272,7 @@ const stopReplay = function() {
 		FormatVersion : 3,
 		UUID          : localStorage.UUID,
 	};
-	axios.post(PostAddressIP, data)
+	axios.post(url, data)
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
@@ -1302,7 +1295,7 @@ ipcMain.on("testEEW", () => {
 					ID            : list[index],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				axios.post(PostAddressIP, data)
+				axios.post(url, data)
 					.catch((error) => {
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
@@ -1317,7 +1310,7 @@ ipcMain.on("testEEW", () => {
 			UUID          : localStorage.UUID,
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		axios.post(PostAddressIP, data)
+		axios.post(url, data)
 			.catch((error) => {
 				dump({ level: 2, message: error, origin: "Verbose" });
 			});
@@ -1387,11 +1380,11 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 // #region EEW
 async function FCMdata(data) {
 	const json = JSON.parse(data);
-	if (Server.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
-	Server.push(json.TimeStamp);
-	if (Server.length > 5) Server.splice(0, 1);
+	if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
+	server_timestamp.push(json.TimeStamp);
+	if (server_timestamp.length > 5) server_timestamp.splice(0, 1);
 	// eslint-disable-next-line no-empty-function
-	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(Server), () => {});
+	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
 	GetData = true;
 	if (json.response != "You have successfully subscribed to earthquake information" && json.FormatVersion == 1) {
 		const folder = path.join(app.getPath("userData"), "data");
