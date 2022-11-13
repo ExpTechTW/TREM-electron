@@ -3220,6 +3220,7 @@ function main(data) {
 			if (INFO[index].ID == data.ID) {
 				INFO[index].alert_type = "alert-box eew-cancel";
 				data.TimeStamp = NOW.getTime() - 150000;
+				clear(data.ID);
 				EarthquakeList[data.ID].Cancel = true;
 
 				if (Object.keys(EarthquakeList).length == 1) {
