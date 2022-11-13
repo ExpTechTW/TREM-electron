@@ -54,7 +54,6 @@ const EarthquakeList = {};
 let marker = null;
 const Maps = {};
 const MapBases = { main: [], mini: [], report: [] };
-const PGAMainLock = false;
 const Station = {};
 const PGA = {};
 const pga = {};
@@ -97,8 +96,6 @@ let TSUNAMI = {};
 let Ping = 0;
 let EEWAlert = false;
 let PGACancel = false;
-let IntensityListTime = 0;
-let WarnAudio = 0;
 let Unlock = false;
 let report_get_timestamp = 0;
 // #endregion
@@ -734,7 +731,7 @@ function handler(response) {
 		if (station[All[index].uuid] == undefined) continue;
 		All[index].loc = station[All[index].uuid].Loc;
 	}
-	if (All.length >= 2 && All[0].intensity > PGAtag && Object.keys(pga).length != 0) {
+	if (All[0].intensity > PGAtag) {
 		if (setting["audio.realtime"])
 			if (All[0].intensity >= 5 && PGAtag < 5)
 				TREM.Audios.int2.play();
@@ -757,7 +754,7 @@ function handler(response) {
 		if (!win.isFocused()) win.flashFrame(true);
 		PGAtag = All[0].intensity;
 	}
-	let list = [];
+	const list = [];
 	let count = 0;
 	if (All.length <= 8)
 		for (let Index = 0; Index < All.length; Index++, count++) {
@@ -792,17 +789,6 @@ function handler(response) {
 			list.push(container);
 		}
 	}
-	if (Json.Alert) IntensityListTime = Date.now();
-	if (Date.now() - IntensityListTime > 180000)
-		list = [];
-	else
-	if (Object.keys(EEW).length == 0)
-		if (Date.now() - WarnAudio > 1500 && audioList.length == 0) {
-			WarnAudio = Date.now();
-			audioPlay("audio/Warn.wav");
-		}
-
-
 	document.getElementById("rt-list").replaceChildren(...list);
 }
 
