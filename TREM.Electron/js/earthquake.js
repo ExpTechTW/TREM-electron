@@ -71,8 +71,6 @@ let TINFO = 0;
 let ticker = null;
 let ITimer = null;
 let Report = 0;
-let Sspeed = 3.5;
-let Pspeed = 6.5;
 const server_timestamp = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
 let PAlert = {};
 let Location;
@@ -1504,6 +1502,8 @@ TREM.Earthquake.on("eew", (data) => {
 	if (EarthquakeList[data.ID] == undefined) EarthquakeList[data.ID] = {};
 	EarthquakeList[data.ID].Time = data.Time;
 	EarthquakeList[data.ID].ID = data.ID;
+	EarthquakeList[data.ID].Pspeed = 6.5;
+	EarthquakeList[data.ID].Sspeed = 3.5;
 	let value = 0;
 	let distance = 0;
 
@@ -1531,11 +1531,11 @@ TREM.Earthquake.on("eew", (data) => {
 
 			if (setting["location.city"] == city && setting["location.town"] == town) {
 				if (setting["auto.waveSpeed"] && data.Speed != undefined) {
-					Pspeed = data.Speed.Pv;
-					Sspeed = data.Speed.Sv;
+					EarthquakeList[data.ID].Pspeed = data.Speed.Pv;
+					EarthquakeList[data.ID].Sspeed = data.Speed.Sv;
 				}
 				level = int;
-				value = Math.round((d - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed) - 5;
+				value = Math.round((d - ((NOW.getTime() - data.Time) / 1000) * EarthquakeList[data.ID].Sspeed) / EarthquakeList[data.ID].Sspeed) - 5;
 				distance = d;
 			}
 
@@ -1664,14 +1664,14 @@ TREM.Earthquake.on("eew", (data) => {
 		id   : data.ID,
 		km   : 0,
 	};
-	value = Math.round((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
+	value = Math.round((distance - ((NOW.getTime() - data.Time) / 1000) * EarthquakeList[data.ID].Sspeed) / EarthquakeList[data.ID].Sspeed);
 	if (Second == -1 || value < Second)
 		if (setting["audio.eew"] && Alert)
 			if (arrive == data.ID || arrive == "") {
 				arrive = data.ID;
 				if (t != null) clearInterval(t);
 				t = setInterval(() => {
-					value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * Sspeed) / Sspeed);
+					value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * EarthquakeList[data.ID].Sspeed) / EarthquakeList[data.ID].Sspeed);
 					Second = value;
 					if (stamp != value && !audioLock1) {
 						stamp = value;
@@ -1989,7 +1989,7 @@ function main(data) {
 	if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (setting["shock.p"]) {
-			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
+			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
 			if (kmP > 0) {
 				if (!EarthquakeList[data.ID].CircleP)
 					EarthquakeList[data.ID].CircleP = L.circle([+data.NorthLatitude, +data.EastLongitude], {
@@ -2024,7 +2024,7 @@ function main(data) {
 					.setRadius(kmP);
 			}
 		}
-		const km = Math.pow((NOW.getTime() - data.Time) * Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
+		const km = Math.pow((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
 		if (km > 0) {
 			const kmS = Math.sqrt(km);
 			EEW[data.ID].km = kmS;
@@ -2075,7 +2075,7 @@ function main(data) {
 				);
 		} else {
 			let Progress = 0;
-			const num = Math.round(((NOW.getTime() - data.Time) * Sspeed / (data.Depth * 1000)) * 100);
+			const num = Math.round(((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Sspeed / (data.Depth * 1000)) * 100);
 			if (num > 15) Progress = 1;
 			if (num > 25) Progress = 2;
 			if (num > 35) Progress = 3;
@@ -2277,11 +2277,11 @@ function updateText() {
 		$("#alert-p").text("X");
 		$("#alert-s").text("X");
 	} else {
-		let num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Sspeed) / Sspeed);
+		let num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * EarthquakeList[INFO[TINFO].ID].Sspeed) / EarthquakeList[INFO[TINFO].ID].Sspeed);
 		if (num <= 0) num = "";
 		$("#alert-s").text(num);
 
-		num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * Pspeed) / Pspeed);
+		num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * EarthquakeList[INFO[TINFO].ID].Pspeed) / EarthquakeList[INFO[TINFO].ID].Pspeed);
 		if (num <= 0) num = "";
 		$("#alert-p").text(num);
 	}
