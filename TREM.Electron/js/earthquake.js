@@ -1543,47 +1543,6 @@ TREM.Earthquake.on("eew", (data) => {
 			if (Intensity > MaxIntensity) MaxIntensity = Intensity;
 			GC[loc[0]] = Intensity;
 		}
-	if (EarthquakeList[data.ID].geojson != undefined) {
-		EarthquakeList[data.ID].geojson.remove();
-		delete EarthquakeList[data.ID].geojson;
-	}
-	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.tw_town, {
-		minZoom   : 7,
-		maxZoom   : 7,
-		tolerance : 20,
-		buffer    : 256,
-		debug     : 0,
-		zIndex    : 1,
-		style     : (properties) => {
-			if (properties.TOWNCODE) {
-				if (!GC[properties.TOWNCODE])
-					return {
-						stroke      : false,
-						color       : "transparent",
-						weight      : 0.8,
-						opacity     : 0,
-						fillColor   : TREM.Colors.surfaceVariant,
-						fillOpacity : 0.6,
-					};
-				return {
-					stroke      : false,
-					color       : "transparent",
-					weight      : 0.8,
-					opacity     : 0,
-					fillColor   : color(GC[properties.TOWNCODE]),
-					fillOpacity : 1,
-				};
-			} else
-				return {
-					color       : "transparent",
-					weight      : 0.8,
-					opacity     : 0,
-					fillColor   : TREM.Colors.surfaceVariant,
-					fillOpacity : 0.6,
-				};
-		},
-	});
-
 	let Alert = true;
 	if (IntensityN(level) < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
 	if (!Info.Notify.includes(data.ID)) {
@@ -1768,6 +1727,47 @@ TREM.Earthquake.on("eew", (data) => {
 	EarthquakeList[data.ID].Timer = setInterval(() => {
 		main(data);
 	}, speed);
+
+	if (EarthquakeList[data.ID].geojson != undefined) {
+		EarthquakeList[data.ID].geojson.remove();
+		delete EarthquakeList[data.ID].geojson;
+	}
+	EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.tw_town, {
+		minZoom   : 7,
+		maxZoom   : 7,
+		tolerance : 20,
+		buffer    : 256,
+		debug     : 0,
+		zIndex    : 1,
+		style     : (properties) => {
+			if (properties.TOWNCODE) {
+				if (!GC[properties.TOWNCODE])
+					return {
+						stroke      : false,
+						color       : "transparent",
+						weight      : 0.8,
+						opacity     : 0,
+						fillColor   : TREM.Colors.surfaceVariant,
+						fillOpacity : 0.6,
+					};
+				return {
+					stroke      : false,
+					color       : "transparent",
+					weight      : 0.8,
+					opacity     : 0,
+					fillColor   : color(GC[properties.TOWNCODE]),
+					fillOpacity : 1,
+				};
+			} else
+				return {
+					color       : "transparent",
+					weight      : 0.8,
+					opacity     : 0,
+					fillColor   : TREM.Colors.surfaceVariant,
+					fillOpacity : 0.6,
+				};
+		},
+	});
 
 	setTimeout(() => {
 		if (setting["webhook.url"] != "") {
@@ -2212,6 +2212,7 @@ function main(data) {
 			}
 		clearInterval(EarthquakeList[data.ID].Timer);
 		document.getElementById("box-10").innerHTML = "";
+		if (EarthquakeList[data.ID].geojson != undefined) EarthquakeList[data.ID].geojson.remove();
 		delete EarthquakeList[data.ID];
 		delete EEW[data.ID];
 		if (Object.keys(EarthquakeList).length == 0) {
