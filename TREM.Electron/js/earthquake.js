@@ -799,14 +799,9 @@ async function fetchFiles() {
 	dump({ level: 0, message: "Get Location File", origin: "Location" });
 	PGAjson = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
 	dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
-	station_data();
-	setInterval(() => {station_data();}, 600_000);
+	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+	dump({ level: 0, message: "Get Station File", origin: "Location" });
 	PGAMain();
-
-	async function station_data() {
-		station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
-		dump({ level: 0, message: "Get Station File", origin: "Location" });
-	}
 }
 
 // #region 用戶所在位置
