@@ -11,8 +11,7 @@ const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
 const workerFarm = require("worker-farm"),
-	workers_rts = workerFarm(require.resolve("../js/core/rts")),
-	workers_rf = workerFarm(require.resolve("../js/core/rf"));
+	workers_rts = workerFarm(require.resolve("../js/core/rts"));
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -91,7 +90,6 @@ let Location;
 let station = {};
 let PGAjson = {};
 let PGAMainClock = null;
-let RFMainClock = null;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -1278,12 +1276,6 @@ async function init() {
 
 function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
-
-	if (RFMainClock) clearInterval(RFMainClock);
-	RFMainClock = setInterval(() => {
-		// eslint-disable-next-line no-empty-function
-		workers_rf([], (err, Res) => {});
-	}, 100);
 
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {
