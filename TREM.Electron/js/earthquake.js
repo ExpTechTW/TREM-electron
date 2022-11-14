@@ -11,8 +11,7 @@ const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
 const workerFarm = require("worker-farm"),
-	workers_rts = workerFarm(require.resolve("../js/core/rts")),
-	workers_rf = workerFarm(require.resolve("../js/core/rf"));
+	workers_rts = workerFarm(require.resolve("../js/core/rts"));
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -92,7 +91,6 @@ let Location;
 let station = {};
 let PGAjson = {};
 let PGAMainClock = null;
-let RFMainClock = null;
 let investigation = false;
 let ReportTag = 0;
 TREM.ReportTag1 = 0;
@@ -623,11 +621,12 @@ async function init() {
 				}
 
 				const stationall = Object.keys(station).length;
+				const stationPercentage = Math.round(stationnow / stationall * 1000) / 10;
 
 				const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
-				const formatCPUUsage = (data) => `${data} %`;
+				// const formatCPUUsage = (data) => `${data} %`;
 				const memoryData = process.memoryUsage();
-				const CPUData = formatCPUUsage(process.getCPUUsage().percentCPUUsage.toString().slice(0, 5));
+				// const CPUData = formatCPUUsage(process.getCPUUsage().percentCPUUsage.toString().slice(0, 5));
 				const rss = formatMemoryUsage(memoryData.rss);
 				// const heapTotal = formatMemoryUsage(memoryData.heapTotal);
 				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
@@ -636,9 +635,9 @@ async function init() {
 				const warn = (Warn) ? "⚠️" : "";
 				const error = (testEEWerror) ? "❌" : "";
 				const unlock = (Unlock) ? "⚡" : "";
-				$("#log").text(`${stationnow}/${stationall} | ${CPUData} | ${rss}`);
-				$("#log1").text(`${stationnow}/${stationall} | ${CPUData} | ${rss}`);
-				$("#log2").text(`${stationnow}/${stationall} | ${CPUData} | ${rss}`);
+				$("#log").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
+				$("#log1").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
+				$("#log2").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
 				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
 				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
 				$("#app-version2").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
@@ -1434,21 +1433,22 @@ async function init() {
 	global.gc();
 	// const userJSON = require(path.resolve(__dirname, "../js/1667291675675.json"));
 	// TREM.Intensity.handle(userJSON);
-	// const userJSON1 = require(path.resolve(__dirname, "../js/1667356513251.json"));
+	// const userJSON1 = require(path.resolve(__dirname, "../js/1668323000997.json"));
 	// TREM.MapIntensity.palert(userJSON1.Data);
 	// const userJSON2 = require(path.resolve(__dirname, "../js/1667356513251.json"));
 	// handler(userJSON2);
+
+	document.getElementById("rt-station-local").addEventListener("click", () => {
+		navigator.clipboard.writeText(document.getElementById("rt-station-local-id").innerText).then(() => {
+			console.log(document.getElementById("rt-station-local-id").innerText);
+			console.log("複製成功");
+		});
+	});
 }
 // #endregion
 
 function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
-
-	if (RFMainClock) clearInterval(RFMainClock);
-	RFMainClock = setInterval(() => {
-		// eslint-disable-next-line no-empty-function
-		workers_rf([], (err, Res) => {});
-	}, 100);
 
 	if (PGAMainClock) clearInterval(PGAMainClock);
 	PGAMainClock = setInterval(() => {
@@ -2856,7 +2856,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 	const GC = {};
 	let level;
-	let MaxIntensity = 0;
+	let MaxIntensity = { value: 0 };
 	const focusBounds = new maplibregl.LngLatBounds();
 
 	for (const eewid in EarthquakeList)
