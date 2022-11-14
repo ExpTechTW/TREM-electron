@@ -1388,10 +1388,13 @@ async function init() {
 					if (km > 300000)
 						Zoom = 4.5;
 					// const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
+
 					// if (num >= 5)
 					// 	TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
 					// else
-						// TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2)], size: Zoom });
+					// 	TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], size: Zoom });
+					// EEW[Object.keys(EEW)[index]].time = NOW.getTime();
+
 					TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
 					EEW[Object.keys(EEW)[index]].time = NOW.getTime();
 				}
@@ -1426,8 +1429,10 @@ async function init() {
 
 					if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
 				}
+
 				TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
 			}
+
 			auto = true;
 		} else if (auto) {
 			auto = false;
@@ -1865,6 +1870,7 @@ function handler(response) {
 			if (!win.isFocused()) win.flashFrame(true);
 			PGAtag = All[0].intensity;
 		}
+
 		let count = 0;
 
 		if (All.length <= 8) {
@@ -1983,13 +1989,13 @@ TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
 		Focus[2] = size;
 
 		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || size != Maps.main.getZoom())
-			Maps.main.flyTo({
+			Maps.main.jumpTo({
 				center : [center[1], center[0]],
 				zoom   : size,
 			});
 	} else if (Focus.length != 0) {
 		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != Maps.main.getZoom())
-			Maps.main.flyTo({
+			Maps.main.jumpTo({
 				center : [Focus[1], Focus[0]],
 				zoom   : Focus[2],
 			});
@@ -2003,7 +2009,7 @@ function Mapsmainfocus() {
 		122.18,
 		25.47,
 	], {
-		padding  : { right: Maps.report.getCanvas().width / 8 },
+		padding  : { right: Maps.main.getCanvas().width / 6 },
 		speed    : 2,
 		curve    : 1,
 		easing   : (e) => Math.sin(e * Math.PI / 2),
@@ -2893,13 +2899,13 @@ TREM.Earthquake.on("eew", (data) => {
 
 	TREM.MapIntensity.expected(GC);
 
-	const focusCamera = Maps.main.cameraForBounds(focusBounds);
+	// const focusCamera = Maps.main.cameraForBounds(focusBounds);
 
-	Maps.main.easeTo({
-		center  : focusCamera.center,
-		zoom    : focusCamera.zoom > 7.5 ? 7.5 : focusCamera.zoom,
-		padding : { bottom: 100, right: 100 },
-	});
+	// Maps.main.easeTo({
+	// 	center  : focusCamera.center,
+	// 	zoom    : focusCamera.zoom > 7.5 ? 7.5 : focusCamera.zoom,
+	// 	// padding : { bottom: 100, right: 100 },
+	// });
 
 	let Alert = true;
 
