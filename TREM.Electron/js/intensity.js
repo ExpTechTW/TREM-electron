@@ -105,6 +105,7 @@ TREM.Intensity = {
 			document.getElementById("intensity-overview").style.visibility = "none";
 			document.getElementById("intensity-overview").classList.remove("show");
 			delete this.intensities;
+			this._markers = [];
 			this.intensities = new Map();
 			this.alertTime = 0;
 			this.isTriggered = false;
