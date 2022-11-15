@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "6.0.0-pre.2",
+  "version": "6.0.0-pre.3",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "scripts": {
@@ -76,6 +76,7 @@
     "leaflet": "^1.9.2",
     "leaflet-edgebuffer": "^1.0.6",
     "leaflet-geojson-vt": "1.1.0",
+    "node-datachannel": "^0.4.0",
     "tinycolor2": "^1.4.2",
     "worker-farm": "github:ExpTechTW/node-worker-farm",
     "ws": "^8.11.0"
