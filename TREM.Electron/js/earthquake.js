@@ -35,7 +35,7 @@ localStorage.dirname = __dirname;
 // 	const bytecode = script.createCachedData();
 // 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
 // }
-bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+// bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
 const url = "https://exptech.com.tw/post";
@@ -156,9 +156,21 @@ async function init() {
 					time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
 				}
 				let GetDataState = "";
-				if (GetData) {
-					GetData = false;
-					GetDataState = "✉";
+				if (GetData_WS) {
+					GetData_WS = false;
+					GetDataState += "✉";
+				}
+				if (GetData_FCM) {
+					GetData_FCM = false;
+					GetDataState += "🔌";
+				}
+				if (GetData_P2P) {
+					GetData_P2P = false;
+					GetDataState += "🧩";
+				}
+				if (GetData_time) {
+					GetData_time = false;
+					GetDataState += "⏰";
 				}
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
 				const warn = (Warn) ? "⚠️" : "";
