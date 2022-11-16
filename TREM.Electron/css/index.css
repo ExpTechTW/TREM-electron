@@ -1740,6 +1740,39 @@ body:not(.darkmode) #here-marker {
 	cursor: pointer;
 }
 
+.rt-station-tooltip {
+	background-color: rgb(var(--md-sys-color-surface-variant)) !important;
+	border: none !important;
+	border-radius: 8px !important;
+	color: rgb(var(--md-sys-color-on-surface-variant)) !important;
+	padding: 8px !important;
+}
+
+.rt-station-tooltip::before {
+	display: none !important;
+}
+
+.rt-station-tooltip > div:first-child {
+	font-weight: 500;
+}
+
+.rt-station-tooltip > div:nth-child(3)::before {
+	content: "PGA";
+	font-weight: 400;
+	padding-right: 8px;
+}
+
+.rt-station-tooltip > div:nth-child(3)::after {
+	content: "gal";
+	padding-left: 4px;
+}
+
+.rt-station-tooltip > div:last-child::before {
+	content: var(--rt-station-intensity);
+	font-weight: 400;
+	padding-right: 8px;
+}
+
 svg#svg-defs {
 	position: absolute;
 	visibility: hidden;
