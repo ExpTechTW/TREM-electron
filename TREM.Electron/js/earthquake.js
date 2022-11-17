@@ -38,7 +38,6 @@ localStorage.dirname = __dirname;
 // bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
-const url = "/post";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -1225,12 +1224,9 @@ const stopReplay = function() {
 		ReportGET();
 	}
 	const data = {
-		Function      : "earthquake",
-		Type          : "cancel",
-		FormatVersion : 3,
-		UUID          : localStorage.UUID,
+		uuid: localStorage.UUID,
 	};
-	ExpTechAPI.v0.post(url, data)
+	ExpTechAPI.v1.post("/trem/stop", data)
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
@@ -1245,14 +1241,11 @@ ipcMain.on("testEEW", () => {
 			setTimeout(() => {
 				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 				const data = {
-					Function      : "earthquake",
-					Type          : "test",
-					FormatVersion : 3,
-					UUID          : localStorage.UUID,
-					ID            : list[index],
+					uuid : localStorage.UUID,
+					id   : list[index],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				ExpTechAPI.v0.post(url, data)
+				ExpTechAPI.v1.post("/trem/replay", data)
 					.catch((error) => {
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
@@ -1261,13 +1254,10 @@ ipcMain.on("testEEW", () => {
 	} else {
 		dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 		const data = {
-			Function      : "earthquake",
-			Type          : "test",
-			FormatVersion : 3,
-			UUID          : localStorage.UUID,
+			uuid: localStorage.UUID,
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		ExpTechAPI.v0.post(url, data)
+		ExpTechAPI.v1.post("/trem/replay", data)
 			.catch((error) => {
 				dump({ level: 2, message: error, origin: "Verbose" });
 			});
