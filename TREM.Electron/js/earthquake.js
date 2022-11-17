@@ -38,7 +38,7 @@ localStorage.dirname = __dirname;
 // bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
-const url = "https://exptech.com.tw/post";
+const url = "/post";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -1230,7 +1230,7 @@ const stopReplay = function() {
 		FormatVersion : 3,
 		UUID          : localStorage.UUID,
 	};
-	axios.post(url, data)
+	ExpTechAPI.v0.post(url, data)
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
@@ -1252,7 +1252,7 @@ ipcMain.on("testEEW", () => {
 					ID            : list[index],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				axios.post(url, data)
+				ExpTechAPI.v0.post(url, data)
 					.catch((error) => {
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
@@ -1267,7 +1267,7 @@ ipcMain.on("testEEW", () => {
 			UUID          : localStorage.UUID,
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		axios.post(url, data)
+		ExpTechAPI.v0.post(url, data)
 			.catch((error) => {
 				dump({ level: 2, message: error, origin: "Verbose" });
 			});
@@ -1756,10 +1756,13 @@ TREM.Earthquake.on("eew", (data) => {
 				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 			};
 			dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
-			axios.post(setting["webhook.url"], msg)
-				.catch((error) => {
-					dump({ level: 2, message: error, origin: "Webhook" });
-				});
+			fetch(setting["webhook.url"], {
+				method  : "POST",
+				headers : { "Content-Type": "application/json" },
+				body    : JSON.stringify(msg),
+			}).catch((error) => {
+				dump({ level: 2, message: error, origin: "Webhook" });
+			});
 		}
 	}, 2000);
 });
