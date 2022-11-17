@@ -352,14 +352,17 @@ TREM.Report = {
 					[report.epicenterLat, report.epicenterLon],
 					{
 						icon: L.divIcon({
-							html      : TREM.Resources.icon.cross,
+							html      : TREM.Resources.icon.oldcross,
 							iconSize  : [report.magnitudeValue * 4, report.magnitudeValue * 4],
 							className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
 						}),
 						opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
 						zIndexOffset : 1000 + this.cache.size - keys.indexOf(report.identifier),
+					})
+					.on("click", () => {
+						TREM.set_report_overview = 0;
+						this.setView("report-overview", report.identifier);
 					}));
-
 				this._markersGroup = L.featureGroup(this._markers).addTo(Maps.report);
 			}
 	},

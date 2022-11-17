@@ -40,7 +40,7 @@ localStorage.dirname = __dirname;
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
-const url = "https://exptech.com.tw/post";
+const posturl = "https://exptech.com.tw/api/v1/trem/";
 const geturl = "https://exptech.com.tw/api/v1/trem/RTS?time=";
 const MapData = {};
 const Timers = {};
@@ -2333,7 +2333,7 @@ function handler(response) {
 		} else if (TREM.MapArea.isVisible) {
 			TREM.MapArea.clear();
 		}
-	} else {
+	} else if (!TREM.Detector.webgl) {
 		for (let index = 0; index < Object.keys(detected_box_list).length; index++) {
 			if (RMT == 0) Maps.main.removeLayer(detected_box_list[Object.keys(detected_box_list)[index]]);
 			delete detected_box_list[Object.keys(detected_box_list)[index]];
@@ -2345,7 +2345,7 @@ function handler(response) {
 		for (let index = 0; index < Object.keys(detected_list).length; index++) {
 			const Intensity = detected_list[Object.keys(detected_list)[index]].Intensity;
 
-			if (NOW.getTime() - detected_list[Object.keys(detected_list)[index]].Time > 30000 || PGACancel) {
+			if (NOW.getTime() - detected_list[Object.keys(detected_list)[index]].Time > 30_000 || PGACancel) {
 				delete detected_list[Object.keys(detected_list)[index]];
 				index--;
 			} else {
@@ -3044,12 +3044,10 @@ const stopReplay = function() {
 
 	WarnAudio = Date.now() + 3000;
 	const data = {
-		Function      : "earthquake",
-		Type          : "cancel",
-		FormatVersion : 3,
-		UUID          : localStorage.UUID,
+		uuid: localStorage.UUID,
 	};
-	axios.post(url, data)
+	axios.post(posturl + "stop", data)
+	// ExpTechAPI.v1.post("/trem/stop", data)
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
@@ -3104,14 +3102,12 @@ ipcMain.on("testEEW", () => {
 			setTimeout(() => {
 				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 				const data = {
-					Function      : "earthquake",
-					Type          : "test",
-					FormatVersion : 3,
-					UUID          : localStorage.UUID,
-					ID            : list[index],
+					uuid : localStorage.UUID,
+					id   : list[index],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				axios.post(url, data)
+				axios.post(posturl + "replay", data)
+				// ExpTechAPI.v1.post("/trem/replay", data)
 					.then(() => {
 						testEEWerror = false;
 					})
@@ -3124,13 +3120,11 @@ ipcMain.on("testEEW", () => {
 	} else {
 		dump({ level: 0, message: "Start EEW NO TestID Test", origin: "EEW" });
 		const data = {
-			Function      : "earthquake",
-			Type          : "test",
-			FormatVersion : 3,
-			UUID          : localStorage.UUID,
+			uuid: localStorage.UUID,
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		axios.post(url, data)
+		axios.post(posturl + "replay", data)
+		// ExpTechAPI.v1.post("/trem/replay", data)
 			.then(() => {
 				testEEWerror = false;
 			})
