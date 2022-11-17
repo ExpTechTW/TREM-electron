@@ -465,13 +465,11 @@ function PGAMain() {
 			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res) => {
 				if (!err) {
 					Ping = Date.now();
-					TimerDesynced = false;
 					Response = Res;
 					handler(Response);
-				} else {
-					TimerDesynced = true;
+				} else
 					handler(Response);
-				}
+
 			});
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
