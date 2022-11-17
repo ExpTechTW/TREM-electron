@@ -857,7 +857,9 @@ async function init() {
 		}
 		*/
 
-		TREM.Detector.webgl = false;
+		if (TREM.Detector.webgl)
+			TREM.Detector.webgl = setting["compatibility.hwaccel"];
+		// TREM.Detector.webgl = false;
 		console.log("WebGL: " + TREM.Detector.webgl);
 
 		if (TREM.Detector.webgl) {
@@ -1721,33 +1723,58 @@ async function init() {
 				for (let index = 0; index < Object.keys(EEW).length; index++)
 					if (EEWT.id == 0 || EEWT.id == EEW[Object.keys(EEW)[index]].id || NOW.getTime() - EEW[Object.keys(EEW)[index]].time >= 10000) {
 						EEWT.id = EEW[Object.keys(EEW)[index]].id;
-						let Zoom = 7;
+						let Zoom = 9;
+						const X = 0;
 						const km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
 
 						if (km > 100000)
-							Zoom = 6.5;
+							Zoom = 8;
 
 						if (km > 150000)
-							Zoom = 6;
+							Zoom = 7.5;
 
 						if (km > 200000)
-							Zoom = 5.5;
+							Zoom = 7;
 
 						if (km > 250000)
-							Zoom = 5;
+							Zoom = 6.5;
 
 						if (km > 300000)
-							Zoom = 4.5;
-						// const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
+							Zoom = 6;
+						const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
 
-						// if (num >= 5)
-						// 	TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
-						// else
-						// 	TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], size: Zoom });
-						// EEW[Object.keys(EEW)[index]].time = NOW.getTime();
-
-						TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
+						if (num >= 5)
+							TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
+						else
+							TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], size: Zoom });
 						EEW[Object.keys(EEW)[index]].time = NOW.getTime();
+						// let Zoom = 7;
+						// const km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
+
+						// if (km > 100000)
+						// 	Zoom = 6.5;
+
+						// if (km > 150000)
+						// 	Zoom = 6;
+
+						// if (km > 200000)
+						// 	Zoom = 5.5;
+
+						// if (km > 250000)
+						// 	Zoom = 5;
+
+						// if (km > 300000)
+						// 	Zoom = 4.5;
+						// // const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
+
+						// // if (num >= 5)
+						// // 	TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
+						// // else
+						// // 	TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], size: Zoom });
+						// // EEW[Object.keys(EEW)[index]].time = NOW.getTime();
+
+						// TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
+						// EEW[Object.keys(EEW)[index]].time = NOW.getTime();
 					}
 
 				auto = true;
@@ -2242,8 +2269,7 @@ function handler(response) {
 				if (Intensity == undefined) continue;
 
 				if (NOW.getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
-					if (TREM.Detector.webgl)
-						TREM.MapArea.clear(pgaKeys[index]);
+					TREM.MapArea.clear(pgaKeys[index]);
 					delete detected_list[pgaKeys[index]];
 					delete pgaKeys[index];
 					index--;
@@ -2268,9 +2294,7 @@ function handler(response) {
 
 					if (passed) {
 						detected_list[pgaKeys[index]].passed = true;
-
-						if (TREM.Detector.webgl)
-							TREM.MapArea.clear(pgaKeys[index]);
+						TREM.MapArea.clear(pgaKeys[index]);
 					} else {
 						TREM.MapArea.setArea(pgaKeys[index], Intensity);
 						const cache = Maps.main.getSource("Source_area")._data.features[pgaKeys[index] - 1].geometry.coordinates[0];
