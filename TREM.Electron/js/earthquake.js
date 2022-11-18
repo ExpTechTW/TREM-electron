@@ -8,8 +8,6 @@ const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
-const workerFarm = require("worker-farm"),
-	workers_rts = workerFarm(require.resolve("../js/core/rts"));
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -459,17 +457,21 @@ function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 	if (Timers.rts_clock) clearInterval(Timers.rts_clock);
 	Timers.rts_clock = setInterval(() => {
-		setTimeout(() => {
+		setTimeout(async () => {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res) => {
-				if (!err) {
-					Ping = Date.now();
-					Response = Res;
-					handler(Response);
-				} else
-					handler(Response);
-
-			});
+			const controller = new AbortController();
+			setTimeout(() => {
+				controller.abort();
+			}, 950);
+			let ans = await fetch(`https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["api.key"]}`, { signal: controller.signal }).catch((err) => void 0);
+			if (controller.signal.aborted || ans == undefined) {
+				handler(Response);
+				return;
+			}
+			ans = await ans.json();
+			Ping = Date.now();
+			Response = ans;
+			handler(Response);
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
 }
