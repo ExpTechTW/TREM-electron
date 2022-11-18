@@ -8,6 +8,7 @@ const { default: turfCircle } = require("@turf/circle");
 const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:timers");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
+const axios = require("axios");
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
 const workerFarm = require("worker-farm"),
@@ -112,6 +113,7 @@ let MaxIntensity1 = 0;
 let testEEWerror = false;
 TREM.win = BrowserWindow.fromId(process.env.window * 1);
 let stationnow = 0;
+let RMTpgaTime = 0;
 // #endregion
 
 TREM.Detector = {
@@ -753,9 +755,24 @@ async function init() {
 
 				let GetDataState = "";
 
-				if (GetData) {
-					GetData = false;
-					GetDataState = "✉";
+				if (GetData_WS) {
+					GetData_WS = false;
+					GetDataState += "✉";
+				}
+
+				if (GetData_FCM) {
+					GetData_FCM = false;
+					GetDataState += "🔌";
+				}
+
+				if (GetData_P2P) {
+					GetData_P2P = false;
+					GetDataState += "🧩";
+				}
+
+				if (GetData_time) {
+					GetData_time = false;
+					GetDataState += "⏰";
 				}
 
 				const stationall = Object.keys(station).length;
@@ -2340,10 +2357,14 @@ function handler(response) {
 			index--;
 		}
 
-		RMT++;
+		if (NOW.getTime() - RMTpgaTime > 30_000)
+			RMT = 0;
+		else
+			RMT++;
 
 		for (let index = 0; index < Object.keys(detected_list).length; index++) {
 			const Intensity = detected_list[Object.keys(detected_list)[index]].Intensity;
+			RMTpgaTime = NOW.getTime();
 
 			if (NOW.getTime() - detected_list[Object.keys(detected_list)[index]].Time > 30_000 || PGACancel) {
 				delete detected_list[Object.keys(detected_list)[index]];
