@@ -877,7 +877,7 @@ async function init() {
 		if (TREM.Detector.webgl)
 			TREM.Detector.webgl = setting["compatibility.hwaccel"];
 		// TREM.Detector.webgl = false;
-		dump({ level: 0, message: "WebGL: " + TREM.Detector.webgl, origin: "WebGL" });
+		dump({ level: 0, message: TREM.Detector.webgl, origin: "WebGL" });
 
 		if (TREM.Detector.webgl) {
 
