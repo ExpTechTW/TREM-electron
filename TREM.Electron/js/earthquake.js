@@ -458,20 +458,22 @@ function PGAMain() {
 	if (Timers.rts_clock) clearInterval(Timers.rts_clock);
 	Timers.rts_clock = setInterval(() => {
 		setTimeout(async () => {
-			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-			const controller = new AbortController();
-			setTimeout(() => {
-				controller.abort();
-			}, 950);
-			let ans = await fetch(`https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["api.key"]}`, { signal: controller.signal }).catch((err) => void 0);
-			if (controller.signal.aborted || ans == undefined) {
+			try {
+				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
+				const controller = new AbortController();
+				setTimeout(() => {
+					controller.abort();
+				}, 950);
+				let ans = await fetch(`https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["api.key"]}`, { signal: controller.signal }).catch((err) => void 0);
+				if (controller.signal.aborted || ans == undefined) {
+					handler(Response);
+					return;
+				}
+				ans = await ans.json();
+				Ping = Date.now();
+				Response = ans;
 				handler(Response);
-				return;
-			}
-			ans = await ans.json();
-			Ping = Date.now();
-			Response = ans;
-			handler(Response);
+			} catch (err) {void 0;}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
 }
