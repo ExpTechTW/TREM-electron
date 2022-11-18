@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "6.0.0-106-pre8",
+  "version": "6.0.0-106-pre9",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "homepage": "https://exptech.com.tw/",
@@ -14,7 +14,7 @@
   "build": {
     "productName": "TREM",
     "appId": "tw.exptech.trem",
-    "asar": false,
+    "asar": true,
     "dmg": {
       "contents": [
         {
@@ -30,7 +30,11 @@
       ]
     },
     "win": {
-      "publish": null,
+      "publish": [{
+        "provider": "github",
+        "owner": "yayacat",
+        "repo": "TREM"
+      }],
       "target": [],
       "icon": "TREM.ico"
     },
@@ -47,7 +51,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ExpTechTW/TREM.git"
+    "url": "https://github.com/yayacat/TREM.git"
   },
   "keywords": [],
   "license": "AGPL-3.0",

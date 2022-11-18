@@ -17,6 +17,12 @@ autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
 autoUpdater.logger = logger;
 
+// Object.defineProperty(TREM, 'isPackaged', {
+// 	get() {
+// 	  return true;
+// 	}
+//   });
+
 /**
  * @type {Tray}
  */
@@ -195,7 +201,7 @@ autoUpdater.on("update-available", (info) => {
 					icon  : "TREM.ico",
 				}).on("click", () => {
 					logger.info(info);
-					shell.openExternal(`https://github.com/ExpTechTW/TREM/releases/tag/5.1.4${info.version}`);
+					shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/${info.version}`);
 				}).show();
 				break;
 			}
