@@ -35,7 +35,7 @@ localStorage.dirname = __dirname;
 // 	const bytecode = script.createCachedData();
 // 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
 // }
-// bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
 const MapData = {};
