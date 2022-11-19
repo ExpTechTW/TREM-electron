@@ -1938,12 +1938,12 @@ function PGAMain() {
 					PGAMainbkup();
 				});
 
-				if (controller.signal.aborted || ans == undefined) {
+				if (controller.signal.aborted || ans == undefined)
 					return;
-				}
 
 				ans = await ans.json();
 				Ping = Date.now();
+				TimerDesynced = false;
 				Response = ans;
 				handler(Response);
 			} catch (err) {
