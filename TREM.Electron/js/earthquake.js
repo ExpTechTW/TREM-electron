@@ -11,8 +11,6 @@ const ExpTechAPI = new ExpTech();
 const axios = require("axios");
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
-const workerFarm = require("worker-farm"),
-	workers_rts = workerFarm(require.resolve("../js/core/rts"));
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -1925,23 +1923,34 @@ async function init() {
 function PGAMain() {
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 
-	if (Timers.rts) clearInterval(Timers.rts);
-	Timers.rts = setInterval(() => {
-		setTimeout(() => {
-			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res) => {
-				if (!err) {
-					Ping = Date.now();
-					TimerDesynced = false;
-					Response = Res;
-					handler(Response);
-				} else {
+	if (Timers.rts_clock) clearInterval(Timers.rts_clock);
+	Timers.rts_clock = setInterval(() => {
+		setTimeout(async () => {
+			try {
+				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
+				const controller = new AbortController();
+				setTimeout(() => {
+					controller.abort();
+				}, 950);
+				let ans = await fetch(`${geturl}${ReplayTime}&key=${setting["api.key"]}`, { signal: controller.signal }).catch((err) => {
 					TimerDesynced = true;
-					handler(Response);
 					stationnow = 0;
 					PGAMainbkup();
+				});
+
+				if (controller.signal.aborted || ans == undefined) {
+					return;
 				}
-			});
+
+				ans = await ans.json();
+				Ping = Date.now();
+				Response = ans;
+				handler(Response);
+			} catch (err) {
+				TimerDesynced = true;
+				stationnow = 0;
+				PGAMainbkup();
+			}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
 }
@@ -1949,32 +1958,37 @@ function PGAMain() {
 function PGAMainbkup() {
 	dump({ level: 0, message: "Starting PGA timer backup", origin: "PGATimer" });
 
-	if (Timers.rts) clearInterval(Timers.rts);
-	Timers.rts = setInterval(() => {
+	if (Timers.rts_clock) clearInterval(Timers.rts_clock);
+	Timers.rts_clock = setInterval(() => {
 		setTimeout(() => {
-			const CancelToken = axios.CancelToken;
-			let cancel;
-			setTimeout(() => {
-				cancel();
-			}, 2500);
-			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-			axios({
-				method      : "get",
-				url         : geturl + ReplayTime + "&key=" + setting["api.key"] ?? "",
-				cancelToken : new CancelToken((c) => {
-					cancel = c;
-				}),
-			}).then((response) => {
-				Ping = Date.now();
-				TimerDesynced = false;
-				Response = response.data;
-				handler(Response);
-			}).catch((err) => {
+			try {
+				const CancelToken = axios.CancelToken;
+				let cancel;
+				setTimeout(() => {
+					cancel();
+				}, 950);
+				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
+				axios({
+					method      : "get",
+					url         : geturl + ReplayTime + "&key=" + setting["api.key"] ?? "",
+					cancelToken : new CancelToken((c) => {
+						cancel = c;
+					}),
+				}).then((response) => {
+					Ping = Date.now();
+					TimerDesynced = false;
+					Response = response.data;
+					handler(Response);
+				}).catch((err) => {
+					TimerDesynced = true;
+					stationnow = 0;
+					PGAMain();
+				});
+			} catch (err) {
 				TimerDesynced = true;
-				handler(Response);
 				stationnow = 0;
 				PGAMain();
-			});
+			}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
 }
