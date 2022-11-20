@@ -10,8 +10,6 @@ const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 const ExpTechAPI = new ExpTech();
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
-const workerFarm = require("worker-farm"),
-	workers_rts = workerFarm(require.resolve("../js/core/rts"));
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -1276,19 +1274,23 @@ function PGAMain() {
 
 	if (Timers.rts) clearInterval(Timers.rts);
 	Timers.rts = setInterval(() => {
-		setTimeout(() => {
+		setTimeout(async () => {
 			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-			workers_rts([ReplayTime, setting["api.key"] ?? ""], (err, Res) => {
-				if (!err) {
-					Ping = Date.now();
-					TimerDesynced = false;
-					Response = Res;
-					handler(Response);
-				} else {
-					TimerDesynced = true;
-					handler(Response);
-				}
-			});
+			const controller = new AbortController();
+			setTimeout(() => {
+				controller.abort();
+			}, 950);
+			let ans = await fetch(`https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["api.key"]}`, { signal: controller.signal }).catch((err) => void 0);
+
+			if (controller.signal.aborted || ans == undefined) {
+				handler(Response);
+				return;
+			}
+
+			ans = await ans.json();
+			Ping = Date.now();
+			Response = ans;
+			handler(Response);
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
 }
@@ -1527,7 +1529,7 @@ function handler(response) {
 					Time     : NOW.getTime(),
 					Shot     : 1,
 				});
-			}, 2250);
+			}, 1250);
 			changeView("main", "#mainView_btn");
 
 			if (setting["Real-time.show"]) win.showInactive();
@@ -2086,16 +2088,12 @@ const stopReplay = function() {
 	}
 
 	const data = {
-		Function      : "earthquake",
-		Type          : "cancel",
-		FormatVersion : 3,
-		UUID          : localStorage.UUID,
+		uuid: localStorage.UUID,
 	};
-	axios.post(url, data)
+	ExpTechAPI.v1.post("/trem/stop", data)
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
-
 	document.getElementById("togglenav_btn").classList.remove("hide");
 	document.getElementById("stopReplay").classList.add("hide");
 };
@@ -2107,14 +2105,11 @@ ipcMain.on("testEEW", () => {
 			setTimeout(() => {
 				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 				const data = {
-					Function      : "earthquake",
-					Type          : "test",
-					FormatVersion : 3,
-					UUID          : localStorage.UUID,
-					ID            : list[index],
+					uuid : localStorage.UUID,
+					id   : list[index],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				axios.post(url, data)
+				ExpTechAPI.v1.post("/trem/replay", data)
 					.catch((error) => {
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
@@ -2123,13 +2118,10 @@ ipcMain.on("testEEW", () => {
 	} else {
 		dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 		const data = {
-			Function      : "earthquake",
-			Type          : "test",
-			FormatVersion : 3,
-			UUID          : localStorage.UUID,
+			uuid: localStorage.UUID,
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		axios.post(url, data)
+		ExpTechAPI.v1.post("/trem/replay", data)
 			.catch((error) => {
 				dump({ level: 2, message: error, origin: "Verbose" });
 			});
@@ -2767,10 +2759,13 @@ TREM.Earthquake.on("eew", (data) => {
 				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 			};
 			dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
-			axios.post(setting["webhook.url"], msg)
-				.catch((error) => {
-					dump({ level: 2, message: error, origin: "Webhook" });
-				});
+			fetch(setting["webhook.url"], {
+				method  : "POST",
+				headers : { "Content-Type": "application/json" },
+				body    : JSON.stringify(msg),
+			}).catch((error) => {
+				dump({ level: 2, message: error, origin: "Webhook" });
+			});
 		}
 	}, 2000);
 });
