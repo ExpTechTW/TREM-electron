@@ -28,15 +28,15 @@ TREM.AudioContext = new AudioContext({});
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
-// if (fs.existsSync("./js/server.js")) {
-// 	const vm = require("vm");
-// 	const v8 = require("v8");
-// 	v8.setFlagsFromString("--no-lazy");
-// 	const code = fs.readFileSync(path.resolve(__dirname, "../js/server.js"), "utf-8");
-// 	const script = new vm.Script(code);
-// 	const bytecode = script.createCachedData();
-// 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
-// }
+if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
+	const vm = require("vm");
+	const v8 = require("v8");
+	v8.setFlagsFromString("--no-lazy");
+	const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
+	const script = new vm.Script(code);
+	const bytecode = script.createCachedData();
+	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
+}
 
 // #region 變數
 const url = "https://exptech.com.tw/post";
