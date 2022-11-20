@@ -91,6 +91,9 @@ let report_get_timestamp = 0;
 
 // #region 初始化
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+const folder = path.join(app.getPath("userData"), "data");
+if (!fs.existsSync(folder))
+	fs.mkdirSync(folder);
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
@@ -1209,7 +1212,7 @@ ipcMain.once("start", () => {
 		setInterval(() => {
 			if (DATAstamp != 0 && Stamp != DATAstamp) {
 				Stamp = DATAstamp;
-				FCMdata(DATA);
+				FCMdata(DATA, DATA_Unit);
 			}
 		}, 0);
 		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer}`, origin: "Initialization" });
@@ -1329,7 +1332,7 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 // #endregion
 
 // #region EEW
-async function FCMdata(data) {
+async function FCMdata(data, Unit) {
 	const json = JSON.parse(data);
 	if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	server_timestamp.push(json.TimeStamp);
@@ -1337,17 +1340,13 @@ async function FCMdata(data) {
 	// eslint-disable-next-line no-empty-function
 	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
 	GetData = true;
-	if (json.response != "You have successfully subscribed to earthquake information" && json.FormatVersion == 1) {
-		const folder = path.join(app.getPath("userData"), "data");
-		if (!fs.existsSync(folder))
-			fs.mkdirSync(folder);
-		const list = fs.readdirSync(folder);
-		for (let index = 0; index < list.length; index++) {
-			const date = fs.statSync(`${folder}/${list[index]}`);
-			if (new Date().getTime() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
-		}
-		const filename = `${NOW.getTime()}.json`;
-		fs.writeFileSync(path.join(folder, filename), JSON.stringify(json));
+	if (json.response != "You have successfully subscribed to earthquake information") {
+		const filename = NOW.getTime();
+		json.data_unit = Unit;
+		json.delay = NOW.getTime() - json.TimeStamp;
+		fs.writeFile(path.join(folder, `${filename}.tmp`), JSON.stringify(json), (err) => {
+			fs.rename(path.join(folder, `${filename}.tmp`), path.join(folder, `${filename}.json`), () => void 0);
+		});
 	}
 	if (json.TimeStamp != undefined)
 		dump({ level: 0, message: `Latency: ${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
@@ -1500,7 +1499,7 @@ TREM.Earthquake.on("eew", (data) => {
 		else
 			Nmsg = "已抵達 (預警盲區)";
 		new Notification("EEW 強震即時警報", {
-			body   : `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`,
+			body   : `${level.replace("+", "強").replace("-", "弱")}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`,
 			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});
@@ -2195,6 +2194,11 @@ function main(data) {
 			delete Timers.epicenterBlinker;
 			clearInterval(Timers.eew_clock);
 			Timers.eew_clock = null;
+			const list = fs.readdirSync(folder);
+			for (let index = 0; index < list.length; index++) {
+				const date = fs.statSync(`${folder}/${list[index]}`);
+				if (new Date().getTime() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
+			}
 			global.gc();
 		}
 	}
