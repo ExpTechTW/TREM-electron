@@ -26,15 +26,15 @@ TREM.AudioContext = new AudioContext({});
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
-if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
-	const vm = require("vm");
-	const v8 = require("v8");
-	v8.setFlagsFromString("--no-lazy");
-	const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
-	const script = new vm.Script(code);
-	const bytecode = script.createCachedData();
-	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
-}
+// if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
+// 	const vm = require("vm");
+// 	const v8 = require("v8");
+// 	v8.setFlagsFromString("--no-lazy");
+// 	const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
+// 	const script = new vm.Script(code);
+// 	const bytecode = script.createCachedData();
+// 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
+// }
 
 // #region 變數
 const url = "https://exptech.com.tw/post";
@@ -567,9 +567,24 @@ async function init() {
 
 				let GetDataState = "";
 
-				if (GetData) {
-					GetData = false;
-					GetDataState = "✉";
+				if (GetData_WS) {
+					GetData_WS = false;
+					GetDataState += "✉";
+				}
+
+				if (GetData_FCM) {
+					GetData_FCM = false;
+					GetDataState += "🔌";
+				}
+
+				if (GetData_P2P) {
+					GetData_P2P = false;
+					GetDataState += "🧩";
+				}
+
+				if (GetData_time) {
+					GetData_time = false;
+					GetDataState += "⏰";
 				}
 
 				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
