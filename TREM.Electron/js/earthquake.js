@@ -746,7 +746,7 @@ function handler(response) {
 					Time     : NOW.getTime(),
 					Shot     : 1,
 				});
-			}, 2250);
+			}, 1250);
 			changeView("main", "#mainView_btn");
 			if (setting["Real-time.show"]) win.showInactive();
 			if (setting["Real-time.cover"]) win.moveTop();
