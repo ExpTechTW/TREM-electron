@@ -37,7 +37,6 @@ localStorage.dirname = __dirname;
 // 	const bytecode = script.createCachedData();
 // 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
 // }
-bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
 const url = "https://exptech.com.tw/post";
@@ -500,6 +499,7 @@ TREM.MapArea = {
 };
 
 // #region 初始化
+bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
