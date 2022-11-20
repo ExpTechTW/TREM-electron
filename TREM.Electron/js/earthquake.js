@@ -27,16 +27,16 @@ TREM.AudioContext = new AudioContext({});
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
-// if (fs.existsSync("./js/server.js")) {
+// if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
 // 	const vm = require("vm");
 // 	const v8 = require("v8");
 // 	v8.setFlagsFromString("--no-lazy");
-// 	const code = fs.readFileSync(path.resolve(__dirname, "../js/server.js"), "utf-8");
+// 	const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
 // 	const script = new vm.Script(code);
 // 	const bytecode = script.createCachedData();
 // 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
 // }
-bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+// bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
 const posturl = "https://exptech.com.tw/api/v1/trem/";
@@ -657,6 +657,11 @@ TREM.MapArea = {
 };
 
 // #region 初始化
+bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+const folder = path.join(app.getPath("userData"), "data");
+
+if (!fs.existsSync(folder))
+	fs.mkdirSync(folder);
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
@@ -682,6 +687,7 @@ win.on("leave-full-screen", () => {
 async function init() {
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
+	report_get_timestamp = 0;
 
 	// Connect to server
 	await (async () => {
@@ -700,7 +706,7 @@ async function init() {
 		const time2 = document.getElementById("time2");
 
 		// clock
-		dump({ level: 3, message: "Initializing clock", origin: "Clock" });
+		dump({ level: 0, message: "Initializing clock", origin: "Clock" });
 
 		if (!Timers.clock)
 			Timers.clock = setInterval(() => {
@@ -820,7 +826,7 @@ async function init() {
 
 		progressbar.value = (1 / progressStep) * 2.5;
 
-		dump({ level: 3, message: "Initializing map", origin: "Map" });
+		dump({ level: 0, message: "Initializing map", origin: "Map" });
 
 		/*
 		if (!Maps.main) {
@@ -2454,7 +2460,7 @@ function handler(response) {
 					Time     : NOW.getTime(),
 					Shot     : 1,
 				});
-			}, 2250);
+			}, 1250);
 			changeView("main", "#mainView_btn");
 
 			if (setting["Real-time.show"]) win.showInactive();
@@ -3066,7 +3072,7 @@ ipcMain.once("start", () => {
 		setInterval(() => {
 			if (DATAstamp != 0 && Stamp != DATAstamp) {
 				Stamp = DATAstamp;
-				FCMdata(DATA);
+				FCMdata(DATA, DATA_Unit);
 			}
 		}, 0);
 		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer}`, origin: "Initialization" });
@@ -3337,7 +3343,7 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 // #endregion
 
 // #region EEW
-function FCMdata(data) {
+function FCMdata(data, Unit) {
 	const json = JSON.parse(data);
 	console.log(json);
 
@@ -3349,21 +3355,13 @@ function FCMdata(data) {
 	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
 	GetData = true;
 
-	if (json.response != "You have successfully subscribed to earthquake information" && json.FormatVersion == 1) {
-		const folder = path.join(app.getPath("userData"), "data");
-
-		if (!fs.existsSync(folder))
-			fs.mkdirSync(folder);
-		const list = fs.readdirSync(folder);
-
-		for (let index = 0; index < list.length; index++) {
-			const date = fs.statSync(`${folder}/${list[index]}`);
-
-			if (new Date().getTime() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
-		}
-
-		const filename = `${NOW.getTime()}.json`;
-		fs.writeFileSync(path.join(folder, filename), JSON.stringify(json));
+	if (json.response != "You have successfully subscribed to earthquake information") {
+		const filename = NOW.getTime();
+		json.data_unit = Unit;
+		json.delay = NOW.getTime() - json.TimeStamp;
+		fs.writeFile(path.join(folder, `${filename}.tmp`), JSON.stringify(json), (err) => {
+			fs.rename(path.join(folder, `${filename}.tmp`), path.join(folder, `${filename}.json`), () => void 0);
+		});
 	}
 
 	if (json.TimeStamp != undefined)
@@ -3539,7 +3537,7 @@ TREM.Earthquake.on("eew", (data) => {
 		else
 			Nmsg = "已抵達 (預警盲區)";
 		new Notification("EEW 強震即時警報", {
-			body   : `${level.text}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}\n延遲 ${NOW.getTime() - data.TimeStamp}ms`,
+			body   : `${level.text}地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`,
 			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});
@@ -4378,6 +4376,14 @@ function main(data) {
 			delete Timers.epicenterBlinker;
 			clearInterval(Timers.eew);
 			Timers.eew = null;
+			const list = fs.readdirSync(folder);
+
+			for (let index = 0; index < list.length; index++) {
+				const date = fs.statSync(`${folder}/${list[index]}`);
+
+				if (new Date().getTime() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
+			}
+
 			unstopReplaybtn();
 			global.gc();
 		}

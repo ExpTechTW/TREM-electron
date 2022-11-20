@@ -138,5 +138,5 @@ TREM/js/server.js
 
 # wip
 TREM.MAUI
-TREM.Electron/js/server.js
+server.js
 TREM.Electron/dev
