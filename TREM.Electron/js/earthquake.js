@@ -3097,8 +3097,7 @@ const stopReplay = function() {
 	const data = {
 		uuid: localStorage.UUID,
 	};
-	axios.post(posturl + "stop", data)
-	// ExpTechAPI.v1.post("/trem/stop", data)
+	ExpTechAPI.v1.post("/trem/stop", data)
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
@@ -3157,8 +3156,7 @@ ipcMain.on("testEEW", () => {
 					id   : list[index],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				axios.post(posturl + "replay", data)
-				// ExpTechAPI.v1.post("/trem/replay", data)
+				ExpTechAPI.v1.post("/trem/replay", data)
 					.then(() => {
 						testEEWerror = false;
 					})
@@ -3174,8 +3172,7 @@ ipcMain.on("testEEW", () => {
 			uuid: localStorage.UUID,
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		axios.post(posturl + "replay", data)
-		// ExpTechAPI.v1.post("/trem/replay", data)
+		ExpTechAPI.v1.post("/trem/replay", data)
 			.then(() => {
 				testEEWerror = false;
 			})
@@ -3819,10 +3816,13 @@ TREM.Earthquake.on("eew", (data) => {
 				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 			};
 			dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
-			axios.post(setting["webhook.url"], msg)
-				.catch((error) => {
-					dump({ level: 2, message: error, origin: "Webhook" });
-				});
+			fetch(setting["webhook.url"], {
+				method  : "POST",
+				headers : { "Content-Type": "application/json" },
+				body    : JSON.stringify(msg),
+			}).catch((error) => {
+				dump({ level: 2, message: error, origin: "Webhook" });
+			});
 		}
 	}, 2000);
 });
