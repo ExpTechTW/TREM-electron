@@ -653,10 +653,10 @@ const webhook = async () => {
 			TREM.Localization.getString("Webhook_Dialog_Error_Title"),
 			TREM.Localization.getString("Webhook_Dialog_Error_Invalid"));
 
-	const { MessageEmbed, WebhookClient } = require("discord.js");
+	const { EmbedBuilder, WebhookClient } = require("discord.js");
 
 	const embeds = [
-		new MessageEmbed()
+		new EmbedBuilder()
 			.setDescription("這是一則由 TREM 發送的測試訊息")
 			.setColor("BLUE")
 			.setFooter({ text: "ExpTech Studio", iconURL: "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png" })

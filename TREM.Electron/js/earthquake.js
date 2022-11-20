@@ -1904,7 +1904,7 @@ async function init() {
 		}
 	}, 500);
 	global.gc();
-	// const userJSON = require(path.resolve(__dirname, "../js/1667291675675.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1668909259128.json"));
 	// TREM.Intensity.handle(userJSON);
 	// const userJSON1 = require(path.resolve(__dirname, "../js/1668323000997.json"));
 	// TREM.MapIntensity.palert(userJSON1.Data);
@@ -2377,11 +2377,21 @@ function handler(response) {
 			RMT++;
 
 		for (let index = 0; index < Object.keys(detected_list).length; index++) {
-			const Intensity = detected_list[Object.keys(detected_list)[index]].Intensity;
-			RMTpgaTime = NOW.getTime();
+			const Intensity = detected_list[Object.keys(detected_list)[index]].intensity;
+			const time = detected_list[Object.keys(detected_list)[index]].time;
 
-			if (NOW.getTime() - detected_list[Object.keys(detected_list)[index]].Time > 30_000 || PGACancel) {
+			if (RMTpgaTime == 0) {
+				RMTpgaTime = NOW.getTime();
+				console.log(RMTpgaTime);
+			}
+
+			if (time != 0 && NOW.getTime() - time > 30_000 || PGACancel) {
 				delete detected_list[Object.keys(detected_list)[index]];
+				index--;
+			} else if (NOW.getTime() - RMTpgaTime > 30_000) {
+				delete detected_list[Object.keys(detected_list)[index]];
+				RMTpgaTime = 0;
+				console.log(NOW.getTime());
 				index--;
 			} else {
 				detected_box_list[Object.keys(detected_list)[index]] = L.polygon(detected_box_location[Object.keys(detected_list)[index].toString()], {

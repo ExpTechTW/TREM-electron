@@ -343,6 +343,11 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
+		case "compatibility.hwaccel": {
+			MainWindow.reload();
+			break;
+		}
+
 		default:
 			break;
 	}
