@@ -343,7 +343,7 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
-		case "compatibility.hwaccel": {
+		case "leaflet.open": {
 			MainWindow.reload();
 			break;
 		}
