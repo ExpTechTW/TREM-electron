@@ -30,13 +30,8 @@
       ]
     },
     "win": {
-      "publish": {
-        "provider": "github",
-        "owner": "yayacat",
-        "repo": "TREM",
-        "vPrefixedTagName": false
-      },
-      "target": "nsis",
+      "publish": null,
+      "target": [],
       "icon": "TREM.ico"
     },
     "linux": {
