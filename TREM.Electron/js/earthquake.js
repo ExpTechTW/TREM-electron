@@ -1941,6 +1941,7 @@ function PGAMain() {
 				let ans = await fetch(`${geturl}${ReplayTime}&key=${setting["api.key"]}`, { signal: controller.signal }).catch((err) => {
 					TimerDesynced = true;
 					stationnow = 0;
+					handler(Response);
 					PGAMainbkup();
 				});
 
@@ -1955,6 +1956,7 @@ function PGAMain() {
 			} catch (err) {
 				TimerDesynced = true;
 				stationnow = 0;
+				handler(Response);
 				PGAMainbkup();
 			}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
@@ -1988,11 +1990,13 @@ function PGAMainbkup() {
 				}).catch((err) => {
 					TimerDesynced = true;
 					stationnow = 0;
+					handler(Response);
 					PGAMain();
 				});
 			} catch (err) {
 				TimerDesynced = true;
 				stationnow = 0;
+				handler(Response);
 				PGAMain();
 			}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
@@ -2035,14 +2039,13 @@ function handler(response) {
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const stationData = Json[keys[index]];
 		const amount = Number(stationData.PGA);
-		const amountI = Number(stationData.I);
 
 		if (station[keys[index]] == undefined) continue;
-		const Alert = (!Unlock) ? amountI >= 2 : stationData.alert;
+		const Alert = (!Unlock) ? stationData.I >= 2 : stationData.alert;
 
 		if (amount > MaxPGA) MaxPGA = amount;
 		const intensity
-			= (Alert && Json.Alert) ? amountI
+			= (Alert && Json.Alert) ? stationData.I
 				: (NOW.getTime() - stationData.TS * 1000 > 5000) ? "NA"
 					: (!Alert) ? 0
 						: (amount >= 800) ? 9
@@ -2232,7 +2235,7 @@ function handler(response) {
 			document.getElementById("rt-station-local-pga").innerText = amount;
 		}
 
-		if (intensity != "NA" && NA999 != "Y" && (intensity > 0 || Alert) && amount < 999) {
+		if (intensity != "NA" && NA999 != "Y" && (intensity > 0 && Alert) && amount < 999) {
 			detected_list[station[keys[index]].PGA] ??= {
 				intensity : intensity,
 				time      : 0,
@@ -2241,7 +2244,7 @@ function handler(response) {
 			if ((detected_list[station[keys[index]].PGA].intensity ?? 0) < intensity)
 				detected_list[station[keys[index]].PGA].intensity = intensity;
 
-			if (Alert && Json.Alert) {
+			if (Json.Alert) {
 				if (setting["audio.realtime"])
 					if (amount > 8 && PGALimit == 0) {
 						PGALimit = 1;
@@ -2371,62 +2374,64 @@ function handler(response) {
 			TREM.MapArea.clear();
 		}
 	} else if (!TREM.Detector.webgl) {
-		for (let index = 0; index < Object.keys(detected_box_list).length; index++) {
-			if (RMT == 0) Maps.main.removeLayer(detected_box_list[Object.keys(detected_box_list)[index]]);
-			delete detected_box_list[Object.keys(detected_box_list)[index]];
-			index--;
-		}
+		if (Object.keys(detected_box_list).length)
+			for (let index = 0; index < Object.keys(detected_box_list).length; index++) {
+				if (RMT == 0) Maps.main.removeLayer(detected_box_list[Object.keys(detected_box_list)[index]]);
+				delete detected_box_list[Object.keys(detected_box_list)[index]];
+				index--;
+			}
 
 		if (NOW.getTime() - RMTpgaTime > 30_000)
 			RMT = 0;
 		else
 			RMT++;
 
-		for (let index = 0; index < Object.keys(detected_list).length; index++) {
-			const Intensity = detected_list[Object.keys(detected_list)[index]].intensity;
-			const time = detected_list[Object.keys(detected_list)[index]].time;
+		if (Object.keys(detected_list).length)
+			for (let index = 0; index < Object.keys(detected_list).length; index++) {
+				const Intensity = detected_list[Object.keys(detected_list)[index]].intensity;
+				const time = detected_list[Object.keys(detected_list)[index]].time;
 
-			if (RMTpgaTime == 0) {
-				RMTpgaTime = NOW.getTime();
-				console.log(RMTpgaTime);
-			}
+				if (RMTpgaTime == 0) {
+					RMTpgaTime = NOW.getTime();
+					console.log(RMTpgaTime);
+				}
 
-			if (time != 0 && NOW.getTime() - time > 30_000 || PGACancel) {
-				delete detected_list[Object.keys(detected_list)[index]];
-				index--;
-			} else if (NOW.getTime() - RMTpgaTime > 30_000) {
-				delete detected_list[Object.keys(detected_list)[index]];
-				RMTpgaTime = 0;
-				console.log(NOW.getTime());
-				index--;
-			} else {
-				detected_box_list[Object.keys(detected_list)[index]] = L.polygon(detected_box_location[Object.keys(detected_list)[index].toString()], {
-					color     : TREM.color(Intensity),
-					fillColor : "transparent",
-				});
-				let skip = false;
+				if (time != 0 && NOW.getTime() - time > 30_000 || PGACancel) {
+					delete detected_list[Object.keys(detected_list)[index]];
+					index--;
+				} else if (NOW.getTime() - RMTpgaTime > 30_000) {
+					delete detected_list[Object.keys(detected_list)[index]];
+					RMTpgaTime = 0;
+					console.log(NOW.getTime());
+					index--;
+				} else {
+					detected_box_list[Object.keys(detected_list)[index]] = L.polygon(detected_box_location[Object.keys(detected_list)[index].toString()], {
+						color     : TREM.color(Intensity),
+						fillColor : "transparent",
+					});
+					let skip = false;
 
-				if (Object.keys(EEW).length != 0)
-					for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
-						let SKIP = 0;
+					if (Object.keys(EEW).length != 0)
+						for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
+							let SKIP = 0;
 
-						for (let i = 0; i < 4; i++) {
-							const dis = Math.sqrt(Math.pow((detected_box_location[Object.keys(detected_list)[index].toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((detected_box_location[Object.keys(detected_list)[index].toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
+							for (let i = 0; i < 4; i++) {
+								const dis = Math.sqrt(Math.pow((detected_box_location[Object.keys(detected_list)[index].toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((detected_box_location[Object.keys(detected_list)[index].toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
 
-							if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
+								if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
+							}
+
+							if (SKIP >= 4) {
+								skip = true;
+								break;
+							}
 						}
 
-						if (SKIP >= 4) {
-							skip = true;
-							break;
-						}
-					}
+					if (skip) continue;
 
-				if (skip) continue;
-
-				if (RMT >= 2) Maps.main.addLayer(detected_box_list[Object.keys(detected_list)[index]]);
+					if (RMT >= 2) Maps.main.addLayer(detected_box_list[Object.keys(detected_list)[index]]);
+				}
 			}
-		}
 
 		if (RMT >= 2) RMT = 0;
 	}
@@ -3097,7 +3102,8 @@ const stopReplay = function() {
 	const data = {
 		uuid: localStorage.UUID,
 	};
-	ExpTechAPI.v1.post("/trem/stop", data)
+	axios.post(posturl + "stop", data)
+	// ExpTechAPI.v1.post("/trem/stop", data)
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
@@ -3156,7 +3162,8 @@ ipcMain.on("testEEW", () => {
 					id   : list[index],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				ExpTechAPI.v1.post("/trem/replay", data)
+				axios.post(posturl + "replay", data)
+				// ExpTechAPI.v1.post("/trem/replay", data)
 					.then(() => {
 						testEEWerror = false;
 					})
@@ -3172,7 +3179,8 @@ ipcMain.on("testEEW", () => {
 			uuid: localStorage.UUID,
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		ExpTechAPI.v1.post("/trem/replay", data)
+		axios.post(posturl + "replay", data)
+		// ExpTechAPI.v1.post("/trem/replay", data)
 			.then(() => {
 				testEEWerror = false;
 			})
@@ -3376,12 +3384,12 @@ function FCMdata(data, Unit) {
 	} else if (json.Function == "PWS") {
 		TREM.PWS.addPWS(json.raw);
 	} else if (json.Function == "intensity") {
-		console.log("intensity");
+		dump({ level: 0, message: "Got Earthquake intensity", origin: "API" });
+		console.log(json);
 
 		if (TREM.Intensity.isTriggered)
 			TREM.Intensity.clear();
 		TREM.Intensity.handle(json);
-		// console.log(json);
 	} else if (json.Function == "Replay") {
 		replay = json.timestamp;
 		replayT = NOW.getTime();
