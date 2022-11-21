@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "6.0.0-123-pre13",
+  "version": "6.0.0-123-pre14",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "homepage": "https://exptech.com.tw/",
@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "dist": "electron-builder",
+    "dist": "electron-builder -p always",
     "lint": "eslint --ext .js js/"
   },
   "build": {
@@ -30,8 +30,13 @@
       ]
     },
     "win": {
-      "publish": null,
-      "target": [],
+      "publish": {
+        "provider": "github",
+        "owner": "yayacat",
+        "repo": "TREM",
+        "vPrefixedTagName": false
+      },
+      "target": "nsis",
       "icon": "TREM.ico"
     },
     "linux": {
