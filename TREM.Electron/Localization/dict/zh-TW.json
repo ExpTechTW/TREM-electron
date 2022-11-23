@@ -39,5 +39,8 @@
     "Setting": "設定",
     "Setting_Open": "開啟設定",
     "general_locale": "顯示語言",
+    "check_For_Updates": "檢查更新",
+    "Notification_No_Update_Title": "沒有可用的更新",
+    "Notification_No_Update_Body": "當前v{0}\n最新v{1}",
     "Tray_Reload": "重新加載"
 }

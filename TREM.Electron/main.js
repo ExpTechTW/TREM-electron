@@ -179,6 +179,9 @@ else {
 
 TREM.on("ready", () => {
 	autoUpdater.checkForUpdates();
+	setInterval(() => {
+		autoUpdater.checkForUpdates();
+	}, 43200_000);
 });
 
 autoUpdater.on("update-available", (info) => {
@@ -212,7 +215,13 @@ autoUpdater.on("update-available", (info) => {
 });
 
 autoUpdater.on("update-not-available", (info) => {
-	logger.info("No new updates found");
+	// logger.info(info.version);
+	// logger.info("No new updates found");
+	new Notification({
+		title : TREM.Localization.getString("Notification_No_Update_Title"),
+		body  : TREM.Localization.getString("Notification_No_Update_Body").format(TREM.getVersion(), info.version),
+		icon  : "TREM.ico",
+	}).show();
 });
 
 autoUpdater.on("error", (err) => {
@@ -507,6 +516,13 @@ function trayIcon() {
 							}
 						},
 					]
+				},
+				{
+					label : TREM.Localization.getString("check_For_Updates"),
+					type  : "normal",
+					click : () => {
+						autoUpdater.checkForUpdates();
+					}
 				}
 			]
 		},

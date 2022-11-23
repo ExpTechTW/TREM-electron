@@ -693,7 +693,7 @@ async function init() {
 	await (async () => {
 		$("#loading").text(TREM.Localization.getString("Application_Connecting"));
 		dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
-		await ReportGET({});
+		await ReportGET();
 		progressbar.value = (1 / progressStep) * 1;
 	})().catch(e => dump({ level: 2, message: e }));
 
@@ -721,6 +721,7 @@ async function init() {
 					if (NOW.getTime() - replayT > 180_000) {
 						replay = 0;
 						ReportGET();
+						stopReplay();
 					}
 				} else {
 					if (time.classList.contains("replay"))
@@ -2937,6 +2938,7 @@ function addReport(report, prepend = false) {
 		Div.append(report_container);
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
 		Div.addEventListener("click", () => {
+			if (replay != 0) return;
 			TREM.set_report_overview = 1;
 			TREM.Report.setView("eq-report-overview", report);
 			changeView("report", "#reportView_btn");
@@ -2951,11 +2953,13 @@ function addReport(report, prepend = false) {
 				// localStorage.TestID = report.ID;
 				// ipcRenderer.send("testEEW");
 			} else {
-				TREM.set_report_overview = 1;
-				TREM.Report.setView("eq-report-overview", report);
-				changeView("report", "#reportView_btn");
-				TREM.ReportTag1 = NOW.getTime();
-				console.log("ReportTag1: ", TREM.ReportTag1);
+				const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
+				ipcRenderer.send("testoldtimeEEW", oldtime);
+				// TREM.set_report_overview = 1;
+				// TREM.Report.setView("eq-report-overview", report);
+				// changeView("report", "#reportView_btn");
+				// TREM.ReportTag1 = NOW.getTime();
+				// console.log("ReportTag1: ", TREM.ReportTag1);
 			}
 		});
 
@@ -3144,6 +3148,7 @@ TREM.backindexButton = () => {
 ipcMain.on("testoldtimeEEW", (event, oldtime) => {
 	replay = oldtime - 25000;
 	replayT = NOW.getTime();
+	ReportGET();
 	stopReplaybtn();
 });
 

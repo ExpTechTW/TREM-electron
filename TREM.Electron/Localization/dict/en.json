@@ -39,5 +39,8 @@
     "Setting": "Settings",
     "Setting_Open": "Open Settings",
     "general_locale": "Display Language",
+    "check_For_Updates": "check For Updates",
+    "Notification_No_Update_Title": "No Update Available",
+    "Notification_No_Update_Body": "Now v{0}\nNew v{1}",
     "Tray_Reload": "Reload TREM"
 }

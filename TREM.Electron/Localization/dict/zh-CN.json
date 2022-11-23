@@ -39,5 +39,8 @@
     "Setting": "设置",
     "Setting_Open": "开启设置",
     "general_locale": "显示语言",
+    "check_For_Updates": "检查更新",
+    "Notification_No_Update_Title": "没有可用的更新",
+    "Notification_No_Update_Body": "当前v{0}\n最新v{1}",
     "Tray_Reload": "重新加载"
 }
