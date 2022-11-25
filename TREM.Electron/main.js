@@ -198,14 +198,16 @@ autoUpdater.on("update-available", (info) => {
 			}
 
 			case "notify": {
+				const getVersion = TREM.getVersion();
 				new Notification({
 					title : TREM.Localization.getString("Notification_Update_Title"),
-					body  : TREM.Localization.getString("Notification_Update_Body").format(TREM.getVersion(), info.version),
+					body  : TREM.Localization.getString("Notification_Update_Body").format(getVersion, info.version),
 					icon  : "TREM.ico",
 				}).on("click", () => {
 					logger.info(info);
-					shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/${info.version}`);
+					shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${info.version}`);
 				}).show();
+				ipcMain.emit("update-available-Notification", info.version, getVersion);
 				break;
 			}
 
@@ -217,11 +219,13 @@ autoUpdater.on("update-available", (info) => {
 autoUpdater.on("update-not-available", (info) => {
 	// logger.info(info.version);
 	// logger.info("No new updates found");
+	const getVersion = TREM.getVersion();
 	new Notification({
 		title : TREM.Localization.getString("Notification_No_Update_Title"),
-		body  : TREM.Localization.getString("Notification_No_Update_Body").format(TREM.getVersion(), info.version),
+		body  : TREM.Localization.getString("Notification_No_Update_Body").format(getVersion, info.version),
 		icon  : "TREM.ico",
 	}).show();
+	ipcMain.emit("update-not-available-Notification", info.version, getVersion);
 });
 
 autoUpdater.on("error", (err) => {
@@ -352,7 +356,27 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
-		case "leaflet.open": {
+		case "leaflet.change": {
+			MainWindow.reload();
+			break;
+		}
+
+		case "map.close.jp": {
+			MainWindow.reload();
+			break;
+		}
+
+		case "map.close.cn": {
+			MainWindow.reload();
+			break;
+		}
+
+		case "map.close.sk": {
+			MainWindow.reload();
+			break;
+		}
+
+		case "map.close.nk": {
 			MainWindow.reload();
 			break;
 		}

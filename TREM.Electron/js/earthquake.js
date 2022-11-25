@@ -11,6 +11,7 @@ const ExpTechAPI = new ExpTech();
 const axios = require("axios");
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
+const { config } = require("node:process");
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -880,7 +881,7 @@ async function init() {
 		*/
 
 		if (TREM.Detector.webgl)
-			TREM.Detector.webgl = !setting["leaflet.open"];
+			TREM.Detector.webgl = !setting["leaflet.change"];
 		// TREM.Detector.webgl = false;
 		dump({ level: 0, message: TREM.Detector.webgl, origin: "WebGL" });
 
@@ -1252,23 +1253,24 @@ async function init() {
 					"jp",
 					"sk",
 					"nk",
-				]) {
-					Maps.main.addSource(`Source_${mapName}`, {
-						type      : "geojson",
-						data      : MapData[mapName],
-						tolerance : 1,
-					});
-					MapBases.main.set(`${mapName}`, Maps.main.addLayer({
-						id     : `Layer_${mapName}`,
-						type   : "fill",
-						source : `Source_${mapName}`,
-						paint  : {
-							"fill-color"         : TREM.Colors.surfaceVariant,
-							"fill-outline-color" : TREM.Colors.secondary,
-							"fill-opacity"       : 0.5,
-						},
-					}).getLayer(`Layer_${mapName}`));
-				}
+				])
+					if (!setting["map.close." + mapName]) {
+						Maps.main.addSource(`Source_${mapName}`, {
+							type      : "geojson",
+							data      : MapData[mapName],
+							tolerance : 1,
+						});
+						MapBases.main.set(`${mapName}`, Maps.main.addLayer({
+							id     : `Layer_${mapName}`,
+							type   : "fill",
+							source : `Source_${mapName}`,
+							paint  : {
+								"fill-color"         : TREM.Colors.surfaceVariant,
+								"fill-outline-color" : TREM.Colors.secondary,
+								"fill-opacity"       : 0.5,
+							},
+						}).getLayer(`Layer_${mapName}`));
+					}
 
 				Maps.main.addSource("Source_tw_county", {
 					type : "geojson",
@@ -1651,22 +1653,23 @@ async function init() {
 					"nk",
 					"tw_county",
 				])
-					MapBases.main.push(
-						L.geoJson.vt(MapData[mapName], {
-							edgeBufferTiles : 2,
-							minZoom         : 4,
-							maxZoom         : 15,
-							tolerance       : 20,
-							buffer          : 256,
-							debug           : 0,
-							style           : {
-								weight      : 0.8,
-								color       : TREM.Colors.primary,
-								fillColor   : TREM.Colors.surfaceVariant,
-								fillOpacity : 1,
-							},
-						}).addTo(Maps.main),
-					);
+					if (!setting["map.close." + mapName])
+						MapBases.main.push(
+							L.geoJson.vt(MapData[mapName], {
+								edgeBufferTiles : 2,
+								minZoom         : 4,
+								maxZoom         : 15,
+								tolerance       : 20,
+								buffer          : 256,
+								debug           : 0,
+								style           : {
+									weight      : 0.8,
+									color       : TREM.Colors.primary,
+									fillColor   : TREM.Colors.surfaceVariant,
+									fillOpacity : 1,
+								},
+							}).addTo(Maps.main),
+						);
 
 			if (!MapBases.mini.length)
 				MapBases.mini.push(
@@ -2944,6 +2947,7 @@ function addReport(report, prepend = false) {
 			changeView("report", "#reportView_btn");
 			TREM.ReportTag1 = NOW.getTime();
 			console.log("ReportTag1: ", TREM.ReportTag1);
+			ipcRenderer.send("report-Notification", report);
 		});
 		Div.addEventListener("contextmenu", () => {
 			if (replay != 0) return;
@@ -3150,6 +3154,116 @@ ipcMain.on("testoldtimeEEW", (event, oldtime) => {
 	replayT = NOW.getTime();
 	ReportGET();
 	stopReplaybtn();
+});
+
+ipcMain.on("report-Notification", (event, report) => {
+	if (setting["webhook.url"] != "" && setting["report.Notification"]) {
+		console.log(report);
+		dump({ level: 0, message: "Posting Notification report Webhook", origin: "Webhook" });
+		const msg = {
+			username   : "TREM | 臺灣即時地震監測",
+			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
+			content : "地震報告",
+			embeds  : [
+				{
+					author: {
+						name     : "地震報告",
+						url      : undefined,
+						icon_url : undefined,
+					},
+					description : "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0].areaName + report.data[0].eqStation[0].stationName + IntensityI(report.data[0].areaIntensity) + "級。",
+					fields      : [
+						{
+							name   : "編號",
+							value  : report.earthquakeNo % 1000 ? report.earthquakeNo : "無（小區域有感地震）",
+							inline : true,
+						},
+						{
+							name   : "時間",
+							value  : report.originTime,
+							inline : true,
+						},
+						{
+							name   : "深度",
+							value  : report.depth + " 公里",
+							inline : true,
+						},
+						{
+							name   : "震央位置",
+							value  : "> 經度 **東經 " + report.epicenterLon + "**\n> 緯度 **北緯 " + report.epicenterLat + "**\n> 即在 **" + report.location + "**",
+							inline : false,
+						},
+						{
+							name   : "最大震度" + IntensityI(report.data[0].areaIntensity) + "級地區",
+							value  : report.data[0].areaName,
+							inline : false,
+						},
+					],
+				},
+			],
+		};
+		fetch(setting["webhook.url"], {
+			method  : "POST",
+			headers : { "Content-Type": "application/json" },
+			body    : JSON.stringify(msg),
+		}).catch((error) => {
+			dump({ level: 2, message: error, origin: "Webhook" });
+		});
+	}
+});
+
+ipcMain.on("update-available-Notification", (version, getVersion) => {
+	if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
+		dump({ level: 0, message: "Posting Notification Update Webhook", origin: "Webhook" });
+		const getVersionbody = TREM.Localization.getString("Notification_Update_Body").format(getVersion, version) + `\nhttps://github.com/yayacat/TREM/releases/tag/v${version}`;
+		const msg = {
+			username   : "TREM | 臺灣即時地震監測",
+			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
+			embeds     : [
+				{
+					author      : { name: "TREM | 臺灣即時地震監測" },
+					title       : "",
+					description : "",
+					color       : 4629503,
+				},
+			] };
+		msg.embeds[0].title = TREM.Localization.getString("Notification_Update_Title");
+		msg.embeds[0].description = getVersionbody;
+		fetch(setting["webhook.url"], {
+			method  : "POST",
+			headers : { "Content-Type": "application/json" },
+			body    : JSON.stringify(msg),
+		}).catch((error) => {
+			dump({ level: 2, message: error, origin: "Webhook" });
+		});
+	}
+});
+
+ipcMain.on("update-not-available-Notification", (version, getVersion) => {
+	if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
+		dump({ level: 0, message: "Posting Notification No Update Webhook", origin: "Webhook" });
+		const getVersionbody = TREM.Localization.getString("Notification_No_Update_Body").format(getVersion, version);
+		const msg = {
+			username   : "TREM | 臺灣即時地震監測",
+			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
+			embeds     : [
+				{
+					author      : { name: "TREM | 臺灣即時地震監測" },
+					title       : "",
+					description : "",
+					color       : 4629503,
+				},
+			] };
+		msg.embeds[0].title = TREM.Localization.getString("Notification_No_Update_Title");
+		msg.embeds[0].description = getVersionbody;
+		fetch(setting["webhook.url"], {
+			method  : "POST",
+			headers : { "Content-Type": "application/json" },
+			body    : JSON.stringify(msg),
+		}).catch((error) => {
+			dump({ level: 2, message: error, origin: "Webhook" });
+		});
+	}
 });
 
 ipcMain.on("testEEW", () => {
@@ -3425,6 +3539,7 @@ function FCMdata(data, Unit) {
 
 		addReport(report, true);
 		TREM.Report.cache.set(report.identifier, report);
+		ipcRenderer.send("report-Notification", report);
 
 		if (setting["report.changeView"]) {
 			TREM.Report.setView("report-overview", report.identifier);

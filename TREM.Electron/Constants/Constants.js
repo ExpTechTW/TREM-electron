@@ -44,7 +44,7 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
-		"leaflet.open": {
+		"leaflet.change": {
 			type  : "toggle",
 			value : true,
 		},
@@ -105,6 +105,30 @@ const Constants = Object.freeze({
 			value : true,
 		},
 		"map.animation": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.close.jp": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.close.cn": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.close.sk": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.close.nk": {
+			type  : "toggle",
+			value : false,
+		},
+		"checkForUpdates.Notification": {
+			type  : "toggle",
+			value : false,
+		},
+		"report.Notification": {
 			type  : "toggle",
 			value : false,
 		},
