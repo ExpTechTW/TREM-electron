@@ -3163,8 +3163,8 @@ ipcMain.on("report-Notification", (event, report) => {
 		const msg = {
 			username   : "TREM | 臺灣即時地震監測",
 			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-			content : "地震報告",
-			embeds  : [
+			content    : "地震報告",
+			embeds     : [
 				{
 					author: {
 						name     : "地震報告",
