@@ -619,8 +619,7 @@ const testAudio = (audioString, el) => {
 	testAudioBtn = el;
 
 	if (!testAudioState.is_playing) {
-		testAudioState.audio.src = `../Audio/${audioString}.wav`;
-		testAudioState.audio.load();
+		testAudioState.audio = new Audio("../audio/" + audioString + ".wav");
 		testAudioState.audio.play();
 		testAudioState.audio.played;
 		testAudioState.is_playing = true;
