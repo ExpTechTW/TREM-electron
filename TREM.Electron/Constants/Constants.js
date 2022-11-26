@@ -196,6 +196,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"theme.int.0": {
+			type  : "color",
+			value : "#6B7979",
+		},
 		"theme.int.1": {
 			type  : "color",
 			value : "#757575",

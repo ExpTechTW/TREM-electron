@@ -893,6 +893,10 @@ body:not(.darkmode) #here-marker {
 .rt-intensity-container.zero,
 #alert-local.zero,
 #rt-list div.zero,
+.rt-station-intensity.zero {
+	background-color: var(--custom-int-0);
+}
+
 .alert-box.one .alert-box-body,
 .rt-intensity-container.one,
 #alert-local.one,
@@ -901,7 +905,6 @@ body:not(.darkmode) #here-marker {
 #rolllist > div.one,
 .map-intensity-icon.one,
 .report-list-item.one .report-list-item-intensity,
-.rt-station-intensity.zero,
 .rt-station-intensity.one {
 	background-color: var(--custom-int-1);
 }
