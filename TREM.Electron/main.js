@@ -326,6 +326,26 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
+		case "map.close.jp": {
+			MainWindow.reload();
+			break;
+		}
+
+		case "map.close.cn": {
+			MainWindow.reload();
+			break;
+		}
+
+		case "map.close.sk": {
+			MainWindow.reload();
+			break;
+		}
+
+		case "map.close.nk": {
+			MainWindow.reload();
+			break;
+		}
+
 		default:
 			break;
 	}

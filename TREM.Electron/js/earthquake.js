@@ -889,23 +889,24 @@ async function init() {
 				"jp",
 				"sk",
 				"nk",
-			]) {
-				Maps.main.addSource(`Source_${mapName}`, {
-					type      : "geojson",
-					data      : MapData[mapName],
-					tolerance : 1,
-				});
-				MapBases.main.set(`${mapName}`, Maps.main.addLayer({
-					id     : `Layer_${mapName}`,
-					type   : "fill",
-					source : `Source_${mapName}`,
-					paint  : {
-						"fill-color"         : TREM.Colors.surfaceVariant,
-						"fill-outline-color" : TREM.Colors.secondary,
-						"fill-opacity"       : 0.5,
-					},
-				}).getLayer(`Layer_${mapName}`));
-			}
+			])
+				if (!setting["map.close." + mapName]) {
+					Maps.main.addSource(`Source_${mapName}`, {
+						type      : "geojson",
+						data      : MapData[mapName],
+						tolerance : 1,
+					});
+					MapBases.main.set(`${mapName}`, Maps.main.addLayer({
+						id     : `Layer_${mapName}`,
+						type   : "fill",
+						source : `Source_${mapName}`,
+						paint  : {
+							"fill-color"         : TREM.Colors.surfaceVariant,
+							"fill-outline-color" : TREM.Colors.secondary,
+							"fill-opacity"       : 0.5,
+						},
+					}).getLayer(`Layer_${mapName}`));
+				}
 
 			Maps.main.addSource("Source_tw_county", {
 				type : "geojson",

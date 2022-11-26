@@ -104,6 +104,22 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"map.close.jp": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.close.cn": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.close.sk": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.close.nk": {
+			type  : "toggle",
+			value : false,
+		},
 		"report.show": {
 			type  : "toggle",
 			value : true,
