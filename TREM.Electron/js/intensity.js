@@ -9,8 +9,8 @@ TREM.Intensity = {
 	/**
 	 * @type {maplibregl.Marker[]}
 	 */
-	_markers      : null,
-	_raw          : null,
+	_markers : null,
+	_raw     : null,
 	handle(rawIntensityData) {
 		if (this._raw != null) this.clear();
 
@@ -47,7 +47,7 @@ TREM.Intensity = {
 						}
 					}
 
-				if (this._markers != null){
+				if (this._markers != null) {
 					this._markers.remove();
 					this._markers = null;
 				}
@@ -76,12 +76,7 @@ TREM.Intensity = {
 					document.getElementById("intensity-overview-magnitude").innerText = raw.magnitude.magnitudeValue;
 					document.getElementById("intensity-overview-depth").innerText = raw.depth.$t;
 
-					this._markers =
-						new maplibregl.Marker({
-							element: $(TREM.Resources.icon.cross(
-								{ size: 32, className: "epicenterIcon", zIndexOffset: 5000 },
-							))[0],
-						}).setLngLat([raw.epicenter.epicenterLon.$t, raw.epicenter.epicenterLat.$t]).addTo(Maps.intensity);
+					this._markers = new maplibregl.Marker({ element: $(TREM.Resources.icon.cross({ size: 32, className: "epicenterIcon", zIndexOffset: 5000 }))[0] }).setLngLat([raw.epicenter.epicenterLon.$t, raw.epicenter.epicenterLat.$t]).addTo(Maps.intensity);
 				} else {
 					dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
 
@@ -97,12 +92,7 @@ TREM.Intensity = {
 					document.getElementById("intensity-overview-magnitude").innerText = raw.magnitude.magnitudeValue;
 					document.getElementById("intensity-overview-depth").innerText = raw.depth.$t;
 
-					this._markers =
-						new maplibregl.Marker({
-							element: $(TREM.Resources.icon.cross(
-								{ size: 32, className: "epicenterIcon", zIndexOffset: 5000 },
-							))[0],
-						}).setLngLat([raw.epicenter.epicenterLon.$t, raw.epicenter.epicenterLat.$t]).addTo(Maps.intensity);
+					this._markers = new maplibregl.Marker({ element: $(TREM.Resources.icon.cross({ size: 32, className: "epicenterIcon", zIndexOffset: 5000 }))[0] }).setLngLat([raw.epicenter.epicenterLon.$t, raw.epicenter.epicenterLat.$t]).addTo(Maps.intensity);
 				}
 			} else {
 				if (this.geojson != null) {
@@ -224,6 +214,7 @@ TREM.Intensity = {
 				Maps.intensity.removeFeatureState({ source: "Source_tw_town" });
 				Maps.intensity.setLayoutProperty("Layer_intensity", "visibility", "none");
 			}
+
 			document.getElementById("intensity-overview").style.visibility = "none";
 			document.getElementById("intensity-overview").classList.remove("show");
 			delete this.intensities;
