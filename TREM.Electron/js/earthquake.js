@@ -527,6 +527,8 @@ async function init() {
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
 
+	TREM.MapRenderingEngine = setting["map.engine"];
+
 	// Connect to server
 	await (async () => {
 		$("#loading").text(TREM.Localization.getString("Application_Connecting"));
@@ -618,102 +620,149 @@ async function init() {
 				}
 			}, 1_000);
 
+		progressbar.value = (1 / progressStep) * 2;
+	})();
+
+	// Audios
+	(() => {
+		const gainNode = TREM.AudioContext.createGain();
+
+		for (const key in TREM.Audios) {
+			const audioSource = TREM.AudioContext.createMediaElementSource(TREM.Audios[key]);
+			audioSource.connect(gainNode).connect(TREM.AudioContext.destination);
+		}
+
+		progressbar.value = (1 / progressStep) * 3;
+	})();
+
+	// Colors and Map
+	await (async () => {
+		TREM.Colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
+
+		dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
+		dump({ level: 3, message: "Starting timer...", origin: "Timer" });
+		let perf_GEOJSON_LOAD = process.hrtime();
+		fs.readdirSync(path.join(__dirname, "../Resources/GeoJSON")).forEach((file, i, arr) => {
+			try {
+				MapData[path.parse(file).name] = require(path.join(__dirname, "../Resources/GeoJSON", file));
+				dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
+				progressbar.value = (1 / progressStep) * 3 + (((1 / progressStep) / arr.length) * (i + 1));
+			} catch (error) {
+				dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
+				dump({ level: 2, message: error, origin: "ResourceLoader" });
+				console.error(error);
+				dump({ level: 3, message: `Skipping ${file}`, origin: "ResourceLoader" });
+			}
+		});
+		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
+		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
+
+		// #region Maps
+
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
 
-		/*
-		if (!Maps.main) {
-			Maps.main = L.map("map",
-				{
-					edgeBufferTiles    : 1,
-					attributionControl : false,
-					closePopupOnClick  : false,
-					maxBounds          : [
-						[60, 50],
-						[10, 180],
-					],
-					preferCanvas    : true,
-					zoomSnap        : 0.25,
-					zoomDelta       : 0.5,
-					zoomAnimation   : true,
-					fadeAnimation   : setting["map.animation"],
-					doubleClickZoom : false,
-					zoomControl     : false,
-				})
-				.fitBounds([[25.35, 119.65], [21.85, 124.05]])
-				.on("click", () => {
-					mapLock = false;
-					TREM.Earthquake.emit("focus", {}, true);
-				})
-				.on("contextmenu", () => {TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });})
-				.on("drag", () => mapLock = true)
-				.on("zoomend", () => {
-					if (Maps.main.getZoom() >= 11)
-						for (const key in Station) {
-							const tooltip = Station[key].getTooltip();
-							if (tooltip) {
-								Station[key].unbindTooltip();
-								tooltip.options.permanent = true;
-								Station[key].bindTooltip(tooltip);
-							}
-						}
-					else
-						for (const key in Station) {
-							const tooltip = Station[key].getTooltip();
-							if (tooltip && !Station[key].keepTooltipAlive) {
-								Station[key].unbindTooltip();
-								tooltip.options.permanent = false;
-								Station[key].bindTooltip(tooltip);
-							}
-						}
-				});
-			Maps.main._zoomAnimated = setting["map.animation"];
-		}
-		*/
-
 		if (!Maps.main)
-			Maps.main = new maplibregl.Map(
-				{
-					container : "map",
-					maxPitch  : 0,
-					maxBounds : [
-						50,
-						10,
-						180,
-						60,
-					],
-					zoom              : 6.895604243192027,
-					center            : [120.99401979478893, 23.633067293391818],
-					renderWorldCopies : false,
-					keyboard          : false,
-					doubleClickZoom   : false,
-				})
-				.on("click", (ev) => {
-					if (ev.originalEvent.target.tagName == "CANVAS")
-						Maps.main.fitBounds([
-							118.25,
-							21.77,
-							122.18,
-							25.47,
-						], {
-							padding  : { right: Maps.main.getCanvas().width / 6 },
-							speed    : 2,
-							curve    : 1,
-							easing   : (e) => Math.sin(e * Math.PI / 2),
-							duration : 1000,
-						});
-				})
-				.on("zoom", () => {
-					if (Maps.main.getZoom() >= 11.5) {
-						for (const key in Station)
-							if (!Station[key].getPopup().isOpen())
-								Station[key].togglePopup();
-					} else {
-						for (const key in Station)
-							if (Station[key].getPopup().isOpen())
-								if (!Station[key].getPopup().persist)
+			if (TREM.MapRenderingEngine == "mapbox-gl") {
+				Maps.main = new maplibregl.Map(
+					{
+						container : "map",
+						maxPitch  : 0,
+						maxBounds : [
+							50,
+							10,
+							180,
+							60,
+						],
+						zoom              : 6.895604243192027,
+						center            : [120.99401979478893, 23.633067293391818],
+						renderWorldCopies : false,
+						keyboard          : false,
+						doubleClickZoom   : false,
+					})
+					.on("click", (ev) => {
+						if (ev.originalEvent.target.tagName == "CANVAS")
+							TREM.Earthquake.emit("focus", {
+								bounds: [
+									118.25,
+									21.77,
+									122.18,
+									25.47,
+								],
+								options: {
+									padding  : { right: Maps.main.getCanvas().width / 6 },
+									speed    : 2,
+									curve    : 1,
+									easing   : (e) => Math.sin(e * Math.PI / 2),
+									duration : 1000,
+								},
+							});
+					})
+					.on("contextmenu", (ev) => {
+						if (ev.originalEvent.target.tagName == "CANVAS")
+							TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+					})
+					.on("zoom", () => {
+						if (Maps.main.getZoom() >= 11.5) {
+							for (const key in Station)
+								if (!Station[key].getPopup().isOpen())
 									Station[key].togglePopup();
-					}
-				});
+						} else {
+							for (const key in Station)
+								if (Station[key].getPopup().isOpen())
+									if (!Station[key].getPopup().persist)
+										Station[key].togglePopup();
+						}
+					});
+			} else if (TREM.MapRenderingEngine == "leaflet") {
+				Maps.main = L.map("map",
+					{
+						edgeBufferTiles    : 1,
+						attributionControl : false,
+						closePopupOnClick  : false,
+						maxBounds          : [[60, 50], [10, 180]],
+						preferCanvas       : true,
+						zoomSnap           : 0.25,
+						zoomDelta          : 0.5,
+						zoomAnimation      : true,
+						fadeAnimation      : setting["map.animation"],
+						doubleClickZoom    : false,
+						zoomControl        : false,
+					})
+					.on("click", () => {
+						TREM.Earthquake.emit("focus", {
+							bounds  : [[21.77, 118.25], [25.47, 122.18]],
+							options : {
+								paddingBottomRight: [ 0, Maps.main.getCanvas().width / 6],
+							},
+						});
+					})
+					.on("contextmenu", () => {
+						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+					})
+					.on("zoomend", () => {
+						if (Maps.main.getZoom() >= 11)
+							for (const key in Station) {
+								const tooltip = Station[key].getTooltip();
+
+								if (tooltip) {
+									Station[key].unbindTooltip();
+									tooltip.options.permanent = true;
+									Station[key].bindTooltip(tooltip);
+								}
+							}
+						else
+							for (const key in Station) {
+								const tooltip = Station[key].getTooltip();
+
+								if (tooltip && !Station[key].keepTooltipAlive) {
+									Station[key].unbindTooltip();
+									tooltip.options.permanent = false;
+									Station[key].bindTooltip(tooltip);
+								}
+							}
+					});
+				Maps.main._zoomAnimated = setting["map.animation"];
+			}
 
 		if (!Maps.mini)
 			Maps.mini = L.map("map-tw",
@@ -735,26 +784,27 @@ async function init() {
 				.on("zoom", () => Maps.mini.setView([23.608428, 120.799168], 7));
 
 		if (!Maps.report)
-			Maps.report = new maplibregl.Map(
-				{
-					container : "map-report",
-					maxPitch  : 0,
-					maxBounds : [
-						100,
-						10,
-						130,
-						30,
-					],
-					maxZoom            : 10,
-					minZoom            : 6,
-					zoom               : 6.8,
-					center             : [121.596, 23.612],
-					renderWorldCopies  : false,
-					attributionControl : false,
-					doubleClickZoom    : false,
-					keyboard           : false,
-				})
-				.on("click", () => TREM.Report._focusMap());
+			if (TREM.MapRenderingEngine == "mapbox-gl")
+				Maps.report = new maplibregl.Map(
+					{
+						container : "map-report",
+						maxPitch  : 0,
+						maxBounds : [
+							100,
+							10,
+							130,
+							30,
+						],
+						maxZoom            : 10,
+						minZoom            : 6,
+						zoom               : 6.8,
+						center             : [121.596, 23.612],
+						renderWorldCopies  : false,
+						attributionControl : false,
+						doubleClickZoom    : false,
+						keyboard           : false,
+					})
+					.on("click", () => TREM.Report._focusMap());
 
 		if (!Maps.intensity) {
 			Maps.intensity = L.map("map-intensity",
@@ -803,42 +853,7 @@ async function init() {
 			else Timers.resize = setTimeout(resizeHandler, 100);
 		});
 
-		progressbar.value = (1 / progressStep) * 2;
-	})();
-
-	// Audios
-	(() => {
-		const gainNode = TREM.AudioContext.createGain();
-
-		for (const key in TREM.Audios) {
-			const audioSource = TREM.AudioContext.createMediaElementSource(TREM.Audios[key]);
-			audioSource.connect(gainNode).connect(TREM.AudioContext.destination);
-		}
-
-		progressbar.value = (1 / progressStep) * 3;
-	})();
-
-	// Colors and Map
-	await (async () => {
-		TREM.Colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
-
-		dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
-		dump({ level: 3, message: "Starting timer...", origin: "Timer" });
-		let perf_GEOJSON_LOAD = process.hrtime();
-		fs.readdirSync(path.join(__dirname, "../Resources/GeoJSON")).forEach((file, i, arr) => {
-			try {
-				MapData[path.parse(file).name] = require(path.join(__dirname, "../Resources/GeoJSON", file));
-				dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
-				progressbar.value = (1 / progressStep) * 3 + (((1 / progressStep) / arr.length) * (i + 1));
-			} catch (error) {
-				dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
-				dump({ level: 2, message: error, origin: "ResourceLoader" });
-				console.error(error);
-				dump({ level: 3, message: `Skipping ${file}`, origin: "ResourceLoader" });
-			}
-		});
-		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
-		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
+		// #endregion
 
 		/*
 		if (!MapBases.mainFill.length)
@@ -890,13 +905,27 @@ async function init() {
 				"sk",
 				"nk",
 			])
-				if (!setting["map.close." + mapName]) {
+				if (TREM.MapRenderingEngine == "mapbox-gl") {
 					Maps.main.addSource(`Source_${mapName}`, {
 						type      : "geojson",
 						data      : MapData[mapName],
 						tolerance : 1,
 					});
 					MapBases.main.set(`${mapName}`, Maps.main.addLayer({
+						id     : `Layer_${mapName}`,
+						type   : "fill",
+						source : `Source_${mapName}`,
+						paint  : {
+							"fill-color"         : TREM.Colors.surfaceVariant,
+							"fill-outline-color" : TREM.Colors.secondary,
+							"fill-opacity"       : 0.5,
+						},
+						layout: {
+							visibility: setting[`map.${mapName}`] ? "visible" : "none",
+						},
+					}).getLayer(`Layer_${mapName}`));
+				} else if (TREM.MapRenderingEngine == "leaflet") {
+					MapBases.main.set(`${mapName}`, L.geoJSON.vt(MapData[mapName], {
 						id     : `Layer_${mapName}`,
 						type   : "fill",
 						source : `Source_${mapName}`,
@@ -2319,6 +2348,9 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 	Maps.main._zoomAnimated = value;
 	Maps.report._fadeAnimated = value;
 	Maps.report._zoomAnimated = value;
+});
+ipcRenderer.on("config:maplayer", (event, mapName, state) => {
+	Maps.main.setLayoutProperty(`Layer_${mapName}`, "visibility", state ? "visible" : "none");
 });
 // #endregion
 

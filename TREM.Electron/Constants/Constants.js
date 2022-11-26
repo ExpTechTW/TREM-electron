@@ -1,5 +1,25 @@
 const Constants = Object.freeze({
 	Default_Configurations: {
+		"map.engine": {
+			type  : "select",
+			value : "mapbox-gl",
+		},
+		"map.jp": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.cn": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.sk": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.nk": {
+			type  : "toggle",
+			value : false,
+		},
 		"general.locale": {
 			type  : "select",
 			value : "zh-TW",
@@ -101,22 +121,6 @@ const Constants = Object.freeze({
 			value : true,
 		},
 		"map.animation": {
-			type  : "toggle",
-			value : false,
-		},
-		"map.close.jp": {
-			type  : "toggle",
-			value : false,
-		},
-		"map.close.cn": {
-			type  : "toggle",
-			value : false,
-		},
-		"map.close.sk": {
-			type  : "toggle",
-			value : false,
-		},
-		"map.close.nk": {
 			type  : "toggle",
 			value : false,
 		},

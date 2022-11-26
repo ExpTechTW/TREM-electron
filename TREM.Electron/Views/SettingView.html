@@ -830,6 +830,50 @@
                                 <div class="control-container">
                                     <div class="option-container">
                                         <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">Rendering Engine</span>
+                                                <span lang="ja">レンダリングエンジン</span>
+                                                <span lang="kr">Rendering Engine</span>
+                                                <span lang="ru">Rendering Engine</span>
+                                                <span lang="zh-CN">渲染引擎</span>
+                                                <span lang="zh-TW">渲染引擎</span>
+                                                <span class="option-label-id">map.engine</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">The library that will be used to render the map.
+                                                    Changing this will require a restart to have an effect.</span>
+                                                <span lang="ja">マップのレンダリング時に使用するレンダリングエンジン。
+                                                    これを変更すると、有効にするために再起動が必要になります。</span>
+                                                <span lang="kr">The library that will be used to render the map.
+                                                    Changing this will require a restart to have an effect.</span>
+                                                <span lang="ru">The library that will be used to render the map.
+                                                    Changing this will require a restart to have an effect.</span>
+                                                <span lang="zh-CN">渲染地图时使用的渲染引擎。
+                                                    更改此项需要重新启动才能生效。</span>
+                                                <span lang="zh-TW">渲染地圖時使用的渲染引擎。
+                                                    更改這項設定需要重新啟動才能生效。</span>
+                                            </div>
+                                        </div>
+                                        <div class="control">
+                                            <select id="map.engine" name="mapengine" onchange="SelectSave('map.engine')">
+                                                <option value="mapbox-gl">Mapbox GL</option>
+                                                <option value="leaflet">Leaflet (LEGACY)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button id="MEReloadButton" class="filled-tonal-button setting-button md3-ripple" onclick="restart()" style="display:none; margin-top: 4px;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Restart</span>
+                                            <span lang="ja">再起動</span>
+                                            <span lang="kr">Restart</span>
+                                            <span lang="ru">Restart</span>
+                                            <span lang="zh-CN">重新啟動</span>
+                                            <span lang="zh-TW">重新啟動</span>
+                                        </span>
+                                    </button>
+                                    <div class="option-container">
+                                        <div class="option-label">
                                             <span class="option-label-title">
                                                 <span lang="en">Auto map zooming</span>
                                                 <span lang="ja">自動地図ズーム</span>
@@ -889,113 +933,123 @@
                                             </span>
                                         </label>
                                     </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <span class="option-label-title">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">關閉日本地圖</span>
-                                                <span class="option-label-id">map.close.jp</span>
-                                            </span>
-                                            <span class="option-label-description">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">讓程式關閉日本地圖。</span>
-                                            </span>
-                                        </div>
-                                        <label class="md3 switch">
-                                            <input type="checkbox" id="map.close.jp" onclick="CheckSave('map.close.jp')">
-                                            <span class="slider">
-                                                <span class="material-symbols-rounded icon">done</span>
-                                            </span>
-                                        </label>
+                                    <div class="control-title-2">
+                                        <span lang="en">Layers</span>
+                                        <span lang="ja">レイヤー</span>
+                                        <span lang="kr">Layers</span>
+                                        <span lang="ru">Layers</span>
+                                        <span lang="zh-CN">地图图层</span>
+                                        <span lang="zh-TW">地圖圖層</span>
                                     </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <span class="option-label-title">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">關閉中國地圖</span>
-                                                <span class="option-label-id">map.close.cn</span>
-                                            </span>
-                                            <span class="option-label-description">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">讓程式關閉中國地圖。</span>
-                                            </span>
+                                    <div id="map-layer-container" class="control-container">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <span class="option-label-title">
+                                                    <span lang="en">Japan</span>
+                                                    <span lang="ja">日本地図</span>
+                                                    <span lang="kr">Japan</span>
+                                                    <span lang="ru">Japan</span>
+                                                    <span lang="zh-CN">日本地图</span>
+                                                    <span lang="zh-TW">日本地圖</span>
+                                                    <span class="option-label-id">map.jp</span>
+                                                </span>
+                                                <span class="option-label-description">
+                                                    <span lang="en">Display Japan on the map.</span>
+                                                    <span lang="ja">地図上に日本地図を表示する。</span>
+                                                    <span lang="kr">Display Japan on the map.</span>
+                                                    <span lang="ru">Display Japan on the map.</span>
+                                                    <span lang="zh-CN">在地图上显示日本地图。</span>
+                                                    <span lang="zh-TW">在地圖上顯示日本地圖。</span>
+                                                </span>
+                                            </div>
+                                            <div class="control">
+                                                <label class="md3 checkbox">
+                                                    <input type="checkbox" id="map.jp" onclick="CheckSave('map.jp')">
+                                                    <span></span>
+                                                </label>
+                                            </div>
                                         </div>
-                                        <label class="md3 switch">
-                                            <input type="checkbox" id="map.close.cn" onclick="CheckSave('map.close.cn')">
-                                            <span class="slider">
-                                                <span class="material-symbols-rounded icon">done</span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <span class="option-label-title">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">關閉南韓地圖</span>
-                                                <span class="option-label-id">map.close.sk</span>
-                                            </span>
-                                            <span class="option-label-description">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">讓程式關閉南韓地圖。</span>
-                                            </span>
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <span class="option-label-title">
+                                                    <span lang="en">China</span>
+                                                    <span lang="ja">中国地図</span>
+                                                    <span lang="kr">China</span>
+                                                    <span lang="ru">China</span>
+                                                    <span lang="zh-CN">中国地图</span>
+                                                    <span lang="zh-TW">中國地圖</span>
+                                                    <span class="option-label-id">map.cn</span>
+                                                </span>
+                                                <span class="option-label-description">
+                                                    <span lang="en">Display China on the map.</span>
+                                                    <span lang="ja">地図上に中国地図を表示する。</span>
+                                                    <span lang="kr">Display China on the map.</span>
+                                                    <span lang="ru">Display China on the map.</span>
+                                                    <span lang="zh-CN">在地图上显示中国地图。</span>
+                                                    <span lang="zh-TW">在地圖上顯示中國地圖。</span>
+                                                </span>
+                                            </div>
+                                            <div class="control">
+                                                <label class="md3 checkbox">
+                                                    <input type="checkbox" id="map.cn" onclick="CheckSave('map.cn')">
+                                                    <span></span>
+                                                </label>
+                                            </div>
                                         </div>
-                                        <label class="md3 switch">
-                                            <input type="checkbox" id="map.close.sk" onclick="CheckSave('map.close.sk')">
-                                            <span class="slider">
-                                                <span class="material-symbols-rounded icon">done</span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <span class="option-label-title">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">關閉北韓地圖</span>
-                                                <span class="option-label-id">map.close.nk</span>
-                                            </span>
-                                            <span class="option-label-description">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">讓程式關閉北韓地圖。</span>
-                                            </span>
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <span class="option-label-title">
+                                                    <span lang="en">South Korea</span>
+                                                    <span lang="ja">韓国地図</span>
+                                                    <span lang="kr">South Korea</span>
+                                                    <span lang="ru">South Korea</span>
+                                                    <span lang="zh-CN">韩国地图</span>
+                                                    <span lang="zh-TW">韓國地圖</span>
+                                                    <span class="option-label-id">map.sk</span>
+                                                </span>
+                                                <span class="option-label-description">
+                                                    <span lang="en">Display South Korea on the map.</span>
+                                                    <span lang="ja">地図上に韓国地図を表示する。</span>
+                                                    <span lang="kr">Display South Korea on the map.</span>
+                                                    <span lang="ru">Display South Korea on the map.</span>
+                                                    <span lang="zh-CN">在地图上显示韩国地图。</span>
+                                                    <span lang="zh-TW">在地圖上顯示韓國地圖。</span>
+                                                </span>
+                                            </div>
+                                            <div class="control">
+                                                <label class="md3 checkbox">
+                                                    <input type="checkbox" id="map.sk" onclick="CheckSave('map.sk')">
+                                                    <span></span>
+                                                </label>
+                                            </div>
                                         </div>
-                                        <label class="md3 switch">
-                                            <input type="checkbox" id="map.close.nk" onclick="CheckSave('map.close.nk')">
-                                            <span class="slider">
-                                                <span class="material-symbols-rounded icon">done</span>
-                                            </span>
-                                        </label>
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <span class="option-label-title">
+                                                    <span lang="en">North Korea</span>
+                                                    <span lang="ja">北朝鮮地図</span>
+                                                    <span lang="kr">North Korea</span>
+                                                    <span lang="ru">North Korea</span>
+                                                    <span lang="zh-CN">朝鲜地图</span>
+                                                    <span lang="zh-TW">北韓地圖</span>
+                                                    <span class="option-label-id">map.nk</span>
+                                                </span>
+                                                <span class="option-label-description">
+                                                    <span lang="en">Display North Korea on the map.</span>
+                                                    <span lang="ja">地図上に北朝鮮地図を表示する。</span>
+                                                    <span lang="kr">Display North Korea on the map.</span>
+                                                    <span lang="ru">Display North Korea on the map.</span>
+                                                    <span lang="zh-CN">在地图上显示朝鲜地图。</span>
+                                                    <span lang="zh-TW">在地圖上顯示北韓地圖。</span>
+                                                </span>
+                                            </div>
+                                            <div class="control">
+                                                <label class="md3 checkbox">
+                                                    <input type="checkbox" id="map.nk" onclick="CheckSave('map.nk')">
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1851,7 +1905,14 @@
                                     </div>
                                     <button id="HAReloadButton" class="filled-tonal-button setting-button md3-ripple" onclick="restart()" style="display:none; margin-top: 4px;">
                                         <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
-                                        <span class="filled-tonal-button-label">重新啟動</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Restart</span>
+                                            <span lang="ja">再起動</span>
+                                            <span lang="kr">Restart</span>
+                                            <span lang="ru">Restart</span>
+                                            <span lang="zh-CN">重新啟動</span>
+                                            <span lang="zh-TW">重新啟動</span>
+                                        </span>
                                     </button>
                                     <div class="option-container input-field">
                                         <div class="option-label">
