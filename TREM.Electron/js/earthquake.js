@@ -935,7 +935,11 @@ async function init() {
 				paint  : {
 					"fill-color": [
 						"match",
-						["feature-state", "intensity"],
+						[
+							"coalesce",
+							["feature-state", "intensity"],
+							0,
+						],
 						9,
 						setting["theme.customColor"] ? setting["theme.int.9"]
 							: "#862DB3",
@@ -1093,7 +1097,11 @@ async function init() {
 				paint  : {
 					"line-color": [
 						"match",
-						["feature-state", "intensity"],
+						[
+							"coalesce",
+							["feature-state", "intensity"],
+							0,
+						],
 						9,
 						setting["theme.customColor"] ? setting["theme.int.9"]
 							: "#862DB3",
@@ -2038,7 +2046,8 @@ function IntensityToClassString(level) {
 									: (level == 1) ? "one"
 										: "zero";
 
-	if (tinycolor(setting["theme.customColor"] ? setting[`theme.int.${level ? level : 1}`] : [
+	if (tinycolor(setting["theme.customColor"] ? setting[`theme.int.${level}`] : [
+		"#757575",
 		"#757575",
 		"#2774C2",
 		"#7BA822",
@@ -2048,7 +2057,7 @@ function IntensityToClassString(level) {
 		"#F55647",
 		"#DB1F1F",
 		"#862DB3",
-	][level ? level - 1 : 0]).getLuminance() > 0.575)
+	][level]).getLuminance() > 0.575)
 		classname += " darkText";
 
 	return classname;
@@ -2057,8 +2066,9 @@ function IntensityToClassString(level) {
 
 // #region color
 function color(Intensity) {
-	return setting["theme.customColor"] ? setting[`theme.int.${Intensity ? Intensity : 1}`]
+	return setting["theme.customColor"] ? setting[`theme.int.${Intensity}`]
 		: [
+			"#757575",
 			"#757575",
 			"#2774C2",
 			"#7BA822",
@@ -2068,7 +2078,7 @@ function color(Intensity) {
 			"#F55647",
 			"#DB1F1F",
 			"#862DB3",
-		][Intensity ? Intensity - 1 : Intensity];
+		][Intensity];
 	// return ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"][Intensity ? Intensity - 1 : Intensity];
 }
 // #endregion
@@ -2198,9 +2208,10 @@ ipcRenderer.on("config:color", (event, key, value) => {
 
 	if (typeof key == "boolean") {
 		for (let i = 0; i < 10; i++) {
-			if (i > 0) document.body.style[key ? "setProperty" : "removeProperty"](`--custom-int-${i}`, setting[`theme.int.${i}`]);
+			document.body.style[key ? "setProperty" : "removeProperty"](`--custom-int-${i}`, setting[`theme.int.${i}`]);
 
-			if (tinycolor(key ? setting[`theme.int.${i ? i : 1}`] : [
+			if (tinycolor(key ? setting[`theme.int.${i}`] : [
+				"#757575",
 				"#757575",
 				"#2774C2",
 				"#7BA822",
@@ -2210,7 +2221,7 @@ ipcRenderer.on("config:color", (event, key, value) => {
 				"#F55647",
 				"#DB1F1F",
 				"#862DB3",
-			][i ? i - 1 : 0]).getLuminance() > 0.575)
+			][i]).getLuminance() > 0.575)
 				$(`.${IntensityToClassString(i).replace(" darkText", "").split(" ").join(".")}`).addClass("darkText");
 			else
 				$(`.${IntensityToClassString(i).replace(" darkText", "").split(" ").join(".")}`).removeClass("darkText");
@@ -2227,7 +2238,11 @@ ipcRenderer.on("config:color", (event, key, value) => {
 	if (Maps.main) {
 		Maps.main.setPaintProperty("Layer_intensity", "fill-color", [
 			"match",
-			["feature-state", "intensity"],
+			[
+				"coalesce",
+				["feature-state", "intensity"],
+				0,
+			],
 			9,
 			setting["theme.customColor"] ? setting["theme.int.9"]
 				: "#862DB3",
@@ -2257,9 +2272,13 @@ ipcRenderer.on("config:color", (event, key, value) => {
 				: "#757575",
 			"transparent",
 		]);
-		Maps.main.setPaintProperty("Layer_area", "fill-color", [
+		Maps.main.setPaintProperty("Layer_area", "line-color", [
 			"match",
-			["feature-state", "intensity"],
+			[
+				"coalesce",
+				["feature-state", "intensity"],
+				0,
+			],
 			9,
 			setting["theme.customColor"] ? setting["theme.int.9"]
 				: "#862DB3",
