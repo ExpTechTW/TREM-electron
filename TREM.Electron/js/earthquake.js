@@ -784,7 +784,7 @@ async function init() {
 				.on("zoom", () => Maps.mini.setView([23.608428, 120.799168], 7));
 
 		if (!Maps.report)
-			if (TREM.MapRenderingEngine == "mapbox-gl")
+			if (TREM.MapRenderingEngine == "mapbox-gl") {
 				Maps.report = new maplibregl.Map(
 					{
 						container : "map-report",
@@ -805,6 +805,27 @@ async function init() {
 						keyboard           : false,
 					})
 					.on("click", () => TREM.Report._focusMap());
+			} else if (TREM.MapRenderingEngine == "leaflet") {
+				Maps.report = L.map("map-report",
+					{
+						attributionControl : false,
+						closePopupOnClick  : false,
+						maxBounds          : [[30, 130], [10, 100]],
+						preferCanvas       : true,
+						zoomSnap           : 0.25,
+						zoomDelta          : 0.5,
+						zoomAnimation      : true,
+						fadeAnimation      : setting["map.animation"],
+						zoomControl        : false,
+						doubleClickZoom    : false,
+						keyboard           : false,
+					})
+					.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
+						paddingTopLeft: [document.getElementById("map-report").offsetWidth / 2, 0],
+					})
+					.on("click", () => TREM.Report._focusMap());
+				Maps.report._zoomAnimated = setting["map.animation"];
+			}
 
 		if (!Maps.intensity) {
 			Maps.intensity = L.map("map-intensity",
@@ -925,262 +946,270 @@ async function init() {
 						},
 					}).getLayer(`Layer_${mapName}`));
 				} else if (TREM.MapRenderingEngine == "leaflet") {
-					MapBases.main.set(`${mapName}`, L.geoJSON.vt(MapData[mapName], {
-						id     : `Layer_${mapName}`,
-						type   : "fill",
-						source : `Source_${mapName}`,
-						paint  : {
-							"fill-color"         : TREM.Colors.surfaceVariant,
-							"fill-outline-color" : TREM.Colors.secondary,
-							"fill-opacity"       : 0.5,
+					MapBases.main.set(`${mapName}`, L.geoJson.vt(MapData[mapName], {
+						edgeBufferTiles : 2,
+						minZoom         : 4,
+						maxZoom         : 12,
+						tolerance       : 20,
+						buffer          : 256,
+						debug           : 0,
+						style           : {
+							weight      : 0.8,
+							color       : TREM.Colors.secondary,
+							fillColor   : TREM.Colors.surfaceVariant,
+							fillOpacity : 0.5,
 						},
-					}).getLayer(`Layer_${mapName}`));
+					}).addTo(Maps.main));
 				}
 
-			Maps.main.addSource("Source_tw_county", {
-				type : "geojson",
-				data : MapData.tw_county,
-			});
-			Maps.main.addSource("Source_tw_town", {
-				type : "geojson",
-				data : MapData.tw_town,
-			});
-			Maps.main.addSource("Source_area", {
-				type : "geojson",
-				data : MapData.area,
-			});
-			MapBases.main.set("tw_county_fill", Maps.main.addLayer({
-				id     : "Layer_tw_county_Fill",
-				type   : "fill",
-				source : "Source_tw_county",
-				paint  : {
-					"fill-color"   : TREM.Colors.surfaceVariant,
-					"fill-opacity" : 1,
-				},
-			}).getLayer("Layer_tw_county_Fill"));
-			Maps.main.addLayer({
-				id     : "Layer_intensity",
-				type   : "fill",
-				source : "Source_tw_town",
-				paint  : {
-					"fill-color": [
-						"match",
-						[
-							"coalesce",
-							["feature-state", "intensity"],
-							0,
-						],
-						9,
-						setting["theme.customColor"] ? setting["theme.int.9"]
-							: "#862DB3",
-						8,
-						setting["theme.customColor"] ? setting["theme.int.8"]
-							: "#DB1F1F",
-						7,
-						setting["theme.customColor"] ? setting["theme.int.7"]
-							: "#F55647",
-						6,
-						setting["theme.customColor"] ? setting["theme.int.6"]
-							: "#DB641F",
-						5,
-						setting["theme.customColor"] ? setting["theme.int.5"]
-							: "#E68439",
-						4,
-						setting["theme.customColor"] ? setting["theme.int.4"]
-							: "#E8D630",
-						3,
-						setting["theme.customColor"] ? setting["theme.int.3"]
-							: "#7BA822",
-						2,
-						setting["theme.customColor"] ? setting["theme.int.2"]
-							: "#2774C2",
-						1,
-						setting["theme.customColor"] ? setting["theme.int.1"]
-							: "#757575",
-						"transparent",
-					],
-					"fill-outline-color": [
-						"case",
-						[
-							">",
+			if (TREM.MapRenderingEngine == "mapbox-gl") {
+				Maps.main.addSource("Source_tw_county", {
+					type : "geojson",
+					data : MapData.tw_county,
+				});
+				Maps.main.addSource("Source_tw_town", {
+					type : "geojson",
+					data : MapData.tw_town,
+				});
+				Maps.main.addSource("Source_area", {
+					type : "geojson",
+					data : MapData.area,
+				});
+				MapBases.main.set("tw_county_fill", Maps.main.addLayer({
+					id     : "Layer_tw_county_Fill",
+					type   : "fill",
+					source : "Source_tw_county",
+					paint  : {
+						"fill-color"   : TREM.Colors.surfaceVariant,
+						"fill-opacity" : 1,
+					},
+				}).getLayer("Layer_tw_county_Fill"));
+				Maps.main.addLayer({
+					id     : "Layer_intensity",
+					type   : "fill",
+					source : "Source_tw_town",
+					paint  : {
+						"fill-color": [
+							"match",
 							[
 								"coalesce",
 								["feature-state", "intensity"],
 								0,
 							],
+							9,
+							setting["theme.customColor"] ? setting["theme.int.9"]
+								: "#862DB3",
+							8,
+							setting["theme.customColor"] ? setting["theme.int.8"]
+								: "#DB1F1F",
+							7,
+							setting["theme.customColor"] ? setting["theme.int.7"]
+								: "#F55647",
+							6,
+							setting["theme.customColor"] ? setting["theme.int.6"]
+								: "#DB641F",
+							5,
+							setting["theme.customColor"] ? setting["theme.int.5"]
+								: "#E68439",
+							4,
+							setting["theme.customColor"] ? setting["theme.int.4"]
+								: "#E8D630",
+							3,
+							setting["theme.customColor"] ? setting["theme.int.3"]
+								: "#7BA822",
+							2,
+							setting["theme.customColor"] ? setting["theme.int.2"]
+								: "#2774C2",
+							1,
+							setting["theme.customColor"] ? setting["theme.int.1"]
+								: "#757575",
+							"transparent",
+						],
+						"fill-outline-color": [
+							"case",
+							[
+								">",
+								[
+									"coalesce",
+									["feature-state", "intensity"],
+									0,
+								],
+								0,
+							],
+							TREM.Colors.onSurfaceVariant,
+							"transparent",
+						],
+						"fill-opacity": [
+							"case",
+							[
+								">",
+								[
+									"coalesce",
+									["feature-state", "intensity"],
+									0,
+								],
+								0,
+							],
+							1,
 							0,
 						],
-						TREM.Colors.onSurfaceVariant,
-						"transparent",
-					],
-					"fill-opacity": [
-						"case",
-						[
-							">",
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+				MapBases.main.set("tw_county_line", Maps.main.addLayer({
+					id     : "Layer_tw_county_Line",
+					type   : "line",
+					source : "Source_tw_county",
+					paint  : {
+						"line-color"   : TREM.Colors.primary,
+						"line-width"   : 1,
+						"line-opacity" : 1,
+					},
+				}).getLayer("Layer_tw_county_Line"));
+				Maps.main.addLayer({
+					id     : "Layer_pws_town",
+					type   : "line",
+					source : "Source_tw_town",
+					paint  : {
+						"line-color": [
+							"case",
+							[
+								">",
+								[
+									"coalesce",
+									["feature-state", "pws"],
+									0,
+								],
+								0,
+							],
+							"#efcc00",
+							"transparent",
+						],
+						"line-width"   : 2,
+						"line-opacity" : [
+							"case",
+							[
+								">",
+								[
+									"coalesce",
+									["feature-state", "pws"],
+									0,
+								],
+								0,
+							],
+							1,
+							0,
+						],
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+				Maps.main.addLayer({
+					id     : "Layer_pws_county",
+					type   : "line",
+					source : "Source_tw_county",
+					paint  : {
+						"line-color": [
+							"case",
+							[
+								">",
+								[
+									"coalesce",
+									["feature-state", "pws"],
+									0,
+								],
+								0,
+							],
+							"#efcc00",
+							"transparent",
+						],
+						"line-width"   : 2,
+						"line-opacity" : [
+							"case",
+							[
+								">",
+								[
+									"coalesce",
+									["feature-state", "pws"],
+									0,
+								],
+								0,
+							],
+							1,
+							0,
+						],
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+				Maps.main.addLayer({
+					id     : "Layer_area",
+					type   : "line",
+					source : "Source_area",
+					paint  : {
+						"line-color": [
+							"match",
 							[
 								"coalesce",
 								["feature-state", "intensity"],
 								0,
 							],
-							0,
+							9,
+							setting["theme.customColor"] ? setting["theme.int.9"]
+								: "#862DB3",
+							8,
+							setting["theme.customColor"] ? setting["theme.int.8"]
+								: "#DB1F1F",
+							7,
+							setting["theme.customColor"] ? setting["theme.int.7"]
+								: "#F55647",
+							6,
+							setting["theme.customColor"] ? setting["theme.int.6"]
+								: "#DB641F",
+							5,
+							setting["theme.customColor"] ? setting["theme.int.5"]
+								: "#E68439",
+							4,
+							setting["theme.customColor"] ? setting["theme.int.4"]
+								: "#E8D630",
+							3,
+							setting["theme.customColor"] ? setting["theme.int.3"]
+								: "#7BA822",
+							2,
+							setting["theme.customColor"] ? setting["theme.int.2"]
+								: "#2774C2",
+							1,
+							setting["theme.customColor"] ? setting["theme.int.1"]
+								: "#757575",
+							"transparent",
 						],
-						1,
-						0,
-					],
-				},
-				layout: {
-					visibility: "none",
-				},
-			});
-			MapBases.main.set("tw_county_line", Maps.main.addLayer({
-				id     : "Layer_tw_county_Line",
-				type   : "line",
-				source : "Source_tw_county",
-				paint  : {
-					"line-color"   : TREM.Colors.primary,
-					"line-width"   : 1,
-					"line-opacity" : 1,
-				},
-			}).getLayer("Layer_tw_county_Line"));
-			Maps.main.addLayer({
-				id     : "Layer_pws_town",
-				type   : "line",
-				source : "Source_tw_town",
-				paint  : {
-					"line-color": [
-						"case",
-						[
-							">",
+						"line-width"   : 3,
+						"line-opacity" : [
+							"case",
 							[
-								"coalesce",
-								["feature-state", "pws"],
+								">=",
+								[
+									"coalesce",
+									["feature-state", "intensity"],
+									-1,
+								],
 								0,
 							],
+							1,
 							0,
 						],
-						"#efcc00",
-						"transparent",
-					],
-					"line-width"   : 2,
-					"line-opacity" : [
-						"case",
-						[
-							">",
-							[
-								"coalesce",
-								["feature-state", "pws"],
-								0,
-							],
-							0,
-						],
-						1,
-						0,
-					],
-				},
-				layout: {
-					visibility: "none",
-				},
-			});
-			Maps.main.addLayer({
-				id     : "Layer_pws_county",
-				type   : "line",
-				source : "Source_tw_county",
-				paint  : {
-					"line-color": [
-						"case",
-						[
-							">",
-							[
-								"coalesce",
-								["feature-state", "pws"],
-								0,
-							],
-							0,
-						],
-						"#efcc00",
-						"transparent",
-					],
-					"line-width"   : 2,
-					"line-opacity" : [
-						"case",
-						[
-							">",
-							[
-								"coalesce",
-								["feature-state", "pws"],
-								0,
-							],
-							0,
-						],
-						1,
-						0,
-					],
-				},
-				layout: {
-					visibility: "none",
-				},
-			});
-			Maps.main.addLayer({
-				id     : "Layer_area",
-				type   : "line",
-				source : "Source_area",
-				paint  : {
-					"line-color": [
-						"match",
-						[
-							"coalesce",
-							["feature-state", "intensity"],
-							0,
-						],
-						9,
-						setting["theme.customColor"] ? setting["theme.int.9"]
-							: "#862DB3",
-						8,
-						setting["theme.customColor"] ? setting["theme.int.8"]
-							: "#DB1F1F",
-						7,
-						setting["theme.customColor"] ? setting["theme.int.7"]
-							: "#F55647",
-						6,
-						setting["theme.customColor"] ? setting["theme.int.6"]
-							: "#DB641F",
-						5,
-						setting["theme.customColor"] ? setting["theme.int.5"]
-							: "#E68439",
-						4,
-						setting["theme.customColor"] ? setting["theme.int.4"]
-							: "#E8D630",
-						3,
-						setting["theme.customColor"] ? setting["theme.int.3"]
-							: "#7BA822",
-						2,
-						setting["theme.customColor"] ? setting["theme.int.2"]
-							: "#2774C2",
-						1,
-						setting["theme.customColor"] ? setting["theme.int.1"]
-							: "#757575",
-						"transparent",
-					],
-					"line-width"   : 3,
-					"line-opacity" : [
-						"case",
-						[
-							">=",
-							[
-								"coalesce",
-								["feature-state", "intensity"],
-								-1,
-							],
-							0,
-						],
-						1,
-						0,
-					],
-				},
-				layout: {
-					visibility: "none",
-				},
-			});
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+			} else if (TREM.MapRenderingEngine == "leaflet") {
+
+			}
 		}
 
 		if (!MapBases.mini.length)
@@ -1201,20 +1230,35 @@ async function init() {
 				}).addTo(Maps.mini));
 
 		if (!MapBases.report.length)
-			MapBases.report.set("tw_county", Maps.report.addLayer({
-				id     : "Layer_tw_county",
-				type   : "fill",
-				source : {
-					type : "geojson",
-					data : MapData.tw_county,
-				},
-				layout : {},
-				paint  : {
-					"fill-color"         : TREM.Colors.surfaceVariant,
-					"fill-outline-color" : TREM.Colors.primary,
-					"fill-opacity"       : 0.8,
-				},
-			}).getLayer("Layer_tw_county"));
+			if (TREM.MapRenderingEngine == "mapbox-gl")
+				MapBases.report.set("tw_county", Maps.report.addLayer({
+					id     : "Layer_tw_county",
+					type   : "fill",
+					source : {
+						type : "geojson",
+						data : MapData.tw_county,
+					},
+					layout : {},
+					paint  : {
+						"fill-color"         : TREM.Colors.surfaceVariant,
+						"fill-outline-color" : TREM.Colors.primary,
+						"fill-opacity"       : 0.8,
+					},
+				}).getLayer("Layer_tw_county"));
+			else if (TREM.MapRenderingEngine == "leaflet")
+				MapBases.report.set("tw_county", L.geoJson.vt(MapData.tw_county, {
+					minZoom   : 7.5,
+					maxZoom   : 10,
+					tolerance : 20,
+					buffer    : 256,
+					debug     : 0,
+					style     : {
+						weight      : 0.8,
+						color       : TREM.Colors.primary,
+						fillColor   : TREM.Colors.surfaceVariant,
+						fillOpacity : 1,
+					},
+				}).addTo(Maps.report));
 
 		if (!MapBases.intensity.length)
 			MapBases.intensity.set("tw_county",
