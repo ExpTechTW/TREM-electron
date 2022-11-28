@@ -162,12 +162,10 @@ TREM.Report = {
 			localStorage.TestID = report.ID;
 			ipcRenderer.send("testEEW");
 		} else {
-			replay = new Date(report.originTime).getTime() - 25000;
+			replay = new Date(report.originTime).getTime() - 5000;
 			replayT = NOW.getTime();
 		}
 		toggleNav(false);
-		document.getElementById("togglenav_btn").classList.add("hide");
-		document.getElementById("stopReplay").classList.remove("hide");
 	},
 	back() {
 		switch (this.view) {

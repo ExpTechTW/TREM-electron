@@ -1416,6 +1416,8 @@ async function FCMdata(data, Unit) {
 	} else if (json.Function == "Replay") {
 		replay = json.timestamp;
 		replayT = NOW.getTime();
+		document.getElementById("togglenav_btn").classList.add("hide");
+		document.getElementById("stopReplay").classList.remove("hide");
 		ReportGET();
 	} else if (json.Function == "report") {
 		if (palert_geojson != null) {
@@ -1634,6 +1636,8 @@ TREM.Earthquake.on("eew", (data) => {
 	if (data.Replay) {
 		replay = data.timestamp;
 		replayT = NOW.getTime();
+		document.getElementById("togglenav_btn").classList.add("hide");
+		document.getElementById("stopReplay").classList.remove("hide");
 	} else
 		replay = 0;
 
