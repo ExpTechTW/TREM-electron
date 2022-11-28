@@ -73,6 +73,7 @@ let detected_box_location = {};
 let PalertT = 0;
 let palert_geojson = null;
 const PWS = null;
+let rts_remove_eew = false;
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -503,6 +504,13 @@ function handler(response) {
 		Station[removedKey].remove();
 		delete Station[removedKey];
 	}
+	if (Object.keys(EEW).length && !rts_remove_eew) {
+		rts_remove_eew = true;
+		for (const removedKey of Object.keys(Station)) {
+			Station[removedKey].remove();
+			delete Station[removedKey];
+		}
+	}
 
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
 		const stationData = Json[keys[index]];
@@ -525,16 +533,17 @@ function handler(response) {
 
 		const size = (Intensity == 0 || Intensity == "NA") ? 8 : 16;
 		const levelClass = (Intensity != 0) ? IntensityToClassString(Intensity) :
-			(amount == 999) ? "pga6" :
-				(amount > 3.5) ? "pga5" :
-					(amount > 3) ? "pga4" :
-						(amount > 2.5) ? "pga3" :
-							(amount > 2) ? "pga2" :
-								"pga1";
+			(Intensity == 0 && Alert) ? "pga0" :
+				(amount == 999) ? "pga6" :
+					(amount > 3.5) ? "pga5" :
+						(amount > 3) ? "pga4" :
+							(amount > 2.5) ? "pga3" :
+								(amount > 2) ? "pga2" :
+									"pga1";
 
 		const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 
-		if (!Station[keys[index]])
+		if (!Station[keys[index]] && (!rts_remove_eew || Alert))
 			Station[keys[index]] = L.marker(
 				[station[keys[index]].Lat, station[keys[index]].Long],
 				{
@@ -562,17 +571,21 @@ function handler(response) {
 						Station[keys[index]].bindTooltip(tooltip);
 					}
 				});
+		if (Station[keys[index]] && rts_remove_eew && !Alert) {
+			Station[keys[index]].remove();
+			delete Station[keys[index]];
+		}
+		if (Station[keys[index]]) {
+			if (Station[keys[index]].getIcon()?.options?.className != `map-intensity-icon rt-icon ${levelClass}`)
+				Station[keys[index]].setIcon(L.divIcon({
+					iconSize  : [size, size],
+					className : `map-intensity-icon rt-icon ${levelClass}`,
+				}));
 
-		if (Station[keys[index]].getIcon()?.options?.className != `map-intensity-icon rt-icon ${levelClass}`)
-			Station[keys[index]].setIcon(L.divIcon({
-				iconSize  : [size, size],
-				className : `map-intensity-icon rt-icon ${levelClass}`,
-			}));
-
-		Station[keys[index]]
-			.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
-			.setTooltipContent(station_tooltip);
-
+			Station[keys[index]]
+				.setZIndexOffset(2000 + ~~(amount * 10) + Intensity * 500)
+				.setTooltipContent(station_tooltip);
+		}
 		const Level = IntensityI(Intensity);
 		const now = new Date(stationData.T * 1000);
 
@@ -1679,7 +1692,7 @@ TREM.Earthquake.on("eew", (data) => {
 	EEWshot = NOW.getTime() - 28500;
 	EEWshotC = 1;
 	const _distance = [];
-	for (let index = 0; index < 1000; index++)
+	for (let index = 0; index < 3002; index++)
 		_distance[index] = _speed(data.Depth, index);
 	EarthquakeList[data.ID].distance = _distance;
 	main(data);
@@ -1999,6 +2012,7 @@ function main(data) {
 
 		if (km > 0) {
 			EEW[data.ID].km = Math.sqrt(km);
+			EarthquakeList[data.ID].km = km;
 			if (!EarthquakeList[data.ID].CircleS)
 				EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 					color       : data.Alert ? "red" : "orange",
@@ -2168,7 +2182,7 @@ function main(data) {
 				}
 				break;
 			}
-	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
+	if (EarthquakeList[data.ID].km / 1000 >= 3000 || Cancel) {
 		clear(data.ID);
 
 		// remove epicenter cross icons
@@ -2215,6 +2229,7 @@ function main(data) {
 			delete Timers.epicenterBlinker;
 			clearInterval(Timers.eew_clock);
 			Timers.eew_clock = null;
+			rts_remove_eew = false;
 			const list = fs.readdirSync(folder);
 			for (let index = 0; index < list.length; index++) {
 				const date = fs.statSync(`${folder}/${list[index]}`);

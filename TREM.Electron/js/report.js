@@ -259,7 +259,7 @@ TREM.Report = {
 		const filepath = path.join(app.getPath("temp"), `TREM_Report_${id}.txt`);
 		fs.writeFileSync(filepath, string.join("\n"), { encoding: "utf-8" });
 		shell.openPath(filepath);
-		setTimeout(() => fs.rmSync(filepath), 500);
+		setTimeout(() => fs.rmSync(filepath), 5000);
 	},
 	/**
 	 * @param {EarthquakeReport[]} oldlist
