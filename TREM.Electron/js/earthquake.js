@@ -1692,7 +1692,7 @@ TREM.Earthquake.on("eew", (data) => {
 	EEWshot = NOW.getTime() - 28500;
 	EEWshotC = 1;
 	const _distance = [];
-	for (let index = 0; index < 3002; index++)
+	for (let index = 0; index < 5500; index++)
 		_distance[index] = _speed(data.Depth, index);
 	EarthquakeList[data.ID].distance = _distance;
 	main(data);
@@ -1968,6 +1968,7 @@ function main(data) {
 		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
 			if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
 				kmP = (index - 1) * 1000;
+				EarthquakeList[data.ID].km = kmP;
 				break;
 			}
 		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
@@ -2012,7 +2013,6 @@ function main(data) {
 
 		if (km > 0) {
 			EEW[data.ID].km = Math.sqrt(km);
-			EarthquakeList[data.ID].km = km;
 			if (!EarthquakeList[data.ID].CircleS)
 				EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 					color       : data.Alert ? "red" : "orange",
@@ -2182,7 +2182,7 @@ function main(data) {
 				}
 				break;
 			}
-	if (EarthquakeList[data.ID].km / 1000 >= 3000 || Cancel) {
+	if (EarthquakeList[data.ID].km / 1000 >= 5450 || Cancel) {
 		clear(data.ID);
 
 		// remove epicenter cross icons
