@@ -185,17 +185,20 @@ TREM.Intensity = {
 
 			if (!this.isTriggered) {
 				this.isTriggered = true;
-				changeView("intensity", "#mainView_btn");
 
-				if (setting["Real-time.show"]) TREM.win.showInactive();
+				if (setting["intensity.show"]) {
+					changeView("intensity", "#mainView_btn");
 
-				if (setting["Real-time.cover"]) TREM.win.moveTop();
+					if (setting["Real-time.show"]) TREM.win.showInactive();
 
-				if (!TREM.win.isFocused()) TREM.win.flashFrame(true);
+					if (setting["Real-time.cover"]) TREM.win.moveTop();
 
-				if (setting["audio.realtime"]) TREM.Audios.palert.play();
-				TREM.IntensityTag1 = NOW.getTime();
-				console.log("IntensityTag1: ", TREM.IntensityTag1);
+					if (!TREM.win.isFocused()) TREM.win.flashFrame(true);
+
+					if (setting["audio.realtime"]) TREM.Audios.palert.play();
+					TREM.IntensityTag1 = NOW.getTime();
+					console.log("IntensityTag1: ", TREM.IntensityTag1);
+				}
 			}
 
 			if (this.timer)
