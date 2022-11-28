@@ -745,13 +745,13 @@ function handler(response) {
 			if (RMT >= 2) Maps.main.addLayer(detected_box_list[Object.keys(detected_list)[index]]);
 		}
 	}
+	if (!Object.keys(detected_list).length) PGACancel = false;
 	if (RMT >= 2) RMT = 0;
 	const All = (Json.Alert) ? Json.I : [];
 	const list = [];
 	if (!All.length) {
 		PGAtag = -1;
 		PGALimit = 0;
-		PGACancel = false;
 	} else {
 		for (let index = 0; index < All.length; index++) {
 			if (station[All[index].uuid] == undefined) continue;
