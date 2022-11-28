@@ -148,7 +148,7 @@ async function init() {
 					if (!time.classList.contains("replay"))
 						time.classList.add("replay");
 					time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
-					if (NOW.getTime() - replayT > 180_000) {
+					if (NOW.getTime() - replayT > 180_000 && !Object.keys(EEW).length) {
 						replay = 0;
 						document.getElementById("togglenav_btn").classList.remove("hide");
 						document.getElementById("stopReplay").classList.add("hide");
@@ -1696,7 +1696,7 @@ TREM.Earthquake.on("eew", (data) => {
 	EEWshot = NOW.getTime() - 28500;
 	EEWshotC = 1;
 	const _distance = [];
-	for (let index = 0; index < 5500; index++)
+	for (let index = 0; index < 1002; index++)
 		_distance[index] = _speed(data.Depth, index);
 	EarthquakeList[data.ID].distance = _distance;
 	main(data);
@@ -1969,17 +1969,20 @@ function main(data) {
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		let kmP = 0;
 		let km = 0;
-		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
+		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
 			if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
 				kmP = (index - 1) * 1000;
-				EarthquakeList[data.ID].km = kmP;
 				break;
 			}
-		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
+			kmP = (NOW.getTime() - data.Time) * (EarthquakeList[data.ID].distance.length / EarthquakeList[data.ID].distance[EarthquakeList[data.ID].distance.length - 1].Ptime);
+		}
+		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
 			if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
 				km = (index - 1) * 1000;
 				break;
 			}
+			km = (NOW.getTime() - data.Time) * (EarthquakeList[data.ID].distance.length / EarthquakeList[data.ID].distance[EarthquakeList[data.ID].distance.length - 1].Stime);
+		}
 		if (setting["shock.p"])
 			if (kmP > 0) {
 				if (!EarthquakeList[data.ID].CircleP)
@@ -2186,7 +2189,7 @@ function main(data) {
 				}
 				break;
 			}
-	if (EarthquakeList[data.ID].km / 1000 >= 5450 || Cancel) {
+	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
 		clear(data.ID);
 
 		// remove epicenter cross icons
@@ -2202,6 +2205,7 @@ function main(data) {
 		clearInterval(EarthquakeList[data.ID].Timer);
 		document.getElementById("box-10").innerHTML = "";
 		if (EarthquakeList[data.ID].geojson != undefined) EarthquakeList[data.ID].geojson.remove();
+		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 		delete EarthquakeList[data.ID];
 		delete EEW[data.ID];
 		if (Object.keys(EarthquakeList).length == 0) {
