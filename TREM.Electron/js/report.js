@@ -48,7 +48,7 @@ TREM.Report = {
 					|| (this._filterIntensity && !(report.data[0].areaIntensity == this._filterIntensityValue))) {
 					element.classList.add("hide");
 					element.style.display = "none";
-				} else if (TREM.Detector.webgl) {
+				} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 					const marker = new maplibregl.Marker({
 						element: $(TREM.Resources.icon.cross(
 							{
@@ -332,7 +332,7 @@ TREM.Report = {
 			this._showItem(document.getElementById(report.identifier));
 
 		for (const report of newlist)
-			if (TREM.Detector.webgl) {
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 				const marker = new maplibregl.Marker({
 					element: $(TREM.Resources.icon.cross(
 						{
@@ -391,7 +391,7 @@ TREM.Report = {
 		} else if (this._lastFocus.length) {
 			Maps.report.fitBounds(...this._lastFocus);
 			Maps.intensity.fitBounds(...this._lastFocus);
-		} else if (TREM.Detector.webgl) {
+		} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			this._lastFocus = [
 				[
 					119.8,
@@ -477,7 +477,7 @@ TREM.Report = {
 
 		for (const data of report.data)
 			for (const eqStation of data.eqStation)
-				if (TREM.Detector.webgl)
+				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 					this._markers.push(
 						new maplibregl.Marker({
 							element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
@@ -494,7 +494,7 @@ TREM.Report = {
 							zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
 						}));
 
-		if (TREM.Detector.webgl) {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			this._markers.push(
 				new maplibregl.Marker({
 					element: $(TREM.Resources.icon.cross(

@@ -81,7 +81,9 @@
 		"padding-line-between-statements": [
 			"warn",
 			{ "blankLine": "always", "prev": "*", "next": ["block-like","if","while"] },
-			{ "blankLine": "always", "prev": "block-like", "next": "*" }
+			{ "blankLine": "always", "prev": "block-like", "next": "*" },
+			{ "blankLine": "never", "prev": "case", "next": "case" },
+			{ "blankLine": "always", "prev": "block-like", "next": "case" }
 		],
 		"prefer-const": "error",
 		"prefer-arrow-callback": "error",

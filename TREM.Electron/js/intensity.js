@@ -32,7 +32,7 @@ TREM.Intensity = {
 				PLoc[towncode] = intensity;
 			}
 
-			if (TREM.Detector.webgl) {
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 				if (this.intensities.size)
 					for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
 						const towncode = keys[index] + "0";
@@ -210,7 +210,7 @@ TREM.Intensity = {
 		dump({ level: 0, message: "Clearing Intensity map", origin: "Intensity" });
 
 		if (this.intensities.size) {
-			if (TREM.Detector.webgl) {
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 				Maps.intensity.removeFeatureState({ source: "Source_tw_town" });
 				Maps.intensity.setLayoutProperty("Layer_intensity", "visibility", "none");
 			}

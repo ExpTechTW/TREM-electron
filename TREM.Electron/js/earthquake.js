@@ -275,7 +275,7 @@ TREM.MapIntensity = {
 					}
 				}
 
-				if (TREM.Detector.webgl) {
+				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 					if (this.intensities.size)
 						for (const [towncode, intensity] of this.intensities)
 							if (int.get(towncode) != intensity) {
@@ -392,7 +392,7 @@ TREM.MapIntensity = {
 			PLoc[towncode] = data[towncode];
 		}
 
-		if (TREM.Detector.webgl) {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (this.intensities.size)
 				for (const [towncode, intensity] of this.intensities)
 					if (int.get(towncode) != intensity) {
@@ -450,7 +450,7 @@ TREM.MapIntensity = {
 	clear() {
 		dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
 
-		if (TREM.Detector.webgl) {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (this.intensities.size) {
 				Maps.main.removeFeatureState({ source: "Source_tw_town" });
 				Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
@@ -690,6 +690,8 @@ async function init() {
 	const progressStep = 5;
 	report_get_timestamp = 0;
 
+	TREM.MapRenderingEngine = setting["map.engine"];
+
 	// Connect to server
 	await (async () => {
 		$("#loading").text(TREM.Localization.getString("Application_Connecting"));
@@ -701,7 +703,6 @@ async function init() {
 	// Timers
 	(() => {
 		$("#loading").text(TREM.Localization.getString("Application_Loading"));
-		progressbar.value = (1 / progressStep) * 2;
 		const time = document.getElementById("time");
 		const time1 = document.getElementById("time1");
 		const time2 = document.getElementById("time2");
@@ -826,67 +827,61 @@ async function init() {
 				}
 			}, 1_000);
 
-		progressbar.value = (1 / progressStep) * 2.5;
+		progressbar.value = (1 / progressStep) * 2;
+	})();
 
-		dump({ level: 0, message: "Initializing map", origin: "Map" });
+	// Audios
+	(() => {
+		const gainNode = TREM.AudioContext.createGain();
 
-		/*
-		if (!Maps.main) {
-			Maps.main = L.map("map",
-				{
-					edgeBufferTiles    : 1,
-					attributionControl : false,
-					closePopupOnClick  : false,
-					maxBounds          : [
-						[60, 50],
-						[10, 180],
-					],
-					preferCanvas    : true,
-					zoomSnap        : 0.25,
-					zoomDelta       : 0.5,
-					zoomAnimation   : true,
-					fadeAnimation   : setting["map.animation"],
-					doubleClickZoom : false,
-					zoomControl     : false,
-				})
-				.fitBounds([[25.35, 119.65], [21.85, 124.05]])
-				.on("click", () => {
-					mapLock = false;
-					TREM.Earthquake.emit("focus", {}, true);
-				})
-				.on("contextmenu", () => {TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });})
-				.on("drag", () => mapLock = true)
-				.on("zoomend", () => {
-					// if (Maps.main.getZoom() >= 11)
-					// 	for (const key in Station) {
-					// 		const tooltip = Station[key].getTooltip();
-					// 		if (tooltip) {
-					// 			Station[key].unbindTooltip();
-					// 			tooltip.options.permanent = true;
-					// 			Station[key].bindTooltip(tooltip);
-					// 		}
-					// 	}
-					// else
-					// 	for (const key in Station) {
-					// 		const tooltip = Station[key].getTooltip();
-					// 		if (tooltip && !Station[key].keepTooltipAlive) {
-					// 			Station[key].unbindTooltip();
-					// 			tooltip.options.permanent = false;
-					// 			Station[key].bindTooltip(tooltip);
-					// 		}
-					// 	}
-				});
-			Maps.main._zoomAnimated = setting["map.animation"];
+		for (const key in TREM.Audios) {
+			const audioSource = TREM.AudioContext.createMediaElementSource(TREM.Audios[key]);
+			audioSource.connect(gainNode).connect(TREM.AudioContext.destination);
 		}
-		*/
+
+		progressbar.value = (1 / progressStep) * 3;
+	})();
+
+	// Colors and Map
+	await (async () => {
+		TREM.Colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
+
+		dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
+		dump({ level: 3, message: "Starting timer...", origin: "Timer" });
+		let perf_GEOJSON_LOAD = process.hrtime();
+		fs.readdirSync(path.join(__dirname, "../Resources/GeoJSON")).forEach((file, i, arr) => {
+			try {
+				MapData[path.parse(file).name] = require(path.join(__dirname, "../Resources/GeoJSON", file));
+				dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
+				progressbar.value = (1 / progressStep) * 3.6 + (((1 / progressStep) / arr.length) * (i + 1));
+			} catch (error) {
+				dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
+				dump({ level: 2, message: error, origin: "ResourceLoader" });
+				console.error(error);
+				dump({ level: 3, message: `Skipping ${file}`, origin: "ResourceLoader" });
+			}
+		});
+		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
+		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
+
+		// #region Maps
+
+		TREM.MapData = MapData;
+
+		dump({ level: 3, message: "Initializing map", origin: "Map" });
 
 		if (TREM.Detector.webgl)
 			TREM.Detector.webgl = !setting["leaflet.change"];
 		// TREM.Detector.webgl = false;
 		dump({ level: 0, message: TREM.Detector.webgl, origin: "WebGL" });
 
-		if (TREM.Detector.webgl) {
+		if (TREM.Detector.webgl == false)
+			TREM.MapRenderingEngine = "leaflet";
 
+		if (TREM.MapRenderingEngine == "leaflet")
+			TREM.Detector.webgl = false;
+
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (!Maps.main)
 				Maps.main = new maplibregl.Map(
 					{
@@ -924,7 +919,6 @@ async function init() {
 						if (ev.originalEvent.target.tagName == "CANVAS")
 							Mapsmainfocus();
 					});
-
 
 			if (!Maps.mini)
 				Maps.mini = L.map("map-tw",
@@ -1045,185 +1039,7 @@ async function init() {
 				if (Timers.resize) Timers.resize.refresh();
 				else Timers.resize = setTimeout(resizeHandler, 100);
 			});
-		} else {
 
-			if (!Maps.main) {
-				Maps.main = L.map("map",
-					{
-						edgeBufferTiles    : 1,
-						attributionControl : false,
-						closePopupOnClick  : false,
-						maxBounds          : [[60, 50], [10, 180]],
-						preferCanvas       : true,
-						zoomSnap           : 0.25,
-						zoomDelta          : 0.5,
-						zoomAnimation      : true,
-						fadeAnimation      : setting["map.animation"],
-						doubleClickZoom    : false,
-						zoomControl        : false,
-					})
-					.on("click", () => {
-						mapLock = false;
-						// TREM.Earthquake.emit("focus", {}, true);
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-					})
-					.on("contextmenu", () => {
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
-					})
-					.on("drag", () => mapLock = true)
-					.on("zoomend", () => {
-						if (Maps.main.getZoom() >= 11)
-							for (const key in Station) {
-								const tooltip = Station[key].getTooltip();
-
-								if (tooltip) {
-									Station[key].unbindTooltip();
-									tooltip.options.permanent = true;
-									Station[key].bindTooltip(tooltip);
-								}
-							}
-						else
-							for (const key in Station) {
-								const tooltip = Station[key].getTooltip();
-
-								if (tooltip && !Station[key].keepTooltipAlive) {
-									Station[key].unbindTooltip();
-									tooltip.options.permanent = false;
-									Station[key].bindTooltip(tooltip);
-								}
-							}
-					});
-				Maps.main._zoomAnimated = setting["map.animation"];
-			}
-
-			if (!Maps.mini)
-				Maps.mini = L.map("map-tw",
-					{
-						attributionControl : false,
-						zoomControl        : false,
-						closePopupOnClick  : false,
-						preferCanvas       : true,
-						zoomAnimation      : false,
-						fadeAnimation      : false,
-						dragging           : false,
-						touchZoom          : false,
-						doubleClickZoom    : false,
-						scrollWheelZoom    : false,
-						boxZoom            : false,
-						keyboard           : false,
-					})
-					.setView([23.608428, 120.799168], 7)
-					.on("zoom", () => Maps.mini.setView([23.608428, 120.799168], 7));
-
-			if (!Maps.report) {
-				Maps.report = L.map("map-report",
-					{
-						attributionControl : false,
-						closePopupOnClick  : false,
-						maxBounds          : [[30, 130], [10, 100]],
-						preferCanvas       : true,
-						zoomSnap           : 0.25,
-						zoomDelta          : 0.5,
-						zoomAnimation      : true,
-						fadeAnimation      : setting["map.animation"],
-						zoomControl        : false,
-						doubleClickZoom    : false,
-						keyboard           : false,
-					})
-					.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
-						paddingTopLeft: [document.getElementById("map-report").offsetWidth / 2, 0],
-					})
-					.on("contextmenu", () => TREM.Report._focusMap())
-					.on("click", () => TREM.Report._focusMap());
-				Maps.report._zoomAnimated = setting["map.animation"];
-			}
-
-			if (!Maps.intensity) {
-				Maps.intensity = L.map("map-intensity",
-					{
-						attributionControl : false,
-						closePopupOnClick  : false,
-						maxBounds          : [[30, 130], [10, 100]],
-						preferCanvas       : true,
-						zoomSnap           : 0.25,
-						zoomDelta          : 0.5,
-						zoomAnimation      : true,
-						fadeAnimation      : setting["map.animation"],
-						zoomControl        : false,
-						doubleClickZoom    : false,
-						keyboard           : false,
-					})
-					.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
-						paddingTopLeft: [document.getElementById("map-intensity").offsetWidth / 2, 0],
-					})
-					.on("contextmenu", () => TREM.Report._focusMap())
-					.on("click", () => TREM.Report._focusMap());
-				Maps.intensity._zoomAnimated = setting["map.animation"];
-			}
-		}
-
-	})();
-
-	progressbar.value = (1 / progressStep) * 3;
-
-	// Audios
-	(() => {
-		const gainNode = TREM.AudioContext.createGain();
-
-		for (const key in TREM.Audios) {
-			const audioSource = TREM.AudioContext.createMediaElementSource(TREM.Audios[key]);
-			audioSource.connect(gainNode).connect(TREM.AudioContext.destination);
-		}
-	})();
-
-	progressbar.value = (1 / progressStep) * 3.3;
-
-	// Colors and Map
-	await (async () => {
-		TREM.Colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
-
-		dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
-		dump({ level: 3, message: "Starting timer...", origin: "Timer" });
-		let perf_GEOJSON_LOAD = process.hrtime();
-		fs.readdirSync(path.join(__dirname, "../Resources/GeoJSON")).forEach((file, i, arr) => {
-			try {
-				MapData[path.parse(file).name] = require(path.join(__dirname, "../Resources/GeoJSON", file));
-				dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
-				progressbar.value = (1 / progressStep) * 3.6 + (((1 / progressStep) / arr.length) * (i + 1));
-			} catch (error) {
-				dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
-				dump({ level: 2, message: error, origin: "ResourceLoader" });
-				console.error(error);
-				dump({ level: 3, message: `Skipping ${file}`, origin: "ResourceLoader" });
-			}
-		});
-		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
-		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
-
-		/*
-		if (!MapBases.mainFill.length)
-			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
-				MapBases.mainFill.push(
-					L.geoJson.vt(MapData[mapName], {
-						edgeBufferTiles : 2,
-						minZoom         : 4,
-						maxZoom         : 15,
-						tolerance       : 20,
-						buffer          : 256,
-						debug           : 0,
-						style           : {
-							weight      : 0.8,
-							color       : TREM.Colors.primary,
-							fillColor   : TREM.Colors.surfaceVariant,
-							fillOpacity : 1,
-						},
-					}).addTo(Maps.main),
-				);
-		*/
-
-		TREM.MapData = MapData;
-
-		if (TREM.Detector.webgl) {
 			TREM.MapBounds = {};
 
 			for (const feature of MapData.tw_town.features) {
@@ -1253,24 +1069,26 @@ async function init() {
 					"jp",
 					"sk",
 					"nk",
-				])
-					if (!setting["map.close." + mapName]) {
-						Maps.main.addSource(`Source_${mapName}`, {
-							type      : "geojson",
-							data      : MapData[mapName],
-							tolerance : 1,
-						});
-						MapBases.main.set(`${mapName}`, Maps.main.addLayer({
-							id     : `Layer_${mapName}`,
-							type   : "fill",
-							source : `Source_${mapName}`,
-							paint  : {
-								"fill-color"         : TREM.Colors.surfaceVariant,
-								"fill-outline-color" : TREM.Colors.secondary,
-								"fill-opacity"       : 0.5,
-							},
-						}).getLayer(`Layer_${mapName}`));
-					}
+				]) {
+					Maps.main.addSource(`Source_${mapName}`, {
+						type      : "geojson",
+						data      : MapData[mapName],
+						tolerance : 1,
+					});
+					MapBases.main.set(`${mapName}`, Maps.main.addLayer({
+						id     : `Layer_${mapName}`,
+						type   : "fill",
+						source : `Source_${mapName}`,
+						paint  : {
+							"fill-color"         : TREM.Colors.surfaceVariant,
+							"fill-outline-color" : TREM.Colors.secondary,
+							"fill-opacity"       : 0.5,
+						},
+						layout: {
+							visibility: setting[`map.${mapName}`] ? "visible" : "none",
+						},
+					}).getLayer(`Layer_${mapName}`));
+				}
 
 				Maps.main.addSource("Source_tw_county", {
 					type : "geojson",
@@ -1655,36 +1473,163 @@ async function init() {
 				}).getLayer("Layer_tw_county_Line"));
 			}
 		} else {
+
+			if (!Maps.main) {
+				Maps.main = L.map("map",
+					{
+						edgeBufferTiles    : 1,
+						attributionControl : false,
+						closePopupOnClick  : false,
+						maxBounds          : [[60, 50], [10, 180]],
+						preferCanvas       : true,
+						zoomSnap           : 0.25,
+						zoomDelta          : 0.5,
+						zoomAnimation      : true,
+						fadeAnimation      : setting["map.animation"],
+						doubleClickZoom    : false,
+						zoomControl        : false,
+					})
+					.on("click", () => {
+						mapLock = false;
+						// TREM.Earthquake.emit("focus", {}, true);
+						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+					})
+					.on("contextmenu", () => {
+						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+					})
+					.on("drag", () => mapLock = true)
+					.on("zoomend", () => {
+						if (Maps.main.getZoom() >= 11)
+							for (const key in Station) {
+								const tooltip = Station[key].getTooltip();
+
+								if (tooltip) {
+									Station[key].unbindTooltip();
+									tooltip.options.permanent = true;
+									Station[key].bindTooltip(tooltip);
+								}
+							}
+						else
+							for (const key in Station) {
+								const tooltip = Station[key].getTooltip();
+
+								if (tooltip && !Station[key].keepTooltipAlive) {
+									Station[key].unbindTooltip();
+									tooltip.options.permanent = false;
+									Station[key].bindTooltip(tooltip);
+								}
+							}
+					});
+				Maps.main._zoomAnimated = setting["map.animation"];
+			}
+
+			if (!Maps.mini)
+				Maps.mini = L.map("map-tw",
+					{
+						attributionControl : false,
+						zoomControl        : false,
+						closePopupOnClick  : false,
+						preferCanvas       : true,
+						zoomAnimation      : false,
+						fadeAnimation      : false,
+						dragging           : false,
+						touchZoom          : false,
+						doubleClickZoom    : false,
+						scrollWheelZoom    : false,
+						boxZoom            : false,
+						keyboard           : false,
+					})
+					.setView([23.608428, 120.799168], 7)
+					.on("zoom", () => Maps.mini.setView([23.608428, 120.799168], 7));
+
+			if (!Maps.report) {
+				Maps.report = L.map("map-report",
+					{
+						attributionControl : false,
+						closePopupOnClick  : false,
+						maxBounds          : [[30, 130], [10, 100]],
+						preferCanvas       : true,
+						zoomSnap           : 0.25,
+						zoomDelta          : 0.5,
+						zoomAnimation      : true,
+						fadeAnimation      : setting["map.animation"],
+						zoomControl        : false,
+						doubleClickZoom    : false,
+						keyboard           : false,
+					})
+					.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
+						paddingTopLeft: [document.getElementById("map-report").offsetWidth / 2, 0],
+					})
+					.on("contextmenu", () => TREM.Report._focusMap())
+					.on("click", () => TREM.Report._focusMap());
+				Maps.report._zoomAnimated = setting["map.animation"];
+			}
+
+			if (!Maps.intensity) {
+				Maps.intensity = L.map("map-intensity",
+					{
+						attributionControl : false,
+						closePopupOnClick  : false,
+						maxBounds          : [[30, 130], [10, 100]],
+						preferCanvas       : true,
+						zoomSnap           : 0.25,
+						zoomDelta          : 0.5,
+						zoomAnimation      : true,
+						fadeAnimation      : setting["map.animation"],
+						zoomControl        : false,
+						doubleClickZoom    : false,
+						keyboard           : false,
+					})
+					.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
+						paddingTopLeft: [document.getElementById("map-intensity").offsetWidth / 2, 0],
+					})
+					.on("contextmenu", () => TREM.Report._focusMap())
+					.on("click", () => TREM.Report._focusMap());
+				Maps.intensity._zoomAnimated = setting["map.animation"];
+			}
+
 			MapBases = { main: [], mini: [], report: [], intensity: [] };
 
-			if (!MapBases.main.length)
+			if (!MapBases.main.length) {
 				for (const mapName of [
 					"cn",
 					"jp",
 					"sk",
 					"nk",
-					"tw_county",
 				])
-					if (!setting["map.close." + mapName])
-						MapBases.main.push(
-							L.geoJson.vt(MapData[mapName], {
-								edgeBufferTiles : 2,
-								minZoom         : 4,
-								maxZoom         : 15,
-								tolerance       : 20,
-								buffer          : 256,
-								debug           : 0,
-								style           : {
-									weight      : 0.8,
-									color       : TREM.Colors.primary,
-									fillColor   : TREM.Colors.surfaceVariant,
-									fillOpacity : 1,
-								},
-							}).addTo(Maps.main),
-						);
+					if (setting["map." + mapName])
+						MapBases.main.push(`${mapName}`, L.geoJson.vt(MapData[mapName], {
+							edgeBufferTiles : 2,
+							minZoom         : 4,
+							maxZoom         : 15,
+							tolerance       : 20,
+							buffer          : 256,
+							debug           : 0,
+							style           : {
+								weight      : 0.8,
+								color       : TREM.Colors.secondary,
+								fillColor   : TREM.Colors.surfaceVariant,
+								fillOpacity : 0.5,
+							},
+						}).addTo(Maps.main));
+				MapBases.main.push("tw_county", L.geoJson.vt(MapData.tw_county, {
+					edgeBufferTiles : 2,
+					minZoom         : 4,
+					maxZoom         : 15,
+					tolerance       : 20,
+					buffer          : 256,
+					debug           : 0,
+					style           : {
+						weight      : 0.8,
+						color       : TREM.Colors.secondary,
+						fillColor   : TREM.Colors.surfaceVariant,
+						fillOpacity : 0.5,
+					},
+				}).addTo(Maps.main));
+			}
 
 			if (!MapBases.mini.length)
-				MapBases.mini.push(
+				MapBases.mini.push("tw_county",
 					L.geoJson.vt(MapData.tw_county, {
 						minZoom   : 7,
 						maxZoom   : 7,
@@ -1698,11 +1643,10 @@ async function init() {
 							fillColor   : "transparent",
 							fillOpacity : 0,
 						},
-					}).addTo(Maps.mini),
-				);
+					}).addTo(Maps.mini));
 
 			if (!MapBases.report.length)
-				MapBases.report.push(
+				MapBases.report.push("tw_county",
 					L.geoJson.vt(MapData.tw_county, {
 						minZoom   : 7.5,
 						maxZoom   : 10,
@@ -1715,11 +1659,10 @@ async function init() {
 							fillColor   : TREM.Colors.surfaceVariant,
 							fillOpacity : 1,
 						},
-					}).addTo(Maps.report),
-				);
+					}).addTo(Maps.report));
 
 			if (!MapBases.intensity.length)
-				MapBases.intensity.push(
+				MapBases.intensity.push("tw_county",
 					L.geoJson.vt(MapData.tw_county, {
 						minZoom   : 7.5,
 						maxZoom   : 10,
@@ -1732,8 +1675,7 @@ async function init() {
 							fillColor   : TREM.Colors.surfaceVariant,
 							fillOpacity : 1,
 						},
-					}).addTo(Maps.intensity),
-				);
+					}).addTo(Maps.intensity));
 		}
 
 	})().catch(e => dump({ level: 2, message: e }));
@@ -1755,7 +1697,7 @@ async function init() {
 	setInterval(() => {
 		if (mapLock) return;
 
-		if (TREM.Detector.webgl) {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (Object.keys(EEW).length != 0) {
 				for (let index = 0; index < Object.keys(EEW).length; index++)
 					if (EEWT.id == 0 || EEWT.id == EEW[Object.keys(EEW)[index]].id || NOW.getTime() - EEW[Object.keys(EEW)[index]].time >= 10000) {
@@ -2092,7 +2034,7 @@ function handler(response) {
 			stationnow = stationnowindex;
 		}
 
-		if (TREM.Detector.webgl) {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 			const station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-id">${keys[index]}</span><span class="rt-station-name">${station[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
 
@@ -2315,7 +2257,7 @@ function handler(response) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	if (TREM.Detector.webgl) {
+	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 		if (Object.keys(detected_list).length) {
 			let x_s = 0, y_s = 0, x_m = 0, y_m = 0;
 
@@ -2389,7 +2331,7 @@ function handler(response) {
 		} else if (TREM.MapArea.isVisible) {
 			TREM.MapArea.clear();
 		}
-	} else if (!TREM.Detector.webgl) {
+	} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 		if (Object.keys(detected_box_list).length)
 			for (let index = 0; index < Object.keys(detected_box_list).length; index++) {
 				if (RMT == 0) Maps.main.removeLayer(detected_box_list[Object.keys(detected_box_list)[index]]);
@@ -2568,7 +2510,7 @@ async function setUserLocationMarker(town) {
 
 	if (!marker)
 
-		if (TREM.Detector.webgl) {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			marker = new maplibregl.Marker({
 				element: $("<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>")[0],
 			})
@@ -2619,7 +2561,7 @@ TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
 
 	if (size >= 9.5) X = 0.2;
 
-	if (TREM.Detector.webgl) {
+	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 		if (center) {
 			Focus[0] = center[0];
 			Focus[1] = center[1] + X;
@@ -3130,7 +3072,7 @@ const stopReplay = function() {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
 
-	if (TREM.Detector.webgl)
+	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 		Mapsmainfocus();
 	else
 		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
@@ -3487,6 +3429,9 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
 	Maps.report._fadeAnimated = value;
 	Maps.report._zoomAnimated = value;
 });
+ipcRenderer.on("config:maplayer", (event, mapName, state) => {
+	Maps.main.setLayoutProperty(`Layer_${mapName}`, "visibility", state ? "visible" : "none");
+});
 // #endregion
 
 // #region EEW
@@ -3643,7 +3588,7 @@ TREM.Earthquake.on("eew", (data) => {
 				),
 			);
 
-			if (TREM.Detector.webgl)
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 				if (int.value >= 2)
 					focusBounds.extend(TREM.MapBounds[loc.code]);
 
@@ -4183,7 +4128,7 @@ function main(data) {
 			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
 
 			if (kmP > 0) {
-				if (TREM.Detector.webgl) {
+				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 					if (!EarthquakeList[data.ID].CircleP) {
 						EarthquakeList[data.ID].CircleP = new WaveCircle(
 							`${data.ID}-p`,
@@ -4245,7 +4190,7 @@ function main(data) {
 			const kmS = Math.sqrt(km);
 			EEW[data.ID].km = kmS;
 
-			if (TREM.Detector.webgl) {
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 				if (!EarthquakeList[data.ID].CircleS) {
 					EarthquakeList[data.ID].CircleS = new WaveCircle(
 						`${data.ID}-s`,
@@ -4376,7 +4321,7 @@ function main(data) {
 
 		// main map
 		if (!EarthquakeList[data.ID].epicenterIcon)
-			if (TREM.Detector.webgl)
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 				EarthquakeList[data.ID].epicenterIcon = new maplibregl.Marker(
 					{
 						element: $(`<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>`)[0],
@@ -4390,7 +4335,7 @@ function main(data) {
 		if (EarthquakeList[data.ID].epicenterIcon.getElement().src != iconUrl)
 			EarthquakeList[data.ID].epicenterIcon.getElement().src = iconUrl;
 
-		if (TREM.Detector.webgl)
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 			EarthquakeList[data.ID].epicenterIcon.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
 		else
 			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);

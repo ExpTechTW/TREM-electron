@@ -292,6 +292,20 @@ TREM.Configuration.on("error", (error) => {
 
 ipcMain.on("config:value", (event, key, value) => {
 	switch (key) {
+		case "map.cn":
+		case "map.jp":
+		case "map.sk":
+		case "map.nk": {
+			emitAllWindow("config:maplayer", key.slice(4), value);
+			MainWindow.reload();
+			break;
+		}
+
+		case "map.engine": {
+			MainWindow.reload();
+			break;
+		}
+
 		case "theme.color": {
 			emitAllWindow("config:theme", value);
 			break;
@@ -357,26 +371,6 @@ ipcMain.on("config:value", (event, key, value) => {
 		}
 
 		case "leaflet.change": {
-			MainWindow.reload();
-			break;
-		}
-
-		case "map.close.jp": {
-			MainWindow.reload();
-			break;
-		}
-
-		case "map.close.cn": {
-			MainWindow.reload();
-			break;
-		}
-
-		case "map.close.sk": {
-			MainWindow.reload();
-			break;
-		}
-
-		case "map.close.nk": {
 			MainWindow.reload();
 			break;
 		}
