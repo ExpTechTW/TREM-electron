@@ -387,10 +387,8 @@ TREM.Report = {
 		if (args.length) {
 			this._lastFocus = [...args];
 			Maps.report.fitBounds(...args);
-			Maps.intensity.fitBounds(...args);
 		} else if (this._lastFocus.length) {
 			Maps.report.fitBounds(...this._lastFocus);
-			Maps.intensity.fitBounds(...this._lastFocus);
 		} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			this._lastFocus = [
 				[
@@ -405,11 +403,9 @@ TREM.Report = {
 				},
 			];
 			Maps.report.fitBounds(...this._lastFocus);
-			Maps.intensity.fitBounds(...this._lastFocus);
 		} else {
 			this._lastFocus = [[[25.35, 119.4], [21.9, 122.22]], { paddingTopLeft: [this._mapPaddingLeft, 0] }];
 			Maps.report.fitBounds(...this._lastFocus);
-			Maps.intensity.fitBounds(...this._lastFocus);
 		}
 	},
 	_clearMap(resetFoucs = false) {

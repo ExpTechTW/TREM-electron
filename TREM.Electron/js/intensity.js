@@ -9,8 +9,39 @@ TREM.Intensity = {
 	/**
 	 * @type {maplibregl.Marker[]}
 	 */
-	_markers : null,
-	_raw     : null,
+	_markers   : null,
+	_raw       : null,
+	_lastFocus : [],
+	get _mapPaddingLeft() {
+		return document.getElementById("map-intensity").offsetWidth / 2;
+	},
+
+	_focusMap(...args) {
+		if (args.length) {
+			this._lastFocus = [...args];
+			Maps.intensity.fitBounds(...args);
+		} else if (this._lastFocus.length) {
+			Maps.intensity.fitBounds(...this._lastFocus);
+		} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+			this._lastFocus = [
+				[
+					119.8,
+					21.82,
+					122.18,
+					25.42,
+				],
+				{
+					padding  : { left: (Maps.intensity.getCanvas().width / 2) * 0.8 },
+					duration : 1000,
+				},
+			];
+			Maps.intensity.fitBounds(...this._lastFocus);
+		} else {
+			this._lastFocus = [[[25.35, 119.4], [21.9, 122.22]], { paddingTopLeft: [this._mapPaddingLeft, 0] }];
+			Maps.intensity.fitBounds(...this._lastFocus);
+		}
+	},
+
 	handle(rawIntensityData) {
 		if (this._raw != null) this.clear();
 
@@ -131,8 +162,8 @@ TREM.Intensity = {
 						}).addTo(Maps.intensity);
 
 					this.geojson = L.geoJson.vt(TREM.MapData.tw_town, {
-						minZoom   : 4,
-						maxZoom   : 15,
+						minZoom   : 7.5,
+						maxZoom   : 10,
 						tolerance : 20,
 						buffer    : 256,
 						debug     : 0,
@@ -207,14 +238,18 @@ TREM.Intensity = {
 				this.timer = setTimeout(() => this.clear, 60_000);
 
 		}
-
 	},
+
 	clear() {
 		dump({ level: 0, message: "Clearing Intensity map", origin: "Intensity" });
 
 		if (this.intensities.size) {
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-				Maps.intensity.removeFeatureState({ source: "Source_tw_town" });
+				for (const [towncode] of this.intensities)
+					Maps.intensity.removeFeatureState({
+						source : "Source_tw_town",
+						id     : towncode,
+					});
 				Maps.intensity.setLayoutProperty("Layer_intensity", "visibility", "none");
 			}
 
@@ -225,6 +260,8 @@ TREM.Intensity = {
 			this.alertTime = 0;
 			this.isTriggered = false;
 			this._raw = null;
+			this._lastFocus = [];
+			this._focusMap();
 
 			if (this.timer) {
 				clearTimeout(this.timer);

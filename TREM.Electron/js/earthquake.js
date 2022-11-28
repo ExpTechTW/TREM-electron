@@ -1583,8 +1583,8 @@ async function init() {
 					.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
 						paddingTopLeft: [document.getElementById("map-intensity").offsetWidth / 2, 0],
 					})
-					.on("contextmenu", () => TREM.Report._focusMap())
-					.on("click", () => TREM.Report._focusMap());
+					.on("contextmenu", () => TREM.Intensity._focusMap())
+					.on("click", () => TREM.Intensity._focusMap());
 				Maps.intensity._zoomAnimated = setting["map.animation"];
 			}
 
@@ -1868,7 +1868,7 @@ async function init() {
 		}
 	}, 500);
 	global.gc();
-	// const userJSON = require(path.resolve(__dirname, "../js/1669424504090.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1669484541389.json"));
 	// TREM.Intensity.handle(userJSON);
 	// const userJSON1 = require(path.resolve(__dirname, "../js/1668323000997.json"));
 	// TREM.MapIntensity.palert(userJSON1.Data);
