@@ -2012,7 +2012,7 @@ function main(data) {
 			}
 
 		if (km > 0) {
-			EEW[data.ID].km = Math.sqrt(km);
+			EEW[data.ID].km = km;
 			if (!EarthquakeList[data.ID].CircleS)
 				EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 					color       : data.Alert ? "red" : "orange",
