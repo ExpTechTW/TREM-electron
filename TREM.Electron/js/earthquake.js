@@ -2020,7 +2020,7 @@ function main(data) {
 					.setRadius(kmP);
 			}
 
-		if (km > 0) {
+		if (km > data.Depth) {
 			EEW[data.ID].km = km;
 			if (!EarthquakeList[data.ID].CircleS)
 				EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
@@ -2068,8 +2068,9 @@ function main(data) {
 					},
 				);
 		} else {
+
 			let Progress = 0;
-			const num = km / data.Depth;
+			const num = (NOW.getTime() - data.Time) / 10 / EarthquakeList[data.ID].distance[1].Stime;
 			if (num > 15) Progress = 1;
 			if (num > 25) Progress = 2;
 			if (num > 35) Progress = 3;
