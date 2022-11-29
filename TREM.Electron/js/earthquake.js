@@ -96,6 +96,7 @@ let report_get_timestamp = 0;
 // #endregion
 
 // #region 初始化
+const _unlock = fs.existsSync(path.join(app.getPath("userData"), "unlock.tmp"));
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 const folder = path.join(app.getPath("userData"), "data");
 if (!fs.existsSync(folder))
@@ -1453,7 +1454,7 @@ async function FCMdata(data, Unit) {
 				Shot     : 1,
 			});
 		}, 5000);
-	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
+	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test || (_unlock && json.Function == "TREM")) {
 		if (replay != 0 && !json.Replay) return;
 		if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
 		if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
