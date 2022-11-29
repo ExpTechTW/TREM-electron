@@ -42,6 +42,7 @@ localStorage.dirname = __dirname;
 // #region 變數
 const posturl = "https://exptech.com.tw/api/v1/trem/";
 const geturl = "https://exptech.com.tw/api/v1/trem/RTS?time=";
+const getapiurl = "https://api.exptech.com.tw/api/v1/trem/rts";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
@@ -79,11 +80,19 @@ const Focus = [
 let INFO = [];
 let TINFO = 0;
 let Report = 0;
-const server_timestamp = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
+let server_timestamp;
+
+try {
+	server_timestamp = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
+} catch (error) {
+	server_timestamp = [];
+}
+
 let Location;
 let station = {};
 let detected_box_location = {};
 let palert_geojson = null;
+let rts_remove_eew = false;
 let investigation = false;
 let ReportTag = 0;
 TREM.ReportTag1 = 0;
@@ -720,7 +729,7 @@ async function init() {
 						time.classList.add("replay");
 					time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 
-					if (NOW.getTime() - replayT > 180_000) {
+					if (NOW.getTime() - replayT > 180_000 && !Object.keys(EEW).length) {
 						replay = 0;
 						ReportGET();
 						stopReplay();
@@ -793,16 +802,16 @@ async function init() {
 				// const heapTotal = formatMemoryUsage(memoryData.heapTotal);
 				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
 				// const external = formatMemoryUsage(memoryData.external);
-				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
+				const Delay = (isNaN(Ping)) ? Ping : (Date.now() - Ping) > 2500 ? "2500+ms" : Date.now() - Ping + "ms";
 				const warn = (Warn) ? "⚠️" : "";
 				const error = (testEEWerror) ? "❌" : "";
 				const unlock = (Unlock) ? "⚡" : "";
 				$("#log").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
 				$("#log1").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
 				$("#log2").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
-				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
-				$("#app-version1").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
-				$("#app-version2").text(`${app.getVersion()} ${Delay}ms ${warn} ${error} ${unlock} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Delay} ${warn} ${error} ${unlock} ${GetDataState}`);
+				$("#app-version1").text(`${app.getVersion()} ${Delay} ${warn} ${error} ${unlock} ${GetDataState}`);
+				$("#app-version2").text(`${app.getVersion()} ${Delay} ${warn} ${error} ${unlock} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -1892,26 +1901,36 @@ function PGAMain() {
 		setTimeout(async () => {
 			try {
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-				const controller = new AbortController();
-				setTimeout(() => {
-					controller.abort();
-				}, 950);
-				let ans = await fetch(`${geturl}${ReplayTime}&key=${setting["api.key"]}`, { signal: controller.signal }).catch((err) => {
-					TimerDesynced = true;
-					stationnow = 0;
+
+				if (ReplayTime == 0 && rts_ws_timestamp != 0 && Date.now() - rts_ws_timestamp <= 550) {
+					Ping = "Super";
+					handler(rts_response);
+				} else {
+					const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
+					const controller = new AbortController();
+					setTimeout(() => {
+						controller.abort();
+					}, 950);
+					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
+						TimerDesynced = true;
+						stationnow = 0;
+						handler(Response);
+						PGAMainbkup();
+					});
+
+					if (controller.signal.aborted || ans == undefined) {
+						handler(Response);
+						return;
+					}
+
+					ans = await ans.json();
+					Ping = Date.now();
+					TimerDesynced = false;
+					Response = ans;
 					handler(Response);
-					PGAMainbkup();
-				});
-
-				if (controller.signal.aborted || ans == undefined)
-					return;
-
-				ans = await ans.json();
-				Ping = Date.now();
-				TimerDesynced = false;
-				Response = ans;
-				handler(Response);
+				}
 			} catch (err) {
+				console.log(err);
 				TimerDesynced = true;
 				stationnow = 0;
 				handler(Response);
@@ -1928,30 +1947,30 @@ function PGAMainbkup() {
 	Timers.rts_clock = setInterval(() => {
 		setTimeout(() => {
 			try {
-				const CancelToken = axios.CancelToken;
-				let cancel;
-				setTimeout(() => {
-					cancel();
-				}, 950);
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-				axios({
-					method      : "get",
-					url         : geturl + ReplayTime + "&key=" + setting["api.key"] ?? "",
-					cancelToken : new CancelToken((c) => {
-						cancel = c;
-					}),
-				}).then((response) => {
-					Ping = Date.now();
-					TimerDesynced = false;
-					Response = response.data;
-					handler(Response);
-				}).catch((err) => {
-					TimerDesynced = true;
-					stationnow = 0;
-					handler(Response);
-					PGAMain();
-				});
+
+				if (ReplayTime == 0 && rts_ws_timestamp != 0 && Date.now() - rts_ws_timestamp <= 550) {
+					Ping = "Super";
+					handler(rts_response);
+				} else {
+					const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
+					axios({
+						method      : "get",
+						url         : url,
+					}).then((response) => {
+						Ping = Date.now();
+						TimerDesynced = false;
+						Response = response.data;
+						handler(Response);
+					}).catch((err) => {
+						TimerDesynced = true;
+						stationnow = 0;
+						handler(Response);
+						PGAMain();
+					});
+				}
 			} catch (err) {
+				console.log(err);
 				TimerDesynced = true;
 				stationnow = 0;
 				handler(Response);
@@ -1990,6 +2009,15 @@ function handler(response) {
 		delete Station[removedKey];
 	}
 
+	if (Object.keys(EEW).length && !rts_remove_eew) {
+		rts_remove_eew = true;
+
+		for (const removedKey of Object.keys(Station)) {
+			Station[removedKey].remove();
+			delete Station[removedKey];
+		}
+	}
+
 	MaxPGA = 0;
 	MaxIntensity1 = 0;
 	let stationnowindex = 0;
@@ -2022,12 +2050,13 @@ function handler(response) {
 		const NA0999 = (intensity == 0 && amount == 999) ? "Y" : "NA";
 		const size = (intensity == 0 || intensity == "NA" && NA999 != "Y" && NA0999 != "Y") ? 8 : 16;
 		const levelClass = (intensity != 0 && NA999 != "Y") ? IntensityToClassString(intensity)
-			: (amount == 999) ? "pga6"
-				: (amount > 3.5) ? "pga5"
-					: (amount > 3) ? "pga4"
-						: (amount > 2.5) ? "pga3"
-							: (amount > 2) ? "pga2"
-								: "pga1";
+			: (intensity == 0 && Alert) ? "pga0"
+				: (amount == 999) ? "pga6"
+					: (amount > 3.5) ? "pga5"
+						: (amount > 3) ? "pga4"
+							: (amount > 2.5) ? "pga3"
+								: (amount > 2) ? "pga2"
+									: "pga1";
 
 		if (intensity != "NA" && NA999 != "Y" && NA0999 != "Y") {
 			stationnowindex += 1;
@@ -2089,7 +2118,7 @@ function handler(response) {
 		} else {
 			const station_tooltip = `<div>${keys[index]}</div><div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(intensity)}</div>`;
 
-			if (!Station[keys[index]])
+			if (!Station[keys[index]] && (!rts_remove_eew || Alert))
 				Station[keys[index]] = L.marker(
 					[station[keys[index]].Lat, station[keys[index]].Long],
 					{
@@ -2127,15 +2156,17 @@ function handler(response) {
 							rtstation1 = keys[index];
 					});
 
-			if (Station[keys[index]].getIcon()?.options?.className != `map-intensity-icon rt-icon ${levelClass}`)
-				Station[keys[index]].setIcon(L.divIcon({
-					iconSize  : [size, size],
-					className : `map-intensity-icon rt-icon ${levelClass}`,
-				}));
+			if (Station[keys[index]]) {
+				if (Station[keys[index]].getIcon()?.options?.className != `map-intensity-icon rt-icon ${levelClass}`)
+					Station[keys[index]].setIcon(L.divIcon({
+						iconSize  : [size, size],
+						className : `map-intensity-icon rt-icon ${levelClass}`,
+					}));
 
-			Station[keys[index]]
-				.setZIndexOffset(2000 + ~~(amount * 10) + intensity * 500)
-				.setTooltipContent(station_tooltip);
+				Station[keys[index]]
+					.setZIndexOffset(2000 + ~~(amount * 10) + intensity * 500)
+					.setTooltipContent(station_tooltip);
+			}
 		}
 
 		const Level = IntensityI(intensity);
@@ -2391,6 +2422,8 @@ function handler(response) {
 				}
 			}
 
+		if (!Object.keys(detected_list).length) PGACancel = false;
+
 		if (RMT >= 2) RMT = 0;
 	}
 
@@ -2400,7 +2433,6 @@ function handler(response) {
 	if (!All.length) {
 		PGAtag = -1;
 		PGALimit = 0;
-		PGACancel = false;
 	} else {
 		for (let index = 0; index < All.length; index++) {
 			if (station[All[index].uuid] == undefined) continue;
@@ -3481,6 +3513,7 @@ function FCMdata(data, Unit) {
 		replay = json.timestamp;
 		replayT = NOW.getTime();
 		ReportGET();
+		stopReplaybtn();
 	} else if (json.Function == "report") {
 		if (TREM.MapIntensity.isTriggered)
 			TREM.MapIntensity.clear();
@@ -3593,14 +3626,9 @@ TREM.Earthquake.on("eew", (data) => {
 					focusBounds.extend(TREM.MapBounds[loc.code]);
 
 			if (setting["location.city"] == city && setting["location.town"] == town) {
-				if (setting["auto.waveSpeed"] && data.Speed != undefined) {
-					EarthquakeList[data.ID].Pspeed = data.Speed.Pv;
-					EarthquakeList[data.ID].Sspeed = data.Speed.Sv;
-				}
-
-				level = int;
-				value = Math.round((d - ((NOW.getTime() - data.Time) / 1000) * EarthquakeList[data.ID].Sspeed) / EarthquakeList[data.ID].Sspeed) - 5;
 				distance = d;
+				level = int;
+				value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000) - 2;
 			}
 
 			if (int.value > MaxIntensity.value)
@@ -3716,7 +3744,7 @@ TREM.Earthquake.on("eew", (data) => {
 		id   : data.ID,
 		km   : 0,
 	};
-	value = Math.round((distance - ((NOW.getTime() - data.Time) / 1000) * EarthquakeList[data.ID].Sspeed) / EarthquakeList[data.ID].Sspeed);
+	value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
 
 	if (Second == -1 || value < Second)
 		if (setting["audio.eew"] && Alert)
@@ -3725,7 +3753,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 				if (t != null) clearInterval(t);
 				t = setInterval(() => {
-					value = Math.floor((distance - ((NOW.getTime() - data.Time) / 1000) * EarthquakeList[data.ID].Sspeed) / EarthquakeList[data.ID].Sspeed);
+					value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
 					Second = value;
 
 					if (stamp != value && !audio.minor_lock) {
@@ -3770,6 +3798,7 @@ TREM.Earthquake.on("eew", (data) => {
 	if (data.Replay) {
 		replay = data.timestamp;
 		replayT = NOW.getTime();
+		stopReplaybtn();
 	} else {
 		replay = 0;
 	}
@@ -3790,7 +3819,8 @@ TREM.Earthquake.on("eew", (data) => {
 		alert_intensity : MaxIntensity.value,
 		alert_location  : data.Location ?? "未知區域",
 		alert_time      : new Date(data["UTC+8"]),
-		alert_sTime     : new Date(data.Time),
+		alert_sTime     : Math.floor(data.Time + _speed(data.Depth, distance).Stime * 1000),
+		alert_pTime     : Math.floor(data.Time + _speed(data.Depth, distance).Ptime * 1000),
 		alert_local     : level.value,
 		alert_magnitude : data.Scale,
 		alert_depth     : data.Depth,
@@ -3830,6 +3860,10 @@ TREM.Earthquake.on("eew", (data) => {
 
 	EEWshot = NOW.getTime() - 28500;
 	EEWshotC = 1;
+	const _distance = [];
+	for (let index = 0; index < 1002; index++)
+		_distance[index] = _speed(data.Depth, index);
+	EarthquakeList[data.ID].distance = _distance;
 	main(data);
 	EarthquakeList[data.ID].Timer = setInterval(() => {
 		main(data);
@@ -4124,9 +4158,32 @@ function main(data) {
 	if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
 	if (EarthquakeList[data.ID].Cancel == undefined) {
-		if (setting["shock.p"]) {
-			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
+		let kmP = 0;
+		let km = 0;
 
+		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
+			if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
+				kmP = (index - 1) * 1000;
+
+				if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 7) (NOW.getTime() - data.Time) * 7;
+				break;
+			}
+
+			kmP = (NOW.getTime() - data.Time) * 7;
+		}
+
+		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
+			if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
+				km = (index - 1) * 1000;
+
+				if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 4) (NOW.getTime() - data.Time) * 4;
+				break;
+			}
+
+			km = (NOW.getTime() - data.Time) * 4;
+		}
+
+		if (setting["shock.p"])
 			if (kmP > 0) {
 				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 					if (!EarthquakeList[data.ID].CircleP) {
@@ -4182,13 +4239,9 @@ function main(data) {
 				EarthquakeList[data.ID].CirclePTW
 					.setRadius(kmP);
 			}
-		}
-
-		const km = Math.pow((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
 
 		if (km > 0) {
-			const kmS = Math.sqrt(km);
-			EEW[data.ID].km = kmS;
+			EEW[data.ID].km = km;
 
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 				if (!EarthquakeList[data.ID].CircleS) {
@@ -4196,7 +4249,7 @@ function main(data) {
 						`${data.ID}-s`,
 						Maps.main,
 						[+data.EastLongitude, +data.NorthLatitude],
-						kmS,
+						km,
 						data.Alert,
 						{
 							type  : "fill",
@@ -4207,7 +4260,7 @@ function main(data) {
 						});
 				} else {
 					EarthquakeList[data.ID].CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
-					EarthquakeList[data.ID].CircleS.setRadius(kmS);
+					EarthquakeList[data.ID].CircleS.setRadius(km);
 					EarthquakeList[data.ID].CircleS.setAlert(data.Alert);
 				}
 			} else {
@@ -4216,7 +4269,7 @@ function main(data) {
 						color       : data.Alert ? "red" : "orange",
 						fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
 						fillOpacity : 1,
-						radius      : kmS,
+						radius      : km,
 						renderer    : L.svg(),
 						className   : "s-wave",
 					}).addTo(Maps.main);
@@ -4226,7 +4279,7 @@ function main(data) {
 						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
 				EarthquakeList[data.ID].CircleS
-					.setRadius(kmS)
+					.setRadius(km)
 					.setStyle(
 						{
 							color     : data.Alert ? "red" : "orange",
@@ -4240,7 +4293,7 @@ function main(data) {
 					color       : data.Alert ? "red" : "orange",
 					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
 					fillOpacity : 1,
-					radius      : kmS,
+					radius      : km,
 					renderer    : L.svg(),
 					className   : "s-wave",
 				}).addTo(Maps.mini);
@@ -4250,7 +4303,7 @@ function main(data) {
 					.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
 			EarthquakeList[data.ID].CircleSTW
-				.setRadius(kmS)
+				.setRadius(km)
 				.setStyle(
 					{
 						color     : data.Alert ? "red" : "orange",
@@ -4259,7 +4312,7 @@ function main(data) {
 				);
 		} else {
 			let Progress = 0;
-			const num = Math.round(((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Sspeed / (data.Depth * 1000)) * 100);
+			const num = km / data.Depth;
 
 			if (num > 15) Progress = 1;
 
@@ -4441,6 +4494,8 @@ function main(data) {
 		document.getElementById("box-10").innerHTML = "";
 
 		if (EarthquakeList[data.ID].geojson != undefined) EarthquakeList[data.ID].geojson.remove();
+
+		if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 		delete EarthquakeList[data.ID];
 		delete EEW[data.ID];
 
@@ -4472,6 +4527,7 @@ function main(data) {
 			delete Timers.epicenterBlinker;
 			clearInterval(Timers.eew);
 			Timers.eew = null;
+			rts_remove_eew = false;
 			const list = fs.readdirSync(folder);
 
 			for (let index = 0; index < list.length; index++) {
@@ -4519,12 +4575,12 @@ function updateText() {
 		$("#alert-p").text("X");
 		$("#alert-s").text("X");
 	} else {
-		let num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * EarthquakeList[INFO[TINFO].ID].Sspeed) / EarthquakeList[INFO[TINFO].ID].Sspeed);
+		let num = Math.floor((INFO[TINFO].alert_sTime - NOW.getTime()) / 1000);
 
 		if (num <= 0) num = "";
 		$("#alert-s").text(num);
 
-		num = Math.floor((INFO[TINFO].distance - ((NOW.getTime() - INFO[TINFO].alert_sTime.getTime()) / 1000) * EarthquakeList[INFO[TINFO].ID].Pspeed) / EarthquakeList[INFO[TINFO].ID].Pspeed);
+		num = Math.floor((INFO[TINFO].alert_pTime - NOW.getTime()) / 1000);
 
 		if (num <= 0) num = "";
 		$("#alert-p").text(num);
