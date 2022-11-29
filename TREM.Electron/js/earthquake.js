@@ -667,6 +667,7 @@ TREM.MapArea = {
 };
 
 // #region 初始化
+const _unlock = fs.existsSync(path.join(app.getPath("userData"), "unlock.tmp"));
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 const folder = path.join(app.getPath("userData"), "data");
 
@@ -1955,8 +1956,8 @@ function PGAMainbkup() {
 				} else {
 					const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
 					axios({
-						method      : "get",
-						url         : url,
+						method : "get",
+						url    : url,
 					}).then((response) => {
 						Ping = Date.now();
 						TimerDesynced = false;
@@ -3558,7 +3559,7 @@ function FCMdata(data, Unit) {
 				Shot     : 1,
 			});
 		}, 5000);
-	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
+	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test || (_unlock && json.Function == "TREM")) {
 		if (replay != 0 && !json.Replay) return;
 
 		if (
@@ -4240,7 +4241,7 @@ function main(data) {
 					.setRadius(kmP);
 			}
 
-		if (km > 0) {
+		if (km > data.Depth) {
 			EEW[data.ID].km = km;
 
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -4311,8 +4312,9 @@ function main(data) {
 					},
 				);
 		} else {
+
 			let Progress = 0;
-			const num = km / data.Depth;
+			const num = (NOW.getTime() - data.Time) / 10 / EarthquakeList[data.ID].distance[1].Stime;
 
 			if (num > 15) Progress = 1;
 
