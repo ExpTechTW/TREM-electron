@@ -218,7 +218,7 @@ TREM.Intensity = {
 				this.isTriggered = true;
 
 				if (setting["intensity.show"]) {
-					changeView("intensity", "#mainView_btn");
+					changeView("intensity", "#intensityView_btn");
 
 					if (setting["Real-time.show"]) TREM.win.showInactive();
 
