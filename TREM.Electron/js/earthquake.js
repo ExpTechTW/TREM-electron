@@ -927,7 +927,13 @@ async function init() {
 					})
 					.on("contextmenu", (ev) => {
 						if (ev.originalEvent.target.tagName == "CANVAS")
-							Mapsmainfocus();
+							TREM.Earthquake.emit("focus", {
+								center  : pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine),
+								zoom    : 7.75,
+								options : {
+									padding: { bottom: 0, right: 0 },
+								},
+							});
 					});
 
 			if (!Maps.mini)
@@ -1028,13 +1034,14 @@ async function init() {
 
 			const resizeHandler = (ev) => {
 				if (ev && ev.propertyName != "margin-top") return;
-				Maps.main.resize().fitBounds([
-					118.25,
-					21.77,
-					122.18,
-					25.47,
-				], {
-					padding  : { right: Maps.main.getCanvas().width / 6 },
+
+				Maps.main.resize();
+
+				const camera = Maps.main.cameraForBounds(new maplibregl.LngLatBounds([ 118.25, 21.77 ], [ 122.18, 25.47 ]));
+				Maps.main.easeTo({
+					center   : camera.center,
+					zoom     : camera.zoom,
+					padding  : { bottom: 0, right: Maps.report.getCanvas().width / 6 },
 					speed    : 2,
 					curve    : 1,
 					easing   : (e) => Math.sin(e * Math.PI / 2),
@@ -1502,10 +1509,10 @@ async function init() {
 					.on("click", () => {
 						mapLock = false;
 						// TREM.Earthquake.emit("focus", {}, true);
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+						TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
 					})
 					.on("contextmenu", () => {
-						TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+						TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
 					})
 					.on("drag", () => mapLock = true)
 					.on("zoomend", () => {
@@ -1709,64 +1716,55 @@ async function init() {
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (Object.keys(EEW).length != 0) {
+				const finalBounds = new maplibregl.LngLatBounds();
+				let finalZoom = 0;
+				let sampleCount = 0;
+
 				for (let index = 0; index < Object.keys(EEW).length; index++)
 					if (EEWT.id == 0 || EEWT.id == EEW[Object.keys(EEW)[index]].id || NOW.getTime() - EEW[Object.keys(EEW)[index]].time >= 10000) {
 						EEWT.id = EEW[Object.keys(EEW)[index]].id;
-						let Zoom = 9;
 						const X = 0;
 						const km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
 
-						if (km > 100000)
-							Zoom = 8;
-
-						if (km > 150000)
-							Zoom = 7.5;
-
-						if (km > 200000)
-							Zoom = 7;
-
-						if (km > 250000)
-							Zoom = 6.5;
-
 						if (km > 300000)
-							Zoom = 6;
+							finalZoom += 6;
+
+						else if (km > 250000)
+							finalZoom += 6.5;
+
+						else if (km > 200000)
+							finalZoom += 6.75;
+
+						else if (km > 150000)
+							finalZoom += 7;
+
+						else if (km > 100000)
+							finalZoom += 7.5;
+
+						else
+							finalZoom += 8;
+
+						sampleCount++;
+
+						finalBounds.extend([EEW[Object.keys(EEW)[index]].lon, EEW[Object.keys(EEW)[index]].lat]);
+
+						/*
 						const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
 
 						if (num >= 5)
-							TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
+							TREM.Earthquake.emit("focus", { center: pointFormatter(EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon, TREM.MapRenderingEngine), zoom: Zoom });
 						else
-							TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], size: Zoom });
+							TREM.Earthquake.emit("focus", { center: pointFormatter((23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X, TREM.MapRenderingEngine), zoom: Zoom });
+						*/
 						EEW[Object.keys(EEW)[index]].time = NOW.getTime();
-						// let Zoom = 7;
-						// const km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
-
-						// if (km > 100000)
-						// 	Zoom = 6.5;
-
-						// if (km > 150000)
-						// 	Zoom = 6;
-
-						// if (km > 200000)
-						// 	Zoom = 5.5;
-
-						// if (km > 250000)
-						// 	Zoom = 5;
-
-						// if (km > 300000)
-						// 	Zoom = 4.5;
-						// // const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
-
-						// // if (num >= 5)
-						// // 	TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
-						// // else
-						// // 	TREM.Earthquake.emit("focus", { center: [(23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X], size: Zoom });
-						// // EEW[Object.keys(EEW)[index]].time = NOW.getTime();
-
-						// TREM.Earthquake.emit("focus", { center: [EEW[Object.keys(EEW)[index]].lat, EEW[Object.keys(EEW)[index]].lon], size: Zoom });
-						// EEW[Object.keys(EEW)[index]].time = NOW.getTime();
 					}
 
-				auto = true;
+				finalZoom = finalZoom / sampleCount;
+
+				if (finalZoom != Maps.main.getZoom() && !Maps.main.isEasing()) {
+					const camera = Maps.main.cameraForBounds(finalBounds, { padding: { bottom: 100, right: 100 } });
+					TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
+				}
 			} else if (Object.keys(detected_box_list).length >= 1) {
 				if (Object.keys(detected_box_list).length == 1) {
 					const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
@@ -1797,13 +1795,8 @@ async function init() {
 						if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
 					}
 
-					TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
+					TREM.Earthquake.emit("focus", { center: pointFormatter((X1 + X2) / 2, (Y1 + Y2) / 2, TREM.MapRenderingEngine), zoom: focusScale });
 				}
-
-				auto = true;
-			} else if (auto) {
-				auto = false;
-				TREM.Earthquake.emit("focus", { center: [23.612, 121.596], size: 6.8 });
 			}
 		} else if (Object.keys(EEW).length != 0) {
 			for (let index = 0; index < Object.keys(EEW).length; index++)
@@ -1841,7 +1834,7 @@ async function init() {
 			if (Object.keys(detected_box_list).length == 1) {
 				const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
 				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
-				TREM.Earthquake.emit("focus", { center: [X1, Y1], size: 9.5 });
+				TREM.Earthquake.emit("focus", { center: pointFormatter(X1, Y1, TREM.MapRenderingEngine), zoom: 9.5 });
 			} else if (Object.keys(detected_box_list).length >= 2) {
 				const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
 				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
@@ -1867,14 +1860,14 @@ async function init() {
 					if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
 				}
 
-				TREM.Earthquake.emit("focus", { center: [(X1 + X2) / 2, (Y1 + Y2) / 2], size: focusScale });
+				TREM.Earthquake.emit("focus", { center: pointFormatter((X1 + X2) / 2, (Y1 + Y2) / 2, TREM.MapRenderingEngine), zoom: focusScale });
 			}
 
 			auto = true;
 		} else
 		if (auto) {
 			auto = false;
-			TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+			TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
 		}
 	}, 500);
 	global.gc();
@@ -2567,59 +2560,67 @@ async function setUserLocationMarker(town) {
 // #endregion
 
 // #region 聚焦
-TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
+TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, linear = false) => {
+
+	/*
 	if (!setting["map.autoZoom"])
 		if (force) {
 			center = [23.608428, 120.799168];
-			size = 7.75;
+			zoom = 7.75;
 		} else {
 			return;
 		}
 
-	let X = 0;
-
-	if (size >= 6) X = 2.5;
-
-	if (size >= 6.5) X = 1.6;
-
-	if (size >= 7) X = 1.5;
-
-	if (size >= 7.5) X = 0.9;
-
-	if (size >= 8) X = 0.6;
-
-	if (size >= 8.5) X = 0.4;
-
-	if (size >= 9) X = 0.35;
-
-	if (size >= 9.5) X = 0.2;
+	*/
 
 	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-		if (center) {
-			Focus[0] = center[0];
-			Focus[1] = center[1] + X;
-			Focus[2] = size;
+		console.log("bounds", bounds, "center", center, "zoom", zoom, "options", options);
 
-			if (Maps.main.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || size != Maps.main.getZoom())
-				Maps.main.jumpTo({
-					center : [center[1], center[0]],
-					zoom   : size,
+		if (bounds)
+			Maps.main.fitBounds(bounds, options);
+		else if (center)
+			if (linear)
+				if (zoom)
+					Maps.main.jumpTo({ center, zoom });
+				else
+					Maps.main.jumpTo({ center });
+			else if (zoom)
+				Maps.main.easeTo({
+					center,
+					zoom,
+					...options,
 				});
-		} else if (Focus.length != 0) {
-			if (Maps.main.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != Maps.main.getZoom())
-				Maps.main.jumpTo({
-					center : [Focus[1], Focus[0]],
-					zoom   : Focus[2],
+			else
+				Maps.main.easeTo({
+					center,
+					...options,
 				});
-		}
 
 	} else if (center) {
+		let X = 0;
+
+		if (zoom >= 6) X = 2.5;
+
+		if (zoom >= 6.5) X = 1.6;
+
+		if (zoom >= 7) X = 1.5;
+
+		if (zoom >= 7.5) X = 0.9;
+
+		if (zoom >= 8) X = 0.6;
+
+		if (zoom >= 8.5) X = 0.4;
+
+		if (zoom >= 9) X = 0.35;
+
+		if (zoom >= 9.5) X = 0.2;
+
 		Focus[0] = center[0];
 		Focus[1] = center[1] + X;
-		Focus[2] = size;
+		Focus[2] = zoom;
 
-		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || size != Maps.main.getZoom())
-			Maps.main.setView([center[0], center[1]], size);
+		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || zoom != Maps.main.getZoom())
+			Maps.main.setView([center[0], center[1]], zoom);
 	} else if (Focus.length != 0) {
 		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != Maps.main.getZoom())
 			Maps.main.setView([Focus[0], Focus[1]], Focus[2]);
@@ -2627,17 +2628,20 @@ TREM.Earthquake.on("focus", ({ center, size } = {}, force = false) => {
 });
 
 function Mapsmainfocus() {
-	Maps.main.fitBounds([
-		118.25,
-		21.77,
-		122.18,
-		25.47,
-	], {
-		padding  : { right: Maps.main.getCanvas().width / 6 },
-		speed    : 2,
-		curve    : 1,
-		easing   : (e) => Math.sin(e * Math.PI / 2),
-		duration : 1000,
+	TREM.Earthquake.emit("focus", {
+		bounds: [
+			118.25,
+			21.77,
+			122.18,
+			25.47,
+		],
+		options: {
+			padding  : { bottom: 0, right: Maps.main.getCanvas().width / 6 },
+			speed    : 2,
+			curve    : 1,
+			easing   : (e) => Math.sin(e * Math.PI / 2),
+			duration : 1000,
+		},
 	});
 }
 
@@ -3108,7 +3112,7 @@ const stopReplay = function() {
 	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 		Mapsmainfocus();
 	else
-		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+		TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
 	testEEWerror = false;
 	unstopReplaybtn();
 };
@@ -3972,7 +3976,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 		if (setting["report.cover"]) win.moveTop();
 
 		if (setting["audio.report"]) audioPlay("../audio/Water.wav");
-		TREM.Earthquake.emit("focus", { center: [23.608428, 120.799168], size: 7.75 });
+		TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), size: 7.75 });
 	}
 
 	if (data.Cancel) {
@@ -4652,3 +4656,10 @@ const changeView = (args, el, event) => {
 
 	TREM.emit("viewChange", currentel.attr("id"), changeel.attr("id"));
 };
+
+function pointFormatter(lat, lng, engine) {
+	if (engine == "mapbox-gl")
+		return [lng, lat];
+	else if (engine == "leaflet")
+		return [lat, lng];
+}
