@@ -766,7 +766,7 @@ async function init() {
 					if (TREM.toggleNavTime != 0 && NOW.getTime() - TREM.toggleNavTime > 5_000) {
 						console.log("toggleNavTime end: ", NOW.getTime());
 						TREM.toggleNavTime = 0;
-						$("#nav-rail").addClass("hide");
+						toggleNav(false);
 					}
 				}
 
