@@ -914,7 +914,7 @@ async function init() {
 							Mapsmainfocus();
 					})
 					.on("zoom", () => {
-						if (Maps.main.getZoom() >= 11.5) {
+						if (Maps.main.getZoom() >= 13.5) {
 							for (const key in Station)
 								if (!Station[key].getPopup().isOpen())
 									Station[key].togglePopup();
@@ -1516,7 +1516,7 @@ async function init() {
 					})
 					.on("drag", () => mapLock = true)
 					.on("zoomend", () => {
-						if (Maps.main.getZoom() >= 11)
+						if (Maps.main.getZoom() >= 13.5)
 							for (const key in Station) {
 								const tooltip = Station[key].getTooltip();
 
@@ -1873,6 +1873,7 @@ async function init() {
 	global.gc();
 	// const userJSON = require(path.resolve(__dirname, "../js/1669484541389.json"));
 	// TREM.Intensity.handle(userJSON);
+	// ipcRenderer.send("intensity-Notification", userJSON);
 	// const userJSON1 = require(path.resolve(__dirname, "../js/1668323000997.json"));
 	// TREM.MapIntensity.palert(userJSON1.Data);
 	// const userJSON2 = require(path.resolve(__dirname, "../js/1667356513251.json"));
@@ -2555,7 +2556,8 @@ async function setUserLocationMarker(town) {
 	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
 
 	if (!TREM.Detector.webgl)
-		Maps.main.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
+		// Maps.main.fitBounds([[25.35, 119.65], [21.85, 124.05]]);
+		Maps.main.setView([23.608428, 120.799168], 7.75);
 }
 // #endregion
 
@@ -3205,6 +3207,57 @@ ipcMain.on("report-Notification", (event, report) => {
 	}
 });
 
+ipcMain.on("intensity-Notification", (event, intensity) => {
+	if (setting["webhook.url"] != "" && setting["intensity.Notification"]) {
+		console.log(intensity);
+		dump({ level: 0, message: "Posting Notification intensity Webhook", origin: "Webhook" });
+		const msg = {
+			username   : "TREM | 臺灣即時地震監測",
+			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
+			content    : "震度速報",
+			embeds     : [
+				{
+					author: {
+						name     : "震度速報",
+						url      : undefined,
+						icon_url : undefined,
+					},
+					description : intensity.raw.description,
+					fields      : [
+						{
+							name   : "時間",
+							value  : new Date(`${intensity.raw.originTime}`).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" }),
+							inline : true,
+						},
+						{
+							name   : "芮氏規模",
+							value  : intensity.raw.magnitude.magnitudeValue,
+							inline : true,
+						},
+						{
+							name   : "深度",
+							value  : intensity.raw.depth.$t + " 公里",
+							inline : true,
+						},
+						{
+							name   : "震央位置",
+							value  : "> 經度 **東經 " + intensity.raw.epicenter.epicenterLon.$t + "**\n> 緯度 **北緯 " + intensity.raw.epicenter.epicenterLat.$t + "**",
+							inline : false,
+						},
+					],
+				},
+			],
+		};
+		fetch(setting["webhook.url"], {
+			method  : "POST",
+			headers : { "Content-Type": "application/json" },
+			body    : JSON.stringify(msg),
+		}).catch((error) => {
+			dump({ level: 2, message: error, origin: "Webhook" });
+		});
+	}
+});
+
 ipcMain.on("update-available-Notification", (version, getVersion) => {
 	if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
 		dump({ level: 0, message: "Posting Notification Update Webhook", origin: "Webhook" });
@@ -3514,6 +3567,7 @@ function FCMdata(data, Unit) {
 		if (TREM.Intensity.isTriggered)
 			TREM.Intensity.clear();
 		TREM.Intensity.handle(json);
+		ipcRenderer.send("intensity-Notification", json);
 	} else if (json.Function == "Replay") {
 		replay = json.timestamp;
 		replayT = NOW.getTime();
