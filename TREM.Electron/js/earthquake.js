@@ -1907,7 +1907,7 @@ function PGAMain() {
 						controller.abort();
 					}, 950);
 					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
-						TimerDesynced = true;
+						// TimerDesynced = true;
 						stationnow = 0;
 						handler(Response);
 						PGAMainbkup();
@@ -1920,13 +1920,13 @@ function PGAMain() {
 
 					ans = await ans.json();
 					Ping = Date.now();
-					TimerDesynced = false;
+					// TimerDesynced = false;
 					Response = ans;
 					handler(Response);
 				}
 			} catch (err) {
 				console.log(err);
-				TimerDesynced = true;
+				// TimerDesynced = true;
 				stationnow = 0;
 				handler(Response);
 				PGAMainbkup();
@@ -1954,11 +1954,11 @@ function PGAMainbkup() {
 						url    : url,
 					}).then((response) => {
 						Ping = Date.now();
-						TimerDesynced = false;
+						// TimerDesynced = false;
 						Response = response.data;
 						handler(Response);
 					}).catch((err) => {
-						TimerDesynced = true;
+						// TimerDesynced = true;
 						stationnow = 0;
 						handler(Response);
 						PGAMain();
@@ -1966,7 +1966,7 @@ function PGAMainbkup() {
 				}
 			} catch (err) {
 				console.log(err);
-				TimerDesynced = true;
+				// TimerDesynced = true;
 				stationnow = 0;
 				handler(Response);
 				PGAMain();
@@ -2043,7 +2043,7 @@ function handler(response) {
 		if (intensity > MaxIntensity1) MaxIntensity1 = intensity;
 		const NA999 = (intensity == 9 && amount == 999) ? "Y" : "NA";
 		const NA0999 = (intensity == 0 && amount == 999) ? "Y" : "NA";
-		const size = (intensity == 0 || intensity == "NA" && NA999 != "Y" && NA0999 != "Y") ? 8 : 16;
+		const size = (intensity == 0 || intensity == "NA" || amount == 999) ? 8 : 16;
 		const levelClass = (intensity != 0 && NA999 != "Y") ? IntensityToClassString(intensity)
 			: (intensity == 0 && Alert) ? "pga0"
 				: (amount == 999) ? "pga6"
@@ -2510,13 +2510,33 @@ function handler(response) {
 }
 
 async function fetchFiles() {
-	Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
-	dump({ level: 0, message: "Get Location File", origin: "Location" });
-	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
-	dump({ level: 0, message: "Get Station File", origin: "Location" });
-	detected_box_location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
-	dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
-	PGAMain();
+	try {
+		Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+		dump({ level: 0, message: "Get Location File", origin: "Location" });
+		station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+		dump({ level: 0, message: "Get Station File", origin: "Location" });
+		detected_box_location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
+		dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
+		PGAMain();
+	} catch (err) {
+		console.log(err);
+		await fetchFilesbackup();
+	}
+}
+
+async function fetchFilesbackup() {
+	try {
+		Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
+		dump({ level: 0, message: "Get Location backup File", origin: "Location" });
+		station = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/station.json")).json();
+		dump({ level: 0, message: "Get Station backup File", origin: "Location" });
+		detected_box_location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/pga.json")).json();
+		dump({ level: 0, message: "Get PGA Location backup File", origin: "Location" });
+		PGAMain();
+	} catch (err) {
+		console.log(err);
+		await fetchFiles();
+	}
 }
 
 // #region 用戶所在位置
@@ -2524,10 +2544,24 @@ async function fetchFiles() {
  * 設定用戶所在位置
  * @param {string} town 鄉鎮
  */
-async function setUserLocationMarker(town) {
+async function setUserLocationMarker(town, errcode = false) {
 	if (!Location) {
-		Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
-		dump({ level: 0, message: "Get Location File", origin: "Location" });
+		if (!errcode)
+			try {
+				Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+				dump({ level: 0, message: "Get Location File 0", origin: "Location" });
+			} catch (err) {
+				console.log(err);
+				await setUserLocationMarker(town, true);
+			}
+
+		try {
+			Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
+			dump({ level: 0, message: "Get Location backup File 0", origin: "Location" });
+		} catch (err) {
+			console.log(err);
+			await setUserLocationMarker(town);
+		}
 	}
 
 	[
