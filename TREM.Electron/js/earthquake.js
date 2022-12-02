@@ -489,7 +489,7 @@ function PGAMain() {
 					Response = ans;
 					handler(Response);
 				}
-			} catch (err) {console.log(err);}
+			} catch (err) {void 0;}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
 }
@@ -822,11 +822,11 @@ function handler(response) {
 }
 
 async function fetchFiles() {
-	Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+	Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
 	dump({ level: 0, message: "Get Location File", origin: "Location" });
-	detected_box_location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
+	detected_box_location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/pga.json")).json();
 	dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
-	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+	station = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/station.json")).json();
 	dump({ level: 0, message: "Get Station File", origin: "Location" });
 	PGAMain();
 }
