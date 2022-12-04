@@ -3665,6 +3665,8 @@ function FCMdata(data, Unit) {
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test || (_unlock && json.Function == "TREM")) {
 		if (replay != 0 && !json.Replay) return;
 
+		if (replay == 0 && json.Replay) return;
+
 		if (
 			(json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"])
 			|| (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"])
