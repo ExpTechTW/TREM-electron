@@ -1456,6 +1456,7 @@ async function FCMdata(data, Unit) {
 		}, 5000);
 	} else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test || (_unlock && json.Function == "TREM")) {
 		if (replay != 0 && !json.Replay) return;
+		if (replay == 0 && json.Replay) return;
 		if (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"]) return;
 		if (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"]) return;
 		if (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"]) return;
