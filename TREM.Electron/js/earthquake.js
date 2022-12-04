@@ -110,10 +110,9 @@ let auto = false;
 const EEW = {};
 const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
-let Ping = 0;
+let Ping = "N/A";
 let EEWAlert = false;
 let PGACancel = false;
-let Unlock = false;
 let report_get_timestamp = 0;
 TREM.set_report_overview = 0;
 let rtstation1 = "";
@@ -803,16 +802,16 @@ async function init() {
 				// const heapTotal = formatMemoryUsage(memoryData.heapTotal);
 				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
 				// const external = formatMemoryUsage(memoryData.external);
-				const Delay = (isNaN(Ping)) ? Ping : (Date.now() - Ping) > 2500 ? "2500+ms" : Date.now() - Ping + "ms";
+				// const Delay = (isNaN(Ping)) ? Ping : (Date.now() - Ping) > 2500 ? "2500+ms" : Date.now() - Ping + "ms";
 				const warn = (Warn) ? "⚠️" : "";
 				const error = (testEEWerror) ? "❌" : "";
-				const unlock = (Unlock) ? "⚡" : "";
+				// const unlock = (Unlock) ? "⚡" : "";
 				$("#log").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
 				$("#log1").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
 				$("#log2").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
-				$("#app-version").text(`${app.getVersion()} ${Delay} ${warn} ${error} ${unlock} ${GetDataState}`);
-				$("#app-version1").text(`${app.getVersion()} ${Delay} ${warn} ${error} ${unlock} ${GetDataState}`);
-				$("#app-version2").text(`${app.getVersion()} ${Delay} ${warn} ${error} ${unlock} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Ping} ${warn} ${error} ${GetDataState}`);
+				$("#app-version1").text(`${app.getVersion()} ${Ping} ${warn} ${error} ${GetDataState}`);
+				$("#app-version2").text(`${app.getVersion()} ${Ping} ${warn} ${error} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -1895,17 +1894,22 @@ function PGAMain() {
 	Timers.rts_clock = setInterval(() => {
 		setTimeout(async () => {
 			try {
+				const _t = NOW.getTime();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (ReplayTime == 0 && rts_ws_timestamp != 0 && Date.now() - rts_ws_timestamp <= 550) {
-					Ping = "Super";
+				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
+					Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
+					handler(rts_response);
+				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
+					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "🧩";
 					handler(rts_response);
 				} else {
-					const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
+					// const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
+					const url = (ReplayTime == 0) ? getapiurl : geturl + ReplayTime;
 					const controller = new AbortController();
 					setTimeout(() => {
 						controller.abort();
-					}, 950);
+					}, 5000);
 					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
 						// TimerDesynced = true;
 						stationnow = 0;
@@ -1919,7 +1923,7 @@ function PGAMain() {
 					}
 
 					ans = await ans.json();
-					Ping = Date.now();
+					Ping = NOW.getTime() - _t + "ms";
 					// TimerDesynced = false;
 					Response = ans;
 					handler(Response);
@@ -1942,18 +1946,23 @@ function PGAMainbkup() {
 	Timers.rts_clock = setInterval(() => {
 		setTimeout(() => {
 			try {
+				const _t = NOW.getTime();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (ReplayTime == 0 && rts_ws_timestamp != 0 && Date.now() - rts_ws_timestamp <= 550) {
-					Ping = "Super";
+				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
+					Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
+					handler(rts_response);
+				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
+					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "🧩";
 					handler(rts_response);
 				} else {
-					const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
+					// const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
+					const url = (ReplayTime == 0) ? getapiurl : geturl + ReplayTime;
 					axios({
 						method : "get",
 						url    : url,
 					}).then((response) => {
-						Ping = Date.now();
+						Ping = NOW.getTime() - _t + "ms";
 						// TimerDesynced = false;
 						Response = response.data;
 						handler(Response);
@@ -1979,23 +1988,23 @@ function handler(response) {
 	const Json = response;
 	// console.log(Json);
 	// console.log(station);
-	Unlock = Json.Unlock ?? false;
+	// Unlock = Json.Unlock ?? false;
 
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
-	if (Unlock)
-		if (replay != 0)
-			ipcRenderer.send("RTSUnlock", !Unlock);
-		else
-			ipcRenderer.send("RTSUnlock", Unlock);
-			// document.getElementById("rt-station").classList.remove("hide");
-			// document.getElementById("rt-station").classList.add("left");
-			// document.getElementById("rt-maxintensitynum").classList.remove("hide");
-	else
-		ipcRenderer.send("RTSUnlock", Unlock);
-		// document.getElementById("rt-station").classList.add("hide");
-		// document.getElementById("rt-station").classList.remove("left");
-		// document.getElementById("rt-maxintensitynum").classList.add("hide");
+	// if (Unlock)
+	// 	if (replay != 0)
+	// 		ipcRenderer.send("RTSUnlock", !Unlock);
+	// 	else
+	// 		ipcRenderer.send("RTSUnlock", Unlock);
+	// 		// document.getElementById("rt-station").classList.remove("hide");
+	// 		// document.getElementById("rt-station").classList.add("left");
+	// 		// document.getElementById("rt-maxintensitynum").classList.remove("hide");
+	// else
+	// 	ipcRenderer.send("RTSUnlock", Unlock);
+	// 	// document.getElementById("rt-station").classList.add("hide");
+	// 	// document.getElementById("rt-station").classList.remove("left");
+	// 	// document.getElementById("rt-maxintensitynum").classList.add("hide");
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
 
@@ -2022,7 +2031,8 @@ function handler(response) {
 		const amount = Number(stationData.PGA);
 
 		if (station[keys[index]] == undefined) continue;
-		const Alert = (!Unlock) ? stationData.I >= 2 : stationData.alert;
+		// const Alert = (!Unlock) ? stationData.I >= 2 : stationData.alert;
+		const Alert = stationData.alert;
 
 		if (amount > MaxPGA) MaxPGA = amount;
 		const intensity
@@ -2167,33 +2177,34 @@ function handler(response) {
 		const Level = IntensityI(intensity);
 		const now = new Date(stationData.T * 1000);
 
-		if (Unlock) {
-			if (rtstation1 == "") {
-				if (keys.includes(setting["Real-time.station"])) {
-					if (keys[index] == setting["Real-time.station"]) {
-						if (document.getElementById("rt-station").classList.contains("hide"))
-							document.getElementById("rt-station").classList.remove("hide");
-						document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
-						document.getElementById("rt-station-local-id").innerText = keys[index];
-						document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
-						document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
-						document.getElementById("rt-station-local-pga").innerText = amount;
-					}
-				} else {
-					document.getElementById("rt-station-local-intensity").className = "rt-station-intensity na";
-					document.getElementById("rt-station-local-id").innerText = TREM.Localization.getString("Realtime_No_Data");
-					document.getElementById("rt-station-local-name").innerText = TREM.Localization.getString("Realtime_No_Data");
-					document.getElementById("rt-station-local-time").innerText = "--:--:--";
-					document.getElementById("rt-station-local-pga").innerText = "--";
-				}
-			} else if (rtstation1 == keys[index]) {
-				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
-				document.getElementById("rt-station-local-id").innerText = keys[index];
-				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
-				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
-				document.getElementById("rt-station-local-pga").innerText = amount;
-			}
-		} else if (rtstation1 == "") {
+		// if (Unlock) {
+		// 	if (rtstation1 == "") {
+		// 		if (keys.includes(setting["Real-time.station"])) {
+		// 			if (keys[index] == setting["Real-time.station"]) {
+		// 				if (document.getElementById("rt-station").classList.contains("hide"))
+		// 					document.getElementById("rt-station").classList.remove("hide");
+		// 				document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
+		// 				document.getElementById("rt-station-local-id").innerText = keys[index];
+		// 				document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
+		// 				document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
+		// 				document.getElementById("rt-station-local-pga").innerText = amount;
+		// 			}
+		// 		} else {
+		// 			document.getElementById("rt-station-local-intensity").className = "rt-station-intensity na";
+		// 			document.getElementById("rt-station-local-id").innerText = TREM.Localization.getString("Realtime_No_Data");
+		// 			document.getElementById("rt-station-local-name").innerText = TREM.Localization.getString("Realtime_No_Data");
+		// 			document.getElementById("rt-station-local-time").innerText = "--:--:--";
+		// 			document.getElementById("rt-station-local-pga").innerText = "--";
+		// 		}
+		// 	} else if (rtstation1 == keys[index]) {
+		// 		document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
+		// 		document.getElementById("rt-station-local-id").innerText = keys[index];
+		// 		document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
+		// 		document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
+		// 		document.getElementById("rt-station-local-pga").innerText = amount;
+		// 	}
+		// } else
+		if (rtstation1 == "") {
 			if (keys.includes(setting["Real-time.station"])) {
 				if (keys[index] == setting["Real-time.station"]) {
 					if (document.getElementById("rt-station").classList.contains("hide"))
@@ -3566,7 +3577,7 @@ function FCMdata(data, Unit) {
 	if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	server_timestamp.push(json.TimeStamp);
 
-	if (server_timestamp.length > 5) server_timestamp.splice(0, 1);
+	if (server_timestamp.length > 15) server_timestamp.splice(0, 1);
 	// eslint-disable-next-line no-empty-function
 	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
 	GetData = true;
