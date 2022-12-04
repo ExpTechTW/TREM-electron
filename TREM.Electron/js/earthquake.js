@@ -88,10 +88,9 @@ let auto = false;
 const EEW = {};
 const EEWT = { id: 0, time: 0 };
 let TSUNAMI = {};
-let Ping = 0;
+let Ping = "N/A";
 let EEWAlert = false;
 let PGACancel = false;
-let Unlock = false;
 let report_get_timestamp = 0;
 // #endregion
 
@@ -179,10 +178,8 @@ async function init() {
 					GetData_time = false;
 					GetDataState += "⏰";
 				}
-				const Delay = (isNaN(Ping)) ? Ping : (Date.now() - Ping) > 2500 ? "2500+ms" : Date.now() - Ping + "ms";
 				const warn = (Warn) ? "⚠️" : "";
-				const unlock = (Unlock) ? "⚡" : "";
-				$("#app-version").text(`${app.getVersion()} ${Delay} ${warn} ${unlock} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Ping} ${warn} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -469,23 +466,27 @@ function PGAMain() {
 	Timers.rts_clock = setInterval(() => {
 		setTimeout(async () => {
 			try {
+				const _t = Date.now();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-				if (ReplayTime == 0 && rts_ws_timestamp != 0 && Date.now() - rts_ws_timestamp <= 550) {
+				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
 					Ping = "Super";
 					handler(rts_response);
+				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
+					Ping = "P2P";
+					handler(rts_response);
 				} else {
-					const url = (ReplayTime == 0) ? "https://api.exptech.com.tw/api/v1/trem/rts" : `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}&key=${setting["api.key"]}`;
+					const url = (ReplayTime == 0) ? "https://api.exptech.com.tw/api/v1/trem/rts" : `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}`;
 					const controller = new AbortController();
 					setTimeout(() => {
 						controller.abort();
-					}, 950);
+					}, 5000);
 					let ans = await fetch(url, { signal: controller.signal }).catch((err) => void 0);
 					if (controller.signal.aborted || ans == undefined) {
 						handler(Response);
 						return;
 					}
 					ans = await ans.json();
-					Ping = Date.now();
+					Ping = Date.now() - _t + "ms";
 					Response = ans;
 					handler(Response);
 				}
@@ -496,7 +497,6 @@ function PGAMain() {
 
 function handler(response) {
 	const Json = response;
-	Unlock = Json.Unlock ?? false;
 
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
@@ -517,7 +517,7 @@ function handler(response) {
 		const stationData = Json[keys[index]];
 		const amount = Number(stationData.PGA);
 		if (station[keys[index]] == undefined) continue;
-		const Alert = (!Unlock) ? (stationData.I >= 2) : stationData.alert;
+		const Alert = stationData.alert;
 		const Intensity = (Alert && Json.Alert) ? stationData.I :
 			(NOW.getTime() - stationData.TS * 1000 > 15000) ? "NA" :
 				(!Alert) ? 0 :
@@ -1361,7 +1361,7 @@ async function FCMdata(data, Unit) {
 	const json = JSON.parse(data);
 	if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	server_timestamp.push(json.TimeStamp);
-	if (server_timestamp.length > 5) server_timestamp.splice(0, 1);
+	if (server_timestamp.length > 15) server_timestamp.splice(0, 1);
 	// eslint-disable-next-line no-empty-function
 	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
 	GetData = true;
