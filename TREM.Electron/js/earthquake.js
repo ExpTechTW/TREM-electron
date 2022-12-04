@@ -1901,7 +1901,7 @@ function PGAMain() {
 					Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
 					handler(rts_response);
 				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
-					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "🧩";
+					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "📡";
 					handler(rts_response);
 				} else {
 					// const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
@@ -1953,7 +1953,7 @@ function PGAMainbkup() {
 					Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
 					handler(rts_response);
 				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
-					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "🧩";
+					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "📡";
 					handler(rts_response);
 				} else {
 					// const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
