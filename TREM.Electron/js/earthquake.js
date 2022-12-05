@@ -2552,7 +2552,7 @@ async function fetchFilesbackup() {
  * @param {string} town 鄉鎮
  */
 async function setUserLocationMarker(town, errcode = false) {
-	if (!Location) {
+	if (!Location)
 		if (!errcode)
 			try {
 				Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
@@ -2561,15 +2561,14 @@ async function setUserLocationMarker(town, errcode = false) {
 				console.log(err);
 				await setUserLocationMarker(town, true);
 			}
-
-		try {
-			Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
-			dump({ level: 0, message: "Get Location backup File 0", origin: "Location" });
-		} catch (err) {
-			console.log(err);
-			await setUserLocationMarker(town);
-		}
-	}
+		else
+			try {
+				Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
+				dump({ level: 0, message: "Get Location backup File 0", origin: "Location" });
+			} catch (err) {
+				console.log(err);
+				await setUserLocationMarker(town);
+			}
 
 	[
 		, UserLocationLat,
