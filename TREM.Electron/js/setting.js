@@ -293,8 +293,8 @@ function SelectSave(id) {
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 
-	// if (id == "map.engine")
-	// 	$("#MEReloadButton").fadeIn(100);
+	if (id == "map.engine")
+		$("#MEReloadButton").fadeIn(100);
 
 	if (id == "location.city") {
 		const town = document.getElementById("location.town");
@@ -337,6 +337,9 @@ function CheckSave(id) {
 	const value = document.getElementById(id).checked;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
+
+	if (id == "map.jp" || id == "map.cn" || id == "map.sk" || id == "map.nk")
+		$("#MAPReloadButton").fadeIn(100);
 
 	if (id == "compatibility.hwaccel")
 		$("#HAReloadButton").fadeIn(100);
@@ -409,10 +412,10 @@ function setList(args, el, event) {
 	$(el).addClass("active");
 
 	changeel.children("div").each((i, e) => {
-		if (!["HAReloadButton", "MEReloadButton"].includes(e.id))
+		if (!["HAReloadButton", "MEReloadButton", "MAPReloadButton"].includes(e.id))
 			$(e).css("opacity", "0");
 		$(e).children().each((i2, e2) => {
-			if (!["HAReloadButton", "MEReloadButton"].includes(e2.id))
+			if (!["HAReloadButton", "MEReloadButton", "MAPReloadButton"].includes(e2.id))
 				$(e2).css("opacity", "0");
 		});
 	});
@@ -435,7 +438,7 @@ function setList(args, el, event) {
 
 		if (child.length)
 			for (let j = 0; j < child.length; j++)
-				if (!["HAReloadButton", "MEReloadButton"].includes(child[j].id)) {
+				if (!["HAReloadButton", "MEReloadButton", "MAPReloadButton"].includes(child[j].id)) {
 					if (!child[j].lang || (child[j].lang == setting["general.locale"]))
 						$(child[j]).delay(delay).fadeTo(100, is_setting_disabled ? 0.6 : 1).delay(100)
 							.queue(function(next) {

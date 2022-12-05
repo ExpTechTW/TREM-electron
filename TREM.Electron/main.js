@@ -297,14 +297,13 @@ ipcMain.on("config:value", (event, key, value) => {
 		case "map.sk":
 		case "map.nk": {
 			emitAllWindow("config:maplayer", key.slice(4), value);
-			MainWindow.reload();
 			break;
 		}
 
-		case "map.engine": {
-			MainWindow.reload();
-			break;
-		}
+		// case "map.engine": {
+		// 	restart();
+		// 	break;
+		// }
 
 		case "theme.color": {
 			emitAllWindow("config:theme", value);
@@ -367,11 +366,6 @@ ipcMain.on("config:value", (event, key, value) => {
 			TREM.Configuration.data["cache.report"] = value;
 			emitAllWindow("setting", TREM.Configuration._data);
 			ipcMain.emit("ReportGET");
-			break;
-		}
-
-		case "leaflet.change": {
-			MainWindow.reload();
 			break;
 		}
 

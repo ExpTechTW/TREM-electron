@@ -879,9 +879,6 @@ async function init() {
 
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
 
-		// if (TREM.Detector.webgl)
-		// 	TREM.Detector.webgl = !setting["leaflet.change"];
-		// TREM.Detector.webgl = false;
 		dump({ level: 0, message: TREM.Detector.webgl, origin: "WebGL" });
 
 		// if (TREM.Detector.webgl == false && TREM.MapRenderingEngine != "mapbox-gl")

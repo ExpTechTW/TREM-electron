@@ -64,10 +64,6 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
-		"leaflet.change": {
-			type  : "toggle",
-			value : true,
-		},
 		"Real-time.show": {
 			type  : "toggle",
 			value : true,
