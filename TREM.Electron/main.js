@@ -250,6 +250,11 @@ TREM.on("before-quit", () => {
 		tray.destroy();
 });
 
+TREM.on("render-process-gone", (e,w,d) => {
+	if (d.reason == "crashed")
+		w.reload();
+});
+
 ipcMain.on("toggleFullscreen", () => {
 	if (MainWindow)
 		MainWindow.setFullScreen(!MainWindow.isFullScreen());
@@ -297,13 +302,14 @@ ipcMain.on("config:value", (event, key, value) => {
 		case "map.sk":
 		case "map.nk": {
 			emitAllWindow("config:maplayer", key.slice(4), value);
+			MainWindow.reload();
 			break;
 		}
 
-		// case "map.engine": {
-		// 	restart();
-		// 	break;
-		// }
+		case "map.engine": {
+			MainWindow.reload();
+			break;
+		}
 
 		case "theme.color": {
 			emitAllWindow("config:theme", value);

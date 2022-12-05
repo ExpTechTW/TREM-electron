@@ -293,8 +293,8 @@ function SelectSave(id) {
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 
-	if (id == "map.engine")
-		$("#MEReloadButton").fadeIn(100);
+	// if (id == "map.engine")
+	// 	$("#MEReloadButton").fadeIn(100);
 
 	if (id == "location.city") {
 		const town = document.getElementById("location.town");
@@ -338,8 +338,8 @@ function CheckSave(id) {
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 
-	if (id == "map.jp" || id == "map.cn" || id == "map.sk" || id == "map.nk")
-		$("#MAPReloadButton").fadeIn(100);
+	// if (id == "map.jp" || id == "map.cn" || id == "map.sk" || id == "map.nk")
+	// 	$("#MAPReloadButton").fadeIn(100);
 
 	if (id == "compatibility.hwaccel")
 		$("#HAReloadButton").fadeIn(100);
