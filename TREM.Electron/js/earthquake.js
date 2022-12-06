@@ -24,15 +24,15 @@ TREM.AudioContext = new AudioContext({});
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
-// if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
-// 	const vm = require("vm");
-// 	const v8 = require("v8");
-// 	v8.setFlagsFromString("--no-lazy");
-// 	const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
-// 	const script = new vm.Script(code);
-// 	const bytecode = script.createCachedData();
-// 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
-// }
+if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
+	const vm = require("vm");
+	const v8 = require("v8");
+	v8.setFlagsFromString("--no-lazy");
+	const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
+	const script = new vm.Script(code);
+	const bytecode = script.createCachedData();
+	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
+}
 
 // #region 變數
 const MapData = {};
@@ -178,8 +178,7 @@ async function init() {
 					GetData_time = false;
 					GetDataState += "⏰";
 				}
-				const warn = (Warn) ? "⚠️" : "";
-				$("#app-version").text(`${app.getVersion()} ${Ping} ${warn} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Ping} ${Warn} ${GetDataState}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -470,9 +469,6 @@ function PGAMain() {
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
 					Ping = "Super";
-					handler(rts_response);
-				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
-					Ping = "P2P";
 					handler(rts_response);
 				} else {
 					const url = (ReplayTime == 0) ? "https://api.exptech.com.tw/api/v1/trem/rts" : `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}`;
