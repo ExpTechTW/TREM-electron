@@ -772,17 +772,21 @@ async function init() {
 
 				if (GetData_WS) {
 					GetData_WS = false;
-					GetDataState += "✉";
+					GetDataState += "🟩";
 				}
 
 				if (GetData_FCM) {
 					GetData_FCM = false;
-					GetDataState += "🔌";
+					GetDataState += "⬜";
 				}
 
 				if (GetData_P2P) {
 					GetData_P2P = false;
-					GetDataState += "🧩";
+					GetDataState += "🟨";
+				}
+				if (GetData_HTTP) {
+					GetData_HTTP = false;
+					GetDataState += "🟥";
 				}
 
 				if (GetData_time) {
@@ -802,15 +806,15 @@ async function init() {
 				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
 				// const external = formatMemoryUsage(memoryData.external);
 				// const Delay = (isNaN(Ping)) ? Ping : (Date.now() - Ping) > 2500 ? "2500+ms" : Date.now() - Ping + "ms";
-				const warn = (Warn) ? "⚠️" : "";
+				// const warn = (Warn) ? "⚠️" : "";
 				const error = (testEEWerror) ? "❌" : "";
 				// const unlock = (Unlock) ? "⚡" : "";
 				$("#log").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
 				$("#log1").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
 				$("#log2").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
-				$("#app-version").text(`${app.getVersion()} ${Ping} ${warn} ${error} ${GetDataState}`);
-				$("#app-version1").text(`${app.getVersion()} ${Ping} ${warn} ${error} ${GetDataState}`);
-				$("#app-version2").text(`${app.getVersion()} ${Ping} ${warn} ${error} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Ping} ${GetDataState} ${Warn} ${error}`);
+				$("#app-version1").text(`${app.getVersion()} ${Ping} ${GetDataState} ${Warn} ${error}`);
+				$("#app-version2").text(`${app.getVersion()} ${Ping} ${GetDataState} ${Warn} ${error}`);
 			}, 500);
 
 		if (!Timers.tsunami)
