@@ -164,21 +164,25 @@ async function init() {
 				let GetDataState = "";
 				if (GetData_WS) {
 					GetData_WS = false;
-					GetDataState += "✉";
+					GetDataState += "🟩";
 				}
 				if (GetData_FCM) {
 					GetData_FCM = false;
-					GetDataState += "🔌";
+					GetDataState += "⬜";
 				}
 				if (GetData_P2P) {
 					GetData_P2P = false;
-					GetDataState += "🧩";
+					GetDataState += "🟨";
+				}
+				if (GetData_HTTP) {
+					GetData_HTTP = false;
+					GetDataState += "🟥";
 				}
 				if (GetData_time) {
 					GetData_time = false;
 					GetDataState += "⏰";
 				}
-				$("#app-version").text(`${app.getVersion()} ${Ping} ${Warn} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Ping} ${GetDataState} ${Warn}`);
 			}, 500);
 
 		if (!Timers.tsunami)
