@@ -1899,10 +1899,12 @@ function PGAMain() {
 
 				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
 					Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
-					handler(rts_response);
+					Response = rts_response;
+					handler(Response);
 				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
 					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "📡";
-					handler(rts_response);
+					Response = rts_response;
+					handler(Response);
 				} else {
 					// const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
 					const url = (ReplayTime == 0) ? getapiurl : geturl + ReplayTime;
@@ -1951,10 +1953,12 @@ function PGAMainbkup() {
 
 				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
 					Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
-					handler(rts_response);
+					Response = rts_response;
+					handler(Response);
 				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
 					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "📡";
-					handler(rts_response);
+					Response = rts_response;
+					handler(Response);
 				} else {
 					// const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
 					const url = (ReplayTime == 0) ? getapiurl : geturl + ReplayTime;
