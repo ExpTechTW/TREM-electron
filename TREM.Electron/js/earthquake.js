@@ -473,7 +473,12 @@ function PGAMain() {
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
 					Ping = "Super";
-					handler(rts_response);
+					Response = rts_response;
+					handler(Response);
+				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
+					Ping = "P2P";
+					Response = rts_response;
+					handler(Response);
 				} else {
 					const url = (ReplayTime == 0) ? "https://api.exptech.com.tw/api/v1/trem/rts" : `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}`;
 					const controller = new AbortController();
