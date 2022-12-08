@@ -132,43 +132,7 @@ TREM.Detector = {
 			return false;
 		}
 	})(),
-	// workers : !!window.Worker,
-	// fileapi : window.File && window.FileReader && window.FileList && window.Blob,
-	// getWebGLErrorMessage: function() {
-	// 	const element = document.createElement('div');
-	// 	element.id = 'webgl-error-message';
-	// 	element.style.fontFamily = 'monospace';
-	// 	element.style.fontSize = '13px';
-	// 	element.style.fontWeight = 'normal';
-	// 	element.style.textAlign = 'center';
-	// 	element.style.background = '#fff';
-	// 	element.style.color = '#000';
-	// 	element.style.padding = '1.5em';
-	// 	element.style.width = '400px';
-	// 	element.style.margin = '5em auto 0';
-
-	// 	if (!this.webgl)
-	// 		element.innerHTML = window.WebGLRenderingContext ? [
-	// 		'Your graphics card does not seem to support <a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" rel="external nofollow" rel="external nofollow"  style="color:#000">WebGL</a>.<br />',
-	// 		'Find out how to get it <a href="http://get.webgl.org/" rel="external nofollow" rel="external nofollow"  style="color:#000">here</a>.']
-	// 		.join('\n') : [
-	// 		'Your browser does not seem to support <a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation" rel="external nofollow" rel="external nofollow"  style="color:#000">WebGL</a>.<br/>',
-	// 		'Find out how to get it <a href="http://get.webgl.org/" rel="external nofollow" rel="external nofollow"  style="color:#000">here</a>.']
-	// 		.join('\n');
-	// 	return element;
-	// },
-	// addGetWebGLMessage: function(parameters) {
-	// 	parameters = parameters || {};
-	// 	const parent = parameters.parent !== undefined ? parameters.parent : document.body;
-	// 	const id = parameters.id !== undefined ? parameters.id : 'oldie';
-	// 	const element = TREM.Detector.getWebGLErrorMessage();
-	// 	element.id = id;
-	// 	parent.appendChild(element);
-	// },
 };
-
-// if (typeof module === "object")
-// 	module.exports = TREM.Detector;
 
 class WaveCircle {
 
@@ -784,6 +748,7 @@ async function init() {
 					GetData_P2P = false;
 					GetDataState += "🟨";
 				}
+
 				if (GetData_HTTP) {
 					GetData_HTTP = false;
 					GetDataState += "🟥";
@@ -1906,7 +1871,6 @@ function PGAMain() {
 					Response = rts_response;
 					handler(Response);
 				} else {
-					// const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
 					const url = (ReplayTime == 0) ? getapiurl : geturl + ReplayTime;
 					const controller = new AbortController();
 					setTimeout(() => {
@@ -1960,7 +1924,6 @@ function PGAMainbkup() {
 					Response = rts_response;
 					handler(Response);
 				} else {
-					// const url = (ReplayTime == 0) ? getapiurl : `${geturl}${ReplayTime}&key=${setting["api.key"]}`;
 					const url = (ReplayTime == 0) ? getapiurl : geturl + ReplayTime;
 					axios({
 						method : "get",
@@ -3706,10 +3669,14 @@ TREM.Earthquake.on("eew", (data) => {
 	const GC = {};
 	let level;
 	let MaxIntensity = { label: "", value: -1 };
-	const focusBounds = new maplibregl.LngLatBounds();
+	const NSSPE = data.Intensity ?? {};
 
-	for (const eewid in EarthquakeList)
-		focusBounds.extend(EarthquakeList[eewid].epicenter);
+	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+		const focusBounds = new maplibregl.LngLatBounds();
+
+		for (const eewid in EarthquakeList)
+			focusBounds.extend(EarthquakeList[eewid].epicenter);
+	}
 
 	for (const city in TREM.Resources.region)
 		for (const town in TREM.Resources.region[city]) {
@@ -3722,7 +3689,7 @@ TREM.Earthquake.on("eew", (data) => {
 				data.Depth,
 			);
 
-			const int = TREM.Utils.PGAToIntensity(
+			let int = TREM.Utils.PGAToIntensity(
 				TREM.Utils.pga(
 					data.Scale,
 					d,
@@ -3733,6 +3700,8 @@ TREM.Earthquake.on("eew", (data) => {
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 				if (int.value >= 2)
 					focusBounds.extend(TREM.MapBounds[loc.code]);
+
+			if (data.Depth == null) int = NSSPE[loc[0]] ?? 0;
 
 			if (setting["location.city"] == city && setting["location.town"] == town) {
 				distance = d;
@@ -3755,6 +3724,7 @@ TREM.Earthquake.on("eew", (data) => {
 	// 	// padding : { bottom: 100, right: 100 },
 	// });
 
+	level = level.toString();
 	let Alert = true;
 
 	if (level.value < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
@@ -3766,8 +3736,12 @@ TREM.Earthquake.on("eew", (data) => {
 			Nmsg = `${value}秒後抵達`;
 		else
 			Nmsg = "已抵達 (預警盲區)";
+		level = level.replace("+", "強").replace("-", "弱");
+		let body = `${level}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`;
+
+		if (data.Depth == null) body = `${level}級地震，${data.Location ?? "未知區域"} (NSSPE)`;
 		new Notification("EEW 強震即時警報", {
-			body   : `${level.text}地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`,
+			body   : body,
 			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});
@@ -3793,30 +3767,31 @@ TREM.Earthquake.on("eew", (data) => {
 
 		EEWT.id = data.ID;
 
-		if (setting["audio.eew"] && Alert) {
-			TREM.Audios.eew.play();
-			audioPlay1(`../audio/1/${level.label.replace("+", "").replace("-", "")}.wav`);
+		if (data.Depth != null)
+			if (setting["audio.eew"] && Alert) {
+				TREM.Audios.eew.play();
+				audioPlay1(`../audio/1/${level.replace("+", "").replace("-", "")}.wav`);
 
-			if (level.label.includes("+"))
-				audioPlay1("../audio/1/intensity-strong.wav");
-			else if (level.label.includes("-"))
-				audioPlay1("../audio/1/intensity-weak.wav");
-			else
-				audioPlay1("../audio/1/intensity.wav");
+				if (level.includes("+"))
+					audioPlay1("../audio/1/intensity-strong.wav");
+				else if (level.includes("-"))
+					audioPlay1("../audio/1/intensity-weak.wav");
+				else
+					audioPlay1("../audio/1/intensity.wav");
 
-			if (value > 0 && value < 100) {
-				if (value <= 10) {
-					audioPlay1(`../audio/1/${value.toString()}.wav`);
-				} else if (value < 20) {
-					audioPlay1(`../audio/1/x${value.toString().substring(1, 2)}.wav`);
-				} else {
-					audioPlay1(`../audio/1/${value.toString().substring(0, 1)}x.wav`);
-					audioPlay1(`../audio/1/x${value.toString().substring(1, 2)}.wav`);
+				if (value > 0 && value < 100) {
+					if (value <= 10) {
+						audioPlay1(`../audio/1/${value.toString()}.wav`);
+					} else if (value < 20) {
+						audioPlay1(`../audio/1/x${value.toString().substring(1, 2)}.wav`);
+					} else {
+						audioPlay1(`../audio/1/${value.toString().substring(0, 1)}x.wav`);
+						audioPlay1(`../audio/1/x${value.toString().substring(1, 2)}.wav`);
+					}
+
+					audioPlay1("../audio/1/second.wav");
 				}
-
-				audioPlay1("../audio/1/second.wav");
 			}
-		}
 	}
 
 	if (MaxIntensity.value >= 5) {
@@ -3853,47 +3828,49 @@ TREM.Earthquake.on("eew", (data) => {
 		id   : data.ID,
 		km   : 0,
 	};
-	value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
 
-	if (Second == -1 || value < Second)
-		if (setting["audio.eew"] && Alert)
-			if (arrive == data.ID || arrive == "") {
-				arrive = data.ID;
+	if (data.Depth != null) {
+		value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
 
-				if (t != null) clearInterval(t);
-				t = setInterval(() => {
-					value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
-					Second = value;
+		if (Second == -1 || value < Second)
+			if (setting["audio.eew"] && Alert)
+				if (arrive == data.ID || arrive == "") {
+					arrive = data.ID;
 
-					if (stamp != value && !audio.minor_lock) {
-						stamp = value;
+					if (t != null) clearInterval(t);
+					t = setInterval(() => {
+						value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
+						Second = value;
 
-						if (_time >= 0) {
-							audioPlay("../audio/1/ding.wav");
-							_time++;
+						if (stamp != value && !audio.minor_lock) {
+							stamp = value;
 
-							if (_time >= 10)
-								clearInterval(t);
-						} else if (value < 100) {
-							if (value > 10) {
-								if (value.toString().substring(1, 2) == "0") {
-									audioPlay1(`../audio/1/${value.toString().substring(0, 1)}x.wav`);
-									audioPlay1("../audio/1/x0.wav");
+							if (_time >= 0) {
+								audioPlay("../audio/1/ding.wav");
+								_time++;
+
+								if (_time >= 10)
+									clearInterval(t);
+							} else if (value < 100) {
+								if (value > 10) {
+									if (value.toString().substring(1, 2) == "0") {
+										audioPlay1(`../audio/1/${value.toString().substring(0, 1)}x.wav`);
+										audioPlay1("../audio/1/x0.wav");
+									} else {
+										audioPlay("../audio/1/ding.wav");
+									}
+								} else if (value > 0) {
+									audioPlay1(`../audio/1/${value.toString()}.wav`);
 								} else {
-									audioPlay("../audio/1/ding.wav");
+									arrive = data.ID;
+									audioPlay1("../audio/1/arrive.wav");
+									_time = 0;
 								}
-
-							} else if (value > 0) {
-								audioPlay1(`../audio/1/${value.toString()}.wav`);
-							} else {
-								arrive = data.ID;
-								audioPlay1("../audio/1/arrive.wav");
-								_time = 0;
 							}
 						}
-					}
-				}, 50);
-			}
+					}, 50);
+				}
+	}
 
 	const speed = setting["shock.smoothing"] ? 100 : 500;
 
@@ -3928,11 +3905,11 @@ TREM.Earthquake.on("eew", (data) => {
 		alert_intensity : MaxIntensity.value,
 		alert_location  : data.Location ?? "未知區域",
 		alert_time      : new Date(data["UTC+8"]),
-		alert_sTime     : Math.floor(data.Time + _speed(data.Depth, distance).Stime * 1000),
-		alert_pTime     : Math.floor(data.Time + _speed(data.Depth, distance).Ptime * 1000),
+		alert_sTime     : (data.Depth == null) ? null : Math.floor(data.Time + _speed(data.Depth, distance).Stime * 1000),
+		alert_pTime     : (data.Depth == null) ? null : Math.floor(data.Time + _speed(data.Depth, distance).Ptime * 1000),
 		alert_local     : level.value,
-		alert_magnitude : data.Scale,
-		alert_depth     : data.Depth,
+		alert_magnitude : data.Scale ?? "?",
+		alert_depth     : data.Depth ?? "?",
 		alert_provider  : data.Unit,
 		alert_type      : classString,
 		"intensity-1"   : `<font color="white" size="7"><b>${MaxIntensity.label}</b></font>`,
@@ -4267,127 +4244,150 @@ function main(data) {
 	if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
 	if (EarthquakeList[data.ID].Cancel == undefined) {
-		let kmP = 0;
-		let km = 0;
+		if (data.Depth != null) {
+			let kmP = 0;
+			let km = 0;
 
-		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
-			if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
-				kmP = (index - 1) * 1000;
+			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
+				if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
+					kmP = (index - 1) * 1000;
 
-				if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 7) (NOW.getTime() - data.Time) * 7;
-				break;
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 7) (NOW.getTime() - data.Time) * 7;
+					break;
+				}
+
+				kmP = (NOW.getTime() - data.Time) * 7;
 			}
 
-			kmP = (NOW.getTime() - data.Time) * 7;
-		}
+			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
+				if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
+					km = (index - 1) * 1000;
 
-		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
-			if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
-				km = (index - 1) * 1000;
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 4) (NOW.getTime() - data.Time) * 4;
+					break;
+				}
 
-				if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 4) (NOW.getTime() - data.Time) * 4;
-				break;
+				km = (NOW.getTime() - data.Time) * 4;
 			}
 
-			km = (NOW.getTime() - data.Time) * 4;
-		}
+			if (setting["shock.p"])
+				if (kmP > 0)
+					if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+						if (!EarthquakeList[data.ID].CircleP) {
+							EarthquakeList[data.ID].CircleP = new WaveCircle(
+								`${data.ID}-p`,
+								Maps.main,
+								[+data.EastLongitude, +data.NorthLatitude],
+								kmP,
+								data.Alert,
+								{
+									type  : "line",
+									paint : {
+										"line-width" : 3,
+										"line-color" : "#6FB7B7",
+									},
+								});
+						} else {
+							EarthquakeList[data.ID].CircleP.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+							EarthquakeList[data.ID].CircleP.setRadius(kmP);
+						}
+					} else {
+						if (!EarthquakeList[data.ID].CircleP)
+							EarthquakeList[data.ID].CircleP = L.circle([+data.NorthLatitude, +data.EastLongitude], {
+								color     : "#6FB7B7",
+								fillColor : "transparent",
+								radius    : kmP,
+								renderer  : L.svg(),
+								className : "p-wave",
+							}).addTo(Maps.main);
 
-		if (setting["shock.p"])
-			if (kmP > 0) {
+						if (!EarthquakeList[data.ID].CircleP.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
+							EarthquakeList[data.ID].CircleP
+								.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+						EarthquakeList[data.ID].CircleP
+							.setRadius(kmP);
+
+						if (!EarthquakeList[data.ID].CirclePTW)
+							EarthquakeList[data.ID].CirclePTW = L.circle([data.NorthLatitude, data.EastLongitude], {
+								color     : "#6FB7B7",
+								fillColor : "transparent",
+								radius    : kmP,
+								renderer  : L.svg(),
+								className : "p-wave",
+							}).addTo(Maps.mini);
+
+						if (!EarthquakeList[data.ID].CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
+							EarthquakeList[data.ID].CirclePTW
+								.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+						EarthquakeList[data.ID].CirclePTW
+							.setRadius(kmP);
+					}
+
+			if (km > data.Depth) {
+				EEW[data.ID].km = km;
+
 				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-					if (!EarthquakeList[data.ID].CircleP) {
-						EarthquakeList[data.ID].CircleP = new WaveCircle(
-							`${data.ID}-p`,
+					if (!EarthquakeList[data.ID].CircleS) {
+						EarthquakeList[data.ID].CircleS = new WaveCircle(
+							`${data.ID}-s`,
 							Maps.main,
 							[+data.EastLongitude, +data.NorthLatitude],
-							kmP,
+							km,
 							data.Alert,
 							{
-								type  : "line",
+								type  : "fill",
 								paint : {
-									"line-width" : 3,
-									"line-color" : "#6FB7B7",
+									"fill-opacity" : 0.15,
+									"fill-color"   : data.Alert ? "#FF0000" : "#FFA500",
 								},
 							});
 					} else {
-						EarthquakeList[data.ID].CircleP.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
-						EarthquakeList[data.ID].CircleP.setRadius(kmP);
+						EarthquakeList[data.ID].CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+						EarthquakeList[data.ID].CircleS.setRadius(km);
+						EarthquakeList[data.ID].CircleS.setAlert(data.Alert);
 					}
 				} else {
-					if (!EarthquakeList[data.ID].CircleP)
-						EarthquakeList[data.ID].CircleP = L.circle([+data.NorthLatitude, +data.EastLongitude], {
-							color     : "#6FB7B7",
-							fillColor : "transparent",
-							radius    : kmP,
-							renderer  : L.svg(),
-							className : "p-wave",
+					if (!EarthquakeList[data.ID].CircleS)
+						EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
+							color       : data.Alert ? "red" : "orange",
+							fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+							fillOpacity : 1,
+							radius      : km,
+							renderer    : L.svg(),
+							className   : "s-wave",
 						}).addTo(Maps.main);
 
-					if (!EarthquakeList[data.ID].CircleP.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
-						EarthquakeList[data.ID].CircleP
+					if (!EarthquakeList[data.ID].CircleS.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
+						EarthquakeList[data.ID].CircleS
 							.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
-					EarthquakeList[data.ID].CircleP
-						.setRadius(kmP);
-				}
-
-				if (!EarthquakeList[data.ID].CirclePTW)
-					EarthquakeList[data.ID].CirclePTW = L.circle([data.NorthLatitude, data.EastLongitude], {
-						color     : "#6FB7B7",
-						fillColor : "transparent",
-						radius    : kmP,
-						renderer  : L.svg(),
-						className : "p-wave",
-					}).addTo(Maps.mini);
-
-				// console.log("kmP", kmP);
-				if (!EarthquakeList[data.ID].CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
-					EarthquakeList[data.ID].CirclePTW
-						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
-
-				EarthquakeList[data.ID].CirclePTW
-					.setRadius(kmP);
-			}
-
-		if (km > data.Depth) {
-			EEW[data.ID].km = km;
-
-			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-				if (!EarthquakeList[data.ID].CircleS) {
-					EarthquakeList[data.ID].CircleS = new WaveCircle(
-						`${data.ID}-s`,
-						Maps.main,
-						[+data.EastLongitude, +data.NorthLatitude],
-						km,
-						data.Alert,
-						{
-							type  : "fill",
-							paint : {
-								"fill-opacity" : 0.15,
-								"fill-color"   : data.Alert ? "#FF0000" : "#FFA500",
+					EarthquakeList[data.ID].CircleS
+						.setRadius(km)
+						.setStyle(
+							{
+								color     : data.Alert ? "red" : "orange",
+								fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
 							},
-						});
-				} else {
-					EarthquakeList[data.ID].CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
-					EarthquakeList[data.ID].CircleS.setRadius(km);
-					EarthquakeList[data.ID].CircleS.setAlert(data.Alert);
+						);
 				}
-			} else {
-				if (!EarthquakeList[data.ID].CircleS)
-					EarthquakeList[data.ID].CircleS = L.circle([+data.NorthLatitude, +data.EastLongitude], {
+
+				if (!EarthquakeList[data.ID].CircleSTW)
+					EarthquakeList[data.ID].CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
 						color       : data.Alert ? "red" : "orange",
 						fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
 						fillOpacity : 1,
 						radius      : km,
 						renderer    : L.svg(),
 						className   : "s-wave",
-					}).addTo(Maps.main);
+					}).addTo(Maps.mini);
 
-				if (!EarthquakeList[data.ID].CircleS.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
-					EarthquakeList[data.ID].CircleS
+				if (!EarthquakeList[data.ID].CircleSTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
+					EarthquakeList[data.ID].CircleSTW
 						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
-				EarthquakeList[data.ID].CircleS
+				EarthquakeList[data.ID].CircleSTW
 					.setRadius(km)
 					.setStyle(
 						{
@@ -4395,60 +4395,37 @@ function main(data) {
 							fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
 						},
 					);
+			} else {
+
+				let Progress = 0;
+				const num = (NOW.getTime() - data.Time) / 10 / EarthquakeList[data.ID].distance[1].Stime;
+
+				if (num > 15) Progress = 1;
+
+				if (num > 25) Progress = 2;
+
+				if (num > 35) Progress = 3;
+
+				if (num > 45) Progress = 4;
+
+				if (num > 55) Progress = 5;
+
+				if (num > 65) Progress = 6;
+
+				if (num > 75) Progress = 7;
+
+				if (num > 85) Progress = 8;
+
+				if (num > 98) Progress = 9;
+				const myIcon = L.icon({
+					iconUrl  : `../image/progress${Progress}.png`,
+					iconSize : [50, 50],
+				});
+				const DepthM = L.marker([Number(data.NorthLatitude), Number(data.EastLongitude) + 0.15], { icon: myIcon });
+				EarthquakeList[data.ID].Depth = DepthM;
+				Maps.main.addLayer(DepthM);
+				DepthM.setZIndexOffset(6000);
 			}
-
-			if (!EarthquakeList[data.ID].CircleSTW)
-				EarthquakeList[data.ID].CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
-					color       : data.Alert ? "red" : "orange",
-					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-					fillOpacity : 1,
-					radius      : km,
-					renderer    : L.svg(),
-					className   : "s-wave",
-				}).addTo(Maps.mini);
-
-			if (!EarthquakeList[data.ID].CircleSTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
-				EarthquakeList[data.ID].CircleSTW
-					.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
-
-			EarthquakeList[data.ID].CircleSTW
-				.setRadius(km)
-				.setStyle(
-					{
-						color     : data.Alert ? "red" : "orange",
-						fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-					},
-				);
-		} else {
-
-			let Progress = 0;
-			const num = (NOW.getTime() - data.Time) / 10 / EarthquakeList[data.ID].distance[1].Stime;
-
-			if (num > 15) Progress = 1;
-
-			if (num > 25) Progress = 2;
-
-			if (num > 35) Progress = 3;
-
-			if (num > 45) Progress = 4;
-
-			if (num > 55) Progress = 5;
-
-			if (num > 65) Progress = 6;
-
-			if (num > 75) Progress = 7;
-
-			if (num > 85) Progress = 8;
-
-			if (num > 98) Progress = 9;
-			const myIcon = L.icon({
-				iconUrl  : `../image/progress${Progress}.png`,
-				iconSize : [50, 50],
-			});
-			const DepthM = L.marker([Number(data.NorthLatitude), Number(data.EastLongitude) + 0.15], { icon: myIcon });
-			EarthquakeList[data.ID].Depth = DepthM;
-			Maps.main.addLayer(DepthM);
-			DepthM.setZIndexOffset(6000);
 		}
 
 		// #region Epicenter Cross Icon
@@ -4684,6 +4661,9 @@ function updateText() {
 	if (EarthquakeList[INFO[TINFO].ID].Cancel != undefined) {
 		$("#alert-p").text("X");
 		$("#alert-s").text("X");
+	} else if (INFO[TINFO].alert_sTime == null) {
+		$("#alert-p").text("?");
+		$("#alert-s").text("?");
 	} else {
 		let num = Math.floor((INFO[TINFO].alert_sTime - NOW.getTime()) / 1000);
 
