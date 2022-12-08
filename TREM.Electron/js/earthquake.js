@@ -3671,13 +3671,6 @@ TREM.Earthquake.on("eew", (data) => {
 	let MaxIntensity = { label: "", value: -1 };
 	const NSSPE = data.Intensity ?? {};
 
-	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-		const focusBounds = new maplibregl.LngLatBounds();
-
-		for (const eewid in EarthquakeList)
-			focusBounds.extend(EarthquakeList[eewid].epicenter);
-	}
-
 	for (const city in TREM.Resources.region)
 		for (const town in TREM.Resources.region[city]) {
 			const loc = TREM.Resources.region[city][town];
@@ -3697,9 +3690,15 @@ TREM.Earthquake.on("eew", (data) => {
 				),
 			);
 
-			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+				const focusBounds = new maplibregl.LngLatBounds();
+
+				for (const eewid in EarthquakeList)
+					focusBounds.extend(EarthquakeList[eewid].epicenter);
+
 				if (int.value >= 2)
 					focusBounds.extend(TREM.MapBounds[loc.code]);
+			}
 
 			if (data.Depth == null) int = NSSPE[loc[0]] ?? 0;
 
