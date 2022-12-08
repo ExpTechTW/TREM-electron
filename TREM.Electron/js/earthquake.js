@@ -2731,10 +2731,10 @@ function playNextAudio1() {
 	audioDOM1.playbackRate = 1.1;
 
 	if (nextAudioPath.startsWith("../audio/1/") && setting["audio.eew"]) {
-		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
+		dump({ level: 0, message: `Playing Audio 1 > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
 	} else if (!nextAudioPath.startsWith("../audio/1/")) {
-		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
+		dump({ level: 0, message: `Playing Audio 1 > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
 	}
 }
@@ -3723,27 +3723,27 @@ TREM.Earthquake.on("eew", (data) => {
 	// 	// padding : { bottom: 100, right: 100 },
 	// });
 
-	level = level.toString();
+	// level = level.toString();
 	let Alert = true;
 
 	if (level.value < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
 
+	let Nmsg = "";
+
+	if (value > 0)
+		Nmsg = `${value}秒後抵達`;
+	else
+		Nmsg = "已抵達 (預警盲區)";
+	let body = `${level.text}地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`;
+
+	if (data.Depth == null) body = `${level.text}地震，${data.Location ?? "未知區域"} (NSSPE)`;
+	new Notification("EEW 強震即時警報", {
+		body   : body,
+		icon   : "../TREM.ico",
+		silent : win.isFocused(),
+	});
+
 	if (!Info.Notify.includes(data.ID)) {
-		let Nmsg = "";
-
-		if (value > 0)
-			Nmsg = `${value}秒後抵達`;
-		else
-			Nmsg = "已抵達 (預警盲區)";
-		level = level.replace("+", "強").replace("-", "弱");
-		let body = `${level}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`;
-
-		if (data.Depth == null) body = `${level}級地震，${data.Location ?? "未知區域"} (NSSPE)`;
-		new Notification("EEW 強震即時警報", {
-			body   : body,
-			icon   : "../TREM.ico",
-			silent : win.isFocused(),
-		});
 		Info.Notify.push(data.ID);
 		// show latest eew
 		TINFO = INFO.length;
@@ -3769,11 +3769,11 @@ TREM.Earthquake.on("eew", (data) => {
 		if (data.Depth != null)
 			if (setting["audio.eew"] && Alert) {
 				TREM.Audios.eew.play();
-				audioPlay1(`../audio/1/${level.replace("+", "").replace("-", "")}.wav`);
+				audioPlay1(`../audio/1/${level.label.replace("+", "").replace("-", "")}.wav`);
 
-				if (level.includes("+"))
+				if (level.label.includes("+"))
 					audioPlay1("../audio/1/intensity-strong.wav");
-				else if (level.includes("-"))
+				else if (level.label.includes("-"))
 					audioPlay1("../audio/1/intensity-weak.wav");
 				else
 					audioPlay1("../audio/1/intensity.wav");
