@@ -10,8 +10,6 @@ const { ExptechAPI } = require("@kamiya4047/exptech-api-wrapper");
 const Exptech = new ExptechAPI();
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
-TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
-TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
 	pga1   : new Audio("../audio/PGA1.wav"),
 	pga2   : new Audio("../audio/PGA2.wav"),
@@ -23,6 +21,9 @@ TREM.Audios = {
 	palert : new Audio("../audio/palert.wav"),
 };
 TREM.AudioContext = new AudioContext({});
+TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
+TREM.Earthquake = new EventEmitter();
+TREM.EEW = new Map();
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
@@ -86,8 +87,8 @@ let replay = 0;
 let replayT = 0;
 let Second = -1;
 const mapLock = false;
-const EEW = {};
-const EEWT = { id: 0, time: 0 };
+const eew = {};
+const eewt = { id: 0, time: 0 };
 let TSUNAMI = {};
 let Ping = 0;
 let EEWAlert = false;
@@ -95,120 +96,6 @@ let PGACancel = false;
 let Unlock = false;
 let report_get_timestamp = 0;
 // #endregion
-
-class WaveCircle {
-
-	/**
-	 * @param {string} id
-	 * @param {maplibregl.Map} map
-	 * @param {maplibregl.LngLatLike} lnglat
-	 * @param {number} radius
-	 * @param {boolean} alert
-	 * @param {maplibregl.LayerSpecification} layerOptions
-	 */
-	constructor(id, map, lnglat, radius, alert, layerOptions) {
-		this.map = map;
-		this.lnglat = lnglat;
-		this.radius = radius;
-		this.alert = alert;
-
-		/**
-		 * @type {maplibregl.GeoJSONSource}
-		 */
-		this.source = map.addSource(`Source_${id}`, {
-			type : "geojson",
-			data : turfCircle(lnglat, radius, { units: "meters" }),
-		}).getSource(`Source_${id}`);
-
-		if (layerOptions.type == "line")
-			this.layerOutline = map.addLayer({
-				type   : "line",
-				id     : `Layer_${id}_Outline`,
-				source : `Source_${id}`,
-				paint  : {
-					"line-width" : 6,
-					"line-color" : "#ffffff",
-				},
-			}).getLayer(`Layer_${id}_Outline`);
-
-		this.layer = map.addLayer({
-			...layerOptions,
-			id     : `Layer_${id}`,
-			source : `Source_${id}`,
-		}).getLayer(`Layer_${id}`);
-
-		if (layerOptions.type == "fill") {
-			this.layerBorderOutline = map.addLayer({
-				type   : "line",
-				id     : `Layer_${id}_Border_Outline`,
-				source : `Source_${id}`,
-				paint  : {
-					"line-width" : 5,
-					"line-color" : "#ffffff",
-				},
-			}).getLayer(`Layer_${id}_Border_Outline`);
-			this.layerBorder = map.addLayer({
-				...layerOptions,
-				type   : "line",
-				id     : `Layer_${id}_Border`,
-				source : `Source_${id}`,
-				paint  : {
-					"line-width" : 3,
-					"line-color" : layerOptions.paint["fill-color"],
-				},
-			}).getLayer(`Layer_${id}_Border`);
-		}
-	}
-
-	setLngLat(lnglat) {
-		if (this.lnglat[0] == lnglat[0] && this.lnglat[1] == lnglat[1]) return;
-		this.lnglat = lnglat;
-		this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
-	}
-
-	setRadius(radius) {
-		if (this.radius == radius) return;
-		this.radius = radius;
-		this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
-	}
-
-	setAlert(state) {
-		if (this.alert == state) return;
-		this.alert = state;
-		this.source();
-		this.layer.setPaintProperty("fill-color", this.alert ? "#FF0000" : "#FFA500");
-		this.layerBorder.setPaintProperty("line-color", this.alert ? "#FF0000" : "#FFA500");
-	}
-
-	setStyle(id, value) {
-		if (this.layer.paint[id] == value) return;
-		this.layer.setPaintProperty(id, value);
-	}
-
-	remove() {
-		this.map.removeLayer(this.layer.id);
-		delete this.layer;
-
-		if (this.layerOutline) {
-			this.map.removeLayer(this.layerOutline.id);
-			delete this.layerOutline;
-		}
-
-		if (this.layerBorder) {
-			this.map.removeLayer(this.layerBorder.id);
-			delete this.layerBorder;
-		}
-
-		if (this.layerBorderOutline) {
-			this.map.removeLayer(this.layerBorderOutline.id);
-			delete this.layerBorderOutline;
-		}
-
-		this.map.removeSource(this.source.id);
-		delete this.source;
-		return null;
-	}
-}
 
 TREM.MapIntensity = {
 	isTriggered : false,
@@ -293,11 +180,11 @@ TREM.MapIntensity = {
 				this.timer = setTimeout(this.clear, 600_000);
 		}
 	},
-	expected(data) {
+	expected(expected) {
 		const int = new Map();
 
-		for (const towncode in data)
-			int.set(towncode, data[towncode]);
+		for (const [towncode, exp] of expected)
+			int.set(towncode, exp.intensity.value);
 
 		if (this.intensities.size)
 			for (const [towncode, intensity] of this.intensities)
@@ -525,6 +412,201 @@ TREM.MapArea = {
 		this.isVisible = false;
 	},
 };
+
+class WaveCircle {
+
+	/**
+	 * @param {string} id
+	 * @param {maplibregl.Map} map
+	 * @param {maplibregl.LngLatLike} lnglat
+	 * @param {number} radius
+	 * @param {boolean} alert
+	 * @param {maplibregl.LayerSpecification} layerOptions
+	 */
+	constructor(id, map, lnglat, radius, alert, layerOptions) {
+		this.map = map;
+		this.lnglat = lnglat;
+		this.radius = radius;
+		this.alert = alert;
+
+		/**
+		 * @type {maplibregl.GeoJSONSource}
+		 */
+		this.source = map.addSource(`Source_${id}`, {
+			type : "geojson",
+			data : turfCircle(lnglat, radius, { units: "meters" }),
+		}).getSource(`Source_${id}`);
+
+		if (layerOptions.type == "line")
+			this.layerOutline = map.addLayer({
+				type   : "line",
+				id     : `Layer_${id}_Outline`,
+				source : `Source_${id}`,
+				paint  : {
+					"line-width" : 6,
+					"line-color" : "#ffffff",
+				},
+			}).getLayer(`Layer_${id}_Outline`);
+
+		this.layer = map.addLayer({
+			...layerOptions,
+			id     : `Layer_${id}`,
+			source : `Source_${id}`,
+		}).getLayer(`Layer_${id}`);
+
+		if (layerOptions.type == "fill") {
+			this.layerBorderOutline = map.addLayer({
+				type   : "line",
+				id     : `Layer_${id}_Border_Outline`,
+				source : `Source_${id}`,
+				paint  : {
+					"line-width" : 5,
+					"line-color" : "#ffffff",
+				},
+			}).getLayer(`Layer_${id}_Border_Outline`);
+			this.layerBorder = map.addLayer({
+				...layerOptions,
+				type   : "line",
+				id     : `Layer_${id}_Border`,
+				source : `Source_${id}`,
+				paint  : {
+					"line-width" : 3,
+					"line-color" : layerOptions.paint["fill-color"],
+				},
+			}).getLayer(`Layer_${id}_Border`);
+		}
+	}
+
+	setLngLat(lnglat) {
+		if (this.lnglat[0] == lnglat[0] && this.lnglat[1] == lnglat[1]) return;
+		this.lnglat = lnglat;
+		this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
+	}
+
+	setRadius(radius) {
+		if (this.radius == radius) return;
+		this.radius = radius;
+		this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
+	}
+
+	setAlert(state) {
+		if (this.alert == state) return;
+		this.alert = state;
+		this.source();
+		this.layer.setPaintProperty("fill-color", this.alert ? "#FF0000" : "#FFA500");
+		this.layerBorder.setPaintProperty("line-color", this.alert ? "#FF0000" : "#FFA500");
+	}
+
+	setStyle(id, value) {
+		if (this.layer.paint[id] == value) return;
+		this.layer.setPaintProperty(id, value);
+	}
+
+	remove() {
+		this.map.removeLayer(this.layer.id);
+		delete this.layer;
+
+		if (this.layerOutline) {
+			this.map.removeLayer(this.layerOutline.id);
+			delete this.layerOutline;
+		}
+
+		if (this.layerBorder) {
+			this.map.removeLayer(this.layerBorder.id);
+			delete this.layerBorder;
+		}
+
+		if (this.layerBorderOutline) {
+			this.map.removeLayer(this.layerBorderOutline.id);
+			delete this.layerBorderOutline;
+		}
+
+		this.map.removeSource(this.source.id);
+		delete this.source;
+		return null;
+	}
+}
+
+class EEW {
+	constructor(data) {
+		this.#fromJson(data);
+	}
+
+	get full() {
+		return (
+			this.id != undefined
+			&& this.depth != undefined
+			&& this.epicenter != undefined
+			&& this.location != undefined
+			&& this.magnitude != undefined
+			&& this.source != undefined
+			&& (this.location && this.location != "未知區域")
+		) ? true : false;
+	}
+
+	get local() {
+		return this._expected.get(this._local.code);
+	}
+
+	#fromJson(data) {
+		this.id = data.ID;
+		this.depth = data.Depth;
+		this.epicenter = { latitude: data.NorthLatitude, longitude: data.EastLongitude };
+		this.location = data.Location;
+		this.magnitude = data.Scale;
+		this.source = data.Unit;
+
+		if (data.Version > this.version) {
+			this._expected = new Map();
+			this.#evalExpected();
+		}
+
+		this.version = data.Version;
+
+		this.eventTime = new Date(data.Time);
+		this.apiTime = new Date(data.TimeStamp);
+
+		this._alert = data.Alert;
+		this._from = data.data_unit;
+		this._receiveTime = new Date(data.timestamp);
+		this._replay = data.Replay;
+		this._wavespeed = { p: 6.5, s: 3.5 };
+
+		if (setting["auto.waveSpeed"] && data.Speed.Pv && data.Speed.Sv)
+			this._wavespeed = { p: data.Speed.Pv, s: data.Speed.Sv };
+	}
+
+	#evalExpected() {
+		for (const city in TREM.Resources.region)
+			for (const town in TREM.Resources.region[city]) {
+				const l = TREM.Resources.region[city][town];
+				const d = TREM.Utils.twoSideDistance(
+					TREM.Utils.twoPointDistance(
+						{ lat: l.latitude, lon: l.longitude },
+						{ lat: this.epicenter.latitude, lon: this.epicenter.longitude },
+					),
+					this.depth,
+				);
+				const pga = TREM.Utils.pga(
+					this.magnitude,
+					d,
+					setting["earthquake.siteEffect"] ? l.siteEffect : undefined,
+				);
+				const i = TREM.Utils.PGAToIntensity(pga);
+
+				if (setting["location.city"] == city && setting["location.town"] == town)
+					this._local = l;
+
+				this._expected.set(l.code, { distance: d, intensity: i, pga });
+			}
+
+		TREM.MapIntensity.expected(this._expected);
+	}
+
+	update(data) {
+		this.#fromJson(data);
+	}
+}
 
 // #region 初始化
 const folder = path.join(app.getPath("userData"), "data");
@@ -1332,16 +1414,16 @@ async function init() {
 	setInterval(() => {
 		if (mapLock) return;
 
-		if (Object.keys(EEW).length != 0) {
+		if (Object.keys(eew).length != 0) {
 			const finalBounds = new maplibregl.LngLatBounds();
 			let finalZoom = 0;
 			let sampleCount = 0;
 
-			for (let index = 0; index < Object.keys(EEW).length; index++)
-				if (EEWT.id == 0 || EEWT.id == EEW[Object.keys(EEW)[index]].id || NOW.getTime() - EEW[Object.keys(EEW)[index]].time >= 10000) {
-					EEWT.id = EEW[Object.keys(EEW)[index]].id;
+			for (let index = 0; index < Object.keys(eew).length; index++)
+				if (eewt.id == 0 || eewt.id == eew[Object.keys(eew)[index]].id || NOW.getTime() - eew[Object.keys(eew)[index]].time >= 10000) {
+					eewt.id = eew[Object.keys(eew)[index]].id;
 					const X = 0;
-					const km = (NOW.getTime() - EEW[Object.keys(EEW)[index]].Time) * 4;
+					const km = (NOW.getTime() - eew[Object.keys(eew)[index]].Time) * 4;
 
 					if (km > 300000)
 						finalZoom += 6;
@@ -1363,7 +1445,7 @@ async function init() {
 
 					sampleCount++;
 
-					finalBounds.extend([EEW[Object.keys(EEW)[index]].lon, EEW[Object.keys(EEW)[index]].lat]);
+					finalBounds.extend([eew[Object.keys(eew)[index]].lon, eew[Object.keys(eew)[index]].lat]);
 
 					/*
 					const num = Math.sqrt(Math.pow(23.608428 - EEW[Object.keys(EEW)[index]].lat, 2) + Math.pow(120.799168 - EEW[Object.keys(EEW)[index]].lon, 2));
@@ -1373,7 +1455,7 @@ async function init() {
 					else
 						TREM.Earthquake.emit("focus", { center: pointFormatter((23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X, TREM.MapRenderingEngine), zoom: Zoom });
 					*/
-					EEW[Object.keys(EEW)[index]].time = NOW.getTime();
+					eew[Object.keys(eew)[index]].time = NOW.getTime();
 				}
 
 			finalZoom = finalZoom / sampleCount;
@@ -1593,14 +1675,14 @@ function handler(response) {
 			} else if (!detected_list[pgaKeys[index]].passed) {
 				let passed = false;
 
-				if (Object.keys(EEW).length)
-					for (let Index = 0; Index < Object.keys(EEW).length; Index++) {
+				if (Object.keys(eew).length)
+					for (let Index = 0; Index < Object.keys(eew).length; Index++) {
 						let SKIP = 0;
 
 						for (let i = 0; i < 4; i++) {
-							const dis = Math.sqrt(Math.pow((detected_box_location[pgaKeys[index].toString()][i][0] - EEW[Object.keys(EEW)[Index]].lat) * 111, 2) + Math.pow((detected_box_location[pgaKeys[index].toString()][i][1] - EEW[Object.keys(EEW)[Index]].lon) * 101, 2));
+							const dis = Math.sqrt(Math.pow((detected_box_location[pgaKeys[index].toString()][i][0] - eew[Object.keys(eew)[Index]].lat) * 111, 2) + Math.pow((detected_box_location[pgaKeys[index].toString()][i][1] - eew[Object.keys(eew)[Index]].lon) * 101, 2));
 
-							if (EEW[Object.keys(EEW)[Index]].km / 1000 > dis) SKIP++;
+							if (eew[Object.keys(eew)[Index]].km / 1000 > dis) SKIP++;
 						}
 
 						if (SKIP >= 4) {
@@ -1893,18 +1975,18 @@ function playNextAudio1() {
 // #endregion
 
 // #region Report Data
-async function ReportGET(eew) {
+async function ReportGET(palert) {
 	try {
 		const res = await getReportData();
 		report_get_timestamp = Date.now();
 
-		if (!res) return setTimeout(ReportGET, 1000, eew);
+		if (!res) return setTimeout(ReportGET, 1000, palert);
 		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
-		ReportList(res, eew);
+		ReportList(res, palert);
 	} catch (error) {
 		dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
-		return setTimeout(ReportGET, 5000, eew);
+		return setTimeout(ReportGET, 5000, palert);
 	}
 }
 
@@ -1928,13 +2010,13 @@ const openURL = url => {
 // #endregion
 
 // #region Report list
-function ReportList(earthquakeReportArr, eew) {
+function ReportList(earthquakeReportArr, palert) {
 	roll.replaceChildren();
 
 	for (let index = 0; index < earthquakeReportArr.length; index++) {
-		if (eew != undefined && index == earthquakeReportArr.length - 1) {
-			earthquakeReportArr[index].Max = eew.Max;
-			earthquakeReportArr[index].Time = eew.Time;
+		if (palert != undefined && index == earthquakeReportArr.length - 1) {
+			earthquakeReportArr[index].Max = palert.Max;
+			earthquakeReportArr[index].Time = palert.Time;
 		}
 
 		addReport(earthquakeReportArr[index]);
@@ -2230,13 +2312,10 @@ const stopReplay = function() {
 		ReportGET();
 	}
 
-	const data = {
-		uuid: localStorage.UUID,
-	};
-	Exptech.v1.post("/trem/stop", data)
-		.catch((error) => {
-			dump({ level: 2, message: error, origin: "Verbose" });
-		});
+	Exptech.v1
+		.post("/trem/stop", { uuid: localStorage.UUID })
+		.catch((error) => dump({ level: 2, message: error, origin: "Verbose" }));
+
 	document.getElementById("togglenav_btn").classList.remove("hide");
 	document.getElementById("stopReplay").classList.add("hide");
 };
@@ -2545,6 +2624,11 @@ TREM.Earthquake.on("eew", (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.debug(data);
 
+	if (!TREM.EEW.has(data.ID))
+		TREM.EEW.set(data.ID, new EEW(data));
+	else
+		TREM.EEW.get(data.ID).update(data);
+
 	// handler
 	if (EarthquakeList[data.ID] == undefined) EarthquakeList[data.ID] = {};
 	EarthquakeList[data.ID].epicenter = [+data.EastLongitude, +data.NorthLatitude];
@@ -2603,17 +2687,8 @@ TREM.Earthquake.on("eew", (data) => {
 			GC[loc.code] = int.value;
 		}
 
-	TREM.MapIntensity.expected(GC);
+	// TREM.MapIntensity.expected(GC);
 
-	const focusCamera = Maps.main.cameraForBounds(focusBounds);
-
-	/*
-	Maps.main.easeTo({
-		center  : focusCamera.center,
-		zoom    : focusCamera.zoom > 7.5 ? 7.5 : focusCamera.zoom,
-		padding : { bottom: 100, right: 100 },
-	});
-	*/
 
 	let Alert = true;
 
@@ -2651,7 +2726,7 @@ TREM.Earthquake.on("eew", (data) => {
 			if (!win.isFocused()) win.flashFrame(true);
 		}
 
-		EEWT.id = data.ID;
+		eewt.id = data.ID;
 
 		if (setting["audio.eew"] && Alert) {
 			TREM.Audios.eew.play();
@@ -2705,7 +2780,7 @@ TREM.Earthquake.on("eew", (data) => {
 		EarthquakeList[data.ID].Version = data.Version;
 	}
 
-	EEW[data.ID] = {
+	eew[data.ID] = {
 		lon  : Number(data.EastLongitude),
 		lat  : Number(data.NorthLatitude),
 		time : 0,
@@ -2919,6 +2994,13 @@ TREM.Earthquake.on("eew", (data) => {
 	}, 2000);
 });
 // #endregion
+
+// #region Event: eewEnd
+TREM.Earthquake.on("eewEnd", (id) => {
+
+});
+// #endregion
+
 
 TREM.Earthquake.on("tsunami", (data) => {
 	if (data.Version == 1) {
@@ -3165,7 +3247,7 @@ function main(data) {
 
 		if (km > 0) {
 			const kmS = Math.sqrt(km);
-			EEW[data.ID].km = kmS;
+			eew[data.ID].km = kmS;
 
 			if (!EarthquakeList[data.ID].CircleS) {
 				EarthquakeList[data.ID].CircleS = new WaveCircle(
@@ -3386,7 +3468,7 @@ function main(data) {
 
 		if (EarthquakeList[data.ID].geojson != undefined) EarthquakeList[data.ID].geojson.remove();
 		delete EarthquakeList[data.ID];
-		delete EEW[data.ID];
+		delete eew[data.ID];
 
 		if (Object.keys(EarthquakeList).length == 0) {
 			clearInterval(t);
