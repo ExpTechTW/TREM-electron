@@ -6,8 +6,8 @@ require("expose-gc");
 const { BrowserWindow, shell } = require("@electron/remote");
 const { default: turfCircle } = require("@turf/circle");
 const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:timers");
-const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
-const ExpTechAPI = new ExpTech();
+const { ExptechAPI } = require("@kamiya4047/exptech-api-wrapper");
+const Exptech = new ExptechAPI();
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
@@ -1878,7 +1878,7 @@ async function ReportGET(eew) {
 
 async function getReportData() {
 	try {
-		const list = await ExpTechAPI.v1.earthquake.getReports(+setting["cache.report"]);
+		const list = await Exptech.v1.earthquake.getReports(+setting["cache.report"]);
 		TREM.Report.cache = new Map(list.map(v => [v.identifier, v]));
 		return list;
 	} catch (error) {
@@ -2201,7 +2201,7 @@ const stopReplay = function() {
 	const data = {
 		uuid: localStorage.UUID,
 	};
-	ExpTechAPI.v1.post("/trem/stop", data)
+	Exptech.v1.post("/trem/stop", data)
 		.catch((error) => {
 			dump({ level: 2, message: error, origin: "Verbose" });
 		});
@@ -2220,7 +2220,7 @@ ipcMain.on("testEEW", () => {
 					id   : list[index],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				ExpTechAPI.v1.post("/trem/replay", data)
+				Exptech.v1.post("/trem/replay", data)
 					.catch((error) => {
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
@@ -2232,7 +2232,7 @@ ipcMain.on("testEEW", () => {
 			uuid: localStorage.UUID,
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		ExpTechAPI.v1.post("/trem/replay", data)
+		Exptech.v1.post("/trem/replay", data)
 			.catch((error) => {
 				dump({ level: 2, message: error, origin: "Verbose" });
 			});
