@@ -1654,12 +1654,13 @@ TREM.Earthquake.on("eew", (data) => {
 
 	let find = INFO.findIndex(v => v.ID == data.ID);
 	if (find == -1) find = INFO.length;
+	const time = new Date(data.Time).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
 	INFO[find] = {
 		ID              : data.ID,
 		alert_number    : data.Version,
 		alert_intensity : MaxIntensity,
 		alert_location  : data.Location ?? "未知區域",
-		alert_time      : new Date(data["UTC+8"]),
+		alert_time      : time,
 		alert_sTime     : (data.Depth == null) ? null : Math.floor(data.Time + _speed(data.Depth, distance).Stime * 1000),
 		alert_pTime     : (data.Depth == null) ? null : Math.floor(data.Time + _speed(data.Depth, distance).Ptime * 1000),
 		alert_local     : IntensityN(level),
@@ -1668,7 +1669,7 @@ TREM.Earthquake.on("eew", (data) => {
 		alert_provider  : data.Unit,
 		alert_type      : classString,
 		"intensity-1"   : `<font color="white" size="7"><b>${IntensityI(MaxIntensity)}</b></font>`,
-		"time-1"        : `<font color="white" size="2"><b>${data["UTC+8"]}</b></font>`,
+		"time-1"        : `<font color="white" size="2"><b>${time}</b></font>`,
 		"info-1"        : `<font color="white" size="4"><b>M ${data.Scale} </b></font><font color="white" size="3"><b> 深度: ${data.Depth} km</b></font>`,
 		distance,
 	};
@@ -1759,7 +1760,7 @@ TREM.Earthquake.on("eew", (data) => {
 				":" + NOW.getSeconds();
 
 			let msg = setting["webhook.body"];
-			msg = msg.replace("%Depth%", data.Depth).replace("%NorthLatitude%", data.NorthLatitude).replace("%Time%", data["UTC+8"]).replace("%EastLongitude%", data.EastLongitude).replace("%Scale%", data.Scale);
+			msg = msg.replace("%Depth%", data.Depth).replace("%NorthLatitude%", data.NorthLatitude).replace("%Time%", time).replace("%EastLongitude%", data.EastLongitude).replace("%Scale%", data.Scale);
 			if (data.Function == "earthquake")
 				msg = msg.replace("%Provider%", "交通部中央氣象局");
 			else if (data.Function == "SCDZJ_earthquake")
