@@ -7,7 +7,7 @@ const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 
 const ExpTechAPI = new ExpTech();
-// const bytenode = require("bytenode");
+const bytenode = require("bytenode");
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -1011,6 +1011,7 @@ function ReportList(earthquakeReportArr, eew) {
 
 function addReport(report, prepend = false) {
 	if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
+	if (report.data.length == 0) report.data = [{ areaIntensity: 0 }];
 	const Level = IntensityI(report.data[0].areaIntensity);
 	let msg = "";
 	if (report.location.includes("("))
@@ -1125,7 +1126,7 @@ function addReport(report, prepend = false) {
 
 		const report_intensity_value = document.createElement("span");
 		report_intensity_value.className = "report-intensity-value";
-		report_intensity_value.innerText = Level;
+		report_intensity_value.innerText = (Level == 0) ? "--" : Level;
 		report_intensity_container.append(report_intensity_title_container, report_intensity_value);
 
 
@@ -1425,6 +1426,13 @@ async function FCMdata(json, Unit) {
 		if (setting["report.cover"]) win.moveTop();
 
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
+		const now = new Date(json.Time);
+		json["UTC+8"] = now.getFullYear() +
+				"/" + (now.getMonth() + 1) +
+				"/" + now.getDate() +
+				" " + now.getHours() +
+				":" + now.getMinutes() +
+				":" + now.getSeconds();
 		new Notification("地震報告",
 			{
 				body   : `${json.Location.substring(json.Location.indexOf("(") + 1, json.Location.indexOf(")")).replace("位於", "")}\n${json["UTC+8"]}\n發生 M${json.Scale} 有感地震`,
