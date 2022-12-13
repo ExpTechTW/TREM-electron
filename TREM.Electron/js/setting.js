@@ -296,6 +296,9 @@ function SelectSave(id) {
 	if (id == "map.engine")
 		$("#MEReloadButton").fadeIn(100);
 
+	if (id == "update.time")
+		$("#UDReloadButton").fadeIn(100);
+
 	if (id == "location.city") {
 		const town = document.getElementById("location.town");
 		town.replaceChildren();
@@ -381,6 +384,9 @@ function ChoiceSave(id, el) {
 	const value = el.value;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
+
+	if (id == "update.mode")
+		$("#UDReloadButton").fadeIn(100);
 }
 
 function RangeSave(id) {
@@ -416,6 +422,7 @@ function setList(args, el, event) {
 			"HAReloadButton",
 			"MEReloadButton",
 			"MAPReloadButton",
+			"UDReloadButton",
 		].includes(e.id))
 			$(e).css("opacity", "0");
 		$(e).children().each((i2, e2) => {
@@ -423,6 +430,7 @@ function setList(args, el, event) {
 				"HAReloadButton",
 				"MEReloadButton",
 				"MAPReloadButton",
+				"UDReloadButton",
 			].includes(e2.id))
 				$(e2).css("opacity", "0");
 		});
@@ -450,6 +458,7 @@ function setList(args, el, event) {
 					"HAReloadButton",
 					"MEReloadButton",
 					"MAPReloadButton",
+					"UDReloadButton",
 				].includes(child[j].id)) {
 					if (!child[j].lang || (child[j].lang == setting["general.locale"]))
 						$(child[j]).delay(delay).fadeTo(100, is_setting_disabled ? 0.6 : 1).delay(100)

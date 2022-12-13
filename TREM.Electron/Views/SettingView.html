@@ -1735,6 +1735,51 @@
                                             </label>
                                         </div>
                                     </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Auto Update time</span>
+                                                <span lang="ja">自動更新時間</span>
+                                                <span lang="kr">자동 업데이트 time</span>
+                                                <span lang="ru">Auto Update time</span>
+                                                <span lang="zh-CN">自动更新時間</span>
+                                                <span lang="zh-TW">自動更新時間</span>
+                                                <span class="option-label-id">update.time</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Auto Update time.</span>
+                                                <span lang="ja">Auto Update time。</span>
+                                                <span lang="kr">Auto Update time.</span>
+                                                <span lang="ru">Auto Update time.</span>
+                                                <span lang="zh-CN">設定自動更新時間。</span>
+                                                <span lang="zh-TW">設定自動更新時間。</span>
+                                            </span>
+                                        </div>
+                                        <div class="control">
+                                            <select id="update.time" name="update.time" onchange="SelectSave('update.time')">
+                                                <option value=0>永不</option>
+                                                <option value=1>1小時</option>
+                                                <option value=2>2小時</option>
+                                                <option value=6>6小時</option>
+                                                <option value=12>12小時</option>
+                                                <option value=24>1天</option>
+                                                <option value=168>7天</option>
+                                                <option value=336>14天</option>
+                                                <option value=720>30天</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <button id="UDReloadButton" class="filled-tonal-button setting-button md3-ripple" onclick="restart()" style="display:none; margin-top: 4px;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Restart</span>
+                                            <span lang="ja">再起動</span>
+                                            <span lang="kr">Restart</span>
+                                            <span lang="ru">Restart</span>
+                                            <span lang="zh-CN">重新啟動</span>
+                                            <span lang="zh-TW">重新啟動</span>
+                                        </span>
+                                    </button>
                                 </div>
                                 <div class="control-title">
                                     <div>

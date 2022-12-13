@@ -7,20 +7,25 @@ document.addEventListener("keydown", (event) => {
 });
 
 const toggleNav = state => {
-	TREM.ReportTag1 = 0;
-
-	if (setting["nav.ui.autoclose"]) {
-		TREM.toggleNavTime = NOW.getTime();
-		console.log("toggleNavTime: ", TREM.toggleNavTime);
-	}
-
 	if (state == undefined) {
 		$("#nav-rail").toggleClass("hide");
 		state = !$("#nav-rail").hasClass("hide");
-	} else if (state) {
+	}
+
+	if (state) {
 		$("#nav-rail").removeClass("hide");
+
+		if (setting["nav.ui.autoclose"]) {
+			TREM.toggleNavTime = NOW.getTime();
+			console.log("toggleNavTime: ", TREM.toggleNavTime);
+		}
 	} else {
 		$("#nav-rail").addClass("hide");
+
+		if (setting["nav.ui.autoclose"] && TREM.toggleNavTime != 0) {
+			TREM.toggleNavTime = 0;
+			console.log("toggleNavTime end: ", TREM.toggleNavTime);
+		}
 	}
 
 	$("#togglenav_btn span.material-symbols-rounded").text(state ? "first_page" : "last_page");

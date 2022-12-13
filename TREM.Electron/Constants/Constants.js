@@ -256,6 +256,10 @@ const Constants = Object.freeze({
 			type  : "choice",
 			value : "notify",
 		},
+		"update.time": {
+			type  : "select",
+			value : "1",
+		},
 		"api.key": {
 			type  : "string",
 			value : "",
