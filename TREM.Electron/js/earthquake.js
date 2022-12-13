@@ -494,6 +494,7 @@ function PGAMain() {
 						Response = ans;
 						handler(Response);
 					}
+				handler(Response);
 			} catch (err) {void 0;}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
