@@ -178,10 +178,9 @@ else {
 }
 
 TREM.on("ready", () => {
-	console.log(TREM.Configuration.data["update.time"]);
 	if (TREM.Configuration.data["update.time"] != 0){
 		autoUpdater.checkForUpdates();
-		const time = TREM.Configuration.data["update.time"] * 360_000;
+		const time = TREM.Configuration.data["update.time"] * 3600_000;
 		setInterval(() => {
 			autoUpdater.checkForUpdates();
 		}, time);
