@@ -705,8 +705,8 @@ class EEW {
 		this._replay = data.Replay;
 		this._wavespeed = { p: 6.5, s: 3.5 };
 
-		if (setting["auto.waveSpeed"] && data.Speed.Pv && data.Speed.Sv)
-			this._wavespeed = { p: data.Speed.Pv, s: data.Speed.Sv };
+		// if (setting["auto.waveSpeed"] && data.Speed.Pv  && data.Speed.Sv)
+		// 	this._wavespeed = { p: data.Speed.Pv, s: data.Speed.Sv };
 	}
 
 	#evalExpected() {
@@ -3748,10 +3748,10 @@ TREM.Earthquake.on("eew", (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.debug(data);
 
-	if (!TREM.EEW.has(data.ID))
-		TREM.EEW.set(data.ID, new EEW(data));
-	else
-		TREM.EEW.get(data.ID).update(data);
+	// if (!TREM.EEW.has(data.ID))
+	// 	TREM.EEW.set(data.ID, new EEW(data));
+	// else
+	// 	TREM.EEW.get(data.ID).update(data);
 
 	// handler
 	if (EarthquakeList[data.ID] == undefined) EarthquakeList[data.ID] = {};
