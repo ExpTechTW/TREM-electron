@@ -3748,10 +3748,10 @@ TREM.Earthquake.on("eew", (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.debug(data);
 
-	// if (!TREM.EEW.has(data.ID))
-	// 	TREM.EEW.set(data.ID, new EEW(data));
-	// else
-	// 	TREM.EEW.get(data.ID).update(data);
+	if (!TREM.EEW.has(data.ID))
+		TREM.EEW.set(data.ID, new EEW(data));
+	else
+		TREM.EEW.get(data.ID).update(data);
 
 	// handler
 	if (EarthquakeList[data.ID] == undefined) EarthquakeList[data.ID] = {};
