@@ -24,15 +24,15 @@ TREM.AudioContext = new AudioContext({});
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
-if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
-	const vm = require("vm");
-	const v8 = require("v8");
-	v8.setFlagsFromString("--no-lazy");
-	const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
-	const script = new vm.Script(code);
-	const bytecode = script.createCachedData();
-	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
-}
+// if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
+// 	const vm = require("vm");
+// 	const v8 = require("v8");
+// 	v8.setFlagsFromString("--no-lazy");
+// 	const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
+// 	const script = new vm.Script(code);
+// 	const bytecode = script.createCachedData();
+// 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
+// }
 
 // #region 變數
 const MapData = {};
@@ -96,6 +96,7 @@ let report_get_timestamp = 0;
 
 // #region 初始化
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+
 
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
@@ -468,30 +469,31 @@ function PGAMain() {
 			try {
 				const _t = Date.now();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
-					Ping = "Super";
-					Response = rts_response;
-					handler(Response);
-				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
-					Ping = "P2P";
-					Response = rts_response;
-					handler(Response);
-				} else {
-					const url = (ReplayTime == 0) ? "https://api.exptech.com.tw/api/v1/trem/rts" : `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}`;
-					const controller = new AbortController();
-					setTimeout(() => {
-						controller.abort();
-					}, 5000);
-					let ans = await fetch(url, { signal: controller.signal }).catch((err) => void 0);
-					if (controller.signal.aborted || ans == undefined) {
+				if (setting["api.key"] != "" || ReplayTime != 0)
+					if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
+						Ping = "Super";
+						Response = rts_response;
 						handler(Response);
-						return;
+					} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
+						Ping = "P2P";
+						Response = rts_response;
+						handler(Response);
+					} else {
+						const url = (ReplayTime == 0) ? "https://api.exptech.com.tw/api/v1/trem/rts" : `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}`;
+						const controller = new AbortController();
+						setTimeout(() => {
+							controller.abort();
+						}, 5000);
+						let ans = await fetch(url, { signal: controller.signal }).catch((err) => void 0);
+						if (controller.signal.aborted || ans == undefined) {
+							handler(Response);
+							return;
+						}
+						ans = await ans.json();
+						Ping = Date.now() - _t + "ms";
+						Response = ans;
+						handler(Response);
 					}
-					ans = await ans.json();
-					Ping = Date.now() - _t + "ms";
-					Response = ans;
-					handler(Response);
-				}
 			} catch (err) {void 0;}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
