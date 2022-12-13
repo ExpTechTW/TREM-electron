@@ -74,7 +74,7 @@ TREM.Report = {
 		el.querySelector(".report-list-item-time").innerText = data.originTime.replace(/-/g, "/");
 		el.querySelector("button").value = data.identifier;
 		el.querySelector("button").addEventListener("click", function() {
-			TREM.Report.setView("report-overview", this.value);
+			if (this.value.includes("CWB")) TREM.Report.setView("report-overview", this.value);
 		});
 		ripple(el.querySelector("button"));
 		return el;

@@ -7,7 +7,7 @@ const { BrowserWindow, shell } = require("@electron/remote");
 const ExpTech = require("@kamiya4047/exptech-api-wrapper").default;
 
 const ExpTechAPI = new ExpTech();
-const bytenode = require("bytenode");
+// const bytenode = require("bytenode");
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
 TREM.Audios = {
@@ -1011,7 +1011,13 @@ function ReportList(earthquakeReportArr, eew) {
 
 function addReport(report, prepend = false) {
 	if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
-	if (report.data.length == 0) report.data = [{ areaIntensity: 0 }];
+	if (report.data.length == 0) report.data = [{
+		areaName      : "未知",
+		areaIntensity : 0,
+		eqStation     : [{
+			stationName: "未知",
+		}],
+	}];
 	const Level = IntensityI(report.data[0].areaIntensity);
 	let msg = "";
 	if (report.location.includes("("))
@@ -1151,10 +1157,11 @@ function addReport(report, prepend = false) {
 		ripple(Div);
 		Div.append(report_container);
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
-		Div.addEventListener("click", (event) => {
-			TREM.Report.setView("report-overview", report.identifier);
-			changeView("report", "#reportView_btn");
-		});
+		if (Level != 0)
+			Div.addEventListener("click", (event) => {
+				TREM.Report.setView("report-overview", report.identifier);
+				changeView("report", "#reportView_btn");
+			});
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
 			if (locating)
