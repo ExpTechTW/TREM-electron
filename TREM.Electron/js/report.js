@@ -39,6 +39,7 @@ TREM.Report = {
 				.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
 
 			for (const report of reports) {
+				if (setting["api.key"] == "" && report.data[0].areaIntensity == 0) continue;
 				const element = this._createReportItem(report);
 
 				if (
