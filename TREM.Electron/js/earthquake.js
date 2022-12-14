@@ -574,10 +574,6 @@ class EEW {
 		this._from = data.data_unit;
 		this._receiveTime = new Date(data.timestamp);
 		this._replay = data.Replay;
-		this._wavespeed = { p: 6.5, s: 3.5 };
-
-		if (setting["auto.waveSpeed"] && data.Speed.Pv && data.Speed.Sv)
-			this._wavespeed = { p: data.Speed.Pv, s: data.Speed.Sv };
 	}
 
 	#evalExpected() {
@@ -2866,12 +2862,20 @@ TREM.Earthquake.on("eew", (data) => {
 	let find = INFO.findIndex(v => v.ID == data.ID);
 
 	if (find == -1) find = INFO.length;
+	const now = new Date((data.Replay) ? data.time : data.Time);
+	const time = now.getFullYear()
+    + "/" + (now.getMonth() + 1)
+	+ "/" + now.getDate()
+    + " " + now.getHours()
+    + ":" + now.getMinutes()
+    + ":" + now.getSeconds();
+
 	INFO[find] = {
 		ID              : data.ID,
 		alert_number    : data.Version,
 		alert_intensity : MaxIntensity.value,
 		alert_location  : data.Location ?? "未知區域",
-		alert_time      : new Date(data["UTC+8"]),
+		alert_time      : time,
 		alert_sTime     : new Date(data.Time),
 		alert_local     : level.value,
 		alert_magnitude : data.Scale,
@@ -2879,7 +2883,7 @@ TREM.Earthquake.on("eew", (data) => {
 		alert_provider  : data.Unit,
 		alert_type      : classString,
 		"intensity-1"   : `<font color="white" size="7"><b>${MaxIntensity.label}</b></font>`,
-		"time-1"        : `<font color="white" size="2"><b>${data["UTC+8"]}</b></font>`,
+		"time-1"        : `<font color="white" size="2"><b>${time}</b></font>`,
 		"info-1"        : `<font color="white" size="4"><b>M ${data.Scale} </b></font><font color="white" size="3"><b> 深度: ${data.Depth} km</b></font>`,
 		distance,
 	};
@@ -2970,7 +2974,7 @@ TREM.Earthquake.on("eew", (data) => {
 				+ ":" + NOW.getSeconds();
 
 			let msg = setting["webhook.body"];
-			msg = msg.replace("%Depth%", data.Depth).replace("%NorthLatitude%", data.NorthLatitude).replace("%Time%", data["UTC+8"]).replace("%EastLongitude%", data.EastLongitude).replace("%Scale%", data.Scale);
+			msg = msg.replace("%Depth%", data.Depth).replace("%NorthLatitude%", data.NorthLatitude).replace("%Time%", time).replace("%EastLongitude%", data.EastLongitude).replace("%Scale%", data.Scale);
 
 			if (data.Function == "earthquake")
 				msg = msg.replace("%Provider%", "交通部中央氣象局");
@@ -3511,14 +3515,6 @@ function main(data) {
 			delete Timers.epicenterBlinker;
 			clearInterval(Timers.eew);
 			Timers.eew = null;
-			const list = fs.readdirSync(folder);
-
-			for (let index = 0; index < list.length; index++) {
-				const date = fs.statSync(`${folder}/${list[index]}`);
-
-				if (new Date().getTime() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
-			}
-
 			global.gc();
 		}
 	}
