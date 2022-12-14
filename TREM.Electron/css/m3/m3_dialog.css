@@ -18,7 +18,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: linear-gradient(90deg, rgba(var(--md-sys-color-surfac-tint), .11) 0%, rgba(var(--md-sys-color-surfac-tint), .11) 100%) rgb(var(--md-sys-color-surface));
+    background: linear-gradient(90deg, rgba(var(--md-sys-color-primary), .11) 0%, rgba(var(--md-sys-color-primary), .11) 100%) rgb(var(--md-sys-color-surface));
     padding: 24px;
     border-radius: 28px;
 }

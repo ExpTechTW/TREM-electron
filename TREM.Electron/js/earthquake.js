@@ -642,6 +642,17 @@ async function init() {
 
 	TREM.MapRenderingEngine = setting["map.engine"];
 
+	if (!window.navigator.onLine)
+		return showDialog(
+			"error",
+			TREM.Localization.getString("Initialization_No_Connection_Title"),
+			TREM.Localization.getString("Initialization_No_Connection_Description"),
+			0, "wifi_off", () => {
+				ipcRenderer.send("restart");
+			},
+		);
+
+
 	// Connect to server
 	await (async () => {
 		$("#loading").text(TREM.Localization.getString("Application_Connecting"));

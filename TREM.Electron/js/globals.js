@@ -119,7 +119,12 @@ const showDialog
 		OK.classList.add("flat-button");
 		OK.id = "dialog-OK";
 		OK.textContent = TREM.Localization.getString("Dialog_Button_OK");
-		OK.onclick = closeDialog;
+
+		OK.onclick = (...args) => {
+			closeDialog(...args);
+			callback();
+		};
+
 		buttons.appendChild(OK);
 	}
 

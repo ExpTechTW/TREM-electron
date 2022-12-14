@@ -5,6 +5,8 @@
     "Application_Welcome": "Добро пожаловать",
     "Audio_Test": "Тестовый звук",
     "Audio_TestStop": "Остановить",
+    "Initialization_No_Connection_Title": null,
+    "Initialization_No_Connection_Description": null,
     "Setting_Dialog_Error_Title": "Ошибка разбора",
     "Setting_Dialog_Error_Description": "Невозможно разобрать файл конфигурации, возможно, вы случайно удалили некоторые важные символы, такие как запятые, двоеточия или кавычки во время редактирования, или файл конфигурации мог быть поврежден.\n\nОшибка: {0}",
     "Setting_Dialog_Reset_Title": "Сбросить настройки?",

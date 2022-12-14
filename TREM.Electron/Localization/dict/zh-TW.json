@@ -5,6 +5,8 @@
     "Application_Welcome": "歡迎",
     "Audio_Test": "測試音效",
     "Audio_TestStop": "停止測試",
+    "Initialization_No_Connection_Title": "無網際網路連線",
+    "Initialization_No_Connection_Description": "TREM 需要網際網路連線才能正常運行，請檢查你的網路設定並再試一次。",
     "Setting_Dialog_Error_Title": "設定檔錯誤",
     "Setting_Dialog_Error_Description": "無法解析設定檔，這可能是你在編輯時不小心刪掉了一些重要的符號，像是逗號、冒號或引號，或是設定檔損壞。\n\n錯誤：{0}",
     "Setting_Dialog_Reset_Title": "重置設定？",
