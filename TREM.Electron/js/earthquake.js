@@ -195,7 +195,7 @@ async function init() {
 						}
 					}
 				} else
-				if (Date.now() - report_get_timestamp > 600_000) ReportGET();
+				if (Date.now() - report_get_timestamp > 300_000) ReportGET();
 				if (ReportTag != 0 && NOW.getTime() - ReportTag > 30_000) {
 					ReportTag = 0;
 					TREM.Report.setView("report-list");
