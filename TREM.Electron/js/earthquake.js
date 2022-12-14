@@ -548,6 +548,10 @@ class EEW {
 		return this._expected.get(this._local.code);
 	}
 
+	get arrivalTime() {
+		return (this.local.distance - (Date.now() - this.eventTime.getTime() * this._wavespeed.s)) / this._wavespeed.s;
+	}
+
 	#fromJson(data) {
 		this.id = data.ID;
 		this.depth = data.Depth;
@@ -556,7 +560,7 @@ class EEW {
 		this.magnitude = data.Scale;
 		this.source = data.Unit;
 
-		if (data.Version > this.version) {
+		if (data.Version > (this.version || 0)) {
 			this._expected = new Map();
 			this.#evalExpected();
 		}
@@ -2183,7 +2187,7 @@ function addReport(report, prepend = false) {
 		report_container.append(report_intensity_container, report_detail_container);
 		ripple(Div);
 		Div.append(report_container);
-		Div.className += IntensityToClassString(report.data[0].areaIntensity);
+		Div.className += IntensityToClassString((report.data[0].areaIntensity == 0) ? 1 : report.data[0].areaIntensity);
 		Div.addEventListener("click", (event) => {
 			TREM.Report.setView("report-overview", report.identifier);
 			changeView("report", "#reportView_btn");
@@ -2654,10 +2658,6 @@ TREM.Earthquake.on("eew", (data) => {
 	const GC = {};
 	let level;
 	let MaxIntensity = { label: "", value: -1 };
-	const focusBounds = new maplibregl.LngLatBounds();
-
-	for (const eewid in EarthquakeList)
-		focusBounds.extend(EarthquakeList[eewid].epicenter);
 
 	for (const city in TREM.Resources.region)
 		for (const town in TREM.Resources.region[city]) {
@@ -2677,9 +2677,6 @@ TREM.Earthquake.on("eew", (data) => {
 					setting["earthquake.siteEffect"] ? loc.siteEffect : undefined,
 				),
 			);
-
-			if (int.value >= 2)
-				focusBounds.extend(TREM.MapBounds[loc.code]);
 
 			if (setting["location.city"] == city && setting["location.town"] == town) {
 				if (setting["auto.waveSpeed"] && data.Speed != undefined) {
