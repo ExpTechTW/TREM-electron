@@ -3383,57 +3383,59 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 });
 
 ipcMain.on("update-available-Notification", (version, getVersion) => {
-	if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
-		dump({ level: 0, message: "Posting Notification Update Webhook", origin: "Webhook" });
-		const getVersionbody = TREM.Localization.getString("Notification_Update_Body").format(getVersion, version) + `\nhttps://github.com/yayacat/TREM/releases/tag/v${version}`;
-		const msg = {
-			username   : "TREM | 臺灣即時地震監測",
-			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-			embeds     : [
-				{
-					author      : { name: "TREM | 臺灣即時地震監測" },
-					title       : "",
-					description : "",
-					color       : 4629503,
-				},
-			] };
-		msg.embeds[0].title = TREM.Localization.getString("Notification_Update_Title");
-		msg.embeds[0].description = getVersionbody;
-		fetch(setting["webhook.url"], {
-			method  : "POST",
-			headers : { "Content-Type": "application/json" },
-			body    : JSON.stringify(msg),
-		}).catch((error) => {
-			dump({ level: 2, message: error, origin: "Webhook" });
-		});
-	}
+	if (setting["webhook.url"] != undefined)
+		if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
+			dump({ level: 0, message: "Posting Notification Update Webhook", origin: "Webhook" });
+			const getVersionbody = TREM.Localization.getString("Notification_Update_Body").format(getVersion, version) + `\nhttps://github.com/yayacat/TREM/releases/tag/v${version}`;
+			const msg = {
+				username   : "TREM | 臺灣即時地震監測",
+				avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
+				embeds     : [
+					{
+						author      : { name: "TREM | 臺灣即時地震監測" },
+						title       : "",
+						description : "",
+						color       : 4629503,
+					},
+				] };
+			msg.embeds[0].title = TREM.Localization.getString("Notification_Update_Title");
+			msg.embeds[0].description = getVersionbody;
+			fetch(setting["webhook.url"], {
+				method  : "POST",
+				headers : { "Content-Type": "application/json" },
+				body    : JSON.stringify(msg),
+			}).catch((error) => {
+				dump({ level: 2, message: error, origin: "Webhook" });
+			});
+		}
 });
 
 ipcMain.on("update-not-available-Notification", (version, getVersion) => {
-	if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
-		dump({ level: 0, message: "Posting Notification No Update Webhook", origin: "Webhook" });
-		const getVersionbody = TREM.Localization.getString("Notification_No_Update_Body").format(getVersion, version);
-		const msg = {
-			username   : "TREM | 臺灣即時地震監測",
-			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-			embeds     : [
-				{
-					author      : { name: "TREM | 臺灣即時地震監測" },
-					title       : "",
-					description : "",
-					color       : 4629503,
-				},
-			] };
-		msg.embeds[0].title = TREM.Localization.getString("Notification_No_Update_Title");
-		msg.embeds[0].description = getVersionbody;
-		fetch(setting["webhook.url"], {
-			method  : "POST",
-			headers : { "Content-Type": "application/json" },
-			body    : JSON.stringify(msg),
-		}).catch((error) => {
-			dump({ level: 2, message: error, origin: "Webhook" });
-		});
-	}
+	if (setting["webhook.url"] != undefined)
+		if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
+			dump({ level: 0, message: "Posting Notification No Update Webhook", origin: "Webhook" });
+			const getVersionbody = TREM.Localization.getString("Notification_No_Update_Body").format(getVersion, version);
+			const msg = {
+				username   : "TREM | 臺灣即時地震監測",
+				avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
+				embeds     : [
+					{
+						author      : { name: "TREM | 臺灣即時地震監測" },
+						title       : "",
+						description : "",
+						color       : 4629503,
+					},
+				] };
+			msg.embeds[0].title = TREM.Localization.getString("Notification_No_Update_Title");
+			msg.embeds[0].description = getVersionbody;
+			fetch(setting["webhook.url"], {
+				method  : "POST",
+				headers : { "Content-Type": "application/json" },
+				body    : JSON.stringify(msg),
+			}).catch((error) => {
+				dump({ level: 2, message: error, origin: "Webhook" });
+			});
+		}
 });
 
 ipcMain.on("testEEW", () => {
