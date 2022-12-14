@@ -2042,7 +2042,7 @@ function ReportList(earthquakeReportArr, palert) {
 
 function addReport(report, prepend = false) {
 	if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
-	const Level = IntensityI(report.data[0].areaIntensity);
+	const Level = IntensityI(report.data[0]?.areaIntensity);
 	let msg = "";
 
 	if (report.location.includes("("))
@@ -2166,7 +2166,6 @@ function addReport(report, prepend = false) {
 		report_intensity_value.innerText = Level;
 		report_intensity_container.append(report_intensity_title_container, report_intensity_value);
 
-
 		const report_detail_container = document.createElement("div");
 		report_detail_container.className = "report-detail-container";
 
@@ -2187,7 +2186,7 @@ function addReport(report, prepend = false) {
 		report_container.append(report_intensity_container, report_detail_container);
 		ripple(Div);
 		Div.append(report_container);
-		Div.className += IntensityToClassString((report.data[0].areaIntensity == 0) ? 1 : report.data[0].areaIntensity);
+		Div.className += IntensityToClassString((report.data[0]?.areaIntensity == 0) ? 1 : report.data[0]?.areaIntensity);
 		Div.addEventListener("click", (event) => {
 			TREM.Report.setView("report-overview", report.identifier);
 			changeView("report", "#reportView_btn");
