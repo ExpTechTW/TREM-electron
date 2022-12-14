@@ -1048,7 +1048,6 @@ async function init() {
 										bounds.extend(coord);
 					}
 
-			if (feature.properties.TOWNCODE == "09007010") console.log(feature.properties.COUNTYNAME, feature.properties.TOWNNAME, feature.geometry.coordinates);
 			TREM.MapBounds[feature.properties.TOWNCODE] = bounds;
 		}
 
@@ -1521,22 +1520,42 @@ function PGAMain() {
 	if (Timers.rts) clearInterval(Timers.rts);
 	Timers.rts = setInterval(() => {
 		setTimeout(async () => {
-			const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-			const controller = new AbortController();
-			setTimeout(() => {
-				controller.abort();
-			}, 950);
-			let ans = await fetch(`https://exptech.com.tw/api/v1/trem/RTS?time=${ReplayTime}&key=${setting["api.key"]}`, { signal: controller.signal }).catch((err) => void 0);
+			try {
+				const _t = Date.now();
+				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-			if (controller.signal.aborted || ans == undefined) {
+				if (setting["api.key"] != "" || ReplayTime != 0)
+					if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
+						Ping = "Super";
+						Response = rts_response;
+						handler(Response);
+					} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
+						Ping = "P2P";
+						Response = rts_response;
+						handler(Response);
+					} else {
+						const url = (ReplayTime == 0) ? "https://api.exptech.com.tw/api/v1/trem/rts" : `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}`;
+						const controller = new AbortController();
+						setTimeout(() => {
+							controller.abort();
+						}, 5000);
+						let ans = await fetch(url, { signal: controller.signal }).catch((err) => void 0);
+
+						if (controller.signal.aborted || ans == undefined) {
+							handler(Response);
+							return;
+						}
+
+						ans = await ans.json();
+						Ping = Date.now() - _t + "ms";
+						Response = ans;
+						handler(Response);
+					}
+
 				handler(Response);
-				return;
+			} catch (err) {
+				void 0;
 			}
-
-			ans = await ans.json();
-			Ping = Date.now();
-			Response = ans;
-			handler(Response);
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
 	}, 500);
 }
