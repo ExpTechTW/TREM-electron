@@ -1157,11 +1157,10 @@ function addReport(report, prepend = false) {
 		ripple(Div);
 		Div.append(report_container);
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
-		if (Level != 0)
-			Div.addEventListener("click", (event) => {
-				TREM.Report.setView("report-overview", report.identifier);
-				changeView("report", "#reportView_btn");
-			});
+		Div.addEventListener("click", (event) => {
+			TREM.Report.setView("report-overview", report.identifier);
+			changeView("report", "#reportView_btn");
+		});
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
 			if (locating)
