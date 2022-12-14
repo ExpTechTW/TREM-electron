@@ -2180,7 +2180,7 @@ function addReport(report, prepend = false) {
 
 		const report_intensity_value = document.createElement("span");
 		report_intensity_value.className = "report-intensity-value";
-		report_intensity_value.innerText = Level;
+		report_intensity_value.innerText = (Level == "?") ? "--" : Level;
 		report_intensity_container.append(report_intensity_title_container, report_intensity_value);
 
 		const report_detail_container = document.createElement("div");
@@ -2203,7 +2203,7 @@ function addReport(report, prepend = false) {
 		report_container.append(report_intensity_container, report_detail_container);
 		ripple(Div);
 		Div.append(report_container);
-		Div.className += IntensityToClassString((report.data[0]?.areaIntensity == 0) ? 1 : report.data[0]?.areaIntensity);
+		Div.className += IntensityToClassString((report.data[0]?.areaIntensity == undefined) ? 1 : report.data[0]?.areaIntensity);
 		Div.addEventListener("click", (event) => {
 			TREM.Report.setView("report-overview", report.identifier);
 			changeView("report", "#reportView_btn");
