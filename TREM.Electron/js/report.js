@@ -98,7 +98,7 @@ TREM.Report = {
 		el.querySelector("button").value = data.identifier;
 		el.querySelector("button").addEventListener("click", function() {
 			TREM.set_report_overview = 0;
-			TREM.Report.setView("report-overview", this.value);
+			if (this.value.includes("CWB")) TREM.Report.setView("report-overview", this.value);
 		});
 		ripple(el.querySelector("button"));
 		return el;

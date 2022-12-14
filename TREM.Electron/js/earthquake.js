@@ -2904,6 +2904,14 @@ function ReportList(earthquakeReportArr, palert) {
 
 function addReport(report, prepend = false) {
 	if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
+
+	if (report.data.length == 0) report.data = [{
+		areaName      : "未知",
+		areaIntensity : 0,
+		eqStation     : [{
+			stationName: "未知",
+		}],
+	}];
 	const Level = IntensityI(report.data[0].areaIntensity);
 	let msg = "";
 
@@ -3025,7 +3033,7 @@ function addReport(report, prepend = false) {
 
 		const report_intensity_value = document.createElement("span");
 		report_intensity_value.className = "report-intensity-value";
-		report_intensity_value.innerText = Level;
+		report_intensity_value.innerText = (Level == 0) ? "--" : Level;
 		report_intensity_container.append(report_intensity_title_container, report_intensity_value);
 
 
@@ -3050,32 +3058,34 @@ function addReport(report, prepend = false) {
 		ripple(Div);
 		Div.append(report_container);
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
-		Div.addEventListener("click", () => {
-			if (replay != 0) return;
-			TREM.set_report_overview = 1;
-			TREM.Report.setView("eq-report-overview", report);
-			changeView("report", "#reportView_btn");
-			ReportTag = NOW.getTime();
-			console.log("ReportTag: ", ReportTag);
-			ipcRenderer.send("report-Notification", report);
-		});
-		Div.addEventListener("contextmenu", () => {
-			if (replay != 0) return;
+		if (Level != 0) {
+			Div.addEventListener("click", () => {
+				if (replay != 0) return;
+				TREM.set_report_overview = 1;
+				TREM.Report.setView("eq-report-overview", report);
+				changeView("report", "#reportView_btn");
+				ReportTag = NOW.getTime();
+				console.log("ReportTag: ", ReportTag);
+				ipcRenderer.send("report-Notification", report);
+			});
+			Div.addEventListener("contextmenu", () => {
+				if (replay != 0) return;
 
-			if (report.ID.length != 0) {
-				TREM.replayOverviewButton(report);
-				// localStorage.TestID = report.ID;
-				// ipcRenderer.send("testEEW");
-			} else {
-				const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
-				ipcRenderer.send("testoldtimeEEW", oldtime);
-				// TREM.set_report_overview = 1;
-				// TREM.Report.setView("eq-report-overview", report);
-				// changeView("report", "#reportView_btn");
-				// ReportTag = NOW.getTime();
-				// console.log("ReportTag: ", ReportTag);
-			}
-		});
+				if (report.ID.length != 0) {
+					TREM.replayOverviewButton(report);
+					// localStorage.TestID = report.ID;
+					// ipcRenderer.send("testEEW");
+				} else {
+					const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
+					ipcRenderer.send("testoldtimeEEW", oldtime);
+					// TREM.set_report_overview = 1;
+					// TREM.Report.setView("eq-report-overview", report);
+					// changeView("report", "#reportView_btn");
+					// ReportTag = NOW.getTime();
+					// console.log("ReportTag: ", ReportTag);
+				}
+			});
+		}
 
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
@@ -3697,6 +3707,13 @@ function FCMdata(data, Unit) {
 
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
 
+		const now = new Date(json.Time);
+		json["UTC+8"] = now.getFullYear() +
+				"/" + (now.getMonth() + 1) +
+				"/" + now.getDate() +
+				" " + now.getHours() +
+				":" + now.getMinutes() +
+				":" + now.getSeconds();
 		const report = json.raw;
 		const location = report.location.match(/(?<=位於).+(?=\))/);
 
