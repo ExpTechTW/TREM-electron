@@ -98,8 +98,7 @@ TREM.Report = {
 		el.querySelector("button").value = data.identifier;
 		el.querySelector("button").addEventListener("click", function() {
 			TREM.set_report_overview = 0;
-
-			if (this.value.includes("CWB")) TREM.Report.setView("report-overview", this.value);
+			TREM.Report.setView("report-overview", this.value);
 		});
 		ripple(el.querySelector("button"));
 		return el;
@@ -450,46 +449,51 @@ TREM.Report = {
 		document.getElementById("report-detail-copy").value = report.identifier;
 		document.getElementById("report-replay").value = report.identifier;
 
-		const cwb_code = "EQ"
-			+ report.earthquakeNo
-			+ "-"
-			+ (time.getMonth() + 1 < 10 ? "0" : "") + (time.getMonth() + 1)
-			+ (time.getDate() < 10 ? "0" : "") + time.getDate()
-			+ "-"
-			+ (time.getHours() < 10 ? "0" : "") + time.getHours()
-			+ (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
-			+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds();
-		document.getElementById("report-cwb").value = `https://www.cwb.gov.tw/V8/C/E/EQ/${cwb_code}.html`;
+		if (report.data[0].areaIntensity != 0) {
+			const cwb_code = "EQ"
+				+ report.earthquakeNo
+				+ "-"
+				+ (time.getMonth() + 1 < 10 ? "0" : "") + (time.getMonth() + 1)
+				+ (time.getDate() < 10 ? "0" : "") + time.getDate()
+				+ "-"
+				+ (time.getHours() < 10 ? "0" : "") + time.getHours()
+				+ (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
+				+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds();
+			document.getElementById("report-cwb").value = `https://www.cwb.gov.tw/V8/C/E/EQ/${cwb_code}.html`;
 
-		const scweb_code = ""
-			+ time.getFullYear()
-			+ (time.getMonth() + 1 < 10 ? "0" : "") + (time.getMonth() + 1)
-			+ (time.getDate() < 10 ? "0" : "") + time.getDate()
-			+ (time.getHours() < 10 ? "0" : "") + time.getHours()
-			+ (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
-			+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds()
-			+ (report.magnitudeValue * 10)
-			+ (report.earthquakeNo - 111000 ? report.earthquakeNo - 111000 : "");
-		document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
+			const scweb_code = ""
+				+ time.getFullYear()
+				+ (time.getMonth() + 1 < 10 ? "0" : "") + (time.getMonth() + 1)
+				+ (time.getDate() < 10 ? "0" : "") + time.getDate()
+				+ (time.getHours() < 10 ? "0" : "") + time.getHours()
+				+ (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
+				+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds()
+				+ (report.magnitudeValue * 10)
+				+ (report.earthquakeNo - 111000 ? report.earthquakeNo - 111000 : "");
+			document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
 
-		for (const data of report.data)
-			for (const eqStation of data.eqStation)
-				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
-					this._markers.push(
-						new maplibregl.Marker({
-							element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
-						}).setLngLat([eqStation.stationLon, eqStation.stationLat]).addTo(Maps.report),
-					);
-				else
-					this._markers.push(L.marker(
-						[eqStation.stationLat, eqStation.stationLon],
-						{
-							icon: L.divIcon({
-								iconSize  : [16, 16],
-								className : `map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}`,
-							}),
-							zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
-						}));
+			for (const data of report.data)
+				for (const eqStation of data.eqStation)
+					if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+						this._markers.push(
+							new maplibregl.Marker({
+								element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
+							}).setLngLat([eqStation.stationLon, eqStation.stationLat]).addTo(Maps.report),
+						);
+					else
+						this._markers.push(L.marker(
+							[eqStation.stationLat, eqStation.stationLon],
+							{
+								icon: L.divIcon({
+									iconSize  : [16, 16],
+									className : `map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}`,
+								}),
+								zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
+							}));
+		} else {
+			document.getElementById("report-cwb").style.display = "none";
+			document.getElementById("report-scweb").style.display = "none";
+		}
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			this._markers.push(
@@ -558,6 +562,13 @@ TREM.Report = {
 		// 		stopReplaybtn();
 		// 	};
 		// }
+		} else if (report.identifier != undefined) {
+			document.getElementById("report-replay").style.display = "block";
+
+			document.getElementById("report-replay").onclick = function() {
+				const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
+				ipcRenderer.send("testoldtimeEEW", oldtime);
+			};
 		} else {
 			document.getElementById("report-replay").style.display = "none";
 		}

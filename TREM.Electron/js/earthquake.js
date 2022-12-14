@@ -3062,35 +3062,32 @@ function addReport(report, prepend = false) {
 		ripple(Div);
 		Div.append(report_container);
 		Div.className += IntensityToClassString(report.data[0].areaIntensity);
+		Div.addEventListener("click", () => {
+			if (replay != 0) return;
+			TREM.set_report_overview = 1;
+			TREM.Report.setView("eq-report-overview", report);
+			changeView("report", "#reportView_btn");
+			ReportTag = NOW.getTime();
+			console.log("ReportTag: ", ReportTag);
+			ipcRenderer.send("report-Notification", report);
+		});
+		Div.addEventListener("contextmenu", () => {
+			if (replay != 0) return;
 
-		if (Level != 0) {
-			Div.addEventListener("click", () => {
-				if (replay != 0) return;
-				TREM.set_report_overview = 1;
-				TREM.Report.setView("eq-report-overview", report);
-				changeView("report", "#reportView_btn");
-				ReportTag = NOW.getTime();
-				console.log("ReportTag: ", ReportTag);
-				ipcRenderer.send("report-Notification", report);
-			});
-			Div.addEventListener("contextmenu", () => {
-				if (replay != 0) return;
-
-				if (report.ID.length != 0) {
-					TREM.replayOverviewButton(report);
-					// localStorage.TestID = report.ID;
-					// ipcRenderer.send("testEEW");
-				} else {
-					const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
-					ipcRenderer.send("testoldtimeEEW", oldtime);
-					// TREM.set_report_overview = 1;
-					// TREM.Report.setView("eq-report-overview", report);
-					// changeView("report", "#reportView_btn");
-					// ReportTag = NOW.getTime();
-					// console.log("ReportTag: ", ReportTag);
-				}
-			});
-		}
+			if (report.ID.length != 0) {
+				TREM.replayOverviewButton(report);
+				// localStorage.TestID = report.ID;
+				// ipcRenderer.send("testEEW");
+			} else {
+				const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
+				ipcRenderer.send("testoldtimeEEW", oldtime);
+				// TREM.set_report_overview = 1;
+				// TREM.Report.setView("eq-report-overview", report);
+				// changeView("report", "#reportView_btn");
+				// ReportTag = NOW.getTime();
+				// console.log("ReportTag: ", ReportTag);
+			}
+		});
 
 		if (prepend) {
 			const locating = document.querySelector(".report-detail-container.locating");
