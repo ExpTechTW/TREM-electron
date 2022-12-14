@@ -2922,6 +2922,10 @@ TREM.Earthquake.on("eew", (data) => {
 
 	EEWshot = NOW.getTime() - 28500;
 	EEWshotC = 1;
+	const _distance = [];
+	for (let index = 0; index < 1002; index++)
+		_distance[index] = _speed(data.Depth, index);
+	EarthquakeList[data.ID].distance = _distance;
 	main(data);
 	EarthquakeList[data.ID].Timer = setInterval(() => {
 		main(data);
@@ -3018,7 +3022,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 // #region Event: eewEnd
 TREM.Earthquake.on("eewEnd", (id) => {
-
+	void 0;
 });
 // #endregion
 
@@ -3223,124 +3227,145 @@ function main(data) {
 	if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
 	if (EarthquakeList[data.ID].Cancel == undefined) {
-		if (setting["shock.p"]) {
-			const kmP = Math.sqrt(Math.pow((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Pspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2));
+		if (data.Depth != null) {
+			let kmP = 0;
+			let km = 0;
 
-			if (kmP > 0) {
-				if (!EarthquakeList[data.ID].CircleP) {
-					EarthquakeList[data.ID].CircleP = new WaveCircle(
-						`${data.ID}-p`,
+			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
+				if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
+					kmP = (index - 1) * 1000;
+
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 7) (NOW.getTime() - data.Time) * 7;
+					break;
+				}
+
+				kmP = (NOW.getTime() - data.Time) * 7;
+			}
+
+			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
+				if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
+					km = (index - 1) * 1000;
+
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 4) (NOW.getTime() - data.Time) * 4;
+					break;
+				}
+
+				km = (NOW.getTime() - data.Time) * 4;
+			}
+
+			if (setting["shock.p"])
+				if (kmP > 0) {
+					if (!EarthquakeList[data.ID].CircleP) {
+						EarthquakeList[data.ID].CircleP = new WaveCircle(
+							`${data.ID}-p`,
+							Maps.main,
+							[+data.EastLongitude, +data.NorthLatitude],
+							kmP,
+							data.Alert,
+							{
+								type  : "line",
+								paint : {
+									"line-width" : 4,
+									"line-color" : "#6FB7B7",
+								},
+							});
+					} else {
+						EarthquakeList[data.ID].CircleP.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+						EarthquakeList[data.ID].CircleP.setRadius(kmP);
+					}
+
+					if (!EarthquakeList[data.ID].CirclePTW)
+						EarthquakeList[data.ID].CirclePTW = L.circle([data.NorthLatitude, data.EastLongitude], {
+							color     : "#6FB7B7",
+							fillColor : "transparent",
+							radius    : kmP,
+							renderer  : L.svg(),
+							className : "p-wave",
+						}).addTo(Maps.mini);
+
+					if (!EarthquakeList[data.ID].CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
+						EarthquakeList[data.ID].CirclePTW
+							.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+					EarthquakeList[data.ID].CirclePTW
+						.setRadius(kmP);
+				}
+
+			if (km > data.Depth) {
+				eew[data.ID].km = km;
+
+				if (!EarthquakeList[data.ID].CircleS) {
+					EarthquakeList[data.ID].CircleS = new WaveCircle(
+						`${data.ID}-s`,
 						Maps.main,
 						[+data.EastLongitude, +data.NorthLatitude],
-						kmP,
+						km,
 						data.Alert,
 						{
-							type  : "line",
+							type  : "fill",
 							paint : {
-								"line-width" : 4,
-								"line-color" : "#6FB7B7",
+								"fill-opacity" : 0.15,
+								"fill-color"   : data.Alert ? "#FF0000" : "#FFA500",
 							},
 						});
 				} else {
-					EarthquakeList[data.ID].CircleP.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
-					EarthquakeList[data.ID].CircleP.setRadius(kmP);
+					EarthquakeList[data.ID].CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+					EarthquakeList[data.ID].CircleS.setRadius(km);
+					EarthquakeList[data.ID].CircleS.setAlert(data.Alert);
 				}
 
-				if (!EarthquakeList[data.ID].CirclePTW)
-					EarthquakeList[data.ID].CirclePTW = L.circle([data.NorthLatitude, data.EastLongitude], {
-						color     : "#6FB7B7",
-						fillColor : "transparent",
-						radius    : kmP,
-						renderer  : L.svg(),
-						className : "p-wave",
+				if (!EarthquakeList[data.ID].CircleSTW)
+					EarthquakeList[data.ID].CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
+						color       : data.Alert ? "red" : "orange",
+						fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+						fillOpacity : 1,
+						radius      : km,
+						renderer    : L.svg(),
+						className   : "s-wave",
 					}).addTo(Maps.mini);
 
-				if (!EarthquakeList[data.ID].CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
-					EarthquakeList[data.ID].CirclePTW
+				if (!EarthquakeList[data.ID].CircleSTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
+					EarthquakeList[data.ID].CircleSTW
 						.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
-				EarthquakeList[data.ID].CirclePTW
-					.setRadius(kmP);
-			}
-		}
-
-		const km = Math.pow((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Sspeed, 2) - Math.pow(Number(data.Depth) * 1000, 2);
-
-		if (km > 0) {
-			const kmS = Math.sqrt(km);
-			eew[data.ID].km = kmS;
-
-			if (!EarthquakeList[data.ID].CircleS) {
-				EarthquakeList[data.ID].CircleS = new WaveCircle(
-					`${data.ID}-s`,
-					Maps.main,
-					[+data.EastLongitude, +data.NorthLatitude],
-					kmS,
-					data.Alert,
-					{
-						type  : "fill",
-						paint : {
-							"fill-opacity" : 0.15,
-							"fill-color"   : data.Alert ? "#FF0000" : "#FFA500",
-						},
-					});
-			} else {
-				EarthquakeList[data.ID].CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
-				EarthquakeList[data.ID].CircleS.setRadius(kmS);
-				EarthquakeList[data.ID].CircleS.setAlert(data.Alert);
-			}
-
-			if (!EarthquakeList[data.ID].CircleSTW)
-				EarthquakeList[data.ID].CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
-					color       : data.Alert ? "red" : "orange",
-					fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-					fillOpacity : 1,
-					radius      : kmS,
-					renderer    : L.svg(),
-					className   : "s-wave",
-				}).addTo(Maps.mini);
-
-			if (!EarthquakeList[data.ID].CircleSTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
 				EarthquakeList[data.ID].CircleSTW
-					.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+					.setRadius(km)
+					.setStyle(
+						{
+							color     : data.Alert ? "red" : "orange",
+							fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
+						},
+					);
+			} else {
+				let Progress = 0;
+				const num = Math.round(((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Sspeed / (data.Depth * 1000)) * 100);
 
-			EarthquakeList[data.ID].CircleSTW
-				.setRadius(kmS)
-				.setStyle(
-					{
-						color     : data.Alert ? "red" : "orange",
-						fillColor : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
-					},
-				);
-		} else {
-			let Progress = 0;
-			const num = Math.round(((NOW.getTime() - data.Time) * EarthquakeList[data.ID].Sspeed / (data.Depth * 1000)) * 100);
+				if (num > 15) Progress = 1;
 
-			if (num > 15) Progress = 1;
+				if (num > 25) Progress = 2;
 
-			if (num > 25) Progress = 2;
+				if (num > 35) Progress = 3;
 
-			if (num > 35) Progress = 3;
+				if (num > 45) Progress = 4;
 
-			if (num > 45) Progress = 4;
+				if (num > 55) Progress = 5;
 
-			if (num > 55) Progress = 5;
+				if (num > 65) Progress = 6;
 
-			if (num > 65) Progress = 6;
+				if (num > 75) Progress = 7;
 
-			if (num > 75) Progress = 7;
+				if (num > 85) Progress = 8;
 
-			if (num > 85) Progress = 8;
-
-			if (num > 98) Progress = 9;
-			const myIcon = L.icon({
-				iconUrl  : `../image/progress${Progress}.png`,
-				iconSize : [50, 50],
-			});
-			const DepthM = L.marker([Number(data.NorthLatitude), Number(data.EastLongitude) + 0.15], { icon: myIcon });
-			EarthquakeList[data.ID].Depth = DepthM;
-			Maps.main.addLayer(DepthM);
-			DepthM.setZIndexOffset(6000);
+				if (num > 98) Progress = 9;
+				const myIcon = L.icon({
+					iconUrl  : `../image/progress${Progress}.png`,
+					iconSize : [50, 50],
+				});
+				const DepthM = L.marker([Number(data.NorthLatitude), Number(data.EastLongitude) + 0.15], { icon: myIcon });
+				EarthquakeList[data.ID].Depth = DepthM;
+				Maps.main.addLayer(DepthM);
+				DepthM.setZIndexOffset(6000);
+			}
 		}
 
 		// #region Epicenter Cross Icon
