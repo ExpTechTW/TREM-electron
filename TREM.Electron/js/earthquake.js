@@ -613,10 +613,6 @@ class EEW {
 }
 
 // #region 初始化
-const folder = path.join(app.getPath("userData"), "data");
-
-if (!fs.existsSync(folder))
-	fs.mkdirSync(folder);
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
@@ -702,17 +698,22 @@ async function init() {
 
 				if (GetData_WS) {
 					GetData_WS = false;
-					GetDataState += "✉";
+					GetDataState += "🟩";
 				}
 
 				if (GetData_FCM) {
 					GetData_FCM = false;
-					GetDataState += "🔌";
+					GetDataState += "⬜";
 				}
 
 				if (GetData_P2P) {
 					GetData_P2P = false;
-					GetDataState += "🧩";
+					GetDataState += "🟨";
+				}
+
+				if (GetData_HTTP) {
+					GetData_HTTP = false;
+					GetDataState += "🟥";
 				}
 
 				if (GetData_time) {
@@ -720,10 +721,7 @@ async function init() {
 					GetDataState += "⏰";
 				}
 
-				const Delay = (Date.now() - Ping) > 2500 ? "2500+" : Date.now() - Ping;
-				const warn = (Warn) ? "⚠️" : "";
-				const unlock = (Unlock) ? "⚡" : "";
-				$("#app-version").text(`${app.getVersion()} ${Delay}ms ${warn} ${unlock} ${GetDataState}`);
+				$("#app-version").text(`${app.getVersion()} ${Ping} ${GetDataState} ${Warn}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -2533,25 +2531,13 @@ ipcRenderer.on("config:maplayer", (event, mapName, state) => {
 // #endregion
 
 // #region EEW
-function FCMdata(data, Unit) {
-	const json = JSON.parse(data);
-
+function FCMdata(json, Unit) {
 	if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
 	server_timestamp.push(json.TimeStamp);
 
 	if (server_timestamp.length > 5) server_timestamp.splice(0, 1);
 	// eslint-disable-next-line no-empty-function
 	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
-	GetData = true;
-
-	if (json.response != "You have successfully subscribed to earthquake information") {
-		const filename = NOW.getTime();
-		json.data_unit = Unit;
-		json.delay = NOW.getTime() - json.TimeStamp;
-		fs.writeFile(path.join(folder, `${filename}.tmp`), JSON.stringify(json), (err) => {
-			fs.rename(path.join(folder, `${filename}.tmp`), path.join(folder, `${filename}.json`), () => void 0);
-		});
-	}
 
 	if (json.TimeStamp != undefined)
 		dump({ level: 0, message: `Latency: ${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
