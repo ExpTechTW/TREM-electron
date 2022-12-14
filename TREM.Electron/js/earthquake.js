@@ -41,6 +41,7 @@ localStorage.dirname = __dirname;
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
+let rts_remove_eew = false;
 let t = null;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
@@ -93,7 +94,6 @@ let TSUNAMI = {};
 let Ping = 0;
 let EEWAlert = false;
 let PGACancel = false;
-let Unlock = false;
 let report_get_timestamp = 0;
 // #endregion
 
@@ -1556,10 +1556,7 @@ function PGAMain() {
 	}, 500);
 }
 
-function handler(response) {
-	const Json = response;
-	Unlock = Json.Unlock ?? false;
-
+function handler(Json) {
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
 	const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
@@ -1569,12 +1566,20 @@ function handler(response) {
 		delete Station[removedKey];
 	}
 
+	if (Object.keys(eew).length && !rts_remove_eew) {
+		rts_remove_eew = true;
+
+		for (const removedKey of Object.keys(Station)) {
+			Station[removedKey].remove();
+			delete Station[removedKey];
+		}
+	}
+
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
+		if (station[keys[index]] == undefined) continue;
 		const stationData = Json[keys[index]];
 		const amount = Number(stationData.PGA);
-
-		if (station[keys[index]] == undefined) continue;
-		const Alert = (!Unlock) ? stationData.I >= 2 : stationData.alert;
+		const Alert = stationData.alert;
 		const intensity
 			= (Alert && Json.Alert) ? stationData.I
 				: (NOW.getTime() - stationData.TS * 1000 > 5000) ? "NA"
@@ -1589,7 +1594,6 @@ function handler(response) {
 													: (amount >= 5) ? 2
 														: (amount >= 2.2) ? 1
 															: 0;
-
 		const levelClass = (intensity != 0 && amount < 999) ? IntensityToClassString(intensity)
 			: (amount == 999) ? "pga6"
 				: (amount > 3.5) ? "pga5"
@@ -1597,11 +1601,9 @@ function handler(response) {
 						: (amount > 2.5) ? "pga3"
 							: (amount > 2) ? "pga2"
 								: "pga1";
-
-		// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 		const station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-name">${station[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
 
-		if (!Station[keys[index]]) {
+		if (!Station[keys[index]] && (!rts_remove_eew || Alert)) {
 			Station[keys[index]] = new maplibregl.Marker(
 				{
 					element: $(`<div class="map-intensity-icon rt-icon ${levelClass}" style="z-index: ${50 + (amount < 999 ? amount : 0) * 10};"></div>`)[0],
@@ -1610,14 +1612,20 @@ function handler(response) {
 				.setPopup(new maplibregl.Popup({ closeOnClick: false, closeButton: false }).setHTML(station_tooltip))
 				.addTo(Maps.main);
 			Station[keys[index]].getElement().addEventListener("click", () => Station[keys[index]].getPopup().persist = !Station[keys[index]].getPopup().persist);
-		} else {
-			Station[keys[index]].getPopup().setHTML(station_tooltip);
 		}
 
-		if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
-			Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
+		if (Station[keys[index]]) {
+			Station[keys[index]].getPopup().setHTML(station_tooltip);
 
-		Station[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
+			if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
+				Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
+			Station[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
+		}
+
+		if (Station[keys[index]] && rts_remove_eew && !Alert) {
+			Station[keys[index]].remove();
+			delete Station[keys[index]];
+		}
 
 		const Level = IntensityI(intensity);
 		const now = new Date(stationData.T * 1000);
@@ -1897,8 +1905,6 @@ TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, linear
 		}
 
 		*/
-
-	console.log("bounds", bounds, "center", center, "zoom", zoom, "options", options);
 
 	if (bounds)
 		Maps.main.fitBounds(bounds, options);
@@ -3511,6 +3517,7 @@ function main(data) {
 			$("#map-tw").removeClass("show");
 			// restore reports
 			$(roll).fadeIn(200);
+			rts_remove_eew = false;
 			clearInterval(Timers.epicenterBlinker);
 			delete Timers.epicenterBlinker;
 			clearInterval(Timers.eew);
