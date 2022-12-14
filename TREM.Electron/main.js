@@ -178,12 +178,16 @@ else {
 }
 
 TREM.on("ready", () => {
-	if (TREM.Configuration.data["update.time"] != 0){
-		autoUpdater.checkForUpdates();
-		const time = TREM.Configuration.data["update.time"] * 3600_000;
-		setInterval(() => {
+	if (TREM.Configuration.data["update.time"] != undefined) {
+		if (TREM.Configuration.data["update.time"] != 0){
 			autoUpdater.checkForUpdates();
-		}, time);
+			const time = TREM.Configuration.data["update.time"] * 3600_000;
+			setInterval(() => {
+				autoUpdater.checkForUpdates();
+			}, time);
+		}
+	} else {
+		restart();
 	}
 });
 
