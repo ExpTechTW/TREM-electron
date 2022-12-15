@@ -83,7 +83,6 @@ let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
 let EEWshotC = 0;
-let Response = {};
 let replay = 0;
 let replayT = 0;
 let Second = -1;
@@ -1519,6 +1518,7 @@ function PGAMain() {
 			try {
 				const _t = Date.now();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
+				Response = {};
 
 				if (setting["api.key"] != "" && verify) {
 					if (ReplayTime == 0) {
@@ -1552,7 +1552,6 @@ function PGAMain() {
 						delete Station[removedKey];
 					}
 
-					Response = {};
 					handler(Response);
 				}
 			} catch (err) {
