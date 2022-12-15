@@ -707,10 +707,6 @@ class EEW {
 		this._from = data.data_unit;
 		this._receiveTime = new Date(data.timestamp);
 		this._replay = data.Replay;
-		this._wavespeed = { p: 6.5, s: 3.5 };
-
-		// if (setting["auto.waveSpeed"] && data.Speed.Pv  && data.Speed.Sv)
-		// 	this._wavespeed = { p: data.Speed.Pv, s: data.Speed.Sv };
 	}
 
 	#evalExpected() {
@@ -4011,7 +4007,7 @@ TREM.Earthquake.on("eew", (data) => {
 	let find = INFO.findIndex(v => v.ID == data.ID);
 
 	if (find == -1) find = INFO.length;
-	const time = new Date(data.Time).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
+	const time = new Date((data.Replay) ? data.time : data.Time).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
 	INFO[find] = {
 		ID              : data.ID,
 		alert_number    : data.Version,
@@ -4737,13 +4733,6 @@ function main(data) {
 			clearInterval(Timers.eew);
 			Timers.eew = null;
 			rts_remove_eew = false;
-			const list = fs.readdirSync(folder);
-
-			for (let index = 0; index < list.length; index++) {
-				const date = fs.statSync(`${folder}/${list[index]}`);
-
-				if (new Date().getTime() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
-			}
 
 			unstopReplaybtn();
 			global.gc();
