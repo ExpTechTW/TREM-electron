@@ -1518,7 +1518,7 @@ function PGAMain() {
 			try {
 				const _t = Date.now();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-				Response = {};
+				let Response = {};
 
 				if (setting["api.key"] != "" && verify) {
 					if (ReplayTime == 0) {
