@@ -2931,7 +2931,7 @@ function addReport(report, prepend = false) {
 		},
 	];
 	const Level = IntensityI(report.data[0].areaIntensity);
-	if (setting["api.key"] == "" && Level == 0) return;
+	// if (setting["api.key"] == "" && Level == 0) return;
 	let msg = "";
 
 	if (report.location.includes("("))

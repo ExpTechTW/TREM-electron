@@ -39,7 +39,7 @@ TREM.Report = {
 				.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
 
 			for (const report of reports) {
-				if (setting["api.key"] == "" && report.data[0].areaIntensity == 0) continue;
+				// if (setting["api.key"] == "" && report.data[0].areaIntensity == 0) continue;
 				const element = this._createReportItem(report);
 
 				if (
@@ -96,12 +96,22 @@ TREM.Report = {
 		el.querySelector(".report-list-item-location").innerText = data.location;
 		el.querySelector(".report-list-item-id").innerText = data.earthquakeNo % 1000 ? data.earthquakeNo : "小區域有感地震";
 		el.querySelector(".report-list-item-time").innerText = data.originTime.replace(/-/g, "/");
-		el.querySelector("button").value = data.identifier;
-		el.querySelector("button").addEventListener("click", function() {
-			TREM.set_report_overview = 0;
-			TREM.Report.setView("report-overview", this.value);
-		});
-		ripple(el.querySelector("button"));
+
+		if (data.data[0]?.areaIntensity) {
+			el.querySelector("button").value = data.identifier;
+			el.querySelector("button").addEventListener("click", function() {
+				TREM.Report.setView("report-overview", this.value);
+			});
+			ripple(el.querySelector("button"));
+		} else if (data.data[0].areaIntensity == 0) {
+			el.querySelector("button").value = data.identifier;
+			el.querySelector("button").addEventListener("click", function() {
+				TREM.Report.setView("report-overview", this.value);
+			});
+			ripple(el.querySelector("button"));
+		} else {
+			el.querySelector("button").style.display = "none";
+		}
 		return el;
 	},
 
