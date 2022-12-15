@@ -5,6 +5,8 @@
     "Application_Welcome": "ようこそ",
     "Audio_Test": "音テスト",
     "Audio_TestStop": "停止",
+    "Initialization_No_Connection_Title": null,
+    "Initialization_No_Connection_Description": null,
     "Setting_Dialog_Error_Title": "解析エラー",
     "Setting_Dialog_Error_Description": "設定ファイルを解析できません。編集中にコンマ、コロン、引用符などの重要な記号を誤って削除したか、設定ファイルが破損している可能性があります。\n\nエラー：{0}",
     "Setting_Dialog_Reset_Title": "設定をリセットする？",

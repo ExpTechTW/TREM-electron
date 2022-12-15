@@ -5,6 +5,8 @@
     "Application_Welcome": "Welcome",
     "Audio_Test": "Test",
     "Audio_TestStop": "Stop",
+    "Initialization_No_Connection_Title": "No Internet Connection",
+    "Initialization_No_Connection_Description": "TREM is designed to be used with an internet connection.\nPplease check your internet settings and try again.",
     "Setting_Dialog_Error_Title": "Parse Error",
     "Setting_Dialog_Error_Description": "Cannot parse the config file, this may be that you have accidentally deleted some important symbols such as commas, colons or quotation marks while editing, or the configuration file may have corrupted.\n\nError: {0}",
     "Setting_Dialog_Reset_Title": "Reset Settings?",
