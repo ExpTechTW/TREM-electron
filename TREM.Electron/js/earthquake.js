@@ -3782,7 +3782,6 @@ function FCMdata(data, Unit) {
 // #region Event: eew
 TREM.Earthquake.on("eew", (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
-	console.debug(data);
 
 	if (!TREM.EEW.has(data.ID))
 		TREM.EEW.set(data.ID, new EEW(data));
