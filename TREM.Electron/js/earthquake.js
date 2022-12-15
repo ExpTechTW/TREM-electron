@@ -40,6 +40,7 @@ localStorage.dirname = __dirname;
 // #region 變數
 const MapData = {};
 const Timers = {};
+let Response = {};
 let Stamp = 0;
 let rts_remove_eew = false;
 let t = null;
@@ -1518,7 +1519,6 @@ function PGAMain() {
 			try {
 				const _t = Date.now();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
-				let Response = {};
 
 				if (setting["api.key"] != "" && verify) {
 					if (ReplayTime == 0) {
@@ -1552,6 +1552,7 @@ function PGAMain() {
 						delete Station[removedKey];
 					}
 
+					Response = {};
 					handler(Response);
 				}
 			} catch (err) {
