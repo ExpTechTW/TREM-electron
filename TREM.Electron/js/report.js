@@ -112,6 +112,7 @@ TREM.Report = {
 		} else {
 			el.querySelector("button").style.display = "none";
 		}
+
 		return el;
 	},
 
