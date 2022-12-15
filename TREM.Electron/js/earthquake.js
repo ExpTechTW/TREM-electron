@@ -155,7 +155,12 @@ TREM.MapIntensity = {
 
 						if (setting["Real-time.show"]) win.showInactive();
 
-						if (setting["Real-time.cover"]) win.moveTop();
+						if (setting["Real-time.cover"])
+							if (!win.isFullScreen()) {
+								win.setAlwaysOnTop(true);
+								win.focus();
+								win.setAlwaysOnTop(false);
+							}
 
 						if (!win.isFocused()) win.flashFrame(true);
 
@@ -1808,7 +1813,12 @@ function handler(Json) {
 
 			if (setting["Real-time.show"]) win.showInactive();
 
-			if (setting["Real-time.cover"]) win.moveTop();
+			if (setting["Real-time.cover"])
+				if (!win.isFullScreen()) {
+					win.setAlwaysOnTop(true);
+					win.focus();
+					win.setAlwaysOnTop(false);
+				}
 
 			if (!win.isFocused()) win.flashFrame(true);
 			PGAtag = All[0].intensity;
@@ -2596,7 +2606,12 @@ function FCMdata(json, Unit) {
 
 		if (setting["report.show"]) win.showInactive();
 
-		if (setting["report.cover"]) win.moveTop();
+		if (setting["report.cover"])
+			if (!win.isFullScreen()) {
+				win.setAlwaysOnTop(true);
+				win.focus();
+				win.setAlwaysOnTop(false);
+			}
 
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
 
@@ -2739,7 +2754,12 @@ TREM.Earthquake.on("eew", (data) => {
 
 			if (setting["eew.show"]) win.showInactive();
 
-			if (setting["eew.cover"]) win.moveTop();
+			if (setting["eew.cover"])
+				if (!win.isFullScreen()) {
+					win.setAlwaysOnTop(true);
+					win.focus();
+					win.setAlwaysOnTop(false);
+				}
 
 			if (!win.isFocused()) win.flashFrame(true);
 		}
@@ -3042,7 +3062,12 @@ TREM.Earthquake.on("tsunami", (data) => {
 
 		if (setting["report.show"]) win.showInactive();
 
-		if (setting["report.cover"]) win.moveTop();
+		if (setting["report.cover"])
+			if (!win.isFullScreen()) {
+				win.setAlwaysOnTop(true);
+				win.focus();
+				win.setAlwaysOnTop(false);
+			}
 
 		if (setting["audio.report"]) audioPlay("../audio/Water.wav");
 		TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), size: 7.75 });
