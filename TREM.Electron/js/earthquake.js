@@ -1520,17 +1520,19 @@ function PGAMain() {
 				const _t = Date.now();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (setting["api.key"] != "" || ReplayTime != 0)
-					if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
-						Ping = "Super";
-						Response = rts_response;
-						handler(Response);
-					} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
-						Ping = "P2P";
-						Response = rts_response;
+				if (setting["api.key"] != "" && verify) {
+					if (ReplayTime == 0) {
+						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
+							Ping = "Super";
+							Response = rts_response;
+						} else if (rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
+							Ping = "P2P";
+							Response = rts_response;
+						}
+
 						handler(Response);
 					} else {
-						const url = (ReplayTime == 0) ? "https://api.exptech.com.tw/api/v1/trem/rts" : `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}`;
+						const url = `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}&key=${setting["api.key"]}`;
 						const controller = new AbortController();
 						setTimeout(() => {
 							controller.abort();
@@ -1538,17 +1540,23 @@ function PGAMain() {
 						let ans = await fetch(url, { signal: controller.signal }).catch((err) => void 0);
 
 						if (controller.signal.aborted || ans == undefined) {
-							handler(Response);
-							return;
+							void 0;
+						} else {
+							ans = await ans.json();
+							Ping = Date.now() - _t + "ms";
+							Response = ans;
 						}
-
-						ans = await ans.json();
-						Ping = Date.now() - _t + "ms";
-						Response = ans;
-						handler(Response);
 					}
 
-				handler(Response);
+					handler(Response);
+				} else {
+					Ping = "📛";
+
+					for (const removedKey of Object.keys(Station)) {
+						Station[removedKey].remove();
+						delete Station[removedKey];
+					}
+				}
 			} catch (err) {
 				void 0;
 			}
