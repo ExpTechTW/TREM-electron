@@ -117,8 +117,8 @@ TREM.Report = {
 		const oldView = document.getElementById(this.view);
 		const newView = document.getElementById(view);
 
-		document.getElementById("report-detail-body").style.height = `${oldView.offsetHeight}px`;
-		document.getElementById("report-detail-body").style.width = `${oldView.offsetWidth}px`;
+		document.getElementById("report-detail-body").style.height = `${oldView.offsetHeight + 16 }px`;
+		document.getElementById("report-detail-body").style.width = `${oldView.offsetWidth + 16 }px`;
 
 		switch (view) {
 			case "report-list": {
@@ -145,8 +145,8 @@ TREM.Report = {
 			oldView.classList.remove("show");
 			newView.style.position = "absolute";
 			newView.style.visibility = "visible";
-			document.getElementById("report-detail-body").style.height = `${newView.offsetHeight}px`;
-			document.getElementById("report-detail-body").style.width = `${newView.offsetWidth}px`;
+			document.getElementById("report-detail-body").style.height = `${newView.offsetHeight + 16 }px`;
+			document.getElementById("report-detail-body").style.width = `${newView.offsetWidth + 16 }px`;
 			setTimeout(() => {
 				oldView.style.visibility = "hidden";
 				newView.classList.add("show");
