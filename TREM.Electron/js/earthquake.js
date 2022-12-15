@@ -845,6 +845,8 @@ async function init() {
 										Station[key].togglePopup();
 						}
 					});
+				Maps.main.dragRotate.disable();
+				Maps.main.touchZoomRotate.disableRotation();
 			} else if (TREM.MapRenderingEngine == "leaflet") {
 				Maps.main = L.map("map",
 					{
