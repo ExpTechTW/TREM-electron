@@ -1159,7 +1159,6 @@ async function init() {
 											bounds.extend(coord);
 						}
 
-				if (feature.properties.TOWNCODE == "09007010") console.log(feature.properties.COUNTYNAME, feature.properties.TOWNNAME, feature.geometry.coordinates);
 				TREM.MapBounds[feature.properties.TOWNCODE] = bounds;
 			}
 
