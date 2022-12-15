@@ -1525,7 +1525,6 @@ function PGAMain() {
 						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
 							Ping = "Super";
 							Response = rts_response;
-							handler(Response);
 						}
 					} else {
 						const url = `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}&key=${setting["api.key"]}`;
@@ -1553,6 +1552,7 @@ function PGAMain() {
 						delete Station[removedKey];
 					}
 
+					Response = {};
 					handler(Response);
 				}
 			} catch (err) {
