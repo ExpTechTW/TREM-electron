@@ -46,6 +46,7 @@ const getapiurl = "https://api.exptech.com.tw/api/v1/trem/rts";
 const MapData = {};
 const Timers = {};
 let Stamp = 0;
+let rts_remove_eew = false;
 let t = null;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
@@ -92,7 +93,6 @@ let Location;
 let station = {};
 let detected_box_location = {};
 let palert_geojson = null;
-let rts_remove_eew = false;
 let investigation = false;
 let ReportTag = 0;
 TREM.IntensityTag1 = 0;
@@ -2066,11 +2066,9 @@ function PGAMainbkup() {
 	}, 500);
 }
 
-function handler(response) {
-	const Json = response;
+function handler(Json) {
 	// console.log(Json);
 	// console.log(station);
-	// Unlock = Json.Unlock ?? false;
 
 	MAXPGA = { pga: 0, station: "NA", level: 0 };
 
@@ -2109,11 +2107,9 @@ function handler(response) {
 	let stationnowindex = 0;
 
 	for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
+		if (station[keys[index]] == undefined) continue;
 		const stationData = Json[keys[index]];
 		const amount = Number(stationData.PGA);
-
-		if (station[keys[index]] == undefined) continue;
-		// const Alert = (!Unlock) ? stationData.I >= 2 : stationData.alert;
 		const Alert = stationData.alert;
 
 		if (amount > MaxPGA) MaxPGA = amount;
@@ -2151,12 +2147,11 @@ function handler(response) {
 		}
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-			// const station_tooltip = `<div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(Intensity)}</div>`;
 			const station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-id">${keys[index]}</span><span class="rt-station-name">${station[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
 
 			const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
 
-			if (!Station[keys[index]]) {
+			if (!Station[keys[index]] && (!rts_remove_eew || Alert)) {
 				Station[keys[index]] = new maplibregl.Marker(
 					{
 						element: $(`<div class="map-intensity-icon rt-icon ${levelClass}" style="z-index: ${50 + (amount < 999 ? amount : 0) * 10};"></div>`)[0],
@@ -2165,7 +2160,6 @@ function handler(response) {
 					.setPopup(station_tooltip_popup.setHTML(station_tooltip))
 					.addTo(Maps.main);
 				Station[keys[index]].getElement().addEventListener("click", () => {
-					// Station[keys[index]].getPopup().persist = !Station[keys[index]].getPopup().persist;
 					if (rtstation1 == "")
 						rtstation1 = keys[index];
 					else if (rtstation1 == keys[index])
@@ -2179,29 +2173,20 @@ function handler(response) {
 				Station[keys[index]].getElement().addEventListener("mouseleave", () => {
 					station_tooltip_popup.remove();
 				});
-				// station_tooltip_popup.on("open", () => {
-				// 	if (rtstation1 == "")
-				// 		rtstation1 = keys[index];
-				// 	else if (rtstation1 == keys[index])
-				// 		rtstation1 = "";
-				// 	else if (rtstation1 != keys[index])
-				// 		rtstation1 = keys[index];
-				// }).on("close", () => {
-				// 	if (rtstation1 == "")
-				// 		rtstation1 = keys[index];
-				// 	else if (rtstation1 == keys[index])
-				// 		rtstation1 = "";
-				// 	else if (rtstation1 != keys[index])
-				// 		rtstation1 = keys[index];
-				// });
-			} else {
-				Station[keys[index]].getPopup().setHTML(station_tooltip);
 			}
 
-			if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
-				Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
+			if (Station[keys[index]]) {
+				Station[keys[index]].getPopup().setHTML(station_tooltip);
 
-			Station[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
+				if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
+					Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
+				Station[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
+			}
+
+			if (Station[keys[index]] && rts_remove_eew && !Alert) {
+				Station[keys[index]].remove();
+				delete Station[keys[index]];
+			}
 		} else {
 			const station_tooltip = `<div>${keys[index]}</div><div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(intensity)}</div>`;
 
@@ -2702,8 +2687,6 @@ TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, linear
 	*/
 
 	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-		console.log("bounds", bounds, "center", center, "zoom", zoom, "options", options);
-
 		if (bounds)
 			Maps.main.fitBounds(bounds, options);
 		else if (center)
@@ -4728,6 +4711,7 @@ function main(data) {
 			$("#map-tw").removeClass("show");
 			// restore reports
 			$(roll).fadeIn(200);
+			rts_remove_eew = false;
 			clearInterval(Timers.epicenterBlinker);
 			delete Timers.epicenterBlinker;
 			clearInterval(Timers.eew);
