@@ -11,6 +11,7 @@ const Exptech = new ExptechAPI();
 const axios = require("axios");
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
+const { resolve } = require("node:path");
 TREM.Audios = {
 	pga1   : new Audio("../audio/PGA1.wav"),
 	pga2   : new Audio("../audio/PGA2.wav"),
@@ -1977,36 +1978,46 @@ function PGAMain() {
 				const _t = NOW.getTime();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
-					Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
-					Response = rts_response;
-					handler(Response);
-				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
-					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "📡";
-					Response = rts_response;
-					handler(Response);
-				} else {
-					const url = (ReplayTime == 0) ? getapiurl : geturl + ReplayTime;
-					const controller = new AbortController();
-					setTimeout(() => {
-						controller.abort();
-					}, 5000);
-					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
-						// TimerDesynced = true;
-						stationnow = 0;
-						handler(Response);
-						PGAMainbkup();
-					});
+				if (setting["api.key"] != "" && verify) {
+					if (ReplayTime == 0) {
+						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
+							Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
+							Response = rts_response;
+						}
+					} else {
+						const url = geturl + ReplayTime + "&key=" + setting["api.key"];
+						const controller = new AbortController();
+						setTimeout(() => {
+							controller.abort();
+						}, 5000);
+						let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
+							// TimerDesynced = true;
+							stationnow = 0;
+							handler(Response);
+							PGAMainbkup();
+						});
 
-					if (controller.signal.aborted || ans == undefined) {
-						handler(Response);
-						return;
+						if (controller.signal.aborted || ans == undefined) {
+							handler(Response);
+							return;
+						}
+
+						ans = await ans.json();
+						Ping = NOW.getTime() - _t + "ms";
+						// TimerDesynced = false;
+						Response = ans;
 					}
 
-					ans = await ans.json();
-					Ping = NOW.getTime() - _t + "ms";
-					// TimerDesynced = false;
-					Response = ans;
+					handler(Response);
+				} else {
+					Ping = "🔒";
+
+					for (const removedKey of Object.keys(Station)) {
+						Station[removedKey].remove();
+						delete Station[removedKey];
+					}
+
+					Response = {};
 					handler(Response);
 				}
 			} catch (err) {
@@ -2030,30 +2041,40 @@ function PGAMainbkup() {
 				const _t = NOW.getTime();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (ReplayTime == 0 && rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
-					Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
-					Response = rts_response;
-					handler(Response);
-				} else if (ReplayTime == 0 && rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
-					Ping = NOW.getTime() - rts_p2p_timestamp + "ms " + "📡";
-					Response = rts_response;
-					handler(Response);
+				if (setting["api.key"] != "" && verify) {
+					if (ReplayTime == 0) {
+						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
+							Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
+							Response = rts_response;
+							handler(Response);
+						}
+					} else {
+						const url = geturl + ReplayTime + "&key=" + setting["api.key"];
+						axios({
+							method : "get",
+							url    : url,
+						}).then((response) => {
+							Ping = NOW.getTime() - _t + "ms";
+							// TimerDesynced = false;
+							Response = response.data;
+							handler(Response);
+						}).catch((err) => {
+							// TimerDesynced = true;
+							stationnow = 0;
+							handler(Response);
+							PGAMain();
+						});
+					}
 				} else {
-					const url = (ReplayTime == 0) ? getapiurl : geturl + ReplayTime;
-					axios({
-						method : "get",
-						url    : url,
-					}).then((response) => {
-						Ping = NOW.getTime() - _t + "ms";
-						// TimerDesynced = false;
-						Response = response.data;
-						handler(Response);
-					}).catch((err) => {
-						// TimerDesynced = true;
-						stationnow = 0;
-						handler(Response);
-						PGAMain();
-					});
+					Ping = "🔒";
+
+					for (const removedKey of Object.keys(Station)) {
+						Station[removedKey].remove();
+						delete Station[removedKey];
+					}
+
+					Response = {};
+					handler(Response);
 				}
 			} catch (err) {
 				console.log(err);
@@ -3644,7 +3665,7 @@ ipcRenderer.on("config:maplayer", (event, mapName, state) => {
 
 // #region EEW
 function FCMdata(data, Unit) {
-	const json = JSON.parse(data);
+	const json = resolve(JSON.parse(data));
 	console.log(json);
 
 	if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
