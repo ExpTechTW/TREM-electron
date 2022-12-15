@@ -1430,7 +1430,6 @@ async function init() {
 			for (let index = 0; index < Object.keys(eew).length; index++)
 				if (eewt.id == 0 || eewt.id == eew[Object.keys(eew)[index]].id || NOW.getTime() - eew[Object.keys(eew)[index]].time >= 10000) {
 					eewt.id = eew[Object.keys(eew)[index]].id;
-					const X = 0;
 					const km = (NOW.getTime() - eew[Object.keys(eew)[index]].Time) * 4;
 
 					if (km > 300000)
