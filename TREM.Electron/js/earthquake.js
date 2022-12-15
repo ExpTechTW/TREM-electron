@@ -1525,9 +1525,6 @@ function PGAMain() {
 						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
 							Ping = "Super";
 							Response = rts_response;
-						} else if (rts_p2p_timestamp != 0 && NOW.getTime() - rts_p2p_timestamp <= 950) {
-							Ping = "P2P";
-							Response = rts_response;
 						}
 
 						handler(Response);
@@ -1550,7 +1547,7 @@ function PGAMain() {
 
 					handler(Response);
 				} else {
-					Ping = "📛";
+					Ping = "🔒";
 
 					for (const removedKey of Object.keys(Station)) {
 						Station[removedKey].remove();
