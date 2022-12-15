@@ -681,6 +681,10 @@ class EEW {
 		return this._expected.get(this._local.code);
 	}
 
+	get arrivalTime() {
+		return (this.local.distance - (Date.now() - this.eventTime.getTime() * this._wavespeed.s)) / this._wavespeed.s;
+	}
+
 	#fromJson(data) {
 		this.id = data.ID;
 		this.depth = data.Depth;
@@ -689,7 +693,7 @@ class EEW {
 		this.magnitude = data.Scale;
 		this.source = data.Unit;
 
-		if (data.Version > this.version) {
+		if (data.Version > (this.version || 0)) {
 			this._expected = new Map();
 			this.#evalExpected();
 		}
@@ -3819,16 +3823,6 @@ TREM.Earthquake.on("eew", (data) => {
 					setting["earthquake.siteEffect"] ? loc.siteEffect : undefined,
 				),
 			);
-
-			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-				const focusBounds = new maplibregl.LngLatBounds();
-
-				for (const eewid in EarthquakeList)
-					focusBounds.extend(EarthquakeList[eewid].epicenter);
-
-				if (int.value >= 2)
-					focusBounds.extend(TREM.MapBounds[loc.code]);
-			}
 
 			if (data.Depth == null) int = NSSPE[loc[0]] ?? 0;
 
