@@ -3275,25 +3275,21 @@ function main(data) {
 		* @type {number} km
  		*/
 		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
-			if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
-				kmP = (index - 1) * 1000;
+			kmP = (index - 1) * 1000;
 
-				if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.p) (NOW.getTime() - data.Time) * wave.p;
+			if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.p) {
+				kmP = (NOW.getTime() - data.Time) * wave.p;
 				break;
 			}
-
-			kmP = (NOW.getTime() - data.Time) * wave.p;
 		}
 
 		for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
-			if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
-				km = (index - 1) * 1000;
+			km = (index - 1) * 1000;
 
-				if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.s) (NOW.getTime() - data.Time) * wave.s;
+			if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.s) {
+				km = (NOW.getTime() - data.Time) * wave.s;
 				break;
 			}
-
-			km = (NOW.getTime() - data.Time) * wave.s;
 		}
 
 		if (setting["shock.p"])
