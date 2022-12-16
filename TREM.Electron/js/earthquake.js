@@ -90,6 +90,7 @@ let Ping = 0;
 let EEWAlert = false;
 let PGACancel = false;
 let report_get_timestamp = 0;
+let map_move_back = false;
 // #endregion
 
 TREM.MapIntensity = {
@@ -1457,15 +1458,58 @@ async function init() {
 				const camera = Maps.main.cameraForBounds(finalBounds, { padding: { bottom: 100, right: 100 } });
 				TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
 			}
-		} else if (Object.keys(detected_box_list).length >= 1) {
-			if (Object.keys(detected_box_list).length == 1) {
-				const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
-				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
-				TREM.Earthquake.emit("focus", { center: pointFormatter(X1, Y1, TREM.MapRenderingEngine), zoom: 9.5 });
-			} else if (Object.keys(detected_box_list).length >= 2) {
-				console.log(1);
-				Maps.main.fitBounds([[detected_box_location[Object.keys(detected_list)[0].toString()][0][0], detected_box_location[Object.keys(detected_list)[0].toString()][0][1]], [detected_box_location[Object.keys(detected_list)[0].toString()][1][0], detected_box_location[Object.keys(detected_list)[0].toString()][1][1]]]);
+		} else if (Object.keys(detected_list).length != 0) {
+			map_move_back = true;
+			let long_min = 1000;
+			let long_max = 0;
+			let lat_min = 1000;
+			let lat_max = 0;
+
+			for (let index = 0; index < Object.keys(detected_list).length; index++) {
+				const num = Object.keys(detected_list)[index];
+
+				for (let i = 0; i < detected_box_location[num].length; i++) {
+					if (detected_box_location[num][i][0] > lat_max) lat_max = detected_box_location[num][i][0];
+
+					if (detected_box_location[num][i][2] > lat_max) lat_max = detected_box_location[num][i][2];
+
+					if (detected_box_location[num][i][0] < lat_min) lat_min = detected_box_location[num][i][0];
+
+					if (detected_box_location[num][i][2] < lat_min) lat_min = detected_box_location[num][i][2];
+
+					if (detected_box_location[num][i][1] > long_max) long_max = detected_box_location[num][i][1];
+
+					if (detected_box_location[num][i][3] > long_max) long_max = detected_box_location[num][i][3];
+
+					if (detected_box_location[num][i][1] < long_min) long_min = detected_box_location[num][i][1];
+
+					if (detected_box_location[num][i][3] < long_min) long_min = detected_box_location[num][i][3];
+				}
 			}
+
+			TREM.Earthquake.emit("focus", {
+				bounds: [
+					long_min,
+					lat_min,
+					long_max,
+					lat_max,
+				],
+				options: {
+					padding: {
+						bottom : Maps.main.getCanvas().width / 8,
+						right  : Maps.main.getCanvas().width / 8,
+						left   : Maps.main.getCanvas().width / 8,
+						top    : Maps.main.getCanvas().width / 8,
+					},
+					speed    : 2,
+					curve    : 1,
+					easing   : (e) => Math.sin(e * Math.PI / 2),
+					duration : 1000,
+				},
+			});
+		} else if (map_move_back) {
+			map_move_back = false;
+			Mapsmainfocus();
 		}
 	}, 500);
 	global.gc();
