@@ -412,13 +412,14 @@ TREM.Report = {
 			+ (report.earthquakeNo - 111000 ? report.earthquakeNo - 111000 : "");
 		document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
 
-		for (const data of report.data)
-			for (const eqStation of data.eqStation)
-				this._markers.push(
-					new maplibregl.Marker({
-						element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
-					}).setLngLat([eqStation.stationLon, eqStation.stationLat]).addTo(Maps.report),
-				);
+		if (report.data[0].areaIntensity != 0)
+			for (const data of report.data)
+				for (const eqStation of data.eqStation)
+					this._markers.push(
+						new maplibregl.Marker({
+							element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
+						}).setLngLat([eqStation.stationLon, eqStation.stationLat]).addTo(Maps.report),
+					);
 
 		this._markers.push(
 			new maplibregl.Marker({
