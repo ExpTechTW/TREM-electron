@@ -68,11 +68,6 @@ let PGALimit = 0;
 let PGAtag = -1;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 let Info = { Notify: [], Warn: [], Focus: [] };
-const Focus = [
-	23.608428,
-	121.699168,
-	7.75,
-];
 let INFO = [];
 let TINFO = 0;
 let Report = 0;
@@ -87,7 +82,7 @@ let EEWshotC = 0;
 let replay = 0;
 let replayT = 0;
 let Second = -1;
-const mapLock = false;
+let mapLock = false;
 const eew = {};
 const eewt = { id: 0, time: 0 };
 let TSUNAMI = {};
@@ -805,7 +800,12 @@ async function init() {
 						keyboard          : false,
 						doubleClickZoom   : false,
 					})
+					.on("drag", () => {
+						mapLock = true;
+					})
 					.on("click", (ev) => {
+						mapLock = false;
+
 						if (ev.originalEvent.target.tagName == "CANVAS")
 							TREM.Earthquake.emit("focus", {
 								bounds: [
@@ -1491,12 +1491,8 @@ async function init() {
 				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
 				TREM.Earthquake.emit("focus", { center: pointFormatter(X1, Y1, TREM.MapRenderingEngine), zoom: 9.5 });
 			} else if (Object.keys(detected_box_list).length >= 2) {
-				const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
-				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
-				const X2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[1].toString()][2][0] - detected_box_location[Object.keys(detected_list)[1].toString()][0][0]) / 2);
-				const Y2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[1].toString()][1][1] - detected_box_location[Object.keys(detected_list)[1].toString()][0][1]) / 2);
-
-				Maps.main.fitBounds([[X1, Y1], [X2, Y2]]);
+				console.log(1);
+				Maps.main.fitBounds([[detected_box_location[Object.keys(detected_list)[0].toString()][0][0], detected_box_location[Object.keys(detected_list)[0].toString()][0][1]], [detected_box_location[Object.keys(detected_list)[0].toString()][1][0], detected_box_location[Object.keys(detected_list)[0].toString()][1][1]]]);
 			}
 		}
 	}, 500);
