@@ -1525,11 +1525,14 @@ function PGAMain() {
 				const _t = Date.now();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (setting["api.key"] != "" && verify) {
+				if (setting["api.key"] != "") {
 					if (ReplayTime == 0) {
-						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
+						if (rts_ws_timestamp) {
 							Ping = "Super";
 							Response = rts_response;
+						} else {
+							Ping = "🔒";
+							Response = {};
 						}
 					} else {
 						const url = `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}&key=${setting["api.key"]}`;
@@ -1550,13 +1553,12 @@ function PGAMain() {
 
 					handler(Response);
 				} else {
-					Ping = "🔒";
-
 					for (const removedKey of Object.keys(Station)) {
 						Station[removedKey].remove();
 						delete Station[removedKey];
 					}
 
+					Ping = "🔒";
 					Response = {};
 					handler(Response);
 				}
