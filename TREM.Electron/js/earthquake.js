@@ -113,6 +113,7 @@ let Ping = "N/A";
 let EEWAlert = false;
 let PGACancel = false;
 let report_get_timestamp = 0;
+let map_move_back = false;
 TREM.set_report_overview = 0;
 let rtstation1 = "";
 let MaxIntensity1 = 0;
@@ -1016,13 +1017,14 @@ async function init() {
 					})
 					.on("contextmenu", (ev) => {
 						if (ev.originalEvent.target.tagName == "CANVAS")
-							TREM.Earthquake.emit("focus", {
-								center  : pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine),
-								zoom    : 7.75,
-								options : {
-									padding: { bottom: 0, right: 0 },
-								},
-							});
+							Mapsmainfocus();
+							// TREM.Earthquake.emit("focus", {
+							// 	center  : pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine),
+							// 	zoom    : 7.75,
+							// 	options : {
+							// 		padding: { bottom: 0, right: 0 },
+							// 	},
+							// });
 					});
 
 			if (!Maps.mini)
@@ -1417,7 +1419,8 @@ async function init() {
 							1,
 							setting["theme.customColor"] ? setting["theme.int.1"]
 								: "#757575",
-							"transparent",
+							setting["theme.customColor"] ? setting["theme.int.0"]
+								: "#6B7979",
 						],
 						"line-width"   : 3,
 						"line-opacity" : [
@@ -1855,38 +1858,58 @@ async function init() {
 					const camera = Maps.main.cameraForBounds(finalBounds, { padding: { bottom: 100, right: 100 } });
 					TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
 				}
-			} else if (Object.keys(detected_box_list).length >= 1) {
-				if (Object.keys(detected_box_list).length == 1) {
-					const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
-					const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
-					TREM.Earthquake.emit("focus", { center: [X1, Y1], size: 9.5 });
-				} else if (Object.keys(detected_box_list).length >= 2) {
-					const X1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[0].toString()][2][0] - detected_box_location[Object.keys(detected_list)[0].toString()][0][0]) / 2);
-					const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
-					const X2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[1].toString()][2][0] - detected_box_location[Object.keys(detected_list)[1].toString()][0][0]) / 2);
-					const Y2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[1].toString()][1][1] - detected_box_location[Object.keys(detected_list)[1].toString()][0][1]) / 2);
-					let focusScale = 9;
+			} else if (Object.keys(detected_list).length != 0) {
+				map_move_back = true;
+				let long_min = 1000;
+				let long_max = 0;
+				let lat_min = 1000;
+				let lat_max = 0;
 
-					if (Object.keys(detected_box_list).length == 2) {
-						const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
+				for (let index = 0; index < Object.keys(detected_list).length; index++) {
+					const num = Object.keys(detected_list)[index];
 
-						if (num > 0.6) focusScale = 9;
+					for (let i = 0; i < detected_box_location[num].length; i++) {
+						if (detected_box_location[num][i][0] > lat_max) lat_max = detected_box_location[num][i][0];
 
-						if (num > 1) focusScale = 8.5;
+						if (detected_box_location[num][i][2] > lat_max) lat_max = detected_box_location[num][i][2];
 
-						if (num > 1.5) focusScale = 8;
+						if (detected_box_location[num][i][0] < lat_min) lat_min = detected_box_location[num][i][0];
 
-						if (num > 2.8) focusScale = 7;
-					} else {
-						if (Object.keys(detected_box_list).length >= 4) focusScale = 8;
+						if (detected_box_location[num][i][2] < lat_min) lat_min = detected_box_location[num][i][2];
 
-						if (Object.keys(detected_box_list).length >= 6) focusScale = 7.5;
+						if (detected_box_location[num][i][1] > long_max) long_max = detected_box_location[num][i][1];
 
-						if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
+						if (detected_box_location[num][i][3] > long_max) long_max = detected_box_location[num][i][3];
+
+						if (detected_box_location[num][i][1] < long_min) long_min = detected_box_location[num][i][1];
+
+						if (detected_box_location[num][i][3] < long_min) long_min = detected_box_location[num][i][3];
 					}
-
-					TREM.Earthquake.emit("focus", { center: pointFormatter((X1 + X2) / 2, (Y1 + Y2) / 2, TREM.MapRenderingEngine), zoom: focusScale });
 				}
+
+				TREM.Earthquake.emit("focus", {
+					bounds: [
+						long_min,
+						lat_min,
+						long_max,
+						lat_max,
+					],
+					options: {
+						padding: {
+							bottom : Maps.main.getCanvas().width / 8,
+							right  : Maps.main.getCanvas().width / 5,
+							left   : Maps.main.getCanvas().width / 12,
+							top    : Maps.main.getCanvas().width / 8,
+						},
+						speed    : 2,
+						curve    : 1,
+						easing   : (e) => Math.sin(e * Math.PI / 2),
+						duration : 1000,
+					},
+				});
+			} else if (map_move_back) {
+				map_move_back = false;
+				Mapsmainfocus();
 			}
 		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 			if (Object.keys(eew).length != 0) {
@@ -2317,7 +2340,7 @@ function handler(Json) {
 			document.getElementById("rt-station-local-pga").innerText = amount;
 		}
 
-		if (intensity != "NA" && NA999 != "Y" && (intensity > 0 && Alert) && amount < 999) {
+		if (intensity != "NA" && NA999 != "Y" && NA0999 != "Y" && (intensity >= 0 && Alert) && amount < 999) {
 			detected_list[station[keys[index]].PGA] ??= {
 				intensity : intensity,
 				time      : 0,
@@ -2383,12 +2406,13 @@ function handler(Json) {
 
 	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 		if (Object.keys(detected_list).length) {
-			let x_s = 0, y_s = 0, x_m = 0, y_m = 0;
-
 			for (let index = 0, pgaKeys = Object.keys(detected_list); index < pgaKeys.length; index++) {
 				const Intensity = detected_list[pgaKeys[index]]?.intensity;
 
-				if (Intensity == undefined) continue;
+				if (Intensity == undefined) {
+					delete detected_list[pgaKeys[index]];
+					continue;
+				}
 
 				if (NOW.getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
 					TREM.MapArea.clear(pgaKeys[index]);
@@ -2419,39 +2443,9 @@ function handler(Json) {
 						TREM.MapArea.clear(pgaKeys[index]);
 					} else {
 						TREM.MapArea.setArea(pgaKeys[index], Intensity);
-						const cache = Maps.main.getSource("Source_area")._data.features[pgaKeys[index] - 1].geometry.coordinates[0];
-						const x = cache[0][0], y = cache[2][1];
-
-						if (x_s == 0) x_s = x;
-						else if (x < x_s) x_s = x;
-
-						if (y_s == 0) y_s = y;
-						else if (y < y_s) y_s = y;
-
-						if (y_m == 0) y_m = y;
-						else if (y > y_m) y_m = y;
-
-						if (x_m == 0) x_m = x;
-						else if (x > x_m) x_m = x;
 					}
 				}
 			}
-
-			// console.log([
-			// 	x_s,
-			// 	y_m,
-			// 	x_m,
-			// 	y_s,
-			// ]);
-
-			/*
-			Maps.main.fitBounds([
-				x_s,
-				y_m,
-				x_m,
-				y_s,
-			], { padding: { top: 100, bottom: 100, right: 100, left: 100 } });
-			*/
 		} else if (TREM.MapArea.isVisible) {
 			TREM.MapArea.clear();
 		}
@@ -3079,7 +3073,7 @@ function addReport(report, prepend = false) {
 		report_container.append(report_intensity_container, report_detail_container);
 		ripple(Div);
 		Div.append(report_container);
-		Div.className += IntensityToClassString((report.data[0].areaIntensity == undefined) ? 1 : report.data[0].areaIntensity);
+		Div.className += IntensityToClassString(report.data[0]?.areaIntensity);
 		Div.addEventListener("click", () => {
 			if (replay != 0) return;
 			TREM.set_report_overview = 1;
@@ -3120,6 +3114,8 @@ function addReport(report, prepend = false) {
 
 				roll.prepend(Div);
 			}
+
+			TREM.Report.cache.set(report.identifier, report);
 
 			if (setting["report.changeView"]) {
 				TREM.Report.setView("eq-report-overview", report);
@@ -3754,7 +3750,6 @@ function FCMdata(data, Unit) {
 				});
 
 		addReport(report, true);
-		TREM.Report.cache.set(report.identifier, report);
 		ipcRenderer.send("report-Notification", report);
 
 		setTimeout(() => {

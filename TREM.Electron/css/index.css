@@ -41,6 +41,7 @@ body {
 	overflow: hidden;
 	transition: background-color .1s ease-in-out;
 
+	--custom-int-0: #6B7979;
 	--custom-int-1: #757575;
 	--custom-int-2: #2774C2;
 	--custom-int-3: #7BA822;
@@ -893,6 +894,7 @@ body:not(.darkmode) #here-marker {
 .rt-intensity-container.zero,
 #alert-local.zero,
 #rt-list div.zero,
+#rolllist > div.zero,
 .rt-station-intensity.zero {
 	background-color: var(--custom-int-0);
 }
