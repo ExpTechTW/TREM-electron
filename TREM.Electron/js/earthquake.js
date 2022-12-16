@@ -1300,7 +1300,8 @@ async function init() {
 							1,
 							setting["theme.customColor"] ? setting["theme.int.1"]
 								: "#757575",
-							"transparent",
+							setting["theme.customColor"] ? setting["theme.int.0"]
+								: "#6B7979",
 						],
 						"line-width"   : 3,
 						"line-opacity" : [
@@ -1497,8 +1498,8 @@ async function init() {
 				options: {
 					padding: {
 						bottom : Maps.main.getCanvas().width / 8,
-						right  : Maps.main.getCanvas().width / 8,
-						left   : Maps.main.getCanvas().width / 6,
+						right  : Maps.main.getCanvas().width / 5,
+						left   : Maps.main.getCanvas().width / 12,
 						top    : Maps.main.getCanvas().width / 8,
 					},
 					speed    : 2,
