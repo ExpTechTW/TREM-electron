@@ -3686,7 +3686,8 @@ ipcRenderer.on("config:maplayer", (event, mapName, state) => {
 
 // #region EEW
 function FCMdata(data, Unit) {
-	const json = JSON.parse(JSON.stringify(data));
+	// const json = JSON.parse(JSON.stringify(data));
+	const json = JSON.parse(data);
 	console.log(json);
 
 	if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
