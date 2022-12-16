@@ -2081,6 +2081,18 @@ function ReportList(earthquakeReportArr, palert) {
 
 function addReport(report, prepend = false) {
 	if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
+
+	if (report.data.length == 0) report.data = [
+		{
+			areaName      : "未知",
+			areaIntensity : 0,
+			eqStation     : [
+				{
+					stationName: "未知",
+				},
+			],
+		},
+	];
 	const Level = IntensityI(report.data[0]?.areaIntensity);
 	let msg = "";
 
