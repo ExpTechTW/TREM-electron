@@ -4399,11 +4399,15 @@ function main(data) {
 
 	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (data.Depth != null) {
+
+			const wave = { p: 7, s: 4 };
+
+			/**
+			 * @type {{p:number,s:number}}
+			 */
+
 			let kmP = 0;
 			let km = 0;
-
-			const p_wave = 7;
-			const s_wave = 4;
 
 			/**
 			* PS 波已走公尺數
@@ -4414,22 +4418,22 @@ function main(data) {
 				if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
 					kmP = (index - 1) * 1000;
 
-					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > p_wave) (NOW.getTime() - data.Time) * p_wave;
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.p) (NOW.getTime() - data.Time) * wave.p;
 					break;
 				}
 
-				kmP = (NOW.getTime() - data.Time) * p_wave;
+				kmP = (NOW.getTime() - data.Time) * wave.p;
 			}
 
 			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
 				if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
 					km = (index - 1) * 1000;
 
-					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > s_wave) (NOW.getTime() - data.Time) * s_wave;
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.s) (NOW.getTime() - data.Time) * wave.s;
 					break;
 				}
 
-				km = (NOW.getTime() - data.Time) * s_wave;
+				km = (NOW.getTime() - data.Time) * wave.s;
 			}
 
 			if (setting["shock.p"])
