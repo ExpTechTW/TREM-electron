@@ -1495,27 +1495,8 @@ async function init() {
 				const Y1 = (detected_box_location[Object.keys(detected_list)[0].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[0].toString()][1][1] - detected_box_location[Object.keys(detected_list)[0].toString()][0][1]) / 2);
 				const X2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][0] + (detected_box_location[Object.keys(detected_list)[1].toString()][2][0] - detected_box_location[Object.keys(detected_list)[1].toString()][0][0]) / 2);
 				const Y2 = (detected_box_location[Object.keys(detected_list)[1].toString()][0][1] + (detected_box_location[Object.keys(detected_list)[1].toString()][1][1] - detected_box_location[Object.keys(detected_list)[1].toString()][0][1]) / 2);
-				let focusScale = 9;
 
-				if (Object.keys(detected_box_list).length == 2) {
-					const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
-
-					if (num > 0.6) focusScale = 9;
-
-					if (num > 1) focusScale = 8.5;
-
-					if (num > 1.5) focusScale = 8;
-
-					if (num > 2.8) focusScale = 7;
-				} else {
-					if (Object.keys(detected_box_list).length >= 4) focusScale = 8;
-
-					if (Object.keys(detected_box_list).length >= 6) focusScale = 7.5;
-
-					if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
-				}
-
-				TREM.Earthquake.emit("focus", { center: pointFormatter((X1 + X2) / 2, (Y1 + Y2) / 2, TREM.MapRenderingEngine), zoom: focusScale });
+				Maps.main.fitBounds([[X1, Y1], [X2, Y2]]);
 			}
 		}
 	}, 500);
@@ -2237,7 +2218,7 @@ function addReport(report, prepend = false) {
 		report_container.append(report_intensity_container, report_detail_container);
 		ripple(Div);
 		Div.append(report_container);
-		Div.className += IntensityToClassString((report.data[0]?.areaIntensity == undefined) ? 1 : report.data[0]?.areaIntensity);
+		Div.className += IntensityToClassString(report.data[0]?.areaIntensity);
 		Div.addEventListener("click", (event) => {
 			TREM.Report.setView("report-overview", report.identifier);
 			changeView("report", "#reportView_btn");
