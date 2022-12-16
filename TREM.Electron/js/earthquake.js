@@ -4486,7 +4486,7 @@ function main(data) {
 							.setRadius(kmP);
 					}
 
-			if (km > data.Depth) {
+			if (km > data.Depth * 1000) {
 				eew[data.ID].km = km;
 
 				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
