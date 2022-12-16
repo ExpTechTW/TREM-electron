@@ -1498,7 +1498,7 @@ async function init() {
 					padding: {
 						bottom : Maps.main.getCanvas().width / 8,
 						right  : Maps.main.getCanvas().width / 8,
-						left   : Maps.main.getCanvas().width / 8,
+						left   : Maps.main.getCanvas().width / 6,
 						top    : Maps.main.getCanvas().width / 8,
 					},
 					speed    : 2,
@@ -1703,13 +1703,14 @@ function handler(Json) {
 		document.getElementById("rt-station-local-pga").innerText = "--";
 	}
 
-	if (Object.keys(detected_list).length) {
-		let x_s = 0, y_s = 0, x_m = 0, y_m = 0;
-
+	if (Object.keys(detected_list).length)
 		for (let index = 0, pgaKeys = Object.keys(detected_list); index < pgaKeys.length; index++) {
 			const Intensity = detected_list[pgaKeys[index]]?.intensity;
 
-			if (Intensity == undefined) continue;
+			if (Intensity == undefined) {
+				delete detected_list[pgaKeys[index]];
+				continue;
+			}
 
 			if (NOW.getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
 				TREM.MapArea.clear(pgaKeys[index]);
@@ -1740,42 +1741,11 @@ function handler(Json) {
 					TREM.MapArea.clear(pgaKeys[index]);
 				} else {
 					TREM.MapArea.setArea(pgaKeys[index], Intensity);
-					const cache = Maps.main.getSource("Source_area")._data.features[pgaKeys[index] - 1].geometry.coordinates[0];
-					const x = cache[0][0], y = cache[2][1];
-
-					if (x_s == 0) x_s = x;
-					else if (x < x_s) x_s = x;
-
-					if (y_s == 0) y_s = y;
-					else if (y < y_s) y_s = y;
-
-					if (y_m == 0) y_m = y;
-					else if (y > y_m) y_m = y;
-
-					if (x_m == 0) x_m = x;
-					else if (x > x_m) x_m = x;
 				}
 			}
 		}
-
-		// console.log([
-		// 	x_s,
-		// 	y_m,
-		// 	x_m,
-		// 	y_s,
-		// ]);
-
-		/*
-		Maps.main.fitBounds([
-			x_s,
-			y_m,
-			x_m,
-			y_s,
-		], { padding: { top: 100, bottom: 100, right: 100, left: 100 } });
-		*/
-	} else if (TREM.MapArea.isVisible) {
+	else if (TREM.MapArea.isVisible)
 		TREM.MapArea.clear();
-	}
 
 	const All = (Json.Alert) ? Json.I : [];
 	const list = [];
