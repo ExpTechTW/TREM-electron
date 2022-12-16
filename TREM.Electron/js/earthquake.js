@@ -3139,7 +3139,7 @@ function addReport(report, prepend = false) {
 			}
 
 			if (setting["report.changeView"]) {
-				TREM.Report.setView("report-overview", report.identifier);
+				TREM.Report.setView("eq-report-overview", report);
 				changeView("report", "#reportView_btn");
 				ReportTag = NOW.getTime();
 				console.log("ReportTag: ", ReportTag);
