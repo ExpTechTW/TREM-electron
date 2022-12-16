@@ -864,6 +864,7 @@ body:not(.darkmode) #here-marker {
 .rt-intensity-container.zero,
 #alert-local.zero,
 #rt-list div.zero,
+#rolllist > div.zero,
 .rt-station-intensity.zero {
 	background-color: var(--custom-int-0);
 }
