@@ -4402,26 +4402,34 @@ function main(data) {
 			let kmP = 0;
 			let km = 0;
 
+			const p_wave = 7;
+			const s_wave = 4;
+
+			/**
+			* PS 波已走公尺數
+			* @type {number} kmP
+			* @type {number} km
+			*/
 			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
 				if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
 					kmP = (index - 1) * 1000;
 
-					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 7) (NOW.getTime() - data.Time) * 7;
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > p_wave) (NOW.getTime() - data.Time) * p_wave;
 					break;
 				}
 
-				kmP = (NOW.getTime() - data.Time) * 7;
+				kmP = (NOW.getTime() - data.Time) * p_wave;
 			}
 
 			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
 				if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
 					km = (index - 1) * 1000;
 
-					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > 4) (NOW.getTime() - data.Time) * 4;
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > s_wave) (NOW.getTime() - data.Time) * s_wave;
 					break;
 				}
 
-				km = (NOW.getTime() - data.Time) * 4;
+				km = (NOW.getTime() - data.Time) * s_wave;
 			}
 
 			if (setting["shock.p"])
