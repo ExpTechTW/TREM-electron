@@ -4763,7 +4763,7 @@ function main(data) {
 			Timers.eew = null;
 			rts_remove_eew = false;
 
-			unstopReplaybtn();
+			stopReplay();
 			global.gc();
 		}
 	}
