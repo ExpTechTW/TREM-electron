@@ -807,39 +807,11 @@ async function init() {
 						mapLock = false;
 
 						if (ev.originalEvent.target.tagName == "CANVAS")
-							TREM.Earthquake.emit("focus", {
-								bounds: [
-									118.25,
-									21.77,
-									122.18,
-									25.47,
-								],
-								options: {
-									padding  : { bottom: 0, right: Maps.main.getCanvas().width / 6 },
-									speed    : 2,
-									curve    : 1,
-									easing   : (e) => Math.sin(e * Math.PI / 2),
-									duration : 1000,
-								},
-							});
+							Mapsmainfocus();
 					})
 					.on("contextmenu", (ev) => {
 						if (ev.originalEvent.target.tagName == "CANVAS")
-							TREM.Earthquake.emit("focus", {
-								bounds: [
-									118.25,
-									21.77,
-									122.18,
-									25.47,
-								],
-								options: {
-									padding  : { bottom: 0, right: Maps.main.getCanvas().width / 6 },
-									speed    : 2,
-									curve    : 1,
-									easing   : (e) => Math.sin(e * Math.PI / 2),
-									duration : 1000,
-								},
-							});
+							Mapsmainfocus();
 					})
 					.on("zoom", () => {
 						if (Maps.main.getZoom() >= 11.5) {
@@ -1923,6 +1895,25 @@ TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, linear
 				...options,
 			});
 });
+
+function Mapsmainfocus() {
+	TREM.Earthquake.emit("focus", {
+		bounds: [
+			118.25,
+			21.77,
+			122.18,
+			25.47,
+		],
+		options: {
+			padding  : { bottom: 0, right: Maps.main.getCanvas().width / 6 },
+			speed    : 2,
+			curve    : 1,
+			easing   : (e) => Math.sin(e * Math.PI / 2),
+			duration : 1000,
+		},
+	});
+}
+
 // #endregion
 
 // #region 音頻播放
@@ -3573,21 +3564,7 @@ function main(data) {
 			global.gc();
 
 			if (TREM.MapRenderingEngine == "mapbox-gl")
-				TREM.Earthquake.emit("focus", {
-					bounds: [
-						118.25,
-						21.77,
-						122.18,
-						25.47,
-					],
-					options: {
-						padding  : { bottom: 0, right: Maps.main.getCanvas().width / 6 },
-						speed    : 2,
-						curve    : 1,
-						easing   : (e) => Math.sin(e * Math.PI / 2),
-						duration : 1000,
-					},
-				});
+				Mapsmainfocus();
 		}
 	}
 }
