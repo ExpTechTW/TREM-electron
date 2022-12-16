@@ -1744,6 +1744,10 @@ button.hide + #report-detail-header-title {
 	margin-right: 8px;
 }
 
+#report-overview-intensity-location {
+	margin-left: 8px;
+}
+
 #report-overview-intensity.strong::after {
 	position: absolute;
 	content: "+";
