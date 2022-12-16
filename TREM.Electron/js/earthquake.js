@@ -1483,7 +1483,7 @@ function PGAMain() {
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
 				if (ReplayTime == 0) {
-					if (rts_ws_timestamp) {
+					if (rts_ws_timestamp && verify) {
 						Ping = "Super";
 						Response = rts_response;
 					} else {
