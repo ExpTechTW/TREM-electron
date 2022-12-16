@@ -1577,6 +1577,9 @@ async function init() {
 					},
 				}).getLayer("Layer_tw_county_Line"));
 			}
+
+			Maps.main.dragRotate.disable();
+			Maps.main.touchZoomRotate.disableRotation();
 		} else {
 
 			if (!Maps.main) {
