@@ -826,10 +826,18 @@ async function init() {
 					.on("contextmenu", (ev) => {
 						if (ev.originalEvent.target.tagName == "CANVAS")
 							TREM.Earthquake.emit("focus", {
-								center  : pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine),
-								zoom    : 7.75,
-								options : {
-									padding: { bottom: 0, right: 0 },
+								bounds: [
+									118.25,
+									21.77,
+									122.18,
+									25.47,
+								],
+								options: {
+									padding  : { bottom: 0, right: Maps.main.getCanvas().width / 6 },
+									speed    : 2,
+									curve    : 1,
+									easing   : (e) => Math.sin(e * Math.PI / 2),
+									duration : 1000,
 								},
 							});
 					})
@@ -3574,6 +3582,23 @@ function main(data) {
 			clearInterval(Timers.eew);
 			Timers.eew = null;
 			global.gc();
+
+			if (TREM.MapRenderingEngine == "mapbox-gl")
+				TREM.Earthquake.emit("focus", {
+					bounds: [
+						118.25,
+						21.77,
+						122.18,
+						25.47,
+					],
+					options: {
+						padding  : { bottom: 0, right: Maps.main.getCanvas().width / 6 },
+						speed    : 2,
+						curve    : 1,
+						easing   : (e) => Math.sin(e * Math.PI / 2),
+						duration : 1000,
+					},
+				});
 		}
 	}
 }
