@@ -3759,19 +3759,20 @@ function FCMdata(data, Unit) {
 				+ " " + now.getHours()
 				+ ":" + now.getMinutes()
 				+ ":" + now.getSeconds();
+		const report = json.raw;
 		const location = json.Location.match(/(?<=位於).+(?=\))/);
 
 		if (!win.isFocused())
 			new Notification("地震報告",
 				{
-					body   : `${location}發生規模 ${json.Scale} 有感地震，最大震度${json.Max}。\n${json["UTC+8"]}`,
+					body   : `${location}發生規模 ${json.Scale} 有感地震，最大震度${(json.Max == null) ? "?" : json.Max}。\n${json["UTC+8"]}`,
 					icon   : "../TREM.ico",
 					silent : win.isFocused(),
 				});
 
-		addReport(json, true);
-		TREM.Report.cache.set(report.identifier, json);
-		ipcRenderer.send("report-Notification", json);
+		addReport(report, true);
+		TREM.Report.cache.set(report.identifier, report);
+		ipcRenderer.send("report-Notification", report);
 
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
