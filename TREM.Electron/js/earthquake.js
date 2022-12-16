@@ -1977,11 +1977,13 @@ function PGAMain() {
 				const _t = NOW.getTime();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (setting["api.key"] != "" && verify) {
+				if (setting["api.key"] != "") {
 					if (ReplayTime == 0) {
 						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
 							Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
 							Response = rts_response;
+						} else {
+							Ping = "🔒";
 						}
 					} else {
 						const url = geturl + ReplayTime + "&key=" + setting["api.key"];
@@ -2040,12 +2042,14 @@ function PGAMainbkup() {
 				const _t = NOW.getTime();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (setting["api.key"] != "" && verify) {
+				if (setting["api.key"] != "") {
 					if (ReplayTime == 0) {
 						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
 							Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
 							Response = rts_response;
 							handler(Response);
+						} else {
+							Ping = "🔒";
 						}
 					} else {
 						const url = geturl + ReplayTime + "&key=" + setting["api.key"];
