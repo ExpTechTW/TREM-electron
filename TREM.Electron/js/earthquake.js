@@ -11,7 +11,6 @@ const Exptech = new ExptechAPI();
 const axios = require("axios");
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
-const { resolve } = require("node:path");
 TREM.Audios = {
 	pga1   : new Audio("../audio/PGA1.wav"),
 	pga2   : new Audio("../audio/PGA2.wav"),
@@ -3051,7 +3050,7 @@ function addReport(report, prepend = false) {
 
 		const report_intensity_value = document.createElement("span");
 		report_intensity_value.className = "report-intensity-value";
-		report_intensity_value.innerText = (Level == "?") ? "--" : Level;
+		report_intensity_value.innerText = (Level == 0) ? "?" : Level;
 		report_intensity_container.append(report_intensity_title_container, report_intensity_value);
 
 
@@ -3665,7 +3664,7 @@ ipcRenderer.on("config:maplayer", (event, mapName, state) => {
 
 // #region EEW
 function FCMdata(data, Unit) {
-	const json = resolve(JSON.parse(data));
+	const json = JSON.parse(JSON.stringify(data));
 	console.log(json);
 
 	if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
@@ -3732,20 +3731,19 @@ function FCMdata(data, Unit) {
 				+ " " + now.getHours()
 				+ ":" + now.getMinutes()
 				+ ":" + now.getSeconds();
-		const report = json.raw;
-		const location = report.location.match(/(?<=位於).+(?=\))/);
+		const location = json.Location.match(/(?<=位於).+(?=\))/);
 
 		if (!win.isFocused())
 			new Notification("地震報告",
 				{
-					body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
+					body   : `${location}發生規模 ${json.Scale} 有感地震，最大震度${json.Max}。\n${json["UTC+8"]}`,
 					icon   : "../TREM.ico",
 					silent : win.isFocused(),
 				});
 
-		addReport(report, true);
-		TREM.Report.cache.set(report.identifier, report);
-		ipcRenderer.send("report-Notification", report);
+		addReport(json, true);
+		TREM.Report.cache.set(report.identifier, json);
+		ipcRenderer.send("report-Notification", json);
 
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {

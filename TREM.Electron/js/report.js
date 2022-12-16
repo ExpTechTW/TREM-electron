@@ -450,7 +450,7 @@ TREM.Report = {
 		document.getElementById("report-overview-latitude").innerText = report.epicenterLat;
 		document.getElementById("report-overview-longitude").innerText = report.epicenterLon;
 		const int = `${IntensityI(report.data[0].areaIntensity)}`.split("");
-		document.getElementById("report-overview-intensity").innerText = int[0];
+		document.getElementById("report-overview-intensity").innerText = (int[0] == 0) ? "?" : int[0];
 		document.getElementById("report-overview-intensity").className = (int[1] == "+") ? "strong"
 			: (int[1] == "-") ? "weak"
 				: "";
