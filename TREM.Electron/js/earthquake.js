@@ -4409,35 +4409,29 @@ function main(data) {
 			 * @type {{p:number,s:number}}
 			 */
 
-			let kmP = 0;
-			let km = 0;
+			let kmP = (NOW.getTime() - data.Time) * wave.p;
+			let km = (NOW.getTime() - data.Time) * wave.s;
 
 			/**
 			* PS 波已走公尺數
 			* @type {number} kmP
 			* @type {number} km
 			*/
-			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
+			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
 				if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
-					kmP = (index - 1) * 1000;
+					kmP = Math.floor(Math.sqrt(Math.pow((index - 1) * 1000, 2) - Math.pow(data.Depth * 1000, 2)));
 
-					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.p) (NOW.getTime() - data.Time) * wave.p;
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.p) kmP = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.p, 2) - Math.pow(data.Depth * 1000, 2)));
 					break;
 				}
 
-				kmP = (NOW.getTime() - data.Time) * wave.p;
-			}
-
-			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++) {
+			for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
 				if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
-					km = (index - 1) * 1000;
+					km = Math.floor(Math.sqrt(Math.pow((index - 1) * 1000, 2) - Math.pow(data.Depth * 1000, 2)));
 
-					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.s) (NOW.getTime() - data.Time) * wave.s;
+					if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Stime > wave.s) km = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.s, 2) - Math.pow(data.Depth * 1000, 2)));
 					break;
 				}
-
-				km = (NOW.getTime() - data.Time) * wave.s;
-			}
 
 			if (setting["shock.p"])
 				if (kmP > 0)
