@@ -610,6 +610,8 @@ class EEW {
 
 // #region 初始化
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+
+__unlock();
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
@@ -2728,7 +2730,7 @@ TREM.Earthquake.on("eew", (data) => {
 		else
 			Nmsg = "已抵達 (預警盲區)";
 		new Notification("EEW 強震即時警報", {
-			body   : `${level.text}級地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`,
+			body   : `${level.label.replace("+", "強").replace("-", "弱")} 地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`,
 			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});
