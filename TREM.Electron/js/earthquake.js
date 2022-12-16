@@ -1990,55 +1990,47 @@ function PGAMain() {
 				const _t = NOW.getTime();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (setting["api.key"] != "") {
-					if (ReplayTime == 0) {
-						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
-							Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
-							Response = rts_response;
-						} else {
-							Ping = "🔒";
-						}
+				if (ReplayTime == 0) {
+					if (rts_ws_timestamp) {
+						Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
+						Response = rts_response;
 					} else {
-						const url = geturl + ReplayTime + "&key=" + setting["api.key"];
-						const controller = new AbortController();
-						setTimeout(() => {
-							controller.abort();
-						}, 5000);
-						let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
-							// TimerDesynced = true;
-							stationnow = 0;
-							handler(Response);
-							PGAMainbkup();
-						});
-
-						if (controller.signal.aborted || ans == undefined) {
-							handler(Response);
-							return;
+						for (const removedKey of Object.keys(Station)) {
+							Station[removedKey].remove();
+							delete Station[removedKey];
 						}
 
+						Ping = "🔒";
+						stationnow = 0;
+						Response = {};
+					}
+				} else {
+					const url = geturl + ReplayTime + "&key=" + setting["api.key"];
+					const controller = new AbortController();
+					setTimeout(() => {
+						controller.abort();
+					}, 5000);
+					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
+						// TimerDesynced = true;
+						PGAMainbkup();
+					});
+
+					if (controller.signal.aborted || ans == undefined) {
+						Ping = "🔒";
+						stationnow = 0;
+						Response = {};
+					} else {
 						ans = await ans.json();
 						Ping = NOW.getTime() - _t + "ms";
 						// TimerDesynced = false;
 						Response = ans;
 					}
-
-					handler(Response);
-				} else {
-					Ping = "🔒";
-
-					for (const removedKey of Object.keys(Station)) {
-						Station[removedKey].remove();
-						delete Station[removedKey];
-					}
-
-					Response = {};
-					handler(Response);
 				}
+
+				handler(Response);
 			} catch (err) {
 				console.log(err);
 				// TimerDesynced = true;
-				stationnow = 0;
-				handler(Response);
 				PGAMainbkup();
 			}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
@@ -2055,48 +2047,39 @@ function PGAMainbkup() {
 				const _t = NOW.getTime();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (setting["api.key"] != "") {
-					if (ReplayTime == 0) {
-						if (rts_ws_timestamp != 0 && NOW.getTime() - rts_ws_timestamp <= 550) {
-							Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
-							Response = rts_response;
-							handler(Response);
-						} else {
-							Ping = "🔒";
-						}
+				if (ReplayTime == 0) {
+					if (rts_ws_timestamp) {
+						Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
+						Response = rts_response;
 					} else {
-						const url = geturl + ReplayTime + "&key=" + setting["api.key"];
-						axios({
-							method : "get",
-							url    : url,
-						}).then((response) => {
-							Ping = NOW.getTime() - _t + "ms";
-							// TimerDesynced = false;
-							Response = response.data;
-							handler(Response);
-						}).catch((err) => {
-							// TimerDesynced = true;
-							stationnow = 0;
-							handler(Response);
-							PGAMain();
-						});
+						for (const removedKey of Object.keys(Station)) {
+							Station[removedKey].remove();
+							delete Station[removedKey];
+						}
+
+						Ping = "🔒";
+						stationnow = 0;
+						Response = {};
 					}
 				} else {
-					Ping = "🔒";
-
-					for (const removedKey of Object.keys(Station)) {
-						Station[removedKey].remove();
-						delete Station[removedKey];
-					}
-
-					Response = {};
-					handler(Response);
+					const url = geturl + ReplayTime + "&key=" + setting["api.key"];
+					axios({
+						method : "get",
+						url    : url,
+					}).then((response) => {
+						Ping = NOW.getTime() - _t + "ms";
+						// TimerDesynced = false;
+						Response = response.data;
+					}).catch((err) => {
+						// TimerDesynced = true;
+						PGAMain();
+					});
 				}
+
+				handler(Response);
 			} catch (err) {
 				console.log(err);
 				// TimerDesynced = true;
-				stationnow = 0;
-				handler(Response);
 				PGAMain();
 			}
 		}, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
