@@ -2237,7 +2237,13 @@ function addReport(report, prepend = false) {
 				roll.prepend(Div);
 			}
 
-			ReportTag = NOW.getTime();
+			TREM.Report.cache.set(report.identifier, report);
+
+			if (setting["report.changeView"]) {
+				TREM.Report.setView("report-overview", report.identifier);
+				changeView("report", "#reportView_btn");
+				ReportTag = NOW.getTime();
+			}
 		} else {
 			roll.append(Div);
 		}
@@ -2624,12 +2630,6 @@ function FCMdata(json, Unit) {
 				});
 
 		addReport(report, true);
-		TREM.Report.cache.set(report.identifier, report);
-
-		if (setting["report.changeView"]) {
-			TREM.Report.setView("report-overview", report.identifier);
-			changeView("report", "#reportView_btn");
-		}
 
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEW", {
