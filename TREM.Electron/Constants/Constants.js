@@ -52,10 +52,6 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
-		"auto.waveSpeed": {
-			type  : "toggle",
-			value : true,
-		},
 		"cache.report": {
 			type  : "select",
 			value : "25",
