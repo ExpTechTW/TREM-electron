@@ -1525,43 +1525,37 @@ function PGAMain() {
 				const _t = Date.now();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
-				if (setting["api.key"] != "") {
-					if (ReplayTime == 0) {
-						if (rts_ws_timestamp) {
-							Ping = "Super";
-							Response = rts_response;
-						} else {
-							Ping = "🔒";
-							Response = {};
-						}
+				if (ReplayTime == 0) {
+					if (rts_ws_timestamp) {
+						Ping = "Super";
+						Response = rts_response;
 					} else {
-						const url = `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}&key=${setting["api.key"]}`;
-						const controller = new AbortController();
-						setTimeout(() => {
-							controller.abort();
-						}, 5000);
-						let ans = await fetch(url, { signal: controller.signal }).catch((err) => void 0);
-
-						if (controller.signal.aborted || ans == undefined) {
-							void 0;
-						} else {
-							ans = await ans.json();
-							Ping = Date.now() - _t + "ms";
-							Response = ans;
+						for (const removedKey of Object.keys(Station)) {
+							Station[removedKey].remove();
+							delete Station[removedKey];
 						}
-					}
 
-					handler(Response);
+						Ping = "🔒";
+						Response = {};
+					}
 				} else {
-					for (const removedKey of Object.keys(Station)) {
-						Station[removedKey].remove();
-						delete Station[removedKey];
-					}
+					const url = `https://exptech.com.tw/api/v1/trem/rts?time=${ReplayTime}&key=${setting["api.key"]}`;
+					const controller = new AbortController();
+					setTimeout(() => {
+						controller.abort();
+					}, 5000);
+					let ans = await fetch(url, { signal: controller.signal }).catch((err) => void 0);
 
-					Ping = "🔒";
-					Response = {};
-					handler(Response);
+					if (controller.signal.aborted || ans == undefined) {
+						void 0;
+					} else {
+						ans = await ans.json();
+						Ping = Date.now() - _t + "ms";
+						Response = ans;
+					}
 				}
+
+				handler(Response);
 			} catch (err) {
 				void 0;
 			}
