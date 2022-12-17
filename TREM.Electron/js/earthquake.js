@@ -52,7 +52,7 @@ const EarthquakeList = {};
 let marker = null;
 
 /**
- * @type {{main: maplibregl.Map, report: maplibregl.Map}}
+ * @type {{main: L.Map, report: maplibregl.Map}}
  */
 const Maps = { main: null, mini: null, report: null };
 
@@ -846,7 +846,7 @@ async function init() {
 						TREM.Earthquake.emit("focus", {
 							bounds  : [[21.77, 118.25], [25.47, 122.18]],
 							options : {
-								paddingBottomRight: [ 0, Maps.main.getCanvas().width / 6],
+								paddingBottomRight: [ 0, document.getElementById("map").offsetWidth / 6],
 							},
 						});
 					})
@@ -1323,7 +1323,89 @@ async function init() {
 					},
 				});
 			} else if (TREM.MapRenderingEngine == "leaflet") {
-				// TODO: Add leaflet map layers.
+				MapBases.main.set("tw_county_fill", L.geoJson.vt(MapData.tw_county, {
+					edgeBufferTiles : 2,
+					minZoom         : 4,
+					maxZoom         : 12,
+					tolerance       : 20,
+					buffer          : 256,
+					debug           : 0,
+					style           : {
+						border      : false,
+						fillColor   : TREM.Colors.surfaceVariant,
+						fillOpacity : 1,
+					},
+				}).addTo(Maps.main));
+				MapBases.main.set("intensity", L.geoJson.vt(MapData.tw_town, {
+					edgeBufferTiles : 2,
+					minZoom         : 4,
+					maxZoom         : 12,
+					tolerance       : 20,
+					buffer          : 256,
+					debug           : 0,
+					style           : {
+						color       : "transparent",
+						fillColor   : TREM.Colors.surfaceVariant,
+						fillOpacity : 0,
+					},
+				}).addTo(Maps.main));
+				MapBases.main.set("tw_county_line", L.geoJson.vt(MapData.tw_county, {
+					edgeBufferTiles : 2,
+					minZoom         : 4,
+					maxZoom         : 12,
+					tolerance       : 20,
+					buffer          : 256,
+					debug           : 0,
+					style           : {
+						color     : TREM.Colors.primary,
+						weight    : 1,
+						fillColor : "transparent",
+					},
+				}).addTo(Maps.main));
+				MapBases.main.set("pws_town", L.geoJson.vt(MapData.tw_town, {
+					edgeBufferTiles : 2,
+					minZoom         : 4,
+					maxZoom         : 12,
+					tolerance       : 20,
+					buffer          : 256,
+					debug           : 0,
+					style           : {
+						// color     :  "#efcc00",
+						color     : "transparent",
+						weight    : 2,
+						opacity   : 0,
+						fillColor : "transparent",
+					},
+				}).addTo(Maps.main));
+				MapBases.main.set("pws_town", L.geoJson.vt(MapData.tw_county, {
+					edgeBufferTiles : 2,
+					minZoom         : 4,
+					maxZoom         : 12,
+					tolerance       : 20,
+					buffer          : 256,
+					debug           : 0,
+					style           : {
+						// color     : "#efcc00",
+						color     : "transparent",
+						weight    : 2,
+						opacity   : 0,
+						fillColor : "transparent",
+					},
+				}).addTo(Maps.main));
+				MapBases.main.set("area", L.geoJson.vt(MapData.area, {
+					edgeBufferTiles : 2,
+					minZoom         : 4,
+					maxZoom         : 12,
+					tolerance       : 20,
+					buffer          : 256,
+					debug           : 0,
+					style           : {
+						color     : "transparent",
+						weight    : 3,
+						opacity   : 0,
+						fillColor : "transparent",
+					},
+				}).addTo(Maps.main));
 			}
 		}
 
@@ -1840,13 +1922,23 @@ async function setUserLocationMarker(town) {
 		UserLocationLon,
 	] = Location[setting["location.city"]][town];
 
-	if (!marker)
-		marker = new maplibregl.Marker({
-			element: $("<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>")[0],
-		})
-			.setLngLat([UserLocationLon, UserLocationLat])
-			.addTo(Maps.main);
-	else marker.setLngLat([UserLocationLon, UserLocationLat]);
+	if (!marker) {
+		if (TREM.MapRenderingEngine == "mapbox-gl")
+			marker = new maplibregl.Marker({
+				element: $("<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>")[0],
+			})
+				.setLngLat([UserLocationLon, UserLocationLat])
+				.addTo(Maps.main);
+		else if (TREM.MapRenderingEngine == "leaflet")
+			marker = L.marker([UserLocationLat, UserLocationLon], {
+				icon: L.divIcon({ html: "<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>" }),
+			})
+				.addTo(Maps.main);
+	} else if (TREM.MapRenderingEngine == "mapbox-gl") {
+		marker.setLngLat([UserLocationLon, UserLocationLat]);
+	} else if (TREM.MapRenderingEngine == "leaflet") {
+		marker.setLatLng([UserLocationLat, UserLocationLon]);
+	}
 }
 // #endregion
 
@@ -3388,17 +3480,27 @@ function main(data) {
 
 		// main map
 		if (!EarthquakeList[data.ID].epicenterIcon)
-			EarthquakeList[data.ID].epicenterIcon = new maplibregl.Marker(
-				{
-					element: $(`<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>`)[0],
-				})
-				.setLngLat([+data.EastLongitude, +data.NorthLatitude])
-				.addTo(Maps.main);
+			if (TREM.MapRenderingEngine == "mapbox-gl")
+				EarthquakeList[data.ID].epicenterIcon = new maplibregl.Marker(
+					{
+						element: $(`<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>`)[0],
+					})
+					.setLngLat([+data.EastLongitude, +data.NorthLatitude])
+					.addTo(Maps.main);
+			else if (TREM.MapRenderingEngine == "leaflet")
+				EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude, +data.EastLongitude],
+					{
+						icon: L.icon({ html: `<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>` }),
+					})
+					.addTo(Maps.main);
 
 		if (EarthquakeList[data.ID].epicenterIcon.getElement().src != iconUrl)
 			EarthquakeList[data.ID].epicenterIcon.getElement().src = iconUrl;
 
-		EarthquakeList[data.ID].epicenterIcon.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+		if (TREM.MapRenderingEngine == "mapbox-gl")
+			EarthquakeList[data.ID].epicenterIcon.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+		else if (TREM.MapRenderingEngine == "leaflet")
+			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
 		// mini map
 		if (!EarthquakeList[data.ID].epicenterIconTW) {

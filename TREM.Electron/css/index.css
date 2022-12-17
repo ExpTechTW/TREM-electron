@@ -1765,3 +1765,10 @@ button.hide + #report-detail-header-title {
 	right: -8px;
 	font-size: 20px;
 }
+
+/* leaflet */
+
+.leaflet-div-icon {
+    background: transparent;
+    border: 0;
+}
