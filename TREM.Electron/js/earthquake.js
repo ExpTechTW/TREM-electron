@@ -1410,7 +1410,7 @@ async function init() {
 	$("#loading").text(TREM.Localization.getString("Application_Welcome"));
 	$("#load").delay(1000).fadeOut(1000);
 	setInterval(() => {
-		if (mapLock) return;
+		if (mapLock || setting["map.autoZoom"]) return;
 
 		if (Object.keys(eew).length != 0) {
 			const finalBounds = new maplibregl.LngLatBounds();
@@ -1880,18 +1880,6 @@ async function setUserLocationMarker(town) {
 
 // #region 聚焦
 TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, linear = false) => {
-
-	/*
-	if (!setting["map.autoZoom"])
-		if (force) {
-			center = [23.608428, 120.799168];
-			zoom = 7.75;
-		} else {
-			return;
-		}
-
-		*/
-
 	if (bounds)
 		Maps.main.fitBounds(bounds, options);
 	else if (center)
