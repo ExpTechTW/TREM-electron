@@ -2067,17 +2067,6 @@ function ReportList(earthquakeReportArr, palert) {
 function addReport(report, prepend = false) {
 	if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
 
-	if (report.data.length == 0) report.data = [
-		{
-			areaName      : "未知",
-			areaIntensity : 0,
-			eqStation     : [
-				{
-					stationName: "未知",
-				},
-			],
-		},
-	];
 	const Level = IntensityI(report.data[0]?.areaIntensity);
 	let msg = "";
 
@@ -2627,12 +2616,13 @@ function FCMdata(json, Unit) {
 		const location = report.location.match(/(?<=位於).+(?=\))/);
 
 		if (!win.isFocused())
-			new Notification("地震報告",
-				{
-					body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
-					icon   : "../TREM.ico",
-					silent : win.isFocused(),
-				});
+			if (report.data)
+				new Notification("地震報告",
+					{
+						body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
+						icon   : "../TREM.ico",
+						silent : win.isFocused(),
+					});
 
 		addReport(report, true);
 
