@@ -37,5 +37,7 @@
     "Intensity_Five_strong": "5+",
     "Intensity_Six_Weak": "6-",
     "Intensity_Six_Strong": "6+",
-    "Intensity_Seven": "7"
+    "Intensity_Seven": "7",
+    "Report_Title_Local": "Local Earthquake",
+    "Report_Title_Small": "Small-felt-area Earthquake"
 }
