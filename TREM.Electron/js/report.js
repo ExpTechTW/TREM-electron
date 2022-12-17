@@ -453,15 +453,15 @@ TREM.Report = {
 		const focusCam = Maps.report.cameraForBounds(bounds, {
 			padding: {
 				top    : canvasHeight * zoomPredict,
-				left   : canvasWidth * zoomPredict,
+				left   : document.getElementById("report-overview").offsetWidth + 40,
 				bottom : canvasHeight * zoomPredict,
 				right  : canvasWidth * zoomPredict,
 			},
 		});
 		this._focusMap(bounds, {
-			zoom    : focusCam.zoom * (this._markers.length > 1 ? 1 : 0.8),
+			zoom    : focusCam.zoom * (this._markers.length > 1 ? 0.975 : 0.8),
 			padding : {
-				left: (canvasWidth / 2) * 0.85,
+				left: document.getElementById("report-overview").offsetWidth + canvasWidth * zoomPredict,
 			},
 			duration: 1000,
 		});
