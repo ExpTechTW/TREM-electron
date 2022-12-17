@@ -1459,6 +1459,7 @@ async function init() {
 				TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
 			}
 		} else if (TREM.MapArea.cache.size) {
+			map_move_back = true;
 			const bounds = (TREM.MapRenderingEngine == "mapbox-gl") ? new maplibregl.LngLatBounds() : new L.Bounds();
 
 			for (const [ id ] of TREM.MapArea.cache) {
