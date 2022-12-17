@@ -72,15 +72,11 @@ TREM.Report = {
 		el.querySelector(".report-list-item-id").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
 		el.querySelector(".report-list-item-time").innerText = report.originTime.replace(/-/g, "/");
 
-		if (report.data[0]?.areaIntensity) {
-			el.querySelector("button").value = report.identifier;
-			el.querySelector("button").addEventListener("click", function() {
-				TREM.Report.setView("report-overview", this.value);
-			});
-			ripple(el.querySelector("button"));
-		} else {
-			el.querySelector("button").style.display = "none";
-		}
+		el.querySelector("button").value = report.identifier;
+		el.querySelector("button").addEventListener("click", function() {
+			TREM.Report.setView("report-overview", this.value);
+		});
+		ripple(el.querySelector("button"));
 
 		return el;
 	},
@@ -389,11 +385,23 @@ TREM.Report = {
 		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
 		document.getElementById("report-overview-depth").innerText = report.depth;
 
-		if ("earthquakeNo" in report)
+		if (report.location.startsWith("TREM 人工定位")) {
+			document.getElementById("report-detail-copy").style.display = "none";
+		} else {
+			document.getElementById("report-detail-copy").style.display = "";
 			document.getElementById("report-detail-copy").value = report.identifier;
+		}
+
 		document.getElementById("report-replay").value = report.identifier;
 
-		const cwb_code = "EQ"
+		if (report.location.startsWith("TREM 人工定位")) {
+			document.getElementById("report-cwb").style.display = "none";
+			document.getElementById("report-scweb").style.display = "none";
+		} else {
+			document.getElementById("report-cwb").style.display = "";
+			document.getElementById("report-scweb").style.display = "";
+
+			const cwb_code = "EQ"
 			+ report.earthquakeNo
 			+ "-"
 			+ (time.getMonth() + 1 < 10 ? "0" : "") + (time.getMonth() + 1)
@@ -402,9 +410,9 @@ TREM.Report = {
 			+ (time.getHours() < 10 ? "0" : "") + time.getHours()
 			+ (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
 			+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds();
-		document.getElementById("report-cwb").value = `https://www.cwb.gov.tw/V8/C/E/EQ/${cwb_code}.html`;
+			document.getElementById("report-cwb").value = `https://www.cwb.gov.tw/V8/C/E/EQ/${cwb_code}.html`;
 
-		const scweb_code = ""
+			const scweb_code = ""
 			+ time.getFullYear()
 			+ (time.getMonth() + 1 < 10 ? "0" : "") + (time.getMonth() + 1)
 			+ (time.getDate() < 10 ? "0" : "") + time.getDate()
@@ -413,7 +421,8 @@ TREM.Report = {
 			+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds()
 			+ (report.magnitudeValue * 10)
 			+ (report.earthquakeNo - 111000 ? report.earthquakeNo - 111000 : "");
-		document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
+			document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
+		}
 
 		if (report.data.length)
 			for (const data of report.data)
@@ -438,15 +447,21 @@ TREM.Report = {
 			bounds.extend(marker.getLngLat());
 
 		const camera = Maps.report.cameraForBounds(bounds);
-		const zoomPredict = (1 / (Maps.report.getMaxZoom() * (camera.zoom ** ((2 * Maps.report.getMaxZoom() - (Maps.report.getMinZoom() + camera.zoom)) / camera.zoom)))) * (camera.zoom - Maps.report.getMinZoom()) * ((this._markers.length > 1) ? 1 : 0.25);
+		const zoomPredict = (1 / (Maps.report.getMaxZoom() * (camera.zoom ** ((2 * Maps.report.getMaxZoom() - (Maps.report.getMinZoom() + camera.zoom)) / camera.zoom)))) * (camera.zoom - Maps.report.getMinZoom());
 		const canvasHeight = Maps.report.getCanvas().height;
 		const canvasWidth = Maps.report.getCanvas().width;
-		this._focusMap(bounds, {
+		const focusCam = Maps.report.cameraForBounds(bounds, {
 			padding: {
 				top    : canvasHeight * zoomPredict,
-				left   : (canvasWidth / 2) * 0.8,
+				left   : canvasWidth * zoomPredict,
 				bottom : canvasHeight * zoomPredict,
 				right  : canvasWidth * zoomPredict,
+			},
+		});
+		this._focusMap(bounds, {
+			zoom    : focusCam.zoom * (this._markers.length > 1 ? 1 : 0.8),
+			padding : {
+				left: (canvasWidth / 2) * 0.85,
 			},
 			duration: 1000,
 		});
