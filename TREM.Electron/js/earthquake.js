@@ -1475,7 +1475,7 @@ async function init() {
 					top    : canvas.height / 8,
 					right  : canvas.width / 5,
 				},
-				maxZoom: 9,
+				maxZoom: 8.5,
 			});
 
 			if (camera.zoom != Maps.main.getZoom() && !Maps.main.isEasing())
@@ -3477,9 +3477,8 @@ function main(data) {
 				break;
 			}
 
-	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
+	if (NOW.getTime() - data.TimeStamp > ((data.EastLongitude < 123.5 && data.NorthLatitude < 26) ? 100_000 : 180_000) || Cancel) {
 		TREM.Earthquake.emit("eewEnd", data.ID);
-
 		TREM.MapIntensity.clear();
 
 		// remove epicenter cross icons
