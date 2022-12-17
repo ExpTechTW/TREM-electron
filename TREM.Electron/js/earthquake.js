@@ -1407,7 +1407,7 @@ async function init() {
 	$("#loading").text(TREM.Localization.getString("Application_Welcome"));
 	$("#load").delay(1000).fadeOut(1000);
 	setInterval(() => {
-		if (mapLock || setting["map.autoZoom"]) return;
+		if (mapLock || !setting["map.autoZoom"]) return;
 
 		if (Object.keys(eew).length != 0) {
 			const finalBounds = new maplibregl.LngLatBounds();
