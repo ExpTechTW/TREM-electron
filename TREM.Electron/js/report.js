@@ -89,29 +89,19 @@ TREM.Report = {
 			this.reportListElement.appendChild(fragment);
 		}
 	},
-	_createReportItem(data) {
+	_createReportItem(report) {
 		const el = document.importNode(this._reportItemTemplate.content, true).querySelector(".report-list-item");
-		el.id = data.identifier;
-		el.className += ` ${IntensityToClassString(data.data[0].areaIntensity)}`;
-		el.querySelector(".report-list-item-location").innerText = data.location;
-		el.querySelector(".report-list-item-id").innerText = data.earthquakeNo % 1000 ? data.earthquakeNo : "小區域有感地震";
-		el.querySelector(".report-list-item-time").innerText = data.originTime.replace(/-/g, "/");
+		el.id = report.identifier;
+		el.className += ` ${IntensityToClassString(report.data[0].areaIntensity)}`;
+		el.querySelector(".report-list-item-location").innerText = report.location;
+		el.querySelector(".report-list-item-id").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
+		el.querySelector(".report-list-item-time").innerText = report.originTime.replace(/-/g, "/");
 
-		if (data.data[0]?.areaIntensity) {
-			el.querySelector("button").value = data.identifier;
-			el.querySelector("button").addEventListener("click", function() {
-				TREM.Report.setView("report-overview", this.value);
-			});
-			ripple(el.querySelector("button"));
-		} else if (data.data[0].areaIntensity == 0) {
-			el.querySelector("button").value = data.identifier;
-			el.querySelector("button").addEventListener("click", function() {
-				TREM.Report.setView("report-overview", this.value);
-			});
-			ripple(el.querySelector("button"));
-		} else {
-			el.querySelector("button").style.display = "none";
-		}
+		el.querySelector("button").value = report.identifier;
+		el.querySelector("button").addEventListener("click", function() {
+			TREM.Report.setView("report-overview", this.value);
+		});
+		ripple(el.querySelector("button"));
 
 		return el;
 	},
@@ -443,25 +433,39 @@ TREM.Report = {
 
 		if (!report) return;
 
-		document.getElementById("report-overview-number").innerText = report.earthquakeNo % 1000 ? report.earthquakeNo : "小區域有感地震";
+		document.getElementById("report-overview-number").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
 		document.getElementById("report-overview-location").innerText = report.location;
 		const time = new Date(`${report.originTime} GMT+08:00`);
 		document.getElementById("report-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
 		document.getElementById("report-overview-latitude").innerText = report.epicenterLat;
 		document.getElementById("report-overview-longitude").innerText = report.epicenterLon;
-		const int = `${IntensityI(report.data[0].areaIntensity)}`.split("");
-		document.getElementById("report-overview-intensity").innerText = (int[0] == 0) ? "?" : int[0];
+
+		const int = `${IntensityI(report.data[0]?.areaIntensity)}`.split("");
+		document.getElementById("report-overview-intensity").innerText = (report.location.startsWith("TREM 人工定位")) ? "?" : int[0];
 		document.getElementById("report-overview-intensity").className = (int[1] == "+") ? "strong"
 			: (int[1] == "-") ? "weak"
 				: "";
-		document.getElementById("report-overview-intensity-location").innerText = `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`;
+
+		document.getElementById("report-overview-intensity-location").innerText = (report.location.startsWith("TREM 人工定位")) ? "" : `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`;
 		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
 		document.getElementById("report-overview-depth").innerText = report.depth;
 
-		document.getElementById("report-detail-copy").value = report.identifier;
+		if (report.location.startsWith("TREM 人工定位")) {
+			document.getElementById("report-detail-copy").style.display = "none";
+		} else {
+			document.getElementById("report-detail-copy").style.display = "";
+			document.getElementById("report-detail-copy").value = report.identifier;
+		}
+
 		document.getElementById("report-replay").value = report.identifier;
 
-		if (report.data[0].areaIntensity != 0) {
+		if (report.location.startsWith("TREM 人工定位")) {
+			document.getElementById("report-cwb").style.display = "none";
+			document.getElementById("report-scweb").style.display = "none";
+		} else {
+			document.getElementById("report-cwb").style.display = "";
+			document.getElementById("report-scweb").style.display = "";
+
 			const cwb_code = "EQ"
 				+ report.earthquakeNo
 				+ "-"
@@ -483,7 +487,9 @@ TREM.Report = {
 				+ (report.magnitudeValue * 10)
 				+ (report.earthquakeNo - 111000 ? report.earthquakeNo - 111000 : "");
 			document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
+		}
 
+		if (report.data.length)
 			for (const data of report.data)
 				for (const eqStation of data.eqStation)
 					if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
@@ -502,10 +508,6 @@ TREM.Report = {
 								}),
 								zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
 							}));
-		} else {
-			document.getElementById("report-cwb").style.display = "none";
-			document.getElementById("report-scweb").style.display = "none";
-		}
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			this._markers.push(
@@ -517,6 +519,7 @@ TREM.Report = {
 			);
 
 			const bounds = new maplibregl.LngLatBounds();
+
 			for (const marker of this._markers)
 				bounds.extend(marker.getLngLat());
 
@@ -524,12 +527,18 @@ TREM.Report = {
 			const zoomPredict = (1 / (Maps.report.getMaxZoom() * (camera.zoom ** ((2 * Maps.report.getMaxZoom() - (Maps.report.getMinZoom() + camera.zoom)) / camera.zoom)))) * (camera.zoom - Maps.report.getMinZoom());
 			const canvasHeight = Maps.report.getCanvas().height;
 			const canvasWidth = Maps.report.getCanvas().width;
-			this._focusMap(bounds, {
+			const focusCam = Maps.report.cameraForBounds(bounds, {
 				padding: {
 					top    : canvasHeight * zoomPredict,
-					left   : (canvasWidth / 2) * 0.8,
+					left   : canvasWidth * zoomPredict,
 					bottom : canvasHeight * zoomPredict,
 					right  : canvasWidth * zoomPredict,
+				},
+			});
+			this._focusMap(bounds, {
+				zoom    : focusCam.zoom * (this._markers.length > 1 ? 1 : 0.8),
+				padding : {
+					left: (canvasWidth / 2) * 0.85,
 				},
 				duration: 1000,
 			});

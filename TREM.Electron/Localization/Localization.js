@@ -34,7 +34,7 @@ class Localization {
 	}
 
 	getString(id, locale) {
-		return this[locale]?.get(id) ?? this[this.defaultLocale]?.get(id) ?? this[this.fallbackLocale]?.get(id);
+		return this[locale]?.get(id) ?? this[this.defaultLocale]?.get(id) ?? this[this.fallbackLocale]?.get(id) ?? id;
 	}
 }
 

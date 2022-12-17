@@ -138,6 +138,7 @@ TREM.Detector = {
 TREM.MapIntensity = {
 	isTriggered : false,
 	alertTime   : 0,
+	MaxI        : 0,
 	intensities : new Map(),
 	palert(rawPalertData) {
 		if (rawPalertData.data?.length && !replay) {
@@ -155,12 +156,12 @@ TREM.MapIntensity = {
 					int.set(towncode, palertEntry.intensity);
 					PLoc[towncode] = palertEntry.intensity;
 
-					if (palertEntry.intensity > MaxI) {
-						MaxI = palertEntry.intensity;
+					if (palertEntry.intensity > this.MaxI) {
+						this.MaxI = palertEntry.intensity;
 						Report = NOW.getTime();
 						ReportGET({
-							Max  : MaxI,
-							Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
+							Max  : this.MaxI,
+							Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
 						});
 					}
 				}
@@ -350,13 +351,15 @@ TREM.MapIntensity = {
 	clear() {
 		dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
 
+		this.alertTime = 0;
+		this.MaxI = 0;
+		this.isTriggered = false;
+
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (this.intensities.size) {
 				Maps.main.removeFeatureState({ source: "Source_tw_town" });
 				Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
 				this.intensities = new Map();
-				this.alertTime = 0;
-				this.isTriggered = false;
 
 				if (this.timer) {
 					clearTimeout(this.timer);
@@ -364,7 +367,6 @@ TREM.MapIntensity = {
 				}
 			}
 		} else if (palert_geojson != null) {
-			this.isTriggered = false;
 			palert_geojson.remove();
 			palert_geojson = null;
 		}
@@ -1806,7 +1808,7 @@ async function init() {
 	$("#loading").text(TREM.Localization.getString("Application_Welcome"));
 	$("#load").delay(1000).fadeOut(1000);
 	setInterval(() => {
-		if (mapLock) return;
+		if (mapLock || setting["map.autoZoom"]) return;
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (Object.keys(eew).length != 0) {
@@ -2694,17 +2696,6 @@ async function setUserLocationMarker(town, errcode = false) {
 // #region 聚焦
 TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, linear = false) => {
 
-	/*
-	if (!setting["map.autoZoom"])
-		if (force) {
-			center = [23.608428, 120.799168];
-			zoom = 7.75;
-		} else {
-			return;
-		}
-
-	*/
-
 	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 		if (bounds)
 			Maps.main.fitBounds(bounds, options);
@@ -2886,7 +2877,14 @@ async function getReportData() {
 }
 
 ipcMain.on("ReportGET", () => {
-	ReportGET();
+	if(Report != 0) {
+		ReportGET({
+			Max  : TREM.MapIntensity.MaxI,
+			Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
+		});
+	} else {
+		ReportGET();
+	}
 });
 // #endregion
 
@@ -2916,18 +2914,7 @@ function ReportList(earthquakeReportArr, palert) {
 function addReport(report, prepend = false) {
 	if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
 
-	if (report.data.length == 0) report.data = [
-		{
-			areaName      : "未知",
-			areaIntensity : 0,
-			eqStation     : [
-				{
-					stationName: "未知",
-				},
-			],
-		},
-	];
-	const Level = IntensityI(report.data[0].areaIntensity);
+	const Level = IntensityI(report.data[0]?.areaIntensity);
 	// if (setting["api.key"] == "" && Level == "?") return;
 	let msg = "";
 
@@ -3742,12 +3729,13 @@ function FCMdata(data, Unit) {
 		const location = json.Location.match(/(?<=位於).+(?=\))/);
 
 		if (!win.isFocused())
-			new Notification("地震報告",
-				{
-					body   : `${location}發生規模 ${json.Scale} 有感地震，最大震度${(json.Max == null) ? "?" : json.Max}。\n${json["UTC+8"]}`,
-					icon   : "../TREM.ico",
-					silent : win.isFocused(),
-				});
+			if (report.data)
+				new Notification("地震報告",
+					{
+						body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
+						icon   : "../TREM.ico",
+						silent : win.isFocused(),
+					});
 
 		addReport(report, true);
 		ipcRenderer.send("report-Notification", report);

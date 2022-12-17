@@ -1954,6 +1954,7 @@ stop.pred-stop {
 	font-size: 14px;
 	font-variant-numeric: tabular-nums;
 	z-index: 100000;
+	white-space: nowrap;
 	overflow: hidden;
 }
 
