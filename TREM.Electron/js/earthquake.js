@@ -3419,26 +3419,7 @@ function main(data) {
 					},
 				);
 		} else {
-			let Progress = 0;
 			const num = (NOW.getTime() - data.Time) / 10 / EarthquakeList[data.ID].distance[1].Stime;
-
-			if (num > 15) Progress = 1;
-
-			if (num > 25) Progress = 2;
-
-			if (num > 35) Progress = 3;
-
-			if (num > 45) Progress = 4;
-
-			if (num > 55) Progress = 5;
-
-			if (num > 65) Progress = 6;
-
-			if (num > 75) Progress = 7;
-
-			if (num > 85) Progress = 8;
-
-			if (num > 98) Progress = 9;
 
 			if (!TREM.EEW.get(data.ID).waveProgress)
 				TREM.EEW.get(data.ID).waveProgress = new maplibregl.Marker({ element: $(`<div class="s-wave-progress-container"><div class="s-wave-progress" style="height:${num}%;"></div></div>`)[0] })
