@@ -2184,6 +2184,24 @@ button.hide + #report-detail-header-title {
 	font-size: 20px;
 }
 
+.s-wave-progress-container {
+	position: relative;
+	display: flex;
+	flex-direction: column-reverse;
+	height: 70px;
+	width: 8px;
+	margin-left: 40px;
+	padding: 4px;
+	border-radius: 8px;
+	background: linear-gradient(0deg, rgba(var(--md-sys-color-primary), .14) 0%, rgba(var(--md-sys-color-primary), .14) 100%), rgb(var(--md-sys-color-background));
+}
+
+.s-wave-progress {
+	width: 8px;
+	border-radius: 4px;
+	background-color: rgb(var(--md-sys-color-primary));
+}
+
 /* leaflet */
 
 .leaflet-div-icon {

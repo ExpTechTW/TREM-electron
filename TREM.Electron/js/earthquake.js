@@ -4352,7 +4352,12 @@ function main(data) {
 							.setRadius(kmP);
 					}
 
-			if (km > data.Depth * 1000) {
+			if (km > data.Depth * 100) {
+				if (TREM.EEW.get(data.ID).waveProgress) {
+					TREM.EEW.get(data.ID).waveProgress.remove();
+					delete TREM.EEW.get(data.ID).waveProgress;
+				}
+
 				eew[data.ID].km = km;
 
 				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -4444,14 +4449,11 @@ function main(data) {
 				if (num > 85) Progress = 8;
 
 				if (num > 98) Progress = 9;
-				const myIcon = L.icon({
-					iconUrl  : `../image/progress${Progress}.png`,
-					iconSize : [50, 50],
-				});
-				const DepthM = L.marker([Number(data.NorthLatitude), Number(data.EastLongitude) + 0.15], { icon: myIcon });
-				EarthquakeList[data.ID].Depth = DepthM;
-				Maps.main.addLayer(DepthM);
-				DepthM.setZIndexOffset(6000);
+				if (!TREM.EEW.get(data.ID).waveProgress)
+					TREM.EEW.get(data.ID).waveProgress = new maplibregl.Marker({ element: $(`<div class="s-wave-progress-container"><div class="s-wave-progress" style="height:${num}%;"></div></div>`)[0] })
+						.setLngLat([+data.EastLongitude, +data.NorthLatitude])
+						.addTo(Maps.main);
+				else TREM.EEW.get(data.ID).waveProgress.getElement().firstChild.style.height = `${num}%`;
 			}
 		}
 
