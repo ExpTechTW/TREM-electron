@@ -56,7 +56,7 @@ const EarthquakeList = {};
 let marker = null;
 
 /**
- * @type {{main: maplibregl.Map, report: maplibregl.Map}}
+ * @type {{main: L.Map, report: maplibregl.Map}}
  */
 const Maps = { main: null, mini: null, report: null, intensity: null };
 
@@ -1601,8 +1601,13 @@ async function init() {
 					})
 					.on("click", () => {
 						mapLock = false;
-						// TREM.Earthquake.emit("focus", {}, true);
-						TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+						TREM.Earthquake.emit("focus", {
+							bounds  : [[21.77, 118.25], [25.47, 122.18]],
+							options : {
+								paddingBottomRight: [ 0, Maps.main.getCanvas().width / 6],
+								paddingBottomRight: [ 0, document.getElementById("map").offsetWidth / 6],
+							},
+						});
 					})
 					.on("contextmenu", () => {
 						TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
@@ -2564,24 +2569,23 @@ async function setUserLocationMarker(town, errcode = false) {
 		UserLocationLon,
 	] = Location[setting["location.city"]][town];
 
-	if (!marker)
-
-		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+	if (!marker) {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 			marker = new maplibregl.Marker({
 				element: $("<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>")[0],
 			})
 				.setLngLat([UserLocationLon, UserLocationLat])
 				.addTo(Maps.main);
-		} else {
-			const icon = L.icon({
-				iconUrl  : "../image/here.png",
-				iconSize : [20, 20],
-			});
-			marker = L.marker([UserLocationLat, UserLocationLon], { icon: icon })
-				.setZIndexOffset(1)
+		else if (TREM.MapRenderingEngine == "leaflet")
+			marker = L.marker([UserLocationLat, UserLocationLon], {
+				icon: L.divIcon({ html: "<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>" }),
+			})
 				.addTo(Maps.main);
-		}
-	else marker.setLngLat([UserLocationLon, UserLocationLat]);
+	} else if (TREM.MapRenderingEngine == "mapbox-gl") {
+		marker.setLngLat([UserLocationLon, UserLocationLat]);
+	} else if (TREM.MapRenderingEngine == "leaflet") {
+		marker.setLatLng([UserLocationLat, UserLocationLon]);
+	}
 	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
 
 	if (!TREM.Detector.webgl)
@@ -4494,8 +4498,12 @@ function main(data) {
 					})
 					.setLngLat([+data.EastLongitude, +data.NorthLatitude])
 					.addTo(Maps.main);
-			else
-				EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon, zIndexOffset: 6000 }).addTo(Maps.main);
+			else if (TREM.MapRenderingEngine == "leaflet")
+				EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude, +data.EastLongitude],
+					{
+						icon: L.icon({ html: `<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>` }),
+					})
+					.addTo(Maps.main);
 
 
 		if (EarthquakeList[data.ID].epicenterIcon.getElement().src != iconUrl)
@@ -4503,8 +4511,8 @@ function main(data) {
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 			EarthquakeList[data.ID].epicenterIcon.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
-		else
-			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
+		else if (TREM.MapRenderingEngine == "leaflet")
+			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
 
 		// mini map

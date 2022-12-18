@@ -2184,6 +2184,15 @@ button.hide + #report-detail-header-title {
 	font-size: 20px;
 }
 
+/* leaflet */
+
+.leaflet-div-icon {
+    background: transparent;
+    border: 0;
+}
+
+/* leaflet end */
+
 #intensity-detail {
 	user-select: none;
 	position: absolute;
