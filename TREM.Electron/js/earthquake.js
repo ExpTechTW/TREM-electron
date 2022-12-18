@@ -579,7 +579,6 @@ class WaveCircle {
 			type : "geojson",
 			data : turfCircle(lnglat, radius, { units: "meters" }),
 		}).getSource(`Source_${id}`);
-
 		this.layer = map.addLayer({
 			...layerOptions,
 			id     : `Layer_${id}`,
@@ -597,7 +596,6 @@ class WaveCircle {
 					"line-color" : layerOptions.paint["fill-color"],
 				},
 			}).getLayer(`Layer_${id}_Border`);
-
 	}
 
 	setLngLat(lnglat) {
@@ -967,8 +965,21 @@ async function init() {
 						renderWorldCopies : false,
 						keyboard          : false,
 						doubleClickZoom   : false,
+						dragRotate        : false,
+						touchZoomRotate   : false,
+					})
+					.on("drag", () => {
+						mapLock = true;
 					})
 					.on("click", (ev) => {
+						mapLock = false;
+
+						if (ev.originalEvent.target.tagName == "CANVAS")
+							Mapsmainfocus();
+					})
+					.on("contextmenu", (ev) => {
+						mapLock = false;
+
 						if (ev.originalEvent.target.tagName == "CANVAS")
 							Mapsmainfocus();
 					})
@@ -983,17 +994,6 @@ async function init() {
 									if (!Station[key].getPopup().persist)
 										Station[key].togglePopup();
 						}
-					})
-					.on("contextmenu", (ev) => {
-						if (ev.originalEvent.target.tagName == "CANVAS")
-							Mapsmainfocus();
-							// TREM.Earthquake.emit("focus", {
-							// 	center  : pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine),
-							// 	zoom    : 7.75,
-							// 	options : {
-							// 		padding: { bottom: 0, right: 0 },
-							// 	},
-							// });
 					});
 
 			if (!Maps.mini)
@@ -1549,9 +1549,6 @@ async function init() {
 					},
 				}).getLayer("Layer_tw_county_Line"));
 			}
-
-			Maps.main.dragRotate.disable();
-			Maps.main.touchZoomRotate.disableRotation();
 		} else {
 
 			if (!Maps.main) {
