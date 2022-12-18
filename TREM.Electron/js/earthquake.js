@@ -2838,7 +2838,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 				if (t != null) clearInterval(t);
 				t = setInterval(() => {
-					value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000) + 1;
+					value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
 					Second = value;
 
 					if (stamp != value && !audio.minor_lock) {
