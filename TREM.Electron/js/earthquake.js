@@ -4536,7 +4536,7 @@ function main(data) {
 				break;
 			}
 
-	if (NOW.getTime() - data.TimeStamp > ((data.EastLongitude < 123.5 && data.NorthLatitude < 26) ? 100_000 : 180_000) || Cancel) {
+	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
 		TREM.Earthquake.emit("eewEnd", data.ID);
 		TREM.MapIntensity.clear();
 
