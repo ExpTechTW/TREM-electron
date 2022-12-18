@@ -104,7 +104,6 @@ let replaytestEEW = 0;
 TREM.toggleNavTime = 0;
 let Second = -1;
 let mapLock = false;
-let auto = false;
 const eew = {};
 const eewt = { id: 0, time: 0 };
 let TSUNAMI = {};
@@ -144,7 +143,6 @@ TREM.MapIntensity = {
 			if (rawPalertData.timestamp != this.alertTime) {
 				this.alertTime = rawPalertData.timestamp;
 				const PLoc = {};
-				let MaxI = 0;
 				const int = new Map();
 
 				for (const palertEntry of rawPalertData.data) {
@@ -1571,7 +1569,6 @@ async function init() {
 						TREM.Earthquake.emit("focus", {
 							bounds  : [[21.77, 118.25], [25.47, 122.18]],
 							options : {
-								paddingBottomRight: [ 0, Maps.main.getCanvas().width / 6],
 								paddingBottomRight: [ 0, document.getElementById("map").offsetWidth / 6],
 							},
 						});
@@ -2276,7 +2273,7 @@ function handler(Json) {
 	}
 
 	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-		if (Object.keys(detected_list).length) {
+		if (Object.keys(detected_list).length)
 			for (let index = 0, pgaKeys = Object.keys(detected_list); index < pgaKeys.length; index++) {
 				const Intensity = detected_list[pgaKeys[index]]?.intensity;
 
@@ -2317,9 +2314,8 @@ function handler(Json) {
 					}
 				}
 			}
-		} else if (TREM.MapArea.isVisible) {
+		else if (TREM.MapArea.isVisible)
 			TREM.MapArea.clear();
-		}
 	} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 		if (Object.keys(detected_box_list).length)
 			for (let index = 0; index < Object.keys(detected_box_list).length; index++) {
@@ -2553,6 +2549,7 @@ async function setUserLocationMarker(town, errcode = false) {
 	} else if (TREM.MapRenderingEngine == "leaflet") {
 		marker.setLatLng([UserLocationLat, UserLocationLon]);
 	}
+
 	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
 
 	if (!TREM.Detector.webgl)
@@ -2742,14 +2739,12 @@ async function getReportData() {
 }
 
 ipcMain.on("ReportGET", () => {
-	if(Report != 0) {
+	if (Report != 0)
 		ReportGET({
 			Max  : TREM.MapIntensity.MaxI,
 			Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
 		});
-	} else {
-		ReportGET();
-	}
+	else ReportGET();
 });
 // #endregion
 
@@ -3592,6 +3587,7 @@ function FCMdata(data, Unit) {
 						icon   : "../TREM.ico",
 						silent : win.isFocused(),
 					});
+
 				if (setting["audio.report"]) audioPlay("../audio/Report.wav");
 			}
 
@@ -4443,13 +4439,14 @@ function main(data) {
 		if (cursor == 3) offsetY = -0.03;
 
 		if (cursor == 4) offsetX = -0.03;
-		} else {
-			epicenterIcon = L.icon({
-				iconUrl,
-				iconSize  : [30, 30],
-				className : "epicenterIcon",
-			});
-		}
+
+	} else {
+		epicenterIcon = L.icon({
+			iconUrl,
+			iconSize  : [30, 30],
+			className : "epicenterIcon",
+		});
+	}
 
 	// main map
 	if (!EarthquakeList[data.ID].epicenterIcon)
@@ -4467,54 +4464,53 @@ function main(data) {
 				})
 				.addTo(Maps.main);
 
+	if (EarthquakeList[data.ID].epicenterIcon.getElement().src != iconUrl)
+		EarthquakeList[data.ID].epicenterIcon.getElement().src = iconUrl;
 
-		if (EarthquakeList[data.ID].epicenterIcon.getElement().src != iconUrl)
-			EarthquakeList[data.ID].epicenterIcon.getElement().src = iconUrl;
+	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+		EarthquakeList[data.ID].epicenterIcon.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+	else if (TREM.MapRenderingEngine == "leaflet")
+		EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
-		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
-			EarthquakeList[data.ID].epicenterIcon.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
-		else if (TREM.MapRenderingEngine == "leaflet")
-			EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+	// mini map
+	if (!EarthquakeList[data.ID].epicenterIconTW) {
+		EarthquakeList[data.ID].epicenterIconTW = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon }).addTo(Maps.mini);
+		EarthquakeList[data.ID].epicenterIconTW.getElement().classList.add("hide");
+	}
 
-		// mini map
-		if (!EarthquakeList[data.ID].epicenterIconTW) {
-			EarthquakeList[data.ID].epicenterIconTW = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon }).addTo(Maps.mini);
-			EarthquakeList[data.ID].epicenterIconTW.getElement().classList.add("hide");
-		}
+	if (EarthquakeList[data.ID].epicenterIconTW.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
+		EarthquakeList[data.ID].epicenterIconTW.setIcon(epicenterIcon);
 
-		if (EarthquakeList[data.ID].epicenterIconTW.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
-			EarthquakeList[data.ID].epicenterIconTW.setIcon(epicenterIcon);
+	if (!EarthquakeList[data.ID].epicenterIconTW.getLatLng().equals([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]))
+		EarthquakeList[data.ID].epicenterIconTW.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
 
-			if (!EarthquakeList[data.ID].epicenterIconTW.getLatLng().equals([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]))
-				EarthquakeList[data.ID].epicenterIconTW.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
+	if (!Timers.epicenterBlinker)
+		Timers.epicenterBlinker = setInterval(() => {
+			const epicenter_blink_state = EarthquakeList[Object.keys(EarthquakeList)[0]]?.epicenterIcon?.getElement()?.classList?.contains("hide");
 
-				if (!Timers.epicenterBlinker)
-				Timers.epicenterBlinker = setInterval(() => {
-					const epicenter_blink_state = EarthquakeList[Object.keys(EarthquakeList)[0]]?.epicenterIcon?.getElement()?.classList?.contains("hide");
+			if (epicenter_blink_state != undefined)
+				for (const key in EarthquakeList) {
+					const el = EarthquakeList[key];
 
-					if (epicenter_blink_state != undefined)
-					for (const key in EarthquakeList) {
-						const el = EarthquakeList[key];
+					if (epicenter_blink_state) {
+						if (el.epicenterIcon.getElement().classList.contains("hide"))
+							el.epicenterIcon.getElement().classList.remove("hide");
+					} else if (!el.epicenterIcon.getElement().classList.contains("hide")) {
+						el.epicenterIcon.getElement().classList.add("hide");
+					}
 
+					if (key == INFO[TINFO].ID) {
 						if (epicenter_blink_state) {
-							if (el.epicenterIcon.getElement().classList.contains("hide"))
-								el.epicenterIcon.getElement().classList.remove("hide");
-						} else if (!el.epicenterIcon.getElement().classList.contains("hide")) {
-							el.epicenterIcon.getElement().classList.add("hide");
-						}
-
-						if (key == INFO[TINFO].ID) {
-							if (epicenter_blink_state) {
-								if (el.epicenterIconTW.getElement().classList.contains("hide"))
-									el.epicenterIconTW.getElement().classList.remove("hide");
-							} else if (!el.epicenterIconTW.getElement().classList.contains("hide")) {
-								el.epicenterIconTW.getElement().classList.add("hide");
-							}
-						} else if (!el.epicenterIconTW.getElement()?.classList?.contains("hide")) {
+							if (el.epicenterIconTW.getElement().classList.contains("hide"))
+								el.epicenterIconTW.getElement().classList.remove("hide");
+						} else if (!el.epicenterIconTW.getElement().classList.contains("hide")) {
 							el.epicenterIconTW.getElement().classList.add("hide");
 						}
+					} else if (!el.epicenterIconTW.getElement()?.classList?.contains("hide")) {
+						el.epicenterIconTW.getElement().classList.add("hide");
 					}
-				}, 500);
+				}
+		}, 500);
 
 	// #endregion <- Epicenter Cross Icon
 
