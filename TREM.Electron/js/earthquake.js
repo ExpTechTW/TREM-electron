@@ -4573,7 +4573,7 @@ function main(data) {
 			if (INFO[index].ID == data.ID) {
 				INFO[index].alert_type = "alert-box eew-cancel";
 				data.TimeStamp = NOW.getTime() - 150000;
-				clear(data.ID);
+				TREM.Earthquake.emit("eewEnd", data.ID);
 				EarthquakeList[data.ID].Cancel = true;
 
 				if (Object.keys(EarthquakeList).length == 1) {
@@ -4585,9 +4585,8 @@ function main(data) {
 				break;
 			}
 
-	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
-		clear(data.ID);
-
+	if (NOW.getTime() - data.TimeStamp > ((data.EastLongitude < 123.5 && data.NorthLatitude < 26) ? 100_000 : 180_000) || Cancel) {
+		TREM.Earthquake.emit("eewEnd", data.ID);
 		TREM.MapIntensity.clear();
 
 		// remove epicenter cross icons
