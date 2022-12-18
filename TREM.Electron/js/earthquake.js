@@ -2956,12 +2956,12 @@ TREM.Earthquake.on("eew", (data) => {
     main(data);
   }, speed);
 
-  if (EarthquakeList[data.ID].geojson != undefined) {
-    EarthquakeList[data.ID].geojson.remove();
-    delete EarthquakeList[data.ID].geojson;
+  if (TREM.EEW.get(INFO[TINFO].ID).geojson) {
+    TREM.EEW.get(INFO[TINFO].ID).geojson.remove();
+    delete TREM.EEW.get(INFO[TINFO].ID).geojson;
   }
 
-  EarthquakeList[data.ID].geojson = L.geoJson.vt(MapData.tw_town, {
+  TREM.EEW.get(INFO[TINFO].ID).geojson = L.geoJson.vt(MapData.tw_town, {
     minZoom   : 7,
     maxZoom   : 7,
     tolerance : 20,
@@ -2997,7 +2997,7 @@ TREM.Earthquake.on("eew", (data) => {
         };
       }
     },
-  }).addTo(Maps.mini);
+  });
 
   setTimeout(() => {
     if (setting["webhook.url"] != "") {
@@ -3547,7 +3547,7 @@ function main(data) {
     clearInterval(EarthquakeList[data.ID].Timer);
     document.getElementById("box-10").innerHTML = "";
 
-    if (EarthquakeList[data.ID].geojson != undefined) EarthquakeList[data.ID].geojson.remove();
+    if (TREM.EEW.get(INFO[TINFO].ID).geojson) TREM.EEW.get(INFO[TINFO].ID).geojson.remove();
     delete EarthquakeList[data.ID];
     delete eew[data.ID];
 
