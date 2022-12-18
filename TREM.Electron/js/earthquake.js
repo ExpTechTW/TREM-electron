@@ -28,13 +28,13 @@ TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
 // if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
-// 	const vm = require("vm");
-// 	const v8 = require("v8");
-// 	v8.setFlagsFromString("--no-lazy");
-// 	const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
-// 	const script = new vm.Script(code);
-// 	const bytecode = script.createCachedData();
-// 	fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
+//   const vm = require("vm");
+//   const v8 = require("v8");
+//   v8.setFlagsFromString("--no-lazy");
+//   const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
+//   const script = new vm.Script(code);
+//   const bytecode = script.createCachedData();
+//   fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
 // }
 
 // #region 變數
@@ -573,7 +573,7 @@ class EEW {
 // #region 初始化
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
-__unlock();
+
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
 win.setAlwaysOnTop(false);
