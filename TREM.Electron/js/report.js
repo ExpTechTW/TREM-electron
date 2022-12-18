@@ -375,11 +375,16 @@ TREM.Report = {
 		document.getElementById("report-overview-latitude").innerText = report.epicenterLat;
 		document.getElementById("report-overview-longitude").innerText = report.epicenterLon;
 
-		const int = `${IntensityI(report.data[0]?.areaIntensity)}`.split("");
-		document.getElementById("report-overview-intensity").innerText = (report.location.startsWith("TREM 人工定位")) ? "?" : int[0];
-		document.getElementById("report-overview-intensity").className = (int[1] == "+") ? "strong"
-			: (int[1] == "-") ? "weak"
-				: "";
+		if (report.location.startsWith("TREM 人工定位")) {
+			document.getElementById("report-overview-intensity").parentElement.parentElement.style.display = "none";
+		} else {
+			document.getElementById("report-overview-intensity").parentElement.parentElement.style.display = "";
+			const int = `${IntensityI(report.data[0]?.areaIntensity)}`.split("");
+			document.getElementById("report-overview-intensity").innerText = int[0];
+			document.getElementById("report-overview-intensity").className = (int[1] == "+") ? "strong"
+				: (int[1] == "-") ? "weak"
+					: "";
+		}
 
 		document.getElementById("report-overview-intensity-location").innerText = (report.location.startsWith("TREM 人工定位")) ? "" : `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`;
 		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
