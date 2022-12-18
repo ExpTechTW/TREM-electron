@@ -4264,7 +4264,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 function main(data) {
 	if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
-	if (EarthquakeList[data.ID].Cancel == undefined) {
+	if (1 == 0 && EarthquakeList[data.ID].Cancel == undefined) {
 		if (data.Depth != null) {
 
 			const wave = { p: 7, s: 4 };
