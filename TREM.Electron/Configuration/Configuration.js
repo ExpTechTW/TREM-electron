@@ -5,95 +5,95 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 class Configuration extends EventEmitter {
-	constructor(app) {
-		super();
+  constructor(app) {
+    super();
 
-		try {
-			this._folder = path.join(app.getPath("userData"));
-			this._path = path.join(app.getPath("userData"), "settings.json");
+    try {
+      this._folder = path.join(app.getPath("userData"));
+      this._path = path.join(app.getPath("userData"), "settings.json");
 
-			if (!fs.existsSync(this._path)) {
-				fs.writeFileSync(this._path, JSON.stringify(Object.keys(Constants.Default_Configurations).reduce((acc, key) => {
-					acc[key] = Constants.Default_Configurations[key].value;
-					return acc;
-				}, {}), null, 2), { encoding: "utf-8" });
-				this.emit("detect-locale");
-			}
+      if (!fs.existsSync(this._path)) {
+        fs.writeFileSync(this._path, JSON.stringify(Object.keys(Constants.Default_Configurations).reduce((acc, key) => {
+          acc[key] = Constants.Default_Configurations[key].value;
+          return acc;
+        }, {}), null, 2), { encoding: "utf-8" });
+        this.emit("detect-locale");
+      }
 
-			this._data = JSON.parse(fs.readFileSync(this._path, { encoding: "utf-8" }));
+      this._data = JSON.parse(fs.readFileSync(this._path, { encoding: "utf-8" }));
 
-			this.backup();
+      this.backup();
 
-			for (let i = 0,
-				k = Object.keys(this._data),
-				dk = Object.keys(Constants.Default_Configurations),
-				n = k.length; i < n; i++)
-				if (!dk.includes(k[i]))
-					delete this._data[k[i]];
+      for (let i = 0,
+        k = Object.keys(this._data),
+        dk = Object.keys(Constants.Default_Configurations),
+        n = k.length; i < n; i++)
+        if (!dk.includes(k[i]))
+          delete this._data[k[i]];
 
-			for (let i = 0,
-				k = Object.keys(this._data),
-				dk = Object.keys(Constants.Default_Configurations),
-				n = dk.length; i < n; i++)
-				if (k.includes(dk[i])) {
-					const ki = k.indexOf(dk[i]);
+      for (let i = 0,
+        k = Object.keys(this._data),
+        dk = Object.keys(Constants.Default_Configurations),
+        n = dk.length; i < n; i++)
+        if (k.includes(dk[i])) {
+          const ki = k.indexOf(dk[i]);
 
-					if (typeof this._data[k[ki]] != typeof Constants.Default_Configurations[dk[i]].value)
-						this._data[k[ki]] = Constants.Default_Configurations[dk[i]].value;
-				} else {
-					this._data[dk[i]] = Constants.Default_Configurations[dk[i]].value;
-				}
+          if (typeof this._data[k[ki]] != typeof Constants.Default_Configurations[dk[i]].value)
+            this._data[k[ki]] = Constants.Default_Configurations[dk[i]].value;
+        } else {
+          this._data[dk[i]] = Constants.Default_Configurations[dk[i]].value;
+        }
 
-			this.save();
+      this.save();
 
-			const thisClass = this;
-			this._proxy = new Proxy(this._data, {
-				set(target, key, value) {
-					target[key] = value;
-					thisClass.save();
-				},
-				get(target, key) {
-					return target[key];
-				},
-			});
-			this._watcher = chokidar.watch(this._path).on("change", () => {
-				try {
-					const _newData = fs.readFileSync(this._path, { encoding: "utf-8" });
+      const thisClass = this;
+      this._proxy = new Proxy(this._data, {
+        set(target, key, value) {
+          target[key] = value;
+          thisClass.save();
+        },
+        get(target, key) {
+          return target[key];
+        },
+      });
+      this._watcher = chokidar.watch(this._path).on("change", () => {
+        try {
+          const _newData = fs.readFileSync(this._path, { encoding: "utf-8" });
 
-					if (JSON.stringify(this._data, null, 2) == _newData) return;
-					this._data = JSON.parse(_newData);
-					this.emit("update", this._data);
-				} catch (error) {
-					this.emit("error", error);
-				}
-			});
-		} catch (error) {
-			console.error(error);
-			app.exit(1);
-		}
-	}
+          if (JSON.stringify(this._data, null, 2) == _newData) return;
+          this._data = JSON.parse(_newData);
+          this.emit("update", this._data);
+        } catch (error) {
+          this.emit("error", error);
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      app.exit(1);
+    }
+  }
 
-	get data() {
-		return this._proxy;
-	}
+  get data() {
+    return this._proxy;
+  }
 
-	get path() {
-		return this._path;
-	}
+  get path() {
+    return this._path;
+  }
 
-	backup() {
-		const files = fs.readdirSync(this._folder).filter(filename => filename.startsWith("backup~") && filename.endsWith(".json"));
+  backup() {
+    const files = fs.readdirSync(this._folder).filter(filename => filename.startsWith("backup~") && filename.endsWith(".json"));
 
-		if (files.length)
-			for (const file of files)
-				fs.rmSync(path.join(this._folder, file));
+    if (files.length)
+      for (const file of files)
+        fs.rmSync(path.join(this._folder, file));
 
-		fs.writeFileSync(path.join(this._folder, `backup~${Date.now()}_settings.json`), JSON.stringify(this._data, null, 2), { encoding: "utf-8" });
-	}
+    fs.writeFileSync(path.join(this._folder, `backup~${Date.now()}_settings.json`), JSON.stringify(this._data, null, 2), { encoding: "utf-8" });
+  }
 
-	save() {
-		fs.writeFileSync(this._path, JSON.stringify(this._data, null, 2), { encoding: "utf-8" });
-	}
+  save() {
+    fs.writeFileSync(this._path, JSON.stringify(this._data, null, 2), { encoding: "utf-8" });
+  }
 }
 
 module.exports = Configuration;
