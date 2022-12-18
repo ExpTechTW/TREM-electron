@@ -433,7 +433,6 @@ class WaveCircle {
 			type : "geojson",
 			data : turfCircle(lnglat, radius, { units: "meters" }),
 		}).getSource(`Source_${id}`);
-
 		this.layer = map.addLayer({
 			...layerOptions,
 			id     : `Layer_${id}`,
@@ -451,7 +450,6 @@ class WaveCircle {
 					"line-color" : layerOptions.paint["fill-color"],
 				},
 			}).getLayer(`Layer_${id}_Border`);
-
 	}
 
 	setLngLat(lnglat) {
@@ -769,6 +767,8 @@ async function init() {
 						renderWorldCopies : false,
 						keyboard          : false,
 						doubleClickZoom   : false,
+						dragRotate        : false,
+						touchZoomRotate   : false,
 					})
 					.on("drag", () => {
 						mapLock = true;
@@ -795,8 +795,6 @@ async function init() {
 										Station[key].togglePopup();
 						}
 					});
-				Maps.main.dragRotate.disable();
-				Maps.main.touchZoomRotate.disableRotation();
 			} else if (TREM.MapRenderingEngine == "leaflet") {
 				Maps.main = L.map("map",
 					{
