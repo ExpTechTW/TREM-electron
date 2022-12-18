@@ -2650,13 +2650,10 @@ TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, linear
 });
 
 function Mapsmainfocus() {
+
+	const camera = Maps.main.cameraForBounds(new maplibregl.LngLatBounds([ 118.25, 21.77 ], [ 122.18, 25.47 ]));
 	TREM.Earthquake.emit("focus", {
-		bounds: [
-			118.25,
-			21.77,
-			122.18,
-			25.47,
-		],
+		...camera,
 		options: {
 			padding  : { top: 0, right: Maps.main.getCanvas().width / 6, bottom: 0, left: 0 },
 			speed    : 2,
