@@ -580,33 +580,13 @@ class WaveCircle {
 			data : turfCircle(lnglat, radius, { units: "meters" }),
 		}).getSource(`Source_${id}`);
 
-		if (layerOptions.type == "line")
-			this.layerOutline = map.addLayer({
-				type   : "line",
-				id     : `Layer_${id}_Outline`,
-				source : `Source_${id}`,
-				paint  : {
-					"line-width" : 6,
-					"line-color" : "#ffffff",
-				},
-			}).getLayer(`Layer_${id}_Outline`);
-
 		this.layer = map.addLayer({
 			...layerOptions,
 			id     : `Layer_${id}`,
 			source : `Source_${id}`,
 		}).getLayer(`Layer_${id}`);
 
-		if (layerOptions.type == "fill") {
-			this.layerBorderOutline = map.addLayer({
-				type   : "line",
-				id     : `Layer_${id}_Border_Outline`,
-				source : `Source_${id}`,
-				paint  : {
-					"line-width" : 5,
-					"line-color" : "#ffffff",
-				},
-			}).getLayer(`Layer_${id}_Border_Outline`);
+		if (layerOptions.type == "fill")
 			this.layerBorder = map.addLayer({
 				...layerOptions,
 				type   : "line",
@@ -617,7 +597,7 @@ class WaveCircle {
 					"line-color" : layerOptions.paint["fill-color"],
 				},
 			}).getLayer(`Layer_${id}_Border`);
-		}
+
 	}
 
 	setLngLat(lnglat) {
@@ -649,19 +629,9 @@ class WaveCircle {
 		this.map.removeLayer(this.layer.id);
 		delete this.layer;
 
-		if (this.layerOutline) {
-			this.map.removeLayer(this.layerOutline.id);
-			delete this.layerOutline;
-		}
-
 		if (this.layerBorder) {
 			this.map.removeLayer(this.layerBorder.id);
 			delete this.layerBorder;
-		}
-
-		if (this.layerBorderOutline) {
-			this.map.removeLayer(this.layerBorderOutline.id);
-			delete this.layerBorderOutline;
 		}
 
 		this.map.removeSource(this.source.id);
@@ -4257,7 +4227,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 function main(data) {
 	if (EarthquakeList[data.ID].Depth != null) Maps.main.removeLayer(EarthquakeList[data.ID].Depth);
 
-	if (1 == 0 && EarthquakeList[data.ID].Cancel == undefined) {
+	if (EarthquakeList[data.ID].Cancel == undefined) {
 		if (data.Depth != null) {
 
 			const wave = { p: 7, s: 4 };
