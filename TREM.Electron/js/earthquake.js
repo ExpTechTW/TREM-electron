@@ -4403,7 +4403,7 @@ function main(data) {
 			for (let index = 0; index < INFO.length; index++)
 				if (INFO[index].ID == data.ID) {
 					INFO[index].alert_type = "alert-box eew-cancel";
-					data.TimeStamp = NOW.getTime() - 150000;
+					data.TimeStamp = NOW.getTime() - ((data.EastLongitude < 122.18 && data.NorthLatitude < 25.47 && data.EastLongitude > 118.25 && data.NorthLatitude > 21.77) ? 90_000 : 150_000);
 
 					if (TREM.EEW.get(data.ID).waveProgress) {
 						TREM.EEW.get(data.ID).waveProgress.remove();
@@ -4539,7 +4539,7 @@ function main(data) {
 		}, 300);
 	}
 
-	if (NOW.getTime() - data.TimeStamp > 180_000 || Cancel) {
+	if (NOW.getTime() - data.TimeStamp > ((data.EastLongitude < 122.18 && data.NorthLatitude < 25.47 && data.EastLongitude > 118.25 && data.NorthLatitude > 21.77) ? 120_000 : 180_000) || Cancel) {
 		TREM.Earthquake.emit("eewEnd", data.ID);
 		TREM.MapIntensity.clear();
 
