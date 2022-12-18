@@ -61,7 +61,6 @@ const Maps = { main: null, mini: null, report: null };
  */
 const MapBases = { main: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
 const Station = {};
-const detected_box_list = {};
 const detected_list = {};
 let Cancel = false;
 let PGALimit = 0;
@@ -1749,7 +1748,7 @@ function handler(Json) {
             let SKIP = 0;
 
             for (let i = 0; i < 4; i++) {
-              const dis = Math.sqrt(Math.pow((detected_box_location[pgaKeys[index].toString()][i][0] - eew[Object.keys(eew)[Index]].lat) * 111, 2) + Math.pow((detected_box_location[pgaKeys[index].toString()][i][1] - eew[Object.keys(eew)[Index]].lon) * 101, 2));
+              const dis = Math.sqrt(Math.pow((TREM.Resources.area[pgaKeys[index].toString()][i][0] - eew[Object.keys(eew)[Index]].lat) * 111, 2) + Math.pow((TREM.Resources.area[pgaKeys[index].toString()][i][1] - eew[Object.keys(eew)[Index]].lon) * 101, 2));
 
               if (eew[Object.keys(eew)[Index]].km / 1000 > dis) SKIP++;
             }
@@ -1869,8 +1868,6 @@ async function fetchFiles() {
   dump({ level: 0, message: "Get Location File", origin: "Location" });
   station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
   dump({ level: 0, message: "Get Station File", origin: "Location" });
-  detected_box_location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/pga.json")).json();
-  dump({ level: 0, message: "Get PGA Location File", origin: "Location" });
   PGAMain();
 }
 
