@@ -1131,7 +1131,7 @@ async function init() {
 				Maps.main.easeTo({
 					center   : camera.center,
 					zoom     : camera.zoom,
-					padding  : { bottom: 0, right: Maps.report.getCanvas().width / 6 },
+					padding  : { top: 0, right: Maps.report.getCanvas().width / 6, bottom: 0, left: 0 },
 					speed    : 2,
 					curve    : 1,
 					easing   : (e) => Math.sin(e * Math.PI / 2),
@@ -1853,7 +1853,7 @@ async function init() {
 			finalZoom = finalZoom / sampleCount;
 
 			if (finalZoom != Maps.main.getZoom() && !Maps.main.isEasing()) {
-				const camera = Maps.main.cameraForBounds(finalBounds, { padding: { bottom: 100, right: 100 } });
+				const camera = Maps.main.cameraForBounds(finalBounds, { padding: { top: 0, right: 100, bottom: 100, left: 0 } });
 				TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
 			}
 		} else if (TREM.MapArea.cache.size) {
@@ -2654,7 +2654,7 @@ function Mapsmainfocus() {
 			25.47,
 		],
 		options: {
-			padding  : { bottom: 0, right: Maps.main.getCanvas().width / 6 },
+			padding  : { top: 0, right: Maps.main.getCanvas().width / 6, bottom: 0, left: 0 },
 			speed    : 2,
 			curve    : 1,
 			easing   : (e) => Math.sin(e * Math.PI / 2),
