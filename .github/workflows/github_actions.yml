@@ -2,9 +2,9 @@ name: TREM
 
 on:
   push:
-    branches: [ "Release",  "pre" ,  "pre.30" ]
+    branches: [ "master",  "pre" ,  "pre.30" ]
   pull_request:
-    branches: [ "Release",  "pre" ,  "pre.30" ]
+    branches: [ "master",  "pre" ,  "pre.30" ]
 
 jobs:
   Windows_x64:
