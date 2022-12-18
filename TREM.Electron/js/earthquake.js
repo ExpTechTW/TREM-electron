@@ -3124,6 +3124,7 @@ TREM.replayOverviewButton = (report) => {
 };
 
 TREM.backindexButton = () => {
+	TREM.set_report_overview = 0;
 	ReportTag = 0;
 	changeView("main", "#mainView_btn");
 };
@@ -3801,7 +3802,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 					if (t != null) clearInterval(t);
 					t = setInterval(() => {
-						value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000) + 1;
+						value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
 						Second = value;
 
 						if (stamp != value && !audio.minor_lock) {
@@ -4011,7 +4012,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 // #region Event: eewEnd
 TREM.Earthquake.on("eewEnd", (id) => {
-	void 0;
+	clear(id);
 });
 // #endregion
 

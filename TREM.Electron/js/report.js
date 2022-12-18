@@ -36,7 +36,7 @@ TREM.Report = {
 				.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 				.filter(v => this._filterHasReplay ? v.ID?.length : true)
 				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
-				.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
+				.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true);
 
 			for (const report of reports) {
 				// if (setting["api.key"] == "" && report.data[0].areaIntensity == 0) continue;
@@ -46,7 +46,7 @@ TREM.Report = {
 					(this._filterHasNumber && !(report.earthquakeNo % 1000))
 					|| (this._filterHasReplay && !(report.ID?.length))
 					|| (this._filterMagnitude && !(this._filterMagnitudeValue == 1 ? report.magnitudeValue < 4.5 : report.magnitudeValue >= 4.5))
-					|| (this._filterIntensity && !(report.data[0].areaIntensity == this._filterIntensityValue))) {
+					|| (this._filterIntensity && !(report.data[0]?.areaIntensity == this._filterIntensityValue))) {
 					element.classList.add("hide");
 					element.style.display = "none";
 				} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -54,7 +54,7 @@ TREM.Report = {
 						element: $(TREM.Resources.icon.cross(
 							{
 								size         : report.magnitudeValue * 4,
-								className    : `epicenterIcon clickable raise-on-hover ${IntensityToClassString(report.data[0].areaIntensity)}`,
+								className    : `epicenterIcon clickable raise-on-hover ${IntensityToClassString(report.data[0]?.areaIntensity)}`,
 								opacity      : (reports.length - reports.indexOf(report)) / reports.length,
 								zIndexOffset : 1000 + reports.length - reports.indexOf(report),
 							}))[0],
@@ -71,7 +71,7 @@ TREM.Report = {
 							icon: L.divIcon({
 								html      : TREM.Resources.icon.oldcross,
 								iconSize  : [report.magnitudeValue * 4, report.magnitudeValue * 4],
-								className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
+								className : `epicenterIcon ${IntensityToClassString(report.data[0]?.areaIntensity)}`,
 							}),
 							opacity      : (reports.length - reports.indexOf(report)) / reports.length,
 							zIndexOffset : 1000 + reports.length - reports.indexOf(report),
@@ -92,7 +92,7 @@ TREM.Report = {
 	_createReportItem(report) {
 		const el = document.importNode(this._reportItemTemplate.content, true).querySelector(".report-list-item");
 		el.id = report.identifier;
-		el.className += ` ${IntensityToClassString(report.data[0].areaIntensity)}`;
+		el.className += ` ${IntensityToClassString(report.data[0]?.areaIntensity)}`;
 		el.querySelector(".report-list-item-location").innerText = report.location;
 		el.querySelector(".report-list-item-id").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
 		el.querySelector(".report-list-item-time").innerText = report.originTime.replace(/-/g, "/");
@@ -126,7 +126,7 @@ TREM.Report = {
 			.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 			.filter(v => this._filterHasReplay ? v.ID?.length : true)
 			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
-			.filter(v => this._filterIntensity ? v.data[0].areaIntensity == this._filterIntensityValue : true);
+			.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true);
 
 		this._updateReports(oldlist, this.reportList);
 	},
@@ -339,7 +339,7 @@ TREM.Report = {
 					element: $(TREM.Resources.icon.cross(
 						{
 							size         : report.magnitudeValue * 4,
-							className    : `epicenterIcon clickable raise-on-hover ${IntensityToClassString(report.data[0].areaIntensity)}`,
+							className    : `epicenterIcon clickable raise-on-hover ${IntensityToClassString(report.data[0]?.areaIntensity)}`,
 							opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
 							zIndexOffset : 1000 + this.cache.size - keys.indexOf(report.identifier),
 						}))[0],
@@ -356,7 +356,7 @@ TREM.Report = {
 						icon: L.divIcon({
 							html      : TREM.Resources.icon.oldcross,
 							iconSize  : [report.magnitudeValue * 4, report.magnitudeValue * 4],
-							className : `epicenterIcon ${IntensityToClassString(report.data[0].areaIntensity)}`,
+							className : `epicenterIcon ${IntensityToClassString(report.data[0]?.areaIntensity)}`,
 						}),
 						opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
 						zIndexOffset : 1000 + this.cache.size - keys.indexOf(report.identifier),
