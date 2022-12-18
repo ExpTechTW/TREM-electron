@@ -895,6 +895,7 @@ body:not(.darkmode) #here-marker {
 #alert-local.zero,
 #rt-list div.zero,
 #rolllist > div.zero,
+.report-list-item.zero .report-list-item-intensity,
 .rt-station-intensity.zero {
 	background-color: var(--custom-int-0);
 }
@@ -1024,6 +1025,10 @@ body:not(.darkmode) #here-marker {
 #rt-list div.zero span:first-child::before,
 .rt-station-intensity.zero::before {
 	content: "0";
+}
+
+.report-list-item.zero .report-list-item-intensity::before {
+	content: "?";
 }
 
 .alert-box.one .alert-box-body #alert-intensity::before,
