@@ -2732,8 +2732,9 @@ TREM.Earthquake.on("eew", (data) => {
       Nmsg = `${value}秒後抵達`;
     else
       Nmsg = "已抵達 (預警盲區)";
+    const notify = (level.label.includes("+") || level.label.includes("-")) ? level.label.replace("+", "強").replace("-", "弱") : level.label + "級";
     new Notification("EEW 強震即時警報", {
-      body   : `${level.label.replace("+", "強").replace("-", "弱")} 地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`,
+      body   : `${notify} 地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`,
       icon   : "../TREM.ico",
       silent : win.isFocused(),
     });
@@ -2766,8 +2767,7 @@ TREM.Earthquake.on("eew", (data) => {
 
     if (setting["audio.eew"] && Alert) {
       TREM.Audios.eew.play();
-      const notify = (level.label.includes("+") || level.label.includes("-")) ? level.label.replace("+", "").replace("-", "") : level.label + "級";
-      audioPlay1(`../audio/1/${notify}.wav`);
+      audioPlay1(`../audio/1/${level.label.replace("+", "").replace("-", "")}.wav`);
 
       if (level.label.includes("+"))
         audioPlay1("../audio/1/intensity-strong.wav");
@@ -2956,12 +2956,12 @@ TREM.Earthquake.on("eew", (data) => {
     main(data);
   }, speed);
 
-  if (TREM.EEW.get(INFO[TINFO].ID).geojson) {
-    TREM.EEW.get(INFO[TINFO].ID).geojson.remove();
-    delete TREM.EEW.get(INFO[TINFO].ID).geojson;
+  if (TREM.EEW.get(data.ID)?.geojson) {
+    TREM.EEW.get(data.ID).geojson.remove();
+    delete TREM.EEW.get(data.ID).geojson;
   }
 
-  TREM.EEW.get(INFO[TINFO].ID).geojson = L.geoJson.vt(MapData.tw_town, {
+  TREM.EEW.get(data.ID).geojson = L.geoJson.vt(MapData.tw_town, {
     minZoom   : 7,
     maxZoom   : 7,
     tolerance : 20,
@@ -3544,10 +3544,13 @@ function main(data) {
         break;
       }
 
+    if (TREM.EEW.get(data.ID)?.geojson) {
+      TREM.EEW.get(data.ID).geojson.remove();
+      delete TREM.EEW.get(data.ID).geojson;
+    }
+
     clearInterval(EarthquakeList[data.ID].Timer);
     document.getElementById("box-10").innerHTML = "";
-
-    if (TREM.EEW.get(INFO[TINFO].ID).geojson) TREM.EEW.get(INFO[TINFO].ID).geojson.remove();
     delete EarthquakeList[data.ID];
     delete eew[data.ID];
 
@@ -3648,8 +3651,7 @@ function updateText() {
 
   if (TREM.EEW.get(INFO[TINFO].ID).CircleSTW) TREM.EEW.get(INFO[TINFO].ID).CircleSTW.getElement()?.classList?.remove("hide");
 
-  if (TREM.EEW.get(INFO[TINFO].ID).geojson) TREM.EEW.get(INFO[TINFO].ID).geojson.addTo(Maps.mini);
-
+  if (TREM.EEW.get(INFO[TINFO].ID)?.geojson) TREM.EEW.get(INFO[TINFO].ID).geojson.addTo(Maps.mini);
   const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
   const Catch = document.getElementById("box-10");
 
