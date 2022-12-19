@@ -2294,6 +2294,7 @@ function handler(Json) {
 
 							for (let i = 0; i < 4; i++) {
 								const dis = Math.sqrt(Math.pow((TREM.Resources.area[pgaKeys[index].toString()][i][0] - eew[Object.keys(eew)[Index]].lat) * 111, 2) + Math.pow((TREM.Resources.area[pgaKeys[index].toString()][i][1] - eew[Object.keys(eew)[Index]].lon) * 101, 2));
+
 								if (eew[Object.keys(eew)[Index]].km / 1000 > dis) SKIP++;
 							}
 
