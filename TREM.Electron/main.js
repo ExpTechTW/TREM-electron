@@ -187,7 +187,11 @@ TREM.on("ready", () => {
 			}, time);
 		}
 	} else {
-		restart();
+		autoUpdater.checkForUpdates();
+		const time = 3600_000;
+		setInterval(() => {
+			autoUpdater.checkForUpdates();
+		}, time);
 	}
 });
 
