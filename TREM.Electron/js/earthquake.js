@@ -3726,7 +3726,8 @@ TREM.Earthquake.on("eew", (data) => {
 		if (data.Depth != null)
 			if (setting["audio.eew"] && Alert) {
 				TREM.Audios.eew.play();
-				audioPlay1(`../audio/1/${level.label.replace("+", "").replace("-", "")}.wav`);
+				const notify = (level.label.includes("+") || level.label.includes("-")) ? level.label.replace("+", "").replace("-", "") : level.label + "級";
+      			audioPlay1(`../audio/1/${notify}.wav`);
 
 				if (level.label.includes("+"))
 					audioPlay1("../audio/1/intensity-strong.wav");
