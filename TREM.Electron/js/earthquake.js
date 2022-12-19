@@ -708,8 +708,6 @@ class EEW {
 
 				this._expected.set(l.code, { distance: d, intensity: i, pga });
 			}
-
-		TREM.MapIntensity.expected(this._expected);
 	}
 
 	update(data) {
@@ -3955,7 +3953,7 @@ TREM.Earthquake.on("eew", (data) => {
 				};
 			}
 		},
-	});
+	}).addTo(Maps.mini);
 
 	setTimeout(() => {
 		if (setting["webhook.url"] != "") {
