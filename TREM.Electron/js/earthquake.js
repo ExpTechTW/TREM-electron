@@ -3242,7 +3242,7 @@ ipcMain.on("report-Notification", (event, report) => {
 							inline : false,
 						},
 						{
-							name   : (report.data.length != 0) ? "最大震度" + IntensityI(report.data[0].areaIntensity) + "級地區" : "最大震度?級地區"  ,
+							name   : (report.data.length != 0) ? "最大震度" + IntensityI(report.data[0].areaIntensity) + "級地區" : "最大震度?級地區",
 							value  : (report.data.length != 0) ? report.data[0].areaName : "?級。",
 							inline : false,
 						},
