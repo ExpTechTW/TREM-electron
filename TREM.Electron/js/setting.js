@@ -525,12 +525,16 @@ function send() {
 		};
 	axios.post("https://exptech.com.tw/api/v1/et", data)
 		.then((response) => {
-			if (response.data.response == "State Close")
+			if (response.data.response == "State Close") {
+				document.getElementById("sendState").innerHTML = "設備未連接至伺服器";
 				console.log("設備未連接至伺服器");
-			else if (response.data.response == "Device Not Found")
+			} else if (response.data.response == "Device Not Found") {
+				document.getElementById("sendState").innerHTML = "找不到此 UUID 的設備";
 				console.log("找不到此 UUID 的設備");
-			else
+			} else {
+				document.getElementById("sendState").innerHTML = "發送成功，第" + data.Value.Version + "報";
 				console.log("發送成功 請刷新網頁");
+			}
 			document.getElementById("Version").value = Number(document.getElementById("Version").value) + 1;
 			const utc = new Date();
 			const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
@@ -579,6 +583,7 @@ function resend() {
 	document.getElementById("Scale").value = "5.0";
 	document.getElementById("Version").value = "1";
 	document.getElementById("UUID").value = "";
+	document.getElementById("sendState").innerHTML = "已重置";
 }
 
 function testEEW() {
