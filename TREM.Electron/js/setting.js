@@ -495,8 +495,11 @@ function send() {
 				"UTC+8"       : document.getElementById("Time").value,
 				Version       : document.getElementById("Version").value,
 				ID            : document.getElementById("ID").value,
-				Test          : true,
-				Unit          : "測試模式",
+				Test          : document.getElementById("testbtn").checked,
+				Unit          : document.getElementById("testtext").value,
+				Location      : "未知區域",
+				Alert         : true,
+				Cancel        : false,
 			},
 		};
 	else
@@ -519,8 +522,11 @@ function send() {
 				"UTC+8"       : document.getElementById("Time").value,
 				Version       : document.getElementById("Version").value,
 				ID            : document.getElementById("ID").value,
-				Test          : true,
-				Unit          : "測試模式",
+				Test          : document.getElementById("testbtn").checked,
+				Unit          : document.getElementById("testtext").value,
+				Location      : document.getElementById("Location").value,
+				Alert         : document.getElementById("alertbtn").checked,
+				Cancel        : document.getElementById("cancelbtn").checked,
 			},
 		};
 	axios.post("https://exptech.com.tw/api/v1/et", data)
@@ -535,6 +541,7 @@ function send() {
 				document.getElementById("sendState").innerHTML = "發送成功，第" + data.Value.Version + "報";
 				console.log("發送成功 請刷新網頁");
 			}
+
 			document.getElementById("Version").value = Number(document.getElementById("Version").value) + 1;
 			const utc = new Date();
 			const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
@@ -558,6 +565,10 @@ function send() {
 }
 
 function resend() {
+	document.getElementById("testbtn").checked = true;
+	document.getElementById("alertbtn").checked = true;
+	document.getElementById("cancelbtn").checked = false;
+	document.getElementById("testtext").value = "測試模式";
 	document.getElementById("ID").value = "111000";
 	const utc = new Date();
 	const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
@@ -579,6 +590,7 @@ function resend() {
 	document.getElementById("TimeStamp").value = Now1;
 	document.getElementById("EastLongitude").value = "120.7";
 	document.getElementById("NorthLatitude").value = "22.2";
+	document.getElementById("Location").value = "未知區域";
 	document.getElementById("Depth").value = "10";
 	document.getElementById("Scale").value = "5.0";
 	document.getElementById("Version").value = "1";

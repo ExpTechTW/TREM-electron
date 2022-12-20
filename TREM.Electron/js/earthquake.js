@@ -4044,7 +4044,10 @@ TREM.Earthquake.on("eew", (data) => {
 			msg = msg.replace("%Depth%", data.Depth).replace("%NorthLatitude%", data.NorthLatitude).replace("%Time%", time).replace("%EastLongitude%", data.EastLongitude).replace("%Scale%", data.Scale);
 
 			if (data.Function == "earthquake")
-				msg = msg.replace("%Provider%", "交通部中央氣象局");
+				if (data.Unit == "交通部中央氣象局")
+					msg = msg.replace("%Provider%", "交通部中央氣象局");
+				else
+					msg = msg.replace("%Provider%", data.Unit);
 			else if (data.Function == "SCDZJ_earthquake")
 				msg = msg.replace("%Provider%", "四川省地震局");
 			else if (data.Function == "FJDZJ_earthquake")
