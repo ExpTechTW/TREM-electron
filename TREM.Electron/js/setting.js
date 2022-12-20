@@ -622,18 +622,22 @@ const restart = () => {
 const testAudioState = {
 	audio      : new Audio(),
 	is_playing : false,
+	Listener() {
+		testAudioState.audio.addEventListener("ended", () => {
+			testAudioState.is_playing = false;
+			testAudioBtn.style.removeProperty("--progress");
+			testAudioBtn.childNodes[1].textContent = "play_arrow";
+			testAudioBtn.childNodes[3].textContent = TREM.Localization.getString("Audio_Test");
+		});
+		testAudioState.audio.addEventListener("timeupdate", () => {
+			console.log(testAudioState.audio.currentTime);
+			console.log(testAudioState.audio.duration);
+			testAudioBtn.style.setProperty("--progress", (testAudioState.audio.currentTime / (testAudioState.audio.duration - 0.25)) || 0);
+		});
+	},
 };
+
 let testAudioBtn;
-testAudioState.audio.addEventListener("ended", () => {
-	testAudioState.is_playing = false;
-	testAudioBtn.style.removeProperty("--progress");
-	testAudioBtn.childNodes[1].textContent = "play_arrow";
-	testAudioBtn.childNodes[3].textContent = TREM.Localization.getString("Audio_Test");
-});
-testAudioState.audio.addEventListener("timeupdate", () => {
-	console.log(testAudioState.audio.currentTime);
-	testAudioBtn.style.setProperty("--progress", (testAudioState.audio.currentTime / (testAudioState.audio.duration - 0.25)) || 0);
-});
 
 /**
  * @param {string} audioString
@@ -653,8 +657,8 @@ const testAudio = (audioString, el) => {
 
 	if (!testAudioState.is_playing) {
 		testAudioState.audio = new Audio("../audio/" + audioString + ".wav");
+		testAudioState.Listener();
 		testAudioState.audio.play();
-		testAudioState.audio.played;
 		testAudioState.is_playing = true;
 		el.childNodes[1].textContent = "pause";
 		el.childNodes[3].textContent = TREM.Localization.getString("Audio_TestStop");
