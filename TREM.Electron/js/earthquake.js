@@ -3219,11 +3219,11 @@ ipcMain.on("report-Notification", (event, report) => {
 						url      : undefined,
 						icon_url : undefined,
 					},
-					description : "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0]?.areaName + report.data[0]?.eqStation[0].stationName + IntensityI(report.data[0]?.areaIntensity) + "級。",
+					description : (report.data.length != 0) ? "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0].areaName + report.data[0].eqStation[0].stationName + IntensityI(report.data[0].areaIntensity) + "級。" : "發生規模" + report.magnitudeValue + "有感地震，最大震度" + "?級。",
 					fields      : [
 						{
 							name   : "編號",
-							value  : report.earthquakeNo % 1000 ? report.earthquakeNo : "無（小區域有感地震）",
+							value  : report.location.startsWith("TREM 人工定位") ? "無（TREM 人工定位）" : report.earthquakeNo % 1000 ? report.earthquakeNo : "無（小區域有感地震）",
 							inline : true,
 						},
 						{
@@ -3242,8 +3242,8 @@ ipcMain.on("report-Notification", (event, report) => {
 							inline : false,
 						},
 						{
-							name   : "最大震度" + IntensityI(report.data[0]?.areaIntensity) + "級地區",
-							value  : report.data[0]?.areaName,
+							name   : (report.data.length != 0) ? "最大震度" + IntensityI(report.data[0].areaIntensity) + "級地區" : "最大震度?級地區"  ,
+							value  : (report.data.length != 0) ? report.data[0].areaName : "?級。",
 							inline : false,
 						},
 					],
