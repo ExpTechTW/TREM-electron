@@ -3219,7 +3219,7 @@ ipcMain.on("report-Notification", (event, report) => {
 						url      : undefined,
 						icon_url : undefined,
 					},
-					description : "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0].areaName + report.data[0].eqStation[0].stationName + IntensityI(report.data[0]?.areaIntensity) + "級。",
+					description : "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0]?.areaName + report.data[0]?.eqStation[0].stationName + IntensityI(report.data[0]?.areaIntensity) + "級。",
 					fields      : [
 						{
 							name   : "編號",
@@ -3243,7 +3243,7 @@ ipcMain.on("report-Notification", (event, report) => {
 						},
 						{
 							name   : "最大震度" + IntensityI(report.data[0]?.areaIntensity) + "級地區",
-							value  : report.data[0].areaName,
+							value  : report.data[0]?.areaName,
 							inline : false,
 						},
 					],
