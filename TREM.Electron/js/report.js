@@ -18,6 +18,7 @@ TREM.Report = {
 	_filterMagnitudeValue : 2,
 	_filterIntensity      : false,
 	_filterIntensityValue : 4,
+	_filterTREM           : false,
 	_reportItemTemplate   : document.getElementById("template-report-list-item"),
 	get _mapPaddingLeft() {
 		return document.getElementById("map-report").offsetWidth / 2;
@@ -36,7 +37,8 @@ TREM.Report = {
 				.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 				.filter(v => this._filterHasReplay ? v.ID?.length : true)
 				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
-				.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true);
+				.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
+				.filter(v => this._filterTREM ? !(v.data.length) : true);
 
 			for (const report of reports) {
 				// if (setting["api.key"] == "" && report.data[0].areaIntensity == 0) continue;
@@ -46,7 +48,8 @@ TREM.Report = {
 					(this._filterHasNumber && !(report.earthquakeNo % 1000))
 					|| (this._filterHasReplay && !(report.ID?.length))
 					|| (this._filterMagnitude && !(this._filterMagnitudeValue == 1 ? report.magnitudeValue < 4.5 : report.magnitudeValue >= 4.5))
-					|| (this._filterIntensity && !(report.data[0]?.areaIntensity == this._filterIntensityValue))) {
+					|| (this._filterIntensity && !(report.data[0]?.areaIntensity == this._filterIntensityValue))
+					|| (this._filterTREM && report.data.length)) {
 					element.classList.add("hide");
 					element.style.display = "none";
 				} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -126,7 +129,8 @@ TREM.Report = {
 			.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 			.filter(v => this._filterHasReplay ? v.ID?.length : true)
 			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
-			.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true);
+			.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
+			.filter(v => this._filterTREM ? !(v.data.length) : true);
 
 		this._updateReports(oldlist, this.reportList);
 	},
@@ -230,7 +234,7 @@ TREM.Report = {
 		const { clipboard, shell } = require("electron");
 		const report = this.cache.get(id);
 		const string = [];
-		string.push(`　　　　　　　　　　中央氣象局地震測報中心　${report.earthquakeNo % 1000 ? `第${report.earthquakeNo - 111000}號` : "小區域"}有感地震報告`);
+		string.push(`　　　　　　　　　　${report.location.startsWith("TREM 人工定位") ? "TREM 人工定位" : "中央氣象局"}地震測報中心　${TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? `第${report.earthquakeNo - 111000}號` : "Report_Title_Small"))}`);
 		const time = new Date(report.originTime);
 		string.push(`　　　　　　　　　　發　震　時　間： ${time.getFullYear() - 1911}年${(time.getMonth() + 1 < 10 ? " " : "") + (time.getMonth() + 1)}月${(time.getDate() < 10 ? " " : "") + time.getDate()}日${(time.getHours() < 10 ? " " : "") + time.getHours()}時${(time.getMinutes() < 10 ? " " : "") + time.getMinutes()}分${(time.getSeconds() < 10 ? " " : "") + time.getSeconds()}秒`);
 		string.push(`　　　　　　　　　　震　央　位　置： 北　緯　 ${report.epicenterLat.toFixed(2)} °`);
@@ -455,12 +459,14 @@ TREM.Report = {
 		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
 		document.getElementById("report-overview-depth").innerText = report.depth;
 
-		if (report.location.startsWith("TREM 人工定位")) {
-			document.getElementById("report-detail-copy").style.display = "none";
-		} else {
-			document.getElementById("report-detail-copy").style.display = "";
-			document.getElementById("report-detail-copy").value = report.identifier;
-		}
+		// if (report.location.startsWith("TREM 人工定位")) {
+		// 	document.getElementById("report-detail-copy").style.display = "none";
+		// } else {
+		// 	document.getElementById("report-detail-copy").style.display = "";
+		// 	document.getElementById("report-detail-copy").value = report.identifier;
+		// }
+		document.getElementById("report-detail-copy").style.display = "";
+		document.getElementById("report-detail-copy").value = report.identifier;
 
 		document.getElementById("report-replay").value = report.identifier;
 
