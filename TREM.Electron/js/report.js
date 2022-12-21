@@ -46,13 +46,21 @@ TREM.Report = {
           element.style.display = "none";
         } else {
           const marker = new maplibregl.Marker({
-            element: $(TREM.Resources.icon.cross(
-              {
-                size         : report.magnitudeValue * 4,
-                className    : `epicenterIcon clickable raise-on-hover ${IntensityToClassString(report.data[0]?.areaIntensity)}`,
-                opacity      : (reports.length - reports.indexOf(report)) / reports.length,
-                zIndexOffset : 1000 + reports.length - reports.indexOf(report),
-              }))[0],
+            element: $(report.location.startsWith("TREM 人工定位")
+              ? TREM.Resources.icon.square(
+                {
+                  size         : report.magnitudeValue * 4,
+                  className    : "epicenterIcon clickable raise-on-hover",
+                  opacity      : (reports.length - reports.indexOf(report)) / reports.length,
+                  zIndexOffset : 100 + reports.length - reports.indexOf(report),
+                })
+              : TREM.Resources.icon.cross(
+                {
+                  size         : report.magnitudeValue * 4,
+                  className    : `epicenterIcon clickable raise-on-hover ${IntensityToClassString(report.data[0]?.areaIntensity)}`,
+                  opacity      : (reports.length - reports.indexOf(report)) / reports.length,
+                  zIndexOffset : 1000 + reports.length - reports.indexOf(report),
+                }))[0],
           }).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report);
           marker.getElement().addEventListener("click", () => this.setView("report-overview", report.identifier));
           this._markers.push(marker);
