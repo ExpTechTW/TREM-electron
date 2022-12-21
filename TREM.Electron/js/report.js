@@ -39,7 +39,7 @@ TREM.Report = {
 				.filter(v => this._filterHasReplay ? v.ID?.length : true)
 				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 				.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
-				.filter(v => this._filterTREM ? !(v.data.length) : true)
+				.filter(v => this._filterTREM ? v.location.startsWith("TREM 人工定位") : true)
 				.filter(v => this._filterCWB ? v.data.length : true);
 
 			for (const report of reports) {
@@ -51,7 +51,7 @@ TREM.Report = {
 					|| (this._filterHasReplay && !(report.ID?.length))
 					|| (this._filterMagnitude && !(this._filterMagnitudeValue == 1 ? report.magnitudeValue < 4.5 : report.magnitudeValue >= 4.5))
 					|| (this._filterIntensity && !(report.data[0]?.areaIntensity == this._filterIntensityValue))
-					|| (this._filterTREM && report.data.length)
+					|| (this._filterTREM && report.location.startsWith("TREM 人工定位"))
 					|| (this._filterCWB && !report.data.length)) {
 					element.classList.add("hide");
 					element.style.display = "none";
@@ -133,7 +133,7 @@ TREM.Report = {
 			.filter(v => this._filterHasReplay ? v.ID?.length : true)
 			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 			.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
-			.filter(v => this._filterTREM ? !(v.data.length) : true)
+			.filter(v => this._filterTREM ? v.location.startsWith("TREM 人工定位") : true)
 			.filter(v => this._filterCWB ? v.data.length : true);
 
 		this._updateReports(oldlist, this.reportList);
