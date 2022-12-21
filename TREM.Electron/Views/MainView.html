@@ -296,8 +296,11 @@
                                                 <span lang="zh-TW">規模</span>
                                             </span>
                                             <select id="report-filter-magnitude-value" onchange="TREM.Report._handleFilter('filterMagnitudeValue', this.options[this.selectedIndex].value, this)">
-                                                <option value=1>＜4.5</option>
-                                                <option value=2 selected>≥4.5</option>
+                                                <option value=1>＜2.0</option>
+                                                <option value=2>＜3.0</option>
+                                                <option value=3>＜4.0</option>
+                                                <option value=45>＜4.5</option>
+                                                <option value=5 selected>≥4.5</option>
                                             </select>
                                         </div>
                                     </label>
@@ -337,7 +340,7 @@
                                         </div>
                                     </label>
                                     <label for="report-filter-CWB" class="chip filter md3-ripple">
-                                        <input type="checkbox" id="report-filter-CWB" onclick="TREM.Report._handleFilter('filterCWB', this.checked)">
+                                        <input type="checkbox" id="report-filter-CWB" onclick="TREM.Report._handleFilter('filterCWB', this.checked)" checked>
                                         <div class="chip-label">
                                             <span lang="en">CWB</span>
                                             <span lang="ja">CWB</span>
