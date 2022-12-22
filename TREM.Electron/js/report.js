@@ -57,13 +57,21 @@ TREM.Report = {
 					element.style.display = "none";
 				} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 					const marker = new maplibregl.Marker({
-						element: $(TREM.Resources.icon.cross(
+						element: $(report.location.startsWith("TREM 人工定位")
+							? TREM.Resources.icon.square(
+							{
+								size         : report.magnitudeValue * 4,
+								className    : "epicenterIcon clickable raise-on-hover",
+								opacity      : (reports.length - reports.indexOf(report)) / reports.length,
+								zIndexOffset : 100 + reports.length - reports.indexOf(report),
+							})
+							: TREM.Resources.icon.cross(
 							{
 								size         : report.magnitudeValue * 4,
 								className    : `epicenterIcon clickable raise-on-hover ${IntensityToClassString(report.data[0]?.areaIntensity)}`,
 								opacity      : (reports.length - reports.indexOf(report)) / reports.length,
 								zIndexOffset : 1000 + reports.length - reports.indexOf(report),
-							}))[0],
+						}))[0],
 					}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report);
 					marker.getElement().addEventListener("click", () => {
 						TREM.set_report_overview = 0;
@@ -344,13 +352,21 @@ TREM.Report = {
 		for (const report of newlist)
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 				const marker = new maplibregl.Marker({
-					element: $(TREM.Resources.icon.cross(
-						{
+					element: $(report.location.startsWith("TREM 人工定位")
+						? TREM.Resources.icon.square(
+							{
+							size         : report.magnitudeValue * 4,
+							className    : "epicenterIcon clickable raise-on-hover",
+							opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
+							zIndexOffset : 100 + this.cache.size - keys.indexOf(report.identifier),
+							})
+						: TREM.Resources.icon.cross(
+							{
 							size         : report.magnitudeValue * 4,
 							className    : `epicenterIcon clickable raise-on-hover ${IntensityToClassString(report.data[0]?.areaIntensity)}`,
 							opacity      : (newlist.length - newlist.indexOf(report)) / newlist.length,
 							zIndexOffset : 1000 + this.cache.size - keys.indexOf(report.identifier),
-						}))[0],
+					}))[0],
 				}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report);
 				marker.getElement().addEventListener("click", () => {
 					TREM.set_report_overview = 0;
@@ -443,7 +459,8 @@ TREM.Report = {
 
 		document.getElementById("report-overview-number").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
 		document.getElementById("report-overview-location").innerText = report.location;
-		const time = new Date(`${report.originTime} GMT+08:00`);
+		const time = new Date((new Date(`${report.originTime} GMT+08:00`)).toLocaleString("en-US", { timeZone: "Asia/Taipei" }));
+    	const timeString = time.toLocaleString("zh-TW", { dateStyle: "short", timeStyle: "short", hour12: false, timeZone: "Asia/Taipei" });
 		document.getElementById("report-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
 		document.getElementById("report-overview-latitude").innerText = report.epicenterLat;
 		document.getElementById("report-overview-longitude").innerText = report.epicenterLon;

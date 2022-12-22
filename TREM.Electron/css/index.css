@@ -1808,7 +1808,8 @@ stop.pred-stop {
 }
 
 .cross-inner { fill: #f34336; }
-.cross-outer { fill: #fff; }
+.square-inner { fill: var(--custom-int-0); }
+.cross-outer, .square-outer { fill: #fff; }
 .epicenterIcon.one .cross-inner { fill: var(--custom-int-1); }
 .epicenterIcon.two .cross-inner { fill: var(--custom-int-2); }
 .epicenterIcon.three .cross-inner { fill: var(--custom-int-3); }

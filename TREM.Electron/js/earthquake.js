@@ -1163,12 +1163,14 @@ async function init() {
 				}
 
 				Maps.main.addSource("Source_tw_county", {
-					type : "geojson",
-					data : MapData.tw_county,
+					type      : "geojson",
+					data      : MapData.tw_county,
+					tolerance : 0.5,
 				});
 				Maps.main.addSource("Source_tw_town", {
-					type : "geojson",
-					data : MapData.tw_town,
+					type      : "geojson",
+					data      : MapData.tw_town,
+					tolerance : 0.5,
 				});
 				Maps.main.addSource("Source_area", {
 					type : "geojson",
@@ -1431,8 +1433,9 @@ async function init() {
 					id     : "Layer_tw_county",
 					type   : "fill",
 					source : {
-						type : "geojson",
-						data : MapData.tw_county,
+						type      : "geojson",
+						data      : MapData.tw_county,
+						tolerance : 0.5,
 					},
 					layout : {},
 					paint  : {
