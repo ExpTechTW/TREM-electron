@@ -1960,6 +1960,11 @@ function PGAMain() {
 					if (rts_ws_timestamp) {
 						Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
+
+						if ((NOW.getTime() - rts_ws_timestamp) > 10_000) {
+							dump({ level: 0, message: "PGA timer time out", origin: "PGATimer" });
+							ipcMain.emit("restart");
+						}
 					} else {
 						for (const removedKey of Object.keys(Station)) {
 							Station[removedKey].remove();
@@ -2017,6 +2022,11 @@ function PGAMainbkup() {
 					if (rts_ws_timestamp) {
 						Ping = NOW.getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
+
+						if ((NOW.getTime() - rts_ws_timestamp) > 10_000) {
+							dump({ level: 0, message: "PGA timer backup time out", origin: "PGATimer" });
+							ipcMain.emit("restart");
+						}
 					} else {
 						for (const removedKey of Object.keys(Station)) {
 							Station[removedKey].remove();
