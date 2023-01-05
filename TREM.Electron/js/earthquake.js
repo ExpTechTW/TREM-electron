@@ -1963,7 +1963,8 @@ function PGAMain() {
 
 						if ((NOW.getTime() - rts_ws_timestamp) > 10_000) {
 							dump({ level: 0, message: "PGA timer time out", origin: "PGATimer" });
-							ipcMain.emit("restart");
+							// ipcMain.emit("restart");
+							PGAMainbkup();
 						}
 					} else {
 						for (const removedKey of Object.keys(Station)) {
@@ -2025,7 +2026,8 @@ function PGAMainbkup() {
 
 						if ((NOW.getTime() - rts_ws_timestamp) > 10_000) {
 							dump({ level: 0, message: "PGA timer backup time out", origin: "PGATimer" });
-							ipcMain.emit("restart");
+							// ipcMain.emit("restart");
+							PGAMain();
 						}
 					} else {
 						for (const removedKey of Object.keys(Station)) {
