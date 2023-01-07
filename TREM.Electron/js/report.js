@@ -238,7 +238,7 @@ TREM.Report = {
 		const { clipboard, shell } = require("electron");
 		const report = this.cache.get(id);
 		const string = [];
-		string.push(`　　　　　　　　　　${report.location.startsWith("TREM 人工定位") ? "TREM 人工定位" : "中央氣象局"}地震測報中心　${TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? `第${report.earthquakeNo - 111000}號` : "Report_Title_Small"))}`);
+		string.push(`　　　　　　　　　　${report.location.startsWith("TREM 人工定位") ? "TREM 人工定位" : "中央氣象局"}地震測報中心　${TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? `第${report.earthquakeNo.toString().slice(-3)}號有感地震報告` : "Report_Title_Small"))}`);
 		const time = new Date(report.originTime);
 		string.push(`　　　　　　　　　　發　震　時　間： ${time.getFullYear() - 1911}年${(time.getMonth() + 1 < 10 ? " " : "") + (time.getMonth() + 1)}月${(time.getDate() < 10 ? " " : "") + time.getDate()}日${(time.getHours() < 10 ? " " : "") + time.getHours()}時${(time.getMinutes() < 10 ? " " : "") + time.getMinutes()}分${(time.getSeconds() < 10 ? " " : "") + time.getSeconds()}秒`);
 		string.push(`　　　　　　　　　　震　央　位　置： 北　緯　 ${report.epicenterLat.toFixed(2)} °`);
@@ -501,7 +501,7 @@ TREM.Report = {
 				+ (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
 				+ (time.getSeconds() < 10 ? "0" : "") + time.getSeconds()
 				+ (report.magnitudeValue * 10)
-				+ (report.earthquakeNo - 111000 ? report.earthquakeNo - 111000 : "");
+				+ (report.earthquakeNo % 1000 ? report.earthquakeNo.toString().slice(-3) : "");
 			document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
 		}
 
