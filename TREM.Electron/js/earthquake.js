@@ -23,6 +23,10 @@ TREM.Audios = {
 TREM.AudioContext = new AudioContext({});
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
+
+/**
+ * @type {Map<string, EEW}
+ */
 TREM.EEW = new Map();
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
@@ -60,7 +64,6 @@ const Maps = { main: null, mini: null, report: null };
  * @type { {[key: string]: Map<string, maplibregl.StyleLayer>} }
  */
 const MapBases = { main: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
-const Station = {};
 const detected_list = {};
 let Cancel = false;
 let PGALimit = 0;
@@ -72,7 +75,28 @@ let TINFO = 0;
 let Report = 0;
 const server_timestamp = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
 let Location;
-let station = {};
+
+/**
+ * @typedef StationData 測站
+ * @property {number} Lat   緯度
+ * @property {number} Long  經度
+ * @property {number} PGA   對應 area id
+ * @property {string} Loc   地點
+ * @property {string} area  區域
+ */
+
+/**
+ * 所有測站列表
+ * @type {Object<string, StationData>}
+ */
+let station_list = {};
+
+/**
+ * 地圖上測站列表
+ * @type {Map<string, L.Marker>}
+ */
+const stations = new Map();
+
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -80,7 +104,7 @@ let EEWshotC = 0;
 let replay = 0;
 let replayT = 0;
 let Second = -1;
-let mapLock = false;
+const mapLock = false;
 const eew = {};
 const eewt = { id: 0, time: 0 };
 let TSUNAMI = {};
@@ -91,402 +115,263 @@ let report_get_timestamp = 0;
 let map_move_back = false;
 // #endregion
 
-TREM.MapIntensity = {
-  isTriggered : false,
-  alertTime   : 0,
-  intensities : new Map(),
-  palert(rawPalertData) {
-    if (rawPalertData.data?.length && !replay) {
-      if (rawPalertData.timestamp != this.alertTime) {
-        this.alertTime = rawPalertData.timestamp;
-        let MaxI = 0;
-        const int = new Map();
+const MainMap = {
+  intensity: {
+    isVisible   : false,
+    isTriggered : false,
+    alertTime   : 0,
+    intensities : new Map(),
+    palert(rawPalertData) {
+      if (rawPalertData.data?.length && !replay) {
+        if (rawPalertData.timestamp != this.alertTime) {
+          this.alertTime = rawPalertData.timestamp;
+          let MaxI = 0;
+          const int = new Map();
 
-        for (const palertEntry of rawPalertData.data) {
-          const [countyName, townName] = palertEntry.loc.split(" ");
-          const towncode = TREM.Resources.region[countyName]?.[townName]?.code;
+          for (const palertEntry of rawPalertData.data) {
+            const [countyName, townName] = palertEntry.loc.split(" ");
+            const towncode = TREM.Resources.region[countyName]?.[townName]?.code;
 
-          if (!towncode) continue;
-          int.set(towncode, palertEntry.intensity);
+            if (!towncode) continue;
+            int.set(towncode, palertEntry.intensity);
 
-          if (palertEntry.intensity > MaxI) {
-            MaxI = palertEntry.intensity;
-            Report = NOW.getTime();
-            ReportGET({
-              Max  : MaxI,
-              Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
-            });
-          }
-        }
-
-        if (this.intensities.size)
-          for (const [towncode, intensity] of this.intensities)
-            if (int.get(towncode) != intensity) {
-              this.intensities.delete(towncode);
-              Maps.main.setFeatureState({
-                source : "Source_tw_town",
-                id     : towncode,
-              }, { intensity: 0 });
+            if (palertEntry.intensity > MaxI) {
+              MaxI = palertEntry.intensity;
+              Report = NOW.getTime();
+              ReportGET({
+                Max  : MaxI,
+                Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
+              });
             }
+          }
 
-        if (int.size) {
-          dump({ level: 0, message: `Total ${int.size} triggered stations`, origin: "P-Alert" });
-
-          for (const [towncode, intensity] of int)
-            if (this.intensities.get(towncode) != intensity)
-              Maps.main.setFeatureState({
-                source : "Source_tw_town",
-                id     : towncode,
-              }, { intensity });
-
-          Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
-
-          this.intensities = int;
-
-          if (!this.isTriggered) {
-            this.isTriggered = true;
-            changeView("main", "#mainView_btn");
-
-            if (setting["Real-time.show"]) win.showInactive();
-
-            if (setting["Real-time.cover"])
-              if (!win.isFullScreen()) {
-                win.setAlwaysOnTop(true);
-                win.focus();
-                win.setAlwaysOnTop(false);
+          if (this.intensities.size)
+            for (const [towncode, intensity] of this.intensities)
+              if (int.get(towncode) != intensity) {
+                this.intensities.delete(towncode);
+                Maps.main.setFeatureState({
+                  source : "Source_tw_town",
+                  id     : towncode,
+                }, { intensity: 0 });
               }
 
-            if (!win.isFocused()) win.flashFrame(true);
+          if (int.size) {
+            dump({ level: 0, message: `Total ${int.size} triggered stations`, origin: "P-Alert" });
 
-            if (setting["audio.realtime"]) TREM.Audios.palert.play();
+            for (const [towncode, intensity] of int)
+              if (this.intensities.get(towncode) != intensity)
+                Maps.main.setFeatureState({
+                  source : "Source_tw_town",
+                  id     : towncode,
+                }, { intensity });
+
+            Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
+
+            this.intensities = int;
+
+            if (!this.isTriggered) {
+              this.isTriggered = true;
+              changeView("main", "#mainView_btn");
+
+              if (setting["Real-time.show"]) win.showInactive();
+
+              if (setting["Real-time.cover"])
+                if (!win.isFullScreen()) {
+                  win.setAlwaysOnTop(true);
+                  win.focus();
+                  win.setAlwaysOnTop(false);
+                }
+
+              if (!win.isFocused()) win.flashFrame(true);
+
+              if (setting["audio.realtime"]) TREM.Audios.palert.play();
+            }
+
+            setTimeout(() => {
+              ipcRenderer.send("screenshotEEW", {
+                Function : "palert",
+                ID       : 1,
+                Version  : 1,
+                Time     : NOW.getTime(),
+                Shot     : 1,
+              });
+            }, 1250);
           }
-
-          setTimeout(() => {
-            ipcRenderer.send("screenshotEEW", {
-              Function : "palert",
-              ID       : 1,
-              Version  : 1,
-              Time     : NOW.getTime(),
-              Shot     : 1,
-            });
-          }, 1250);
-        }
-      }
-
-      if (this.timer)
-        this.timer.refresh();
-      else
-        this.timer = setTimeout(this.clear, 600_000);
-    }
-  },
-  expected(expected) {
-    const int = new Map();
-
-    for (const [towncode, exp] of expected)
-      int.set(towncode, exp.intensity.value);
-
-    if (this.intensities.size)
-      for (const [towncode, intensity] of this.intensities)
-        if (int.get(towncode) != intensity) {
-          this.intensities.delete(towncode);
-          Maps.main.setFeatureState({
-            source : "Source_tw_town",
-            id     : towncode,
-          }, { intensity: 0 });
         }
 
-    if (int.size) {
-      for (const [towncode, intensity] of int)
-        if (this.intensities.get(towncode) != intensity)
-          Maps.main.setFeatureState({
-            source : "Source_tw_town",
-            id     : towncode,
-          }, { intensity });
-
-      Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
-
-      this.intensities = int;
-    }
-  },
-  clear() {
-    dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
-
-    if (this.intensities.size) {
-      Maps.main.removeFeatureState({ source: "Source_tw_town" });
-      Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
-      this.intensities = new Map();
-      this.alertTime = 0;
-      this.isTriggered = false;
-
-      if (this.timer) {
-        clearTimeout(this.timer);
-        delete this.timer;
-      }
-    }
-  },
-};
-
-TREM.PWS = {
-  cache: new Map(),
-  addPWS(rawPWSData) {
-    const id = rawPWSData.link.href.slice(15);
-
-    if (!id.length) return;
-    const pws = {
-      id,
-      title       : rawPWSData.title,
-      sender      : rawPWSData.sender.value,
-      description : rawPWSData.description.$t,
-      area        : rawPWSData.area.areaDesc,
-      areaCodes   : TREM.Utils.findRegions(rawPWSData.area.areaDesc),
-      sentTime    : new Date(rawPWSData.sent.slice(0, rawPWSData.sent.length - 3)),
-      expireTime  : new Date(rawPWSData.expires.slice(0, rawPWSData.expires.length - 3)),
-      url         : rawPWSData.link.href,
-      timer       : null,
-    };
-    dump({ level: 0, message: `${pws.description}`, origin: "PWS" });
-
-    if (Date.now() > pws.expireTime.getTime()) return;
-
-    for (const area of pws.areaCodes)
-      if (area.town) {
-        const { pws: pwsCount } = Maps.main.getFeatureState({
-          source : "Source_tw_town",
-          id     : area.code,
-        });
-        Maps.main.setFeatureState({
-          source : "Source_tw_town",
-          id     : area.code,
-        }, { pws: (pwsCount ?? 0) + 1 });
-        Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "visible");
-        pws.marker = new maplibregl.Marker({
-          element: $("<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>")[0],
-        })
-          .setLngLat([area.longitude, area.latitude])
-          .setPopup(new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: 360 }).setHTML(`<div class="marker-popup pws-popup"><strong>${pws.title}</strong>\n發報單位：${pws.sender}\n內文：${pws.description}\n發報時間：${pws.sentTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n失效時間：${pws.expireTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n\n<span class="url" onclick="openURL('${pws.url}')">報告連結</span></div>`))
-          .addTo(Maps.main);
-      } else {
-        const { pws: pwsCount } = Maps.main.getFeatureState({
-          source : "Source_tw_county",
-          id     : area.code,
-        });
-        Maps.main.setFeatureState({
-          source : "Source_tw_county",
-          id     : area.code,
-        }, { pws: (pwsCount ?? 0) + 1 });
-        Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "visible");
-      }
-
-    pws.timer = setTimeout(this.clear, pws.expireTime.getTime() - Date.now(), id);
-
-    this.cache.set(id, pws);
-  },
-  clear(pwsId) {
-    if (pwsId) {
-      const pws = this.cache.get(pwsId);
-
-      if (!pws) return;
-      dump({ level: 0, message: `Clearing PWS id ${pwsId}`, origin: "PWS" });
-
-      for (const area of pws.areaCodes)
-        if (area.town) {
-          const { pws: pwsCount } = Maps.main.getFeatureState({
-            source : "Source_tw_town",
-            id     : area.code,
-          });
-          Maps.main.setFeatureState({
-            source : "Source_tw_town",
-            id     : area.code,
-          }, { pws: pwsCount - 1 });
-
-          if (pws.marker) {
-            pws.marker.remove();
-            delete pws.marker;
-          }
-
-          if (!(pwsCount - 1))
-            Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
-        } else {
-          const { pws: pwsCount } = Maps.main.getFeatureState({
-            source : "Source_tw_county",
-            id     : area.code,
-          });
-          Maps.main.setFeatureState({
-            source : "Source_tw_county",
-            id     : area.code,
-          }, { pws: pwsCount - 1 });
-
-          if (pws.marker) {
-            pws.marker.remove();
-            delete pws.marker;
-          }
-
-          if (!(pwsCount - 1))
-            Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
-        }
-
-      if (pws.timer) {
-        clearTimeout(pws.timer);
-        delete pws.timer;
-      }
-
-      this.cache.delete(pwsId);
-    }
-
-    if (this.cache.size) {
-      dump({ level: 0, message: "Clearing PWS map", origin: "PWS" });
-
-      for (const [id, pws] of this.cache) {
-        for (const area of pws.areaCodes)
-          if (area.town)
-            Maps.main.setFeatureState({
-              source : "Source_tw_town",
-              id     : area.code,
-            }, { pws: 0 });
-          else
-            Maps.main.setFeatureState({
-              source : "Source_tw_county",
-              id     : area.code,
-            }, { pws: 0 });
-
-        if (pws.timer) {
-          clearTimeout(pws.timer);
-          delete pws.timer;
-        }
-      }
-
-      Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
-      Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
-      this.cache = new Map();
-    }
-  },
-};
-
-TREM.MapArea = {
-  cache      : new Map(),
-  isVisible  : false,
-  blinkTimer : null,
-  setArea(id, intensity) {
-    if (this.cache.get(id) == intensity) return;
-    Maps.main.setFeatureState({
-      source: "Source_area",
-      id,
-    }, { intensity });
-    this.cache.set(id, intensity);
-    this.show();
-
-    if (!this.blinkTimer)
-      this.blinkTimer = setInterval(() => {
-        if (this.isVisible)
-          this.hide();
+        if (this.timer)
+          this.timer.refresh();
         else
-          this.show();
-      }, 500);
-  },
-  clear(id) {
-    if (id) {
-      Maps.main.removeFeatureState({ source: "Source_area", id });
-      this.cache.delete(id);
-    } else {
-      Maps.main.removeFeatureState({ source: "Source_area" });
-      delete this.cache;
-      this.cache = new Map();
-    }
+          this.timer = setTimeout(this.clear, 600_000);
+      }
+    },
+    clear() {
+      dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
 
-    if (!this.cache.size) {
-      if (this.blinkTimer)
-        clearTimeout(this.blinkTimer);
-      delete this.blinkTimer;
-      this.hide();
-    }
+      if (this.intensities.size) {
+        Maps.main.removeFeatureState({ source: "Source_tw_town" });
+        Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
+        this.intensities = new Map();
+        this.alertTime = 0;
+        this.isTriggered = false;
+
+        if (MapBases.main.has("tw_town")) {
+          MapBases.main.get("tw_town").remove();
+          MapBases.main.delete("tw_town");
+          MapBases.main.get("tw_county").addTo(Maps.main);
+          this.isVisible = false;
+        }
+
+
+        if (this.timer) {
+          clearTimeout(this.timer);
+          delete this.timer;
+        }
+      }
+    },
   },
-  show() {
-    Maps.main.setLayoutProperty("Layer_area", "visibility", "visible");
-    this.isVisible = true;
-  },
-  hide() {
-    Maps.main.setLayoutProperty("Layer_area", "visibility", "none");
-    this.isVisible = false;
-  },
+  area: {
+    cache      : new Map(),
+    isVisible  : false,
+    blinkTimer : null,
+    setArea(id, intensity) {
+      if (this.cache.get(id)?.intensity == intensity) return;
+
+      if (this.cache.has(id)) {
+        this.cache.get(id).polygon.setStyle({ color: color(intensity) });
+      } else {
+        this.cache.set(id, {
+          intensity,
+          polygon: L.polygon(TREM.Resources.area[id], {
+            renderer : L.svg(),
+            color    : color(intensity),
+            fill     : false
+          })
+        });
+
+        if (this.isVisible) this.cache.get(id).polygon.addTo(Maps.main);
+      }
+
+      if (!this.blinkTimer) {
+        this.show();
+        this.blinkTimer = setInterval(() => {
+          if (this.isVisible)
+            this.hide();
+          else
+            this.show();
+        }, 500);
+      }
+    },
+    clear(id) {
+      if (id) {
+        this.cache.get(id).polygon.remove();
+        this.cache.delete(id);
+      } else {
+        for (const [, value] of this.cache)
+          value.polygon.remove();
+
+        delete this.cache;
+        this.cache = new Map();
+      }
+
+      if (!this.cache.size) {
+        if (this.blinkTimer)
+          clearTimeout(this.blinkTimer);
+        delete this.blinkTimer;
+        this.hide();
+      }
+    },
+    show() {
+      for (const [, value] of this.cache)
+        value.polygon.addTo(Maps.main);
+      this.isVisible = true;
+    },
+    hide() {
+      for (const [, value] of this.cache)
+        value.polygon.remove();
+      this.isVisible = false;
+    },
+  }
 };
+
 class WaveCircle {
 
   /**
-	 * @param {string} id
-	 * @param {maplibregl.Map} map
-	 * @param {maplibregl.LngLatLike} lnglat
-	 * @param {number} radius
-	 * @param {boolean} alert
-	 * @param {maplibregl.LayerSpecification} layerOptions
+	 * @param {{id: string, map: L.Map, latlng: L.LatLng, radius: number, alert: boolean}}
 	 */
-  constructor(id, map, lnglat, radius, alert, layerOptions) {
+  constructor({ id, map, latlng, radius, alert }) {
     this.map = map;
-    this.lnglat = lnglat;
+    this.latlng = latlng;
     this.radius = radius;
     this.alert = alert;
+    this.layer = { main: null, mini: null };
 
-    /**
-		 * @type {maplibregl.GeoJSONSource}
-		 */
-    this.source = map.addSource(`Source_${id}`, {
-      type : "geojson",
-      data : turfCircle(lnglat, radius, { units: "meters" }),
-    }).getSource(`Source_${id}`);
-    this.layer = map.addLayer({
-      ...layerOptions,
-      id     : `Layer_${id}`,
-      source : `Source_${id}`,
-    }).getLayer(`Layer_${id}`);
-
-    if (layerOptions.type == "fill")
-      this.layerBorder = map.addLayer({
-        ...layerOptions,
-        type   : "line",
-        id     : `Layer_${id}_Border`,
-        source : `Source_${id}`,
-        paint  : {
-          "line-width" : 3,
-          "line-color" : layerOptions.paint["fill-color"],
-        },
-      }).getLayer(`Layer_${id}_Border`);
+    if (id.endsWith("p")) {
+      this.layer.main = L.circle(this.latlng, {
+        color     : "#6FB7B7",
+        fillColor : "transparent",
+        radius    : radius,
+        renderer  : L.svg(),
+        className : "p-wave",
+      }).addTo(Maps.main);
+      this.layer.mini = L.circle(this.latlng, {
+        color     : "#6FB7B7",
+        fillColor : "transparent",
+        radius    : radius,
+        renderer  : L.svg(),
+        className : "p-wave",
+      }).addTo(Maps.mini);
+    } else {
+      this.layer.main = L.circle(this.latlng, {
+        color       : this.alert ? "red" : "orange",
+        fillColor   : `url(#${this.alert ? "alert" : "pred"}-gradient)`,
+        fillOpacity : 1,
+        radius      : radius,
+        renderer    : L.svg(),
+        className   : "s-wave",
+      }).addTo(Maps.main);
+      this.layer.mini = L.circle(this.latlng, {
+        color       : this.alert ? "red" : "orange",
+        fillColor   : `url(#${this.alert ? "alert" : "pred"}-gradient)`,
+        fillOpacity : 1,
+        radius      : radius,
+        renderer    : L.svg(),
+        className   : "s-wave",
+      }).addTo(Maps.mini);
+    }
   }
 
-  setLngLat(lnglat) {
-    if (this.lnglat[0] == lnglat[0] && this.lnglat[1] == lnglat[1]) return;
-    this.lnglat = lnglat;
-    this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
+  setLatLng(latlng) {
+    if (this.latlng[0] == latlng[0] && this.latlng[1] == latlng[1]) return;
+    this.latlng = latlng;
+    this.layer.main.setLatLng(this.latlng);
+    this.layer.mini.setLatLng(this.latlng);
   }
 
   setRadius(radius) {
     if (this.radius == radius) return;
     this.radius = radius;
-    this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
+    this.layer.main.setRadius(this.radius);
+    this.layer.mini.setRadius(this.radius);
   }
 
   setAlert(state) {
     if (this.alert == state) return;
     this.alert = state;
-    this.source();
-    this.layer.setPaintProperty("fill-color", this.alert ? "#FF0000" : "#FFA500");
-    this.layerBorder.setPaintProperty("line-color", this.alert ? "#FF0000" : "#FFA500");
-  }
-
-  setStyle(id, value) {
-    if (this.layer.paint[id] == value) return;
-    this.layer.setPaintProperty(id, value);
+    this.layer.main.setStyle({
+      color     : this.alert ? "red" : "orange",
+      fillColor : `url(#${this.alert ? "alert" : "pred"}-gradient)`,
+    });
+    this.layer.mini.setStyle({
+      color     : this.alert ? "red" : "orange",
+      fillColor : `url(#${this.alert ? "alert" : "pred"}-gradient)`,
+    });
   }
 
   remove() {
-    this.map.removeLayer(this.layer.id);
+    this.layer.main.remove();
+    this.layer.mini.remove();
     delete this.layer;
-
-    if (this.layerBorder) {
-      this.map.removeLayer(this.layerBorder.id);
-      delete this.layerBorder;
-    }
-
-    this.map.removeSource(this.source.id);
-    delete this.source;
     return null;
   }
 }
@@ -520,6 +405,7 @@ class EEW {
     this.id = data.ID;
     this.depth = data.Depth;
     this.epicenter = { latitude: data.NorthLatitude, longitude: data.EastLongitude };
+    this.epicenterIcon = { main: null, mini: null };
     this.location = data.Location;
     this.magnitude = data.Scale;
     this.source = data.Unit;
@@ -538,6 +424,8 @@ class EEW {
     this._from = data.data_unit;
     this._receiveTime = new Date(data.timestamp);
     this._replay = data.Replay;
+
+    this.#epicenterIcon();
   }
 
   #evalExpected() {
@@ -565,6 +453,28 @@ class EEW {
       }
   }
 
+  #epicenterIcon() {
+    if (this.epicenter.icon) {
+      this.epicenterIcon.main.setLatLng([this.epicenter.latitude, this.epicenter.longitude]);
+      this.epicenterIcon.mini.setLatLng([this.epicenter.latitude, this.epicenter.longitude]);
+    } else {
+      this.epicenterIcon.main = L.marker([this.epicenter.latitude, this.epicenter.longitude], {
+        icon: L.icon({
+          iconUrl   : "../image/cross.png",
+          iconSize  : [30, 30],
+          className : "epicenterIcon",
+        })
+      }).addTo(Maps.main);
+      this.epicenterIcon.mini = L.marker([this.epicenter.latitude, this.epicenter.longitude], {
+        icon: L.icon({
+          iconUrl   : "../image/cross.png",
+          iconSize  : [30, 30],
+          className : "epicenterIcon",
+        })
+      }).addTo(Maps.mini);
+    }
+  }
+
   update(data) {
     this.#fromJson(data);
   }
@@ -572,7 +482,6 @@ class EEW {
 
 // #region 初始化
 bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
-
 
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
@@ -602,6 +511,7 @@ async function init() {
 
   TREM.MapRenderingEngine = setting["map.engine"];
 
+  // checks internet connectivity
   if (!window.navigator.onLine)
     return showDialog(
       "error",
@@ -611,7 +521,6 @@ async function init() {
         ipcRenderer.send("restart");
       },
     );
-
 
   // Connect to server
   await (async () => {
@@ -691,8 +600,8 @@ async function init() {
             investigation = false;
             roll.removeChild(roll.children[0]);
 
-            if (TREM.MapIntensity.isTriggered)
-              TREM.MapIntensity.clear();
+            if (MainMap.intensity.isTriggered)
+              MainMap.intensity.clear();
           }
         } else
         if (Date.now() - report_get_timestamp > 600_000) {
@@ -747,101 +656,55 @@ async function init() {
 
     dump({ level: 3, message: "Initializing map", origin: "Map" });
 
-    if (!Maps.main)
-      if (TREM.MapRenderingEngine == "mapbox-gl") {
-        Maps.main = new maplibregl.Map(
-          {
-            container : "map",
-            maxPitch  : 0,
-            maxBounds : [
-              50,
-              10,
-              180,
-              60,
-            ],
-            zoom              : 6.895604243192027,
-            center            : [120.99401979478893, 23.633067293391818],
-            renderWorldCopies : false,
-            keyboard          : false,
-            doubleClickZoom   : false,
-            dragRotate        : false,
-            touchZoomRotate   : false,
-          })
-          .on("drag", () => {
-            mapLock = true;
-          })
-          .on("click", (ev) => {
-            mapLock = false;
+    // MainMap
+    Maps.main = L.map("map", {
+      edgeBufferTiles    : 1,
+      attributionControl : false,
+      closePopupOnClick  : false,
+      maxBounds          : [[60, 50], [10, 180]],
+      preferCanvas       : true,
+      zoomSnap           : 0.25,
+      zoomDelta          : 0.5,
+      zoomAnimation      : true,
+      fadeAnimation      : setting["map.animation"],
+      doubleClickZoom    : false,
+      zoomControl        : false,
+    })
+      .setView([23.630405850000496, 120.90373206379121], 7.75)
+      .on("click", () => {
+        TREM.Earthquake.emit("focus", {
+          bounds  : [[21.77, 118.25], [25.47, 122.18]],
+          options : {
+            paddingBottomRight: [ document.getElementById("map").offsetWidth / 6, 0],
+          },
+        });
+      })
+      .on("contextmenu", () => {
+        TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+      })
+      .on("zoomend", () => {
+        if (Maps.main.getZoom() >= 11)
+          for (const key in stations) {
+            const tooltip = stations[key].getTooltip();
 
-            if (ev.originalEvent.target.tagName == "CANVAS")
-              Mapsmainfocus();
-          })
-          .on("contextmenu", (ev) => {
-            if (ev.originalEvent.target.tagName == "CANVAS")
-              Mapsmainfocus();
-          })
-          .on("zoom", () => {
-            if (Maps.main.getZoom() >= 11.5) {
-              for (const key in Station)
-                if (!Station[key].getPopup().isOpen())
-                  Station[key].togglePopup();
-            } else {
-              for (const key in Station)
-                if (Station[key].getPopup().isOpen())
-                  if (!Station[key].getPopup().persist)
-                    Station[key].togglePopup();
+            if (tooltip) {
+              stations[key].unbindTooltip();
+              tooltip.options.permanent = true;
+              stations[key].bindTooltip(tooltip);
             }
-          });
-      } else if (TREM.MapRenderingEngine == "leaflet") {
-        Maps.main = L.map("map",
-          {
-            edgeBufferTiles    : 1,
-            attributionControl : false,
-            closePopupOnClick  : false,
-            maxBounds          : [[60, 50], [10, 180]],
-            preferCanvas       : true,
-            zoomSnap           : 0.25,
-            zoomDelta          : 0.5,
-            zoomAnimation      : true,
-            fadeAnimation      : setting["map.animation"],
-            doubleClickZoom    : false,
-            zoomControl        : false,
-          })
-          .on("click", () => {
-            TREM.Earthquake.emit("focus", {
-              bounds  : [[21.77, 118.25], [25.47, 122.18]],
-              options : {
-                paddingBottomRight: [ 0, document.getElementById("map").offsetWidth / 6],
-              },
-            });
-          })
-          .on("contextmenu", () => {
-            TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
-          })
-          .on("zoomend", () => {
-            if (Maps.main.getZoom() >= 11)
-              for (const key in Station) {
-                const tooltip = Station[key].getTooltip();
+          }
+        else
+          for (const key in stations) {
+            const tooltip = stations[key].getTooltip();
 
-                if (tooltip) {
-                  Station[key].unbindTooltip();
-                  tooltip.options.permanent = true;
-                  Station[key].bindTooltip(tooltip);
-                }
-              }
-            else
-              for (const key in Station) {
-                const tooltip = Station[key].getTooltip();
-
-                if (tooltip && !Station[key].keepTooltipAlive) {
-                  Station[key].unbindTooltip();
-                  tooltip.options.permanent = false;
-                  Station[key].bindTooltip(tooltip);
-                }
-              }
-          });
-        Maps.main._zoomAnimated = setting["map.animation"];
-      }
+            if (tooltip && !stations[key].keepTooltipAlive) {
+              stations[key].unbindTooltip();
+              tooltip.options.permanent = false;
+              stations[key].bindTooltip(tooltip);
+            }
+          }
+      });
+    // Maps.main._zoomAnimated = setting["map.animation"];
 
     if (!Maps.mini)
       Maps.mini = L.map("map-tw",
@@ -866,14 +729,9 @@ async function init() {
       if (TREM.MapRenderingEngine == "mapbox-gl") {
         Maps.report = new maplibregl.Map(
           {
-            container : "map-report",
-            maxPitch  : 0,
-            maxBounds : [
-              100,
-              10,
-              130,
-              30,
-            ],
+            container          : "map-report",
+            maxPitch           : 0,
+            maxBounds          : [100, 10, 130, 30,],
             maxZoom            : 10,
             minZoom            : 6,
             zoom               : 6.8,
@@ -956,425 +814,54 @@ async function init() {
 
     // #endregion
 
-    /*
-		if (!MapBases.mainFill.length)
-			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
-				MapBases.mainFill.push(
-					L.geoJson.vt(MapData[mapName], {
-						edgeBufferTiles : 2,
-						minZoom         : 4,
-						maxZoom         : 12,
-						tolerance       : 20,
-						buffer          : 256,
-						debug           : 0,
-						style           : {
-							weight      : 0.8,
-							color       : TREM.Colors.primary,
-							fillColor   : TREM.Colors.surfaceVariant,
-							fillOpacity : 1,
-						},
-					}).addTo(Maps.main),
-				);
-*/
-    TREM.MapBounds = {};
+    for (const mapName of ["cn", "jp", "sk", "nk"]) {
+      MapBases.main.set(mapName, L.geoJson.vt(MapData[mapName], {
+        edgeBufferTiles : 2,
+        minZoom         : 4,
+        maxZoom         : 12,
+        tolerance       : 25,
+        buffer          : 256,
+        debug           : 0,
+        style           : {
+          weight      : 0.8,
+          color       : TREM.Colors.secondary,
+          fillColor   : TREM.Colors.surfaceVariant,
+          fillOpacity : 1,
+        },
+      }));
 
-    for (const feature of MapData.tw_town.features) {
-      const bounds = new maplibregl.LngLatBounds();
-
-      for (const coordinate of feature.geometry.coordinates)
-        for (const coords of coordinate)
-          if (!Array.isArray(coords[0])) {
-            if (coords[0] > 118 && coords[1] > 21.5)
-              if (coords[0] < 122.5 && coords[1] < 25.5)
-                bounds.extend(coords);
-          } else {
-            for (const coord of coords)
-              if (Array.isArray(coord))
-                if (coord[0] > 118 && coord[1] > 21.5)
-                  if (coord[0] < 122.5 && coord[1] < 26.5)
-                    bounds.extend(coord);
-          }
-
-      TREM.MapBounds[feature.properties.TOWNCODE] = bounds;
+      if (setting[`map.${mapName}`])
+        MapBases.main.get(mapName).addTo(Maps.main);
     }
 
-    if (!MapBases.main.size) {
-      for (const mapName of [
-        "cn",
-        "jp",
-        "sk",
-        "nk",
-      ])
-        if (TREM.MapRenderingEngine == "mapbox-gl") {
-          Maps.main.addSource(`Source_${mapName}`, {
-            type      : "geojson",
-            data      : MapData[mapName],
-            tolerance : 1,
-          });
-          MapBases.main.set(`${mapName}`, Maps.main.addLayer({
-            id     : `Layer_${mapName}`,
-            type   : "fill",
-            source : `Source_${mapName}`,
-            paint  : {
-              "fill-color"         : TREM.Colors.surfaceVariant,
-              "fill-outline-color" : TREM.Colors.secondary,
-              "fill-opacity"       : 0.5,
-            },
-            layout: {
-              visibility: setting[`map.${mapName}`] ? "visible" : "none",
-            },
-          }).getLayer(`Layer_${mapName}`));
-        } else if (TREM.MapRenderingEngine == "leaflet") {
-          MapBases.main.set(`${mapName}`, L.geoJson.vt(MapData[mapName], {
-            edgeBufferTiles : 2,
-            minZoom         : 4,
-            maxZoom         : 12,
-            tolerance       : 20,
-            buffer          : 256,
-            debug           : 0,
-            style           : {
-              weight      : 0.8,
-              color       : TREM.Colors.secondary,
-              fillColor   : TREM.Colors.surfaceVariant,
-              fillOpacity : 0.5,
-            },
-          }).addTo(Maps.main));
-        }
-
-      if (TREM.MapRenderingEngine == "mapbox-gl") {
-        Maps.main.addSource("Source_tw_county", {
-          type      : "geojson",
-          data      : MapData.tw_county,
-          tolerance : 0.5,
-        });
-        Maps.main.addSource("Source_tw_town", {
-          type      : "geojson",
-          data      : MapData.tw_town,
-          tolerance : 0.5,
-        });
-        Maps.main.addSource("Source_area", {
-          type : "geojson",
-          data : MapData.area,
-        });
-        MapBases.main.set("tw_county_fill", Maps.main.addLayer({
-          id     : "Layer_tw_county_Fill",
-          type   : "fill",
-          source : "Source_tw_county",
-          paint  : {
-            "fill-color"   : TREM.Colors.surfaceVariant,
-            "fill-opacity" : 1,
-          },
-        }).getLayer("Layer_tw_county_Fill"));
-        Maps.main.addLayer({
-          id     : "Layer_intensity",
-          type   : "fill",
-          source : "Source_tw_town",
-          paint  : {
-            "fill-color": [
-              "match",
-              [
-                "coalesce",
-                ["feature-state", "intensity"],
-                0,
-              ],
-              9,
-              setting["theme.customColor"] ? setting["theme.int.9"]
-                : "#862DB3",
-              8,
-              setting["theme.customColor"] ? setting["theme.int.8"]
-                : "#DB1F1F",
-              7,
-              setting["theme.customColor"] ? setting["theme.int.7"]
-                : "#F55647",
-              6,
-              setting["theme.customColor"] ? setting["theme.int.6"]
-                : "#DB641F",
-              5,
-              setting["theme.customColor"] ? setting["theme.int.5"]
-                : "#E68439",
-              4,
-              setting["theme.customColor"] ? setting["theme.int.4"]
-                : "#E8D630",
-              3,
-              setting["theme.customColor"] ? setting["theme.int.3"]
-                : "#7BA822",
-              2,
-              setting["theme.customColor"] ? setting["theme.int.2"]
-                : "#2774C2",
-              1,
-              setting["theme.customColor"] ? setting["theme.int.1"]
-                : "#757575",
-              "transparent",
-            ],
-            "fill-outline-color": [
-              "case",
-              [
-                ">",
-                [
-                  "coalesce",
-                  ["feature-state", "intensity"],
-                  0,
-                ],
-                0,
-              ],
-              TREM.Colors.onSurfaceVariant,
-              "transparent",
-            ],
-            "fill-opacity": [
-              "case",
-              [
-                ">",
-                [
-                  "coalesce",
-                  ["feature-state", "intensity"],
-                  0,
-                ],
-                0,
-              ],
-              1,
-              0,
-            ],
-          },
-          layout: {
-            visibility: "none",
-          },
-        });
-        MapBases.main.set("tw_county_line", Maps.main.addLayer({
-          id     : "Layer_tw_county_Line",
-          type   : "line",
-          source : "Source_tw_county",
-          paint  : {
-            "line-color"   : TREM.Colors.primary,
-            "line-width"   : 1,
-            "line-opacity" : 1,
-          },
-        }).getLayer("Layer_tw_county_Line"));
-        Maps.main.addLayer({
-          id     : "Layer_pws_town",
-          type   : "line",
-          source : "Source_tw_town",
-          paint  : {
-            "line-color": [
-              "case",
-              [
-                ">",
-                [
-                  "coalesce",
-                  ["feature-state", "pws"],
-                  0,
-                ],
-                0,
-              ],
-              "#efcc00",
-              "transparent",
-            ],
-            "line-width"   : 2,
-            "line-opacity" : [
-              "case",
-              [
-                ">",
-                [
-                  "coalesce",
-                  ["feature-state", "pws"],
-                  0,
-                ],
-                0,
-              ],
-              1,
-              0,
-            ],
-          },
-          layout: {
-            visibility: "none",
-          },
-        });
-        Maps.main.addLayer({
-          id     : "Layer_pws_county",
-          type   : "line",
-          source : "Source_tw_county",
-          paint  : {
-            "line-color": [
-              "case",
-              [
-                ">",
-                [
-                  "coalesce",
-                  ["feature-state", "pws"],
-                  0,
-                ],
-                0,
-              ],
-              "#efcc00",
-              "transparent",
-            ],
-            "line-width"   : 2,
-            "line-opacity" : [
-              "case",
-              [
-                ">",
-                [
-                  "coalesce",
-                  ["feature-state", "pws"],
-                  0,
-                ],
-                0,
-              ],
-              1,
-              0,
-            ],
-          },
-          layout: {
-            visibility: "none",
-          },
-        });
-        Maps.main.addLayer({
-          id     : "Layer_area",
-          type   : "line",
-          source : "Source_area",
-          paint  : {
-            "line-color": [
-              "match",
-              [
-                "coalesce",
-                ["feature-state", "intensity"],
-                0,
-              ],
-              9,
-              setting["theme.customColor"] ? setting["theme.int.9"]
-                : "#862DB3",
-              8,
-              setting["theme.customColor"] ? setting["theme.int.8"]
-                : "#DB1F1F",
-              7,
-              setting["theme.customColor"] ? setting["theme.int.7"]
-                : "#F55647",
-              6,
-              setting["theme.customColor"] ? setting["theme.int.6"]
-                : "#DB641F",
-              5,
-              setting["theme.customColor"] ? setting["theme.int.5"]
-                : "#E68439",
-              4,
-              setting["theme.customColor"] ? setting["theme.int.4"]
-                : "#E8D630",
-              3,
-              setting["theme.customColor"] ? setting["theme.int.3"]
-                : "#7BA822",
-              2,
-              setting["theme.customColor"] ? setting["theme.int.2"]
-                : "#2774C2",
-              1,
-              setting["theme.customColor"] ? setting["theme.int.1"]
-                : "#757575",
-              setting["theme.customColor"] ? setting["theme.int.0"]
-                : "#6B7979",
-            ],
-            "line-width"   : 3,
-            "line-opacity" : [
-              "case",
-              [
-                ">=",
-                [
-                  "coalesce",
-                  ["feature-state", "intensity"],
-                  -1,
-                ],
-                0,
-              ],
-              1,
-              0,
-            ],
-          },
-          layout: {
-            visibility: "none",
-          },
-        });
-      } else if (TREM.MapRenderingEngine == "leaflet") {
-        MapBases.main.set("tw_county_fill", L.geoJson.vt(MapData.tw_county, {
-          edgeBufferTiles : 2,
-          minZoom         : 4,
-          maxZoom         : 12,
-          tolerance       : 20,
-          buffer          : 256,
-          debug           : 0,
-          style           : {
-            border      : false,
-            fillColor   : TREM.Colors.surfaceVariant,
-            fillOpacity : 1,
-          },
-        }).addTo(Maps.main));
-        MapBases.main.set("intensity", L.geoJson.vt(MapData.tw_town, {
-          edgeBufferTiles : 2,
-          minZoom         : 4,
-          maxZoom         : 12,
-          tolerance       : 20,
-          buffer          : 256,
-          debug           : 0,
-          style           : {
-            color       : "transparent",
-            fillColor   : TREM.Colors.surfaceVariant,
-            fillOpacity : 0,
-          },
-        }).addTo(Maps.main));
-        MapBases.main.set("tw_county_line", L.geoJson.vt(MapData.tw_county, {
-          edgeBufferTiles : 2,
-          minZoom         : 4,
-          maxZoom         : 12,
-          tolerance       : 20,
-          buffer          : 256,
-          debug           : 0,
-          style           : {
-            color     : TREM.Colors.primary,
-            weight    : 1,
-            fillColor : "transparent",
-          },
-        }).addTo(Maps.main));
-        MapBases.main.set("pws_town", L.geoJson.vt(MapData.tw_town, {
-          edgeBufferTiles : 2,
-          minZoom         : 4,
-          maxZoom         : 12,
-          tolerance       : 20,
-          buffer          : 256,
-          debug           : 0,
-          style           : {
-            // color     :  "#efcc00",
-            color     : "transparent",
-            weight    : 2,
-            opacity   : 0,
-            fillColor : "transparent",
-          },
-        }).addTo(Maps.main));
-        MapBases.main.set("pws_town", L.geoJson.vt(MapData.tw_county, {
-          edgeBufferTiles : 2,
-          minZoom         : 4,
-          maxZoom         : 12,
-          tolerance       : 20,
-          buffer          : 256,
-          debug           : 0,
-          style           : {
-            // color     : "#efcc00",
-            color     : "transparent",
-            weight    : 2,
-            opacity   : 0,
-            fillColor : "transparent",
-          },
-        }).addTo(Maps.main));
-        MapBases.main.set("area", L.geoJson.vt(MapData.area, {
-          edgeBufferTiles : 2,
-          minZoom         : 4,
-          maxZoom         : 12,
-          tolerance       : 20,
-          buffer          : 256,
-          debug           : 0,
-          style           : {
-            color     : "transparent",
-            weight    : 3,
-            opacity   : 0,
-            fillColor : "transparent",
-          },
-        }).addTo(Maps.main));
-      }
-    }
+    MapBases.main.set("tw_county", L.geoJson.vt(MapData.tw_county, {
+      edgeBufferTiles : 2,
+      minZoom         : 4,
+      maxZoom         : 12,
+      tolerance       : 25,
+      buffer          : 256,
+      debug           : 0,
+      style           : {
+        color       : TREM.Colors.primary,
+        weight      : 1,
+        fillColor   : TREM.Colors.surfaceVariant,
+        fillOpacity : 1,
+      },
+    }).addTo(Maps.main));
+    MapBases.main.set("area", L.geoJson.vt(MapData.area, {
+      edgeBufferTiles : 2,
+      minZoom         : 4,
+      maxZoom         : 12,
+      tolerance       : 20,
+      buffer          : 256,
+      debug           : 0,
+      style           : {
+        color     : "transparent",
+        weight    : 3,
+        opacity   : 0,
+        fillColor : "transparent",
+      },
+    }).addTo(Maps.main));
 
     if (!MapBases.mini.length)
       MapBases.mini.set("tw_county",
@@ -1392,38 +879,6 @@ async function init() {
             fillOpacity : 0,
           },
         }).addTo(Maps.mini));
-
-    if (!MapBases.report.length)
-      if (TREM.MapRenderingEngine == "mapbox-gl")
-        MapBases.report.set("tw_county", Maps.report.addLayer({
-          id     : "Layer_tw_county",
-          type   : "fill",
-          source : {
-            type      : "geojson",
-            data      : MapData.tw_county,
-            tolerance : 0.5,
-          },
-          layout : {},
-          paint  : {
-            "fill-color"         : TREM.Colors.surfaceVariant,
-            "fill-outline-color" : TREM.Colors.primary,
-            "fill-opacity"       : 0.8,
-          },
-        }).getLayer("Layer_tw_county"));
-      else if (TREM.MapRenderingEngine == "leaflet")
-        MapBases.report.set("tw_county", L.geoJson.vt(MapData.tw_county, {
-          minZoom   : 7.5,
-          maxZoom   : 10,
-          tolerance : 20,
-          buffer    : 256,
-          debug     : 0,
-          style     : {
-            weight      : 0.8,
-            color       : TREM.Colors.primary,
-            fillColor   : TREM.Colors.surfaceVariant,
-            fillOpacity : 1,
-          },
-        }).addTo(Maps.report));
 
     if (!MapBases.intensity.length)
       MapBases.intensity.set("tw_county",
@@ -1508,11 +963,11 @@ async function init() {
         const camera = Maps.main.cameraForBounds(finalBounds, { padding: { top: 0, right: 100, bottom: 100, left: 0 } });
         TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
       }
-    } else if (TREM.MapArea.cache.size) {
+    } else if (MainMap.area.cache.size) {
       map_move_back = true;
       const bounds = (TREM.MapRenderingEngine == "mapbox-gl") ? new maplibregl.LngLatBounds() : new L.Bounds();
 
-      for (const [ id ] of TREM.MapArea.cache) {
+      for (const [ id ] of MainMap.area.cache) {
         const points = TREM.Resources.area[id].map(latlng => pointFormatter(latlng[0], latlng[1], TREM.MapRenderingEngine));
         bounds.extend([points[0], points[2]]);
       }
@@ -1555,9 +1010,9 @@ function PGAMain() {
             Ping = "Super";
             Response = rts_response;
           } else {
-            for (const removedKey of Object.keys(Station)) {
-              Station[removedKey].remove();
-              delete Station[removedKey];
+            for (const removedKey of Object.keys(stations)) {
+              stations[removedKey].remove();
+              delete stations[removedKey];
             }
 
             Ping = "🔒";
@@ -1591,24 +1046,150 @@ function PGAMain() {
 function handler(Json) {
   MAXPGA = { pga: 0, station: "NA", level: 0 };
 
-  const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
+  const removed = Object.keys(Json).filter(k => !stations.has(k));
 
-  for (const removedKey of removed) {
-    Station[removedKey].remove();
-    delete Station[removedKey];
-  }
-
-  if (Object.keys(eew).length && !rts_remove_eew) {
-    rts_remove_eew = true;
-
-    for (const removedKey of Object.keys(Station)) {
-      Station[removedKey].remove();
-      delete Station[removedKey];
+  for (const removedKey of removed)
+    if (stations.has(removedKey)) {
+      stations.get(removedKey).remove();
+      stations.delete(removedKey);
     }
+
+  try {
+    for (let index = 0, keys = Object.keys(station_list), n = keys.length; index < n; index++) {
+      const uuid = keys[index];
+      const current_station_data = station_list[uuid];
+      const current_data = Json[uuid];
+
+      let level_class = "";
+      let popup_content = "";
+      let amount = 0;
+      let intensity = 0;
+      const Alert = current_data?.alert ?? false;
+
+      // debugger;
+
+      if (current_data == undefined) {
+        level_class = "na";
+        popup_content = "無資料";
+      } else {
+        amount = +current_data.PGA;
+        intensity
+        = (Alert && Json.Alert) ? current_data.I
+            : (NOW.getTime() - current_data.TS * 1000 > 5000) ? "NA"
+              : (!Alert) ? 0
+                : (amount >= 800) ? 9
+                  : (amount >= 440) ? 8
+                    : (amount >= 250) ? 7
+                      : (amount >= 140) ? 6
+                        : (amount >= 80) ? 5
+                          : (amount >= 25) ? 4
+                            : (amount >= 8) ? 3
+                              : (amount >= 5) ? 2
+                                : (amount >= 2.2) ? 1
+                                  : 0;
+        level_class = (intensity != 0 && amount < 999) ? IntensityToClassString(intensity)
+          : (amount == 999) ? "pga6"
+            : (amount > 3.5) ? "pga5"
+              : (amount > 3) ? "pga4"
+                : (amount > 2.5) ? "pga3"
+                  : (amount > 2) ? "pga2"
+                    : "pga1";
+        popup_content = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-name">${station_list[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
+      }
+
+      if (stations.has(uuid)) {
+        const station_marker = stations.get(uuid);
+
+        if (station_marker.getElement().className != `map-intensity-icon rt-icon ${level_class}`) {
+          station_marker.setIcon(L.divIcon({
+            className : `map-intensity-icon rt-icon ${level_class}`,
+            iconSize  : intensity > 0 ? [16, 16] : [8, 8]
+          }));
+          station_marker.setZIndexOffset(50 + (amount < 999 ? amount : 0) * 10);
+        }
+      } else {
+        const station_marker = L.marker(
+          [ current_station_data.Lat, current_station_data.Long ],
+          {
+            icon: L.divIcon(
+              {
+                className : `map-intensity-icon rt-icon ${level_class}`,
+                iconSize  : intensity > 0 ? [16, 16] : [8, 8]
+              }
+            ),
+            zIndexOffset : 50 + (amount < 999 ? amount : 0) * 10,
+            riseOnHover  : true,
+            title        : `${current_station_data.Loc} (${uuid})`
+          }
+        ).addTo(Maps.main);
+
+        stations.set(uuid, station_marker);
+      }
+
+      // Top-left station overlay
+      if (Object.keys(Json).includes(setting["Real-time.station"])) {
+        if (uuid == setting["Real-time.station"]) {
+          document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
+          document.getElementById("rt-station-local-name").innerText = station_list[keys[index]].Loc;
+          document.getElementById("rt-station-local-time").innerText = new Date(current_data.T * 1000).format("HH:mm:ss");
+          document.getElementById("rt-station-local-pga").innerText = amount;
+        }
+      } else {
+      // FIXME: Performance: This block will be executed repeatly when the station the user selected is not in the current_station list.
+        document.getElementById("rt-station-local-intensity").className = "rt-station-intensity na";
+        document.getElementById("rt-station-local-name").innerText = TREM.Localization.getString("Realtime_No_Data");
+        document.getElementById("rt-station-local-time").innerText = "--:--:--";
+        document.getElementById("rt-station-local-pga").innerText = "--";
+      }
+
+      // box
+      if (current_data) {
+        const Level = IntensityI(intensity);
+        const now = new Date(current_data.T * 1000);
+
+        if (intensity != "NA" && (intensity > 0 || Alert) && amount < 999) {
+          detected_list[station_list[uuid].PGA] ??= {
+            intensity : intensity,
+            time      : 0,
+          };
+
+          if ((detected_list[station_list[uuid].PGA].intensity ?? 0) < intensity)
+            detected_list[station_list[uuid].PGA].intensity = intensity;
+
+          if (Alert && Json.Alert) {
+            if (setting["audio.realtime"])
+              if (amount > 8 && PGALimit == 0) {
+                PGALimit = 1;
+                TREM.Audios.pga1.play();
+              } else if (amount > 250 && PGALimit > 1) {
+                PGALimit = 2;
+                TREM.Audios.pga2.play();
+              }
+
+            detected_list[station_list[uuid].PGA].time = NOW.getTime();
+          }
+        }
+
+        if (MAXPGA.pga < amount && amount < 999 && Level != "NA") {
+          MAXPGA.pga = amount;
+          MAXPGA.station = uuid;
+          MAXPGA.level = Level;
+          MAXPGA.lat = station_list[uuid].Lat;
+          MAXPGA.long = station_list[uuid].Long;
+          MAXPGA.loc = station_list[uuid].Loc;
+          MAXPGA.intensity = intensity;
+          MAXPGA.time = new Date(current_data.T * 1000);
+        }
+
+      }
+    }
+  } catch (error) {
+    console.error(error);
   }
 
+  /*
   for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
-    if (station[keys[index]] == undefined) continue;
+    if (station_list[keys[index]] == undefined) continue;
     const stationData = Json[keys[index]];
     const amount = Number(stationData.PGA);
     const Alert = stationData.alert;
@@ -1633,30 +1214,32 @@ function handler(Json) {
             : (amount > 2.5) ? "pga3"
               : (amount > 2) ? "pga2"
                 : "pga1";
-    const station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-name">${station[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
+    const station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-name">${station_list[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
 
-    if (!Station[keys[index]] && (!rts_remove_eew || Alert)) {
-      Station[keys[index]] = new maplibregl.Marker(
-        {
-          element: $(`<div class="map-intensity-icon rt-icon ${levelClass}" style="z-index: ${50 + (amount < 999 ? amount : 0) * 10};"></div>`)[0],
+    if (!stations[keys[index]] && (!rts_remove_eew || Alert)) {
+      stations[keys[index]] = L.marker(
+        [station_list[keys[index]].Lat, station_list[keys[index]].Long], {
+          icon: L.divIcon({
+            html: `<div class="map-intensity-icon rt-icon ${levelClass}" style="z-index: ${50 + (amount < 999 ? amount : 0) * 10};"></div>`
+          }),
+          riseOnHover: true
         })
-        .setLngLat([station[keys[index]].Long, station[keys[index]].Lat])
-        .setPopup(new maplibregl.Popup({ closeOnClick: false, closeButton: false }).setHTML(station_tooltip))
+        .setPopupContent(L.popup({ content: station_tooltip }))
         .addTo(Maps.main);
-      Station[keys[index]].getElement().addEventListener("click", () => Station[keys[index]].getPopup().persist = !Station[keys[index]].getPopup().persist);
+      stations[keys[index]].getElement().addEventListener("click", () => stations[keys[index]].getPopup().persist = !stations[keys[index]].getPopup().persist);
     }
 
-    if (Station[keys[index]]) {
-      Station[keys[index]].getPopup().setHTML(station_tooltip);
+    if (stations[keys[index]]) {
+      stations[keys[index]].getPopup().setHTML(station_tooltip);
 
-      if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
-        Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
-      Station[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
+      if (stations[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
+        stations[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
+      stations[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
     }
 
-    if (Station[keys[index]] && rts_remove_eew && !Alert) {
-      Station[keys[index]].remove();
-      delete Station[keys[index]];
+    if (stations[keys[index]] && rts_remove_eew && !Alert) {
+      stations[keys[index]].remove();
+      delete stations[keys[index]];
     }
 
     const Level = IntensityI(intensity);
@@ -1665,7 +1248,7 @@ function handler(Json) {
     if (keys.includes(setting["Real-time.station"])) {
       if (keys[index] == setting["Real-time.station"]) {
         document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
-        document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
+        document.getElementById("rt-station-local-name").innerText = station_list[keys[index]].Loc;
         document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
         document.getElementById("rt-station-local-pga").innerText = amount;
       }
@@ -1677,13 +1260,13 @@ function handler(Json) {
     }
 
     if (intensity != "NA" && (intensity > 0 || Alert) && amount < 999) {
-      detected_list[station[keys[index]].PGA] ??= {
+      detected_list[station_list[keys[index]].PGA] ??= {
         intensity : intensity,
         time      : 0,
       };
 
-      if ((detected_list[station[keys[index]].PGA].intensity ?? 0) < intensity)
-        detected_list[station[keys[index]].PGA].intensity = intensity;
+      if ((detected_list[station_list[keys[index]].PGA].intensity ?? 0) < intensity)
+        detected_list[station_list[keys[index]].PGA].intensity = intensity;
 
       if (Alert && Json.Alert) {
         if (setting["audio.realtime"])
@@ -1695,7 +1278,7 @@ function handler(Json) {
             TREM.Audios.pga2.play();
           }
 
-        detected_list[station[keys[index]].PGA].time = NOW.getTime();
+        detected_list[station_list[keys[index]].PGA].time = NOW.getTime();
       }
     }
 
@@ -1703,13 +1286,14 @@ function handler(Json) {
       MAXPGA.pga = amount;
       MAXPGA.station = keys[index];
       MAXPGA.level = Level;
-      MAXPGA.lat = station[keys[index]].Lat;
-      MAXPGA.long = station[keys[index]].Long;
-      MAXPGA.loc = station[keys[index]].Loc;
+      MAXPGA.lat = station_list[keys[index]].Lat;
+      MAXPGA.long = station_list[keys[index]].Long;
+      MAXPGA.loc = station_list[keys[index]].Loc;
       MAXPGA.intensity = intensity;
       MAXPGA.time = new Date(stationData.T * 1000);
     }
   }
+  */
 
   if (MAXPGA.station != "NA") {
     document.getElementById("rt-station-max-intensity").className = `rt-station-intensity ${(MAXPGA.pga < 999) ? IntensityToClassString(MAXPGA.intensity) : "na"}`;
@@ -1737,7 +1321,7 @@ function handler(Json) {
       }
 
       if (NOW.getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
-        TREM.MapArea.clear(pgaKeys[index]);
+        MainMap.area.clear(pgaKeys[index]);
         delete detected_list[pgaKeys[index]];
         delete pgaKeys[index];
         index--;
@@ -1762,15 +1346,15 @@ function handler(Json) {
 
         if (passed) {
           detected_list[pgaKeys[index]].passed = true;
-          TREM.MapArea.clear(pgaKeys[index]);
+          MainMap.area.clear(pgaKeys[index]);
         } else {
-          TREM.MapArea.setArea(pgaKeys[index], Intensity);
+          MainMap.area.setArea(pgaKeys[index], Intensity);
         }
       }
     }
 
-  else if (TREM.MapArea.isVisible)
-    TREM.MapArea.clear();
+  else if (MainMap.area.isVisible)
+    MainMap.area.clear();
 
   const All = (Json.Alert) ? Json.I : [];
   const list = [];
@@ -1781,8 +1365,8 @@ function handler(Json) {
     PGACancel = false;
   } else {
     for (let index = 0; index < All.length; index++) {
-      if (station[All[index].uuid] == undefined) continue;
-      All[index].loc = station[All[index].uuid].Loc;
+      if (station_list[All[index].uuid] == undefined) continue;
+      All[index].loc = station_list[All[index].uuid].Loc;
     }
 
     if (All[0].intensity > PGAtag) {
@@ -1867,7 +1451,7 @@ function handler(Json) {
 async function fetchFiles() {
   Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
   dump({ level: 0, message: "Get Location File", origin: "Location" });
-  station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+  station_list = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
   dump({ level: 0, message: "Get Station File", origin: "Location" });
   PGAMain();
 }
@@ -1883,28 +1467,14 @@ async function setUserLocationMarker(town) {
     dump({ level: 0, message: "Get Location File", origin: "Location" });
   }
 
-  [
-    , UserLocationLat,
-    UserLocationLon,
-  ] = Location[setting["location.city"]][town];
+  [, UserLocationLat, UserLocationLon] = Location[setting["location.city"]][town];
 
-  if (!marker) {
-    if (TREM.MapRenderingEngine == "mapbox-gl")
-      marker = new maplibregl.Marker({
-        element: $("<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>")[0],
-      })
-        .setLngLat([UserLocationLon, UserLocationLat])
-        .addTo(Maps.main);
-    else if (TREM.MapRenderingEngine == "leaflet")
-      marker = L.marker([UserLocationLat, UserLocationLon], {
-        icon: L.divIcon({ html: "<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>" }),
-      })
-        .addTo(Maps.main);
-  } else if (TREM.MapRenderingEngine == "mapbox-gl") {
-    marker.setLngLat([UserLocationLon, UserLocationLat]);
-  } else if (TREM.MapRenderingEngine == "leaflet") {
+  if (!marker)
+    marker = L.marker([UserLocationLat, UserLocationLon], {
+      icon: L.divIcon({ html: "<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>" }) })
+      .addTo(Maps.main);
+  else
     marker.setLatLng([UserLocationLat, UserLocationLon]);
-  }
 }
 // #endregion
 
@@ -2442,20 +2012,7 @@ const updateMapColors = async (event, value) => {
           Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
         }
 
-  Maps.main.setPaintProperty("Layer_intensity", "fill-outline-color", [
-    "case",
-    [
-      ">",
-      [
-        "coalesce",
-        ["feature-state", "intensity"],
-        0,
-      ],
-      0,
-    ],
-    TREM.Colors.onSurfaceVariant,
-    "transparent",
-  ]);
+  Maps.main.setPaintProperty("Layer_intensity", "fill-outline-color", ["case", [">", ["coalesce", ["feature-state", "intensity"], 0,], 0,], TREM.Colors.onSurfaceVariant, "transparent",]);
 };
 
 ipcRenderer.on("config:theme", updateMapColors);
@@ -2495,11 +2052,7 @@ ipcRenderer.on("config:color", (event, key, value) => {
   if (Maps.main) {
     Maps.main.setPaintProperty("Layer_intensity", "fill-color", [
       "match",
-      [
-        "coalesce",
-        ["feature-state", "intensity"],
-        0,
-      ],
+      ["coalesce", ["feature-state", "intensity"], 0,],
       9,
       setting["theme.customColor"] ? setting["theme.int.9"]
         : "#862DB3",
@@ -2531,11 +2084,7 @@ ipcRenderer.on("config:color", (event, key, value) => {
     ]);
     Maps.main.setPaintProperty("Layer_area", "line-color", [
       "match",
-      [
-        "coalesce",
-        ["feature-state", "intensity"],
-        0,
-      ],
+      ["coalesce", ["feature-state", "intensity"], 0,],
       9,
       setting["theme.customColor"] ? setting["theme.int.9"]
         : "#862DB3",
@@ -2577,7 +2126,10 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
   Maps.report._zoomAnimated = value;
 });
 ipcRenderer.on("config:maplayer", (event, mapName, state) => {
-  Maps.main.setLayoutProperty(`Layer_${mapName}`, "visibility", state ? "visible" : "none");
+  if (state)
+    MapBases.main.get(mapName).addTo(Maps.main);
+  else
+    MapBases.main.get(mapName).remove();
 });
 // #endregion
 
@@ -2599,7 +2151,7 @@ function FCMdata(json, Unit) {
   } else if (json.Function == "TSUNAMI") {
     TREM.Earthquake.emit("tsunami", json);
   } else if (json.Function == "palert") {
-    TREM.MapIntensity.palert(json.Data);
+    MainMap.intensity.palert(json.Data);
   } else if (json.Function == "TREM_earthquake") {
     trem_alert = json;
   } else if (json.Function == "PWS") {
@@ -2611,8 +2163,8 @@ function FCMdata(json, Unit) {
     replayT = NOW.getTime();
     ReportGET();
   } else if (json.Function == "report") {
-    if (TREM.MapIntensity.isTriggered)
-      TREM.MapIntensity.clear();
+    if (MainMap.intensity.isTriggered)
+      MainMap.intensity.clear();
 
     dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
     console.debug(json);
@@ -2722,7 +2274,7 @@ TREM.Earthquake.on("eew", (data) => {
       GC[loc.code] = int.value;
     }
 
-  // TREM.MapIntensity.expected(GC);
+  // MainMap.intensity.expected(GC);
 
   let Alert = true;
 
@@ -3054,6 +2606,10 @@ TREM.Earthquake.on("eewEnd", (id) => {
 
   if (TREM.EEW.get(id).CircleP != undefined) TREM.EEW.get(id).CircleP = TREM.EEW.get(id).CircleP.remove();
 
+  if (TREM.EEW.get(id).epicenterIcon.main != undefined) TREM.EEW.get(id).epicenterIcon.main.remove();
+
+  if (TREM.EEW.get(id).epicenterIcon.mini != undefined) TREM.EEW.get(id).epicenterIcon.mini.remove();
+
   if (TREM.EEW.get(id).CircleSTW != undefined) Maps.mini.removeLayer(TREM.EEW.get(id).CircleSTW);
 
   if (TREM.EEW.get(id).CirclePTW != undefined) Maps.mini.removeLayer(TREM.EEW.get(id).CirclePTW);
@@ -3298,21 +2854,15 @@ function main(data) {
     if (setting["shock.p"])
       if (kmP > 0) {
         if (!TREM.EEW.get(data.ID).CircleP) {
-          TREM.EEW.get(data.ID).CircleP = new WaveCircle(
-            `${data.ID}-p`,
-            Maps.main,
-            [+data.EastLongitude, +data.NorthLatitude],
-            kmP,
-            data.Alert,
-            {
-              type  : "line",
-              paint : {
-                "line-width" : 4,
-                "line-color" : "#6FB7B7",
-              },
-            });
+          TREM.EEW.get(data.ID).CircleP = new WaveCircle({
+            id     : `${data.ID}-p`,
+            map    : Maps.main,
+            latlng : [+data.NorthLatitude, +data.EastLongitude],
+            radius : kmP,
+            alert  : data.Alert
+          });
         } else {
-          TREM.EEW.get(data.ID).CircleP.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+          TREM.EEW.get(data.ID).CircleP.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
           TREM.EEW.get(data.ID).CircleP.setRadius(kmP);
         }
 
@@ -3342,21 +2892,15 @@ function main(data) {
       eew[data.ID].km = km;
 
       if (!TREM.EEW.get(data.ID).CircleS) {
-        TREM.EEW.get(data.ID).CircleS = new WaveCircle(
-          `${data.ID}-s`,
-          Maps.main,
-          [+data.EastLongitude, +data.NorthLatitude],
-          km,
-          data.Alert,
-          {
-            type  : "fill",
-            paint : {
-              "fill-opacity" : 0.15,
-              "fill-color"   : data.Alert ? "#FF0000" : "#FFA500",
-            },
-          });
+        TREM.EEW.get(data.ID).CircleS = new WaveCircle({
+          id     : `${data.ID}-s`,
+          map    : Maps.main,
+          latlng : [+data.NorthLatitude, +data.EastLongitude],
+          radius : km,
+          alert  : data.Alert
+        });
       } else {
-        TREM.EEW.get(data.ID).CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+        TREM.EEW.get(data.ID).CircleS.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
         TREM.EEW.get(data.ID).CircleS.setRadius(km);
         TREM.EEW.get(data.ID).CircleS.setAlert(data.Alert);
       }
@@ -3372,8 +2916,7 @@ function main(data) {
         }).addTo(Maps.mini);
 
       if (!TREM.EEW.get(data.ID).CircleSTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
-        TREM.EEW.get(data.ID).CircleSTW
-          .setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+        TREM.EEW.get(data.ID).CircleSTW.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
       TREM.EEW.get(data.ID).CircleSTW
         .setRadius(km)
@@ -3419,98 +2962,35 @@ function main(data) {
 
   // #region Epicenter Cross Icon
 
-  let epicenterIcon;
-  let offsetX = 0;
-  let offsetY = 0;
-
-  const cursor = INFO.findIndex((v) => v.ID == data.ID) + 1;
-  const iconUrl = cursor <= 4 && INFO.length > 1 ? "../image/cross.png" : "../image/cross.png";
-
-  if (cursor <= 4 && INFO.length > 1) {
-    epicenterIcon = L.icon({
-      iconUrl,
-      iconSize  : [40, 40],
-      className : "epicenterIcon",
-    });
-
-    if (cursor == 1) offsetY = 0.03;
-
-    if (cursor == 2) offsetX = 0.03;
-
-    if (cursor == 3) offsetY = -0.03;
-
-    if (cursor == 4) offsetX = -0.03;
-  } else {
-    epicenterIcon = L.icon({
-      iconUrl,
-      iconSize  : [30, 30],
-      className : "epicenterIcon",
-    });
-  }
-
-  // main map
-  if (!EarthquakeList[data.ID].epicenterIcon)
-    if (TREM.MapRenderingEngine == "mapbox-gl")
-      EarthquakeList[data.ID].epicenterIcon = new maplibregl.Marker(
-        {
-          element: $(`<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>`)[0],
-        })
-        .setLngLat([+data.EastLongitude, +data.NorthLatitude])
-        .addTo(Maps.main);
-    else if (TREM.MapRenderingEngine == "leaflet")
-      EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude, +data.EastLongitude],
-        {
-          icon: L.icon({ html: `<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>` }),
-        })
-        .addTo(Maps.main);
-
-  if (EarthquakeList[data.ID].epicenterIcon.getElement().src != iconUrl)
-    EarthquakeList[data.ID].epicenterIcon.getElement().src = iconUrl;
-
-  if (TREM.MapRenderingEngine == "mapbox-gl")
-    EarthquakeList[data.ID].epicenterIcon.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
-  else if (TREM.MapRenderingEngine == "leaflet")
-    EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
-
-  // mini map
-  if (!EarthquakeList[data.ID].epicenterIconTW) {
-    EarthquakeList[data.ID].epicenterIconTW = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon }).addTo(Maps.mini);
-    EarthquakeList[data.ID].epicenterIconTW.getElement().classList.add("hide");
-  }
-
-  if (EarthquakeList[data.ID].epicenterIconTW.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
-    EarthquakeList[data.ID].epicenterIconTW.setIcon(epicenterIcon);
-
-  if (!EarthquakeList[data.ID].epicenterIconTW.getLatLng().equals([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]))
-    EarthquakeList[data.ID].epicenterIconTW.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
-
   if (!Timers.epicenterBlinker)
-    Timers.epicenterBlinker = setInterval(() => {
-      const epicenter_blink_state = EarthquakeList[Object.keys(EarthquakeList)[0]]?.epicenterIcon?.getElement()?.classList?.contains("hide");
-
-      if (epicenter_blink_state != undefined)
-        for (const key in EarthquakeList) {
-          const el = EarthquakeList[key];
+    Timers.epicenterBlinker = (function() {
+      let epicenter_blink_state = true;
+      return setInterval(() => {
+        for (const [key, value] of TREM.EEW) {
+          const el = value.epicenterIcon.main;
 
           if (epicenter_blink_state) {
-            if (el.epicenterIcon.getElement().classList.contains("hide"))
-              el.epicenterIcon.getElement().classList.remove("hide");
-          } else if (!el.epicenterIcon.getElement().classList.contains("hide")) {
-            el.epicenterIcon.getElement().classList.add("hide");
+            if (value.epicenterIcon.main.getElement().classList.contains("hide"))
+              value.epicenterIcon.main.getElement().classList.remove("hide");
+          } else if (!value.epicenterIcon.main.getElement().classList.contains("hide")) {
+            value.epicenterIcon.main.getElement().classList.add("hide");
           }
 
           if (key == INFO[TINFO].ID) {
             if (epicenter_blink_state) {
-              if (el.epicenterIconTW.getElement().classList.contains("hide"))
-                el.epicenterIconTW.getElement().classList.remove("hide");
-            } else if (!el.epicenterIconTW.getElement().classList.contains("hide")) {
-              el.epicenterIconTW.getElement().classList.add("hide");
+              if (value.epicenterIcon.mini.getElement().classList.contains("hide"))
+                value.epicenterIcon.mini.getElement().classList.remove("hide");
+            } else if (!value.epicenterIcon.mini.getElement().classList.contains("hide")) {
+              value.epicenterIcon.mini.getElement().classList.add("hide");
             }
-          } else if (!el.epicenterIconTW.getElement()?.classList?.contains("hide")) {
-            el.epicenterIconTW.getElement().classList.add("hide");
+          } else if (!value.epicenterIcon.mini.getElement()?.classList?.contains("hide")) {
+            value.epicenterIcon.mini.getElement().classList.add("hide");
           }
         }
-    }, 500);
+
+        epicenter_blink_state = !epicenter_blink_state;
+      }, 500);
+    })();
 
   // #endregion <- Epicenter Cross Icon
 
@@ -3534,11 +3014,7 @@ function main(data) {
 
   if (NOW.getTime() - data.TimeStamp > ((data.EastLongitude < 122.18 && data.NorthLatitude < 25.47 && data.EastLongitude > 118.25 && data.NorthLatitude > 21.77) ? 120_000 : 180_000) || Cancel) {
     TREM.Earthquake.emit("eewEnd", data.ID);
-    TREM.MapIntensity.clear();
-
-    // remove epicenter cross icons
-    EarthquakeList[data.ID].epicenterIcon.remove();
-    EarthquakeList[data.ID].epicenterIconTW.remove();
+    MainMap.intensity.clear();
 
     for (let index = 0; index < INFO.length; index++)
       if (INFO[index].ID == data.ID) {

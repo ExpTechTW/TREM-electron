@@ -35,8 +35,8 @@
     "TREM": "readonly"
   },
   "rules": {
-    "array-bracket-newline": ["warn", { "multiline": true, "minItems": 3 }],
-    "array-element-newline": ["warn", { "multiline": true, "minItems": 3 }],
+    "array-bracket-newline": ["warn", { "multiline": true, "minItems": 5 }],
+    "array-element-newline": ["warn", { "multiline": true, "minItems": 5 }],
     "arrow-body-style": "warn",
     "arrow-spacing": ["warn", { "before": true, "after": true }],
     "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
