@@ -497,9 +497,9 @@ function send() {
 				ID            : document.getElementById("ID").value,
 				Test          : document.getElementById("testbtn").checked,
 				Unit          : document.getElementById("testtext").value,
-				Location      : "未知區域",
-				Alert         : true,
-				Cancel        : false,
+				Location      : document.getElementById("Location").value,
+				Alert         : document.getElementById("alertbtn").checked,
+				Cancel        : document.getElementById("cancelbtn").checked,
 			},
 		};
 	else
