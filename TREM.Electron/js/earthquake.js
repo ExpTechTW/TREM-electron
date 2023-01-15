@@ -4,7 +4,6 @@ require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
 require("expose-gc");
 const { BrowserWindow, shell } = require("@electron/remote");
-const { default: turfCircle } = require("@turf/circle");
 const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:timers");
 const { ExptechAPI } = require("@kamiya4047/exptech-api-wrapper");
 const Exptech = new ExptechAPI();
@@ -31,15 +30,17 @@ TREM.EEW = new Map();
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
-// if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
-//   const vm = require("vm");
-//   const v8 = require("v8");
-//   v8.setFlagsFromString("--no-lazy");
-//   const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
-//   const script = new vm.Script(code);
-//   const bytecode = script.createCachedData();
-//   fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
-// }
+if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
+  const vm = require("vm");
+  const v8 = require("v8");
+  v8.setFlagsFromString("--no-lazy");
+  const code = fs.readFileSync(path.resolve(__dirname, "../../server.js"), "utf-8");
+  const script = new vm.Script(code);
+  const bytecode = script.createCachedData();
+  fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
+}
+
+bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
 const MapData = {};
@@ -137,10 +138,10 @@ const MainMap = {
 
             if (palertEntry.intensity > MaxI) {
               MaxI = palertEntry.intensity;
-              Report = NOW.getTime();
+              Report = NOW().getTime();
               ReportGET({
                 Max  : MaxI,
-                Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
+                Time : NOW().format("YYYY/MM/DD HH:mm:ss"),
               });
             }
           }
@@ -192,7 +193,7 @@ const MainMap = {
                 Function : "palert",
                 ID       : 1,
                 Version  : 1,
-                Time     : NOW.getTime(),
+                Time     : NOW().getTime(),
                 Shot     : 1,
               });
             }, 1250);
@@ -481,7 +482,6 @@ class EEW {
 }
 
 // #region 初始化
-bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
@@ -546,9 +546,9 @@ async function init() {
         } else if (replay) {
           if (!time.classList.contains("replay"))
             time.classList.add("replay");
-          time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
+          time.innerText = `${new Date(replay + (NOW().getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 
-          if (NOW.getTime() - replayT > 180_000) {
+          if (NOW().getTime() - replayT > 180_000) {
             replay = 0;
             document.getElementById("togglenav_btn").classList.remove("hide");
             document.getElementById("stopReplay").classList.add("hide");
@@ -560,7 +560,7 @@ async function init() {
 
           if (time.classList.contains("desynced"))
             time.classList.remove("desynced");
-          time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
+          time.innerText = `${NOW().format("YYYY/MM/DD HH:mm:ss")}`;
         }
 
         let GetDataState = "";
@@ -596,7 +596,7 @@ async function init() {
     if (!Timers.tsunami)
       Timers.tsunami = setInterval(() => {
         if (investigation) {
-          if (NOW.getTime() - Report > 600_000) {
+          if (NOW().getTime() - Report > 600_000) {
             investigation = false;
             roll.removeChild(roll.children[0]);
 
@@ -608,7 +608,7 @@ async function init() {
           ReportGET();
         }
 
-        if (ReportTag != 0 && NOW.getTime() - ReportTag > 30_000) {
+        if (ReportTag != 0 && NOW().getTime() - ReportTag > 30_000) {
           ReportTag = 0;
           TREM.Report.setView("report-list");
           changeView("main");
@@ -920,9 +920,9 @@ async function init() {
       let sampleCount = 0;
 
       for (let index = 0; index < Object.keys(eew).length; index++)
-        if (eewt.id == 0 || eewt.id == eew[Object.keys(eew)[index]].id || NOW.getTime() - eew[Object.keys(eew)[index]].time >= 10000) {
+        if (eewt.id == 0 || eewt.id == eew[Object.keys(eew)[index]].id || NOW().getTime() - eew[Object.keys(eew)[index]].time >= 10000) {
           eewt.id = eew[Object.keys(eew)[index]].id;
-          const km = (NOW.getTime() - eew[Object.keys(eew)[index]].Time) * 4;
+          const km = (NOW().getTime() - eew[Object.keys(eew)[index]].Time) * 4;
 
           if (km > 300000)
             finalZoom += 6;
@@ -954,7 +954,7 @@ async function init() {
 					else
 						TREM.Earthquake.emit("focus", { center: pointFormatter((23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X, TREM.MapRenderingEngine), zoom: Zoom });
 					*/
-          eew[Object.keys(eew)[index]].time = NOW.getTime();
+          eew[Object.keys(eew)[index]].time = NOW().getTime();
         }
 
       finalZoom = finalZoom / sampleCount;
@@ -1003,7 +1003,7 @@ function PGAMain() {
     setTimeout(async () => {
       try {
         const _t = Date.now();
-        const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
+        const ReplayTime = (replay == 0) ? 0 : replay + (NOW().getTime() - replayT);
 
         if (ReplayTime == 0) {
           if (rts_ws_timestamp) {
@@ -1039,7 +1039,7 @@ function PGAMain() {
       } catch (err) {
         void 0;
       }
-    }, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
+    }, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds());
   }, 500);
 }
 
@@ -1075,7 +1075,7 @@ function handler(Json) {
         amount = +current_data.PGA;
         intensity
         = (Alert && Json.Alert) ? current_data.I
-            : (NOW.getTime() - current_data.TS * 1000 > 5000) ? "NA"
+            : (NOW().getTime() - current_data.TS * 1000 > 5000) ? "NA"
               : (!Alert) ? 0
                 : (amount >= 800) ? 9
                   : (amount >= 440) ? 8
@@ -1166,7 +1166,7 @@ function handler(Json) {
                 TREM.Audios.pga2.play();
               }
 
-            detected_list[station_list[uuid].PGA].time = NOW.getTime();
+            detected_list[station_list[uuid].PGA].time = NOW().getTime();
           }
         }
 
@@ -1195,7 +1195,7 @@ function handler(Json) {
     const Alert = stationData.alert;
     const intensity
       = (Alert && Json.Alert) ? stationData.I
-        : (NOW.getTime() - stationData.TS * 1000 > 5000) ? "NA"
+        : (NOW().getTime() - stationData.TS * 1000 > 5000) ? "NA"
           : (!Alert) ? 0
             : (amount >= 800) ? 9
               : (amount >= 440) ? 8
@@ -1278,7 +1278,7 @@ function handler(Json) {
             TREM.Audios.pga2.play();
           }
 
-        detected_list[station_list[keys[index]].PGA].time = NOW.getTime();
+        detected_list[station_list[keys[index]].PGA].time = NOW().getTime();
       }
     }
 
@@ -1320,7 +1320,7 @@ function handler(Json) {
         continue;
       }
 
-      if (NOW.getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
+      if (NOW().getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
         MainMap.area.clear(pgaKeys[index]);
         delete detected_list[pgaKeys[index]];
         delete pgaKeys[index];
@@ -1382,7 +1382,7 @@ function handler(Json) {
           Function : "station",
           ID       : 1,
           Version  : 1,
-          Time     : NOW.getTime(),
+          Time     : NOW().getTime(),
           Shot     : 1,
         });
       }, 1250);
@@ -1653,7 +1653,7 @@ function ReportList(earthquakeReportArr, palert) {
 }
 
 function addReport(report, prepend = false) {
-  if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
+  if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW().getTime() - replayT)).getTime()) return;
 
   const Level = IntensityI(report.data[0]?.areaIntensity);
   let msg = "";
@@ -1824,7 +1824,7 @@ function addReport(report, prepend = false) {
       if (setting["report.changeView"]) {
         TREM.Report.setView("report-overview", report.identifier);
         changeView("report", "#reportView_btn");
-        ReportTag = NOW.getTime();
+        ReportTag = NOW().getTime();
       }
     } else {
       roll.append(Div);
@@ -2135,7 +2135,7 @@ ipcRenderer.on("config:maplayer", (event, mapName, state) => {
 
 // #region EEW
 function FCMdata(json, Unit) {
-  if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
+  if (server_timestamp.includes(json.TimeStamp) || NOW().getTime() - json.TimeStamp > 180000) return;
   server_timestamp.push(json.TimeStamp);
 
   if (server_timestamp.length > 5) server_timestamp.splice(0, 1);
@@ -2143,7 +2143,7 @@ function FCMdata(json, Unit) {
   fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
 
   if (json.TimeStamp != undefined)
-    dump({ level: 0, message: `Latency: ${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
+    dump({ level: 0, message: `Latency: ${NOW().getTime() - json.TimeStamp}ms`, origin: "API" });
 
   if (json.Function == "tsunami") {
     dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
@@ -2160,7 +2160,7 @@ function FCMdata(json, Unit) {
     TREM.Intensity.handle(json);
   } else if (json.Function == "Replay") {
     replay = json.timestamp;
-    replayT = NOW.getTime();
+    replayT = NOW().getTime();
     ReportGET();
   } else if (json.Function == "report") {
     if (MainMap.intensity.isTriggered)
@@ -2200,7 +2200,7 @@ function FCMdata(json, Unit) {
         Function : "report",
         ID       : json.ID,
         Version  : 1,
-        Time     : NOW.getTime(),
+        Time     : NOW().getTime(),
         Shot     : 1,
       });
     }, 5000);
@@ -2265,7 +2265,7 @@ TREM.Earthquake.on("eew", (data) => {
       if (setting["location.city"] == city && setting["location.town"] == town) {
         level = int;
         distance = d;
-        value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000) - 2;
+        value = Math.floor(_speed(data.Depth, distance).Stime - (NOW().getTime() - data.Time) / 1000) - 2;
       }
 
       if (int.value > MaxIntensity.value)
@@ -2380,7 +2380,7 @@ TREM.Earthquake.on("eew", (data) => {
     id   : data.ID,
     km   : 0,
   };
-  value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
+  value = Math.floor(_speed(data.Depth, distance).Stime - (NOW().getTime() - data.Time) / 1000);
 
   if (Second == -1 || value < Second)
     if (setting["audio.eew"] && Alert)
@@ -2389,7 +2389,7 @@ TREM.Earthquake.on("eew", (data) => {
 
         if (t != null) clearInterval(t);
         t = setInterval(() => {
-          value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
+          value = Math.floor(_speed(data.Depth, distance).Stime - (NOW().getTime() - data.Time) / 1000);
           Second = value;
 
           if (stamp != value && !audio.minor_lock) {
@@ -2432,7 +2432,7 @@ TREM.Earthquake.on("eew", (data) => {
 
   if (data.Replay) {
     replay = data.timestamp;
-    replayT = NOW.getTime();
+    replayT = NOW().getTime();
   } else {
     replay = 0;
   }
@@ -2500,7 +2500,7 @@ TREM.Earthquake.on("eew", (data) => {
         }, 5000);
     }, 1000);
 
-  EEWshot = NOW.getTime() - 28500;
+  EEWshot = NOW().getTime() - 28500;
   EEWshotC = 1;
   const _distance = [];
   for (let index = 0; index < 1002; index++)
@@ -2556,12 +2556,12 @@ TREM.Earthquake.on("eew", (data) => {
 
   setTimeout(() => {
     if (setting["webhook.url"] != "") {
-      const Now = NOW.getFullYear()
-				+ "/" + (NOW.getMonth() + 1)
-				+ "/" + NOW.getDate()
-				+ " " + NOW.getHours()
-				+ ":" + NOW.getMinutes()
-				+ ":" + NOW.getSeconds();
+      const Now = NOW().getFullYear()
+				+ "/" + (NOW().getMonth() + 1)
+				+ "/" + NOW().getDate()
+				+ " " + NOW().getHours()
+				+ ":" + NOW().getMinutes()
+				+ ":" + NOW().getSeconds();
 
       let msg = setting["webhook.body"];
       msg = msg.replace("%Depth%", data.Depth).replace("%NorthLatitude%", data.NorthLatitude).replace("%Time%", time).replace("%EastLongitude%", data.EastLongitude).replace("%Scale%", data.Scale);
@@ -2826,8 +2826,8 @@ function main(data) {
 		* @type {{p:number,s:number}}
 		*/
 
-    let kmP = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.p, 2) - Math.pow(data.Depth * 1000, 2)));
-    let km = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.s, 2) - Math.pow(data.Depth * 1000, 2)));
+    let kmP = Math.floor(Math.sqrt(Math.pow((NOW().getTime() - data.Time) * wave.p, 2) - Math.pow(data.Depth * 1000, 2)));
+    let km = Math.floor(Math.sqrt(Math.pow((NOW().getTime() - data.Time) * wave.s, 2) - Math.pow(data.Depth * 1000, 2)));
 
 
     /**
@@ -2836,18 +2836,18 @@ function main(data) {
 		* @type {number} km
  		*/
     for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
-      if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
+      if (EarthquakeList[data.ID].distance[index].Ptime > (NOW().getTime() - data.Time) / 1000) {
         kmP = (index - 1) * 1000;
 
-        if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.p) kmP = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.p, 2) - Math.pow(data.Depth * 1000, 2)));
+        if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.p) kmP = Math.floor(Math.sqrt(Math.pow((NOW().getTime() - data.Time) * wave.p, 2) - Math.pow(data.Depth * 1000, 2)));
         break;
       }
 
     for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
-      if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
+      if (EarthquakeList[data.ID].distance[index].Stime > (NOW().getTime() - data.Time) / 1000) {
         km = (index - 1) * 1000;
 
-        if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Stime > wave.s) km = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.s, 2) - Math.pow(data.Depth * 1000, 2)));
+        if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Stime > wave.s) km = Math.floor(Math.sqrt(Math.pow((NOW().getTime() - data.Time) * wave.s, 2) - Math.pow(data.Depth * 1000, 2)));
         break;
       }
 
@@ -2927,7 +2927,7 @@ function main(data) {
           },
         );
     } else {
-      const num = (NOW.getTime() - data.Time) / 10 / EarthquakeList[data.ID].distance[1].Stime;
+      const num = (NOW().getTime() - data.Time) / 10 / EarthquakeList[data.ID].distance[1].Stime;
 
       if (!TREM.EEW.get(data.ID).waveProgress)
         TREM.EEW.get(data.ID).waveProgress = new maplibregl.Marker({ element: $(`<div class="s-wave-progress-container"><div class="s-wave-progress" style="height:${num}%;"></div></div>`)[0] })
@@ -2940,7 +2940,7 @@ function main(data) {
       for (let index = 0; index < INFO.length; index++)
         if (INFO[index].ID == data.ID) {
           INFO[index].alert_type = "alert-box eew-cancel";
-          data.TimeStamp = NOW.getTime() - ((data.EastLongitude < 122.18 && data.NorthLatitude < 25.47 && data.EastLongitude > 118.25 && data.NorthLatitude > 21.77) ? 90_000 : 150_000);
+          data.TimeStamp = NOW().getTime() - ((data.EastLongitude < 122.18 && data.NorthLatitude < 25.47 && data.EastLongitude > 118.25 && data.NorthLatitude > 21.77) ? 90_000 : 150_000);
 
           if (TREM.EEW.get(data.ID).waveProgress) {
             TREM.EEW.get(data.ID).waveProgress.remove();
@@ -2995,24 +2995,24 @@ function main(data) {
   // #endregion <- Epicenter Cross Icon
 
 
-  if (NOW.getTime() - EEWshot > 60000)
+  if (NOW().getTime() - EEWshot > 60000)
     EEWshotC = 1;
 
-  if (NOW.getTime() - EEWshot > 30000 && EEWshotC <= 2) {
+  if (NOW().getTime() - EEWshot > 30000 && EEWshotC <= 2) {
     EEWshotC++;
-    EEWshot = NOW.getTime();
+    EEWshot = NOW().getTime();
     setTimeout(() => {
       ipcRenderer.send("screenshotEEW", {
         Function : data.Function,
         ID       : data.ID,
         Version  : data.Version,
-        Time     : NOW.getTime(),
+        Time     : NOW().getTime(),
         Shot     : EEWshotC,
       });
     }, 300);
   }
 
-  if (NOW.getTime() - data.TimeStamp > ((data.EastLongitude < 122.18 && data.NorthLatitude < 25.47 && data.EastLongitude > 118.25 && data.NorthLatitude > 21.77) ? 120_000 : 180_000) || Cancel) {
+  if (NOW().getTime() - data.TimeStamp > ((data.EastLongitude < 122.18 && data.NorthLatitude < 25.47 && data.EastLongitude > 118.25 && data.NorthLatitude > 21.77) ? 120_000 : 180_000) || Cancel) {
     TREM.Earthquake.emit("eewEnd", data.ID);
     MainMap.intensity.clear();
 
@@ -3095,12 +3095,12 @@ function updateText() {
     $("#alert-p").text("X");
     $("#alert-s").text("X");
   } else {
-    let num = Math.floor((INFO[TINFO].alert_sTime - NOW.getTime()) / 1000);
+    let num = Math.floor((INFO[TINFO].alert_sTime - NOW().getTime()) / 1000);
 
     if (num <= 0) num = "";
     $("#alert-s").text(num);
 
-    num = Math.floor((INFO[TINFO].alert_pTime - NOW.getTime()) / 1000);
+    num = Math.floor((INFO[TINFO].alert_pTime - NOW().getTime()) / 1000);
 
     if (num <= 0) num = "";
     $("#alert-p").text(num);
@@ -3131,7 +3131,7 @@ function updateText() {
   if (TREM.EEW.get(INFO[TINFO].ID).CircleSTW) TREM.EEW.get(INFO[TINFO].ID).CircleSTW.getElement()?.classList?.remove("hide");
 
   if (TREM.EEW.get(INFO[TINFO].ID)?.geojson) TREM.EEW.get(INFO[TINFO].ID).geojson.addTo(Maps.mini);
-  const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
+  const Num = Math.round(((NOW().getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
   const Catch = document.getElementById("box-10");
 
   if (Num <= 100)
@@ -3167,4 +3167,8 @@ function pointFormatter(lat, lng, engine) {
     return [lng, lat];
   else if (engine == "leaflet")
     return [lat, lng];
+}
+
+function NOW() {
+  return new Date(ServerTime + (Date.now() - ServerT));
 }
