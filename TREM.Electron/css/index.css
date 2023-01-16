@@ -1905,7 +1905,7 @@ stop.pred-stop {
 }
 
 .map-intensity-icon:not([class*=pga]) {
-	border: 1px solid white;
+	border: 1px solid rgb(var(--md-sys-color-on-surface-variant));
 }
 
 .map-intensity-icon::before {
@@ -1936,6 +1936,7 @@ stop.pred-stop {
 .map-intensity-icon.pga6 { background-color: #ff0000; }
 .map-intensity-icon.pga0 { background-color: #BEBEBE; }
 
+.map-intensity-icon.na,
 .map-intensity-icon.zero,
 .map-intensity-icon.pga1,
 .map-intensity-icon.pga2,

@@ -227,7 +227,7 @@ TREM.Intensity = {
 					if (!TREM.win.isFocused()) TREM.win.flashFrame(true);
 
 					if (setting["audio.realtime"]) TREM.Audios.palert.play();
-					TREM.IntensityTag1 = NOW.getTime();
+					TREM.IntensityTag1 = NOW().getTime();
 					console.log("IntensityTag1: ", TREM.IntensityTag1);
 				}
 			}

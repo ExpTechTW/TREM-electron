@@ -485,21 +485,22 @@ function send() {
 			Value         : {
 				Function      : "earthquake",
 				Type          : "data",
-				Time          : new Date(document.getElementById("Time").value).getTime(),
-				EastLongitude : document.getElementById("EastLongitude").value,
-				NorthLatitude : document.getElementById("NorthLatitude").value,
-				Depth         : document.getElementById("Depth").value,
-				Scale         : document.getElementById("Scale").value,
+				type          : "eew",
+				time          : new Date(document.getElementById("Time").value).getTime(),
+				lon           : document.getElementById("EastLongitude").value,
+				lat           : document.getElementById("NorthLatitude").value,
+				depth         : document.getElementById("Depth").value,
+				scale         : document.getElementById("Scale").value,
 				FormatVersion : 1,
-				TimeStamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
+				timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 				"UTC+8"       : document.getElementById("Time").value,
-				Version       : document.getElementById("Version").value,
-				ID            : document.getElementById("ID").value,
+				number        : document.getElementById("Version").value,
+				id            : document.getElementById("ID").value,
 				Test          : document.getElementById("testbtn").checked,
 				Unit          : document.getElementById("testtext").value,
-				Location      : document.getElementById("Location").value,
+				location      : document.getElementById("Location").value,
 				Alert         : document.getElementById("alertbtn").checked,
-				Cancel        : document.getElementById("cancelbtn").checked,
+				cancel        : document.getElementById("cancelbtn").checked,
 			},
 		};
 	else
@@ -512,21 +513,22 @@ function send() {
 			Value         : {
 				Function      : "earthquake",
 				Type          : "data",
-				Time          : new Date(document.getElementById("Time").value).getTime(),
-				EastLongitude : document.getElementById("EastLongitude").value,
-				NorthLatitude : document.getElementById("NorthLatitude").value,
-				Depth         : document.getElementById("Depth").value,
-				Scale         : document.getElementById("Scale").value,
+				type          : "eew",
+				time          : new Date(document.getElementById("Time").value).getTime(),
+				lon           : document.getElementById("EastLongitude").value,
+				lat           : document.getElementById("NorthLatitude").value,
+				depth         : document.getElementById("Depth").value,
+				scale         : document.getElementById("Scale").value,
 				FormatVersion : 1,
-				TimeStamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
+				timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 				"UTC+8"       : document.getElementById("Time").value,
-				Version       : document.getElementById("Version").value,
-				ID            : document.getElementById("ID").value,
+				number        : document.getElementById("Version").value,
+				id            : document.getElementById("ID").value,
 				Test          : document.getElementById("testbtn").checked,
 				Unit          : document.getElementById("testtext").value,
-				Location      : document.getElementById("Location").value,
+				location      : document.getElementById("Location").value,
 				Alert         : document.getElementById("alertbtn").checked,
-				Cancel        : document.getElementById("cancelbtn").checked,
+				cancel        : document.getElementById("cancelbtn").checked,
 			},
 		};
 	axios.post("https://exptech.com.tw/api/v1/et", data)
@@ -538,7 +540,7 @@ function send() {
 				document.getElementById("sendState").innerHTML = "找不到此 UUID 的設備";
 				console.log("找不到此 UUID 的設備");
 			} else {
-				document.getElementById("sendState").innerHTML = "發送成功，第" + data.Value.Version + "報";
+				document.getElementById("sendState").innerHTML = "發送成功，第" + data.Value.number + "報";
 				console.log("發送成功 請刷新網頁");
 			}
 

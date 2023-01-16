@@ -214,7 +214,7 @@ TREM.Report = {
 			ipcRenderer.send("testEEW");
 		} else {
 			replay = new Date(`${report.originTime} GMT+08:00`).getTime() - 15000;
-			replayT = NOW.getTime();
+			replayT = NOW().getTime();
 		}
 	},
 	back() {
