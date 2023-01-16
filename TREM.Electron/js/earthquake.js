@@ -2164,8 +2164,8 @@ function FCMdata(json, Unit) {
     TREM.PWS.addPWS(json.raw);
   } else if (json.type == "intensity") {
     TREM.Intensity.handle(json);
-  } else if (json.Function == "Replay") {
-    replay = json.timestamp;
+  } else if (json.type == "replay") {
+    replay = json.replay_timestamp;
     replayT = NOW().getTime();
     ReportGET();
   } else if (json.type == "report") {
@@ -2208,8 +2208,8 @@ function FCMdata(json, Unit) {
         Shot     : 1,
       });
     }, 5000);
-  } else if (json.type.startsWith("eew") || json.Replay || json.Test) {
-    if (replay != 0 && !json.Replay) return;
+  } else if (json.type.startsWith("eew") || json.replay_timestamp || json.Test) {
+    if (replay != 0 && !json.replay_timestamp) return;
 
     if (
       (json.Function == "eew-scdzj" && !setting["accept.eew.SCDZJ"])
@@ -2282,7 +2282,7 @@ TREM.Earthquake.on("eew", (data) => {
 
   let Alert = true;
 
-  if (level.value < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
+  if (level.value < Number(setting["eew.Intensity"])) Alert = false;
 
   if (!Info.Notify.includes(data.id)) {
     let Nmsg = "";
@@ -2434,8 +2434,8 @@ TREM.Earthquake.on("eew", (data) => {
   // AlertBox: 種類
   let classString = "alert-box ";
 
-  if (data.Replay) {
-    replay = data.timestamp;
+  if (data.replay_timestamp) {
+    replay = data.replay_timestamp;
     replayT = NOW().getTime();
   } else {
     replay = 0;
@@ -2451,7 +2451,7 @@ TREM.Earthquake.on("eew", (data) => {
   let find = INFO.findIndex(v => v.ID == data.id);
 
   if (find == -1) find = INFO.length;
-  const now = new Date((data.Replay) ? data.replay_time : data.time);
+  const now = new Date((data.replay_time) ? data.replay_time : data.time);
   const time = now.getFullYear()
     + "/" + (now.getMonth() + 1)
 	+ "/" + now.getDate()
