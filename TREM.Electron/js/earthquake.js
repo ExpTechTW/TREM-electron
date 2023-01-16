@@ -2623,8 +2623,14 @@ TREM.Earthquake.on("eewEnd", (id) => {
 
 TREM.Earthquake.on("tsunami", (data) => {
   if (data.number == 1) {
+    const now = new Date(json.time);
+    const Now = now.getFullYear()
+        + "/" + (now.getMonth() + 1)
+        + "/" + now.getDate()
+        + " " + now.getHours()
+        + ":" + now.getMinutes();
     new Notification("海嘯警報", {
-      body   : `${data["UTC+8"]} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度`,
+      body   : `${Now} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度`,
       icon   : "../TREM.ico",
       silent : win.isFocused(),
     });
