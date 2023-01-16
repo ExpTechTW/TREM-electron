@@ -41,7 +41,7 @@ localStorage.dirname = __dirname;
 
 // #region 變數
 const posturl = "https://exptech.com.tw/api/v1/trem/";
-const geturl = "https://exptech.com.tw/api/v1/trem/RTS?time=";
+const geturl = "https://exptech.com.tw/api/v2/trem/RTS?Time=";
 const getapiurl = "https://api.exptech.com.tw/api/v1/trem/rts";
 const MapData = {};
 const Timers = {};
@@ -139,13 +139,14 @@ TREM.MapIntensity = {
 	MaxI        : 0,
 	intensities : new Map(),
 	palert(rawPalertData) {
-		if (rawPalertData.data?.length && !replay) {
+		console.log(rawPalertData);
+		if (rawPalertData.intensity?.length && !replay) {
 			if (rawPalertData.timestamp != this.alertTime) {
 				this.alertTime = rawPalertData.timestamp;
 				const PLoc = {};
 				const int = new Map();
 
-				for (const palertEntry of rawPalertData.data) {
+				for (const palertEntry of rawPalertData.intensity) {
 					const [countyName, townName] = palertEntry.loc.split(" ");
 					const towncode = TREM.Resources.region[countyName]?.[townName]?.code;
 
@@ -1959,8 +1960,8 @@ async function init() {
 	// const userJSON = require(path.resolve(__dirname, "../js/1669484541389.json"));
 	// TREM.Intensity.handle(userJSON);
 	// ipcRenderer.send("intensity-Notification", userJSON);
-	// const userJSON1 = require(path.resolve(__dirname, "../js/1668323000997.json"));
-	// TREM.MapIntensity.palert(userJSON1.Data);
+	// const userJSON1 = require(path.resolve(__dirname, "../js/1673836629226.json"));
+	// TREM.MapIntensity.palert(userJSON1);
 	// const userJSON2 = require(path.resolve(__dirname, "../js/1667356513251.json"));
 	// handler(userJSON2);
 
@@ -3692,7 +3693,7 @@ function FCMdata(json, Unit) {
 	} else if (json.type == "tsunami") {
 		TREM.Earthquake.emit("tsunami", json);
 	} else if (json.type == "palert") {
-		TREM.MapIntensity.palert(json.Data);
+		TREM.MapIntensity.palert(json);
 	} else if (json.type == "pws") {
 		TREM.PWS.addPWS(json.raw);
 	} else if (json.type == "intensity") {
