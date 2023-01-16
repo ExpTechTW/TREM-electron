@@ -123,13 +123,13 @@ const MainMap = {
     alertTime   : 0,
     intensities : new Map(),
     palert(rawPalertData) {
-      if (rawPalertData.data?.length && !replay) {
+      if (rawPalertData.intensity?.length && !replay) {
         if (rawPalertData.timestamp != this.alertTime) {
           this.alertTime = rawPalertData.timestamp;
           let MaxI = 0;
           const int = new Map();
 
-          for (const palertEntry of rawPalertData.data) {
+          for (const palertEntry of rawPalertData.intensity) {
             const [countyName, townName] = palertEntry.loc.split(" ");
             const towncode = TREM.Resources.region[countyName]?.[townName]?.code;
 
@@ -2157,7 +2157,7 @@ function FCMdata(json, Unit) {
   } else if (json.type == "tsunami") {
     TREM.Earthquake.emit("tsunami", json);
   } else if (json.type == "palert") {
-    MainMap.intensity.palert(json.Data);
+    MainMap.intensity.palert(json);
   } else if (json.type == "pws") {
     TREM.PWS.addPWS(json.raw);
   } else if (json.type == "intensity") {
