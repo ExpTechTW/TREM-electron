@@ -1449,9 +1449,9 @@ function handler(Json) {
 }
 
 async function fetchFiles() {
-  Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+  Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
   dump({ level: 0, message: "Get Location File", origin: "Location" });
-  station_list = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+  station_list = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/station.json")).json();
   dump({ level: 0, message: "Get Station File", origin: "Location" });
   PGAMain();
 }
@@ -1463,7 +1463,7 @@ async function fetchFiles() {
  */
 async function setUserLocationMarker(town) {
   if (!Location) {
-    Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+    Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
     dump({ level: 0, message: "Get Location File", origin: "Location" });
   }
 
