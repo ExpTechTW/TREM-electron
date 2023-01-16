@@ -2135,6 +2135,8 @@ ipcRenderer.on("config:maplayer", (event, mapName, state) => {
 
 // #region EEW
 function FCMdata(json, Unit) {
+  console.log(json);
+
   if (server_timestamp.includes(json.timestamp) || NOW().getTime() - json.timestamp > 180000) return;
   server_timestamp.push(json.timestamp);
 
@@ -2170,6 +2172,7 @@ function FCMdata(json, Unit) {
     if (MainMap.intensity.isTriggered)
       MainMap.intensity.clear();
 
+    if (setting["audio.report"]) audioPlay("../audio/Report.wav");
     dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
     console.debug(json);
 
@@ -2186,16 +2189,13 @@ function FCMdata(json, Unit) {
     const location = report.location.match(/(?<=位於).+(?=\))/);
 
     if (!win.isFocused())
-      if (!report.location.startsWith("TREM 人工定位")) {
+      if (!report.location.startsWith("TREM 人工定位"))
         new Notification("地震報告",
           {
             body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
             icon   : "../TREM.ico",
             silent : win.isFocused(),
           });
-
-        if (setting["audio.report"]) audioPlay("../audio/Report.wav");
-      }
 
     addReport(report, true);
 
