@@ -683,7 +683,7 @@ class EEW {
 		this._alert = data.Alert;
 		this._from = data.data_unit;
 		this._receiveTime = new Date(data.timestamp);
-		this._replay = data.Replay;
+		this._replay = data.replay_time;
 	}
 
 	#evalExpected() {
@@ -4014,7 +4014,7 @@ TREM.Earthquake.on("eew", (data) => {
 	let find = INFO.findIndex(v => v.ID == data.id);
 
 	if (find == -1) find = INFO.length;
-	const time = new Date((data.Replay) ? data.replay_time : data.time).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
+	const time = new Date((data.replay_time) ? data.replay_time : data.time).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
 	INFO[find] = {
 		ID              : data.id,
 		alert_number    : data.number,
