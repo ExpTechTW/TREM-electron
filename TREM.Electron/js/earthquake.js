@@ -2156,9 +2156,9 @@ function handler(Json) {
 			level_class = "na";
 
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
-				station_tooltip = "<div class=\"marker-popup rt-station-popup rt-station-detail-container\">無資料</div>";
+				station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container">${station[keys[index]].Loc}(${keys[index]})無資料</div>`;
 			else
-				station_tooltip = "<div>無資料</div>";
+				station_tooltip = `<div>${station[keys[index]].Loc}(${keys[index]})無資料</div>`;
 			NA999 = "NA";
 			NA0999 = "NA";
 			size = 8;
@@ -3663,7 +3663,7 @@ function FCMdata(json, Unit) {
 	// const json = JSON.parse(data);
 	// console.log(json);
 
-	if (server_timestamp.includes(json.timestamp) || NOW().getTime() - json.timestamp > 180000) return;
+	if (server_timestamp.includes(json.timestamp) || NOW().getTime() - json.timestamp > 180_000) return;
 	server_timestamp.push(json.timestamp);
 
 	if (server_timestamp.length > 15) server_timestamp.splice(0, 1);
@@ -3674,7 +3674,7 @@ function FCMdata(json, Unit) {
 	if (json.response != "You have successfully subscribed to earthquake information") {
 		const filename = NOW().getTime();
 		json.data_unit = Unit;
-		json.delay = NOW().getTime() - json.timeStamp;
+		json.delay = NOW().getTime() - json.timestamp;
 		fs.writeFile(path.join(folder, `${filename}.tmp`), JSON.stringify(json), (err) => {
 			fs.rename(path.join(folder, `${filename}.tmp`), path.join(folder, `${filename}.json`), () => void 0);
 		});
@@ -4562,7 +4562,7 @@ function main(data) {
 			for (let index = 0; index < INFO.length; index++)
 				if (INFO[index].ID == data.id) {
 					INFO[index].alert_type = "alert-box eew-cancel";
-					data.timeStamp = NOW().getTime() - ((data.lon < 122.18 && data.lat < 25.47 && data.lon > 118.25 && data.lat > 21.77) ? 90_000 : 150_000);
+					data.timestamp = NOW().getTime() - ((data.lon < 122.18 && data.lat < 25.47 && data.lon > 118.25 && data.lat > 21.77) ? 90_000 : 150_000);
 
 					if (TREM.EEW.get(data.id).waveProgress) {
 						TREM.EEW.get(data.id).waveProgress.remove();
@@ -4698,7 +4698,7 @@ function main(data) {
 		}, 300);
 	}
 
-	if (NOW().getTime() - data.timeStamp > ((data.lon < 122.18 && data.lat < 25.47 && data.lon > 118.25 && data.lat > 21.77) ? 120_000 : 180_000) || Cancel) {
+	if (NOW().getTime() - data.timestamp > ((data.lon < 122.18 && data.lat < 25.47 && data.lon > 118.25 && data.lat > 21.77) ? 120_000 : 180_000) || Cancel) {
 		TREM.Earthquake.emit("eewEnd", data.id);
 		TREM.MapIntensity.clear();
 
