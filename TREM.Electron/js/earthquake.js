@@ -815,7 +815,8 @@ async function init() {
 						time.classList.add("replay");
 					time.innerText = `${new Date(replay + (NOW().getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 
-					if (NOW().getTime() - replayT > 180_000 && !Object.keys(eew).length) {
+					// if (NOW().getTime() - replayT > 180_000 && !Object.keys(eew).length) {
+					if (NOW().getTime() - replayT > 180_000) {
 						replay = 0;
 						ReportGET();
 						stopReplay();
