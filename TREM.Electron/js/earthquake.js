@@ -612,7 +612,6 @@ class WaveCircle {
 	setAlert(state) {
 		if (this.alert == state) return;
 		this.alert = state;
-		this.source();
 		this.layer.setPaintProperty("fill-color", this.alert ? "#FF0000" : "#FFA500");
 		this.layerBorder.setPaintProperty("line-color", this.alert ? "#FF0000" : "#FFA500");
 	}
@@ -668,7 +667,7 @@ class EEW {
 		this.epicenter = { latitude: data.lat, longitude: data.lon };
 		this.location = data.location;
 		this.magnitude = data.scale;
-		this.source = data.Unit;
+		this.source = (data.type == "eew-cwb") ? "中央氣象局" : (data.type == "eew-nied") ? "日本防災科研" : (data.type == "eew-jma") ? "日本氣象廳" : (data.type == "eew-kma") ? "韓國氣象廳" : (data.type == "eew-fjdzj") ? "中國福建省地震局" : (data.type == "eew-scdzj") ? "中國四川省地震局" : "未知單位";
 
 		if (data.number > (this.version || 0)) {
 			this._expected = new Map();
@@ -3263,6 +3262,7 @@ function stopReplaybtn() {
 }
 
 TREM.replayOverviewButton = (report) => {
+	// localStorage.TestID = ["20230116135054"];
 	localStorage.TestID = report.ID;
 	ipcRenderer.send("testEEW");
 };
@@ -3704,8 +3704,10 @@ function FCMdata(json, Unit) {
 			TREM.Intensity.clear();
 		TREM.Intensity.handle(json);
 		ipcRenderer.send("intensity-Notification", json);
-	} else if (json.Function == "Replay") {
-		replay = json.timestamp;
+	} else if (json.type == "replay") {
+		dump({ level: 0, message: "Got Earthquake replay", origin: "API" });
+		console.log(json);
+		replay = json.replay_timestamp;
 		replayT = NOW().getTime();
 		ReportGET();
 		stopReplaybtn();
@@ -3713,6 +3715,7 @@ function FCMdata(json, Unit) {
 		if (TREM.MapIntensity.isTriggered)
 			TREM.MapIntensity.clear();
 
+		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
 		console.debug(json);
 
@@ -3729,16 +3732,13 @@ function FCMdata(json, Unit) {
 		const location = json.location.match(/(?<=位於).+(?=\))/);
 
 		if (!win.isFocused())
-			if (!report.location.startsWith("TREM 人工定位")) {
+			if (!report.location.startsWith("TREM 人工定位"))
 				new Notification("地震報告",
 					{
 						body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
 						icon   : "../TREM.ico",
 						silent : win.isFocused(),
 					});
-
-				if (setting["audio.report"]) audioPlay("../audio/Report.wav");
-			}
 
 		addReport(report, true);
 		ipcRenderer.send("report-Notification", report);
@@ -3752,10 +3752,10 @@ function FCMdata(json, Unit) {
 				Shot     : 1,
 			});
 		}, 5000);
-	} else if (json.type.startsWith("eew") || json.Replay || json.Test) {
-		if (replay != 0 && !json.Replay) return;
+	} else if (json.type.startsWith("eew") || json.replay_timestamp || json.Test) {
+		if (replay != 0 && !json.replay_timestamp) return;
 
-		if (replay == 0 && json.Replay) return;
+		if (replay == 0 && json.replay_timestamp) return;
 
 		if (
 			(json.Function == "eew-scdzj" && !setting["accept.eew.SCDZJ"])
@@ -3777,6 +3777,7 @@ function FCMdata(json, Unit) {
 // #region Event: eew
 TREM.Earthquake.on("eew", (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
+	console.log(data);
 
 	if (!TREM.EEW.has(data.id))
 		TREM.EEW.set(data.id, new EEW(data));
@@ -3833,7 +3834,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 	let Alert = true;
 
-	if (level.value < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
+	if (level.value < Number(setting["eew.Intensity"])) Alert = false;
 
 	let Nmsg = "";
 
@@ -3993,8 +3994,8 @@ TREM.Earthquake.on("eew", (data) => {
 	// AlertBox: 種類
 	let classString = "alert-box ";
 
-	if (data.Replay) {
-		replay = data.timestamp;
+	if (data.replay_timestamp) {
+		replay = data.replay_timestamp;
 		replayT = NOW().getTime();
 		stopReplaybtn();
 	} else {
@@ -4175,8 +4176,14 @@ TREM.Earthquake.on("eewEnd", (id) => {
 
 TREM.Earthquake.on("tsunami", (data) => {
 	if (data.number == 1) {
+		const now = new Date(json.time);
+		const Now = now.getFullYear()
+			+ "/" + (now.getMonth() + 1)
+			+ "/" + now.getDate()
+			+ " " + now.getHours()
+			+ ":" + now.getMinutes();
 		new Notification("海嘯警報", {
-			body   : `${data["UTC+8"]} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度`,
+			body   : `${Now} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度`,
 			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});
@@ -4551,7 +4558,7 @@ function main(data) {
 
 		if (data.cancel)
 			for (let index = 0; index < INFO.length; index++)
-				if (INFO[index].id == data.id) {
+				if (INFO[index].ID == data.id) {
 					INFO[index].alert_type = "alert-box eew-cancel";
 					data.timeStamp = NOW().getTime() - ((data.lon < 122.18 && data.lat < 25.47 && data.lon > 118.25 && data.lat > 21.77) ? 90_000 : 150_000);
 
