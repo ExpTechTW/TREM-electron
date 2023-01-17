@@ -140,6 +140,7 @@ TREM.MapIntensity = {
 	intensities : new Map(),
 	palert(rawPalertData) {
 		console.log(rawPalertData);
+
 		if (rawPalertData.intensity?.length && !replay) {
 			if (rawPalertData.timestamp != this.alertTime) {
 				this.alertTime = rawPalertData.timestamp;
@@ -2170,7 +2171,7 @@ function handler(Json) {
 			station[uuid].Json_Time = Json.Time;
 			amount = +current_data.v;
 
-			if (amount > MaxPGA) MaxPGA = amount;
+			if (amount > station[uuid].MaxPGA) station[uuid].MaxPGA = amount;
 			intensity = (Alert && Json.Alert) ? current_data.i
 				: (NOW().getTime() - current_data.TS * 1000 > 5000) ? "NA"
 					: (!Alert) ? 0
