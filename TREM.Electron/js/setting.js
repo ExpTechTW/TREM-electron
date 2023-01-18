@@ -474,6 +474,14 @@ function setList(args, el, event) {
 
 function send() {
 	let data = {};
+	let Unit_type = "eew";
+	const testtext_value = document.getElementById("testtext").value;
+	if (testtext_value == "中央氣象局") Unit_type = "eew-cwb";
+	if (testtext_value == "防災科学技術研究所") Unit_type = "eew-nied";
+	if (testtext_value == "日本氣象廳") Unit_type = "eew-jma";
+	if (testtext_value == "韓國氣象廳") Unit_type = "eew-kma";
+	if (testtext_value == "福建省地震局") Unit_type = "eew-fjdzj";
+	if (testtext_value == "四川省地震局") Unit_type = "eew-scdzj";
 
 	if (document.getElementById("UUID").value != "")
 		data = {
@@ -485,7 +493,7 @@ function send() {
 			Value         : {
 				Function      : "earthquake",
 				Type          : "data",
-				type          : "eew",
+				type          : Unit_type,
 				time          : new Date(document.getElementById("Time").value).getTime(),
 				lon           : document.getElementById("EastLongitude").value,
 				lat           : document.getElementById("NorthLatitude").value,
@@ -513,7 +521,7 @@ function send() {
 			Value         : {
 				Function      : "earthquake",
 				Type          : "data",
-				type          : "eew",
+				type          : Unit_type,
 				time          : new Date(document.getElementById("Time").value).getTime(),
 				lon           : document.getElementById("EastLongitude").value,
 				lat           : document.getElementById("NorthLatitude").value,

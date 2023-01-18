@@ -668,7 +668,7 @@ class EEW {
 		this.epicenter = { latitude: data.lat, longitude: data.lon };
 		this.location = data.location;
 		this.magnitude = data.scale;
-		this.source = (data.type == "eew-cwb") ? "中央氣象局" : (data.type == "eew-nied") ? "日本防災科研" : (data.type == "eew-jma") ? "日本氣象廳" : (data.type == "eew-kma") ? "韓國氣象廳" : (data.type == "eew-fjdzj") ? "中國福建省地震局" : (data.type == "eew-scdzj") ? "中國四川省地震局" : "未知單位";
+		this.source = (data.type == "eew-cwb") ? "中央氣象局" : (data.type == "eew-nied") ? "日本防災科研" : (data.type == "eew-jma") ? "日本氣象廳" : (data.type == "eew-kma") ? "韓國氣象廳" : (data.type == "eew-fjdzj") ? "中國福建省地震局" : (data.type == "eew-scdzj") ? "中國四川省地震局" : (data.Unit) ? data.Unit : "未知單位";
 
 		if (data.number > (this.version || 0)) {
 			this._expected = new Map();
@@ -1965,6 +1965,28 @@ async function init() {
 	// TREM.MapIntensity.palert(userJSON1);
 	// const userJSON2 = require(path.resolve(__dirname, "../js/1667356513251.json"));
 	// handler(userJSON2);
+	// const userJSON3 = require(path.resolve(__dirname, "../js/1674021360000.json"));
+	// const userJSON = {};
+	// const userJSON1_iconUrl = "../image/cross.png";
+	// const userJSON2_epicenterIcon = L.icon({
+	// 	userJSON1_iconUrl,
+	// 	iconSize  : [30, 30],
+	// 	className : "epicenterIcon",
+	// });
+	// if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+	// 	userJSON = new maplibregl.Marker(
+	// 		{
+	// 			element: $(`<img class="epicenterIcon" height="40" width="40" src="${userJSON1_iconUrl}"></img>`)[0],
+	// 		})
+	// 		.setLngLat([+userJSON3.lon, +userJSON3.lat])
+	// 		.addTo(Maps.main);
+	// else if (TREM.MapRenderingEngine == "leaflet")
+	// 	userJSON = L.marker([+userJSON3.lat, +userJSON3.lon],
+	// 		{
+	// 			icon: userJSON2_epicenterIcon,
+	// 		})
+	// 		.addTo(Maps.main);
+	// TREM.Earthquake.emit("eew", userJSON3);
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
 		navigator.clipboard.writeText(document.getElementById("rt-station-local-id").innerText).then(() => {
@@ -2584,7 +2606,7 @@ function handler(Json) {
 				const container = document.createElement("DIV");
 				container.className = IntensityToClassString(All[Index].intensity);
 				const location = document.createElement("span");
-				location.innerText = `${All[Index].loc}\n${All[Index].pga} gal`;
+				location.innerText = `${All[Index].loc}\n${Json[All[Index].uuid.split("-")[2]].v} gal`;
 				container.appendChild(document.createElement("span"));
 				container.appendChild(location);
 				list.push(container);
@@ -2599,9 +2621,9 @@ function handler(Json) {
 				const city = All[Index].loc.split(" ")[0];
 				const CPGA = (Idata[city] == undefined) ? 0 : Idata[city];
 
-				if (All[Index].pga > CPGA) {
-					if (Idata[city] == undefined)Idata[city] = {};
-					Idata[city].pga = All[Index].pga;
+				if (Json[All[Index].uuid.split("-")[2]].v > CPGA) {
+					if (Idata[city] == undefined) Idata[city] = {};
+					Idata[city].pga = Json[All[Index].uuid.split("-")[2]].v;
 					Idata[city].intensity = All[Index].intensity;
 				}
 			}
@@ -4026,7 +4048,7 @@ TREM.Earthquake.on("eew", (data) => {
 		alert_local     : level.value,
 		alert_magnitude : data.scale ?? "?",
 		alert_depth     : data.depth ?? "?",
-		alert_provider  : "",
+		alert_provider  : TREM.EEW.get(data.id).source,
 		alert_type      : classString,
 		"intensity-1"   : `<font color="white" size="7"><b>${MaxIntensity.label}</b></font>`,
 		"time-1"        : `<font color="white" size="2"><b>${time}</b></font>`,
@@ -4791,7 +4813,7 @@ function updateText() {
 	$("#alert-box").addClass("show");
 	$("#map-legends").addClass("show");
 
-	if (EarthquakeList[INFO[TINFO].ID].Cancel != undefined) {
+	if (TREM.EEW.get(INFO[TINFO].ID).Cancel != undefined) {
 		$("#alert-p").text("X");
 		$("#alert-s").text("X");
 	} else if (INFO[TINFO].alert_sTime == null) {
@@ -4814,24 +4836,24 @@ function updateText() {
 	// if (EarthquakeList[INFO[TINFO].ID].CircleS) EarthquakeList[INFO[TINFO].ID].CircleS.bringToFront();
 
 	for (const key in EarthquakeList) {
-		if (!EarthquakeList[key]?.epicenterIconTW?.getElement()?.classList?.contains("hide"))
-			EarthquakeList[key]?.epicenterIconTW?.getElement()?.classList?.add("hide");
+		if (!TREM.EEW.get(key)?.epicenterIconTW?.getElement()?.classList?.contains("hide"))
+			TREM.EEW.get(key)?.epicenterIconTW?.getElement()?.classList?.add("hide");
 
-		if (!EarthquakeList[key]?.CirclePTW?.getElement()?.classList?.contains("hide"))
-			EarthquakeList[key]?.CirclePTW?.getElement()?.classList?.add("hide");
+		if (!TREM.EEW.get(key)?.CirclePTW?.getElement()?.classList?.contains("hide"))
+			TREM.EEW.get(key)?.CirclePTW?.getElement()?.classList?.add("hide");
 
-		if (!EarthquakeList[key]?.CircleSTW?.getElement()?.classList?.contains("hide"))
-			EarthquakeList[key]?.CircleSTW?.getElement()?.classList?.add("hide");
+		if (!TREM.EEW.get(key)?.CircleSTW?.getElement()?.classList?.contains("hide"))
+			TREM.EEW.get(key)?.CircleSTW?.getElement()?.classList?.add("hide");
 
-		if (EarthquakeList[key]?.geojson)
-			EarthquakeList[key].geojson.remove();
+		if (TREM.EEW.get(key)?.geojson)
+			TREM.EEW.get(key).geojson.remove();
 	}
 
-	if (EarthquakeList[INFO[TINFO].ID].epicenterIconTW) EarthquakeList[INFO[TINFO].ID].epicenterIconTW.getElement()?.classList?.remove("hide");
+	if (TREM.EEW.get(INFO[TINFO].ID).epicenterIconTW) TREM.EEW.get(INFO[TINFO].ID).epicenterIconTW.getElement()?.classList?.remove("hide");
 
-	if (EarthquakeList[INFO[TINFO].ID].CirclePTW) EarthquakeList[INFO[TINFO].ID].CirclePTW.getElement()?.classList?.remove("hide");
+	if (TREM.EEW.get(INFO[TINFO].ID).CirclePTW) TREM.EEW.get(INFO[TINFO].ID).CirclePTW.getElement()?.classList?.remove("hide");
 
-	if (EarthquakeList[INFO[TINFO].ID].CircleSTW) EarthquakeList[INFO[TINFO].ID].CircleSTW.getElement()?.classList?.remove("hide");
+	if (TREM.EEW.get(INFO[TINFO].ID).CircleSTW) TREM.EEW.get(INFO[TINFO].ID).CircleSTW.getElement()?.classList?.remove("hide");
 
 	if (TREM.EEW.get(INFO[TINFO].ID)?.geojson) TREM.EEW.get(INFO[TINFO].ID).geojson.addTo(Maps.mini);
 
