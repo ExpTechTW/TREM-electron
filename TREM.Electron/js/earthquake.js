@@ -41,7 +41,7 @@ localStorage.dirname = __dirname;
 
 // #region 變數
 const posturl = "https://exptech.com.tw/api/v1/trem/";
-const geturl = "https://exptech.com.tw/api/v2/trem/RTS?Time=";
+const geturl = "https://exptech.com.tw/api/v2/trem/rts?time=";
 const getapiurl = "https://api.exptech.com.tw/api/v1/trem/rts";
 const MapData = {};
 const Timers = {};
@@ -2194,7 +2194,7 @@ function handler(Json) {
 			amount = +current_data.v;
 
 			if (amount > station[uuid].MaxPGA) station[uuid].MaxPGA = amount;
-			intensity = (Alert && Json.Alert) ? current_data.i
+			intensity = (Alert && Json.Alert) ? Math.round(current_data.i)
 				: (NOW().getTime() - current_data.TS * 1000 > 5000) ? "NA"
 					: (!Alert) ? 0
 						: (amount >= 800) ? 9
