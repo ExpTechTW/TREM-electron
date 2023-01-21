@@ -2601,7 +2601,7 @@ function FCMdata(json, Unit) {
         + " " + now.getHours()
         + ":" + now.getMinutes();
     dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-    new Notification("海嘯資訊", { body: `${Now} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
+    new Notification("海嘯資訊", { body: `${Now}\n${json.location} 發生 M ${json.scale} 地震`, icon: "../TREM.ico" });
   } else if (json.type == "tsunami") {
     TREM.Earthquake.emit("tsunami", json);
   } else if (json.type == "palert") {
