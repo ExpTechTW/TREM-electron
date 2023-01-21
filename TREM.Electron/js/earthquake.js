@@ -2733,19 +2733,20 @@ TREM.Earthquake.on("eew", (data) => {
 
   if (level.value < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
 
-  if (!Info.Notify.includes(data.id)) {
-    let Nmsg = "";
+  let Nmsg = "";
 
-    if (value > 0)
-      Nmsg = `${value}秒後抵達`;
-    else
-      Nmsg = "已抵達 (預警盲區)";
-    const notify = (level.label.includes("+") || level.label.includes("-")) ? level.label.replace("+", "強").replace("-", "弱") : level.label + "級";
-    new Notification("EEW 強震即時警報", {
-      body   : `${notify} 地震，${Nmsg}\nM ${data.scale} ${data.location ?? "未知區域"}`,
-      icon   : "../TREM.ico",
-      silent : win.isFocused(),
-    });
+  if (value > 0)
+    Nmsg = `${value}秒後抵達`;
+  else
+    Nmsg = "已抵達 (預警盲區)";
+  const notify = (level.label.includes("+") || level.label.includes("-")) ? level.label.replace("+", "強").replace("-", "弱") : level.label + "級";
+  new Notification(`${data.Unit} | 第${data.number}報`, {
+    body   : `${notify} 地震，${Nmsg}\nM ${data.scale} ${data.location ?? "未知區域"}`,
+    icon   : "../TREM.ico",
+    silent : win.isFocused(),
+  });
+
+  if (!Info.Notify.includes(data.id)) {
     Info.Notify.push(data.id);
     // show latest eew
     TINFO = INFO.length;
