@@ -168,6 +168,7 @@ TREM.MapIntensity = {
 
 				if (setting["webhook.url"] != "" && setting["palert.Notification"]) {
 					dump({ level: 0, message: "Posting Notification palert Webhook", origin: "Webhook" });
+					this.description = "";
 					for (let index = this.MaxI; index != 0; index--) {
 						this.description += `${index}級\n`;
 						let countyName_index = "";
