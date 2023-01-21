@@ -96,13 +96,13 @@ TREM.MapIntensity = {
   alertTime   : 0,
   intensities : new Map(),
   palert(rawPalertData) {
-    if (rawPalertData.data?.length && !replay) {
+    if (rawPalertData.intensity?.length && !replay) {
       if (rawPalertData.timestamp != this.alertTime) {
         this.alertTime = rawPalertData.timestamp;
         let MaxI = 0;
         const int = new Map();
 
-        for (const palertEntry of rawPalertData.data) {
+        for (const palertEntry of rawPalertData.intensity) {
           const [countyName, townName] = palertEntry.loc.split(" ");
           const towncode = TREM.Resources.region[countyName]?.[townName]?.code;
 
@@ -2593,15 +2593,19 @@ function FCMdata(json, Unit) {
   if (json.TimeStamp != undefined)
     dump({ level: 0, message: `Latency: ${NOW().getTime() - json.TimeStamp}ms`, origin: "API" });
 
-  if (json.type == "tsunami") {
+  if (json.type == "tsunami-info") {
+    const now = new Date(json.time);
+    const Now = now.getFullYear()
+        + "/" + (now.getMonth() + 1)
+        + "/" + now.getDate()
+        + " " + now.getHours()
+        + ":" + now.getMinutes();
     dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-    new Notification("海嘯資訊", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "../TREM.ico" });
-  } else if (json.type == "TSUNAMI") {
+    new Notification("海嘯資訊", { body: `${Now} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
+  } else if (json.type == "tsunami") {
     TREM.Earthquake.emit("tsunami", json);
   } else if (json.type == "palert") {
-    TREM.MapIntensity.palert(json.Data);
-  } else if (json.type == "TREM_earthquake") {
-    trem_alert = json;
+    TREM.MapIntensity.palert(json);
   } else if (json.type == "PWS") {
     TREM.PWS.addPWS(json.raw);
   } else if (json.type == "intensity") {
