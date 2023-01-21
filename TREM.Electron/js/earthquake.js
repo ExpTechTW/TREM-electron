@@ -1304,8 +1304,6 @@ async function init() {
             fillOpacity : 1,
           },
         }).addTo(Maps.intensity));
-
-    setUserLocationMarker(setting["location.town"]);
     progressbar.value = (1 / progressStep) * 4;
   })().catch(e => dump({ level: 2, message: e }));
 
@@ -1317,7 +1315,7 @@ async function init() {
       Timers.fetchFiles = setInterval(fetchFiles, 10 * 60 * 1000);
     progressbar.value = 1;
   })().catch(e => dump({ level: 2, message: e }));
-
+  setUserLocationMarker(setting["location.town"]);
   $("#loading").text(TREM.Localization.getString("Application_Welcome"));
   $("#load").delay(1000).fadeOut(1000);
   Mapsmainfocus();
@@ -1742,12 +1740,7 @@ async function fetchFiles() {
  * 設定用戶所在位置
  * @param {string} town 鄉鎮
  */
-async function setUserLocationMarker(town) {
-  if (!Location) {
-    Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/station.json")).json();
-    dump({ level: 0, message: "Get Location File", origin: "Location" });
-  }
-
+function setUserLocationMarker(town) {
   [
     , UserLocationLat,
     UserLocationLon,
