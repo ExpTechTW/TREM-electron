@@ -520,7 +520,7 @@ class EEW {
     this.id = data.id;
     this.depth = data.depth;
     this.epicenter = { latitude: data.lat, longitude: data.lon };
-    this.location = data.Location;
+    this.location = data.location;
     this.magnitude = data.scale;
     this.source = data.Unit;
 
@@ -2742,7 +2742,7 @@ TREM.Earthquake.on("eew", (data) => {
       Nmsg = "已抵達 (預警盲區)";
     const notify = (level.label.includes("+") || level.label.includes("-")) ? level.label.replace("+", "強").replace("-", "弱") : level.label + "級";
     new Notification("EEW 強震即時警報", {
-      body   : `${notify} 地震，${Nmsg}\nM ${data.scale} ${data.Location ?? "未知區域"}`,
+      body   : `${notify} 地震，${Nmsg}\nM ${data.scale} ${data.location ?? "未知區域"}`,
       icon   : "../TREM.ico",
       silent : win.isFocused(),
     });
@@ -3537,7 +3537,7 @@ function main(data) {
     }, 300);
   }
 
-  if (NOW().getTime() - data.timeStamp > ((data.lon < 122.18 && data.lat < 25.47 && data.lon > 118.25 && data.lat > 21.77) ? 120_000 : 180_000) || Cancel) {
+  if (NOW().getTime() - data.time > 240_000 || Cancel) {
     TREM.Earthquake.emit("eewEnd", data.id);
     TREM.MapIntensity.clear();
 
