@@ -200,7 +200,7 @@ TREM.MapIntensity = {
 						embeds     : [
 							{
 								author: {
-									name     : "PAlert",
+									name     : rawPalertData.final ? "PAlert最終報" : "PAlert",
 									url      : rawPalertData.link,
 									icon_url : undefined,
 								},
@@ -209,6 +209,11 @@ TREM.MapIntensity = {
 									{
 										name   : "時間",
 										value  : _Now,
+										inline : true,
+									},
+									{
+										name   : "觸發測站",
+										value  : `${rawPalertData.tiggered}台`,
 										inline : true,
 									},
 								],
