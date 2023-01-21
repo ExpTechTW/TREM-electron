@@ -2071,7 +2071,7 @@ function addReport(report, prepend = false) {
 
     const report_intensity_value = document.createElement("span");
     report_intensity_value.className = "report-intensity-value";
-    report_intensity_value.innerText = (Level == 0) ? "?" : Level;
+    report_intensity_value.innerText = Level;
     report_intensity_container.append(report_intensity_title_container, report_intensity_value);
 
     const report_detail_container = document.createElement("div");
@@ -2143,7 +2143,7 @@ function IntensityI(Intensity) {
       : Intensity == 7 ? "6-"
         : Intensity == 8 ? "6+"
           : Intensity == 9 ? "7"
-            : Intensity ?? "?";
+            : Intensity ?? "--";
 }
 // #endregion
 
