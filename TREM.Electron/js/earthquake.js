@@ -4,6 +4,7 @@ require("leaflet-edgebuffer");
 require("leaflet-geojson-vt");
 require("expose-gc");
 const { BrowserWindow, shell } = require("@electron/remote");
+const { default: turfCircle } = require("@turf/circle");
 const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:timers");
 const { ExptechAPI } = require("@kamiya4047/exptech-api-wrapper");
 const Exptech = new ExptechAPI();
@@ -22,10 +23,6 @@ TREM.Audios = {
 TREM.AudioContext = new AudioContext({});
 TREM.Constants = require(path.resolve(__dirname, "../Constants/Constants.js"));
 TREM.Earthquake = new EventEmitter();
-
-/**
- * @type {Map<string, EEW}
- */
 TREM.EEW = new Map();
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
@@ -39,8 +36,6 @@ localStorage.dirname = __dirname;
 //   const bytecode = script.createCachedData();
 //   fs.writeFileSync(path.resolve(__dirname, "../js/server.jar"), bytecode);
 // }
-
-bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 
 // #region 變數
 const MapData = {};
@@ -65,6 +60,7 @@ const Maps = { main: null, mini: null, report: null };
  * @type { {[key: string]: Map<string, maplibregl.StyleLayer>} }
  */
 const MapBases = { main: new Map(), mini: new Map(), report: new Map(), intensity: new Map() };
+const Station = {};
 const detected_list = {};
 let Cancel = false;
 let PGALimit = 0;
@@ -76,28 +72,7 @@ let TINFO = 0;
 let Report = 0;
 const server_timestamp = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "server.json")).toString());
 let Location;
-
-/**
- * @typedef StationData 測站
- * @property {number} Lat   緯度
- * @property {number} Long  經度
- * @property {number} PGA   對應 area id
- * @property {string} Loc   地點
- * @property {string} area  區域
- */
-
-/**
- * 所有測站列表
- * @type {Object<string, StationData>}
- */
-let station_list = {};
-
-/**
- * 地圖上測站列表
- * @type {Map<string, L.Marker>}
- */
-const stations = new Map();
-
+let station = {};
 let investigation = false;
 let ReportTag = 0;
 let EEWshot = 0;
@@ -105,7 +80,7 @@ let EEWshotC = 0;
 let replay = 0;
 let replayT = 0;
 let Second = -1;
-const mapLock = false;
+let mapLock = false;
 const eew = {};
 const eewt = { id: 0, time: 0 };
 let TSUNAMI = {};
@@ -116,263 +91,402 @@ let report_get_timestamp = 0;
 let map_move_back = false;
 // #endregion
 
-const MainMap = {
-  intensity: {
-    isVisible   : false,
-    isTriggered : false,
-    alertTime   : 0,
-    intensities : new Map(),
-    palert(rawPalertData) {
-      if (rawPalertData.intensity?.length && !replay) {
-        if (rawPalertData.timestamp != this.alertTime) {
-          this.alertTime = rawPalertData.timestamp;
-          let MaxI = 0;
-          const int = new Map();
+TREM.MapIntensity = {
+  isTriggered : false,
+  alertTime   : 0,
+  intensities : new Map(),
+  palert(rawPalertData) {
+    if (rawPalertData.data?.length && !replay) {
+      if (rawPalertData.timestamp != this.alertTime) {
+        this.alertTime = rawPalertData.timestamp;
+        let MaxI = 0;
+        const int = new Map();
 
-          for (const palertEntry of rawPalertData.intensity) {
-            const [countyName, townName] = palertEntry.loc.split(" ");
-            const towncode = TREM.Resources.region[countyName]?.[townName]?.code;
+        for (const palertEntry of rawPalertData.data) {
+          const [countyName, townName] = palertEntry.loc.split(" ");
+          const towncode = TREM.Resources.region[countyName]?.[townName]?.code;
 
-            if (!towncode) continue;
-            int.set(towncode, palertEntry.intensity);
+          if (!towncode) continue;
+          int.set(towncode, palertEntry.intensity);
 
-            if (palertEntry.intensity > MaxI) {
-              MaxI = palertEntry.intensity;
-              Report = NOW().getTime();
-              ReportGET({
-                Max  : MaxI,
-                Time : NOW().format("YYYY/MM/DD HH:mm:ss"),
-              });
-            }
+          if (palertEntry.intensity > MaxI) {
+            MaxI = palertEntry.intensity;
+            Report = NOW.getTime();
+            ReportGET({
+              Max  : MaxI,
+              Time : NOW.format("YYYY/MM/DD HH:mm:ss"),
+            });
           }
+        }
 
-          if (this.intensities.size)
-            for (const [towncode, intensity] of this.intensities)
-              if (int.get(towncode) != intensity) {
-                this.intensities.delete(towncode);
-                Maps.main.setFeatureState({
-                  source : "Source_tw_town",
-                  id     : towncode,
-                }, { intensity: 0 });
+        if (this.intensities.size)
+          for (const [towncode, intensity] of this.intensities)
+            if (int.get(towncode) != intensity) {
+              this.intensities.delete(towncode);
+              Maps.main.setFeatureState({
+                source : "Source_tw_town",
+                id     : towncode,
+              }, { intensity: 0 });
+            }
+
+        if (int.size) {
+          dump({ level: 0, message: `Total ${int.size} triggered stations`, origin: "P-Alert" });
+
+          for (const [towncode, intensity] of int)
+            if (this.intensities.get(towncode) != intensity)
+              Maps.main.setFeatureState({
+                source : "Source_tw_town",
+                id     : towncode,
+              }, { intensity });
+
+          Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
+
+          this.intensities = int;
+
+          if (!this.isTriggered) {
+            this.isTriggered = true;
+            changeView("main", "#mainView_btn");
+
+            if (setting["Real-time.show"]) win.showInactive();
+
+            if (setting["Real-time.cover"])
+              if (!win.isFullScreen()) {
+                win.setAlwaysOnTop(true);
+                win.focus();
+                win.setAlwaysOnTop(false);
               }
 
-          if (int.size) {
-            dump({ level: 0, message: `Total ${int.size} triggered stations`, origin: "P-Alert" });
+            if (!win.isFocused()) win.flashFrame(true);
 
-            for (const [towncode, intensity] of int)
-              if (this.intensities.get(towncode) != intensity)
-                Maps.main.setFeatureState({
-                  source : "Source_tw_town",
-                  id     : towncode,
-                }, { intensity });
-
-            Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
-
-            this.intensities = int;
-
-            if (!this.isTriggered) {
-              this.isTriggered = true;
-              changeView("main", "#mainView_btn");
-
-              if (setting["Real-time.show"]) win.showInactive();
-
-              if (setting["Real-time.cover"])
-                if (!win.isFullScreen()) {
-                  win.setAlwaysOnTop(true);
-                  win.focus();
-                  win.setAlwaysOnTop(false);
-                }
-
-              if (!win.isFocused()) win.flashFrame(true);
-
-              if (setting["audio.realtime"]) TREM.Audios.palert.play();
-            }
-
-            setTimeout(() => {
-              ipcRenderer.send("screenshotEEW", {
-                Function : "palert",
-                ID       : 1,
-                Version  : 1,
-                Time     : NOW().getTime(),
-                Shot     : 1,
-              });
-            }, 1250);
+            if (setting["audio.realtime"]) TREM.Audios.palert.play();
           }
-        }
 
-        if (this.timer)
-          this.timer.refresh();
-        else
-          this.timer = setTimeout(this.clear, 600_000);
-      }
-    },
-    clear() {
-      dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
-
-      if (this.intensities.size) {
-        Maps.main.removeFeatureState({ source: "Source_tw_town" });
-        Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
-        this.intensities = new Map();
-        this.alertTime = 0;
-        this.isTriggered = false;
-
-        if (MapBases.main.has("tw_town")) {
-          MapBases.main.get("tw_town").remove();
-          MapBases.main.delete("tw_town");
-          MapBases.main.get("tw_county").addTo(Maps.main);
-          this.isVisible = false;
-        }
-
-
-        if (this.timer) {
-          clearTimeout(this.timer);
-          delete this.timer;
+          setTimeout(() => {
+            ipcRenderer.send("screenshotEEW", {
+              Function : "palert",
+              ID       : 1,
+              Version  : 1,
+              Time     : NOW.getTime(),
+              Shot     : 1,
+            });
+          }, 1250);
         }
       }
-    },
+
+      if (this.timer)
+        this.timer.refresh();
+      else
+        this.timer = setTimeout(this.clear, 600_000);
+    }
   },
-  area: {
-    cache      : new Map(),
-    isVisible  : false,
-    blinkTimer : null,
-    setArea(id, intensity) {
-      if (this.cache.get(id)?.intensity == intensity) return;
+  expected(expected) {
+    const int = new Map();
 
-      if (this.cache.has(id)) {
-        this.cache.get(id).polygon.setStyle({ color: color(intensity) });
-      } else {
-        this.cache.set(id, {
-          intensity,
-          polygon: L.polygon(TREM.Resources.area[id], {
-            renderer : L.svg(),
-            color    : color(intensity),
-            fill     : false
-          })
-        });
+    for (const [towncode, exp] of expected)
+      int.set(towncode, exp.intensity.value);
 
-        if (this.isVisible) this.cache.get(id).polygon.addTo(Maps.main);
+    if (this.intensities.size)
+      for (const [towncode, intensity] of this.intensities)
+        if (int.get(towncode) != intensity) {
+          this.intensities.delete(towncode);
+          Maps.main.setFeatureState({
+            source : "Source_tw_town",
+            id     : towncode,
+          }, { intensity: 0 });
+        }
+
+    if (int.size) {
+      for (const [towncode, intensity] of int)
+        if (this.intensities.get(towncode) != intensity)
+          Maps.main.setFeatureState({
+            source : "Source_tw_town",
+            id     : towncode,
+          }, { intensity });
+
+      Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
+
+      this.intensities = int;
+    }
+  },
+  clear() {
+    dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
+
+    if (this.intensities.size) {
+      Maps.main.removeFeatureState({ source: "Source_tw_town" });
+      Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
+      this.intensities = new Map();
+      this.alertTime = 0;
+      this.isTriggered = false;
+
+      if (this.timer) {
+        clearTimeout(this.timer);
+        delete this.timer;
       }
-
-      if (!this.blinkTimer) {
-        this.show();
-        this.blinkTimer = setInterval(() => {
-          if (this.isVisible)
-            this.hide();
-          else
-            this.show();
-        }, 500);
-      }
-    },
-    clear(id) {
-      if (id) {
-        this.cache.get(id).polygon.remove();
-        this.cache.delete(id);
-      } else {
-        for (const [, value] of this.cache)
-          value.polygon.remove();
-
-        delete this.cache;
-        this.cache = new Map();
-      }
-
-      if (!this.cache.size) {
-        if (this.blinkTimer)
-          clearTimeout(this.blinkTimer);
-        delete this.blinkTimer;
-        this.hide();
-      }
-    },
-    show() {
-      for (const [, value] of this.cache)
-        value.polygon.addTo(Maps.main);
-      this.isVisible = true;
-    },
-    hide() {
-      for (const [, value] of this.cache)
-        value.polygon.remove();
-      this.isVisible = false;
-    },
-  }
+    }
+  },
 };
 
+TREM.PWS = {
+  cache: new Map(),
+  addPWS(rawPWSData) {
+    const id = rawPWSData.link.href.slice(15);
+
+    if (!id.length) return;
+    const pws = {
+      id,
+      title       : rawPWSData.title,
+      sender      : rawPWSData.sender.value,
+      description : rawPWSData.description.$t,
+      area        : rawPWSData.area.areaDesc,
+      areaCodes   : TREM.Utils.findRegions(rawPWSData.area.areaDesc),
+      sentTime    : new Date(rawPWSData.sent.slice(0, rawPWSData.sent.length - 3)),
+      expireTime  : new Date(rawPWSData.expires.slice(0, rawPWSData.expires.length - 3)),
+      url         : rawPWSData.link.href,
+      timer       : null,
+    };
+    dump({ level: 0, message: `${pws.description}`, origin: "PWS" });
+
+    if (Date.now() > pws.expireTime.getTime()) return;
+
+    for (const area of pws.areaCodes)
+      if (area.town) {
+        const { pws: pwsCount } = Maps.main.getFeatureState({
+          source : "Source_tw_town",
+          id     : area.code,
+        });
+        Maps.main.setFeatureState({
+          source : "Source_tw_town",
+          id     : area.code,
+        }, { pws: (pwsCount ?? 0) + 1 });
+        Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "visible");
+        pws.marker = new maplibregl.Marker({
+          element: $("<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>")[0],
+        })
+          .setLngLat([area.longitude, area.latitude])
+          .setPopup(new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: 360 }).setHTML(`<div class="marker-popup pws-popup"><strong>${pws.title}</strong>\n發報單位：${pws.sender}\n內文：${pws.description}\n發報時間：${pws.sentTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n失效時間：${pws.expireTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n\n<span class="url" onclick="openURL('${pws.url}')">報告連結</span></div>`))
+          .addTo(Maps.main);
+      } else {
+        const { pws: pwsCount } = Maps.main.getFeatureState({
+          source : "Source_tw_county",
+          id     : area.code,
+        });
+        Maps.main.setFeatureState({
+          source : "Source_tw_county",
+          id     : area.code,
+        }, { pws: (pwsCount ?? 0) + 1 });
+        Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "visible");
+      }
+
+    pws.timer = setTimeout(this.clear, pws.expireTime.getTime() - Date.now(), id);
+
+    this.cache.set(id, pws);
+  },
+  clear(pwsId) {
+    if (pwsId) {
+      const pws = this.cache.get(pwsId);
+
+      if (!pws) return;
+      dump({ level: 0, message: `Clearing PWS id ${pwsId}`, origin: "PWS" });
+
+      for (const area of pws.areaCodes)
+        if (area.town) {
+          const { pws: pwsCount } = Maps.main.getFeatureState({
+            source : "Source_tw_town",
+            id     : area.code,
+          });
+          Maps.main.setFeatureState({
+            source : "Source_tw_town",
+            id     : area.code,
+          }, { pws: pwsCount - 1 });
+
+          if (pws.marker) {
+            pws.marker.remove();
+            delete pws.marker;
+          }
+
+          if (!(pwsCount - 1))
+            Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
+        } else {
+          const { pws: pwsCount } = Maps.main.getFeatureState({
+            source : "Source_tw_county",
+            id     : area.code,
+          });
+          Maps.main.setFeatureState({
+            source : "Source_tw_county",
+            id     : area.code,
+          }, { pws: pwsCount - 1 });
+
+          if (pws.marker) {
+            pws.marker.remove();
+            delete pws.marker;
+          }
+
+          if (!(pwsCount - 1))
+            Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
+        }
+
+      if (pws.timer) {
+        clearTimeout(pws.timer);
+        delete pws.timer;
+      }
+
+      this.cache.delete(pwsId);
+    }
+
+    if (this.cache.size) {
+      dump({ level: 0, message: "Clearing PWS map", origin: "PWS" });
+
+      for (const [id, pws] of this.cache) {
+        for (const area of pws.areaCodes)
+          if (area.town)
+            Maps.main.setFeatureState({
+              source : "Source_tw_town",
+              id     : area.code,
+            }, { pws: 0 });
+          else
+            Maps.main.setFeatureState({
+              source : "Source_tw_county",
+              id     : area.code,
+            }, { pws: 0 });
+
+        if (pws.timer) {
+          clearTimeout(pws.timer);
+          delete pws.timer;
+        }
+      }
+
+      Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
+      Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
+      this.cache = new Map();
+    }
+  },
+};
+
+TREM.MapArea = {
+  cache      : new Map(),
+  isVisible  : false,
+  blinkTimer : null,
+  setArea(id, intensity) {
+    if (this.cache.get(id) == intensity) return;
+    Maps.main.setFeatureState({
+      source: "Source_area",
+      id,
+    }, { intensity });
+    this.cache.set(id, intensity);
+    this.show();
+
+    if (!this.blinkTimer)
+      this.blinkTimer = setInterval(() => {
+        if (this.isVisible)
+          this.hide();
+        else
+          this.show();
+      }, 500);
+  },
+  clear(id) {
+    if (id) {
+      Maps.main.removeFeatureState({ source: "Source_area", id });
+      this.cache.delete(id);
+    } else {
+      Maps.main.removeFeatureState({ source: "Source_area" });
+      delete this.cache;
+      this.cache = new Map();
+    }
+
+    if (!this.cache.size) {
+      if (this.blinkTimer)
+        clearTimeout(this.blinkTimer);
+      delete this.blinkTimer;
+      this.hide();
+    }
+  },
+  show() {
+    Maps.main.setLayoutProperty("Layer_area", "visibility", "visible");
+    this.isVisible = true;
+  },
+  hide() {
+    Maps.main.setLayoutProperty("Layer_area", "visibility", "none");
+    this.isVisible = false;
+  },
+};
 class WaveCircle {
 
   /**
-	 * @param {{id: string, map: L.Map, latlng: L.LatLng, radius: number, alert: boolean}}
+	 * @param {string} id
+	 * @param {maplibregl.Map} map
+	 * @param {maplibregl.LngLatLike} lnglat
+	 * @param {number} radius
+	 * @param {boolean} alert
+	 * @param {maplibregl.LayerSpecification} layerOptions
 	 */
-  constructor({ id, map, latlng, radius, alert }) {
+  constructor(id, map, lnglat, radius, alert, layerOptions) {
     this.map = map;
-    this.latlng = latlng;
+    this.lnglat = lnglat;
     this.radius = radius;
     this.alert = alert;
-    this.layer = { main: null, mini: null };
 
-    if (id.endsWith("p")) {
-      this.layer.main = L.circle(this.latlng, {
-        color     : "#6FB7B7",
-        fillColor : "transparent",
-        radius    : radius,
-        renderer  : L.svg(),
-        className : "p-wave",
-      }).addTo(Maps.main);
-      this.layer.mini = L.circle(this.latlng, {
-        color     : "#6FB7B7",
-        fillColor : "transparent",
-        radius    : radius,
-        renderer  : L.svg(),
-        className : "p-wave",
-      }).addTo(Maps.mini);
-    } else {
-      this.layer.main = L.circle(this.latlng, {
-        color       : this.alert ? "red" : "orange",
-        fillColor   : `url(#${this.alert ? "alert" : "pred"}-gradient)`,
-        fillOpacity : 1,
-        radius      : radius,
-        renderer    : L.svg(),
-        className   : "s-wave",
-      }).addTo(Maps.main);
-      this.layer.mini = L.circle(this.latlng, {
-        color       : this.alert ? "red" : "orange",
-        fillColor   : `url(#${this.alert ? "alert" : "pred"}-gradient)`,
-        fillOpacity : 1,
-        radius      : radius,
-        renderer    : L.svg(),
-        className   : "s-wave",
-      }).addTo(Maps.mini);
-    }
+    /**
+		 * @type {maplibregl.GeoJSONSource}
+		 */
+    this.source = map.addSource(`Source_${id}`, {
+      type : "geojson",
+      data : turfCircle(lnglat, radius, { units: "meters" }),
+    }).getSource(`Source_${id}`);
+    this.layer = map.addLayer({
+      ...layerOptions,
+      id     : `Layer_${id}`,
+      source : `Source_${id}`,
+    }).getLayer(`Layer_${id}`);
+
+    if (layerOptions.type == "fill")
+      this.layerBorder = map.addLayer({
+        ...layerOptions,
+        type   : "line",
+        id     : `Layer_${id}_Border`,
+        source : `Source_${id}`,
+        paint  : {
+          "line-width" : 3,
+          "line-color" : layerOptions.paint["fill-color"],
+        },
+      }).getLayer(`Layer_${id}_Border`);
   }
 
-  setLatLng(latlng) {
-    if (this.latlng[0] == latlng[0] && this.latlng[1] == latlng[1]) return;
-    this.latlng = latlng;
-    this.layer.main.setLatLng(this.latlng);
-    this.layer.mini.setLatLng(this.latlng);
+  setLngLat(lnglat) {
+    if (this.lnglat[0] == lnglat[0] && this.lnglat[1] == lnglat[1]) return;
+    this.lnglat = lnglat;
+    this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
   }
 
   setRadius(radius) {
     if (this.radius == radius) return;
     this.radius = radius;
-    this.layer.main.setRadius(this.radius);
-    this.layer.mini.setRadius(this.radius);
+    this.source.setData(turfCircle(this.lnglat, this.radius, { units: "meters" }));
   }
 
   setAlert(state) {
     if (this.alert == state) return;
     this.alert = state;
-    this.layer.main.setStyle({
-      color     : this.alert ? "red" : "orange",
-      fillColor : `url(#${this.alert ? "alert" : "pred"}-gradient)`,
-    });
-    this.layer.mini.setStyle({
-      color     : this.alert ? "red" : "orange",
-      fillColor : `url(#${this.alert ? "alert" : "pred"}-gradient)`,
-    });
+    this.source();
+    this.layer.setPaintProperty("fill-color", this.alert ? "#FF0000" : "#FFA500");
+    this.layerBorder.setPaintProperty("line-color", this.alert ? "#FF0000" : "#FFA500");
+  }
+
+  setStyle(id, value) {
+    if (this.layer.paint[id] == value) return;
+    this.layer.setPaintProperty(id, value);
   }
 
   remove() {
-    this.layer.main.remove();
-    this.layer.mini.remove();
+    this.map.removeLayer(this.layer.id);
     delete this.layer;
+
+    if (this.layerBorder) {
+      this.map.removeLayer(this.layerBorder.id);
+      delete this.layerBorder;
+    }
+
+    this.map.removeSource(this.source.id);
+    delete this.source;
     return null;
   }
 }
@@ -403,30 +517,27 @@ class EEW {
   }
 
   #fromJson(data) {
-    this.id = data.id;
-    this.depth = data.depth;
-    this.epicenter = { latitude: data.lat, longitude: data.lon };
-    this.epicenterIcon = { main: null, mini: null };
+    this.id = data.ID;
+    this.depth = data.Depth;
+    this.epicenter = { latitude: data.NorthLatitude, longitude: data.EastLongitude };
     this.location = data.Location;
-    this.magnitude = data.scale;
-    this.source = (data.type == "eew-cwb") ? "中央氣象局" : (data.type == "eew-nied") ? "日本防災科研" : (data.type == "eew-jma") ? "日本氣象廳" : (data.type == "eew-kma") ? "韓國氣象廳" : (data.type == "eew-fjdzj") ? "中國福建省地震局" : (data.type == "eew-scdzj") ? "中國四川省地震局" : "未知單位";
+    this.magnitude = data.Scale;
+    this.source = data.Unit;
 
-    if (data.number > (this.version || 0)) {
+    if (data.Version > (this.version || 0)) {
       this._expected = new Map();
       this.#evalExpected();
     }
 
-    this.version = data.number;
+    this.version = data.Version;
 
-    this.eventTime = new Date(data.time);
-    this.apiTime = new Date(data.timeStamp);
+    this.eventTime = new Date(data.Time);
+    this.apiTime = new Date(data.TimeStamp);
 
     this._alert = data.Alert;
     this._from = data.data_unit;
     this._receiveTime = new Date(data.timestamp);
     this._replay = data.Replay;
-
-    this.#epicenterIcon();
   }
 
   #evalExpected() {
@@ -454,34 +565,14 @@ class EEW {
       }
   }
 
-  #epicenterIcon() {
-    if (this.epicenter.icon) {
-      this.epicenterIcon.main.setLatLng([this.epicenter.latitude, this.epicenter.longitude]);
-      this.epicenterIcon.mini.setLatLng([this.epicenter.latitude, this.epicenter.longitude]);
-    } else {
-      this.epicenterIcon.main = L.marker([this.epicenter.latitude, this.epicenter.longitude], {
-        icon: L.icon({
-          iconUrl   : "../image/cross.png",
-          iconSize  : [30, 30],
-          className : "epicenterIcon",
-        })
-      }).addTo(Maps.main);
-      this.epicenterIcon.mini = L.marker([this.epicenter.latitude, this.epicenter.longitude], {
-        icon: L.icon({
-          iconUrl   : "../image/cross.png",
-          iconSize  : [30, 30],
-          className : "epicenterIcon",
-        })
-      }).addTo(Maps.mini);
-    }
-  }
-
   update(data) {
     this.#fromJson(data);
   }
 }
 
 // #region 初始化
+bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
+
 
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
@@ -511,7 +602,6 @@ async function init() {
 
   TREM.MapRenderingEngine = setting["map.engine"];
 
-  // checks internet connectivity
   if (!window.navigator.onLine)
     return showDialog(
       "error",
@@ -521,6 +611,7 @@ async function init() {
         ipcRenderer.send("restart");
       },
     );
+
 
   // Connect to server
   await (async () => {
@@ -546,9 +637,9 @@ async function init() {
         } else if (replay) {
           if (!time.classList.contains("replay"))
             time.classList.add("replay");
-          time.innerText = `${new Date(replay + (NOW().getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
+          time.innerText = `${new Date(replay + (NOW.getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
 
-          if (NOW().getTime() - replayT > 180_000) {
+          if (NOW.getTime() - replayT > 180_000) {
             replay = 0;
             document.getElementById("togglenav_btn").classList.remove("hide");
             document.getElementById("stopReplay").classList.add("hide");
@@ -560,7 +651,7 @@ async function init() {
 
           if (time.classList.contains("desynced"))
             time.classList.remove("desynced");
-          time.innerText = `${NOW().format("YYYY/MM/DD HH:mm:ss")}`;
+          time.innerText = `${NOW.format("YYYY/MM/DD HH:mm:ss")}`;
         }
 
         let GetDataState = "";
@@ -596,19 +687,19 @@ async function init() {
     if (!Timers.tsunami)
       Timers.tsunami = setInterval(() => {
         if (investigation) {
-          if (NOW().getTime() - Report > 600_000) {
+          if (NOW.getTime() - Report > 600_000) {
             investigation = false;
             roll.removeChild(roll.children[0]);
 
-            if (MainMap.intensity.isTriggered)
-              MainMap.intensity.clear();
+            if (TREM.MapIntensity.isTriggered)
+              TREM.MapIntensity.clear();
           }
         } else
         if (Date.now() - report_get_timestamp > 600_000) {
           ReportGET();
         }
 
-        if (ReportTag != 0 && NOW().getTime() - ReportTag > 30_000) {
+        if (ReportTag != 0 && NOW.getTime() - ReportTag > 30_000) {
           ReportTag = 0;
           TREM.Report.setView("report-list");
           changeView("main");
@@ -656,55 +747,101 @@ async function init() {
 
     dump({ level: 3, message: "Initializing map", origin: "Map" });
 
-    // MainMap
-    Maps.main = L.map("map", {
-      edgeBufferTiles    : 1,
-      attributionControl : false,
-      closePopupOnClick  : false,
-      maxBounds          : [[60, 50], [10, 180]],
-      preferCanvas       : true,
-      zoomSnap           : 0.25,
-      zoomDelta          : 0.5,
-      zoomAnimation      : true,
-      fadeAnimation      : setting["map.animation"],
-      doubleClickZoom    : false,
-      zoomControl        : false,
-    })
-      .setView([23.630405850000496, 120.90373206379121], 7.75)
-      .on("click", () => {
-        TREM.Earthquake.emit("focus", {
-          bounds  : [[21.77, 118.25], [25.47, 122.18]],
-          options : {
-            paddingBottomRight: [ document.getElementById("map").offsetWidth / 6, 0],
-          },
-        });
-      })
-      .on("contextmenu", () => {
-        TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
-      })
-      .on("zoomend", () => {
-        if (Maps.main.getZoom() >= 11)
-          for (const key in stations) {
-            const tooltip = stations[key].getTooltip();
+    if (!Maps.main)
+      if (TREM.MapRenderingEngine == "mapbox-gl") {
+        Maps.main = new maplibregl.Map(
+          {
+            container : "map",
+            maxPitch  : 0,
+            maxBounds : [
+              50,
+              10,
+              180,
+              60,
+            ],
+            zoom              : 6.895604243192027,
+            center            : [120.99401979478893, 23.633067293391818],
+            renderWorldCopies : false,
+            keyboard          : false,
+            doubleClickZoom   : false,
+            dragRotate        : false,
+            touchZoomRotate   : false,
+          })
+          .on("drag", () => {
+            mapLock = true;
+          })
+          .on("click", (ev) => {
+            mapLock = false;
 
-            if (tooltip) {
-              stations[key].unbindTooltip();
-              tooltip.options.permanent = true;
-              stations[key].bindTooltip(tooltip);
+            if (ev.originalEvent.target.tagName == "CANVAS")
+              Mapsmainfocus();
+          })
+          .on("contextmenu", (ev) => {
+            if (ev.originalEvent.target.tagName == "CANVAS")
+              Mapsmainfocus();
+          })
+          .on("zoom", () => {
+            if (Maps.main.getZoom() >= 11.5) {
+              for (const key in Station)
+                if (!Station[key].getPopup().isOpen())
+                  Station[key].togglePopup();
+            } else {
+              for (const key in Station)
+                if (Station[key].getPopup().isOpen())
+                  if (!Station[key].getPopup().persist)
+                    Station[key].togglePopup();
             }
-          }
-        else
-          for (const key in stations) {
-            const tooltip = stations[key].getTooltip();
+          });
+      } else if (TREM.MapRenderingEngine == "leaflet") {
+        Maps.main = L.map("map",
+          {
+            edgeBufferTiles    : 1,
+            attributionControl : false,
+            closePopupOnClick  : false,
+            maxBounds          : [[60, 50], [10, 180]],
+            preferCanvas       : true,
+            zoomSnap           : 0.25,
+            zoomDelta          : 0.5,
+            zoomAnimation      : true,
+            fadeAnimation      : setting["map.animation"],
+            doubleClickZoom    : false,
+            zoomControl        : false,
+          })
+          .on("click", () => {
+            TREM.Earthquake.emit("focus", {
+              bounds  : [[21.77, 118.25], [25.47, 122.18]],
+              options : {
+                paddingBottomRight: [ 0, document.getElementById("map").offsetWidth / 6],
+              },
+            });
+          })
+          .on("contextmenu", () => {
+            TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+          })
+          .on("zoomend", () => {
+            if (Maps.main.getZoom() >= 11)
+              for (const key in Station) {
+                const tooltip = Station[key].getTooltip();
 
-            if (tooltip && !stations[key].keepTooltipAlive) {
-              stations[key].unbindTooltip();
-              tooltip.options.permanent = false;
-              stations[key].bindTooltip(tooltip);
-            }
-          }
-      });
-    // Maps.main._zoomAnimated = setting["map.animation"];
+                if (tooltip) {
+                  Station[key].unbindTooltip();
+                  tooltip.options.permanent = true;
+                  Station[key].bindTooltip(tooltip);
+                }
+              }
+            else
+              for (const key in Station) {
+                const tooltip = Station[key].getTooltip();
+
+                if (tooltip && !Station[key].keepTooltipAlive) {
+                  Station[key].unbindTooltip();
+                  tooltip.options.permanent = false;
+                  Station[key].bindTooltip(tooltip);
+                }
+              }
+          });
+        Maps.main._zoomAnimated = setting["map.animation"];
+      }
 
     if (!Maps.mini)
       Maps.mini = L.map("map-tw",
@@ -729,9 +866,14 @@ async function init() {
       if (TREM.MapRenderingEngine == "mapbox-gl") {
         Maps.report = new maplibregl.Map(
           {
-            container          : "map-report",
-            maxPitch           : 0,
-            maxBounds          : [100, 10, 130, 30,],
+            container : "map-report",
+            maxPitch  : 0,
+            maxBounds : [
+              100,
+              10,
+              130,
+              30,
+            ],
             maxZoom            : 10,
             minZoom            : 6,
             zoom               : 6.8,
@@ -814,54 +956,425 @@ async function init() {
 
     // #endregion
 
-    for (const mapName of ["cn", "jp", "sk", "nk"]) {
-      MapBases.main.set(mapName, L.geoJson.vt(MapData[mapName], {
-        edgeBufferTiles : 2,
-        minZoom         : 4,
-        maxZoom         : 12,
-        tolerance       : 25,
-        buffer          : 256,
-        debug           : 0,
-        style           : {
-          weight      : 0.8,
-          color       : TREM.Colors.secondary,
-          fillColor   : TREM.Colors.surfaceVariant,
-          fillOpacity : 1,
-        },
-      }));
+    /*
+		if (!MapBases.mainFill.length)
+			for (const mapName of ["cn", "jp", "sk", "nk", "tw_county"])
+				MapBases.mainFill.push(
+					L.geoJson.vt(MapData[mapName], {
+						edgeBufferTiles : 2,
+						minZoom         : 4,
+						maxZoom         : 12,
+						tolerance       : 20,
+						buffer          : 256,
+						debug           : 0,
+						style           : {
+							weight      : 0.8,
+							color       : TREM.Colors.primary,
+							fillColor   : TREM.Colors.surfaceVariant,
+							fillOpacity : 1,
+						},
+					}).addTo(Maps.main),
+				);
+*/
+    TREM.MapBounds = {};
 
-      if (setting[`map.${mapName}`])
-        MapBases.main.get(mapName).addTo(Maps.main);
+    for (const feature of MapData.tw_town.features) {
+      const bounds = new maplibregl.LngLatBounds();
+
+      for (const coordinate of feature.geometry.coordinates)
+        for (const coords of coordinate)
+          if (!Array.isArray(coords[0])) {
+            if (coords[0] > 118 && coords[1] > 21.5)
+              if (coords[0] < 122.5 && coords[1] < 25.5)
+                bounds.extend(coords);
+          } else {
+            for (const coord of coords)
+              if (Array.isArray(coord))
+                if (coord[0] > 118 && coord[1] > 21.5)
+                  if (coord[0] < 122.5 && coord[1] < 26.5)
+                    bounds.extend(coord);
+          }
+
+      TREM.MapBounds[feature.properties.TOWNCODE] = bounds;
     }
 
-    MapBases.main.set("tw_county", L.geoJson.vt(MapData.tw_county, {
-      edgeBufferTiles : 2,
-      minZoom         : 4,
-      maxZoom         : 12,
-      tolerance       : 25,
-      buffer          : 256,
-      debug           : 0,
-      style           : {
-        color       : TREM.Colors.primary,
-        weight      : 1,
-        fillColor   : TREM.Colors.surfaceVariant,
-        fillOpacity : 1,
-      },
-    }).addTo(Maps.main));
-    MapBases.main.set("area", L.geoJson.vt(MapData.area, {
-      edgeBufferTiles : 2,
-      minZoom         : 4,
-      maxZoom         : 12,
-      tolerance       : 20,
-      buffer          : 256,
-      debug           : 0,
-      style           : {
-        color     : "transparent",
-        weight    : 3,
-        opacity   : 0,
-        fillColor : "transparent",
-      },
-    }).addTo(Maps.main));
+    if (!MapBases.main.size) {
+      for (const mapName of [
+        "cn",
+        "jp",
+        "sk",
+        "nk",
+      ])
+        if (TREM.MapRenderingEngine == "mapbox-gl") {
+          Maps.main.addSource(`Source_${mapName}`, {
+            type      : "geojson",
+            data      : MapData[mapName],
+            tolerance : 1,
+          });
+          MapBases.main.set(`${mapName}`, Maps.main.addLayer({
+            id     : `Layer_${mapName}`,
+            type   : "fill",
+            source : `Source_${mapName}`,
+            paint  : {
+              "fill-color"         : TREM.Colors.surfaceVariant,
+              "fill-outline-color" : TREM.Colors.secondary,
+              "fill-opacity"       : 0.5,
+            },
+            layout: {
+              visibility: setting[`map.${mapName}`] ? "visible" : "none",
+            },
+          }).getLayer(`Layer_${mapName}`));
+        } else if (TREM.MapRenderingEngine == "leaflet") {
+          MapBases.main.set(`${mapName}`, L.geoJson.vt(MapData[mapName], {
+            edgeBufferTiles : 2,
+            minZoom         : 4,
+            maxZoom         : 12,
+            tolerance       : 20,
+            buffer          : 256,
+            debug           : 0,
+            style           : {
+              weight      : 0.8,
+              color       : TREM.Colors.secondary,
+              fillColor   : TREM.Colors.surfaceVariant,
+              fillOpacity : 0.5,
+            },
+          }).addTo(Maps.main));
+        }
+
+      if (TREM.MapRenderingEngine == "mapbox-gl") {
+        Maps.main.addSource("Source_tw_county", {
+          type      : "geojson",
+          data      : MapData.tw_county,
+          tolerance : 0.5,
+        });
+        Maps.main.addSource("Source_tw_town", {
+          type      : "geojson",
+          data      : MapData.tw_town,
+          tolerance : 0.5,
+        });
+        Maps.main.addSource("Source_area", {
+          type : "geojson",
+          data : MapData.area,
+        });
+        MapBases.main.set("tw_county_fill", Maps.main.addLayer({
+          id     : "Layer_tw_county_Fill",
+          type   : "fill",
+          source : "Source_tw_county",
+          paint  : {
+            "fill-color"   : TREM.Colors.surfaceVariant,
+            "fill-opacity" : 1,
+          },
+        }).getLayer("Layer_tw_county_Fill"));
+        Maps.main.addLayer({
+          id     : "Layer_intensity",
+          type   : "fill",
+          source : "Source_tw_town",
+          paint  : {
+            "fill-color": [
+              "match",
+              [
+                "coalesce",
+                ["feature-state", "intensity"],
+                0,
+              ],
+              9,
+              setting["theme.customColor"] ? setting["theme.int.9"]
+                : "#862DB3",
+              8,
+              setting["theme.customColor"] ? setting["theme.int.8"]
+                : "#DB1F1F",
+              7,
+              setting["theme.customColor"] ? setting["theme.int.7"]
+                : "#F55647",
+              6,
+              setting["theme.customColor"] ? setting["theme.int.6"]
+                : "#DB641F",
+              5,
+              setting["theme.customColor"] ? setting["theme.int.5"]
+                : "#E68439",
+              4,
+              setting["theme.customColor"] ? setting["theme.int.4"]
+                : "#E8D630",
+              3,
+              setting["theme.customColor"] ? setting["theme.int.3"]
+                : "#7BA822",
+              2,
+              setting["theme.customColor"] ? setting["theme.int.2"]
+                : "#2774C2",
+              1,
+              setting["theme.customColor"] ? setting["theme.int.1"]
+                : "#757575",
+              "transparent",
+            ],
+            "fill-outline-color": [
+              "case",
+              [
+                ">",
+                [
+                  "coalesce",
+                  ["feature-state", "intensity"],
+                  0,
+                ],
+                0,
+              ],
+              TREM.Colors.onSurfaceVariant,
+              "transparent",
+            ],
+            "fill-opacity": [
+              "case",
+              [
+                ">",
+                [
+                  "coalesce",
+                  ["feature-state", "intensity"],
+                  0,
+                ],
+                0,
+              ],
+              1,
+              0,
+            ],
+          },
+          layout: {
+            visibility: "none",
+          },
+        });
+        MapBases.main.set("tw_county_line", Maps.main.addLayer({
+          id     : "Layer_tw_county_Line",
+          type   : "line",
+          source : "Source_tw_county",
+          paint  : {
+            "line-color"   : TREM.Colors.primary,
+            "line-width"   : 1,
+            "line-opacity" : 1,
+          },
+        }).getLayer("Layer_tw_county_Line"));
+        Maps.main.addLayer({
+          id     : "Layer_pws_town",
+          type   : "line",
+          source : "Source_tw_town",
+          paint  : {
+            "line-color": [
+              "case",
+              [
+                ">",
+                [
+                  "coalesce",
+                  ["feature-state", "pws"],
+                  0,
+                ],
+                0,
+              ],
+              "#efcc00",
+              "transparent",
+            ],
+            "line-width"   : 2,
+            "line-opacity" : [
+              "case",
+              [
+                ">",
+                [
+                  "coalesce",
+                  ["feature-state", "pws"],
+                  0,
+                ],
+                0,
+              ],
+              1,
+              0,
+            ],
+          },
+          layout: {
+            visibility: "none",
+          },
+        });
+        Maps.main.addLayer({
+          id     : "Layer_pws_county",
+          type   : "line",
+          source : "Source_tw_county",
+          paint  : {
+            "line-color": [
+              "case",
+              [
+                ">",
+                [
+                  "coalesce",
+                  ["feature-state", "pws"],
+                  0,
+                ],
+                0,
+              ],
+              "#efcc00",
+              "transparent",
+            ],
+            "line-width"   : 2,
+            "line-opacity" : [
+              "case",
+              [
+                ">",
+                [
+                  "coalesce",
+                  ["feature-state", "pws"],
+                  0,
+                ],
+                0,
+              ],
+              1,
+              0,
+            ],
+          },
+          layout: {
+            visibility: "none",
+          },
+        });
+        Maps.main.addLayer({
+          id     : "Layer_area",
+          type   : "line",
+          source : "Source_area",
+          paint  : {
+            "line-color": [
+              "match",
+              [
+                "coalesce",
+                ["feature-state", "intensity"],
+                0,
+              ],
+              9,
+              setting["theme.customColor"] ? setting["theme.int.9"]
+                : "#862DB3",
+              8,
+              setting["theme.customColor"] ? setting["theme.int.8"]
+                : "#DB1F1F",
+              7,
+              setting["theme.customColor"] ? setting["theme.int.7"]
+                : "#F55647",
+              6,
+              setting["theme.customColor"] ? setting["theme.int.6"]
+                : "#DB641F",
+              5,
+              setting["theme.customColor"] ? setting["theme.int.5"]
+                : "#E68439",
+              4,
+              setting["theme.customColor"] ? setting["theme.int.4"]
+                : "#E8D630",
+              3,
+              setting["theme.customColor"] ? setting["theme.int.3"]
+                : "#7BA822",
+              2,
+              setting["theme.customColor"] ? setting["theme.int.2"]
+                : "#2774C2",
+              1,
+              setting["theme.customColor"] ? setting["theme.int.1"]
+                : "#757575",
+              setting["theme.customColor"] ? setting["theme.int.0"]
+                : "#6B7979",
+            ],
+            "line-width"   : 3,
+            "line-opacity" : [
+              "case",
+              [
+                ">=",
+                [
+                  "coalesce",
+                  ["feature-state", "intensity"],
+                  -1,
+                ],
+                0,
+              ],
+              1,
+              0,
+            ],
+          },
+          layout: {
+            visibility: "none",
+          },
+        });
+      } else if (TREM.MapRenderingEngine == "leaflet") {
+        MapBases.main.set("tw_county_fill", L.geoJson.vt(MapData.tw_county, {
+          edgeBufferTiles : 2,
+          minZoom         : 4,
+          maxZoom         : 12,
+          tolerance       : 20,
+          buffer          : 256,
+          debug           : 0,
+          style           : {
+            border      : false,
+            fillColor   : TREM.Colors.surfaceVariant,
+            fillOpacity : 1,
+          },
+        }).addTo(Maps.main));
+        MapBases.main.set("intensity", L.geoJson.vt(MapData.tw_town, {
+          edgeBufferTiles : 2,
+          minZoom         : 4,
+          maxZoom         : 12,
+          tolerance       : 20,
+          buffer          : 256,
+          debug           : 0,
+          style           : {
+            color       : "transparent",
+            fillColor   : TREM.Colors.surfaceVariant,
+            fillOpacity : 0,
+          },
+        }).addTo(Maps.main));
+        MapBases.main.set("tw_county_line", L.geoJson.vt(MapData.tw_county, {
+          edgeBufferTiles : 2,
+          minZoom         : 4,
+          maxZoom         : 12,
+          tolerance       : 20,
+          buffer          : 256,
+          debug           : 0,
+          style           : {
+            color     : TREM.Colors.primary,
+            weight    : 1,
+            fillColor : "transparent",
+          },
+        }).addTo(Maps.main));
+        MapBases.main.set("pws_town", L.geoJson.vt(MapData.tw_town, {
+          edgeBufferTiles : 2,
+          minZoom         : 4,
+          maxZoom         : 12,
+          tolerance       : 20,
+          buffer          : 256,
+          debug           : 0,
+          style           : {
+            // color     :  "#efcc00",
+            color     : "transparent",
+            weight    : 2,
+            opacity   : 0,
+            fillColor : "transparent",
+          },
+        }).addTo(Maps.main));
+        MapBases.main.set("pws_town", L.geoJson.vt(MapData.tw_county, {
+          edgeBufferTiles : 2,
+          minZoom         : 4,
+          maxZoom         : 12,
+          tolerance       : 20,
+          buffer          : 256,
+          debug           : 0,
+          style           : {
+            // color     : "#efcc00",
+            color     : "transparent",
+            weight    : 2,
+            opacity   : 0,
+            fillColor : "transparent",
+          },
+        }).addTo(Maps.main));
+        MapBases.main.set("area", L.geoJson.vt(MapData.area, {
+          edgeBufferTiles : 2,
+          minZoom         : 4,
+          maxZoom         : 12,
+          tolerance       : 20,
+          buffer          : 256,
+          debug           : 0,
+          style           : {
+            color     : "transparent",
+            weight    : 3,
+            opacity   : 0,
+            fillColor : "transparent",
+          },
+        }).addTo(Maps.main));
+      }
+    }
 
     if (!MapBases.mini.length)
       MapBases.mini.set("tw_county",
@@ -879,6 +1392,38 @@ async function init() {
             fillOpacity : 0,
           },
         }).addTo(Maps.mini));
+
+    if (!MapBases.report.length)
+      if (TREM.MapRenderingEngine == "mapbox-gl")
+        MapBases.report.set("tw_county", Maps.report.addLayer({
+          id     : "Layer_tw_county",
+          type   : "fill",
+          source : {
+            type      : "geojson",
+            data      : MapData.tw_county,
+            tolerance : 0.5,
+          },
+          layout : {},
+          paint  : {
+            "fill-color"         : TREM.Colors.surfaceVariant,
+            "fill-outline-color" : TREM.Colors.primary,
+            "fill-opacity"       : 0.8,
+          },
+        }).getLayer("Layer_tw_county"));
+      else if (TREM.MapRenderingEngine == "leaflet")
+        MapBases.report.set("tw_county", L.geoJson.vt(MapData.tw_county, {
+          minZoom   : 7.5,
+          maxZoom   : 10,
+          tolerance : 20,
+          buffer    : 256,
+          debug     : 0,
+          style     : {
+            weight      : 0.8,
+            color       : TREM.Colors.primary,
+            fillColor   : TREM.Colors.surfaceVariant,
+            fillOpacity : 1,
+          },
+        }).addTo(Maps.report));
 
     if (!MapBases.intensity.length)
       MapBases.intensity.set("tw_county",
@@ -920,9 +1465,9 @@ async function init() {
       let sampleCount = 0;
 
       for (let index = 0; index < Object.keys(eew).length; index++)
-        if (eewt.id == 0 || eewt.id == eew[Object.keys(eew)[index]].id || NOW().getTime() - eew[Object.keys(eew)[index]].time >= 10000) {
+        if (eewt.id == 0 || eewt.id == eew[Object.keys(eew)[index]].id || NOW.getTime() - eew[Object.keys(eew)[index]].time >= 10000) {
           eewt.id = eew[Object.keys(eew)[index]].id;
-          const km = (NOW().getTime() - eew[Object.keys(eew)[index]].Time) * 4;
+          const km = (NOW.getTime() - eew[Object.keys(eew)[index]].Time) * 4;
 
           if (km > 300000)
             finalZoom += 6;
@@ -954,7 +1499,7 @@ async function init() {
 					else
 						TREM.Earthquake.emit("focus", { center: pointFormatter((23.608428 + EEW[Object.keys(EEW)[index]].lat) / 2, ((120.799168 + EEW[Object.keys(EEW)[index]].lon) / 2) + X, TREM.MapRenderingEngine), zoom: Zoom });
 					*/
-          eew[Object.keys(eew)[index]].time = NOW().getTime();
+          eew[Object.keys(eew)[index]].time = NOW.getTime();
         }
 
       finalZoom = finalZoom / sampleCount;
@@ -963,11 +1508,11 @@ async function init() {
         const camera = Maps.main.cameraForBounds(finalBounds, { padding: { top: 0, right: 100, bottom: 100, left: 0 } });
         TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
       }
-    } else if (MainMap.area.cache.size) {
+    } else if (TREM.MapArea.cache.size) {
       map_move_back = true;
       const bounds = (TREM.MapRenderingEngine == "mapbox-gl") ? new maplibregl.LngLatBounds() : new L.Bounds();
 
-      for (const [ id ] of MainMap.area.cache) {
+      for (const [ id ] of TREM.MapArea.cache) {
         const points = TREM.Resources.area[id].map(latlng => pointFormatter(latlng[0], latlng[1], TREM.MapRenderingEngine));
         bounds.extend([points[0], points[2]]);
       }
@@ -1003,16 +1548,16 @@ function PGAMain() {
     setTimeout(async () => {
       try {
         const _t = Date.now();
-        const ReplayTime = (replay == 0) ? 0 : replay + (NOW().getTime() - replayT);
+        const ReplayTime = (replay == 0) ? 0 : replay + (NOW.getTime() - replayT);
 
         if (ReplayTime == 0) {
           if (rts_ws_timestamp) {
             Ping = "Super";
             Response = rts_response;
           } else {
-            for (const removedKey of Object.keys(stations)) {
-              stations[removedKey].remove();
-              delete stations[removedKey];
+            for (const removedKey of Object.keys(Station)) {
+              Station[removedKey].remove();
+              delete Station[removedKey];
             }
 
             Ping = "🔒";
@@ -1039,163 +1584,37 @@ function PGAMain() {
       } catch (err) {
         void 0;
       }
-    }, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds());
+    }, (NOW.getMilliseconds() > 500) ? 1000 - NOW.getMilliseconds() : 500 - NOW.getMilliseconds());
   }, 500);
 }
 
 function handler(Json) {
   MAXPGA = { pga: 0, station: "NA", level: 0 };
 
-  const removed = Object.keys(Json).filter(k => !stations.has(k));
+  const removed = Object.keys(Station).filter(key => !Object.keys(Json).includes(key));
 
-  for (const removedKey of removed)
-    if (stations.has(removedKey)) {
-      stations.get(removedKey).remove();
-      stations.delete(removedKey);
-    }
-
-  try {
-    for (let index = 0, keys = Object.keys(station_list), n = keys.length; index < n; index++) {
-      const uuid = keys[index];
-      const current_station_data = station_list[uuid];
-      const current_data = Json[uuid];
-
-      let level_class = "";
-      let popup_content = "";
-      let amount = 0;
-      let intensity = 0;
-      const Alert = current_data?.alert ?? false;
-
-      // debugger;
-
-      if (current_data == undefined) {
-        level_class = "na";
-        popup_content = "無資料";
-      } else {
-        amount = +current_data.PGA;
-        intensity
-        = (Alert && Json.Alert) ? current_data.I
-            : (NOW().getTime() - current_data.TS * 1000 > 5000) ? "NA"
-              : (!Alert) ? 0
-                : (amount >= 800) ? 9
-                  : (amount >= 440) ? 8
-                    : (amount >= 250) ? 7
-                      : (amount >= 140) ? 6
-                        : (amount >= 80) ? 5
-                          : (amount >= 25) ? 4
-                            : (amount >= 8) ? 3
-                              : (amount >= 5) ? 2
-                                : (amount >= 2.2) ? 1
-                                  : 0;
-        level_class = (intensity != 0 && amount < 999) ? IntensityToClassString(intensity)
-          : (amount == 999) ? "pga6"
-            : (amount > 3.5) ? "pga5"
-              : (amount > 3) ? "pga4"
-                : (amount > 2.5) ? "pga3"
-                  : (amount > 2) ? "pga2"
-                    : "pga1";
-        popup_content = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-name">${station_list[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
-      }
-
-      if (stations.has(uuid)) {
-        const station_marker = stations.get(uuid);
-
-        if (station_marker.getElement().className != `map-intensity-icon rt-icon ${level_class}`) {
-          station_marker.setIcon(L.divIcon({
-            className : `map-intensity-icon rt-icon ${level_class}`,
-            iconSize  : intensity > 0 ? [16, 16] : [8, 8]
-          }));
-          station_marker.setZIndexOffset(50 + (amount < 999 ? amount : 0) * 10);
-        }
-      } else {
-        const station_marker = L.marker(
-          [ current_station_data.Lat, current_station_data.Long ],
-          {
-            icon: L.divIcon(
-              {
-                className : `map-intensity-icon rt-icon ${level_class}`,
-                iconSize  : intensity > 0 ? [16, 16] : [8, 8]
-              }
-            ),
-            zIndexOffset : 50 + (amount < 999 ? amount : 0) * 10,
-            riseOnHover  : true,
-            title        : `${current_station_data.Loc} (${uuid})`
-          }
-        ).addTo(Maps.main);
-
-        stations.set(uuid, station_marker);
-      }
-
-      // Top-left station overlay
-      if (Object.keys(Json).includes(setting["Real-time.station"])) {
-        if (uuid == setting["Real-time.station"]) {
-          document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
-          document.getElementById("rt-station-local-name").innerText = station_list[keys[index]].Loc;
-          document.getElementById("rt-station-local-time").innerText = new Date(current_data.T * 1000).format("HH:mm:ss");
-          document.getElementById("rt-station-local-pga").innerText = amount;
-        }
-      } else {
-      // FIXME: Performance: This block will be executed repeatly when the station the user selected is not in the current_station list.
-        document.getElementById("rt-station-local-intensity").className = "rt-station-intensity na";
-        document.getElementById("rt-station-local-name").innerText = TREM.Localization.getString("Realtime_No_Data");
-        document.getElementById("rt-station-local-time").innerText = "--:--:--";
-        document.getElementById("rt-station-local-pga").innerText = "--";
-      }
-
-      // box
-      if (current_data) {
-        const Level = IntensityI(intensity);
-        const now = new Date(current_data.T * 1000);
-
-        if (intensity != "NA" && (intensity > 0 || Alert) && amount < 999) {
-          detected_list[station_list[uuid].PGA] ??= {
-            intensity : intensity,
-            time      : 0,
-          };
-
-          if ((detected_list[station_list[uuid].PGA].intensity ?? 0) < intensity)
-            detected_list[station_list[uuid].PGA].intensity = intensity;
-
-          if (Alert && Json.Alert) {
-            if (setting["audio.realtime"])
-              if (amount > 8 && PGALimit == 0) {
-                PGALimit = 1;
-                TREM.Audios.pga1.play();
-              } else if (amount > 250 && PGALimit > 1) {
-                PGALimit = 2;
-                TREM.Audios.pga2.play();
-              }
-
-            detected_list[station_list[uuid].PGA].time = NOW().getTime();
-          }
-        }
-
-        if (MAXPGA.pga < amount && amount < 999 && Level != "NA") {
-          MAXPGA.pga = amount;
-          MAXPGA.station = uuid;
-          MAXPGA.level = Level;
-          MAXPGA.lat = station_list[uuid].Lat;
-          MAXPGA.long = station_list[uuid].Long;
-          MAXPGA.loc = station_list[uuid].Loc;
-          MAXPGA.intensity = intensity;
-          MAXPGA.time = new Date(current_data.T * 1000);
-        }
-
-      }
-    }
-  } catch (error) {
-    console.error(error);
+  for (const removedKey of removed) {
+    Station[removedKey].remove();
+    delete Station[removedKey];
   }
 
-  /*
+  if (Object.keys(eew).length && !rts_remove_eew) {
+    rts_remove_eew = true;
+
+    for (const removedKey of Object.keys(Station)) {
+      Station[removedKey].remove();
+      delete Station[removedKey];
+    }
+  }
+
   for (let index = 0, keys = Object.keys(Json), n = keys.length; index < n; index++) {
-    if (station_list[keys[index]] == undefined) continue;
+    if (station[keys[index]] == undefined) continue;
     const stationData = Json[keys[index]];
     const amount = Number(stationData.PGA);
     const Alert = stationData.alert;
     const intensity
       = (Alert && Json.Alert) ? stationData.I
-        : (NOW().getTime() - stationData.TS * 1000 > 5000) ? "NA"
+        : (NOW.getTime() - stationData.TS * 1000 > 5000) ? "NA"
           : (!Alert) ? 0
             : (amount >= 800) ? 9
               : (amount >= 440) ? 8
@@ -1214,32 +1633,30 @@ function handler(Json) {
             : (amount > 2.5) ? "pga3"
               : (amount > 2) ? "pga2"
                 : "pga1";
-    const station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-name">${station_list[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
+    const station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-name">${station[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
 
-    if (!stations[keys[index]] && (!rts_remove_eew || Alert)) {
-      stations[keys[index]] = L.marker(
-        [station_list[keys[index]].Lat, station_list[keys[index]].Long], {
-          icon: L.divIcon({
-            html: `<div class="map-intensity-icon rt-icon ${levelClass}" style="z-index: ${50 + (amount < 999 ? amount : 0) * 10};"></div>`
-          }),
-          riseOnHover: true
+    if (!Station[keys[index]] && (!rts_remove_eew || Alert)) {
+      Station[keys[index]] = new maplibregl.Marker(
+        {
+          element: $(`<div class="map-intensity-icon rt-icon ${levelClass}" style="z-index: ${50 + (amount < 999 ? amount : 0) * 10};"></div>`)[0],
         })
-        .setPopupContent(L.popup({ content: station_tooltip }))
+        .setLngLat([station[keys[index]].Long, station[keys[index]].Lat])
+        .setPopup(new maplibregl.Popup({ closeOnClick: false, closeButton: false }).setHTML(station_tooltip))
         .addTo(Maps.main);
-      stations[keys[index]].getElement().addEventListener("click", () => stations[keys[index]].getPopup().persist = !stations[keys[index]].getPopup().persist);
+      Station[keys[index]].getElement().addEventListener("click", () => Station[keys[index]].getPopup().persist = !Station[keys[index]].getPopup().persist);
     }
 
-    if (stations[keys[index]]) {
-      stations[keys[index]].getPopup().setHTML(station_tooltip);
+    if (Station[keys[index]]) {
+      Station[keys[index]].getPopup().setHTML(station_tooltip);
 
-      if (stations[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
-        stations[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
-      stations[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
+      if (Station[keys[index]].getElement().className != `map-intensity-icon rt-icon ${levelClass}`)
+        Station[keys[index]].getElement().className = `map-intensity-icon rt-icon ${levelClass}`;
+      Station[keys[index]].getElement().style.zIndex = 50 + (amount < 999 ? amount : 0) * 10;
     }
 
-    if (stations[keys[index]] && rts_remove_eew && !Alert) {
-      stations[keys[index]].remove();
-      delete stations[keys[index]];
+    if (Station[keys[index]] && rts_remove_eew && !Alert) {
+      Station[keys[index]].remove();
+      delete Station[keys[index]];
     }
 
     const Level = IntensityI(intensity);
@@ -1248,7 +1665,7 @@ function handler(Json) {
     if (keys.includes(setting["Real-time.station"])) {
       if (keys[index] == setting["Real-time.station"]) {
         document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
-        document.getElementById("rt-station-local-name").innerText = station_list[keys[index]].Loc;
+        document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
         document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
         document.getElementById("rt-station-local-pga").innerText = amount;
       }
@@ -1260,13 +1677,13 @@ function handler(Json) {
     }
 
     if (intensity != "NA" && (intensity > 0 || Alert) && amount < 999) {
-      detected_list[station_list[keys[index]].PGA] ??= {
+      detected_list[station[keys[index]].PGA] ??= {
         intensity : intensity,
         time      : 0,
       };
 
-      if ((detected_list[station_list[keys[index]].PGA].intensity ?? 0) < intensity)
-        detected_list[station_list[keys[index]].PGA].intensity = intensity;
+      if ((detected_list[station[keys[index]].PGA].intensity ?? 0) < intensity)
+        detected_list[station[keys[index]].PGA].intensity = intensity;
 
       if (Alert && Json.Alert) {
         if (setting["audio.realtime"])
@@ -1278,7 +1695,7 @@ function handler(Json) {
             TREM.Audios.pga2.play();
           }
 
-        detected_list[station_list[keys[index]].PGA].time = NOW().getTime();
+        detected_list[station[keys[index]].PGA].time = NOW.getTime();
       }
     }
 
@@ -1286,14 +1703,13 @@ function handler(Json) {
       MAXPGA.pga = amount;
       MAXPGA.station = keys[index];
       MAXPGA.level = Level;
-      MAXPGA.lat = station_list[keys[index]].Lat;
-      MAXPGA.long = station_list[keys[index]].Long;
-      MAXPGA.loc = station_list[keys[index]].Loc;
+      MAXPGA.lat = station[keys[index]].Lat;
+      MAXPGA.long = station[keys[index]].Long;
+      MAXPGA.loc = station[keys[index]].Loc;
       MAXPGA.intensity = intensity;
       MAXPGA.time = new Date(stationData.T * 1000);
     }
   }
-  */
 
   if (MAXPGA.station != "NA") {
     document.getElementById("rt-station-max-intensity").className = `rt-station-intensity ${(MAXPGA.pga < 999) ? IntensityToClassString(MAXPGA.intensity) : "na"}`;
@@ -1320,8 +1736,8 @@ function handler(Json) {
         continue;
       }
 
-      if (NOW().getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
-        MainMap.area.clear(pgaKeys[index]);
+      if (NOW.getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
+        TREM.MapArea.clear(pgaKeys[index]);
         delete detected_list[pgaKeys[index]];
         delete pgaKeys[index];
         index--;
@@ -1346,15 +1762,15 @@ function handler(Json) {
 
         if (passed) {
           detected_list[pgaKeys[index]].passed = true;
-          MainMap.area.clear(pgaKeys[index]);
+          TREM.MapArea.clear(pgaKeys[index]);
         } else {
-          MainMap.area.setArea(pgaKeys[index], Intensity);
+          TREM.MapArea.setArea(pgaKeys[index], Intensity);
         }
       }
     }
 
-  else if (MainMap.area.isVisible)
-    MainMap.area.clear();
+  else if (TREM.MapArea.isVisible)
+    TREM.MapArea.clear();
 
   const All = (Json.Alert) ? Json.I : [];
   const list = [];
@@ -1365,8 +1781,8 @@ function handler(Json) {
     PGACancel = false;
   } else {
     for (let index = 0; index < All.length; index++) {
-      if (station_list[All[index].uuid] == undefined) continue;
-      All[index].loc = station_list[All[index].uuid].Loc;
+      if (station[All[index].uuid] == undefined) continue;
+      All[index].loc = station[All[index].uuid].Loc;
     }
 
     if (All[0].intensity > PGAtag) {
@@ -1382,7 +1798,7 @@ function handler(Json) {
           Function : "station",
           ID       : 1,
           Version  : 1,
-          Time     : NOW().getTime(),
+          Time     : NOW.getTime(),
           Shot     : 1,
         });
       }, 1250);
@@ -1449,9 +1865,9 @@ function handler(Json) {
 }
 
 async function fetchFiles() {
-  Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
+  Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
   dump({ level: 0, message: "Get Location File", origin: "Location" });
-  station_list = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/station.json")).json();
+  station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
   dump({ level: 0, message: "Get Station File", origin: "Location" });
   PGAMain();
 }
@@ -1463,18 +1879,32 @@ async function fetchFiles() {
  */
 async function setUserLocationMarker(town) {
   if (!Location) {
-    Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
+    Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
     dump({ level: 0, message: "Get Location File", origin: "Location" });
   }
 
-  [, UserLocationLat, UserLocationLon] = Location[setting["location.city"]][town];
+  [
+    , UserLocationLat,
+    UserLocationLon,
+  ] = Location[setting["location.city"]][town];
 
-  if (!marker)
-    marker = L.marker([UserLocationLat, UserLocationLon], {
-      icon: L.divIcon({ html: "<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>" }) })
-      .addTo(Maps.main);
-  else
+  if (!marker) {
+    if (TREM.MapRenderingEngine == "mapbox-gl")
+      marker = new maplibregl.Marker({
+        element: $("<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>")[0],
+      })
+        .setLngLat([UserLocationLon, UserLocationLat])
+        .addTo(Maps.main);
+    else if (TREM.MapRenderingEngine == "leaflet")
+      marker = L.marker([UserLocationLat, UserLocationLon], {
+        icon: L.divIcon({ html: "<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>" }),
+      })
+        .addTo(Maps.main);
+  } else if (TREM.MapRenderingEngine == "mapbox-gl") {
+    marker.setLngLat([UserLocationLon, UserLocationLat]);
+  } else if (TREM.MapRenderingEngine == "leaflet") {
     marker.setLatLng([UserLocationLat, UserLocationLon]);
+  }
 }
 // #endregion
 
@@ -1653,7 +2083,7 @@ function ReportList(earthquakeReportArr, palert) {
 }
 
 function addReport(report, prepend = false) {
-  if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW().getTime() - replayT)).getTime()) return;
+  if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW.getTime() - replayT)).getTime()) return;
 
   const Level = IntensityI(report.data[0]?.areaIntensity);
   let msg = "";
@@ -1824,7 +2254,7 @@ function addReport(report, prepend = false) {
       if (setting["report.changeView"]) {
         TREM.Report.setView("report-overview", report.identifier);
         changeView("report", "#reportView_btn");
-        ReportTag = NOW().getTime();
+        ReportTag = NOW.getTime();
       }
     } else {
       roll.append(Div);
@@ -2012,7 +2442,20 @@ const updateMapColors = async (event, value) => {
           Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
         }
 
-  Maps.main.setPaintProperty("Layer_intensity", "fill-outline-color", ["case", [">", ["coalesce", ["feature-state", "intensity"], 0,], 0,], TREM.Colors.onSurfaceVariant, "transparent",]);
+  Maps.main.setPaintProperty("Layer_intensity", "fill-outline-color", [
+    "case",
+    [
+      ">",
+      [
+        "coalesce",
+        ["feature-state", "intensity"],
+        0,
+      ],
+      0,
+    ],
+    TREM.Colors.onSurfaceVariant,
+    "transparent",
+  ]);
 };
 
 ipcRenderer.on("config:theme", updateMapColors);
@@ -2052,7 +2495,11 @@ ipcRenderer.on("config:color", (event, key, value) => {
   if (Maps.main) {
     Maps.main.setPaintProperty("Layer_intensity", "fill-color", [
       "match",
-      ["coalesce", ["feature-state", "intensity"], 0,],
+      [
+        "coalesce",
+        ["feature-state", "intensity"],
+        0,
+      ],
       9,
       setting["theme.customColor"] ? setting["theme.int.9"]
         : "#862DB3",
@@ -2084,7 +2531,11 @@ ipcRenderer.on("config:color", (event, key, value) => {
     ]);
     Maps.main.setPaintProperty("Layer_area", "line-color", [
       "match",
-      ["coalesce", ["feature-state", "intensity"], 0,],
+      [
+        "coalesce",
+        ["feature-state", "intensity"],
+        0,
+      ],
       9,
       setting["theme.customColor"] ? setting["theme.int.9"]
         : "#862DB3",
@@ -2126,52 +2577,45 @@ ipcRenderer.on("config:mapanimation", (event, value) => {
   Maps.report._zoomAnimated = value;
 });
 ipcRenderer.on("config:maplayer", (event, mapName, state) => {
-  if (state)
-    MapBases.main.get(mapName).addTo(Maps.main);
-  else
-    MapBases.main.get(mapName).remove();
+  Maps.main.setLayoutProperty(`Layer_${mapName}`, "visibility", state ? "visible" : "none");
 });
 // #endregion
 
 // #region EEW
 function FCMdata(json, Unit) {
-  if (server_timestamp.includes(json.timestamp) || NOW().getTime() - json.timestamp > 180000) return;
-  server_timestamp.push(json.timestamp);
+  if (server_timestamp.includes(json.TimeStamp) || NOW.getTime() - json.TimeStamp > 180000) return;
+  server_timestamp.push(json.TimeStamp);
 
   if (server_timestamp.length > 5) server_timestamp.splice(0, 1);
   // eslint-disable-next-line no-empty-function
   fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
 
-  if (json.timestamp != undefined)
-    dump({ level: 0, message: `Latency: ${NOW().getTime() - json.timestamp}ms`, origin: "API" });
+  if (json.TimeStamp != undefined)
+    dump({ level: 0, message: `Latency: ${NOW.getTime() - json.TimeStamp}ms`, origin: "API" });
 
-  if (json.type == "tsunami-info") {
-    const now = new Date(json.time);
-    const Now = now.getFullYear()
-        + "/" + (now.getMonth() + 1)
-        + "/" + now.getDate()
-        + " " + now.getHours()
-        + ":" + now.getMinutes();
+  if (json.Function == "tsunami") {
     dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-    new Notification("海嘯資訊", { body: `${Now} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
-  } else if (json.type == "tsunami") {
+    new Notification("海嘯資訊", { body: `${json["UTC+8"]} 發生 ${json.Scale} 地震\n\n東經: ${json.EastLongitude} 度\n北緯: ${json.NorthLatitude} 度`, icon: "../TREM.ico" });
+  } else if (json.Function == "TSUNAMI") {
     TREM.Earthquake.emit("tsunami", json);
-  } else if (json.type == "palert") {
-    MainMap.intensity.palert(json);
-  } else if (json.type == "pws") {
+  } else if (json.Function == "palert") {
+    TREM.MapIntensity.palert(json.Data);
+  } else if (json.Function == "TREM_earthquake") {
+    trem_alert = json;
+  } else if (json.Function == "PWS") {
     TREM.PWS.addPWS(json.raw);
-  } else if (json.type == "intensity") {
+  } else if (json.Function == "intensity") {
     TREM.Intensity.handle(json);
-  } else if (json.type == "replay") {
-    replay = json.replay_timestamp;
-    replayT = NOW().getTime();
+  } else if (json.Function == "Replay") {
+    replay = json.timestamp;
+    replayT = NOW.getTime();
     ReportGET();
-  } else if (json.type == "report") {
-    if (MainMap.intensity.isTriggered)
-      MainMap.intensity.clear();
+  } else if (json.Function == "report") {
+    if (TREM.MapIntensity.isTriggered)
+      TREM.MapIntensity.clear();
 
-    if (setting["audio.report"]) audioPlay("../audio/Report.wav");
     dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
+    console.debug(json);
 
     if (setting["report.show"]) win.showInactive();
 
@@ -2186,13 +2630,16 @@ function FCMdata(json, Unit) {
     const location = report.location.match(/(?<=位於).+(?=\))/);
 
     if (!win.isFocused())
-      if (!report.location.startsWith("TREM 人工定位"))
+      if (!report.location.startsWith("TREM 人工定位")) {
         new Notification("地震報告",
           {
             body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
             icon   : "../TREM.ico",
             silent : win.isFocused(),
           });
+
+        if (setting["audio.report"]) audioPlay("../audio/Report.wav");
+      }
 
     addReport(report, true);
 
@@ -2201,20 +2648,20 @@ function FCMdata(json, Unit) {
         Function : "report",
         ID       : json.ID,
         Version  : 1,
-        Time     : NOW().getTime(),
+        Time     : NOW.getTime(),
         Shot     : 1,
       });
     }, 5000);
-  } else if (json.type.startsWith("eew") || json.replay_timestamp || json.Test) {
-    if (replay != 0 && !json.replay_timestamp) return;
+  } else if (json.Function != undefined && json.Function.includes("earthquake") || json.Replay || json.Test) {
+    if (replay != 0 && !json.Replay) return;
 
     if (
-      (json.Function == "eew-scdzj" && !setting["accept.eew.SCDZJ"])
-			|| (json.Function == "eew-nied" && !setting["accept.eew.NIED"])
-			|| (json.Function == "eew-jma" && !setting["accept.eew.JMA"])
-			|| (json.Function == "eew-kma" && !setting["accept.eew.KMA"])
-			|| (json.Function == "eew-cwb" && !setting["accept.eew.CWB"])
-			|| (json.Function == "eew-fjdzj" && !setting["accept.eew.FJDZJ"])
+      (json.Function == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"])
+			|| (json.Function == "NIED_earthquake" && !setting["accept.eew.NIED"])
+			|| (json.Function == "JMA_earthquake" && !setting["accept.eew.JMA"])
+			|| (json.Function == "KMA_earthquake" && !setting["accept.eew.KMA"])
+			|| (json.Function == "earthquake" && !setting["accept.eew.CWB"])
+			|| (json.Function == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"])
     ) return;
 
     TREM.Earthquake.emit("eew", json);
@@ -2226,16 +2673,16 @@ function FCMdata(json, Unit) {
 TREM.Earthquake.on("eew", (data) => {
   dump({ level: 0, message: "Got EEW", origin: "API" });
 
-  if (!TREM.EEW.has(data.id))
-    TREM.EEW.set(data.id, new EEW(data));
+  if (!TREM.EEW.has(data.ID))
+    TREM.EEW.set(data.ID, new EEW(data));
   else
-    TREM.EEW.get(data.id).update(data);
+    TREM.EEW.get(data.ID).update(data);
 
   // handler
-  if (EarthquakeList[data.id] == undefined) EarthquakeList[data.id] = {};
-  EarthquakeList[data.id].epicenter = [+data.lon, +data.lat];
-  EarthquakeList[data.id].Time = data.time;
-  EarthquakeList[data.id].ID = data.id;
+  if (EarthquakeList[data.ID] == undefined) EarthquakeList[data.ID] = {};
+  EarthquakeList[data.ID].epicenter = [+data.EastLongitude, +data.NorthLatitude];
+  EarthquakeList[data.ID].Time = data.Time;
+  EarthquakeList[data.ID].ID = data.ID;
 
   let value = 0;
   let distance = 0;
@@ -2250,14 +2697,14 @@ TREM.Earthquake.on("eew", (data) => {
       const d = TREM.Utils.twoSideDistance(
         TREM.Utils.twoPointDistance(
           { lat: loc.latitude, lon: loc.longitude },
-          { lat: data.lat, lon: data.lon },
+          { lat: data.NorthLatitude, lon: data.EastLongitude },
         ),
-        data.depth,
+        data.Depth,
       );
 
       const int = TREM.Utils.PGAToIntensity(
         TREM.Utils.pga(
-          data.scale,
+          data.Scale,
           d,
           setting["earthquake.siteEffect"] ? loc.siteEffect : undefined,
         ),
@@ -2266,7 +2713,7 @@ TREM.Earthquake.on("eew", (data) => {
       if (setting["location.city"] == city && setting["location.town"] == town) {
         level = int;
         distance = d;
-        value = Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000) - 2;
+        value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000) - 2;
       }
 
       if (int.value > MaxIntensity.value)
@@ -2275,13 +2722,13 @@ TREM.Earthquake.on("eew", (data) => {
       GC[loc.code] = int.value;
     }
 
-  // MainMap.intensity.expected(GC);
+  // TREM.MapIntensity.expected(GC);
 
   let Alert = true;
 
-  if (level.value < Number(setting["eew.Intensity"])) Alert = false;
+  if (level.value < Number(setting["eew.Intensity"]) && !data.Replay) Alert = false;
 
-  if (!Info.Notify.includes(data.id)) {
+  if (!Info.Notify.includes(data.ID)) {
     let Nmsg = "";
 
     if (value > 0)
@@ -2290,11 +2737,11 @@ TREM.Earthquake.on("eew", (data) => {
       Nmsg = "已抵達 (預警盲區)";
     const notify = (level.label.includes("+") || level.label.includes("-")) ? level.label.replace("+", "強").replace("-", "弱") : level.label + "級";
     new Notification("EEW 強震即時警報", {
-      body   : `${notify} 地震，${Nmsg}\nM ${data.scale} ${data.location ?? "未知區域"}`,
+      body   : `${notify} 地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`,
       icon   : "../TREM.ico",
       silent : win.isFocused(),
     });
-    Info.Notify.push(data.id);
+    Info.Notify.push(data.ID);
     // show latest eew
     TINFO = INFO.length;
     clearInterval(Timers.ticker);
@@ -2319,7 +2766,7 @@ TREM.Earthquake.on("eew", (data) => {
       if (!win.isFocused()) win.flashFrame(true);
     }
 
-    eewt.id = data.id;
+    eewt.id = data.ID;
 
     if (setting["audio.eew"] && Alert) {
       TREM.Audios.eew.play();
@@ -2350,8 +2797,8 @@ TREM.Earthquake.on("eew", (data) => {
   if (MaxIntensity.value >= 5) {
     data.Alert = true;
 
-    if (!Info.Warn.includes(data.id)) {
-      Info.Warn.push(data.id);
+    if (!Info.Warn.includes(data.ID)) {
+      Info.Warn.push(data.ID);
 
       if (!EEWAlert) {
         EEWAlert = true;
@@ -2368,29 +2815,29 @@ TREM.Earthquake.on("eew", (data) => {
   let _time = -1;
   let stamp = 0;
 
-  if ((EarthquakeList[data.id].number ?? 1) < data.number) {
+  if ((EarthquakeList[data.ID].Version ?? 1) < data.Version) {
     if (setting["audio.eew"] && Alert) TREM.Audios.update.play();
-    EarthquakeList[data.id].number = data.number;
+    EarthquakeList[data.ID].Version = data.Version;
   }
 
-  eew[data.id] = {
-    lon  : Number(data.lon),
-    lat  : Number(data.lat),
+  eew[data.ID] = {
+    lon  : Number(data.EastLongitude),
+    lat  : Number(data.NorthLatitude),
     time : 0,
-    Time : data.time,
-    id   : data.id,
+    Time : data.Time,
+    id   : data.ID,
     km   : 0,
   };
-  value = Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000);
+  value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
 
   if (Second == -1 || value < Second)
     if (setting["audio.eew"] && Alert)
-      if (arrive == data.id || arrive == "") {
-        arrive = data.id;
+      if (arrive == data.ID || arrive == "") {
+        arrive = data.ID;
 
         if (t != null) clearInterval(t);
         t = setInterval(() => {
-          value = Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000);
+          value = Math.floor(_speed(data.Depth, distance).Stime - (NOW.getTime() - data.Time) / 1000);
           Second = value;
 
           if (stamp != value && !audio.minor_lock) {
@@ -2413,7 +2860,7 @@ TREM.Earthquake.on("eew", (data) => {
               } else if (value > 0) {
                 audioPlay1(`../audio/1/${value.toString()}.wav`);
               } else {
-                arrive = data.id;
+                arrive = data.ID;
                 audioPlay1("../audio/1/arrive.wav");
                 _time = 0;
               }
@@ -2424,16 +2871,16 @@ TREM.Earthquake.on("eew", (data) => {
 
   const speed = setting["shock.smoothing"] ? 100 : 500;
 
-  if (EarthquakeList[data.id].Timer != undefined) clearInterval(EarthquakeList[data.id].Timer);
+  if (EarthquakeList[data.ID].Timer != undefined) clearInterval(EarthquakeList[data.ID].Timer);
 
   if (EarthquakeList.ITimer != undefined) clearInterval(EarthquakeList.ITimer);
 
   // AlertBox: 種類
   let classString = "alert-box ";
 
-  if (data.replay_timestamp) {
-    replay = data.replay_timestamp;
-    replayT = NOW().getTime();
+  if (data.Replay) {
+    replay = data.timestamp;
+    replayT = NOW.getTime();
   } else {
     replay = 0;
   }
@@ -2445,10 +2892,10 @@ TREM.Earthquake.on("eew", (data) => {
   else
     classString += "eew-pred";
 
-  let find = INFO.findIndex(v => v.ID == data.id);
+  let find = INFO.findIndex(v => v.ID == data.ID);
 
   if (find == -1) find = INFO.length;
-  const now = new Date((data.replay_time) ? data.replay_time : data.time);
+  const now = new Date((data.Replay) ? data.time : data.Time);
   const time = now.getFullYear()
     + "/" + (now.getMonth() + 1)
 	+ "/" + now.getDate()
@@ -2457,21 +2904,21 @@ TREM.Earthquake.on("eew", (data) => {
     + ":" + now.getSeconds();
 
   INFO[find] = {
-    ID              : data.id,
-    alert_number    : data.number,
+    ID              : data.ID,
+    alert_number    : data.Version,
     alert_intensity : MaxIntensity.value,
-    alert_location  : data.location ?? "未知區域",
+    alert_location  : data.Location ?? "未知區域",
     alert_time      : time,
-    alert_sTime     : Math.floor(data.time + _speed(data.depth, distance).Stime * 1000),
-    alert_pTime     : Math.floor(data.time + _speed(data.depth, distance).Ptime * 1000),
+    alert_sTime     : Math.floor(data.Time + _speed(data.Depth, distance).Stime * 1000),
+    alert_pTime     : Math.floor(data.Time + _speed(data.Depth, distance).Ptime * 1000),
     alert_local     : level.value,
-    alert_magnitude : data.scale,
-    alert_depth     : data.depth,
-    alert_provider  : "",
+    alert_magnitude : data.Scale,
+    alert_depth     : data.Depth,
+    alert_provider  : data.Unit,
     alert_type      : classString,
     "intensity-1"   : `<font color="white" size="7"><b>${MaxIntensity.label}</b></font>`,
     "time-1"        : `<font color="white" size="2"><b>${time}</b></font>`,
-    "info-1"        : `<font color="white" size="4"><b>M ${data.scale} </b></font><font color="white" size="3"><b> 深度: ${data.depth} km</b></font>`,
+    "info-1"        : `<font color="white" size="4"><b>M ${data.Scale} </b></font><font color="white" size="3"><b> 深度: ${data.Depth} km</b></font>`,
     distance,
   };
 
@@ -2501,23 +2948,23 @@ TREM.Earthquake.on("eew", (data) => {
         }, 5000);
     }, 1000);
 
-  EEWshot = NOW().getTime() - 28500;
+  EEWshot = NOW.getTime() - 28500;
   EEWshotC = 1;
   const _distance = [];
   for (let index = 0; index < 1002; index++)
-    _distance[index] = _speed(data.depth, index);
-  EarthquakeList[data.id].distance = _distance;
+    _distance[index] = _speed(data.Depth, index);
+  EarthquakeList[data.ID].distance = _distance;
   main(data);
-  EarthquakeList[data.id].Timer = setInterval(() => {
+  EarthquakeList[data.ID].Timer = setInterval(() => {
     main(data);
   }, speed);
 
-  if (TREM.EEW.get(data.id)?.geojson) {
-    TREM.EEW.get(data.id).geojson.remove();
-    delete TREM.EEW.get(data.id).geojson;
+  if (TREM.EEW.get(data.ID)?.geojson) {
+    TREM.EEW.get(data.ID).geojson.remove();
+    delete TREM.EEW.get(data.ID).geojson;
   }
 
-  TREM.EEW.get(data.id).geojson = L.geoJson.vt(MapData.tw_town, {
+  TREM.EEW.get(data.ID).geojson = L.geoJson.vt(MapData.tw_town, {
     minZoom   : 7,
     maxZoom   : 7,
     tolerance : 20,
@@ -2557,27 +3004,27 @@ TREM.Earthquake.on("eew", (data) => {
 
   setTimeout(() => {
     if (setting["webhook.url"] != "") {
-      const Now = NOW().getFullYear()
-				+ "/" + (NOW().getMonth() + 1)
-				+ "/" + NOW().getDate()
-				+ " " + NOW().getHours()
-				+ ":" + NOW().getMinutes()
-				+ ":" + NOW().getSeconds();
+      const Now = NOW.getFullYear()
+				+ "/" + (NOW.getMonth() + 1)
+				+ "/" + NOW.getDate()
+				+ " " + NOW.getHours()
+				+ ":" + NOW.getMinutes()
+				+ ":" + NOW.getSeconds();
 
       let msg = setting["webhook.body"];
-      msg = msg.replace("%Depth%", data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale);
+      msg = msg.replace("%Depth%", data.Depth).replace("%NorthLatitude%", data.NorthLatitude).replace("%Time%", time).replace("%EastLongitude%", data.EastLongitude).replace("%Scale%", data.Scale);
 
-      if (data.type == "eew-cwb")
+      if (data.Function == "earthquake")
         msg = msg.replace("%Provider%", "交通部中央氣象局");
-      else if (data.type == "eew-scdzj")
+      else if (data.Function == "SCDZJ_earthquake")
         msg = msg.replace("%Provider%", "四川省地震局");
-      else if (data.type == "eew-fjdzj")
+      else if (data.Function == "FJDZJ_earthquake")
         msg = msg.replace("%Provider%", "福建省地震局");
-      else if (data.type == "eew-nied")
+      else if (data.Function == "NIED_earthquake")
         msg = msg.replace("%Provider%", "防災科学技術研究所");
-      else if (data.type == "eew-jma")
+      else if (data.Function == "JMA_earthquake")
         msg = msg.replace("%Provider%", "気象庁(JMA)");
-      else if (data.type == "eew-kma")
+      else if (data.Function == "KMA_earthquake")
         msg = msg.replace("%Provider%", "기상청(KMA)");
 
       msg = JSON.parse(msg);
@@ -2607,10 +3054,6 @@ TREM.Earthquake.on("eewEnd", (id) => {
 
   if (TREM.EEW.get(id).CircleP != undefined) TREM.EEW.get(id).CircleP = TREM.EEW.get(id).CircleP.remove();
 
-  if (TREM.EEW.get(id).epicenterIcon.main != undefined) TREM.EEW.get(id).epicenterIcon.main.remove();
-
-  if (TREM.EEW.get(id).epicenterIcon.mini != undefined) TREM.EEW.get(id).epicenterIcon.mini.remove();
-
   if (TREM.EEW.get(id).CircleSTW != undefined) Maps.mini.removeLayer(TREM.EEW.get(id).CircleSTW);
 
   if (TREM.EEW.get(id).CirclePTW != undefined) Maps.mini.removeLayer(TREM.EEW.get(id).CirclePTW);
@@ -2619,15 +3062,9 @@ TREM.Earthquake.on("eewEnd", (id) => {
 
 
 TREM.Earthquake.on("tsunami", (data) => {
-  if (data.number == 1) {
-    const now = new Date(json.time);
-    const Now = now.getFullYear()
-        + "/" + (now.getMonth() + 1)
-        + "/" + now.getDate()
-        + " " + now.getHours()
-        + ":" + now.getMinutes();
+  if (data.Version == 1) {
     new Notification("海嘯警報", {
-      body   : `${Now} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度`,
+      body   : `${data["UTC+8"]} 發生 ${data.Scale} 地震\n\n東經: ${data.EastLongitude} 度\n北緯: ${data.NorthLatitude} 度`,
       icon   : "../TREM.ico",
       silent : win.isFocused(),
     });
@@ -2645,7 +3082,7 @@ TREM.Earthquake.on("tsunami", (data) => {
     TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), size: 7.75 });
   }
 
-  if (data.cancel) {
+  if (data.Cancel) {
     if (TSUNAMI.E)
       TSUNAMI.E.remove();
 
@@ -2674,9 +3111,9 @@ TREM.Earthquake.on("tsunami", (data) => {
         iconSize  : [30, 30],
         className : "tsunami",
       });
-      TSUNAMI.warnIcon = L.marker([+data.lat, +data.lon], { icon: warnIcon }).addTo(Maps.main);
+      TSUNAMI.warnIcon = L.marker([+data.NorthLatitude, +data.EastLongitude], { icon: warnIcon }).addTo(Maps.main);
     } else {
-      TSUNAMI.warnIcon.setLatLng([+data.lat, +data.lon]);
+      TSUNAMI.warnIcon.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
     }
 
     if (!TSUNAMI.E) {
@@ -2689,7 +3126,7 @@ TREM.Earthquake.on("tsunami", (data) => {
         style     : {
           weight  : 10,
           opacity : 1,
-          color   : Tcolor(data.area[0].areaColor),
+          color   : Tcolor(data.Addition[0].areaColor),
           fill    : false,
         },
       }).addTo(Maps.main);
@@ -2698,7 +3135,7 @@ TREM.Earthquake.on("tsunami", (data) => {
       TSUNAMI.E.setStyle({
         weight  : 10,
         opacity : 1,
-        color   : Tcolor(data.area[0].areaColor),
+        color   : Tcolor(data.Addition[0].areaColor),
         fill    : false,
       });
     }
@@ -2713,7 +3150,7 @@ TREM.Earthquake.on("tsunami", (data) => {
         style     : {
           weight  : 10,
           opacity : 1,
-          color   : Tcolor(data.area[1].areaColor),
+          color   : Tcolor(data.Addition[1].areaColor),
           fill    : false,
         },
       }).addTo(Maps.main);
@@ -2722,7 +3159,7 @@ TREM.Earthquake.on("tsunami", (data) => {
       TSUNAMI.EN.setStyle({
         weight  : 10,
         opacity : 1,
-        color   : Tcolor(data.area[1].areaColor),
+        color   : Tcolor(data.Addition[1].areaColor),
         fill    : false,
       });
     }
@@ -2737,7 +3174,7 @@ TREM.Earthquake.on("tsunami", (data) => {
         style     : {
           weight  : 10,
           opacity : 1,
-          color   : Tcolor(data.area[2].areaColor),
+          color   : Tcolor(data.Addition[2].areaColor),
           fill    : false,
         },
       }).addTo(Maps.main);
@@ -2746,7 +3183,7 @@ TREM.Earthquake.on("tsunami", (data) => {
       TSUNAMI.ES.setStyle({
         weight  : 10,
         opacity : 1,
-        color   : Tcolor(data.area[2].areaColor),
+        color   : Tcolor(data.Addition[2].areaColor),
         fill    : false,
       });
     }
@@ -2761,7 +3198,7 @@ TREM.Earthquake.on("tsunami", (data) => {
         style     : {
           weight  : 10,
           opacity : 1,
-          color   : Tcolor.vt(data.area[3].areaColor),
+          color   : Tcolor.vt(data.Addition[3].areaColor),
           fill    : false,
         },
       }).addTo(Maps.main);
@@ -2770,7 +3207,7 @@ TREM.Earthquake.on("tsunami", (data) => {
       TSUNAMI.N.setStyle({
         weight  : 10,
         opacity : 1,
-        color   : Tcolor(data.area[3].areaColor),
+        color   : Tcolor(data.Addition[3].areaColor),
         fill    : false,
       });
     }
@@ -2785,7 +3222,7 @@ TREM.Earthquake.on("tsunami", (data) => {
         style     : {
           weight  : 10,
           opacity : 1,
-          color   : Tcolor(data.area[4].areaColor),
+          color   : Tcolor(data.Addition[4].areaColor),
           fill    : false,
         },
       }).addTo(Maps.main);
@@ -2794,7 +3231,7 @@ TREM.Earthquake.on("tsunami", (data) => {
       TSUNAMI.WS.setStyle({
         weight  : 10,
         opacity : 1,
-        color   : Tcolor(data.area[4].areaColor),
+        color   : Tcolor(data.Addition[4].areaColor),
         fill    : false,
       });
     }
@@ -2809,7 +3246,7 @@ TREM.Earthquake.on("tsunami", (data) => {
         style     : {
           weight  : 10,
           opacity : 1,
-          color   : Tcolor(data.area[5].areaColor),
+          color   : Tcolor(data.Addition[5].areaColor),
           fill    : false,
         },
       }).addTo(Maps.main);
@@ -2818,7 +3255,7 @@ TREM.Earthquake.on("tsunami", (data) => {
       TSUNAMI.W.setStyle({
         weight  : 10,
         opacity : 1,
-        color   : Tcolor(data.area[5].areaColor),
+        color   : Tcolor(data.Addition[5].areaColor),
         fill    : false,
       });
     }
@@ -2833,8 +3270,8 @@ function main(data) {
 		* @type {{p:number,s:number}}
 		*/
 
-    let kmP = Math.floor(Math.sqrt(Math.pow((NOW().getTime() - data.time) * wave.p, 2) - Math.pow(data.depth * 1000, 2)));
-    let km = Math.floor(Math.sqrt(Math.pow((NOW().getTime() - data.time) * wave.s, 2) - Math.pow(data.depth * 1000, 2)));
+    let kmP = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.p, 2) - Math.pow(data.Depth * 1000, 2)));
+    let km = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.s, 2) - Math.pow(data.Depth * 1000, 2)));
 
 
     /**
@@ -2842,39 +3279,45 @@ function main(data) {
  		* @type {number} kmP
 		* @type {number} km
  		*/
-    for (let index = 1; index < EarthquakeList[data.id].distance.length; index++)
-      if (EarthquakeList[data.id].distance[index].Ptime > (NOW().getTime() - data.time) / 1000) {
+    for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
+      if (EarthquakeList[data.ID].distance[index].Ptime > (NOW.getTime() - data.Time) / 1000) {
         kmP = (index - 1) * 1000;
 
-        if ((index - 1) / EarthquakeList[data.id].distance[index - 1].Ptime > wave.p) kmP = Math.floor(Math.sqrt(Math.pow((NOW().getTime() - data.time) * wave.p, 2) - Math.pow(data.depth * 1000, 2)));
+        if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Ptime > wave.p) kmP = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.p, 2) - Math.pow(data.Depth * 1000, 2)));
         break;
       }
 
-    for (let index = 1; index < EarthquakeList[data.id].distance.length; index++)
-      if (EarthquakeList[data.id].distance[index].Stime > (NOW().getTime() - data.time) / 1000) {
+    for (let index = 1; index < EarthquakeList[data.ID].distance.length; index++)
+      if (EarthquakeList[data.ID].distance[index].Stime > (NOW.getTime() - data.Time) / 1000) {
         km = (index - 1) * 1000;
 
-        if ((index - 1) / EarthquakeList[data.id].distance[index - 1].Stime > wave.s) km = Math.floor(Math.sqrt(Math.pow((NOW().getTime() - data.time) * wave.s, 2) - Math.pow(data.depth * 1000, 2)));
+        if ((index - 1) / EarthquakeList[data.ID].distance[index - 1].Stime > wave.s) km = Math.floor(Math.sqrt(Math.pow((NOW.getTime() - data.Time) * wave.s, 2) - Math.pow(data.Depth * 1000, 2)));
         break;
       }
 
     if (setting["shock.p"])
       if (kmP > 0) {
-        if (!TREM.EEW.get(data.id).CircleP) {
-          TREM.EEW.get(data.id).CircleP = new WaveCircle({
-            id     : `${data.id}-p`,
-            map    : Maps.main,
-            latlng : [+data.lat, +data.lon],
-            radius : kmP,
-            alert  : data.Alert
-          });
+        if (!TREM.EEW.get(data.ID).CircleP) {
+          TREM.EEW.get(data.ID).CircleP = new WaveCircle(
+            `${data.ID}-p`,
+            Maps.main,
+            [+data.EastLongitude, +data.NorthLatitude],
+            kmP,
+            data.Alert,
+            {
+              type  : "line",
+              paint : {
+                "line-width" : 4,
+                "line-color" : "#6FB7B7",
+              },
+            });
         } else {
-          TREM.EEW.get(data.id).CircleP.setLatLng([+data.lat, +data.lon]);
-          TREM.EEW.get(data.id).CircleP.setRadius(kmP);
+          TREM.EEW.get(data.ID).CircleP.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+          TREM.EEW.get(data.ID).CircleP.setRadius(kmP);
         }
 
-        if (!TREM.EEW.get(data.id).CirclePTW)
-          TREM.EEW.get(data.id).CirclePTW = L.circle([data.lat, data.lon], {
+        if (!TREM.EEW.get(data.ID).CirclePTW)
+          TREM.EEW.get(data.ID).CirclePTW = L.circle([data.NorthLatitude, data.EastLongitude], {
             color     : "#6FB7B7",
             fillColor : "transparent",
             radius    : kmP,
@@ -2882,38 +3325,44 @@ function main(data) {
             className : "p-wave",
           }).addTo(Maps.mini);
 
-        if (!TREM.EEW.get(data.id).CirclePTW.getLatLng().equals([+data.lat, +data.lon]))
-          TREM.EEW.get(data.id).CirclePTW
-            .setLatLng([+data.lat, +data.lon]);
+        if (!TREM.EEW.get(data.ID).CirclePTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
+          TREM.EEW.get(data.ID).CirclePTW
+            .setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
-        TREM.EEW.get(data.id).CirclePTW
+        TREM.EEW.get(data.ID).CirclePTW
           .setRadius(kmP);
       }
 
-    if (km > data.depth * 100) {
-      if (TREM.EEW.get(data.id).waveProgress) {
-        TREM.EEW.get(data.id).waveProgress.remove();
-        delete TREM.EEW.get(data.id).waveProgress;
+    if (km > data.Depth * 100) {
+      if (TREM.EEW.get(data.ID).waveProgress) {
+        TREM.EEW.get(data.ID).waveProgress.remove();
+        delete TREM.EEW.get(data.ID).waveProgress;
       }
 
-      eew[data.id].km = km;
+      eew[data.ID].km = km;
 
-      if (!TREM.EEW.get(data.id).CircleS) {
-        TREM.EEW.get(data.id).CircleS = new WaveCircle({
-          id     : `${data.id}-s`,
-          map    : Maps.main,
-          latlng : [+data.lat, +data.lon],
-          radius : km,
-          alert  : data.Alert
-        });
+      if (!TREM.EEW.get(data.ID).CircleS) {
+        TREM.EEW.get(data.ID).CircleS = new WaveCircle(
+          `${data.ID}-s`,
+          Maps.main,
+          [+data.EastLongitude, +data.NorthLatitude],
+          km,
+          data.Alert,
+          {
+            type  : "fill",
+            paint : {
+              "fill-opacity" : 0.15,
+              "fill-color"   : data.Alert ? "#FF0000" : "#FFA500",
+            },
+          });
       } else {
-        TREM.EEW.get(data.id).CircleS.setLatLng([+data.lat, +data.lon]);
-        TREM.EEW.get(data.id).CircleS.setRadius(km);
-        TREM.EEW.get(data.id).CircleS.setAlert(data.Alert);
+        TREM.EEW.get(data.ID).CircleS.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+        TREM.EEW.get(data.ID).CircleS.setRadius(km);
+        TREM.EEW.get(data.ID).CircleS.setAlert(data.Alert);
       }
 
-      if (!TREM.EEW.get(data.id).CircleSTW)
-        TREM.EEW.get(data.id).CircleSTW = L.circle([+data.lat, +data.lon], {
+      if (!TREM.EEW.get(data.ID).CircleSTW)
+        TREM.EEW.get(data.ID).CircleSTW = L.circle([+data.NorthLatitude, +data.EastLongitude], {
           color       : data.Alert ? "red" : "orange",
           fillColor   : `url(#${data.Alert ? "alert" : "pred"}-gradient)`,
           fillOpacity : 1,
@@ -2922,10 +3371,11 @@ function main(data) {
           className   : "s-wave",
         }).addTo(Maps.mini);
 
-      if (!TREM.EEW.get(data.id).CircleSTW.getLatLng().equals([+data.lat, +data.lon]))
-        TREM.EEW.get(data.id).CircleSTW.setLatLng([+data.lat, +data.lon]);
+      if (!TREM.EEW.get(data.ID).CircleSTW.getLatLng().equals([+data.NorthLatitude, +data.EastLongitude]))
+        TREM.EEW.get(data.ID).CircleSTW
+          .setLatLng([+data.NorthLatitude, +data.EastLongitude]);
 
-      TREM.EEW.get(data.id).CircleSTW
+      TREM.EEW.get(data.ID).CircleSTW
         .setRadius(km)
         .setStyle(
           {
@@ -2934,27 +3384,27 @@ function main(data) {
           },
         );
     } else {
-      const num = (NOW().getTime() - data.time) / 10 / EarthquakeList[data.id].distance[1].Stime;
+      const num = (NOW.getTime() - data.Time) / 10 / EarthquakeList[data.ID].distance[1].Stime;
 
-      if (!TREM.EEW.get(data.id).waveProgress)
-        TREM.EEW.get(data.id).waveProgress = new maplibregl.Marker({ element: $(`<div class="s-wave-progress-container"><div class="s-wave-progress" style="height:${num}%;"></div></div>`)[0] })
-          .setLngLat([+data.lon, +data.lat])
+      if (!TREM.EEW.get(data.ID).waveProgress)
+        TREM.EEW.get(data.ID).waveProgress = new maplibregl.Marker({ element: $(`<div class="s-wave-progress-container"><div class="s-wave-progress" style="height:${num}%;"></div></div>`)[0] })
+          .setLngLat([+data.EastLongitude, +data.NorthLatitude])
           .addTo(Maps.main);
-      else TREM.EEW.get(data.id).waveProgress.getElement().firstChild.style.height = `${num}%`;
+      else TREM.EEW.get(data.ID).waveProgress.getElement().firstChild.style.height = `${num}%`;
     }
 
-    if (data.cancel)
+    if (data.Cancel)
       for (let index = 0; index < INFO.length; index++)
-        if (INFO[index].ID == data.id) {
+        if (INFO[index].ID == data.ID) {
           INFO[index].alert_type = "alert-box eew-cancel";
-          data.timeStamp = NOW().getTime() - ((data.lon < 122.18 && data.lat < 25.47 && data.lon > 118.25 && data.lat > 21.77) ? 90_000 : 150_000);
+          data.TimeStamp = NOW.getTime() - ((data.EastLongitude < 122.18 && data.NorthLatitude < 25.47 && data.EastLongitude > 118.25 && data.NorthLatitude > 21.77) ? 90_000 : 150_000);
 
-          if (TREM.EEW.get(data.id).waveProgress) {
-            TREM.EEW.get(data.id).waveProgress.remove();
-            delete TREM.EEW.get(data.id).waveProgress;
+          if (TREM.EEW.get(data.ID).waveProgress) {
+            TREM.EEW.get(data.ID).waveProgress.remove();
+            delete TREM.EEW.get(data.ID).waveProgress;
           }
 
-          TREM.Earthquake.emit("eewEnd", data.id);
+          TREM.Earthquake.emit("eewEnd", data.ID);
           TREM.EEW.get(INFO[TINFO].ID).Cancel = true;
 
           if (Object.keys(EarthquakeList).length == 1) {
@@ -2969,76 +3419,143 @@ function main(data) {
 
   // #region Epicenter Cross Icon
 
+  let epicenterIcon;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  const cursor = INFO.findIndex((v) => v.ID == data.ID) + 1;
+  const iconUrl = cursor <= 4 && INFO.length > 1 ? "../image/cross.png" : "../image/cross.png";
+
+  if (cursor <= 4 && INFO.length > 1) {
+    epicenterIcon = L.icon({
+      iconUrl,
+      iconSize  : [40, 40],
+      className : "epicenterIcon",
+    });
+
+    if (cursor == 1) offsetY = 0.03;
+
+    if (cursor == 2) offsetX = 0.03;
+
+    if (cursor == 3) offsetY = -0.03;
+
+    if (cursor == 4) offsetX = -0.03;
+  } else {
+    epicenterIcon = L.icon({
+      iconUrl,
+      iconSize  : [30, 30],
+      className : "epicenterIcon",
+    });
+  }
+
+  // main map
+  if (!EarthquakeList[data.ID].epicenterIcon)
+    if (TREM.MapRenderingEngine == "mapbox-gl")
+      EarthquakeList[data.ID].epicenterIcon = new maplibregl.Marker(
+        {
+          element: $(`<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>`)[0],
+        })
+        .setLngLat([+data.EastLongitude, +data.NorthLatitude])
+        .addTo(Maps.main);
+    else if (TREM.MapRenderingEngine == "leaflet")
+      EarthquakeList[data.ID].epicenterIcon = L.marker([+data.NorthLatitude, +data.EastLongitude],
+        {
+          icon: L.icon({ html: `<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>` }),
+        })
+        .addTo(Maps.main);
+
+  if (EarthquakeList[data.ID].epicenterIcon.getElement().src != iconUrl)
+    EarthquakeList[data.ID].epicenterIcon.getElement().src = iconUrl;
+
+  if (TREM.MapRenderingEngine == "mapbox-gl")
+    EarthquakeList[data.ID].epicenterIcon.setLngLat([+data.EastLongitude, +data.NorthLatitude]);
+  else if (TREM.MapRenderingEngine == "leaflet")
+    EarthquakeList[data.ID].epicenterIcon.setLatLng([+data.NorthLatitude, +data.EastLongitude]);
+
+  // mini map
+  if (!EarthquakeList[data.ID].epicenterIconTW) {
+    EarthquakeList[data.ID].epicenterIconTW = L.marker([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX], { icon: epicenterIcon }).addTo(Maps.mini);
+    EarthquakeList[data.ID].epicenterIconTW.getElement().classList.add("hide");
+  }
+
+  if (EarthquakeList[data.ID].epicenterIconTW.getIcon()?.options?.iconUrl != epicenterIcon.options.iconUrl)
+    EarthquakeList[data.ID].epicenterIconTW.setIcon(epicenterIcon);
+
+  if (!EarthquakeList[data.ID].epicenterIconTW.getLatLng().equals([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]))
+    EarthquakeList[data.ID].epicenterIconTW.setLatLng([+data.NorthLatitude + offsetY, +data.EastLongitude + offsetX]);
+
   if (!Timers.epicenterBlinker)
-    Timers.epicenterBlinker = (function() {
-      let epicenter_blink_state = true;
-      return setInterval(() => {
-        for (const [key, value] of TREM.EEW) {
-          const el = value.epicenterIcon.main;
+    Timers.epicenterBlinker = setInterval(() => {
+      const epicenter_blink_state = EarthquakeList[Object.keys(EarthquakeList)[0]]?.epicenterIcon?.getElement()?.classList?.contains("hide");
+
+      if (epicenter_blink_state != undefined)
+        for (const key in EarthquakeList) {
+          const el = EarthquakeList[key];
 
           if (epicenter_blink_state) {
-            if (value.epicenterIcon.main.getElement().classList.contains("hide"))
-              value.epicenterIcon.main.getElement().classList.remove("hide");
-          } else if (!value.epicenterIcon.main.getElement().classList.contains("hide")) {
-            value.epicenterIcon.main.getElement().classList.add("hide");
+            if (el.epicenterIcon.getElement().classList.contains("hide"))
+              el.epicenterIcon.getElement().classList.remove("hide");
+          } else if (!el.epicenterIcon.getElement().classList.contains("hide")) {
+            el.epicenterIcon.getElement().classList.add("hide");
           }
 
           if (key == INFO[TINFO].ID) {
             if (epicenter_blink_state) {
-              if (value.epicenterIcon.mini.getElement().classList.contains("hide"))
-                value.epicenterIcon.mini.getElement().classList.remove("hide");
-            } else if (!value.epicenterIcon.mini.getElement().classList.contains("hide")) {
-              value.epicenterIcon.mini.getElement().classList.add("hide");
+              if (el.epicenterIconTW.getElement().classList.contains("hide"))
+                el.epicenterIconTW.getElement().classList.remove("hide");
+            } else if (!el.epicenterIconTW.getElement().classList.contains("hide")) {
+              el.epicenterIconTW.getElement().classList.add("hide");
             }
-          } else if (!value.epicenterIcon.mini.getElement()?.classList?.contains("hide")) {
-            value.epicenterIcon.mini.getElement().classList.add("hide");
+          } else if (!el.epicenterIconTW.getElement()?.classList?.contains("hide")) {
+            el.epicenterIconTW.getElement().classList.add("hide");
           }
         }
-
-        epicenter_blink_state = !epicenter_blink_state;
-      }, 500);
-    })();
+    }, 500);
 
   // #endregion <- Epicenter Cross Icon
 
 
-  if (NOW().getTime() - EEWshot > 60000)
+  if (NOW.getTime() - EEWshot > 60000)
     EEWshotC = 1;
 
-  if (NOW().getTime() - EEWshot > 30000 && EEWshotC <= 2) {
+  if (NOW.getTime() - EEWshot > 30000 && EEWshotC <= 2) {
     EEWshotC++;
-    EEWshot = NOW().getTime();
+    EEWshot = NOW.getTime();
     setTimeout(() => {
       ipcRenderer.send("screenshotEEW", {
         Function : data.Function,
-        ID       : data.id,
-        Version  : data.number,
-        Time     : NOW().getTime(),
+        ID       : data.ID,
+        Version  : data.Version,
+        Time     : NOW.getTime(),
         Shot     : EEWshotC,
       });
     }, 300);
   }
 
-  if (NOW().getTime() - data.timeStamp > ((data.lon < 122.18 && data.lat < 25.47 && data.lon > 118.25 && data.lat > 21.77) ? 120_000 : 180_000) || Cancel) {
-    TREM.Earthquake.emit("eewEnd", data.id);
-    MainMap.intensity.clear();
+  if (NOW.getTime() - data.TimeStamp > ((data.EastLongitude < 122.18 && data.NorthLatitude < 25.47 && data.EastLongitude > 118.25 && data.NorthLatitude > 21.77) ? 120_000 : 180_000) || Cancel) {
+    TREM.Earthquake.emit("eewEnd", data.ID);
+    TREM.MapIntensity.clear();
+
+    // remove epicenter cross icons
+    EarthquakeList[data.ID].epicenterIcon.remove();
+    EarthquakeList[data.ID].epicenterIconTW.remove();
 
     for (let index = 0; index < INFO.length; index++)
-      if (INFO[index].ID == data.id) {
+      if (INFO[index].ID == data.ID) {
         TINFO = 0;
         INFO.splice(index, 1);
         break;
       }
 
-    if (TREM.EEW.get(data.id)?.geojson) {
-      TREM.EEW.get(data.id).geojson.remove();
-      delete TREM.EEW.get(data.id).geojson;
+    if (TREM.EEW.get(data.ID)?.geojson) {
+      TREM.EEW.get(data.ID).geojson.remove();
+      delete TREM.EEW.get(data.ID).geojson;
     }
 
-    clearInterval(EarthquakeList[data.id].Timer);
+    clearInterval(EarthquakeList[data.ID].Timer);
     document.getElementById("box-10").innerHTML = "";
-    delete EarthquakeList[data.id];
-    delete eew[data.id];
+    delete EarthquakeList[data.ID];
+    delete eew[data.ID];
 
     if (Object.keys(EarthquakeList).length == 0) {
       clearInterval(t);
@@ -3102,12 +3619,12 @@ function updateText() {
     $("#alert-p").text("X");
     $("#alert-s").text("X");
   } else {
-    let num = Math.floor((INFO[TINFO].alert_sTime - NOW().getTime()) / 1000);
+    let num = Math.floor((INFO[TINFO].alert_sTime - NOW.getTime()) / 1000);
 
     if (num <= 0) num = "";
     $("#alert-s").text(num);
 
-    num = Math.floor((INFO[TINFO].alert_pTime - NOW().getTime()) / 1000);
+    num = Math.floor((INFO[TINFO].alert_pTime - NOW.getTime()) / 1000);
 
     if (num <= 0) num = "";
     $("#alert-p").text(num);
@@ -3138,7 +3655,7 @@ function updateText() {
   if (TREM.EEW.get(INFO[TINFO].ID).CircleSTW) TREM.EEW.get(INFO[TINFO].ID).CircleSTW.getElement()?.classList?.remove("hide");
 
   if (TREM.EEW.get(INFO[TINFO].ID)?.geojson) TREM.EEW.get(INFO[TINFO].ID).geojson.addTo(Maps.mini);
-  const Num = Math.round(((NOW().getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
+  const Num = Math.round(((NOW.getTime() - INFO[TINFO].Time) * 4 / 10) / INFO[TINFO].Depth);
   const Catch = document.getElementById("box-10");
 
   if (Num <= 100)
@@ -3174,8 +3691,4 @@ function pointFormatter(lat, lng, engine) {
     return [lng, lat];
   else if (engine == "leaflet")
     return [lat, lng];
-}
-
-function NOW() {
-  return new Date(ServerTime + (Date.now() - ServerT));
 }

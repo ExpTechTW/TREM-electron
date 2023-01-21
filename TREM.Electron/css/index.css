@@ -1488,7 +1488,7 @@ stop.pred-stop {
 }
 
 .map-intensity-icon:not([class*=pga]) {
-	border: 1px solid rgb(var(--md-sys-color-on-surface-variant));
+	border: 1px solid white;
 }
 
 .map-intensity-icon::before {
