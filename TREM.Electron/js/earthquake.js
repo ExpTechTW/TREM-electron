@@ -2654,7 +2654,7 @@ function FCMdata(json, Unit) {
         Shot     : 1,
       });
     }, 5000);
-  } else if (json.type.startsWith("eew") || !json.replay_timestamp || json.test) {
+  } else if (json.type.startsWith("eew")) {
     if (replay != 0 && !json.replay_timestamp) return;
 
     if (
