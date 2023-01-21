@@ -138,6 +138,7 @@ TREM.MapIntensity = {
 	alertTime   : 0,
 	MaxI        : 0,
 	intensities : new Map(),
+	description : "",
 	palert(rawPalertData) {
 		console.log(rawPalertData);
 
@@ -163,6 +164,64 @@ TREM.MapIntensity = {
 							Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
 						});
 					}
+				}
+
+				if (setting["webhook.url"] != "" && setting["palert.Notification"]) {
+					dump({ level: 0, message: "Posting Notification palert Webhook", origin: "Webhook" });
+					for (let index = this.MaxI; index != 0; index--) {
+						this.description += `${index}級\n`;
+						let countyName_index = "";
+						for (const palertEntry of rawPalertData.intensity) {
+							const [countyName, townName] = palertEntry.loc.split(" ");
+							if (palertEntry.intensity == index) {
+								if (countyName_index == "")
+									this.description += `${palertEntry.loc} `;
+								else if (countyName_index == countyName)
+									this.description += `${townName} `;
+								else
+									this.description += `\n${palertEntry.loc} `;
+								countyName_index = countyName;
+							}
+						}
+						this.description += `\n`;
+					}
+					// console.log(this.description);
+					const now = new Date(rawPalertData.time);
+					const _Now = now.getFullYear()
+						+ "/" + (now.getMonth() + 1 < 10 ? "0" : "") + (now.getMonth() + 1)
+						+ "/" + (now.getDate() < 10 ? "0" : "") + now.getDate()
+						+ " " + (now.getHours() < 10 ? "0" : "") + now.getHours()
+						+ ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes()
+						+ ":" + (now.getSeconds() < 10 ? "0" : "") + now.getSeconds();
+					const msg = {
+						username   : "TREM | 臺灣即時地震監測",
+						avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
+						content    : "PAlert",
+						embeds     : [
+							{
+								author: {
+									name     : "PAlert",
+									url      : rawPalertData.link,
+									icon_url : undefined,
+								},
+								description : this.description,
+								fields      : [
+									{
+										name   : "時間",
+										value  : _Now,
+										inline : true,
+									},
+								],
+							},
+						],
+					};
+					fetch(setting["webhook.url"], {
+						method  : "POST",
+						headers : { "Content-Type": "application/json" },
+						body    : JSON.stringify(msg),
+					}).catch((error) => {
+						dump({ level: 2, message: error, origin: "Webhook" });
+					});
 				}
 
 				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -353,6 +412,7 @@ TREM.MapIntensity = {
 		this.alertTime = 0;
 		this.MaxI = 0;
 		this.isTriggered = false;
+		this.description = "";
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (this.intensities.size) {
@@ -1961,7 +2021,7 @@ async function init() {
 	// const userJSON = require(path.resolve(__dirname, "../js/1669484541389.json"));
 	// TREM.Intensity.handle(userJSON);
 	// ipcRenderer.send("intensity-Notification", userJSON);
-	// const userJSON1 = require(path.resolve(__dirname, "../js/1673836629226.json"));
+	// const userJSON1 = require(path.resolve(__dirname, "../js/1674281248871.json"));
 	// TREM.MapIntensity.palert(userJSON1);
 	// const userJSON2 = require(path.resolve(__dirname, "../js/1667356513251.json"));
 	// handler(userJSON2);

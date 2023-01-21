@@ -132,6 +132,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"palert.Notification": {
+			type  : "toggle",
+			value : false,
+		},
 		"report.show": {
 			type  : "toggle",
 			value : true,
