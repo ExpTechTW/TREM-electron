@@ -226,142 +226,6 @@ TREM.MapIntensity = {
   },
 };
 
-TREM.PWS = {
-  cache: new Map(),
-  addPWS(rawPWSData) {
-    const id = rawPWSData.link.href.slice(15);
-
-    if (!id.length) return;
-    const pws = {
-      id,
-      title       : rawPWSData.title,
-      sender      : rawPWSData.sender.value,
-      description : rawPWSData.description.$t,
-      area        : rawPWSData.area.areaDesc,
-      areaCodes   : TREM.Utils.findRegions(rawPWSData.area.areaDesc),
-      sentTime    : new Date(rawPWSData.sent.slice(0, rawPWSData.sent.length - 3)),
-      expireTime  : new Date(rawPWSData.expires.slice(0, rawPWSData.expires.length - 3)),
-      url         : rawPWSData.link.href,
-      timer       : null,
-    };
-    dump({ level: 0, message: `${pws.description}`, origin: "PWS" });
-
-    if (Date.now() > pws.expireTime.getTime()) return;
-
-    for (const area of pws.areaCodes)
-      if (area.town) {
-        const { pws: pwsCount } = Maps.main.getFeatureState({
-          source : "Source_tw_town",
-          id     : area.code,
-        });
-        Maps.main.setFeatureState({
-          source : "Source_tw_town",
-          id     : area.code,
-        }, { pws: (pwsCount ?? 0) + 1 });
-        Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "visible");
-        pws.marker = new maplibregl.Marker({
-          element: $("<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>")[0],
-        })
-          .setLngLat([area.longitude, area.latitude])
-          .setPopup(new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: 360 }).setHTML(`<div class="marker-popup pws-popup"><strong>${pws.title}</strong>\n發報單位：${pws.sender}\n內文：${pws.description}\n發報時間：${pws.sentTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n失效時間：${pws.expireTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n\n<span class="url" onclick="openURL('${pws.url}')">報告連結</span></div>`))
-          .addTo(Maps.main);
-      } else {
-        const { pws: pwsCount } = Maps.main.getFeatureState({
-          source : "Source_tw_county",
-          id     : area.code,
-        });
-        Maps.main.setFeatureState({
-          source : "Source_tw_county",
-          id     : area.code,
-        }, { pws: (pwsCount ?? 0) + 1 });
-        Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "visible");
-      }
-
-    pws.timer = setTimeout(this.clear, pws.expireTime.getTime() - Date.now(), id);
-
-    this.cache.set(id, pws);
-  },
-  clear(pwsId) {
-    if (pwsId) {
-      const pws = this.cache.get(pwsId);
-
-      if (!pws) return;
-      dump({ level: 0, message: `Clearing PWS id ${pwsId}`, origin: "PWS" });
-
-      for (const area of pws.areaCodes)
-        if (area.town) {
-          const { pws: pwsCount } = Maps.main.getFeatureState({
-            source : "Source_tw_town",
-            id     : area.code,
-          });
-          Maps.main.setFeatureState({
-            source : "Source_tw_town",
-            id     : area.code,
-          }, { pws: pwsCount - 1 });
-
-          if (pws.marker) {
-            pws.marker.remove();
-            delete pws.marker;
-          }
-
-          if (!(pwsCount - 1))
-            Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
-        } else {
-          const { pws: pwsCount } = Maps.main.getFeatureState({
-            source : "Source_tw_county",
-            id     : area.code,
-          });
-          Maps.main.setFeatureState({
-            source : "Source_tw_county",
-            id     : area.code,
-          }, { pws: pwsCount - 1 });
-
-          if (pws.marker) {
-            pws.marker.remove();
-            delete pws.marker;
-          }
-
-          if (!(pwsCount - 1))
-            Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
-        }
-
-      if (pws.timer) {
-        clearTimeout(pws.timer);
-        delete pws.timer;
-      }
-
-      this.cache.delete(pwsId);
-    }
-
-    if (this.cache.size) {
-      dump({ level: 0, message: "Clearing PWS map", origin: "PWS" });
-
-      for (const [id, pws] of this.cache) {
-        for (const area of pws.areaCodes)
-          if (area.town)
-            Maps.main.setFeatureState({
-              source : "Source_tw_town",
-              id     : area.code,
-            }, { pws: 0 });
-          else
-            Maps.main.setFeatureState({
-              source : "Source_tw_county",
-              id     : area.code,
-            }, { pws: 0 });
-
-        if (pws.timer) {
-          clearTimeout(pws.timer);
-          delete pws.timer;
-        }
-      }
-
-      Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
-      Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
-      this.cache = new Map();
-    }
-  },
-};
-
 TREM.MapArea = {
   cache      : new Map(),
   isVisible  : false,
@@ -1456,6 +1320,7 @@ async function init() {
 
   $("#loading").text(TREM.Localization.getString("Application_Welcome"));
   $("#load").delay(1000).fadeOut(1000);
+  Mapsmainfocus();
   setInterval(() => {
     if (mapLock || !setting["map.autoZoom"]) return;
 
@@ -2606,10 +2471,6 @@ function FCMdata(json, Unit) {
     TREM.Earthquake.emit("tsunami", json);
   } else if (json.type == "palert") {
     TREM.MapIntensity.palert(json);
-  } else if (json.type == "PWS") {
-    TREM.PWS.addPWS(json.raw);
-  } else if (json.type == "intensity") {
-    TREM.Intensity.handle(json);
   } else if (json.type == "replay") {
     replay = json.replay_timestamp;
     replayT = NOW().getTime();
@@ -3073,8 +2934,14 @@ TREM.Earthquake.on("eewEnd", (id) => {
 
 TREM.Earthquake.on("tsunami", (data) => {
   if (data.number == 1) {
+    const now = new Date(data.time);
+    const Now = now.getFullYear()
+        + "/" + (now.getMonth() + 1)
+        + "/" + now.getDate()
+        + " " + now.getHours()
+        + ":" + now.getMinutes();
     new Notification("海嘯警報", {
-      body   : `${data["UTC+8"]} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度`,
+      body   : `${Now}\n${data.location} 發生 M ${data.scale} 地震\n\n請迅速疏散至安全場所`,
       icon   : "../TREM.ico",
       silent : win.isFocused(),
     });
@@ -3089,186 +2956,27 @@ TREM.Earthquake.on("tsunami", (data) => {
       }
 
     if (setting["audio.report"]) audioPlay("../audio/Water.wav");
-    TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), size: 7.75 });
+    Mapsmainfocus();
   }
 
-  if (data.Cancel) {
-    if (TSUNAMI.E)
-      TSUNAMI.E.remove();
-
-    if (TSUNAMI.EN)
-      TSUNAMI.EN.remove();
-
-    if (TSUNAMI.ES)
-      TSUNAMI.ES.remove();
-
-    if (TSUNAMI.N)
-      TSUNAMI.N.remove();
-
-    if (TSUNAMI.WS)
-      TSUNAMI.WS.remove();
-
-    if (TSUNAMI.W)
-      TSUNAMI.W.remove();
-
+  if (data.cancel) {
     if (TSUNAMI.warnIcon)
       TSUNAMI.warnIcon.remove();
     TSUNAMI = {};
+    Mapsmainfocus();
   } else {
-    if (!TSUNAMI.warnIcon) {
-      const warnIcon = L.icon({
-        iconUrl   : "../image/warn.png",
-        iconSize  : [30, 30],
-        className : "tsunami",
-      });
-      TSUNAMI.warnIcon = L.marker([+data.lat, +data.lon], { icon: warnIcon }).addTo(Maps.main);
-    } else {
-      TSUNAMI.warnIcon.setLatLng([+data.lat, +data.lon]);
-    }
+    data.lat = Number(data.lat);
+    data.lon = Number(data.lon);
 
-    if (!TSUNAMI.E) {
-      TSUNAMI.E = L.geoJson.vt(MapData.E, {
-        minZoom   : 4,
-        maxZoom   : 12,
-        tolerance : 20,
-        buffer    : 256,
-        debug     : 0,
-        style     : {
-          weight  : 10,
-          opacity : 1,
-          color   : Tcolor(data.Addition[0].areaColor),
-          fill    : false,
-        },
-      }).addTo(Maps.main);
-      L.DomUtil.addClass(TSUNAMI.E._container, "tsunami");
-    } else {
-      TSUNAMI.E.setStyle({
-        weight  : 10,
-        opacity : 1,
-        color   : Tcolor(data.Addition[0].areaColor),
-        fill    : false,
-      });
-    }
-
-    if (!TSUNAMI.EN) {
-      TSUNAMI.EN = L.geoJson.vt(MapData.EN, {
-        minZoom   : 4,
-        maxZoom   : 12,
-        tolerance : 20,
-        buffer    : 256,
-        debug     : 0,
-        style     : {
-          weight  : 10,
-          opacity : 1,
-          color   : Tcolor(data.Addition[1].areaColor),
-          fill    : false,
-        },
-      }).addTo(Maps.main);
-      L.DomUtil.addClass(TSUNAMI.EN._container, "tsunami");
-    } else {
-      TSUNAMI.EN.setStyle({
-        weight  : 10,
-        opacity : 1,
-        color   : Tcolor(data.Addition[1].areaColor),
-        fill    : false,
-      });
-    }
-
-    if (!TSUNAMI.ES) {
-      TSUNAMI.ES = L.geoJson.vt(MapData.ES, {
-        minZoom   : 4,
-        maxZoom   : 12,
-        tolerance : 20,
-        buffer    : 256,
-        debug     : 0,
-        style     : {
-          weight  : 10,
-          opacity : 1,
-          color   : Tcolor(data.Addition[2].areaColor),
-          fill    : false,
-        },
-      }).addTo(Maps.main);
-      L.DomUtil.addClass(TSUNAMI.ES._container, "tsunami");
-    } else {
-      TSUNAMI.ES.setStyle({
-        weight  : 10,
-        opacity : 1,
-        color   : Tcolor(data.Addition[2].areaColor),
-        fill    : false,
-      });
-    }
-
-    if (!TSUNAMI.N) {
-      TSUNAMI.N = L.geoJson.vt(MapData.N, {
-        minZoom   : 4,
-        maxZoom   : 12,
-        tolerance : 20,
-        buffer    : 256,
-        debug     : 0,
-        style     : {
-          weight  : 10,
-          opacity : 1,
-          color   : Tcolor.vt(data.Addition[3].areaColor),
-          fill    : false,
-        },
-      }).addTo(Maps.main);
-      L.DomUtil.addClass(TSUNAMI.N._container, "tsunami");
-    } else {
-      TSUNAMI.N.setStyle({
-        weight  : 10,
-        opacity : 1,
-        color   : Tcolor(data.Addition[3].areaColor),
-        fill    : false,
-      });
-    }
-
-    if (!TSUNAMI.WS) {
-      TSUNAMI.WS = L.geoJson.vt(MapData.WS, {
-        minZoom   : 4,
-        maxZoom   : 12,
-        tolerance : 20,
-        buffer    : 256,
-        debug     : 0,
-        style     : {
-          weight  : 10,
-          opacity : 1,
-          color   : Tcolor(data.Addition[4].areaColor),
-          fill    : false,
-        },
-      }).addTo(Maps.main);
-      L.DomUtil.addClass(TSUNAMI.WS._container, "tsunami");
-    } else {
-      TSUNAMI.WS.setStyle({
-        weight  : 10,
-        opacity : 1,
-        color   : Tcolor(data.Addition[4].areaColor),
-        fill    : false,
-      });
-    }
-
-    if (!TSUNAMI.W) {
-      TSUNAMI.W = L.geoJson.vt(MapData.W, {
-        minZoom   : 4,
-        maxZoom   : 12,
-        tolerance : 20,
-        buffer    : 256,
-        debug     : 0,
-        style     : {
-          weight  : 10,
-          opacity : 1,
-          color   : Tcolor(data.Addition[5].areaColor),
-          fill    : false,
-        },
-      }).addTo(Maps.main);
-      L.DomUtil.addClass(TSUNAMI.W._container, "tsunami");
-    } else {
-      TSUNAMI.W.setStyle({
-        weight  : 10,
-        opacity : 1,
-        color   : Tcolor(data.Addition[5].areaColor),
-        fill    : false,
-      });
-    }
+    if (!TSUNAMI.warnIcon)
+      TSUNAMI.warnIcon = new maplibregl.Marker(
+        {
+          element: $("<img class=\"tsunami\" height=\"40\" width=\"40\" src=\"../image/warn.png\"></img>")[0],
+        })
+        .setLngLat([+data.lon, +data.lat])
+        .addTo(Maps.main);
+    else
+      TSUNAMI.warnIcon.setLngLat([+data.lon, +data.lat]);
   }
 });
 
@@ -3403,7 +3111,7 @@ function main(data) {
       else TREM.EEW.get(data.id).waveProgress.getElement().firstChild.style.height = `${num}%`;
     }
 
-    if (data.Cancel)
+    if (data.cancel)
       for (let index = 0; index < INFO.length; index++)
         if (INFO[index].ID == data.id) {
           INFO[index].alert_type = "alert-box eew-cancel";
@@ -3434,7 +3142,7 @@ function main(data) {
   let offsetY = 0;
 
   const cursor = INFO.findIndex((v) => v.ID == data.id) + 1;
-  const iconUrl = cursor <= 4 && INFO.length > 1 ? "../image/cross.png" : "../image/cross.png";
+  const iconUrl = cursor <= 4 && INFO.length > 1 ? `../image/cross${cursor}.png` : "../image/cross.png";
 
   if (cursor <= 4 && INFO.length > 1) {
     epicenterIcon = L.icon({
