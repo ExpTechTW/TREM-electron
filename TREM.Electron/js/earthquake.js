@@ -521,15 +521,15 @@ class EEW {
     this.depth = data.depth;
     this.epicenter = { latitude: data.lat, longitude: data.lon };
     this.location = data.Location;
-    this.magnitude = data.Scale;
+    this.magnitude = data.scale;
     this.source = data.Unit;
 
-    if (data.Version > (this.version || 0)) {
+    if (data.number > (this.version || 0)) {
       this._expected = new Map();
       this.#evalExpected();
     }
 
-    this.version = data.Version;
+    this.version = data.number;
 
     this.eventTime = new Date(data.time);
     this.apiTime = new Date(data.timeStamp);
@@ -2650,17 +2650,24 @@ function FCMdata(json, Unit) {
         Shot     : 1,
       });
     }, 5000);
-  } else if (json.type != undefined && json.type.includes("earthquake") || json.Replay || json.Test) {
+  } else if (json.type.startsWith("eew") || json.Replay || json.Test) {
     if (replay != 0 && !json.Replay) return;
 
     if (
-      (json.type == "SCDZJ_earthquake" && !setting["accept.eew.SCDZJ"])
-			|| (json.type == "NIED_earthquake" && !setting["accept.eew.NIED"])
-			|| (json.type == "JMA_earthquake" && !setting["accept.eew.JMA"])
-			|| (json.type == "KMA_earthquake" && !setting["accept.eew.KMA"])
-			|| (json.type == "earthquake" && !setting["accept.eew.CWB"])
-			|| (json.type == "FJDZJ_earthquake" && !setting["accept.eew.FJDZJ"])
+      (json.type == "eew-scdzj" && !setting["accept.eew.SCDZJ"])
+			|| (json.type == "eew-nied" && !setting["accept.eew.NIED"])
+			|| (json.type == "eew-jma" && !setting["accept.eew.JMA"])
+			|| (json.type == "eew-kma" && !setting["accept.eew.KMA"])
+			|| (json.type == "eew-cwb" && !setting["accept.eew.CWB"])
+			|| (json.type == "eew-fjdzj" && !setting["accept.eew.FJDZJ"])
     ) return;
+
+    json.Unit = (json.type == "eew-scdzj") ? "四川省地震局 (SCDZJ)"
+      : (json.type == "eew-nied") ? "防災科学技術研究所 (NIED)"
+        : (json.type == "eew-kma") ? "기상청(KMA)"
+          : (json.type == "eew-jma") ? "気象庁(JMA)"
+            : (json.type == "eew-cwb") ? "中央氣象局 (CWB)"
+              : (json.type == "eew-fjdzj") ? "福建省地震局 (FJDZJ)" : "";
 
     TREM.Earthquake.emit("eew", json);
   }
@@ -2702,7 +2709,7 @@ TREM.Earthquake.on("eew", (data) => {
 
       const int = TREM.Utils.PGAToIntensity(
         TREM.Utils.pga(
-          data.Scale,
+          data.scale,
           d,
           setting["earthquake.siteEffect"] ? loc.siteEffect : undefined,
         ),
@@ -2735,7 +2742,7 @@ TREM.Earthquake.on("eew", (data) => {
       Nmsg = "已抵達 (預警盲區)";
     const notify = (level.label.includes("+") || level.label.includes("-")) ? level.label.replace("+", "強").replace("-", "弱") : level.label + "級";
     new Notification("EEW 強震即時警報", {
-      body   : `${notify} 地震，${Nmsg}\nM ${data.Scale} ${data.Location ?? "未知區域"}`,
+      body   : `${notify} 地震，${Nmsg}\nM ${data.scale} ${data.Location ?? "未知區域"}`,
       icon   : "../TREM.ico",
       silent : win.isFocused(),
     });
@@ -2813,9 +2820,9 @@ TREM.Earthquake.on("eew", (data) => {
   let _time = -1;
   let stamp = 0;
 
-  if ((EarthquakeList[data.id].Version ?? 1) < data.Version) {
+  if ((EarthquakeList[data.id].Version ?? 1) < data.number) {
     if (setting["audio.eew"] && Alert) TREM.Audios.update.play();
-    EarthquakeList[data.id].Version = data.Version;
+    EarthquakeList[data.id].Version = data.number;
   }
 
   eew[data.id] = {
@@ -2903,20 +2910,20 @@ TREM.Earthquake.on("eew", (data) => {
 
   INFO[find] = {
     ID              : data.id,
-    alert_number    : data.Version,
+    alert_number    : data.number,
     alert_intensity : MaxIntensity.value,
-    alert_location  : data.Location ?? "未知區域",
+    alert_location  : data.location ?? "未知區域",
     alert_time      : time,
     alert_sTime     : Math.floor(data.time + _speed(data.depth, distance).Stime * 1000),
     alert_pTime     : Math.floor(data.time + _speed(data.depth, distance).Ptime * 1000),
     alert_local     : level.value,
-    alert_magnitude : data.Scale,
+    alert_magnitude : data.scale,
     alert_depth     : data.depth,
     alert_provider  : data.Unit,
     alert_type      : classString,
     "intensity-1"   : `<font color="white" size="7"><b>${MaxIntensity.label}</b></font>`,
     "time-1"        : `<font color="white" size="2"><b>${time}</b></font>`,
-    "info-1"        : `<font color="white" size="4"><b>M ${data.Scale} </b></font><font color="white" size="3"><b> 深度: ${data.depth} km</b></font>`,
+    "info-1"        : `<font color="white" size="4"><b>M ${data.scale} </b></font><font color="white" size="3"><b> 深度: ${data.depth} km</b></font>`,
     distance,
   };
 
@@ -3010,16 +3017,16 @@ TREM.Earthquake.on("eew", (data) => {
 				+ ":" + NOW().getSeconds();
 
       let msg = setting["webhook.body"];
-      msg = msg.replace("%Depth%", data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.Scale);
+      msg = msg.replace("%Depth%", data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale);
 
       if (data.Function == "earthquake")
-        msg = msg.replace("%Provider%", "交通部中央氣象局");
+        msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
       else if (data.Function == "SCDZJ_earthquake")
-        msg = msg.replace("%Provider%", "四川省地震局");
+        msg = msg.replace("%Provider%", "四川省地震局 (SCDZJ)");
       else if (data.Function == "FJDZJ_earthquake")
-        msg = msg.replace("%Provider%", "福建省地震局");
+        msg = msg.replace("%Provider%", "福建省地震局 (FJDZJ)");
       else if (data.Function == "NIED_earthquake")
-        msg = msg.replace("%Provider%", "防災科学技術研究所");
+        msg = msg.replace("%Provider%", "防災科学技術研究所 (NIED)");
       else if (data.Function == "JMA_earthquake")
         msg = msg.replace("%Provider%", "気象庁(JMA)");
       else if (data.Function == "KMA_earthquake")
@@ -3060,9 +3067,9 @@ TREM.Earthquake.on("eewEnd", (id) => {
 
 
 TREM.Earthquake.on("tsunami", (data) => {
-  if (data.Version == 1) {
+  if (data.number == 1) {
     new Notification("海嘯警報", {
-      body   : `${data["UTC+8"]} 發生 ${data.Scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度`,
+      body   : `${data["UTC+8"]} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度`,
       icon   : "../TREM.ico",
       silent : win.isFocused(),
     });
@@ -3523,7 +3530,7 @@ function main(data) {
       ipcRenderer.send("screenshotEEW", {
         Function : data.Function,
         ID       : data.id,
-        Version  : data.Version,
+        Version  : data.number,
         Time     : NOW().getTime(),
         Shot     : EEWshotC,
       });
