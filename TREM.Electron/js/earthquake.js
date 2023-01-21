@@ -2135,8 +2135,6 @@ ipcRenderer.on("config:maplayer", (event, mapName, state) => {
 
 // #region EEW
 function FCMdata(json, Unit) {
-  console.log(json);
-
   if (server_timestamp.includes(json.timestamp) || NOW().getTime() - json.timestamp > 180000) return;
   server_timestamp.push(json.timestamp);
 
@@ -2174,7 +2172,6 @@ function FCMdata(json, Unit) {
 
     if (setting["audio.report"]) audioPlay("../audio/Report.wav");
     dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
-    console.debug(json);
 
     if (setting["report.show"]) win.showInactive();
 
