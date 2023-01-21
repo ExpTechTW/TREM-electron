@@ -78,46 +78,6 @@ ipcRenderer.on("settingError", (event, error) => {
 	init();
 });
 
-let station;
-
-// #region 選單
-(() => {
-	const el = document.getElementById("location.city");
-
-	for (const key of Object.keys(TREM.Resources.region)) {
-		const option = document.createElement("option");
-		option.text = key;
-		option.value = key;
-		el.appendChild(option);
-	}
-})();
-
-(async () => {
-	station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
-	const el = document.getElementById("Real-time.station");
-	const stations = {};
-
-	for (const key of Object.keys(station)) {
-		if (!stations[station[key].Loc.split(" ")[0]]) stations[station[key].Loc.split(" ")[0]] = {};
-		stations[station[key].Loc.split(" ")[0]][key] = station[key].Loc;
-	}
-
-	for (const city of Object.keys(stations)) {
-		const optgroup = document.createElement("optgroup");
-		optgroup.label = city;
-
-		for (const stationKey of Object.keys(stations[city])) {
-			const option = document.createElement("option");
-			option.text = `${stations[city][stationKey]} ${stationKey}`;
-			option.value = stationKey;
-			optgroup.appendChild(option);
-		}
-
-		el.appendChild(optgroup);
-	}
-})();
-// #endregion
-
 /**
  * 初始化設定
  */
@@ -285,6 +245,48 @@ function init() {
 				break;
 		}
 	});
+
+	let station;
+
+	// #region 選單
+	(() => {
+		const el = document.getElementById("location.city");
+
+		for (const key of Object.keys(TREM.Resources.region)) {
+			const option = document.createElement("option");
+			option.text = key;
+			option.value = key;
+			el.appendChild(option);
+		}
+	})();
+
+	(async () => {
+		station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+		const el = document.getElementById("Real-time.station");
+		const stations = {};
+
+		for (const key of Object.keys(station)) {
+			if (!stations[station[key].Loc.split(" ")[0]]) stations[station[key].Loc.split(" ")[0]] = {};
+			stations[station[key].Loc.split(" ")[0]][key] = station[key].Loc;
+		}
+
+		for (const city of Object.keys(stations)) {
+			const optgroup = document.createElement("optgroup");
+			optgroup.label = city;
+
+			for (const stationKey of Object.keys(stations[city])) {
+				const option = document.createElement("option");
+				option.text = `${stations[city][stationKey]} ${stationKey}`;
+				option.value = stationKey;
+				if (setting["Real-time.station"] == stationKey)
+					option.selected = true;
+				optgroup.appendChild(option);
+			}
+
+			el.appendChild(optgroup);
+		}
+	})();
+	// #endregion
 }
 
 function SelectSave(id) {
