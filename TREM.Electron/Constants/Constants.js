@@ -136,6 +136,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"trem-eq.Notification": {
+			type  : "toggle",
+			value : false,
+		},
 		"report.show": {
 			type  : "toggle",
 			value : true,

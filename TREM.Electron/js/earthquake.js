@@ -169,11 +169,14 @@ TREM.MapIntensity = {
 				if (setting["webhook.url"] != "" && setting["palert.Notification"]) {
 					dump({ level: 0, message: "Posting Notification palert Webhook", origin: "Webhook" });
 					this.description = "";
+
 					for (let index = this.MaxI; index != 0; index--) {
 						this.description += `${index}級\n`;
 						let countyName_index = "";
+
 						for (const palertEntry of rawPalertData.intensity) {
 							const [countyName, townName] = palertEntry.loc.split(" ");
+
 							if (palertEntry.intensity == index) {
 								if (countyName_index == "")
 									this.description += `${palertEntry.loc} `;
@@ -184,8 +187,10 @@ TREM.MapIntensity = {
 								countyName_index = countyName;
 							}
 						}
-						this.description += `\n`;
+
+						this.description += "\n";
 					}
+
 					// console.log(this.description);
 					const now = new Date(rawPalertData.time);
 					const _Now = now.getFullYear()
@@ -201,7 +206,7 @@ TREM.MapIntensity = {
 						embeds     : [
 							{
 								author: {
-									name     : rawPalertData.final ? "PAlert最終報" : "PAlert",
+									name     : rawPalertData.final ? "PAlert(最終報)" : "PAlert",
 									url      : rawPalertData.link,
 									icon_url : undefined,
 								},
@@ -2053,6 +2058,10 @@ async function init() {
 	// 		})
 	// 		.addTo(Maps.main);
 	// TREM.Earthquake.emit("eew", userJSON3);
+	// const userJSON = require(path.resolve(__dirname, "../js/1674382588199.json"));
+	// TREM.Earthquake.emit("trem-eq", userJSON);
+	// const userJSON1 = require(path.resolve(__dirname, "../js/1674382618201.json"));
+	// TREM.Earthquake.emit("trem-eq", userJSON1);
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
 		navigator.clipboard.writeText(document.getElementById("rt-station-local-id").innerText).then(() => {
@@ -3782,6 +3791,8 @@ function FCMdata(json, Unit) {
 		new Notification("海嘯資訊", { body: `${Now} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
 	} else if (json.type == "tsunami") {
 		TREM.Earthquake.emit("tsunami", json);
+	} else if (json.type == "trem-eq") {
+		TREM.Earthquake.emit("trem-eq", json);
 	} else if (json.type == "palert") {
 		TREM.MapIntensity.palert(json);
 	} else if (json.type == "pws") {
@@ -4263,6 +4274,69 @@ TREM.Earthquake.on("eewEnd", (id) => {
 });
 // #endregion
 
+TREM.Earthquake.on("trem-eq", (data) => {
+	// console.log(data);
+
+	if (setting["webhook.url"] != "" && setting["trem-eq.Notification"]) {
+		dump({ level: 0, message: "Posting Notification trem-eq Webhook", origin: "Webhook" });
+		let state_station;
+		let description = "";
+
+		if (data.cancel)
+			description += "取消\n";
+		else if (data.alert)
+			description += "警報\n";
+		else
+			description += "預報\n";
+		const now = new Date(data.time);
+		const Now = now.getFullYear()
+		+ "/" + (now.getMonth() + 1 < 10 ? "0" : "") + (now.getMonth() + 1)
+		+ "/" + (now.getDate() < 10 ? "0" : "") + now.getDate()
+		+ " " + (now.getHours() < 10 ? "0" : "") + now.getHours()
+		+ ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes()
+		+ ":" + (now.getSeconds() < 10 ? "0" : "") + now.getSeconds();
+		description += `\n開始時間 > ${Now}\n\n`;
+
+		for (let index = 0, keys = Object.keys(data.list), n = keys.length; index < n; index++) {
+			description += `${station[keys[index]].Loc} 最大震度 > ${data.list[keys[index]]}\n`;
+			state_station = index + 1;
+		}
+
+		description += `\n第 ${data.number} 報 | ${data.data_count} 筆數據 ${data.final ? "(最終報)" : ""}\n`;
+		description += `共 ${state_station} 站觸發 | 全部 ${data.total_station} 站\n`;
+		const _now = new Date(data.timestamp);
+		const _Now = _now.getFullYear()
+		+ "/" + (_now.getMonth() + 1 < 10 ? "0" : "") + (_now.getMonth() + 1)
+		+ "/" + (_now.getDate() < 10 ? "0" : "") + _now.getDate()
+		+ " " + (_now.getHours() < 10 ? "0" : "") + _now.getHours()
+		+ ":" + (_now.getMinutes() < 10 ? "0" : "") + _now.getMinutes()
+		+ ":" + (_now.getSeconds() < 10 ? "0" : "") + _now.getSeconds();
+		description += `現在時間 > ${_Now}\n`;
+		// console.log(description);
+		const msg = {
+			username   : "TREM | 臺灣即時地震監測",
+			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
+			content    : "地震檢知",
+			embeds     : [
+				{
+					author: {
+						name     : data.final ? "地震檢知(最終報)" : "地震檢知",
+						url      : `https://exptech.com.tw/api/v1/file?path=/trem-report.html&id=${data.report_id}`,
+						icon_url : undefined,
+					},
+					description: description,
+				},
+			],
+		};
+		fetch(setting["webhook.url"], {
+			method  : "POST",
+			headers : { "Content-Type": "application/json" },
+			body    : JSON.stringify(msg),
+		}).catch((error) => {
+			dump({ level: 2, message: error, origin: "Webhook" });
+		});
+	}
+});
 
 TREM.Earthquake.on("tsunami", (data) => {
 	if (data.number == 1) {

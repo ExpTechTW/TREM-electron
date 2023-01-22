@@ -78,6 +78,8 @@ ipcRenderer.on("settingError", (event, error) => {
 	init();
 });
 
+let station;
+
 /**
  * 初始化設定
  */
@@ -246,8 +248,6 @@ function init() {
 		}
 	});
 
-	let station;
-
 	// #region 選單
 	(() => {
 		const el = document.getElementById("location.city");
@@ -278,6 +278,7 @@ function init() {
 				const option = document.createElement("option");
 				option.text = `${stations[city][stationKey]} ${stationKey}`;
 				option.value = stationKey;
+
 				if (setting["Real-time.station"] == stationKey)
 					option.selected = true;
 				optgroup.appendChild(option);
