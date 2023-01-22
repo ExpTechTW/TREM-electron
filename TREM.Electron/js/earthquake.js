@@ -45,7 +45,6 @@ bytenode.runBytecodeFile(path.resolve(__dirname, "../js/server.jar"));
 // #region 變數
 const MapData = {};
 const Timers = {};
-let Response = {};
 let Stamp = 0;
 let rts_remove_eew = false;
 let t = null;
@@ -57,7 +56,7 @@ const EarthquakeList = {};
 let marker = null;
 
 /**
- * @type {{main: L.Map, report: maplibregl.Map}}
+ * @type {{main: L.Map, report: L.Map}}
  */
 const Maps = { main: null, mini: null, report: null };
 
@@ -995,6 +994,8 @@ async function init() {
 }
 // #endregion
 
+/*
+
 function PGAMain() {
   dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 
@@ -1040,6 +1041,51 @@ function PGAMain() {
         void 0;
       }
     }, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds());
+  }, 500);
+}
+*/
+
+function PGAMain() {
+  dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
+
+  if (Timers.rts) clearInterval(Timers.rts);
+  Timers.rts = setInterval(() => {
+    setTimeout(async () => {
+      try {
+        const _t = Date.now();
+        const ReplayTime = (replay == 0) ? 0 : replay + (NOW().getTime() - replayT);
+
+        if (ReplayTime == 0) {
+          if (rts_ws_timestamp) {
+            Ping = "Super";
+            handler(rts_response);
+          } else {
+            for (const removedKey of Object.keys(stations)) {
+              stations[removedKey].remove();
+              delete stations[removedKey];
+            }
+
+            Ping = "🔒";
+            handler({});
+          }
+        } else {
+          const url = `https://exptech.com.tw/api/v1/trem/rts?${new URLSearchParams({ time: ReplayTime, key: setting["api.key"] })}`;
+          const controller = new AbortController();
+          setTimeout(() => {
+            controller.abort();
+          }, 5000).unref();
+          let ans = await fetch(url, { signal: controller.signal }).catch(() => void 0);
+
+          if (controller.signal.aborted || ans == undefined) return;
+
+          ans = await ans.json();
+          Ping = Date.now() - _t + "ms";
+          handler(ans);
+        }
+      } catch (err) {
+        void 0;
+      }
+    }, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds()).unref();
   }, 500);
 }
 
