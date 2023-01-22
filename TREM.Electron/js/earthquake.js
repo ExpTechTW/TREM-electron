@@ -4275,7 +4275,7 @@ TREM.Earthquake.on("eewEnd", (id) => {
 // #endregion
 
 TREM.Earthquake.on("trem-eq", (data) => {
-	// console.log(data);
+	console.log(data);
 
 	if (setting["webhook.url"] != "" && setting["trem-eq.Notification"]) {
 		dump({ level: 0, message: "Posting Notification trem-eq Webhook", origin: "Webhook" });
