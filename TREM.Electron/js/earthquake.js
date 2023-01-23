@@ -1670,15 +1670,16 @@ async function init() {
 					})
 					.on("click", () => {
 						mapLock = false;
-						TREM.Earthquake.emit("focus", {
-							bounds  : [[21.77, 118.25], [25.47, 122.18]],
-							options : {
-								paddingBottomRight: [ 0, document.getElementById("map").offsetWidth / 6],
-							},
-						});
+						Mapsmainfocus();
+						// TREM.Earthquake.emit("focus", {
+						// 	bounds  : [[21.77, 118.25], [25.47, 122.18]],
+						// 	options : {
+						// 		paddingBottomRight: [ 0, document.getElementById("map").offsetWidth / 6],
+						// 	},
+						// });
 					})
 					.on("contextmenu", () => {
-						TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+						Mapsmainfocus();
 					})
 					.on("drag", () => mapLock = true)
 					.on("zoomend", () => {
@@ -1877,10 +1878,7 @@ async function init() {
 	setUserLocationMarker(setting["location.town"]);
 	$("#loading").text(TREM.Localization.getString("Application_Welcome"));
 	$("#load").delay(1000).fadeOut(1000);
-	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
-		Mapsmainfocus();
-	else
-		TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+	Mapsmainfocus();
 	setInterval(() => {
 		if (mapLock || !setting["map.autoZoom"]) return;
 
@@ -1989,7 +1987,8 @@ async function init() {
 						if (num >= 5)
 							TREM.Earthquake.emit("focus", { center: [eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon], size: Zoom });
 						else
-							TREM.Earthquake.emit("focus", { center: [(23.608428 + eew[Object.keys(eew)[index]].lat) / 2, ((120.799168 + eew[Object.keys(eew)[index]].lon) / 2) + X], size: Zoom });
+							TREM.Earthquake.emit("focus", { center: [eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon], size: Zoom });
+							// TREM.Earthquake.emit("focus", { center: [(23.608428 + eew[Object.keys(eew)[index]].lat) / 2, ((120.799168 + eew[Object.keys(eew)[index]].lon) / 2) + X], size: Zoom });
 						eew[Object.keys(eew)[index]].time = NOW().getTime();
 					}
 
@@ -2031,7 +2030,7 @@ async function init() {
 			} else
 			if (map_move_back) {
 				map_move_back = false;
-				TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+				Mapsmainfocus();
 			}
 		}
 	}, 500);
@@ -2812,13 +2811,16 @@ async function setUserLocationMarker(town, errcode = false) {
 // #endregion
 
 // #region 聚焦
-TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, linear = false) => {
+TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, jump = false) => {
 
 	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 		if (bounds)
-			Maps.main.fitBounds(bounds, options);
+			Maps.main.fitBounds(bounds, {
+				...options,
+				animate: !jump,
+			});
 		else if (center)
-			if (linear)
+			if (jump)
 				if (zoom)
 					Maps.main.jumpTo({ center, zoom });
 				else
@@ -2867,18 +2869,19 @@ TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, linear
 });
 
 function Mapsmainfocus() {
-
-	const camera = Maps.main.cameraForBounds(new maplibregl.LngLatBounds([ 118.25, 21.77 ], [ 122.18, 25.47 ]));
-	TREM.Earthquake.emit("focus", {
-		...camera,
-		options: {
-			padding  : { top: 0, right: Maps.main.getCanvas().width / 6, bottom: 0, left: 0 },
-			speed    : 2,
-			curve    : 1,
-			easing   : (e) => Math.sin(e * Math.PI / 2),
-			duration : 1000,
-		},
-	});
+	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+		const camera = Maps.main.cameraForBounds(new maplibregl.LngLatBounds([ 118.25, 21.77 ], [ 122.18, 25.47 ]));
+		TREM.Earthquake.emit("focus", {
+			...camera,
+			options: {
+				padding  : { top: 0, right: Maps.main.getCanvas().width / 6, bottom: 0, left: 0 },
+				speed    : 2,
+				curve    : 1,
+				easing   : (e) => Math.sin(e * Math.PI / 2),
+				duration : 1000,
+			},
+		});
+	} else TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
 }
 
 // #endregion
@@ -3352,10 +3355,7 @@ const stopReplay = function() {
 	// Exptech.v1.post("/trem/stop", { uuid: localStorage.UUID })
 		.catch((error) => dump({ level: 2, message: error, origin: "Verbose" }));
 
-	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
-		Mapsmainfocus();
-	else
-		TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+	Mapsmainfocus();
 	testEEWerror = false;
 	unstopReplaybtn();
 };
@@ -4379,10 +4379,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 			}
 
 		if (setting["audio.report"]) audioPlay("../audio/Water.wav");
-		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
-			Mapsmainfocus();
-		else
-			TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+		Mapsmainfocus();
 	}
 
 	if (data.cancel) {
@@ -4407,10 +4404,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 		if (TSUNAMI.warnIcon)
 			TSUNAMI.warnIcon.remove();
 		TSUNAMI = {};
-		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
-			Mapsmainfocus();
-		else
-			TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+		Mapsmainfocus();
 	} else {
 		if (!TSUNAMI.warnIcon) {
 			const warnIcon = L.icon({
