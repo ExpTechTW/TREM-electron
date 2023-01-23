@@ -2100,6 +2100,7 @@ function PGAMain() {
 						if ((NOW().getTime() - rts_ws_timestamp) > 10_000) {
 							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
 							// ipcMain.emit("restart");
+							reconnect();
 							PGAMainbkup();
 						}
 					} else {
@@ -2163,6 +2164,7 @@ function PGAMainbkup() {
 						if ((NOW().getTime() - rts_ws_timestamp) > 10_000) {
 							dump({ level: 0, message: "PGA timer backup time out 10s", origin: "PGATimer" });
 							// ipcMain.emit("restart");
+							reconnect();
 							PGAMain();
 						}
 					} else {
