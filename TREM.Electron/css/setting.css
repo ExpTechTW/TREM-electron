@@ -297,6 +297,16 @@ body.settingDisabled .control-title, body.settingDisabled .option-label {
     margin: 0 10px;
 }
 
+.control-location {
+    width: 21%;
+    margin-right: 10px;
+}
+
+.span-location {
+    margin-right: 10px;
+    color: rgb(var(--md-sys-color-on-background));
+}
+
 .option-container > *:last-child {
     justify-self: right;
 }

@@ -192,6 +192,14 @@ const Constants = Object.freeze({
 			type  : "select",
 			value : "歸仁區",
 		},
+		"location.lat": {
+			type  : "string",
+			value : "",
+		},
+		"location.lon": {
+			type  : "string",
+			value : "",
+		},
 		"theme.color": {
 			type  : "color",
 			value : "#6750A4",

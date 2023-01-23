@@ -2779,10 +2779,20 @@ async function setUserLocationMarker(town, errcode = false) {
 				await setUserLocationMarker(town);
 			}
 
-	[
-		, UserLocationLat,
-		UserLocationLon,
-	] = Location[setting["location.city"]][town];
+	if (setting["location.lat"] != "" && setting["location.lon"] != "")
+		[
+			, UserLocationLat,
+			UserLocationLon,
+		] = [
+			null,
+			setting["location.lat"],
+			setting["location.lon"],
+		];
+	else
+		[
+			, UserLocationLat,
+			UserLocationLon,
+		] = Location[setting["location.city"]][town];
 
 	if (!marker) {
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
@@ -3928,7 +3938,6 @@ TREM.Earthquake.on("eew", (data) => {
 				),
 				data.depth,
 			);
-
 			let int = TREM.Utils.PGAToIntensity(
 				TREM.Utils.pga(
 					data.scale,
@@ -3949,6 +3958,32 @@ TREM.Earthquake.on("eew", (data) => {
 				MaxIntensity = int;
 			GC[loc.code] = int.value;
 		}
+
+	if (setting["location.lat"] != "" && setting["location.lon"] != "") {
+		const d = TREM.Utils.twoSideDistance(
+			TREM.Utils.twoPointDistance(
+				{ lat: setting["location.lat"], lon: setting["location.lon"] },
+				{ lat: data.lat, lon: data.lon },
+			),
+			data.depth,
+		);
+		let int = TREM.Utils.PGAToIntensity(
+			TREM.Utils.pga(
+				data.scale,
+				d,
+				undefined,
+			),
+		);
+
+		if (data.depth == null) int = NSSPE[loc[0]] ?? 0;
+
+		level = int;
+		distance = d;
+		value = Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000) - 2;
+
+		if (int.value > MaxIntensity.value)
+			MaxIntensity = int;
+	}
 
 	// TREM.MapIntensity.expected(GC);
 
