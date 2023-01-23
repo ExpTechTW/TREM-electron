@@ -1862,7 +1862,6 @@ async function init() {
 		}
 
 	})().catch(e => dump({ level: 2, message: e }));
-	setUserLocationMarker(setting["location.town"]);
 	progressbar.value = (1 / progressStep) * 4;
 
 	// Files
@@ -1875,8 +1874,13 @@ async function init() {
 
 	progressbar.value = 1;
 
+	setUserLocationMarker(setting["location.town"]);
 	$("#loading").text(TREM.Localization.getString("Application_Welcome"));
 	$("#load").delay(1000).fadeOut(1000);
+	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+		Mapsmainfocus();
+	else
+		TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
 	setInterval(() => {
 		if (mapLock || !setting["map.autoZoom"]) return;
 
@@ -2368,7 +2372,7 @@ function handler(Json) {
 					.bindTooltip(station_tooltip, {
 						offset    : [8, 0],
 						permanent : false,
-						className : "rt-station-tooltip",
+						className : current_data == undefined ? "rt-station-tooltip-na" : "rt-station-tooltip",
 					})
 					.on("click", () => {
 						// Station[keys[index]].keepTooltipAlive = !Station[keys[index]].keepTooltipAlive;
@@ -4369,7 +4373,10 @@ TREM.Earthquake.on("tsunami", (data) => {
 			}
 
 		if (setting["audio.report"]) audioPlay("../audio/Water.wav");
-		TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), size: 7.75 });
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+			Mapsmainfocus();
+		else
+			TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
 	}
 
 	if (data.cancel) {
@@ -4394,6 +4401,10 @@ TREM.Earthquake.on("tsunami", (data) => {
 		if (TSUNAMI.warnIcon)
 			TSUNAMI.warnIcon.remove();
 		TSUNAMI = {};
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+			Mapsmainfocus();
+		else
+			TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
 	} else {
 		if (!TSUNAMI.warnIcon) {
 			const warnIcon = L.icon({

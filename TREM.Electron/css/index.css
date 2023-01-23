@@ -1783,6 +1783,18 @@ body:not(.darkmode) #here-marker {
 	padding-right: 8px;
 }
 
+.rt-station-tooltip-na {
+	background-color: rgb(var(--md-sys-color-surface-variant)) !important;
+	border: none !important;
+	border-radius: 8px !important;
+	color: rgb(var(--md-sys-color-on-surface-variant)) !important;
+	padding: 8px !important;
+}
+
+.rt-station-tooltip-na::before {
+	display: none !important;
+}
+
 svg#svg-defs {
 	position: absolute;
 	visibility: hidden;
