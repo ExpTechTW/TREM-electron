@@ -742,7 +742,7 @@ class EEW {
 		this.epicenter = { latitude: data.lat, longitude: data.lon };
 		this.location = data.location;
 		this.magnitude = data.scale;
-		this.source = (data.type == "eew-cwb") ? "中央氣象局" : (data.type == "eew-nied") ? "日本防災科研" : (data.type == "eew-jma") ? "日本氣象廳" : (data.type == "eew-kma") ? "韓國氣象廳" : (data.type == "eew-fjdzj") ? "中國福建省地震局" : (data.type == "eew-scdzj") ? "中國四川省地震局" : (data.Unit) ? data.Unit : "未知單位";
+		this.source = data.Unit;
 
 		if (data.number > (this.version || 0)) {
 			this._expected = new Map();
