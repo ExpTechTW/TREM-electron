@@ -169,9 +169,11 @@ TREM.MapIntensity = {
 				if (setting["webhook.url"] != "" && setting["palert.Notification"]) {
 					dump({ level: 0, message: "Posting Notification palert Webhook", origin: "Webhook" });
 					this.description = "";
+					let intensity_index = 0;
 
 					for (let index = this.MaxI; index != 0; index--) {
-						this.description += `${index}級\n`;
+						if (rawPalertData.intensity.length != intensity_index)
+							this.description += `${index}級\n`;
 						let countyName_index = "";
 
 						for (const palertEntry of rawPalertData.intensity) {
@@ -185,6 +187,7 @@ TREM.MapIntensity = {
 								else
 									this.description += `\n${palertEntry.loc} `;
 								countyName_index = countyName;
+								intensity_index += 1;
 							}
 						}
 
@@ -2032,8 +2035,12 @@ async function init() {
 	// const userJSON = require(path.resolve(__dirname, "../js/1669484541389.json"));
 	// TREM.Intensity.handle(userJSON);
 	// ipcRenderer.send("intensity-Notification", userJSON);
-	// const userJSON1 = require(path.resolve(__dirname, "../js/1674281248871.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1674419891226.json"));
+	// TREM.MapIntensity.palert(userJSON);
+	// const userJSON1 = require(path.resolve(__dirname, "../js/1674419911217.json"));
 	// TREM.MapIntensity.palert(userJSON1);
+	// const userJSON2 = require(path.resolve(__dirname, "../js/1674419931238.json"));
+	// TREM.MapIntensity.palert(userJSON2);
 	// const userJSON2 = require(path.resolve(__dirname, "../js/1667356513251.json"));
 	// handler(userJSON2);
 	// const userJSON3 = require(path.resolve(__dirname, "../js/1674021360000.json"));
