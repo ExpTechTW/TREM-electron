@@ -2881,7 +2881,9 @@ function Mapsmainfocus() {
 				duration : 1000,
 			},
 		});
-	} else TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+	} else {
+		TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
+	}
 }
 
 // #endregion
@@ -3879,10 +3881,10 @@ function FCMdata(json, Unit) {
 		json.Unit = (json.type == "eew-scdzj") ? "四川省地震局 (SCDZJ)"
 			: (json.type == "eew-nied") ? "防災科学技術研究所 (NIED)"
 				: (json.type == "eew-kma") ? "기상청(KMA)"
-				: (json.type == "eew-jma") ? "気象庁(JMA)"
-					: (json.type == "eew-cwb") ? "中央氣象局 (CWB)"
-					: (json.type == "eew-fjdzj") ? "福建省地震局 (FJDZJ)"
-						: (json.Unit) ? json.Unit : "";
+					: (json.type == "eew-jma") ? "気象庁(JMA)"
+						: (json.type == "eew-cwb") ? "中央氣象局 (CWB)"
+							: (json.type == "eew-fjdzj") ? "福建省地震局 (FJDZJ)"
+								: (json.Unit) ? json.Unit : "";
 
 		if (TREM.Intensity.isTriggered)
 			TREM.Intensity.clear();
