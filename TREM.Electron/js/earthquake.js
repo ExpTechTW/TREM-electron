@@ -3799,7 +3799,7 @@ function FCMdata(json, Unit) {
 			+ " " + now.getHours()
 			+ ":" + now.getMinutes();
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-		new Notification("海嘯資訊", { body: `${Now} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
+		new Notification("海嘯資訊", { body: `${Now}\n${json.location} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
 	} else if (json.type == "tsunami") {
 		TREM.Earthquake.emit("tsunami", json);
 	} else if (json.type == "trem-eq") {
@@ -3864,19 +3864,25 @@ function FCMdata(json, Unit) {
 				Shot     : 1,
 			});
 		}, 5000);
-	} else if (json.type.startsWith("eew") || json.replay_timestamp || json.Test) {
+	} else if (json.type.startsWith("eew")) {
 		if (replay != 0 && !json.replay_timestamp) return;
 
-		if (replay == 0 && json.replay_timestamp) return;
-
 		if (
-			(json.Function == "eew-scdzj" && !setting["accept.eew.SCDZJ"])
-			|| (json.Function == "eew-nied" && !setting["accept.eew.NIED"])
-			|| (json.Function == "eew-jma" && !setting["accept.eew.JMA"])
-			|| (json.Function == "eew-kma" && !setting["accept.eew.KMA"])
-			|| (json.Function == "eew-cwb" && !setting["accept.eew.CWB"])
-			|| (json.Function == "eew-fjdzj" && !setting["accept.eew.FJDZJ"])
+			(json.type == "eew-scdzj" && !setting["accept.eew.SCDZJ"])
+			|| (json.type == "eew-nied" && !setting["accept.eew.NIED"])
+			|| (json.type == "eew-jma" && !setting["accept.eew.JMA"])
+			|| (json.type == "eew-kma" && !setting["accept.eew.KMA"])
+			|| (json.type == "eew-cwb" && !setting["accept.eew.CWB"])
+			|| (json.type == "eew-fjdzj" && !setting["accept.eew.FJDZJ"])
 		) return;
+
+		json.Unit = (json.type == "eew-scdzj") ? "四川省地震局 (SCDZJ)"
+			: (json.type == "eew-nied") ? "防災科学技術研究所 (NIED)"
+				: (json.type == "eew-kma") ? "기상청(KMA)"
+				: (json.type == "eew-jma") ? "気象庁(JMA)"
+					: (json.type == "eew-cwb") ? "中央氣象局 (CWB)"
+					: (json.type == "eew-fjdzj") ? "福建省地震局 (FJDZJ)"
+						: (json.Unit) ? json.Unit : "";
 
 		if (TREM.Intensity.isTriggered)
 			TREM.Intensity.clear();
@@ -4136,7 +4142,7 @@ TREM.Earthquake.on("eew", (data) => {
 		alert_local     : level.value,
 		alert_magnitude : data.scale ?? "?",
 		alert_depth     : data.depth ?? "?",
-		alert_provider  : TREM.EEW.get(data.id).source,
+		alert_provider  : data.Unit,
 		alert_type      : classString,
 		"intensity-1"   : `<font color="white" size="7"><b>${MaxIntensity.label}</b></font>`,
 		"time-1"        : `<font color="white" size="2"><b>${time}</b></font>`,
@@ -4242,13 +4248,13 @@ TREM.Earthquake.on("eew", (data) => {
 			// 	else
 			// 		msg = msg.replace("%Provider%", data.Unit);
 			if (data.type == "eew-cwb")
-				msg = msg.replace("%Provider%", "交通部中央氣象局");
+				msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
 			else if (data.type == "eew-scdzj")
-				msg = msg.replace("%Provider%", "四川省地震局");
+				msg = msg.replace("%Provider%", "四川省地震局 (SCDZJ)");
 			else if (data.type == "eew-fjdzj")
-				msg = msg.replace("%Provider%", "福建省地震局");
+				msg = msg.replace("%Provider%", "福建省地震局 (FJDZJ)");
 			else if (data.type == "eew-nied")
-				msg = msg.replace("%Provider%", "防災科学技術研究所");
+				msg = msg.replace("%Provider%", "防災科学技術研究所 (NIED)");
 			else if (data.type == "eew-jma")
 				msg = msg.replace("%Provider%", "気象庁(JMA)");
 			else if (data.type == "eew-kma")
@@ -4358,7 +4364,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 			+ " " + now.getHours()
 			+ ":" + now.getMinutes();
 		new Notification("海嘯警報", {
-			body   : `${Now} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度`,
+			body   : `${Now} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度\n\n請迅速疏散至安全場所`,
 			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});
@@ -4769,7 +4775,7 @@ function main(data) {
 	let offsetY = 0;
 
 	const cursor = INFO.findIndex((v) => v.ID == data.id) + 1;
-	const iconUrl = cursor <= 4 && INFO.length > 1 ? "../image/cross.png" : "../image/cross.png";
+	const iconUrl = cursor <= 4 && INFO.length > 1 ? `../image/cross${cursor}.png` : "../image/cross.png";
 
 	if (cursor <= 4 && INFO.length > 1) {
 		epicenterIcon = L.icon({
@@ -4878,7 +4884,7 @@ function main(data) {
 		}, 300);
 	}
 
-	if (NOW().getTime() - data.timestamp > ((data.lon < 122.18 && data.lat < 25.47 && data.lon > 118.25 && data.lat > 21.77) ? 120_000 : 180_000) || Cancel) {
+	if (NOW().getTime() - data.time > 240_000 || Cancel) {
 		TREM.Earthquake.emit("eewEnd", data.id);
 		TREM.MapIntensity.clear();
 
