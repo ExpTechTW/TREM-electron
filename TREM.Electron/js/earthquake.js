@@ -2312,9 +2312,9 @@ function handler(Json) {
 			}
 
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
-				station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-id">${keys[index]}</span><span class="rt-station-name">${station[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${IntensityI(intensity)}</span></div>`;
+				station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span class="rt-station-id">${keys[index]}</span><span class="rt-station-name">${station[keys[index]].Loc}</span><span class="rt-station-pga">${amount}</span><span class="rt-station-int">${current_data.i}</span></div>`;
 			else
-				station_tooltip = `<div>${keys[index]}</div><div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${IntensityI(intensity)}</div>`;
+				station_tooltip = `<div>${keys[index]}</div><div>${station[keys[index]].Loc}</div><div>${amount}</div><div>${current_data.i}</div>`;
 		}
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
