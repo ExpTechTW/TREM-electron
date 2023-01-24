@@ -3447,6 +3447,7 @@ ipcMain.on("report-Notification", (event, report) => {
 							inline : false,
 						},
 					],
+					color: report.location.startsWith("TREM 人工定位") ? 9807270 : report.earthquakeNo % 1000 ? 15158332 : 3066993,
 				},
 			],
 		};
@@ -3902,6 +3903,8 @@ function FCMdata(json, Unit) {
 			TREM.Intensity.clear();
 		stopReplaybtn();
 		TREM.Earthquake.emit("eew", json);
+	} else {
+		console.log(json);
 	}
 }
 // #endregion
@@ -4377,10 +4380,11 @@ TREM.Earthquake.on("trem-eq", (data) => {
 				{
 					author: {
 						name     : data.final ? "地震檢知(最終報)" : "地震檢知",
-						url      : `https://exptech.com.tw/api/v1/file?path=/trem-report.html&id=${data.report_id}`,
+						url      : (data.alert) ? `https://exptech.com.tw/api/v1/file?path=/trem-report.html&id=${data.report_id}` : "",
 						icon_url : undefined,
 					},
-					description: description,
+					description : description,
+					color       : (data.cancel) ? 9807270 : (data.alert) ? 15158332 : 15105570,
 				},
 			],
 		};
