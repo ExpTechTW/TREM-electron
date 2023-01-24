@@ -3209,10 +3209,11 @@ function addReport(report, prepend = false) {
 				TREM.replayOverviewButton(report);
 				// localStorage.TestID = report.ID;
 				// ipcRenderer.send("testEEW");
+			} else if (report.trem.length != 0) {
+				TREM.replaytremOverviewButton(report);
 			} else {
 				const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
 				ipcRenderer.send("testoldtimeEEW", oldtime);
-				ipcRenderer.send("testEEW");
 				// TREM.set_report_overview = 1;
 				// TREM.Report.setView("eq-report-overview", report);
 				// changeView("report", "#reportView_btn");
@@ -3392,6 +3393,12 @@ function stopReplaybtn() {
 TREM.replayOverviewButton = (report) => {
 	// localStorage.TestID = ["20230116135054"];
 	localStorage.TestID = report.ID;
+	ipcRenderer.send("testEEW");
+};
+
+TREM.replaytremOverviewButton = (report) => {
+	// localStorage.Testtrem = ["80"];
+	localStorage.Testtrem = report.trem;
 	ipcRenderer.send("testEEW");
 };
 
@@ -3576,6 +3583,7 @@ ipcMain.on("testEEW", () => {
 	toggleNav(false);
 	stopReplaybtn();
 	replaytestEEW = NOW().getTime();
+	let list_Testtrem;
 
 	if (localStorage.TestID != undefined) {
 		const list = localStorage.TestID.split(",");
@@ -3585,7 +3593,6 @@ ipcMain.on("testEEW", () => {
 				const data = {
 					uuid : localStorage.UUID,
 					id   : list[index],
-					trem : [],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 				axios.post(posturl + "replay", data)
@@ -3599,6 +3606,50 @@ ipcMain.on("testEEW", () => {
 					});
 			}, 100);
 		delete localStorage.TestID;
+
+		if (localStorage.Testtrem != undefined) {
+			list_Testtrem = localStorage.Testtrem.split(",");
+			for (let index = 0; index < list_Testtrem.length; index++)
+				setTimeout(() => {
+					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+					const data = {
+						uuid : localStorage.UUID,
+						trem : list_Testtrem[index],
+					};
+					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+					axios.post(posturl + "replay", data)
+					// Exptech.v1.post("/trem/replay", data)
+						.then(() => {
+							testEEWerror = false;
+						})
+						.catch((error) => {
+							testEEWerror = true;
+							dump({ level: 2, message: error, origin: "Verbose" });
+						});
+				}, 100);
+			delete localStorage.Testtrem;
+		}
+	} else if (localStorage.Testtrem != undefined) {
+		const list = localStorage.Testtrem.split(",");
+		for (let index = 0; index < list.length; index++)
+			setTimeout(() => {
+				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+				const data = {
+					uuid : localStorage.UUID,
+					trem : list[index],
+				};
+				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+				axios.post(posturl + "replay", data)
+				// Exptech.v1.post("/trem/replay", data)
+					.then(() => {
+						testEEWerror = false;
+					})
+					.catch((error) => {
+						testEEWerror = true;
+						dump({ level: 2, message: error, origin: "Verbose" });
+					});
+			}, 100);
+		delete localStorage.Testtrem;
 	} else {
 		dump({ level: 0, message: "Start EEW NO TestID Test", origin: "EEW" });
 		const data = {

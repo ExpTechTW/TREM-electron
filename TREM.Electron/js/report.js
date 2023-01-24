@@ -598,6 +598,12 @@ TREM.Report = {
 		// 		stopReplaybtn();
 		// 	};
 		// }
+		} else if (report.trem.length != 0) {
+			document.getElementById("report-replay").style.display = "block";
+
+			document.getElementById("report-replay").onclick = function() {
+				TREM.replaytremOverviewButton(report);
+			};
 		} else if (report.identifier != undefined) {
 			document.getElementById("report-replay").style.display = "block";
 
