@@ -2072,6 +2072,8 @@ async function init() {
 	// TREM.Earthquake.emit("trem-eq", userJSON);
 	// const userJSON1 = require(path.resolve(__dirname, "../js/1674382618201.json"));
 	// TREM.Earthquake.emit("trem-eq", userJSON1);
+	// const userJSON = require(path.resolve(__dirname, "../js/1674533864290.json"));
+	// FCMdata(userJSON, type = "websocket");
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
 		navigator.clipboard.writeText(document.getElementById("rt-station-local-id").innerText).then(() => {
@@ -3879,8 +3881,10 @@ function FCMdata(json, Unit) {
 				Shot     : 1,
 			});
 		}, 5000);
-	} else if (json.type.startsWith("eew")) {
+	} else if (json.type.startsWith("eew") || json.type == "trem-eew") {
 		if (replay != 0 && !json.replay_timestamp) return;
+
+		// if (json.max < 3) return;
 
 		if (
 			(json.type == "eew-scdzj" && !setting["accept.eew.SCDZJ"])
@@ -3897,7 +3901,8 @@ function FCMdata(json, Unit) {
 					: (json.type == "eew-jma") ? "気象庁(JMA)"
 						: (json.type == "eew-cwb") ? "中央氣象局 (CWB)"
 							: (json.type == "eew-fjdzj") ? "福建省地震局 (FJDZJ)"
-								: (json.Unit) ? json.Unit : "";
+								: (json.type == "trem-eew") ? "NSSPE(無震源參數推算)"
+									: (json.Unit) ? json.Unit : "";
 
 		if (TREM.Intensity.isTriggered)
 			TREM.Intensity.clear();
@@ -3931,7 +3936,7 @@ TREM.Earthquake.on("eew", (data) => {
 	const GC = {};
 	let level;
 	let MaxIntensity = { label: "", value: -1 };
-	const NSSPE = data.Intensity ?? {};
+	const NSSPE = data.intensity ?? {};
 
 	for (const city in TREM.Resources.region)
 		for (const town in TREM.Resources.region[city]) {
@@ -3997,6 +4002,11 @@ TREM.Earthquake.on("eew", (data) => {
 	if (level.value < Number(setting["eew.Intensity"])) Alert = false;
 
 	let Nmsg = "";
+
+	if (data.type == "trem-eew") {
+		data.scale = null;
+		data.depth = null;
+	}
 
 	if (value > 0)
 		Nmsg = `${value}秒後抵達`;
@@ -4301,6 +4311,8 @@ TREM.Earthquake.on("eew", (data) => {
 				msg = msg.replace("%Provider%", "気象庁(JMA)");
 			else if (data.type == "eew-kma")
 				msg = msg.replace("%Provider%", "기상청(KMA)");
+			else if (data.type == "trem-eew")
+				msg = msg.replace("%Provider%", "NSSPE(無震源參數推算)");
 			else if (data.type == "TREM")
 				msg = msg.replace("%Provider%", data.Unit);
 			else if (data.type == "eew")
