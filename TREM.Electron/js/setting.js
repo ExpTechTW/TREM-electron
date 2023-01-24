@@ -502,7 +502,7 @@ function setList(args, el, event) {
 
 function send() {
 	let data = {};
-	let Unit_type = "eew";
+	let Unit_type = "eew-test";
 	const testtext_value = document.getElementById("testtext").value;
 
 	if (testtext_value == "中央氣象局") Unit_type = "eew-cwb";
