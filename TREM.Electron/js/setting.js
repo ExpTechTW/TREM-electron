@@ -256,6 +256,9 @@ function init() {
 			const option = document.createElement("option");
 			option.text = key;
 			option.value = key;
+
+			if (setting["location.city"] == key)
+				option.selected = true;
 			el.appendChild(option);
 		}
 	})();

@@ -3602,8 +3602,8 @@ ipcMain.on("testEEW", () => {
 	} else {
 		dump({ level: 0, message: "Start EEW NO TestID Test", origin: "EEW" });
 		const data = {
-			uuid: localStorage.UUID,
-			trem:[],
+			uuid : localStorage.UUID,
+			trem : [],
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 		axios.post(posturl + "replay", data)
@@ -4406,7 +4406,7 @@ TREM.Earthquake.on("trem-eq", (data) => {
 		}).catch((error) => {
 			dump({ level: 2, message: error, origin: "Webhook" });
 		});
-	}else if (setting["webhook.url"] != "" && setting["trem-eq.Notification"]) {
+	} else if (setting["webhook.url"] != "" && setting["trem-eq.Notification"]) {
 		dump({ level: 0, message: "Posting Notification trem-eq Webhook", origin: "Webhook" });
 		let state_station;
 		let description = "";
