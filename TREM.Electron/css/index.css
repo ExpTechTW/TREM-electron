@@ -1641,6 +1641,10 @@ body:not(.darkmode) #here-marker {
 	content: "7";
 }
 
+#alert-local.na #alert-local-intensity::before {
+	content: "?"
+}
+
 #rt-maxintensity.na::before {
 	content: "-"
 }

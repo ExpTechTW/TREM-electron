@@ -3295,7 +3295,8 @@ function IntensityToClassString(level) {
 							: (level == 3) ? "three"
 								: (level == 2) ? "two"
 									: (level == 1) ? "one"
-										: "zero";
+										: (level == "na") ? "na"
+											: "zero";
 
 	if (tinycolor(setting["theme.customColor"] ? setting[`theme.int.${level}`] : [
 		"#757575",
@@ -4186,12 +4187,12 @@ TREM.Earthquake.on("eew", (data) => {
 	INFO[find] = {
 		ID              : data.id,
 		alert_number    : data.number,
-		alert_intensity : MaxIntensity.value,
+		alert_intensity : (data.depth == null) ? data.max ?? 0 : MaxIntensity.value,
 		alert_location  : data.location ?? "未知區域",
 		alert_time      : time,
 		alert_sTime     : (data.depth == null) ? null : Math.floor(data.time + _speed(data.depth, distance).Stime * 1000),
 		alert_pTime     : (data.depth == null) ? null : Math.floor(data.time + _speed(data.depth, distance).Ptime * 1000),
-		alert_local     : level.value,
+		alert_local     : (data.depth == null) ? "na" : level.value,
 		alert_magnitude : data.scale ?? "?",
 		alert_depth     : data.depth ?? "?",
 		alert_provider  : data.Unit,
