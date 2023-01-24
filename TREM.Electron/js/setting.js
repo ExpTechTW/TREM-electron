@@ -344,6 +344,28 @@ function CheckSave(id) {
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 
+	if (id == "trem-eq.alert.Notification") {
+		const element = document.getElementById("trem-eq.Notification");
+		element.checked = false;
+
+		if (is_setting_disabled) element.disabled = true;
+		else element.disabled = false;
+
+		ipcRenderer.send("config:value", "trem-eq.Notification", false);
+		dump({ level: 0, message: `Value Changed trem-eq.Notification: ${setting["trem-eq.Notification"]} -> false`, origin: "Setting" });
+	}
+
+	if (id == "trem-eq.Notification") {
+		const element = document.getElementById("trem-eq.alert.Notification");
+		element.checked = false;
+
+		if (is_setting_disabled) element.disabled = true;
+		else element.disabled = false;
+
+		ipcRenderer.send("config:value", "trem-eq.alert.Notification", false);
+		dump({ level: 0, message: `Value Changed trem-eq.alert.Notification: ${setting["trem-eq.alert.Notification"]} -> false`, origin: "Setting" });
+	}
+
 	if (id == "map.jp" || id == "map.cn" || id == "map.sk" || id == "map.nk")
 		$("#MAPReloadButton").fadeIn(100);
 

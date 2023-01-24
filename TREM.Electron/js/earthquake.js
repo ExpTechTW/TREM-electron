@@ -4354,7 +4354,59 @@ TREM.Earthquake.on("eewEnd", (id) => {
 TREM.Earthquake.on("trem-eq", (data) => {
 	console.log(data);
 
-	if (setting["webhook.url"] != "" && setting["trem-eq.Notification"]) {
+	if (setting["webhook.url"] != "" && setting["trem-eq.alert.Notification"] && data.alert) {
+		dump({ level: 0, message: "Posting Notification trem-eq alert Webhook", origin: "Webhook" });
+		let state_station;
+		let description = "警報\n";
+		const now = new Date(data.time);
+		const Now = now.getFullYear()
+		+ "/" + (now.getMonth() + 1 < 10 ? "0" : "") + (now.getMonth() + 1)
+		+ "/" + (now.getDate() < 10 ? "0" : "") + now.getDate()
+		+ " " + (now.getHours() < 10 ? "0" : "") + now.getHours()
+		+ ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes()
+		+ ":" + (now.getSeconds() < 10 ? "0" : "") + now.getSeconds();
+		description += `\n開始時間 > ${Now}\n\n`;
+
+		for (let index = 0, keys = Object.keys(data.list), n = keys.length; index < n; index++) {
+			description += `${station[keys[index]].Loc} 最大震度 > ${data.list[keys[index]]}\n`;
+			state_station = index + 1;
+		}
+
+		description += `\n第 ${data.number} 報 | ${data.data_count} 筆數據 ${data.final ? "(最終報)" : ""}\n`;
+		description += `共 ${state_station} 站觸發 | 全部 ${data.total_station} 站\n`;
+		const _now = new Date(data.timestamp);
+		const _Now = _now.getFullYear()
+		+ "/" + (_now.getMonth() + 1 < 10 ? "0" : "") + (_now.getMonth() + 1)
+		+ "/" + (_now.getDate() < 10 ? "0" : "") + _now.getDate()
+		+ " " + (_now.getHours() < 10 ? "0" : "") + _now.getHours()
+		+ ":" + (_now.getMinutes() < 10 ? "0" : "") + _now.getMinutes()
+		+ ":" + (_now.getSeconds() < 10 ? "0" : "") + _now.getSeconds();
+		description += `現在時間 > ${_Now}\n`;
+		// console.log(description);
+		const msg = {
+			username   : "TREM | 臺灣即時地震監測",
+			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
+			content    : "地震檢知",
+			embeds     : [
+				{
+					author: {
+						name     : data.final ? "地震檢知(最終報)" : "地震檢知",
+						url      : `https://exptech.com.tw/api/v1/file?path=/trem-report.html&id=${data.report_id}`,
+						icon_url : undefined,
+					},
+					description : description,
+					color       : 15158332,
+				},
+			],
+		};
+		fetch(setting["webhook.url"], {
+			method  : "POST",
+			headers : { "Content-Type": "application/json" },
+			body    : JSON.stringify(msg),
+		}).catch((error) => {
+			dump({ level: 2, message: error, origin: "Webhook" });
+		});
+	}else if (setting["webhook.url"] != "" && setting["trem-eq.Notification"]) {
 		dump({ level: 0, message: "Posting Notification trem-eq Webhook", origin: "Webhook" });
 		let state_station;
 		let description = "";
