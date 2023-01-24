@@ -3212,6 +3212,7 @@ function addReport(report, prepend = false) {
 			} else {
 				const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
 				ipcRenderer.send("testoldtimeEEW", oldtime);
+				ipcRenderer.send("testEEW");
 				// TREM.set_report_overview = 1;
 				// TREM.Report.setView("eq-report-overview", report);
 				// changeView("report", "#reportView_btn");
@@ -3584,6 +3585,7 @@ ipcMain.on("testEEW", () => {
 				const data = {
 					uuid : localStorage.UUID,
 					id   : list[index],
+					trem : [],
 				};
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 				axios.post(posturl + "replay", data)
@@ -3601,6 +3603,7 @@ ipcMain.on("testEEW", () => {
 		dump({ level: 0, message: "Start EEW NO TestID Test", origin: "EEW" });
 		const data = {
 			uuid: localStorage.UUID,
+			trem:[],
 		};
 		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 		axios.post(posturl + "replay", data)
@@ -3919,6 +3922,8 @@ function FCMdata(json, Unit) {
 TREM.Earthquake.on("eew", (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.log(data);
+
+	if (data.type == "trem-eew" && data.lat == null || data.lon == null) return;
 
 	if (!TREM.EEW.has(data.id))
 		TREM.EEW.set(data.id, new EEW(data));
