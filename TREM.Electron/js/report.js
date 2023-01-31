@@ -443,8 +443,7 @@ TREM.Report = {
 
 		document.getElementById("report-overview-number").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
 		document.getElementById("report-overview-location").innerText = report.location;
-		const time = new Date((new Date(`${report.originTime} GMT+08:00`)).toLocaleString("en-US", { timeZone: "Asia/Taipei" }));
-		document.getElementById("report-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
+		document.getElementById("report-overview-time").innerText = report.originTime;
 		document.getElementById("report-overview-latitude").innerText = report.epicenterLat;
 		document.getElementById("report-overview-longitude").innerText = report.epicenterLon;
 
