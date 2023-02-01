@@ -1667,7 +1667,7 @@
                                                 <span lang="kr">?</span>
                                                 <span lang="ru">?</span>
                                                 <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">發地震檢知 Webhook通知。</span>
+                                                <span lang="zh-TW">發地震檢知 Webhook通知。(需要特殊通道才會生效)</span>
                                             </span>
                                         </div>
                                         <label class="md3 switch">
@@ -1687,7 +1687,7 @@
                                                 <span lang="kr">?</span>
                                                 <span lang="ru">?</span>
                                                 <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">地震檢知只收警報通知</span>
+                                                <span lang="zh-TW">地震檢知(警報)通知</span>
                                                 <span class="option-label-id">trem-eq.alert.Notification</span>
                                             </span>
                                             <span class="option-label-description">
@@ -1696,7 +1696,7 @@
                                                 <span lang="kr">?</span>
                                                 <span lang="ru">?</span>
                                                 <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">發地震檢知只收警報 Webhook通知。</span>
+                                                <span lang="zh-TW">發地震檢知(警報) Webhook通知。</span>
                                             </span>
                                         </div>
                                         <label class="md3 switch">
@@ -1705,6 +1705,41 @@
                                                 <span class="material-symbols-rounded icon">done</span>
                                             </span>
                                         </label>
+                                    </div>
+                                </div>
+                                <div class="option-container">
+                                    <div class="option-label">
+                                        <span class="option-label-title">
+                                            <span lang="en">?</span>
+                                            <span lang="ja">?</span>
+                                            <span lang="kr">?</span>
+                                            <span lang="ru">?</span>
+                                            <span lang="zh-CN">?</span>
+                                            <span lang="zh-TW">地震檢知(警報)震度</span>
+                                            <span class="option-label-id">trem-eq.alert.Notification.Intensity</span>
+                                        </span>
+                                        <span class="option-label-description">
+                                            <span lang="en">?</span>
+                                            <span lang="ja">?</span>
+                                            <span lang="kr">?</span>
+                                            <span lang="ru">?</span>
+                                            <span lang="zh-CN">?</span>
+                                            <span lang="zh-TW">地震檢知(警報)超過「地震檢知(警報)震度」時觸發 。</span>
+                                        </span>
+                                    </div>
+                                    <div class="control">
+                                        <select id="trem-eq.alert.Notification.Intensity" name="city" onchange="SelectSave('trem-eq.alert.Notification.Intensity')">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5-</option>
+                                            <option value="6">5+</option>
+                                            <option value="7">6-</option>
+                                            <option value="8">6+</option>
+                                            <option value="9">7</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>

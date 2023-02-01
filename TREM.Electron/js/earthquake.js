@@ -4406,8 +4406,8 @@ TREM.Earthquake.on("trem-eq", (data) => {
 	console.log(data);
 
 	if (setting["webhook.url"] != "" && setting["trem-eq.alert.Notification"] && data.alert) {
-		dump({ level: 0, message: "Posting Notification trem-eq alert Webhook", origin: "Webhook" });
 		let state_station;
+		let Max_Intensity = 0;
 		let description = "警報\n";
 		const now = new Date(data.time);
 		const Now = now.getFullYear()
@@ -4419,7 +4419,8 @@ TREM.Earthquake.on("trem-eq", (data) => {
 		description += `\n開始時間 > ${Now}\n\n`;
 
 		for (let index = 0, keys = Object.keys(data.list), n = keys.length; index < n; index++) {
-			description += `${station[keys[index]].Loc} 最大震度 > ${data.list[keys[index]]}\n`;
+			if (data.list[keys[index]] > Max_Intensity) Max_Intensity = data.list[keys[index]];
+			description += `${station[keys[index]].Loc} 最大震度 > ${IntensityI(data.list[keys[index]])}\n`;
 			state_station = index + 1;
 		}
 
@@ -4450,15 +4451,18 @@ TREM.Earthquake.on("trem-eq", (data) => {
 				},
 			],
 		};
-		fetch(setting["webhook.url"], {
-			method  : "POST",
-			headers : { "Content-Type": "application/json" },
-			body    : JSON.stringify(msg),
-		}).catch((error) => {
-			dump({ level: 2, message: error, origin: "Webhook" });
-		});
-	} else if (setting["webhook.url"] != "" && setting["trem-eq.Notification"]) {
-		dump({ level: 0, message: "Posting Notification trem-eq Webhook", origin: "Webhook" });
+
+		if (setting["trem-eq.alert.Notification.Intensity"] <= Max_Intensity) {
+			fetch(setting["webhook.url"], {
+				method  : "POST",
+				headers : { "Content-Type": "application/json" },
+				body    : JSON.stringify(msg),
+			}).catch((error) => {
+				dump({ level: 2, message: error, origin: "Webhook" });
+			});
+			dump({ level: 0, message: "Posting Notification trem-eq alert Webhook", origin: "Webhook" });
+		}
+	} else if (setting["webhook.url"] != "" && setting["trem-eq.Notification"] && setting["dev.mode"]) {
 		let state_station;
 		let description = "";
 
@@ -4478,7 +4482,7 @@ TREM.Earthquake.on("trem-eq", (data) => {
 		description += `\n開始時間 > ${Now}\n\n`;
 
 		for (let index = 0, keys = Object.keys(data.list), n = keys.length; index < n; index++) {
-			description += `${station[keys[index]].Loc} 最大震度 > ${data.list[keys[index]]}\n`;
+			description += `${station[keys[index]].Loc} 最大震度 > ${IntensityI(data.list[keys[index]])}\n`;
 			state_station = index + 1;
 		}
 
@@ -4516,6 +4520,7 @@ TREM.Earthquake.on("trem-eq", (data) => {
 		}).catch((error) => {
 			dump({ level: 2, message: error, origin: "Webhook" });
 		});
+		dump({ level: 0, message: "Posting Notification trem-eq Webhook", origin: "Webhook" });
 	}
 });
 
