@@ -121,6 +121,36 @@ TREM.Report = {
 		const oldlist = [...this.reportList];
 		this[`_${key}`] = value;
 
+		if (key == "filterTREM" && value) {
+			const element = document.getElementById("report-label-filter-hasNumber");
+			element.classList.add("hide");
+			element.style.display = "none";
+			const element1 = document.getElementById("report-label-filter-intensity");
+			element1.classList.add("hide");
+			element1.style.display = "none";
+			const element2 = document.getElementById("report-label-filter-CWB");
+			element2.classList.add("hide");
+			element2.style.display = "none";
+			this._filterHasNumber = false;
+			this._filterIntensity = false;
+			this._filterCWB = false;
+		} else if (key == "filterTREM" && !value) {
+			const element = document.getElementById("report-label-filter-hasNumber");
+			element.classList.remove("hide");
+			element.style.display = "block";
+			const element1 = document.getElementById("report-label-filter-intensity");
+			element1.classList.remove("hide");
+			element1.style.display = "block";
+			const element2 = document.getElementById("report-label-filter-CWB");
+			element2.classList.remove("hide");
+			element2.style.display = "block";
+			this._filterCWB = true;
+			const element3 = document.getElementById("report-filter-hasNumber");
+			element3.checked = false;
+			const element5 = document.getElementById("report-filter-intensity");
+			element5.checked = false;
+		}
+
 		if (select) {
 			const parent = document.getElementById(select.id.slice(0, select.id.length - 6));
 
