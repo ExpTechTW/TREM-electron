@@ -4047,6 +4047,7 @@ TREM.Earthquake.on("eew", (data) => {
 		for (const city in TREM.Resources.region)
 			for (const town in TREM.Resources.region[city]) {
 				const loc = TREM.Resources.region[city][town];
+
 				if (data.depth == null) int = NSSPE[loc[0]] ?? { value: 0, label: "0", get text() {
 					return TREM.Localization.getString("Intensity_Zero");
 				} };
