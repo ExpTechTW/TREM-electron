@@ -2072,7 +2072,7 @@ async function init() {
 	// TREM.Earthquake.emit("trem-eq", userJSON);
 	// const userJSON1 = require(path.resolve(__dirname, "../js/1674382618201.json"));
 	// TREM.Earthquake.emit("trem-eq", userJSON1);
-	// const userJSON = require(path.resolve(__dirname, "../js/1674533864290.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1675348466390.json"));
 	// FCMdata(userJSON, type = "websocket");
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
@@ -4013,7 +4013,9 @@ TREM.Earthquake.on("eew", (data) => {
 				),
 			);
 
-			if (data.depth == null) int = NSSPE[loc[0]] ?? 0;
+			if (data.depth == null) int = NSSPE[loc[0]] ?? { value: 0, label: "0", get text() {
+				return TREM.Localization.getString("Intensity_Zero");
+			} };
 
 			if (setting["location.city"] == city && setting["location.town"] == town) {
 				level = int;
@@ -4042,7 +4044,13 @@ TREM.Earthquake.on("eew", (data) => {
 			),
 		);
 
-		if (data.depth == null) int = NSSPE[loc[0]] ?? 0;
+		for (const city in TREM.Resources.region)
+			for (const town in TREM.Resources.region[city]) {
+				const loc = TREM.Resources.region[city][town];
+				if (data.depth == null) int = NSSPE[loc[0]] ?? { value: 0, label: "0", get text() {
+					return TREM.Localization.getString("Intensity_Zero");
+				} };
+			}
 
 		level = int;
 		distance = d;
