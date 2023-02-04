@@ -756,7 +756,7 @@ const webhook = async () => {
 	];
 
 	await new WebhookClient({ url: setting["webhook.url"] })
-		.send({ embeds, username: "TREM | 臺灣即時地震監測", avatarURL: "https://cdn.discordapp.com/attachments/976452418114048051/976469802644291584/received_1354357138388018.webp" })
+		.send({ embeds, username: "TREM | 臺灣即時地震監測", avatarURL: "https://cdn.discordapp.com/attachments/976452418114048051/976469802644291584/received_1354357138388018.webp", content: setting["tts.Notification"] ? "這是一則由 TREM 發送的測試訊息" : "", tts: setting["tts.Notification"]})
 		.then(m => {
 			showDialog("success",
 				TREM.Localization.getString("Webhook_Dialog_Title"),
