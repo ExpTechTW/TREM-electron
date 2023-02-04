@@ -148,6 +148,10 @@ const Constants = Object.freeze({
 			type  : "select",
 			value : "0",
 		},
+		"tts.Notification": {
+			type  : "toggle",
+			value : false,
+		},
 		"report.show": {
 			type  : "toggle",
 			value : true,

@@ -195,17 +195,12 @@ TREM.MapIntensity = {
 					}
 
 					// console.log(this.description);
-					const now = new Date(rawPalertData.time);
-					const _Now = now.getFullYear()
-						+ "/" + (now.getMonth() + 1 < 10 ? "0" : "") + (now.getMonth() + 1)
-						+ "/" + (now.getDate() < 10 ? "0" : "") + now.getDate()
-						+ " " + (now.getHours() < 10 ? "0" : "") + now.getHours()
-						+ ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes()
-						+ ":" + (now.getSeconds() < 10 ? "0" : "") + now.getSeconds();
+					const now = new Date(rawPalertData.time).format("YYYY/MM/DD HH:mm:ss");
 					const msg = {
 						username   : "TREM | 臺灣即時地震監測",
 						avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-						content    : "PAlert",
+						content    : setting["tts.Notification"] ? ((rawPalertData.final ? "PAlert最終報" : "PAlert") + "時間" + now + "觸發測站" + rawPalertData.tiggered + "台" + this.description) : "PAlert",
+						tts        : setting["tts.Notification"],
 						embeds     : [
 							{
 								author: {
@@ -217,7 +212,7 @@ TREM.MapIntensity = {
 								fields      : [
 									{
 										name   : "時間",
-										value  : _Now,
+										value  : now,
 										inline : true,
 									},
 									{
@@ -2038,7 +2033,7 @@ async function init() {
 	// const userJSON = require(path.resolve(__dirname, "../js/1669484541389.json"));
 	// TREM.Intensity.handle(userJSON);
 	// ipcRenderer.send("intensity-Notification", userJSON);
-	// const userJSON = require(path.resolve(__dirname, "../js/1674419891226.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1675451253223.json"));
 	// TREM.MapIntensity.palert(userJSON);
 	// const userJSON1 = require(path.resolve(__dirname, "../js/1674419911217.json"));
 	// TREM.MapIntensity.palert(userJSON1);
@@ -2068,11 +2063,11 @@ async function init() {
 	// 		})
 	// 		.addTo(Maps.main);
 	// TREM.Earthquake.emit("eew", userJSON3);
-	// const userJSON = require(path.resolve(__dirname, "../js/1674382588199.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1675531439780.json"));
 	// TREM.Earthquake.emit("trem-eq", userJSON);
 	// const userJSON1 = require(path.resolve(__dirname, "../js/1674382618201.json"));
 	// TREM.Earthquake.emit("trem-eq", userJSON1);
-	// const userJSON = require(path.resolve(__dirname, "../js/1675348466390.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1669621178753.json"));
 	// FCMdata(userJSON, type = "websocket");
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
@@ -3422,7 +3417,19 @@ ipcMain.on("report-Notification", (event, report) => {
 		const msg = {
 			username   : "TREM | 臺灣即時地震監測",
 			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-			content    : "地震報告",
+			content    : setting["tts.Notification"] ? ("地震報告" +
+			((report.data.length != 0) ? "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0].areaName + report.data[0].eqStation[0].stationName + IntensityI(report.data[0].areaIntensity) + "級。" : "發生規模" + report.magnitudeValue + "有感地震，最大震度" + "?級。") +
+			"編號" +
+			(report.location.startsWith("TREM 人工定位") ? "無（TREM 人工定位）" : report.earthquakeNo % 1000 ? report.earthquakeNo : "無（小區域有感地震）") +
+			"時間" +
+			report.originTime +
+			"深度" +
+			report.depth + " 公里" +
+			"震央位置" +
+			"經度 東經 " + report.epicenterLon + "緯度 北緯 " + report.epicenterLat + "即在" + report.location +
+			((report.data.length != 0) ? "最大震度" + IntensityI(report.data[0].areaIntensity) + "級地區" : "最大震度?級地區") +
+			((report.data.length != 0) ? report.data[0].areaName : "?級。")) : "地震報告",
+			tts        : setting["tts.Notification"],
 			embeds     : [
 				{
 					author: {
@@ -3479,7 +3486,12 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 		const msg = {
 			username   : "TREM | 臺灣即時地震監測",
 			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-			content    : "震度速報",
+			content    : setting["tts.Notification"] ? ("震度速報" + intensity.raw.description +
+			"時間" + new Date(`${intensity.raw.originTime}`).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" }) +
+			"芮氏規模" + intensity.raw.magnitude.magnitudeValue +
+			"深度" + intensity.raw.depth.$t + "公里" +
+			"震央位置" + "東經 " + intensity.raw.epicenter.epicenterLon.$t + "北緯" + intensity.raw.epicenter.epicenterLat.$t) : "震度速報",
+			tts        : setting["tts.Notification"],
 			embeds     : [
 				{
 					author: {
@@ -4383,6 +4395,8 @@ TREM.Earthquake.on("eew", (data) => {
 				msg = msg.replace("%Provider%", data.Unit);
 			else if (data.type == "eew")
 				msg = msg.replace("%Provider%", data.Unit);
+			else if (data.type == "eew-test")
+				msg = msg.replace("%Provider%", data.Unit);
 
 			msg = JSON.parse(msg);
 			msg.username = "TREM | 臺灣即時地震監測";
@@ -4392,6 +4406,8 @@ TREM.Earthquake.on("eew", (data) => {
 				text     : `ExpTech Studio ${Now}`,
 				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 			};
+			msg.tts = setting["tts.Notification"];
+			msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + data.depth + "公里規模" + data.scale + "發報單位" + data.Unit +"慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
 			dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
 			fetch(setting["webhook.url"], {
 				method  : "POST",
@@ -4447,7 +4463,8 @@ TREM.Earthquake.on("trem-eq", (data) => {
 		const msg = {
 			username   : "TREM | 臺灣即時地震監測",
 			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-			content    : "地震檢知",
+			content    : setting["tts.Notification"] ? ((data.final ? "地震檢知(最終報)" : "地震檢知") + description) : "地震檢知",
+			tts        : setting["tts.Notification"],
 			embeds     : [
 				{
 					author: {
@@ -4509,7 +4526,8 @@ TREM.Earthquake.on("trem-eq", (data) => {
 		const msg = {
 			username   : "TREM | 臺灣即時地震監測",
 			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-			content    : "地震檢知",
+			content    : setting["tts.Notification"] ? ((data.final ? "地震檢知(最終報)" : "地震檢知") + description) : "地震檢知",
+			tts        : setting["tts.Notification"],
 			embeds     : [
 				{
 					author: {
