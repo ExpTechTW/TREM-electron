@@ -4370,7 +4370,7 @@ TREM.Earthquake.on("eew", (data) => {
 				+ ":" + NOW().getSeconds();
 
 			let msg = setting["webhook.body"];
-			msg = msg.replace("%Depth%", data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale);
+			msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale == null ? "?" : data.scale);
 
 			// if (data.Function == "earthquake")
 			// 	if (data.Unit == "交通部中央氣象局")
@@ -4407,7 +4407,7 @@ TREM.Earthquake.on("eew", (data) => {
 				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 			};
 			msg.tts = setting["tts.Notification"];
-			msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + data.depth + "公里規模" + data.scale + "發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
+			msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + (data.depth == null ? "?" : data.depth  + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
 			dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
 			fetch(setting["webhook.url"], {
 				method  : "POST",
