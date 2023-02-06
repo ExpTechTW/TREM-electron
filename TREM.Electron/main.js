@@ -71,6 +71,10 @@ let MainWindow = TREM.Window.get("main");
  * @type {BrowserWindow}
  */
 let SettingWindow = TREM.Window.get("setting");
+/**
+ * @type {BrowserWindow}
+ */
+let RTSWindow = TREM.Window.get("rts");
 
 TREM.setLoginItemSettings({
 	openAtLogin : TREM.Configuration.data["windows.startup"],
@@ -128,6 +132,8 @@ function createWindow() {
 			MainWindow.hide();
 			if (SettingWindow)
 				SettingWindow.close();
+			if (RTSWindow)
+				RTSWindow.close();
 			event.returnValue = false;
 		} else
 			TREM.quit();
@@ -163,6 +169,37 @@ function createSettingWindow() {
 		SettingWindow = null;
 	});
 }
+
+function createRTSWindow() {
+	if (RTSWindow instanceof BrowserWindow) return RTSWindow.focus();
+	RTSWindow = TREM.Window.set("rts", new BrowserWindow({
+		title          : TREM.Localization.getString("Setting_Title"),
+		height         : 600,
+		width          : 400,
+		minHeight      : 600,
+		minWidth       : 400,
+		frame          : false,
+		transparent    : true,
+		show           : false,
+		icon           : "TREM.ico",
+		webPreferences : {
+			nodeIntegration  : true,
+			contextIsolation : false,
+		},
+	})).get("rts");
+	require("@electron/remote/main").enable(RTSWindow.webContents);
+	RTSWindow.loadFile("./Views/RTSView.html");
+	RTSWindow.setMenu(null);
+	RTSWindow.webContents.on("did-finish-load", () => {
+		RTSWindow.webContents.send("setting", TREM.Configuration._data);
+		setTimeout(() => RTSWindow.show(), 500);
+	});
+	RTSWindow.on("close", () => {
+		// ipcMain.emit("setting_btn_remove_hide");
+		RTSWindow = null;
+	});
+}
+
 
 const shouldQuit = TREM.requestSingleInstanceLock();
 if (!shouldQuit)
@@ -283,6 +320,10 @@ ipcMain.on("openChildWindow", async (event, arg) => {
 	await createSettingWindow();
 });
 
+ipcMain.on("openRTSWindow", async (event, arg) => {
+	await createRTSWindow();
+});
+
 ipcMain.on("reset", (event, arg) => {
 	TREM.isQuiting = true;
 	TREM.quit();
@@ -341,6 +382,7 @@ ipcMain.on("config:value", (event, key, value) => {
 			TREM.Localization.setLocale(value);
 			if (MainWindow) MainWindow.setTitle(TREM.Localization.getString("Application_Title"));
 			if (SettingWindow) SettingWindow.setTitle(TREM.Localization.getString("Setting_Title"));
+			if (RTSWindow) RTSWindow.setTitle(TREM.Localization.getString("Setting_Title"));
 			trayIcon();
 			emitAllWindow("config:locale", value);
 			break;
@@ -443,11 +485,19 @@ function changelocale(value){
 	if (SettingWindow){
 		SettingWindow.setTitle(TREM.Localization.getString("Setting_Title"));
 	}
+	if (RTSWindow){
+		RTSWindow.setTitle(TREM.Localization.getString("Setting_Title"));
+	}
 	trayIcon();
 	if (!SettingWindow) {
 		createSettingWindow();
 		emitAllWindow("config:locale", value);
 		SettingWindow.close();
+	}
+	if (!RTSWindow) {
+		createRTSWindow();
+		emitAllWindow("config:locale", value);
+		RTSWindow.close();
 	} else
 		emitAllWindow("config:locale", value);
 }
