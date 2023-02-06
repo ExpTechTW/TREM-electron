@@ -315,9 +315,8 @@ const wave = (wave_data) => {
 
 async function init() {
 	setInterval(() => {
-		if ((Date.now() - ServerT > 15_000 && ServerT != 0)) {
+		if ((Date.now() - ServerT > 15_000 && ServerT != 0))
 			reconnect();
-		}
 	}, 3000);
 	connect(1000);
 	await (async () => {
