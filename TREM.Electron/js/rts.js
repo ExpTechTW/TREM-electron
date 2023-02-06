@@ -47,7 +47,7 @@ let Realtimestation = app.Configuration.data["Real-time.station"];
 let themecolor = app.Configuration.data["theme.color"];
 let themedark = app.Configuration.data["theme.dark"];
 
-let chartuuids = [
+const chartuuids = [
 	"H-335-11339620-4",
 	"H-979-11336952-11",
 	"H-711-11334880-12",
@@ -66,7 +66,7 @@ function reconnect() {
 		ws = null;
 	}
 
-    ws = new WebSocket("wss://exptech.com.tw/api");
+	ws = new WebSocket("wss://exptech.com.tw/api");
 	connect(1000);
 }
 
