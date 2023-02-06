@@ -48,13 +48,13 @@ let themecolor = app.Configuration.data["theme.color"];
 let themedark = app.Configuration.data["theme.dark"];
 
 let chartuuids = [
-    "H-335-11339620-4",
-    "H-979-11336952-11",
-    "H-711-11334880-12",
-    "H-541-11370676-10",
-    "L-269-11370996-5",
-    "L-648-4832348-9",
-    Realtimestation,
+	"H-335-11339620-4",
+	"H-979-11336952-11",
+	"H-711-11334880-12",
+	"H-541-11370676-10",
+	"L-269-11370996-5",
+	"L-648-4832348-9",
+	Realtimestation,
 ];
 
 function reconnect() {
@@ -66,12 +66,13 @@ function reconnect() {
 		ws = null;
 	}
 
+    ws = new WebSocket("wss://exptech.com.tw/api");
 	connect(1000);
 }
 
 const connect = (retryTimeout) => {
-    ws.onclose = function() {
-        console.log(`WebSocket closed. Reconnect after ${retryTimeout / 1000}s`);
+	ws.onclose = function() {
+		console.log(`WebSocket closed. Reconnect after ${retryTimeout / 1000}s`);
 		reconnect();
 	};
 
@@ -104,42 +105,42 @@ const data = {
 };
 const timer = {};
 
-const Real_time_station = async () => {
+const Real_time_station = () => {
 	try {
 		if (Realtimestation != app.Configuration.data["Real-time.station"]) {
-            Realtimestation = app.Configuration.data["Real-time.station"];
-            setCharts([
-                "11339620",
-                "11336952",
-                "11334880",
-                "11370676",
-                "11370996",
-                "4832348",
-                Realtimestation.split("-")[2],
-            ]);
+			Realtimestation = app.Configuration.data["Real-time.station"];
+			setCharts([
+				"11339620",
+				"11336952",
+				"11334880",
+				"11370676",
+				"11370996",
+				"4832348",
+				Realtimestation.split("-")[2],
+			]);
 		} else if (themecolor != app.Configuration.data["theme.color"]) {
-            themecolor = app.Configuration.data["theme.color"];
-            setCharts([
-                "11339620",
-                "11336952",
-                "11334880",
-                "11370676",
-                "11370996",
-                "4832348",
-                Realtimestation.split("-")[2],
-            ]);
-        } else if (themedark != app.Configuration.data["theme.dark"]) {
-            themedark = app.Configuration.data["theme.dark"];
-            setCharts([
-                "11339620",
-                "11336952",
-                "11334880",
-                "11370676",
-                "11370996",
-                "4832348",
-                Realtimestation.split("-")[2],
-            ]);
-        }
+			themecolor = app.Configuration.data["theme.color"];
+			setCharts([
+				"11339620",
+				"11336952",
+				"11334880",
+				"11370676",
+				"11370996",
+				"4832348",
+				Realtimestation.split("-")[2],
+			]);
+		} else if (themedark != app.Configuration.data["theme.dark"]) {
+			themedark = app.Configuration.data["theme.dark"];
+			setCharts([
+				"11339620",
+				"11336952",
+				"11334880",
+				"11370676",
+				"11370996",
+				"4832348",
+				Realtimestation.split("-")[2],
+			]);
+		}
 	} catch (error) {
 		console.warn("Failed to load station data!", error);
 	}
@@ -172,7 +173,7 @@ const charts = [
 	echarts.init(document.getElementById("wave-4"), null, { height: 750 / 7, width: 400 }),
 	echarts.init(document.getElementById("wave-5"), null, { height: 750 / 7, width: 400 }),
 	echarts.init(document.getElementById("wave-6"), null, { height: 750 / 7, width: 400 }),
-    echarts.init(document.getElementById("wave-7"), null, { height: 750 / 7, width: 400 }),
+	echarts.init(document.getElementById("wave-7"), null, { height: 750 / 7, width: 400 }),
 ];
 const chartdata = [
 	[],
@@ -181,7 +182,7 @@ const chartdata = [
 	[],
 	[],
 	[],
-    [],
+	[],
 ];
 
 for (let i = 0; i < wave_count; i++) {
@@ -214,7 +215,7 @@ const setCharts = (ids) => {
 				title: {
 					textStyle: {
 						fontSize : 10,
-                        color    : (themedark ? "rgb(230, 225, 229)" : "rgb(26, 28, 25)"),
+						color    : (themedark ? "rgb(230, 225, 229)" : "rgb(26, 28, 25)"),
 					},
 				},
 				xAxis: {
@@ -245,7 +246,7 @@ const setCharts = (ids) => {
 						type       : "line",
 						showSymbol : false,
 						data       : [],
-                        color      : themecolor,
+						color      : themecolor,
 					},
 				],
 			});
@@ -314,7 +315,8 @@ async function init() {
 
 		if (!timer.stations)
 			timer.stations = setInterval(fetch_files, 300_000);
-        if (!timer.Realtimestation)
+
+		if (!timer.Realtimestation)
 			timer.Realtimestation = setInterval(Real_time_station, 1_000);
 	})().catch(e => dump({ level: 2, message: e }));
 	setCharts([
@@ -324,14 +326,14 @@ async function init() {
 		"11370676",
 		"11370996",
 		"4832348",
-        Realtimestation.split("-")[2],
+		Realtimestation.split("-")[2],
 	]);
 	for (const chart of charts)
 		chart.setOption({
 			title: {
 				textStyle: {
 					fontSize : 10,
-                    color    : (themedark ? "rgb(230, 225, 229)" : "rgb(26, 28, 25)"),
+					color    : (themedark ? "rgb(230, 225, 229)" : "rgb(26, 28, 25)"),
 				},
 			},
 			xAxis: {
@@ -362,7 +364,7 @@ async function init() {
 					type       : "line",
 					showSymbol : false,
 					data       : [],
-                    color      : themecolor,
+					color      : themecolor,
 				},
 			],
 		});
