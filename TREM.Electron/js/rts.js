@@ -41,7 +41,7 @@ function handleWindowControls() {
 const wave_count = +localStorage.getItem("displayWaveCount") ?? 8;
 
 let ws = new WebSocket("wss://exptech.com.tw/api");
-let Reconnect = 0;
+// let Reconnect = 0;
 
 let Realtimestation = app.Configuration.data["Real-time.station"];
 let themecolor = app.Configuration.data["theme.color"];
@@ -57,8 +57,8 @@ let chartuuids = [
 ];
 
 function reconnect() {
-	if (Date.now() - Reconnect < 5000) return;
-	Reconnect = Date.now();
+	// if (Date.now() - Reconnect < 500) return;
+	// Reconnect = Date.now();
 
 	if (ws != null) {
 		ws.close();
