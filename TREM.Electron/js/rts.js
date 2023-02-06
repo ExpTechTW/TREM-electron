@@ -38,21 +38,47 @@ function handleWindowControls() {
 	}
 }
 
-const wave_count = +localStorage.getItem("displayWaveCount") ?? 7;
+const wave_count = +localStorage.getItem("displayWaveCount") ?? 8;
+
+let ws = new WebSocket("wss://exptech.com.tw/api");
+let Reconnect = 0;
+
+let Realtimestation = app.Configuration.data["Real-time.station"];
+
+let chartuuids = [
+    "H-335-11339620-4",
+    "H-979-11336952-11",
+    "H-711-11334880-12",
+    "H-541-11370676-10",
+    "L-269-11370996-5",
+    "L-648-4832348-9",
+    Realtimestation,
+];
+
+function reconnect() {
+	if (Date.now() - Reconnect < 5000) return;
+	Reconnect = Date.now();
+
+	if (ws != null) {
+		ws.close();
+		ws = null;
+	}
+
+	connect(1000);
+}
 
 const connect = (retryTimeout) => {
-	const ws = new WebSocket("wss://exptech.com.tw/api");
+    ws.onclose = function() {
+        console.log(`WebSocket closed. Reconnect after ${retryTimeout / 1000}s`);
+		reconnect();
+	};
 
-	ws.addEventListener("close", () => {
-		console.debug(`WebSocket closed. Reconnect after ${retryTimeout / 1000}s`);
-		setTimeout(connect, retryTimeout, retryTimeout).unref();
-	});
+	ws.onerror = function(err) {
+		console.log(err);
+		reconnect();
+	};
 
-	ws.addEventListener("error", (err) => {
-		console.error(err);
-	});
-
-	ws.addEventListener("open", () => {
+	ws.onopen = function() {
 		ws.send(JSON.stringify({
 			uuid     : `TREM/${app.getVersion()} (${localStorage.UUID};)`,
 			function : "subscriptionService",
@@ -61,20 +87,39 @@ const connect = (retryTimeout) => {
 				"trem-rts-original-v1": chartuuids,
 			},
 		}));
-	});
+	};
 
-	ws.addEventListener("message", (ev) => {
-		const parsed = JSON.parse(ev.data);
+	ws.onmessage = function(evt) {
+		const parsed = JSON.parse(evt.data);
 
 		if (parsed.type == "trem-rts-original")
 			wave(parsed.raw);
-	});
+	};
 };
 
 const data = {
 	stations: {},
 };
 const timer = {};
+
+const Real_time_station = async () => {
+	try {
+		if (Realtimestation != app.Configuration.data["Real-time.station"]) {
+            Realtimestation = app.Configuration.data["Real-time.station"];
+            setCharts([
+                "11339620",
+                "11336952",
+                "11334880",
+                "11370676",
+                "11370996",
+                "4832348",
+                Realtimestation.split("-")[2],
+            ]);
+		}
+	} catch (error) {
+		console.warn("Failed to load station data!", error);
+	}
+};
 
 const fetch_files = async () => {
 	try {
@@ -91,29 +136,19 @@ const fetch_files = async () => {
 
 			data.stations = s;
 		}
-
-		console.log(res);
 	} catch (error) {
 		console.warn("Failed to load station data!", error);
 	}
 };
 
-const chartuuids = [
-	"H-335-11339620-4",
-	"H-979-11336952-11",
-	"H-711-11334880-12",
-	"H-541-11370676-10",
-	"L-269-11370996-5",
-	"L-648-4832348-9",
-];
-
 const charts = [
-	echarts.init(document.getElementById("wave-1"), null, { height: 560 / 6, width: 400 }),
-	echarts.init(document.getElementById("wave-2"), null, { height: 560 / 6, width: 400 }),
-	echarts.init(document.getElementById("wave-3"), null, { height: 560 / 6, width: 400 }),
-	echarts.init(document.getElementById("wave-4"), null, { height: 560 / 6, width: 400 }),
-	echarts.init(document.getElementById("wave-5"), null, { height: 560 / 6, width: 400 }),
-	echarts.init(document.getElementById("wave-6"), null, { height: 560 / 6, width: 400 }),
+	echarts.init(document.getElementById("wave-1"), null, { height: 750 / 7, width: 400 }),
+	echarts.init(document.getElementById("wave-2"), null, { height: 750 / 7, width: 400 }),
+	echarts.init(document.getElementById("wave-3"), null, { height: 750 / 7, width: 400 }),
+	echarts.init(document.getElementById("wave-4"), null, { height: 750 / 7, width: 400 }),
+	echarts.init(document.getElementById("wave-5"), null, { height: 750 / 7, width: 400 }),
+	echarts.init(document.getElementById("wave-6"), null, { height: 750 / 7, width: 400 }),
+    echarts.init(document.getElementById("wave-7"), null, { height: 750 / 7, width: 400 }),
 ];
 const chartdata = [
 	[],
@@ -122,6 +157,7 @@ const chartdata = [
 	[],
 	[],
 	[],
+    [],
 ];
 
 for (let i = 0; i < wave_count; i++) {
@@ -135,7 +171,7 @@ for (let i = 0; i < wave_count; i++) {
  * @param {string[]} ids
  */
 const setCharts = (ids) => {
-	for (let i = 0; i < 6; i++)
+	for (let i = 0; i < 7; i++)
 		if (data.stations?.[ids[i]]?.uuid) {
 			if (chartuuids[i] != data.stations[ids[i]].uuid) {
 				chartuuids[i] = data.stations[ids[i]].uuid;
@@ -191,7 +227,7 @@ const setCharts = (ids) => {
 };
 
 const wave = (wave_data) => {
-	console.log(wave_data);
+	// console.log(wave_data);
 	const jsondata = {};
 
 	for (let i = 0; i < wave_data.length; i++)
@@ -252,6 +288,8 @@ async function init() {
 
 		if (!timer.stations)
 			timer.stations = setInterval(fetch_files, 300_000);
+        if (!timer.Realtimestation)
+			timer.Realtimestation = setInterval(Real_time_station, 1_000);
 	})().catch(e => dump({ level: 2, message: e }));
 	setCharts([
 		"11339620",
@@ -260,8 +298,7 @@ async function init() {
 		"11370676",
 		"11370996",
 		"4832348",
-		"11423064",
-		"11336816",
+        Realtimestation.split("-")[2],
 	]);
 	for (const chart of charts)
 		chart.setOption({
