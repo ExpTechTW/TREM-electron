@@ -47,13 +47,12 @@ let Realtimestation = app.Configuration.data["Real-time.station"];
 let themecolor = app.Configuration.data["theme.color"];
 let themedark = app.Configuration.data["theme.dark"];
 
-const chartuuids = [
+let chartuuids = [
 	"H-335-11339620-4",
 	"H-979-11336952-11",
 	"H-711-11334880-12",
 	"H-541-11370676-10",
 	"L-269-11370996-5",
-	"L-648-4832348-9",
 	Realtimestation,
 ];
 
@@ -109,13 +108,21 @@ const Real_time_station = () => {
 	try {
 		if (Realtimestation != app.Configuration.data["Real-time.station"]) {
 			Realtimestation = app.Configuration.data["Real-time.station"];
+			chartuuids = [
+				"H-335-11339620-4",
+				"H-979-11336952-11",
+				"H-711-11334880-12",
+				"H-541-11370676-10",
+				"L-269-11370996-5",
+				Realtimestation,
+			];
+			reconnect();
 			setCharts([
 				"11339620",
 				"11336952",
 				"11334880",
 				"11370676",
 				"11370996",
-				"4832348",
 				Realtimestation.split("-")[2],
 			]);
 		} else if (themecolor != app.Configuration.data["theme.color"]) {
@@ -126,7 +133,6 @@ const Real_time_station = () => {
 				"11334880",
 				"11370676",
 				"11370996",
-				"4832348",
 				Realtimestation.split("-")[2],
 			]);
 		} else if (themedark != app.Configuration.data["theme.dark"]) {
@@ -137,7 +143,6 @@ const Real_time_station = () => {
 				"11334880",
 				"11370676",
 				"11370996",
-				"4832348",
 				Realtimestation.split("-")[2],
 			]);
 		}
@@ -167,16 +172,14 @@ const fetch_files = async () => {
 };
 
 const charts = [
-	echarts.init(document.getElementById("wave-1"), null, { height: 750 / 7, width: 400 }),
-	echarts.init(document.getElementById("wave-2"), null, { height: 750 / 7, width: 400 }),
-	echarts.init(document.getElementById("wave-3"), null, { height: 750 / 7, width: 400 }),
-	echarts.init(document.getElementById("wave-4"), null, { height: 750 / 7, width: 400 }),
-	echarts.init(document.getElementById("wave-5"), null, { height: 750 / 7, width: 400 }),
-	echarts.init(document.getElementById("wave-6"), null, { height: 750 / 7, width: 400 }),
-	echarts.init(document.getElementById("wave-7"), null, { height: 750 / 7, width: 400 }),
+	echarts.init(document.getElementById("wave-1"), null, { height: 560 / 6, width: 400 }),
+	echarts.init(document.getElementById("wave-2"), null, { height: 560 / 6, width: 400 }),
+	echarts.init(document.getElementById("wave-3"), null, { height: 560 / 6, width: 400 }),
+	echarts.init(document.getElementById("wave-4"), null, { height: 560 / 6, width: 400 }),
+	echarts.init(document.getElementById("wave-5"), null, { height: 560 / 6, width: 400 }),
+	echarts.init(document.getElementById("wave-6"), null, { height: 560 / 6, width: 400 }),
 ];
 const chartdata = [
-	[],
 	[],
 	[],
 	[],
@@ -196,7 +199,7 @@ for (let i = 0; i < wave_count; i++) {
  * @param {string[]} ids
  */
 const setCharts = (ids) => {
-	for (let i = 0; i < 7; i++)
+	for (let i = 0; i < 6; i++)
 		if (data.stations?.[ids[i]]?.uuid) {
 			if (chartuuids[i] != data.stations[ids[i]].uuid) {
 				chartuuids[i] = data.stations[ids[i]].uuid;
@@ -325,7 +328,6 @@ async function init() {
 		"11334880",
 		"11370676",
 		"11370996",
-		"4832348",
 		Realtimestation.split("-")[2],
 	]);
 	for (const chart of charts)
