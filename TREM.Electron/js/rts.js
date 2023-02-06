@@ -44,6 +44,8 @@ let ws = new WebSocket("wss://exptech.com.tw/api");
 let Reconnect = 0;
 
 let Realtimestation = app.Configuration.data["Real-time.station"];
+let themecolor = app.Configuration.data["theme.color"];
+let themedark = app.Configuration.data["theme.dark"];
 
 let chartuuids = [
     "H-335-11339620-4",
@@ -115,7 +117,29 @@ const Real_time_station = async () => {
                 "4832348",
                 Realtimestation.split("-")[2],
             ]);
-		}
+		} else if (themecolor != app.Configuration.data["theme.color"]) {
+            themecolor = app.Configuration.data["theme.color"];
+            setCharts([
+                "11339620",
+                "11336952",
+                "11334880",
+                "11370676",
+                "11370996",
+                "4832348",
+                Realtimestation.split("-")[2],
+            ]);
+        } else if (themedark != app.Configuration.data["theme.dark"]) {
+            themedark = app.Configuration.data["theme.dark"];
+            setCharts([
+                "11339620",
+                "11336952",
+                "11334880",
+                "11370676",
+                "11370996",
+                "4832348",
+                Realtimestation.split("-")[2],
+            ]);
+        }
 	} catch (error) {
 		console.warn("Failed to load station data!", error);
 	}
@@ -189,7 +213,8 @@ const setCharts = (ids) => {
 			charts[i].setOption({
 				title: {
 					textStyle: {
-						fontSize: 10,
+						fontSize : 10,
+                        color    : (themedark ? "rgb(230, 225, 229)" : "rgb(26, 28, 25)"),
 					},
 				},
 				xAxis: {
@@ -220,6 +245,7 @@ const setCharts = (ids) => {
 						type       : "line",
 						showSymbol : false,
 						data       : [],
+                        color      : themecolor,
 					},
 				],
 			});
@@ -304,7 +330,8 @@ async function init() {
 		chart.setOption({
 			title: {
 				textStyle: {
-					fontSize: 10,
+					fontSize : 10,
+                    color    : (themedark ? "rgb(230, 225, 229)" : "rgb(26, 28, 25)"),
 				},
 			},
 			xAxis: {
@@ -335,6 +362,7 @@ async function init() {
 					type       : "line",
 					showSymbol : false,
 					data       : [],
+                    color      : themecolor,
 				},
 			],
 		});

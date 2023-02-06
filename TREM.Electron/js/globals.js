@@ -25,7 +25,7 @@ ipcRenderer.once("setting", (event, data) => {
 });
 
 ipcRenderer.on("config:theme", (event, value) => {
-	setThemeColor(value);
+	setThemeColor(value, app.Configuration.data["theme.dark"]);
 });
 
 ipcRenderer.on("config:dark", (event, value) => {
