@@ -41,7 +41,8 @@ function handleWindowControls() {
 const wave_count = +localStorage.getItem("displayWaveCount") ?? 8;
 
 let ws = new WebSocket("wss://exptech.com.tw/api");
-// let Reconnect = 0;
+let Reconnect = 0;
+let ServerT = 0;
 
 let Realtimestation = app.Configuration.data["Real-time.station"];
 let themecolor = app.Configuration.data["theme.color"];
@@ -57,8 +58,8 @@ let chartuuids = [
 ];
 
 function reconnect() {
-	// if (Date.now() - Reconnect < 500) return;
-	// Reconnect = Date.now();
+	if (Date.now() - Reconnect < 500) return;
+	Reconnect = Date.now();
 
 	if (ws != null) {
 		ws.close();
@@ -93,6 +94,7 @@ const connect = (retryTimeout) => {
 
 	ws.onmessage = function(evt) {
 		const parsed = JSON.parse(evt.data);
+		ServerT = Date.now();
 
 		if (parsed.type == "trem-rts-original")
 			wave(parsed.raw);
@@ -312,6 +314,11 @@ const wave = (wave_data) => {
 };
 
 async function init() {
+	setInterval(() => {
+		if ((Date.now() - ServerT > 15_000 && ServerT != 0)) {
+			reconnect();
+		}
+	}, 3000);
 	connect(1000);
 	await (async () => {
 		await fetch_files();
