@@ -266,6 +266,7 @@ function init() {
 	(async () => {
 		station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
 		const el = document.getElementById("Real-time.station");
+		const el1 = document.getElementById("Real-time.station.1");
 		const stations = {};
 
 		for (const key of Object.keys(station)) {
@@ -275,7 +276,9 @@ function init() {
 
 		for (const city of Object.keys(stations)) {
 			const optgroup = document.createElement("optgroup");
+			const optgroup1 = document.createElement("optgroup");
 			optgroup.label = city;
+			optgroup1.label = city;
 
 			for (const stationKey of Object.keys(stations[city])) {
 				const option = document.createElement("option");
@@ -285,9 +288,17 @@ function init() {
 				if (setting["Real-time.station"] == stationKey)
 					option.selected = true;
 				optgroup.appendChild(option);
+				const option1 = document.createElement("option");
+				option1.text = `${stations[city][stationKey]} ${stationKey}`;
+				option1.value = stationKey;
+
+				if (setting["Real-time.station.1"] == stationKey)
+					option1.selected = true;
+				optgroup1.appendChild(option1);
 			}
 
 			el.appendChild(optgroup);
+			el1.appendChild(optgroup1);
 		}
 	})();
 	// #endregion

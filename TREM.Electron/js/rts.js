@@ -45,6 +45,7 @@ let Reconnect = 0;
 let ServerT = 0;
 
 let Realtimestation = app.Configuration.data["Real-time.station"];
+let Realtimestation1 = app.Configuration.data["Real-time.station.1"];
 let themecolor = app.Configuration.data["theme.color"];
 let themedark = app.Configuration.data["theme.dark"];
 
@@ -53,7 +54,7 @@ let chartuuids = [
 	"H-979-11336952-11",
 	"H-711-11334880-12",
 	"H-541-11370676-10",
-	"L-269-11370996-5",
+	Realtimestation1,
 	Realtimestation,
 ];
 
@@ -115,7 +116,7 @@ const Real_time_station = () => {
 				"H-979-11336952-11",
 				"H-711-11334880-12",
 				"H-541-11370676-10",
-				"L-269-11370996-5",
+				Realtimestation1,
 				Realtimestation,
 			];
 			reconnect();
@@ -124,7 +125,26 @@ const Real_time_station = () => {
 				"11336952",
 				"11334880",
 				"11370676",
-				"11370996",
+				Realtimestation1.split("-")[2],
+				Realtimestation.split("-")[2],
+			]);
+		} else if (Realtimestation1 != app.Configuration.data["Real-time.station.1"]) {
+			Realtimestation1 = app.Configuration.data["Real-time.station.1"];
+			chartuuids = [
+				"H-335-11339620-4",
+				"H-979-11336952-11",
+				"H-711-11334880-12",
+				"H-541-11370676-10",
+				Realtimestation1,
+				Realtimestation,
+			];
+			reconnect();
+			setCharts([
+				"11339620",
+				"11336952",
+				"11334880",
+				"11370676",
+				Realtimestation1.split("-")[2],
 				Realtimestation.split("-")[2],
 			]);
 		} else if (themecolor != app.Configuration.data["theme.color"]) {
@@ -134,7 +154,7 @@ const Real_time_station = () => {
 				"11336952",
 				"11334880",
 				"11370676",
-				"11370996",
+				Realtimestation1.split("-")[2],
 				Realtimestation.split("-")[2],
 			]);
 		} else if (themedark != app.Configuration.data["theme.dark"]) {
@@ -144,7 +164,7 @@ const Real_time_station = () => {
 				"11336952",
 				"11334880",
 				"11370676",
-				"11370996",
+				Realtimestation1.split("-")[2],
 				Realtimestation.split("-")[2],
 			]);
 		}
@@ -333,7 +353,7 @@ async function init() {
 		"11336952",
 		"11334880",
 		"11370676",
-		"11370996",
+		Realtimestation1.split("-")[2],
 		Realtimestation.split("-")[2],
 	]);
 	for (const chart of charts)

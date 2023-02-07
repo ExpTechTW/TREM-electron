@@ -104,6 +104,10 @@ const Constants = Object.freeze({
 			type  : "select",
 			value : "L-711-6732340-12",
 		},
+		"Real-time.station.1": {
+			type  : "select",
+			value : "L-269-11370996-5",
+		},
 		"report.cover": {
 			type  : "toggle",
 			value : true,
