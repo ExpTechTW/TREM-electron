@@ -23,9 +23,9 @@ html:lang(ja) body {
 html:lang(kr) body {
     --alert-notch-alert-content: "긴급지진속보";
     --alert-notch-pred-content: "예보";
-    --alert-notch-test-content: "훈련";
-    --alert-notch-history-content: "다시보기";
-    --alert-notch-cancel-content: "취소";
+    --alert-notch-test-content: "훈련보";
+    --alert-notch-history-content: "재발송 중";
+    --alert-notch-cancel-content: "취소보";
 
     --alert-notch-number-before: "제";
     --alert-notch-number-after: "보";
