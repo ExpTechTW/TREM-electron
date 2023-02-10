@@ -46,7 +46,7 @@ TREM.Report = {
           element.style.display = "none";
         } else {
           const marker = new maplibregl.Marker({
-            element: $(report.location.startsWith("TREM 人工定位")
+            element: $(report.location.startsWith("地震資訊")
               ? TREM.Resources.icon.square(
                 {
                   size         : report.magnitudeValue * 4,
@@ -77,7 +77,7 @@ TREM.Report = {
     el.id = report.identifier;
     el.className += ` ${IntensityToClassString(report.data[0]?.areaIntensity)}`;
     el.querySelector(".report-list-item-location").innerText = report.location;
-    el.querySelector(".report-list-item-id").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
+    el.querySelector(".report-list-item-id").innerText = TREM.Localization.getString(report.location.startsWith("地震資訊") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
     el.querySelector(".report-list-item-time").innerText = report.originTime.replace(/-/g, "/");
 
     el.querySelector("button").value = report.identifier;
@@ -306,7 +306,7 @@ TREM.Report = {
 
     for (const report of newlist) {
       const marker = new maplibregl.Marker({
-        element: $(report.location.startsWith("TREM 人工定位")
+        element: $(report.location.startsWith("地震資訊")
           ? TREM.Resources.icon.square(
             {
               size         : report.magnitudeValue * 4,
@@ -384,14 +384,14 @@ TREM.Report = {
   _setupReport(report) {
     this._clearMap();
 
-    document.getElementById("report-overview-number").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
+    document.getElementById("report-overview-number").innerText = TREM.Localization.getString(report.location.startsWith("地震資訊") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
     document.getElementById("report-overview-location").innerText = report.location;
     const time = new Date((new Date(`${report.originTime} GMT+08:00`)).toLocaleString("en-US", { timeZone: "Asia/Taipei" }));
     document.getElementById("report-overview-time").innerText = report.originTime;
     document.getElementById("report-overview-latitude").innerText = report.epicenterLat;
     document.getElementById("report-overview-longitude").innerText = report.epicenterLon;
 
-    if (report.location.startsWith("TREM 人工定位")) {
+    if (report.location.startsWith("地震資訊")) {
       document.getElementById("report-overview-intensity").parentElement.parentElement.style.display = "none";
     } else {
       document.getElementById("report-overview-intensity").parentElement.parentElement.style.display = "";
@@ -402,11 +402,11 @@ TREM.Report = {
           : "";
     }
 
-    document.getElementById("report-overview-intensity-location").innerText = (report.location.startsWith("TREM 人工定位")) ? "" : `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`;
+    document.getElementById("report-overview-intensity-location").innerText = (report.location.startsWith("地震資訊")) ? "" : `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`;
     document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
     document.getElementById("report-overview-depth").innerText = report.depth;
 
-    if (report.location.startsWith("TREM 人工定位")) {
+    if (report.location.startsWith("地震資訊")) {
       document.getElementById("report-detail-copy").style.display = "none";
     } else {
       document.getElementById("report-detail-copy").style.display = "";
@@ -415,7 +415,7 @@ TREM.Report = {
 
     document.getElementById("report-replay").value = report.identifier;
 
-    if (report.location.startsWith("TREM 人工定位")) {
+    if (report.location.startsWith("地震資訊")) {
       document.getElementById("report-cwb").style.display = "none";
       document.getElementById("report-scweb").style.display = "none";
     } else {

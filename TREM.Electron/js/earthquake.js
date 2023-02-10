@@ -2489,10 +2489,17 @@ function FCMdata(json, Unit) {
     if (setting["audio.report"]) audioPlay("../audio/Report.wav");
 
     if (!win.isFocused())
-      if (!report.location.startsWith("TREM 人工定位"))
+      if (!report.location.startsWith("地震資訊"))
         new Notification("地震報告",
           {
-            body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
+            body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}`,
+            icon   : "../TREM.ico",
+            silent : win.isFocused(),
+          });
+      else
+        new Notification("地震資訊",
+          {
+            body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 地震`,
             icon   : "../TREM.ico",
             silent : win.isFocused(),
           });
