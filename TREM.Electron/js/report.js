@@ -39,7 +39,7 @@ TREM.Report = {
 				.filter(v => this._filterHasReplay ? v.ID?.length : true)
 				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 2.0 : this._filterMagnitudeValue == 2 ? v.magnitudeValue < 3.0 : this._filterMagnitudeValue == 3 ? v.magnitudeValue < 4.0 : this._filterMagnitudeValue == 45 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 				.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
-				.filter(v => this._filterTREM ? v.location.startsWith("TREM 人工定位") : true)
+				.filter(v => this._filterTREM ? v.location.startsWith("地震資訊") : true)
 				.filter(v => this._filterCWB ? v.data.length : true);
 
 			for (const report of reports) {
@@ -51,7 +51,7 @@ TREM.Report = {
 					|| (this._filterHasReplay && !(report.ID?.length))
 					|| (this._filterMagnitude && !(this._filterMagnitudeValue == 1 ? report.magnitudeValue < 2.0 : this._filterMagnitudeValue == 2 ? report.magnitudeValue < 3.0 : this._filterMagnitudeValue == 3 ? report.magnitudeValue < 4.0 : this._filterMagnitudeValue == 45 ? report.magnitudeValue < 4.5 : report.magnitudeValue >= 4.5))
 					|| (this._filterIntensity && !(report.data[0]?.areaIntensity == this._filterIntensityValue))
-					|| (this._filterTREM && report.location.startsWith("TREM 人工定位"))
+					|| (this._filterTREM && report.location.startsWith("地震資訊"))
 					|| (this._filterCWB && !report.data.length)) {
 					element.classList.add("hide");
 					element.style.display = "none";
@@ -100,7 +100,7 @@ TREM.Report = {
 		el.id = report.identifier;
 		el.className += ` ${IntensityToClassString(report.data[0]?.areaIntensity)}`;
 		el.querySelector(".report-list-item-location").innerText = report.location;
-		el.querySelector(".report-list-item-id").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
+		el.querySelector(".report-list-item-id").innerText = TREM.Localization.getString(report.location.startsWith("地震資訊") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
 		el.querySelector(".report-list-item-time").innerText = report.originTime.replace(/-/g, "/");
 
 		el.querySelector("button").value = report.identifier;
@@ -163,7 +163,7 @@ TREM.Report = {
 			.filter(v => this._filterHasReplay ? v.ID?.length : true)
 			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 2.0 : this._filterMagnitudeValue == 2 ? v.magnitudeValue < 3.0 : this._filterMagnitudeValue == 3 ? v.magnitudeValue < 4.0 : this._filterMagnitudeValue == 45 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 			.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
-			.filter(v => this._filterTREM ? v.location.startsWith("TREM 人工定位") : true)
+			.filter(v => this._filterTREM ? v.location.startsWith("地震資訊") : true)
 			.filter(v => this._filterCWB ? v.data.length : true);
 
 		this._updateReports(oldlist, this.reportList);
@@ -268,7 +268,7 @@ TREM.Report = {
 		const { clipboard, shell } = require("electron");
 		const report = this.cache.get(id);
 		const string = [];
-		string.push(`　　　　　　　　　　${report.location.startsWith("TREM 人工定位") ? "TREM 人工定位" : "中央氣象局"}地震測報中心　${TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? `第${report.earthquakeNo.toString().slice(-3)}號有感地震報告` : "Report_Title_Small"))}`);
+		string.push(`　　　　　　　　　　${report.location.startsWith("地震資訊") ? "地震資訊" : "中央氣象局"}地震測報中心　${TREM.Localization.getString(report.location.startsWith("地震資訊") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? `第${report.earthquakeNo.toString().slice(-3)}號有感地震報告` : "Report_Title_Small"))}`);
 		const time = new Date(report.originTime);
 		string.push(`　　　　　　　　　　發　震　時　間： ${time.getFullYear() - 1911}年${(time.getMonth() + 1 < 10 ? " " : "") + (time.getMonth() + 1)}月${(time.getDate() < 10 ? " " : "") + time.getDate()}日${(time.getHours() < 10 ? " " : "") + time.getHours()}時${(time.getMinutes() < 10 ? " " : "") + time.getMinutes()}分${(time.getSeconds() < 10 ? " " : "") + time.getSeconds()}秒`);
 		string.push(`　　　　　　　　　　震　央　位　置： 北　緯　 ${report.epicenterLat.toFixed(2)} °`);
@@ -471,14 +471,14 @@ TREM.Report = {
 
 		if (!report) return;
 
-		document.getElementById("report-overview-number").innerText = TREM.Localization.getString(report.location.startsWith("TREM 人工定位") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
+		document.getElementById("report-overview-number").innerText = TREM.Localization.getString(report.location.startsWith("地震資訊") ? "Report_Title_Local" : (report.earthquakeNo % 1000 ? report.earthquakeNo : "Report_Title_Small"));
 		document.getElementById("report-overview-location").innerText = report.location;
 		const time = new Date((new Date(`${report.originTime} GMT+08:00`)).toLocaleString("en-US", { timeZone: "Asia/Taipei" }));
 		document.getElementById("report-overview-time").innerText = report.originTime;
 		document.getElementById("report-overview-latitude").innerText = report.epicenterLat;
 		document.getElementById("report-overview-longitude").innerText = report.epicenterLon;
 
-		if (report.location.startsWith("TREM 人工定位")) {
+		if (report.location.startsWith("地震資訊")) {
 			document.getElementById("report-overview-intensity").parentElement.parentElement.style.display = "none";
 		} else {
 			document.getElementById("report-overview-intensity").parentElement.parentElement.style.display = "";
@@ -489,11 +489,11 @@ TREM.Report = {
 					: "";
 		}
 
-		document.getElementById("report-overview-intensity-location").innerText = (report.location.startsWith("TREM 人工定位")) ? "" : `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`;
+		document.getElementById("report-overview-intensity-location").innerText = (report.location.startsWith("地震資訊")) ? "" : `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`;
 		document.getElementById("report-overview-magnitude").innerText = report.magnitudeValue;
 		document.getElementById("report-overview-depth").innerText = report.depth;
 
-		// if (report.location.startsWith("TREM 人工定位")) {
+		// if (report.location.startsWith("地震資訊")) {
 		// 	document.getElementById("report-detail-copy").style.display = "none";
 		// } else {
 		// 	document.getElementById("report-detail-copy").style.display = "";
@@ -504,7 +504,7 @@ TREM.Report = {
 
 		document.getElementById("report-replay").value = report.identifier;
 
-		if (report.location.startsWith("TREM 人工定位")) {
+		if (report.location.startsWith("地震資訊")) {
 			document.getElementById("report-cwb").style.display = "none";
 			document.getElementById("report-scweb").style.display = "none";
 		} else {

@@ -3428,7 +3428,7 @@ ipcMain.on("report-Notification", (event, report) => {
 			content    : setting["tts.Notification"] ? ("地震報告"
 			+ ((report.data.length != 0) ? "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0].areaName + report.data[0].eqStation[0].stationName + IntensityI(report.data[0].areaIntensity) + "級。" : "發生規模" + report.magnitudeValue + "有感地震，最大震度" + "?級。")
 			+ "編號"
-			+ (report.location.startsWith("TREM 人工定位") ? "無（TREM 人工定位）" : report.earthquakeNo % 1000 ? report.earthquakeNo : "無（小區域有感地震）")
+			+ (report.location.startsWith("地震資訊") ? "無（地震資訊）" : report.earthquakeNo % 1000 ? report.earthquakeNo : "無（小區域有感地震）")
 			+ "時間"
 			+ report.originTime
 			+ "深度"
@@ -3449,7 +3449,7 @@ ipcMain.on("report-Notification", (event, report) => {
 					fields      : [
 						{
 							name   : "編號",
-							value  : report.location.startsWith("TREM 人工定位") ? "無（TREM 人工定位）" : report.earthquakeNo % 1000 ? report.earthquakeNo : "無（小區域有感地震）",
+							value  : report.location.startsWith("地震資訊") ? "無（地震資訊）" : report.earthquakeNo % 1000 ? report.earthquakeNo : "無（小區域有感地震）",
 							inline : true,
 						},
 						{
@@ -3473,7 +3473,7 @@ ipcMain.on("report-Notification", (event, report) => {
 							inline : false,
 						},
 					],
-					color: report.location.startsWith("TREM 人工定位") ? 9807270 : report.earthquakeNo % 1000 ? 15158332 : 3066993,
+					color: report.location.startsWith("地震資訊") ? 9807270 : report.earthquakeNo % 1000 ? 15158332 : 3066993,
 				},
 			],
 		};
@@ -3936,7 +3936,7 @@ function FCMdata(json, Unit) {
 		const location = json.location.match(/(?<=位於).+(?=\))/);
 
 		if (!win.isFocused())
-			if (!report.location.startsWith("TREM 人工定位"))
+			if (!report.location.startsWith("地震資訊"))
 				new Notification("地震報告",
 					{
 						body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
