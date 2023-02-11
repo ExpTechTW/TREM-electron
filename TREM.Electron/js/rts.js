@@ -46,15 +46,19 @@ let ServerT = 0;
 
 let Realtimestation = app.Configuration.data["Real-time.station"];
 let Realtimestation1 = app.Configuration.data["Real-time.station.1"];
+let Realtimestation2 = app.Configuration.data["Real-time.station.2"];
+let Realtimestation3 = app.Configuration.data["Real-time.station.3"];
+let Realtimestation4 = app.Configuration.data["Real-time.station.4"];
+let Realtimestation5 = app.Configuration.data["Real-time.station.5"];
 let themecolor = app.Configuration.data["theme.color"];
 let themedark = app.Configuration.data["theme.dark"];
 
 let chartuuids = [
-	"H-335-11339620-4",
-	"H-979-11336952-11",
-	"H-711-11334880-12",
-	"H-541-11370676-10",
 	Realtimestation1,
+	Realtimestation2,
+	Realtimestation3,
+	Realtimestation4,
+	Realtimestation5,
 	Realtimestation,
 ];
 
@@ -107,64 +111,64 @@ const data = {
 };
 const timer = {};
 
+const Real_time_station_run = () => {
+	chartuuids = [
+		Realtimestation1,
+		Realtimestation2,
+		Realtimestation3,
+		Realtimestation4,
+		Realtimestation5,
+		Realtimestation,
+	];
+	reconnect();
+	setCharts([
+		Realtimestation1.split("-")[2],
+		Realtimestation2.split("-")[2],
+		Realtimestation3.split("-")[2],
+		Realtimestation4.split("-")[2],
+		Realtimestation5.split("-")[2],
+		Realtimestation.split("-")[2],
+	]);
+};
+
 const Real_time_station = () => {
 	try {
 		if (Realtimestation != app.Configuration.data["Real-time.station"]) {
 			Realtimestation = app.Configuration.data["Real-time.station"];
-			chartuuids = [
-				"H-335-11339620-4",
-				"H-979-11336952-11",
-				"H-711-11334880-12",
-				"H-541-11370676-10",
-				Realtimestation1,
-				Realtimestation,
-			];
-			reconnect();
-			setCharts([
-				"11339620",
-				"11336952",
-				"11334880",
-				"11370676",
-				Realtimestation1.split("-")[2],
-				Realtimestation.split("-")[2],
-			]);
+			Real_time_station_run();
 		} else if (Realtimestation1 != app.Configuration.data["Real-time.station.1"]) {
 			Realtimestation1 = app.Configuration.data["Real-time.station.1"];
-			chartuuids = [
-				"H-335-11339620-4",
-				"H-979-11336952-11",
-				"H-711-11334880-12",
-				"H-541-11370676-10",
-				Realtimestation1,
-				Realtimestation,
-			];
-			reconnect();
-			setCharts([
-				"11339620",
-				"11336952",
-				"11334880",
-				"11370676",
-				Realtimestation1.split("-")[2],
-				Realtimestation.split("-")[2],
-			]);
+			Real_time_station_run();
+		} else if (Realtimestation2 != app.Configuration.data["Real-time.station.2"]) {
+			Realtimestation2 = app.Configuration.data["Real-time.station.2"];
+			Real_time_station_run();
+		} else if (Realtimestation3 != app.Configuration.data["Real-time.station.3"]) {
+			Realtimestation3 = app.Configuration.data["Real-time.station.3"];
+			Real_time_station_run();
+		} else if (Realtimestation4 != app.Configuration.data["Real-time.station.4"]) {
+			Realtimestation4 = app.Configuration.data["Real-time.station.4"];
+			Real_time_station_run();
+		} else if (Realtimestation5 != app.Configuration.data["Real-time.station.5"]) {
+			Realtimestation5 = app.Configuration.data["Real-time.station.5"];
+			Real_time_station_run();
 		} else if (themecolor != app.Configuration.data["theme.color"]) {
 			themecolor = app.Configuration.data["theme.color"];
 			setCharts([
-				"11339620",
-				"11336952",
-				"11334880",
-				"11370676",
 				Realtimestation1.split("-")[2],
+				Realtimestation2.split("-")[2],
+				Realtimestation3.split("-")[2],
+				Realtimestation4.split("-")[2],
+				Realtimestation5.split("-")[2],
 				Realtimestation.split("-")[2],
 			]);
 		} else if (themedark != app.Configuration.data["theme.dark"]) {
 			themedark = app.Configuration.data["theme.dark"];
 			setCharts([
-				"11339620",
-				"11336952",
-				"11334880",
-				"11370676",
 				Realtimestation1.split("-")[2],
+				Realtimestation2.split("-")[2],
+				Realtimestation3.split("-")[2],
+				Realtimestation4.split("-")[2],
+				Realtimestation5.split("-")[2],
 				Realtimestation.split("-")[2],
 			]);
 		}
@@ -349,11 +353,11 @@ async function init() {
 			timer.Realtimestation = setInterval(Real_time_station, 1_000);
 	})().catch(e => dump({ level: 2, message: e }));
 	setCharts([
-		"11339620",
-		"11336952",
-		"11334880",
-		"11370676",
 		Realtimestation1.split("-")[2],
+		Realtimestation2.split("-")[2],
+		Realtimestation3.split("-")[2],
+		Realtimestation4.split("-")[2],
+		Realtimestation5.split("-")[2],
 		Realtimestation.split("-")[2],
 	]);
 	for (const chart of charts)

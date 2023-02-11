@@ -267,6 +267,10 @@ function init() {
 		station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
 		const el = document.getElementById("Real-time.station");
 		const el1 = document.getElementById("Real-time.station.1");
+		const el2 = document.getElementById("Real-time.station.2");
+		const el3 = document.getElementById("Real-time.station.3");
+		const el4 = document.getElementById("Real-time.station.4");
+		const el5 = document.getElementById("Real-time.station.5");
 		const stations = {};
 
 		for (const key of Object.keys(station)) {
@@ -277,8 +281,16 @@ function init() {
 		for (const city of Object.keys(stations)) {
 			const optgroup = document.createElement("optgroup");
 			const optgroup1 = document.createElement("optgroup");
+			const optgroup2 = document.createElement("optgroup");
+			const optgroup3 = document.createElement("optgroup");
+			const optgroup4 = document.createElement("optgroup");
+			const optgroup5 = document.createElement("optgroup");
 			optgroup.label = city;
 			optgroup1.label = city;
+			optgroup2.label = city;
+			optgroup3.label = city;
+			optgroup4.label = city;
+			optgroup5.label = city;
 
 			for (const stationKey of Object.keys(stations[city])) {
 				const option = document.createElement("option");
@@ -295,10 +307,42 @@ function init() {
 				if (setting["Real-time.station.1"] == stationKey)
 					option1.selected = true;
 				optgroup1.appendChild(option1);
+				const option2 = document.createElement("option");
+				option2.text = `${stations[city][stationKey]} ${stationKey}`;
+				option2.value = stationKey;
+
+				if (setting["Real-time.station.2"] == stationKey)
+					option2.selected = true;
+				optgroup2.appendChild(option2);
+				const option3 = document.createElement("option");
+				option3.text = `${stations[city][stationKey]} ${stationKey}`;
+				option3.value = stationKey;
+
+				if (setting["Real-time.station.3"] == stationKey)
+					option3.selected = true;
+				optgroup3.appendChild(option3);
+				const option4 = document.createElement("option");
+				option4.text = `${stations[city][stationKey]} ${stationKey}`;
+				option4.value = stationKey;
+
+				if (setting["Real-time.station.4"] == stationKey)
+					option4.selected = true;
+				optgroup4.appendChild(option4);
+				const option5 = document.createElement("option");
+				option5.text = `${stations[city][stationKey]} ${stationKey}`;
+				option5.value = stationKey;
+
+				if (setting["Real-time.station.5"] == stationKey)
+					option5.selected = true;
+				optgroup5.appendChild(option5);
 			}
 
 			el.appendChild(optgroup);
 			el1.appendChild(optgroup1);
+			el2.appendChild(optgroup2);
+			el3.appendChild(optgroup3);
+			el4.appendChild(optgroup4);
+			el5.appendChild(optgroup5);
 		}
 	})();
 	// #endregion
@@ -329,6 +373,13 @@ function SelectSave(id) {
 
 		ipcRenderer.send("config:value", "location.town", town.options[town.selectedIndex].value);
 	}
+
+	for (let index = 1; index < 6; index++)
+		if (id == "Real-time.station." + index) {
+			const text = document.getElementById("Real-time.station." + index + ".text");
+			text.innerHTML = "即時測站波形圖" + index + "已設定 " + value;
+			text.style = "margin-top: 4px; color: rgb(var(--md-sys-color-on-background));";
+		}
 
 	if (id == "location.city" || id == "location.town") {
 		const city = document.getElementById("location.city");
