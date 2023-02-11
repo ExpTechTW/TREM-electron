@@ -2328,12 +2328,16 @@ function handler(Json) {
 					.setPopup(station_tooltip_popup.setHTML(station_tooltip))
 					.addTo(Maps.main);
 				Station[keys[index]].getElement().addEventListener("click", () => {
-					if (rtstation1 == "")
+					if (rtstation1 == "") {
 						rtstation1 = keys[index];
-					else if (rtstation1 == keys[index])
+						app.Configuration.data["Real-time.station"] = keys[index];
+					} else if (rtstation1 == keys[index]) {
 						rtstation1 = "";
-					else if (rtstation1 != keys[index])
+						app.Configuration.data["Real-time.station"] = setting["Real-time.station"];
+					} else if (rtstation1 != keys[index]) {
 						rtstation1 = keys[index];
+						app.Configuration.data["Real-time.station"] = keys[index];
+					}
 				});
 				Station[keys[index]].getElement().addEventListener("mouseover", () => {
 					station_tooltip_popup.setLngLat([station[keys[index]].Long, station[keys[index]].Lat]).setHTML(station_tooltip).addTo(Maps.main);
@@ -2386,12 +2390,16 @@ function handler(Json) {
 						// 	Station[keys[index]].bindTooltip(tooltip);
 						// }
 
-						if (rtstation1 == "")
+						if (rtstation1 == "") {
 							rtstation1 = keys[index];
-						else if (rtstation1 == keys[index])
+							app.Configuration.data["Real-time.station"] = keys[index];
+						} else if (rtstation1 == keys[index]) {
 							rtstation1 = "";
-						else if (rtstation1 != keys[index])
+							app.Configuration.data["Real-time.station"] = setting["Real-time.station"];
+						} else if (rtstation1 != keys[index]) {
 							rtstation1 = keys[index];
+							app.Configuration.data["Real-time.station"] = keys[index];
+						}
 					});
 
 			if (Station[keys[index]]) {
