@@ -4001,6 +4001,7 @@ function FCMdata(json, Unit) {
 TREM.Earthquake.on("eew", (data) => {
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.log(data);
+	let Timer_run;
 
 	if (data.type == "trem-eew" && data.lat == null || data.lon == null) return;
 
@@ -4010,7 +4011,17 @@ TREM.Earthquake.on("eew", (data) => {
 		TREM.EEW.get(data.id).update(data);
 
 	// handler
-	if (EarthquakeList[data.id] == undefined) EarthquakeList[data.id] = {};
+	if (!EarthquakeList[data.id]) EarthquakeList[data.id] = {
+		epicenter       : [],
+		Time            : 0,
+		ID              : "",
+		number          : "",
+		Timer           : Timer_run,
+		Timer_trem      : Timer_run,
+		distance        : [],
+		epicenterIcon   : null,
+		epicenterIconTW : null,
+	};
 	EarthquakeList[data.id].epicenter = [+data.lon, +data.lat];
 	EarthquakeList[data.id].Time = data.time;
 	EarthquakeList[data.id].ID = data.id;
@@ -4251,7 +4262,12 @@ TREM.Earthquake.on("eew", (data) => {
 
 	const speed = setting["shock.smoothing"] ? 100 : 500;
 
-	if (EarthquakeList[data.id].Timer != undefined) clearInterval(EarthquakeList[data.id].Timer);
+	if (EarthquakeList[data.id].Timer != undefined || EarthquakeList[data.id].Timer != null) clearInterval(EarthquakeList[data.id].Timer);
+
+	if (data.type == "trem-eew" && EarthquakeList[data.id].epicenterIcon != undefined || EarthquakeList[data.id].epicenterIcon != null || EarthquakeList[data.id].epicenterIcon) {
+		EarthquakeList[data.id].epicenterIcon.remove();
+		EarthquakeList[data.id].epicenterIcon = null;
+	}
 
 	if (EarthquakeList.ITimer != undefined) clearInterval(EarthquakeList.ITimer);
 
@@ -4328,10 +4344,36 @@ TREM.Earthquake.on("eew", (data) => {
 	for (let index = 0; index < 1002; index++)
 		_distance[index] = _speed(data.depth, index);
 	EarthquakeList[data.id].distance = _distance;
+
+	if (data.type == "trem-eew") EarthquakeList[data.id].distance = null;
+
 	main(data);
-	EarthquakeList[data.id].Timer = setInterval(() => {
-		main(data);
-	}, speed);
+
+	if (data.type != "trem-eew") {
+		EarthquakeList[data.id].Timer = setInterval(() => {
+			main(data);
+		}, speed);
+	} else if (data.type == "trem-eew" && data.number > 23) {
+		if (!EarthquakeList[data.id]) EarthquakeList[data.id] = {
+			epicenter       : [],
+			Time            : 0,
+			ID              : "",
+			number          : "",
+			Timer           : Timer_run,
+			Timer_trem      : Timer_run,
+			distance        : [],
+			epicenterIcon   : null,
+			epicenterIconTW : null,
+		};
+		clearInterval(EarthquakeList[data.id].Timer_trem);
+		EarthquakeList[data.id].Timer_trem = setInterval(() => {
+			main(data);
+		}, speed);
+	} else {
+		EarthquakeList[data.id].Timer = setInterval(() => {
+			main(data);
+		}, speed);
+	}
 
 	if (TREM.EEW.get(data.id)?.geojson) {
 		TREM.EEW.get(data.id).geojson.remove();
@@ -4386,7 +4428,7 @@ TREM.Earthquake.on("eew", (data) => {
 				+ ":" + NOW().getSeconds();
 
 			let msg = setting["webhook.body"];
-			msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale == null ? "?" : data.scale);
+			msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
 
 			// if (data.Function == "earthquake")
 			// 	if (data.Unit == "交通部中央氣象局")
@@ -4423,7 +4465,7 @@ TREM.Earthquake.on("eew", (data) => {
 				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 			};
 			msg.tts = setting["tts.Notification"];
-			msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
+			msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
 			dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
 			fetch(setting["webhook.url"], {
 				method  : "POST",
@@ -4438,8 +4480,8 @@ TREM.Earthquake.on("eew", (data) => {
 // #endregion
 
 // #region Event: eewEnd
-TREM.Earthquake.on("eewEnd", (id) => {
-	clear(id);
+TREM.Earthquake.on("eewEnd", (id, type) => {
+	clear(id, type);
 });
 // #endregion
 
@@ -4776,7 +4818,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 });
 
 function main(data) {
-	if (TREM.EEW.get(INFO[TINFO].ID).Cancel == undefined) {
+	if (TREM.EEW.get(INFO[TINFO]?.ID).Cancel == undefined || data.type != "trem-eew") {
 		if (data.depth != null) {
 
 			const wave = { p: 7, s: 4 };
@@ -5091,7 +5133,7 @@ function main(data) {
 	}
 
 	if (NOW().getTime() - data.time > 240_000 || Cancel) {
-		TREM.Earthquake.emit("eewEnd", data.id);
+		TREM.Earthquake.emit("eewEnd", data.id, data.type);
 		TREM.MapIntensity.clear();
 
 		// remove epicenter cross icons
@@ -5110,10 +5152,12 @@ function main(data) {
 			delete TREM.EEW.get(data.id).geojson;
 		}
 
-		clearInterval(EarthquakeList[data.id].Timer);
+		if (data.type != "trem-eew")
+			clearInterval(EarthquakeList[data.id].Timer);
+		else clearInterval(EarthquakeList[data.id].Timer_trem);
 		document.getElementById("box-10").innerHTML = "";
 
-		if (EarthquakeList[data.id].Depth != null) Maps.main.removeLayer(EarthquakeList[data.id].Depth);
+		// if (EarthquakeList[data.id].Depth != null) Maps.main.removeLayer(EarthquakeList[data.id].Depth);
 		delete EarthquakeList[data.id];
 		delete eew[data.id];
 
@@ -5161,14 +5205,16 @@ function Tcolor(text) {
 				: "purple";
 }
 
-function clear(ID) {
-	if (EarthquakeList[ID].CircleS != undefined) EarthquakeList[ID].CircleS = EarthquakeList[ID].CircleS.remove();
+function clear(ID, type) {
+	if (type != "trem-eew") {
+		if (EarthquakeList[ID].CircleS != undefined) EarthquakeList[ID].CircleS = EarthquakeList[ID].CircleS.remove();
 
-	if (EarthquakeList[ID].CircleP != undefined) EarthquakeList[ID].CircleP = EarthquakeList[ID].CircleP.remove();
+		if (EarthquakeList[ID].CircleP != undefined) EarthquakeList[ID].CircleP = EarthquakeList[ID].CircleP.remove();
 
-	if (EarthquakeList[ID].CircleSTW != undefined) Maps.mini.removeLayer(EarthquakeList[ID].CircleSTW);
+		if (EarthquakeList[ID].CircleSTW != undefined) Maps.mini.removeLayer(EarthquakeList[ID].CircleSTW);
 
-	if (EarthquakeList[ID].CirclePTW != undefined) Maps.mini.removeLayer(EarthquakeList[ID].CirclePTW);
+		if (EarthquakeList[ID].CirclePTW != undefined) Maps.mini.removeLayer(EarthquakeList[ID].CirclePTW);
+	}
 }
 
 function updateText() {
