@@ -3351,7 +3351,7 @@ ipcMain.once("start", () => {
 		setInterval(() => {
 			if (DATAstamp != 0 && Stamp != DATAstamp) {
 				Stamp = DATAstamp;
-				FCMdata(DATA, type = "websocket");
+				FCMdata(DATA, ServerType);
 			}
 		}, 0);
 		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer}`, origin: "Initialization" });
