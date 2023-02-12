@@ -1554,6 +1554,7 @@ async function init() {
 						},
 					}).getLayer(`Layer_${mapName}`));
 				}
+
 				MapBases.report.set("tw_county", Maps.report.addLayer({
 					id     : "Layer_tw_county",
 					type   : "fill",
