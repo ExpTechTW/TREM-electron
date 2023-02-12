@@ -1121,7 +1121,7 @@ async function init() {
 							30,
 						],
 						maxZoom            : 10,
-						minZoom            : 6,
+						minZoom            : 3,
 						zoom               : 6.8,
 						center             : [121.596, 23.612],
 						renderWorldCopies  : false,
@@ -1239,6 +1239,7 @@ async function init() {
 					"jp",
 					"sk",
 					"nk",
+					"ph",
 				]) {
 					Maps.main.addSource(`Source_${mapName}`, {
 						type      : "geojson",
@@ -1526,7 +1527,33 @@ async function init() {
 						},
 					}).addTo(Maps.mini));
 
-			if (!MapBases.report.length)
+			if (!MapBases.report.length) {
+				for (const mapName of [
+					"cn",
+					"jp",
+					"sk",
+					"nk",
+					"ph",
+				]) {
+					Maps.report.addSource(`Source_${mapName}`, {
+						type      : "geojson",
+						data      : MapData[mapName],
+						tolerance : 1,
+					});
+					MapBases.report.set(`${mapName}`, Maps.report.addLayer({
+						id     : `Layer_${mapName}`,
+						type   : "fill",
+						source : `Source_${mapName}`,
+						paint  : {
+							"fill-color"         : TREM.Colors.surfaceVariant,
+							"fill-outline-color" : TREM.Colors.secondary,
+							"fill-opacity"       : 0.5,
+						},
+						layout: {
+							visibility: setting[`map.${mapName}`] ? "visible" : "none",
+						},
+					}).getLayer(`Layer_${mapName}`));
+				}
 				MapBases.report.set("tw_county", Maps.report.addLayer({
 					id     : "Layer_tw_county",
 					type   : "fill",
@@ -1542,6 +1569,7 @@ async function init() {
 						"fill-opacity"       : 0.8,
 					},
 				}).getLayer("Layer_tw_county"));
+			}
 
 			if (!MapBases.intensity.length) {
 				Maps.intensity.addSource("Source_tw_county", {
@@ -1775,6 +1803,7 @@ async function init() {
 					"jp",
 					"sk",
 					"nk",
+					"ph",
 				])
 					if (setting["map." + mapName])
 						MapBases.main.push(`${mapName}`, L.geoJson.vt(MapData[mapName], {
@@ -1824,10 +1853,31 @@ async function init() {
 						},
 					}).addTo(Maps.mini));
 
-			if (!MapBases.report.length)
+			if (!MapBases.report.length) {
+				for (const mapName of [
+					"cn",
+					"jp",
+					"sk",
+					"nk",
+					"ph",
+				])
+					if (setting["map." + mapName])
+						MapBases.report.push(`${mapName}`, L.geoJson.vt(MapData[mapName], {
+							minZoom   : 6,
+							maxZoom   : 10,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							style     : {
+								weight      : 0.8,
+								color       : TREM.Colors.primary,
+								fillColor   : TREM.Colors.surfaceVariant,
+								fillOpacity : 1,
+							},
+						}).addTo(Maps.report));
 				MapBases.report.push("tw_county",
 					L.geoJson.vt(MapData.tw_county, {
-						minZoom   : 7.5,
+						minZoom   : 6,
 						maxZoom   : 10,
 						tolerance : 20,
 						buffer    : 256,
@@ -1839,6 +1889,7 @@ async function init() {
 							fillOpacity : 1,
 						},
 					}).addTo(Maps.report));
+			}
 
 			if (!MapBases.intensity.length)
 				MapBases.intensity.push("tw_county",

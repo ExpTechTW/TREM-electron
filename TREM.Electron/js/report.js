@@ -40,7 +40,7 @@ TREM.Report = {
 				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 2.0 : this._filterMagnitudeValue == 2 ? v.magnitudeValue < 3.0 : this._filterMagnitudeValue == 3 ? v.magnitudeValue < 4.0 : this._filterMagnitudeValue == 45 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 				.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
 				.filter(v => this._filterTREM ? v.location.startsWith("地震資訊") : true)
-				.filter(v => this._filterCWB ? v.data.length : true);
+				.filter(v => this._filterCWB ? v.identifier.startsWith("CWB") : true);
 
 			for (const report of reports) {
 				// if (setting["api.key"] == "" && report.data[0].areaIntensity == 0) continue;
@@ -51,8 +51,8 @@ TREM.Report = {
 					|| (this._filterHasReplay && !(report.ID?.length))
 					|| (this._filterMagnitude && !(this._filterMagnitudeValue == 1 ? report.magnitudeValue < 2.0 : this._filterMagnitudeValue == 2 ? report.magnitudeValue < 3.0 : this._filterMagnitudeValue == 3 ? report.magnitudeValue < 4.0 : this._filterMagnitudeValue == 45 ? report.magnitudeValue < 4.5 : report.magnitudeValue >= 4.5))
 					|| (this._filterIntensity && !(report.data[0]?.areaIntensity == this._filterIntensityValue))
-					|| (this._filterTREM && report.location.startsWith("地震資訊"))
-					|| (this._filterCWB && !report.data.length)) {
+					|| (this._filterTREM && !(report.location.startsWith("地震資訊")))
+					|| (this._filterCWB && !(report.identifier.startsWith("CWB")))) {
 					element.classList.add("hide");
 					element.style.display = "none";
 				} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -145,10 +145,12 @@ TREM.Report = {
 			element2.classList.remove("hide");
 			element2.style.display = "block";
 			this._filterCWB = true;
-			const element3 = document.getElementById("report-filter-hasNumber");
-			element3.checked = false;
-			const element5 = document.getElementById("report-filter-intensity");
+			const element3 = document.getElementById("report-filter-CWB");
+			element3.checked = true;
+			const element5 = document.getElementById("report-filter-hasNumber");
 			element5.checked = false;
+			const element6 = document.getElementById("report-filter-intensity");
+			element6.checked = false;
 		}
 
 		if (select) {
@@ -164,7 +166,7 @@ TREM.Report = {
 			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 2.0 : this._filterMagnitudeValue == 2 ? v.magnitudeValue < 3.0 : this._filterMagnitudeValue == 3 ? v.magnitudeValue < 4.0 : this._filterMagnitudeValue == 45 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 			.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
 			.filter(v => this._filterTREM ? v.location.startsWith("地震資訊") : true)
-			.filter(v => this._filterCWB ? v.data.length : true);
+			.filter(v => this._filterCWB ? v.identifier.startsWith("CWB") : true);
 
 		this._updateReports(oldlist, this.reportList);
 	},
@@ -189,7 +191,7 @@ TREM.Report = {
 			}
 
 			case "report-overview": {
-				if (this.view == "report-list") this.unloadReports();
+				if (this.view == "report-list") this.unloadReports(true);
 				this._setupReport(this.cache.get(reportIdentifier));
 				document.getElementById("report-detail-back").classList.remove("hide");
 				document.getElementById("report-detail-refresh").classList.add("hide");
@@ -197,7 +199,7 @@ TREM.Report = {
 			}
 
 			case "eq-report-overview": {
-				if (this.view == "report-list") this.unloadReports();
+				if (this.view == "report-list") this.unloadReports(true);
 				this._setupReport(reportIdentifier);
 				document.getElementById("report-detail-back").classList.remove("hide");
 				document.getElementById("report-detail-refresh").classList.add("hide");

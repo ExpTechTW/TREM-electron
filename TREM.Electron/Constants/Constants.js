@@ -20,6 +20,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"map.ph": {
+			type  : "toggle",
+			value : false,
+		},
 		"general.locale": {
 			type  : "select",
 			value : "zh-TW",
