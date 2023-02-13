@@ -1114,17 +1114,17 @@ async function init() {
 					{
 						container : "map-report",
 						maxPitch  : 0,
-						maxBounds : [
-							100,
-							10,
-							130,
-							30,
-						],
+						// maxBounds : [
+						// 	100,
+						// 	10,
+						// 	130,
+						// 	30,
+						// ],
 						maxZoom            : 10,
-						minZoom            : 3,
+						minZoom            : 1,
 						zoom               : 6.8,
 						center             : [121.596, 23.612],
-						renderWorldCopies  : false,
+						renderWorldCopies  : true,
 						attributionControl : false,
 						doubleClickZoom    : false,
 						keyboard           : false,
@@ -1534,6 +1534,7 @@ async function init() {
 					"sk",
 					"nk",
 					"ph",
+					"NZ",
 				]) {
 					Maps.report.addSource(`Source_${mapName}`, {
 						type      : "geojson",
@@ -1755,7 +1756,7 @@ async function init() {
 					{
 						attributionControl : false,
 						closePopupOnClick  : false,
-						maxBounds          : [[30, 130], [10, 100]],
+						// maxBounds          : [[30, 130], [10, 100]],
 						preferCanvas       : true,
 						zoomSnap           : 0.25,
 						zoomDelta          : 0.5,
@@ -1861,10 +1862,11 @@ async function init() {
 					"sk",
 					"nk",
 					"ph",
+					"NZ",
 				])
 					if (setting["map." + mapName])
 						MapBases.report.push(`${mapName}`, L.geoJson.vt(MapData[mapName], {
-							minZoom   : 6,
+							minZoom   : 3,
 							maxZoom   : 10,
 							tolerance : 20,
 							buffer    : 256,
@@ -1878,7 +1880,7 @@ async function init() {
 						}).addTo(Maps.report));
 				MapBases.report.push("tw_county",
 					L.geoJson.vt(MapData.tw_county, {
-						minZoom   : 6,
+						minZoom   : 3,
 						maxZoom   : 10,
 						tolerance : 20,
 						buffer    : 256,
