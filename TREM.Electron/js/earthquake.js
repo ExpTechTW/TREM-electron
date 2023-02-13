@@ -5206,7 +5206,9 @@ function main(data) {
 
 		if (data.type != "trem-eew")
 			clearInterval(EarthquakeList[data.id].Timer);
-		else clearInterval(EarthquakeList[data.id].Timer_trem);
+		else if (data.number > 23)
+			clearInterval(EarthquakeList[data.id].Timer_trem);
+		else clearInterval(EarthquakeList[data.id].Timer);
 		document.getElementById("box-10").innerHTML = "";
 
 		// if (EarthquakeList[data.id].Depth != null) Maps.main.removeLayer(EarthquakeList[data.id].Depth);
