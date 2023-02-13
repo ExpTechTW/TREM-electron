@@ -1112,8 +1112,8 @@ async function init() {
 			if (!Maps.report)
 				Maps.report = new maplibregl.Map(
 					{
-						container : "map-report",
-						maxPitch  : 0,
+						container          : "map-report",
+						maxPitch           : 0,
 						// maxBounds : [
 						// 	100,
 						// 	10,
