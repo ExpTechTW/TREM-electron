@@ -354,7 +354,8 @@ ipcMain.on("config:value", (event, key, value) => {
 		case "map.sk":
 		case "map.nk":
 		case "map.ph":
-		case "map.NZ": {
+		case "map.NZ":
+		case "map.in": {
 			emitAllWindow("config:maplayer", key.slice(4), value);
 			MainWindow.reload();
 			break;

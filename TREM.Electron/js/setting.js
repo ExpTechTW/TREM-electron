@@ -431,7 +431,7 @@ function CheckSave(id) {
 		dump({ level: 0, message: `Value Changed trem-eq.alert.Notification: ${setting["trem-eq.alert.Notification"]} -> false`, origin: "Setting" });
 	}
 
-	if (id == "map.jp" || id == "map.cn" || id == "map.sk" || id == "map.nk" || id == "map.ph" || id == "map.NZ")
+	if (id == "map.jp" || id == "map.cn" || id == "map.sk" || id == "map.nk" || id == "map.ph" || id == "map.NZ" || id == "map.in")
 		$("#MAPReloadButton").fadeIn(100);
 
 	if (id == "compatibility.hwaccel")
@@ -578,6 +578,8 @@ function send() {
 	if (testtext_value == "福建省地震局") Unit_type = "eew-fjdzj";
 
 	if (testtext_value == "四川省地震局") Unit_type = "eew-scdzj";
+
+	if (testtext_value == "NSSPE") Unit_type = "trem-eew";
 
 	if (document.getElementById("UUID").value != "")
 		data = {
