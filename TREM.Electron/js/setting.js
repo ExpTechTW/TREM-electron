@@ -431,7 +431,7 @@ function CheckSave(id) {
 		dump({ level: 0, message: `Value Changed trem-eq.alert.Notification: ${setting["trem-eq.alert.Notification"]} -> false`, origin: "Setting" });
 	}
 
-	if (id == "map.jp" || id == "map.cn" || id == "map.sk" || id == "map.nk" || id == "map.ph" || id == "map.NZ" || id == "map.in")
+	if (id == "map.jp" || id == "map.cn" || id == "map.sk" || id == "map.nk" || id == "map.ph" || id == "map.NZ" || id == "map.in" || id == "map.TU")
 		$("#MAPReloadButton").fadeIn(100);
 
 	if (id == "compatibility.hwaccel")
