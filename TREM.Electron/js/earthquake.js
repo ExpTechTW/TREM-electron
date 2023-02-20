@@ -91,7 +91,7 @@ try {
 
 let Location;
 let station = {};
-let station_time = {};
+const station_time = {};
 let palert_geojson = null;
 let investigation = false;
 let ReportTag = 0;
