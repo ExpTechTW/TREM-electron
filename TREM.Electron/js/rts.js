@@ -294,14 +294,14 @@ const wave = (wave_data) => {
 	for (const i in chartuuids) {
 		if (jsondata[chartuuids[i]])
 			chartdata[i].push(...jsondata[chartuuids[i]].map((value, index, array) => ({
-				name  : now.toString(),
-				value : [new Date(+now + (index * (1000 / array.length))).toISOString(), value],
+				name  : now.getTime(),
+				value : [new Date(+now + (index * (1000 / array.length))).getTime(), value],
 			})));
 		else
 			for (let j = 0; j < (chartuuids[i].startsWith("H") ? 19 : 38); j++)
 				chartdata[i].push({
-					name  : now.toString(),
-					value : [new Date(+now + (j * (1000 / (chartuuids[i].startsWith("H") ? 19 : 38)))).toISOString(), null],
+					name  : now.getTime(),
+					value : [new Date(+now + (j * (1000 / (chartuuids[i].startsWith("H") ? 19 : 38)))).getTime(), null],
 				});
 
 
@@ -313,8 +313,8 @@ const wave = (wave_data) => {
 			} else if (chartdata[i].length != (chartuuids[i].startsWith("H") ? 1140 : 2280)) {
 				chartdata[i].shift();
 				chartdata[i].unshift({
-					name  : new Date(Date.now() - 60_000).toString(),
-					value : [new Date(Date.now() - 60_000).toISOString(), null],
+					name  : new Date(Date.now() - 60_000).getTime(),
+					value : [new Date(Date.now() - 60_000).getTime(), null],
 				});
 				break;
 			}

@@ -91,6 +91,7 @@ try {
 
 let Location;
 let station = {};
+let station_time = {};
 let palert_geojson = null;
 let investigation = false;
 let ReportTag = 0;
@@ -1766,6 +1767,7 @@ async function init() {
 						zoomControl        : false,
 						doubleClickZoom    : false,
 						keyboard           : false,
+						worldCopyJump      : true,
 					})
 					.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
 						paddingTopLeft: [document.getElementById("map-report").offsetWidth / 2, 0],
@@ -2300,6 +2302,9 @@ function handler(Json) {
 		const current_station_data = station[uuid];
 		const current_data = Json[uuid.split("-")[2]];
 
+		if (station_time[uuid] == undefined)
+			station_time[uuid] = station[uuid];
+
 		// if (uuid == "H-979-11336952-11")
 		// 	console.log(current_data);
 
@@ -2327,10 +2332,10 @@ function handler(Json) {
 			amount = "--";
 			intensity = "-";
 
-			if (station[uuid].Json_Time == undefined)
-				station[uuid].Json_Time = Date.now();
+			if (station_time[uuid].Json_Time == undefined)
+				station_time[uuid].Json_Time = Date.now();
 		} else {
-			station[uuid].Json_Time = Json.Time;
+			station_time[uuid].Json_Time = Json.Time;
 			amount = +current_data.v;
 
 			if (amount > station[uuid].MaxPGA) station[uuid].MaxPGA = amount;
@@ -2472,7 +2477,7 @@ function handler(Json) {
 		}
 
 		const Level = IntensityI(intensity);
-		const now = new Date(station[uuid].Json_Time);
+		const now = new Date(station_time[uuid].Json_Time);
 
 		// if (Unlock) {
 		// 	if (rtstation1 == "") {
@@ -2558,7 +2563,7 @@ function handler(Json) {
 			MAXPGA.long = station[keys[index]].Long;
 			MAXPGA.loc = station[keys[index]].Loc;
 			MAXPGA.intensity = intensity;
-			MAXPGA.time = new Date(station[uuid].Json_Time);
+			MAXPGA.time = new Date(station_time[uuid].Json_Time);
 		}
 		// if (MaxIntensity1 > MAXPGA.intensity){
 		// 	MAXPGA.pga = amount;
