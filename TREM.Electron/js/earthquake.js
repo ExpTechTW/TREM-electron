@@ -5197,7 +5197,7 @@ function main(data) {
 
 	if (NOW().getTime() - data.time > 240_000 || Cancel) {
 		TREM.Earthquake.emit("eewEnd", data.id, data.type);
-		TREM.MapIntensity.clear();
+		// TREM.MapIntensity.clear();
 
 		// remove epicenter cross icons
 		EarthquakeList[data.id].epicenterIcon.remove();
