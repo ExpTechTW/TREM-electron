@@ -1538,6 +1538,7 @@ async function init() {
 					"NZ",
 					"in",
 					"TU",
+					"ta",
 				]) {
 					Maps.report.addSource(`Source_${mapName}`, {
 						type      : "geojson",
@@ -1869,6 +1870,7 @@ async function init() {
 					"NZ",
 					"in",
 					"TU",
+					"ta",
 				])
 					if (setting["map." + mapName])
 						MapBases.report.push(`${mapName}`, L.geoJson.vt(MapData[mapName], {
