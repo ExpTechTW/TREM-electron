@@ -224,9 +224,18 @@ body:not(.darkmode) #here-marker {
 	color: rgb(var(--md-sys-color-on-background));
 }
 
+#load #ExpTech {
+	margin: 18% 0 0 0;
+}
+
+#load #ExpTech img {
+	height: 128px;
+	width: 128px;
+}
+
 #load #app-name {
 	font-size: 32px;
-	margin: 24% 0 8px 0;
+	margin: 0 0 8px 0;
 }
 
 #load #loading {
