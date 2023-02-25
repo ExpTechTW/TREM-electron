@@ -11,6 +11,8 @@ let setting, is_setting_disabled;
 
 TREM.Resources = require(path.resolve(app.getAppPath(), "./Resources/Resources.js"));
 
+setting = app.Configuration._data;
+
 ipcRenderer.on("setting", (event, data) => {
 	setting = data;
 	is_setting_disabled = false;
