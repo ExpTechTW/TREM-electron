@@ -34,13 +34,12 @@ if (process.argv.includes("--start")) _hide = true;
 if (process.argv.includes("--dev")) {
 	_devMode = true;
 	TREM.Configuration.data["dev.mode"] = _devMode;
-	emitAllWindow("setting", TREM.Configuration._data);
 }else{
 	_devMode = false;
 	TREM.Configuration.data["dev.mode"] = _devMode;
-	emitAllWindow("setting", TREM.Configuration._data);
 }
 
+emitAllWindow("setting", TREM.Configuration._data);
 const latestLog = path.join(TREM.getPath("logs"), "latest.log");
 if (fs.existsSync(latestLog)) {
 	const filetime = fs.statSync(latestLog).mtime;
