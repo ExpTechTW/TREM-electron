@@ -120,6 +120,14 @@ const Constants = Object.freeze({
 			type  : "range",
 			value : 1,
 		},
+		"audio.PAlert": {
+			type  : "toggle",
+			value : true,
+		},
+		"audio.PAlert.volume": {
+			type  : "range",
+			value : 1,
+		},
 		"Real-time.station": {
 			type  : "select",
 			value : "L-711-6732340-12",

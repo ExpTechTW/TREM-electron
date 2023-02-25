@@ -1535,6 +1535,49 @@
                                             <span lang="zh-TW">測試音效</span>
                                         </span>
                                     </button>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">PAlert</span>
+                                                <span lang="ja">PAlert</span>
+                                                <span lang="kr">PAlert</span>
+                                                <span lang="ru">PAlert</span>
+                                                <span lang="zh-CN">PAlert</span>
+                                                <span lang="zh-TW">PAlert</span>
+                                                <span class="option-label-id">audio.PAlert</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Play sounds when PAlert is triggered.</span>
+                                                <span lang="ja">PAlertが引き起こされた時に音を鳴らす。</span>
+                                                <span lang="kr">PAlert 감지 시 소리를 재생합니다.</span>
+                                                <span lang="ru">Воспроизведение звукового эффекта при получении "PAlert".</span>
+                                                <span lang="zh-CN">在收到「PAlert」时播放音效。</span>
+                                                <span lang="zh-TW">在收到「PAlert」時播放音效。</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="audio.PAlert" onclick="CheckSave('audio.PAlert')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <!-- <label class="slider">
+                                        <span class="material-symbols-rounded slider-icon">volume_up</span>
+                                        <input type="range" id="audio.PAlert.volume" min="0" max="1" step="0.01" onchange="RangeSave('audio.PAlert.volume')">
+                                        <span class="slider-value percentage"></span>
+                                    </label> -->
+                                    <button class="filled-tonal-button setting-button md3-ripple" onclick="testAudio('palert', this)" style="margin: 5px 0 16px 0;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Test</span>
+                                            <span lang="ja">音テスト</span>
+                                            <span lang="kr">소리 테스트</span>
+                                            <span lang="ru">Тестовый звук</span>
+                                            <span lang="zh-CN">测试音效</span>
+                                            <span lang="zh-TW">測試音效</span>
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
                             <div class="list-container" id="Connection">

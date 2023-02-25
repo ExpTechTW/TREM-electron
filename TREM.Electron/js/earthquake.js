@@ -274,7 +274,7 @@ TREM.MapIntensity = {
 
 							if (!win.isFocused()) win.flashFrame(true);
 
-							if (setting["audio.realtime"]) TREM.Audios.palert.play();
+							if (setting["audio.PAlert"]) TREM.Audios.palert.play();
 						}
 
 						setTimeout(() => {
@@ -303,7 +303,7 @@ TREM.MapIntensity = {
 
 						if (!win.isFocused()) win.flashFrame(true);
 
-						if (setting["audio.realtime"]) TREM.Audios.palert.play();
+						if (setting["audio.PAlert"]) TREM.Audios.palert.play();
 					} else {
 						palert_geojson.remove();
 					}
