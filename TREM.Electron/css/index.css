@@ -233,6 +233,15 @@ body:not(.darkmode) #here-marker {
 	width: 128px;
 }
 
+#load #ExpTech svg {
+	height: 128px;
+	width: 256px;
+}
+
+#load #ExpTech svg text {
+	fill: rgb(var(--md-sys-color-on-background));
+}
+
 #load #app-name {
 	font-size: 32px;
 	margin: 0 0 8px 0;

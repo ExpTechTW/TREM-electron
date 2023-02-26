@@ -19,13 +19,32 @@
             <span lang="zh-TW">再次點擊<kbd>F11</kbd>來離開全螢幕模式</span>
         </div>
         <div id="load">
-            <div id="ExpTech"><img src="../image/TREM.gif"></div>
-            <div id="app-name" lang="en">Taiwan Real-time Earthquake Monitoring</div>
+            <div id="ExpTech">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 48">
+                    <defs>
+                    <linearGradient id="grad" x1="0.5" y1="0" x2="0.5" y2="1">
+                        <stop offset="1%" stop-color="#a6e5f2"/>
+                        <stop offset="34%" stop-color="#84d2ee"/>
+                        <stop offset="100%" stop-color="#5ea6ed"/>
+                    </linearGradient>
+                    </defs>
+                    <text style="font-family: 'Noto Sans TC'; font-size: 20px; font-weight: 700;" x="54" y="31.15">TREM 臺灣即時地震監測</text>
+                    <g id="logo">
+                    <ellipse style="fill: url('#grad');" cx="24" cy="24" rx="24" ry="24"></ellipse>
+                    <polyline style="fill: none; stroke-linecap: round; stroke-width: 2px; stroke: rgb(255, 255, 255); stroke-linejoin: round;" points="3 24.001 13.5 24.001 17.933 28.667 22.366 10 25.634 37.999 30.067 19.332 34.5 24.001 45 24.001"></polyline>
+                    <ellipse style="fill: rgb(255, 100, 100); stroke: rgb(255, 100, 100);" cx="14" cy="32" rx="1.466" ry="1.466"></ellipse>
+                    <ellipse style="fill: none; stroke: rgb(255, 100, 100);" cx="14" cy="32" rx="4.5" ry="4.5"></ellipse>
+                    <ellipse style="fill: none; stroke: rgb(255, 100, 100);" cx="14" cy="32" rx="7.5" ry="7.5"></ellipse>
+                    </g>
+                </svg>
+                <!-- <img src="../image/TREM.gif"> -->
+            </div>
+            <!-- <div id="app-name" lang="en">Taiwan Real-time Earthquake Monitoring</div>
             <div id="app-name" lang="ja">TREM 台湾リアルタイム地震モニタリング</div>
             <div id="app-name" lang="kr">TREM 대만 실시간 지진 모니터링</div>
             <div id="app-name" lang="ru">TREM Мониторинг землетрясений на Тайване в режиме реального времени</div>
             <div id="app-name" lang="zh-CN">TREM 台湾即时地震监测</div>
-            <div id="app-name" lang="zh-TW">TREM 臺灣即時地震監測</div>
+            <div id="app-name" lang="zh-TW">TREM 臺灣即時地震監測</div> -->
             <progress id="loading_progress" class="progressbar" value="0" max="1"></progress>
             <div id="loading">正在等待網路連線...</div>
             <div id="footer">Powered by ExpTech</div>

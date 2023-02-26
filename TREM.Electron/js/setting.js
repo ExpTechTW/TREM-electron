@@ -248,6 +248,18 @@ function init() {
 		}
 	});
 
+	const value = setting["update.mode"];
+	const element1 = document.getElementById("update.time");
+
+	if (value == "never")
+		element1.disabled = true;
+	else if (value == "notify")
+		element1.disabled = true;
+	else if (value == "download")
+		element1.disabled = false;
+	else if (value == "install")
+		element1.disabled = false;
+
 	// #region 選單
 	(() => {
 		const el = document.getElementById("location.city");
@@ -485,8 +497,22 @@ function ChoiceSave(id, el) {
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 
-	if (id == "update.mode")
-		$("#UDReloadButton").fadeIn(100);
+	if (id == "update.mode") {
+		const element = document.getElementById("update.time");
+
+		if (value == "never")
+			element.disabled = true;
+		else if (value == "notify")
+			element.disabled = true;
+		else if (value == "download") {
+			element.disabled = false;
+			$("#UDReloadButton").fadeIn(100);
+		}
+		else if (value == "install") {
+			element.disabled = false;
+			$("#UDReloadButton").fadeIn(100);
+		}
+	}
 }
 
 function RangeSave(id) {
