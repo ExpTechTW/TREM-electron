@@ -2300,6 +2300,7 @@ function handler(Json) {
 		}
 	}
 
+	let max_intensity = 0;
 	MaxIntensity1 = 0;
 	let stationnowindex = 0;
 	const detection_location = Json.area ?? [];
@@ -2307,7 +2308,7 @@ function handler(Json) {
 
 	if (detection_location.length) console.log(detection_location);
 
-	if (detection_list.length) console.log(detection_list);
+	if (Object.keys(detection_list).length) console.log(detection_list);
 
 	for (let index = 0, keys = Object.keys(station), n = keys.length; index < n; index++) {
 		const uuid = keys[index];
@@ -2564,6 +2565,25 @@ function handler(Json) {
 					}
 
 				detected_list[station[keys[index]].PGA].time = NOW().getTime();
+			}
+		} else {
+			for (let i = 0; i < Object.keys(detection_list).length; i++) {
+				const key = Object.keys(detection_list)[i];
+
+				if (max_intensity < detection_list[key]) max_intensity = detection_list[key];
+
+				if (setting["audio.realtime"])
+					if (max_intensity > 4)
+						TREM.Audios.int2.play();
+					else if (max_intensity > 1)
+						TREM.Audios.int1.play();
+					else
+						TREM.Audios.int0.play();
+
+				detected_list[key] ??= {
+					intensity : detection_list[key],
+					time      : NOW().getTime(),
+				};
 			}
 		}
 
