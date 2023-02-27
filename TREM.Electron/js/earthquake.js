@@ -2264,7 +2264,6 @@ function PGAMainbkup() {
 }
 
 function handler(Json) {
-	if (Json.Alert) console.log(Json);
 	// console.log(Json);
 	// console.log(station);
 
