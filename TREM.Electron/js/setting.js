@@ -500,15 +500,14 @@ function ChoiceSave(id, el) {
 	if (id == "update.mode") {
 		const element = document.getElementById("update.time");
 
-		if (value == "never")
+		if (value == "never") {
 			element.disabled = true;
-		else if (value == "notify")
+		} else if (value == "notify") {
 			element.disabled = true;
-		else if (value == "download") {
+		} else if (value == "download") {
 			element.disabled = false;
 			$("#UDReloadButton").fadeIn(100);
-		}
-		else if (value == "install") {
+		} else if (value == "install") {
 			element.disabled = false;
 			$("#UDReloadButton").fadeIn(100);
 		}
