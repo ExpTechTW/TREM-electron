@@ -2306,6 +2306,10 @@ function handler(Json) {
 	const detection_location = Json.area ?? [];
 	const detection_list = Json.box ?? {};
 
+	if (detection_location != []) console.log(detection_location);
+
+	if (detection_list != {}) console.log(detection_list);
+
 	for (let index = 0, keys = Object.keys(station), n = keys.length; index < n; index++) {
 		const uuid = keys[index];
 		const current_station_data = station[uuid];
