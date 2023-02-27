@@ -2302,6 +2302,8 @@ function handler(Json) {
 	MaxPGA = 0;
 	MaxIntensity1 = 0;
 	let stationnowindex = 0;
+	const detection_location = Json.area ?? [];
+	const detection_list = Json.box ?? {};
 
 	for (let index = 0, keys = Object.keys(station), n = keys.length; index < n; index++) {
 		const uuid = keys[index];
@@ -2711,7 +2713,7 @@ function handler(Json) {
 		if (RMT >= 2) RMT = 0;
 	}
 
-	const All = (Json.Alert) ? Json.I : [];
+	const All = (Json.Alert && Json.I && Json.I.length) ? Json.I : [];
 	const list = [];
 
 	if (!All.length) {
