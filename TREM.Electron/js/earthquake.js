@@ -3976,6 +3976,8 @@ function FCMdata(json, Unit) {
 		TREM.Earthquake.emit("trem-eq", json);
 	} else if (json.type == "palert") {
 		TREM.MapIntensity.palert(json);
+	} else if (json.type == "palert-app") {
+		console.log(json);
 	} else if (json.type == "pws") {
 		TREM.PWS.addPWS(json.raw);
 	} else if (json.type == "intensity") {
