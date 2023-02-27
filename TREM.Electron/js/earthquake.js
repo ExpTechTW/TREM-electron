@@ -2264,6 +2264,7 @@ function PGAMainbkup() {
 }
 
 function handler(Json) {
+	if (Json.Alert) console.log(Json);
 	// console.log(Json);
 	// console.log(station);
 
@@ -2311,7 +2312,7 @@ function handler(Json) {
 		const current_data = Json[uuid.split("-")[2]];
 
 		if (station_time[uuid] == undefined)
-			station_time[uuid] = station[uuid];
+			station_time[uuid] = current_station_data;
 
 		// if (uuid == "H-979-11336952-11")
 		// 	console.log(current_data);
@@ -2346,7 +2347,7 @@ function handler(Json) {
 			station_time[uuid].Json_Time = Json.Time;
 			amount = +current_data.v;
 
-			if (amount > station[uuid].MaxPGA) station[uuid].MaxPGA = amount;
+			if (amount > current_station_data.MaxPGA) current_station_data.MaxPGA = amount;
 			intensity = (Alert && Json.Alert) ? Math.round(current_data.i)
 				: (NOW().getTime() - current_data.TS * 1000 > 5000) ? "NA"
 					: (!Alert) ? 0
