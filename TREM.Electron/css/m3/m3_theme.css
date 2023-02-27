@@ -1,6 +1,7 @@
 body {
   --md-sys-color-background: 255, 251, 254;
   --md-sys-color-on-background: 28, 27, 31;
+  --md-sys-color-on-background-reverse: 230, 225, 229;
   --md-sys-color-primary: 103, 81, 164;
   --md-sys-color-primary-container: 234, 221, 255;
   --md-sys-color-on-primary-container: 33, 0, 94;
@@ -18,6 +19,7 @@ body {
 body.md3-dark {
   --md-sys-color-background: 28, 27, 31;
   --md-sys-color-on-background: 230, 225, 229;
+  --md-sys-color-on-background-reverse: 28, 27, 31;
   --md-sys-color-primary: 208, 188, 255;
   --md-sys-color-primary-container: 79, 55, 139;
   --md-sys-color-on-primary-container: 234, 221, 255;

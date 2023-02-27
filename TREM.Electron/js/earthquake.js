@@ -2300,15 +2300,14 @@ function handler(Json) {
 		}
 	}
 
-	MaxPGA = 0;
 	MaxIntensity1 = 0;
 	let stationnowindex = 0;
 	const detection_location = Json.area ?? [];
 	const detection_list = Json.box ?? {};
 
-	if (detection_location != []) console.log(detection_location);
+	if (detection_location.length) console.log(detection_location);
 
-	if (detection_list != {}) console.log(detection_list);
+	if (detection_list.length) console.log(detection_list);
 
 	for (let index = 0, keys = Object.keys(station), n = keys.length; index < n; index++) {
 		const uuid = keys[index];

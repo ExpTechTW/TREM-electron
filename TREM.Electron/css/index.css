@@ -233,13 +233,77 @@ body:not(.darkmode) #here-marker {
 	width: 128px;
 }
 
+@keyframes stretch {
+    to {
+      scale: 125% 125%;
+    }
+}
+
+@keyframes shrink {
+	to {
+		scale: 100% 100%;
+	}
+}
+
+@keyframes move {
+	to {
+		translate: 0 0;
+	}
+}
+
+@keyframes drawline {
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
 #load #ExpTech svg {
+	overflow: visible;
 	height: 128px;
 	width: 256px;
 }
 
-#load #ExpTech svg text {
+#load #ExpTech svg .loadtext {
+	display: block;
+    font-family: 'Noto Sans TC';
+    font-size: 20px;
+    font-weight: 700;
 	fill: rgb(var(--md-sys-color-on-background));
+}
+
+#load #ExpTech svg .loadtext-stroke {
+    fill: rgb(var(--md-sys-color-on-background));
+    stroke: rgb(var(--md-sys-color-on-background-reverse));
+    stroke-width: 12px;
+    stroke-dashoffset: 200;
+    stroke-dasharray: 200;
+    stroke-linecap: butt;
+    stroke-linejoin: round;
+    width: 200px;
+    animation:
+      drawline 0.5s ease-in 0.1s forwards
+}
+
+#load #ExpTech svg #loadlogo {
+    transform-origin: 24px;
+    scale: 0% 125%;
+    translate: -10240px 0;
+    animation:
+		stretch 0.4s cubic-bezier(0.2, 0.5, 0.6, 1.15) forwards,
+		shrink 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s forwards,
+		move 1s ease-in-out 1.4s forwards;
+}
+
+#load #ExpTech svg #loadwave {
+	fill: none;
+	stroke-linecap: round;
+	stroke-width: 2px;
+	stroke: rgb(255, 255, 255);
+	stroke-linejoin: round;
+	stroke-dasharray: 200;
+	stroke-dashoffset: 200;
+	animation:
+		drawline 1s ease-in-out 0.4s forwards;
 }
 
 #load #app-name {
