@@ -1,5 +1,5 @@
 {
-  "name": "trem",
+  "name": "tremtest",
   "version": "6.0.0-pre.267.86",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
@@ -34,7 +34,6 @@
       ]
     },
     "win": {
-      "publish": null,
       "target": [],
       "icon": "TREM.ico"
     },
@@ -56,23 +55,23 @@
   "keywords": [],
   "license": "AGPL-3.0",
   "devDependencies": {
-    "electron": "22.1.0",
+    "electron": "23.1.1",
     "electron-builder": "^23.6.0",
-    "eslint": "^8.33.0"
+    "eslint": "^8.35.0"
   },
   "dependencies": {
     "@electron/remote": "^2.0.9",
     "@kamiya4047/exptech-api-wrapper": "^2.0.1",
-    "@material/material-color-utilities": "0.2.0",
-    "@material/web": "^0.1.0-alpha.0",
+    "@material/material-color-utilities": "^0.2.0",
+    "@material/web": "1.0.0-pre.3",
     "@turf/circle": "^6.5.0",
     "axios": "^1.0.0",
     "bytenode": "^1.3.7",
     "chokidar": "^3.5.3",
     "discord.js": "^14.7.1",
-    "electron-common-ipc": "^15.1.0",
+    "electron-common-ipc": "16.0.1-dev.7",
     "electron-fcm-push-receiver": "^2.1.7",
-    "electron-log": "^4.4.8",
+    "electron-log": "5.0.0-beta.16",
     "electron-updater": "^5.3.0",
     "expose-gc": "^1.0.0",
     "echarts": "^5.4.1",
@@ -82,7 +81,7 @@
     "leaflet-geojson-vt": "1.1.0",
     "maplibre-gl": "^2.4.0",
     "node-datachannel": "^0.4.1",
-    "tinycolor2": "^1.5.2",
-    "ws": "^8.12.0"
+    "tinycolor2": "1.6.0",
+    "ws": "8.12.1"
   }
 }
