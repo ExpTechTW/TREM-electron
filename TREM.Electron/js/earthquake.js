@@ -2607,6 +2607,16 @@ function handler(Json) {
 					else if (intensitytag == -1)
 						TREM.Audios.int0.play();
 
+				setTimeout(() => {
+					ipcRenderer.send("screenshotEEW", {
+						Function : "station",
+						ID       : 1,
+						Version  : 1,
+						Time     : NOW().getTime(),
+						Shot     : 1,
+					});
+				}, 1250);
+
 				if (setting["Real-time.show"]) win.showInactive();
 
 				if (setting["Real-time.cover"])
