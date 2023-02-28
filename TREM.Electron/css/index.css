@@ -280,8 +280,13 @@ body:not(.darkmode) #here-marker {
     stroke-linecap: butt;
     stroke-linejoin: round;
     width: 200px;
+    transform-origin: 24px;
+    scale: 0% 125%;
+    translate: 768px 0;
     animation:
-      drawline 0.5s ease-in 0.1s forwards
+		stretch 0.4s cubic-bezier(0.2, 0.5, 0.6, 1.15) forwards,
+		shrink 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s forwards,
+		move 1s ease-in-out 1.4s forwards;
 }
 
 #load #ExpTech svg #loadlogo {

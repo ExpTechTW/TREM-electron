@@ -241,12 +241,17 @@ TREM.Report = {
 		if (replay != 0) return;
 		changeView("main", "#mainView_btn");
 
-		if (report.ID.length != 0) {
-			localStorage.TestID = report.ID;
-			ipcRenderer.send("testEEW");
+		let list = [];
+
+		if (report.ID.length) {
+			list = list.concat(report.ID);
+			ipcRenderer.send("testEEW", list);
+		} else if (report.trem.length) {
+			list = list.concat(report.trem);
+			ipcRenderer.send("testEEW", list);
 		} else {
-			replay = new Date(`${report.originTime} GMT+08:00`).getTime() - 15000;
-			replayT = NOW().getTime();
+			const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
+			ipcRenderer.send("testoldtimeEEW", oldtime);
 		}
 	},
 	back() {

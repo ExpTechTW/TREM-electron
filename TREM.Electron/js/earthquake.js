@@ -71,6 +71,7 @@ let Cancel = false;
 let RMT = 1;
 let PGALimit = 0;
 let PGAtag = -1;
+let intensitytag = -1;
 let MAXPGA = { pga: 0, station: "NA", level: 0 };
 let Info = { Notify: [], Warn: [], Focus: [] };
 const Focus = [
@@ -2299,7 +2300,7 @@ function handler(Json) {
 		}
 	}
 
-	let max_intensity = 0;
+	let max_intensity = -1;
 	MaxIntensity1 = 0;
 	let stationnowindex = 0;
 	const detection_location = Json.area ?? [];
@@ -2565,25 +2566,43 @@ function handler(Json) {
 
 				detected_list[station[keys[index]].PGA].time = NOW().getTime();
 			}
-		} else {
+		} else if (Object.keys(detection_list).length) {
 			for (let i = 0; i < Object.keys(detection_list).length; i++) {
 				const key = Object.keys(detection_list)[i];
 
 				if (max_intensity < detection_list[key]) max_intensity = detection_list[key];
 
-				if (setting["audio.realtime"])
-					if (max_intensity > 4)
-						TREM.Audios.int2.play();
-					else if (max_intensity > 1)
-						TREM.Audios.int1.play();
-					else
-						TREM.Audios.int0.play();
-
 				detected_list[key] ??= {
 					intensity : detection_list[key],
 					time      : NOW().getTime(),
 				};
+
+				if (detection_list[key] != detected_list[key].intensity) detected_list[key].intensity = detection_list[key];
 			}
+
+			if (max_intensity > intensitytag) {
+				if (setting["audio.realtime"])
+					if (max_intensity > 4 && intensitytag > 4)
+						TREM.Audios.int2.play();
+					else if (max_intensity > 1 && intensitytag > 1)
+						TREM.Audios.int1.play();
+					else if (intensitytag == -1)
+						TREM.Audios.int0.play();
+
+				if (setting["Real-time.show"]) win.showInactive();
+
+				if (setting["Real-time.cover"])
+					if (!win.isFullScreen()) {
+						win.setAlwaysOnTop(true);
+						win.focus();
+						win.setAlwaysOnTop(false);
+					}
+
+				if (!win.isFocused()) win.flashFrame(true);
+				intensitytag = max_intensity;
+			}
+		} else if (!Object.keys(detection_list).length) {
+			intensitytag = -1;
 		}
 
 		if (MAXPGA.pga < amount && amount < 999 && Level != "NA") {
@@ -3300,20 +3319,17 @@ function addReport(report, prepend = false) {
 		Div.addEventListener("contextmenu", () => {
 			if (replay != 0) return;
 
-			if (report.ID.length != 0) {
-				TREM.replayOverviewButton(report);
-				// localStorage.TestID = report.ID;
-				// ipcRenderer.send("testEEW");
-			} else if (report.trem.length != 0) {
-				TREM.replaytremOverviewButton(report);
+			let list = [];
+
+			if (report.ID.length) {
+				list = list.concat(report.ID);
+				ipcRenderer.send("testEEW", list);
+			} else if (report.trem.length) {
+				list = list.concat(report.trem);
+				ipcRenderer.send("testEEW", list);
 			} else {
 				const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
 				ipcRenderer.send("testoldtimeEEW", oldtime);
-				// TREM.set_report_overview = 1;
-				// TREM.Report.setView("eq-report-overview", report);
-				// changeView("report", "#reportView_btn");
-				// ReportTag = NOW().getTime();
-				// console.log("ReportTag: ", ReportTag);
 			}
 		});
 
@@ -3492,18 +3508,6 @@ function stopReplaybtn() {
 	document.getElementById("togglenav_btn").classList.add("hide");
 	document.getElementById("stopReplay").classList.remove("hide");
 }
-
-TREM.replayOverviewButton = (report) => {
-	// localStorage.TestID = ["20230116135054"];
-	localStorage.TestID = report.ID;
-	ipcRenderer.send("testEEW");
-};
-
-TREM.replaytremOverviewButton = (report) => {
-	// localStorage.Testtrem = ["80"];
-	localStorage.Testtrem = report.trem;
-	ipcRenderer.send("testEEW");
-};
 
 TREM.backindexButton = () => {
 	TREM.set_report_overview = 0;
@@ -3699,14 +3703,29 @@ ipcMain.on("update-not-available-Notification", (version, getVersion) => {
 		}
 });
 
-ipcMain.on("testEEW", () => {
+ipcMain.on("testEEW", (event, list = []) => {
 	toggleNav(false);
 	stopReplaybtn();
 	replaytestEEW = NOW().getTime();
-	let list_Testtrem;
 
-	if (localStorage.TestID != undefined) {
-		const list = localStorage.TestID.split(",");
+	if (!list.length)
+		setTimeout(() => {
+			dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+			const data = {
+				uuid: localStorage.UUID,
+			};
+			dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+			axios.post(posturl + "replay", data)
+			// Exptech.v1.post("/trem/replay", data)
+				.then(() => {
+					testEEWerror = false;
+				})
+				.catch((error) => {
+					testEEWerror = true;
+					dump({ level: 2, message: error, origin: "Verbose" });
+				});
+		}, 100);
+	else
 		for (let index = 0; index < list.length; index++)
 			setTimeout(() => {
 				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
@@ -3725,68 +3744,7 @@ ipcMain.on("testEEW", () => {
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
 			}, 100);
-		delete localStorage.TestID;
-
-		if (localStorage.Testtrem != undefined) {
-			list_Testtrem = localStorage.Testtrem.split(",");
-			for (let index = 0; index < list_Testtrem.length; index++)
-				setTimeout(() => {
-					dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-					const data = {
-						uuid : localStorage.UUID,
-						trem : list_Testtrem[index],
-					};
-					dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-					axios.post(posturl + "replay", data)
-					// Exptech.v1.post("/trem/replay", data)
-						.then(() => {
-							testEEWerror = false;
-						})
-						.catch((error) => {
-							testEEWerror = true;
-							dump({ level: 2, message: error, origin: "Verbose" });
-						});
-				}, 100);
-			delete localStorage.Testtrem;
-		}
-	} else if (localStorage.Testtrem != undefined) {
-		const list = localStorage.Testtrem.split(",");
-		for (let index = 0; index < list.length; index++)
-			setTimeout(() => {
-				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-				const data = {
-					uuid : localStorage.UUID,
-					trem : list[index],
-				};
-				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-				axios.post(posturl + "replay", data)
-				// Exptech.v1.post("/trem/replay", data)
-					.then(() => {
-						testEEWerror = false;
-					})
-					.catch((error) => {
-						testEEWerror = true;
-						dump({ level: 2, message: error, origin: "Verbose" });
-					});
-			}, 100);
-		delete localStorage.Testtrem;
-	} else {
-		dump({ level: 0, message: "Start EEW NO TestID Test", origin: "EEW" });
-		const data = {
-			uuid : localStorage.UUID,
-			trem : [],
-		};
-		dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-		axios.post(posturl + "replay", data)
-		// Exptech.v1.post("/trem/replay", data)
-			.then(() => {
-				testEEWerror = false;
-			})
-			.catch((error) => {
-				testEEWerror = true;
-				dump({ level: 2, message: error, origin: "Verbose" });
-			});
-	}
+	delete localStorage.Testlist;
 });
 
 ipcRenderer.on("settingError", (event, error) => {
