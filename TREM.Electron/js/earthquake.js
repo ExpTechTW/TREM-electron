@@ -2669,6 +2669,11 @@ function handler(Json) {
 			for (let index = 0, pgaKeys = Object.keys(detected_list); index < pgaKeys.length; index++) {
 				const Intensity = detected_list[pgaKeys[index]]?.intensity;
 
+				if (RMTpgaTime == 0) {
+					RMTpgaTime = NOW().getTime();
+					console.log(RMTpgaTime);
+				}
+
 				if (Intensity == undefined) {
 					delete detected_list[pgaKeys[index]];
 					continue;
@@ -2677,7 +2682,11 @@ function handler(Json) {
 				if (NOW().getTime() - detected_list[pgaKeys[index]].time > 30_000 || PGACancel) {
 					TREM.MapArea.clear(pgaKeys[index]);
 					delete detected_list[pgaKeys[index]];
-					delete pgaKeys[index];
+					index--;
+				} else if (NOW().getTime() - RMTpgaTime > 30_000) {
+					delete detected_list[pgaKeys[index]];
+					RMTpgaTime = 0;
+					console.log(NOW().getTime());
 					index--;
 				} else if (!detected_list[pgaKeys[index]].passed) {
 					let passed = false;
@@ -2708,6 +2717,8 @@ function handler(Json) {
 			}
 		else if (TREM.MapArea.isVisible)
 			TREM.MapArea.clear();
+
+		if (!Object.keys(detected_list).length) PGACancel = false;
 	} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 		if (Object.keys(detected_box_list).length)
 			for (let index = 0; index < Object.keys(detected_box_list).length; index++) {
