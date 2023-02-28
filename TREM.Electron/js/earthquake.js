@@ -1492,16 +1492,31 @@ async function init() {
 						],
 						"line-width"   : 3,
 						"line-opacity" : [
-							"case",
+							"match",
 							[
-								">=",
-								[
-									"coalesce",
-									["feature-state", "intensity"],
-									-1,
-								],
-								0,
+								"coalesce",
+								["feature-state", "intensity"],
+								-1,
 							],
+							9,
+							1,
+							8,
+							1,
+							7,
+							1,
+							6,
+							1,
+							5,
+							1,
+							4,
+							1,
+							3,
+							1,
+							2,
+							1,
+							1,
+							1,
+							0,
 							1,
 							0,
 						],
@@ -2577,7 +2592,10 @@ function handler(Json) {
 					time      : NOW().getTime(),
 				};
 
-				if (detection_list[key] != detected_list[key].intensity) detected_list[key].intensity = detection_list[key];
+				if (detection_list[key] != detected_list[key].intensity) detected_list[key] = {
+					intensity : detection_list[key],
+					time      : NOW().getTime(),
+				};
 			}
 
 			if (max_intensity > intensitytag) {
@@ -3943,13 +3961,13 @@ function FCMdata(json, Unit) {
 
 	if (json.type == "tsunami-info") {
 		const now = new Date(json.time);
-		const Now = now.getFullYear()
+		const Now0 = now.getFullYear()
 			+ "/" + (now.getMonth() + 1)
 			+ "/" + now.getDate()
 			+ " " + now.getHours()
 			+ ":" + now.getMinutes();
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-		new Notification("海嘯資訊", { body: `${Now}\n${json.location} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
+		new Notification("海嘯資訊", { body: `${Now0}\n${json.location} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
 	} else if (json.type == "tsunami") {
 		TREM.Earthquake.emit("tsunami", json);
 	} else if (json.type == "trem-eq") {
@@ -4472,7 +4490,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 	setTimeout(() => {
 		if (setting["webhook.url"] != "") {
-			const Now = NOW().getFullYear()
+			const Now1 = NOW().getFullYear()
 				+ "/" + (NOW().getMonth() + 1)
 				+ "/" + NOW().getDate()
 				+ " " + NOW().getHours()
@@ -4513,7 +4531,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 			msg.embeds[0].image.url = "";
 			msg.embeds[0].footer = {
-				text     : `ExpTech Studio ${Now}`,
+				text     : `ExpTech Studio ${Now1}`,
 				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 			};
 			msg.tts = setting["tts.Notification"];
@@ -4539,19 +4557,26 @@ TREM.Earthquake.on("eewEnd", (id, type) => {
 
 TREM.Earthquake.on("trem-eq", (data) => {
 	console.log(data);
+	const now = new Date(data.time);
+	const Now2 = now.getFullYear()
+	+ "/" + (now.getMonth() + 1 < 10 ? "0" : "") + (now.getMonth() + 1)
+	+ "/" + (now.getDate() < 10 ? "0" : "") + now.getDate()
+	+ " " + (now.getHours() < 10 ? "0" : "") + now.getHours()
+	+ ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes()
+	+ ":" + (now.getSeconds() < 10 ? "0" : "") + now.getSeconds();
+	const _now = new Date(data.timestamp);
+	const _Now = _now.getFullYear()
+	+ "/" + (_now.getMonth() + 1 < 10 ? "0" : "") + (_now.getMonth() + 1)
+	+ "/" + (_now.getDate() < 10 ? "0" : "") + _now.getDate()
+	+ " " + (_now.getHours() < 10 ? "0" : "") + _now.getHours()
+	+ ":" + (_now.getMinutes() < 10 ? "0" : "") + _now.getMinutes()
+	+ ":" + (_now.getSeconds() < 10 ? "0" : "") + _now.getSeconds();
 
 	if (setting["webhook.url"] != "" && setting["trem-eq.alert.Notification"] && data.alert) {
 		let state_station;
 		let Max_Intensity = 0;
 		let description = "警報\n";
-		const now = new Date(data.time);
-		const Now = now.getFullYear()
-		+ "/" + (now.getMonth() + 1 < 10 ? "0" : "") + (now.getMonth() + 1)
-		+ "/" + (now.getDate() < 10 ? "0" : "") + now.getDate()
-		+ " " + (now.getHours() < 10 ? "0" : "") + now.getHours()
-		+ ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes()
-		+ ":" + (now.getSeconds() < 10 ? "0" : "") + now.getSeconds();
-		description += `\n開始時間 > ${Now}\n\n`;
+		description += `\n開始時間 > ${Now2}\n\n`;
 
 		for (let index = 0, keys = Object.keys(data.list), n = keys.length; index < n; index++) {
 			if (data.list[keys[index]] > Max_Intensity) Max_Intensity = data.list[keys[index]];
@@ -4561,13 +4586,6 @@ TREM.Earthquake.on("trem-eq", (data) => {
 
 		description += `\n第 ${data.number} 報 | ${data.data_count} 筆數據 ${data.final ? "(最終報)" : ""}\n`;
 		description += `共 ${state_station} 站觸發 | 全部 ${data.total_station} 站\n`;
-		const _now = new Date(data.timestamp);
-		const _Now = _now.getFullYear()
-		+ "/" + (_now.getMonth() + 1 < 10 ? "0" : "") + (_now.getMonth() + 1)
-		+ "/" + (_now.getDate() < 10 ? "0" : "") + _now.getDate()
-		+ " " + (_now.getHours() < 10 ? "0" : "") + _now.getHours()
-		+ ":" + (_now.getMinutes() < 10 ? "0" : "") + _now.getMinutes()
-		+ ":" + (_now.getSeconds() < 10 ? "0" : "") + _now.getSeconds();
 		description += `現在時間 > ${_Now}\n`;
 		// console.log(description);
 		const msg = {
@@ -4608,14 +4626,8 @@ TREM.Earthquake.on("trem-eq", (data) => {
 			description += "警報\n";
 		else
 			description += "預報\n";
-		const now = new Date(data.time);
-		const Now = now.getFullYear()
-		+ "/" + (now.getMonth() + 1 < 10 ? "0" : "") + (now.getMonth() + 1)
-		+ "/" + (now.getDate() < 10 ? "0" : "") + now.getDate()
-		+ " " + (now.getHours() < 10 ? "0" : "") + now.getHours()
-		+ ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes()
-		+ ":" + (now.getSeconds() < 10 ? "0" : "") + now.getSeconds();
-		description += `\n開始時間 > ${Now}\n\n`;
+
+		description += `\n開始時間 > ${Now2}\n\n`;
 
 		for (let index = 0, keys = Object.keys(data.list), n = keys.length; index < n; index++) {
 			description += `${station[keys[index]].Loc} 最大震度 > ${IntensityI(data.list[keys[index]])}\n`;
@@ -4624,13 +4636,6 @@ TREM.Earthquake.on("trem-eq", (data) => {
 
 		description += `\n第 ${data.number} 報 | ${data.data_count} 筆數據 ${data.final ? "(最終報)" : ""}\n`;
 		description += `共 ${state_station} 站觸發 | 全部 ${data.total_station} 站\n`;
-		const _now = new Date(data.timestamp);
-		const _Now = _now.getFullYear()
-		+ "/" + (_now.getMonth() + 1 < 10 ? "0" : "") + (_now.getMonth() + 1)
-		+ "/" + (_now.getDate() < 10 ? "0" : "") + _now.getDate()
-		+ " " + (_now.getHours() < 10 ? "0" : "") + _now.getHours()
-		+ ":" + (_now.getMinutes() < 10 ? "0" : "") + _now.getMinutes()
-		+ ":" + (_now.getSeconds() < 10 ? "0" : "") + _now.getSeconds();
 		description += `現在時間 > ${_Now}\n`;
 		// console.log(description);
 		const msg = {
@@ -4664,13 +4669,13 @@ TREM.Earthquake.on("trem-eq", (data) => {
 TREM.Earthquake.on("tsunami", (data) => {
 	if (data.number == 1) {
 		const now = new Date(json.time);
-		const Now = now.getFullYear()
+		const Now3 = now.getFullYear()
 			+ "/" + (now.getMonth() + 1)
 			+ "/" + now.getDate()
 			+ " " + now.getHours()
 			+ ":" + now.getMinutes();
 		new Notification("海嘯警報", {
-			body   : `${Now} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度\n\n請迅速疏散至安全場所`,
+			body   : `${Now3} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度\n\n請迅速疏散至安全場所`,
 			icon   : "../TREM.ico",
 			silent : win.isFocused(),
 		});

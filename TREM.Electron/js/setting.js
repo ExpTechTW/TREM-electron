@@ -99,13 +99,13 @@ function init() {
 	const utc = new Date();
 	const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
 	const now = new Date(NOW.getTime() - 20000);
-	const Now = now.getFullYear()
+	const Now0 = now.getFullYear()
 	+ "-" + (now.getMonth() + 1)
 	+ "-" + now.getDate()
 	+ " " + now.getHours()
 	+ ":" + now.getMinutes()
 	+ ":" + now.getSeconds();
-	document.getElementById("Time").value = Now;
+	document.getElementById("Time").value = Now0;
 	const now1 = new Date(NOW.getTime());
 	const Now1 = now1.getFullYear()
 	+ "-" + (now1.getMonth() + 1)
@@ -689,21 +689,21 @@ function send() {
 			const utc = new Date();
 			const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
 			const now = new Date(NOW.getTime() - 20000);
-			const Now = now.getFullYear()
+			const Now1 = now.getFullYear()
 			+ "-" + (now.getMonth() + 1)
 			+ "-" + now.getDate()
 			+ " " + now.getHours()
 			+ ":" + now.getMinutes()
 			+ ":" + now.getSeconds();
-			document.getElementById("Time").value = Now;
+			document.getElementById("Time").value = Now1;
 			const now1 = new Date(NOW.getTime());
-			const Now1 = now1.getFullYear()
+			const Now2 = now1.getFullYear()
 			+ "-" + (now1.getMonth() + 1)
 			+ "-" + now1.getDate()
 			+ " " + now1.getHours()
 			+ ":" + now1.getMinutes()
 			+ ":" + now1.getSeconds();
-			document.getElementById("TimeStamp").value = Now1;
+			document.getElementById("TimeStamp").value = Now2;
 		});
 }
 
@@ -716,21 +716,21 @@ function resend() {
 	const utc = new Date();
 	const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
 	const now = new Date(NOW.getTime() - 20000);
-	const Now = now.getFullYear()
+	const Now3 = now.getFullYear()
 		+ "-" + (now.getMonth() + 1)
 		+ "-" + now.getDate()
 		+ " " + now.getHours()
 		+ ":" + now.getMinutes()
 		+ ":" + now.getSeconds();
-	document.getElementById("Time").value = Now;
+	document.getElementById("Time").value = Now3;
 	const now1 = new Date(NOW.getTime());
-	const Now1 = now1.getFullYear()
+	const Now4 = now1.getFullYear()
 		+ "-" + (now1.getMonth() + 1)
 		+ "-" + now1.getDate()
 		+ " " + now1.getHours()
 		+ ":" + now1.getMinutes()
 		+ ":" + now1.getSeconds();
-	document.getElementById("TimeStamp").value = Now1;
+	document.getElementById("TimeStamp").value = Now4;
 	document.getElementById("EastLongitude").value = "120.7";
 	document.getElementById("NorthLatitude").value = "22.2";
 	document.getElementById("Location").value = "未知區域";
