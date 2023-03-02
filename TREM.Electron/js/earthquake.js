@@ -639,13 +639,14 @@ TREM.MapArea2 = {
 	setArea(Json) {
 		console.log(Json.area);
 
-		let max_intensity_list = {};
+		const max_intensity_list = {};
 
 		for (let index = 0, keys = Object.keys(station), n = keys.length; index < n; index++) {
 			const uuid = keys[index];
 			const current_station_data = station[uuid];
 			const current_data = Json[uuid.split("-")[2]];
 			const Alert = current_data?.alert ?? false;
+
 			if (Alert) {
 				max_intensity_list[current_station_data.area] ??= Math.round(current_data.i);
 
