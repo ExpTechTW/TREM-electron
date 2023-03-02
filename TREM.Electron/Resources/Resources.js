@@ -1,5 +1,6 @@
 module.exports = {
 	area   : require("./area.json"),
+	areav2   : require("./areav2.json"),
 	region : require("./region.json"),
 	icon   : {
 		cross(options) {

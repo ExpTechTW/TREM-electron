@@ -19,6 +19,7 @@ TREM.Audios = {
 	int2   : new Audio("../audio/Shindo2.wav"),
 	eew    : new Audio("../audio/EEW.wav"),
 	update : new Audio("../audio/Update.wav"),
+	areav2 : new Audio("../audio/1/update.wav"),
 	palert : new Audio("../audio/palert.wav"),
 };
 TREM.AudioContext = new AudioContext({});
@@ -94,6 +95,7 @@ let Location;
 let station = {};
 const station_time = {};
 let palert_geojson = null;
+let areav2_geojson = null;
 let investigation = false;
 let ReportTag = 0;
 TREM.IntensityTag1 = 0;
@@ -256,7 +258,7 @@ TREM.MapIntensity = {
 									id     : towncode,
 								}, { intensity });
 
-						Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
+						Maps.main.setLayoutProperty("Layer_intensity_palert", "visibility", "visible");
 
 						this.intensities = int;
 
@@ -381,7 +383,7 @@ TREM.MapIntensity = {
 							id     : towncode,
 						}, { intensity });
 
-				Maps.main.setLayoutProperty("Layer_intensity", "visibility", "visible");
+				Maps.main.setLayoutProperty("Layer_intensity_palert", "visibility", "visible");
 
 				this.intensities = int;
 			}
@@ -428,7 +430,7 @@ TREM.MapIntensity = {
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (this.intensities.size) {
 				Maps.main.removeFeatureState({ source: "Source_tw_town" });
-				Maps.main.setLayoutProperty("Layer_intensity", "visibility", "none");
+				Maps.main.setLayoutProperty("Layer_intensity_palert", "visibility", "none");
 				this.intensities = new Map();
 
 				if (this.timer) {
@@ -623,6 +625,177 @@ TREM.MapArea = {
 	},
 	hide() {
 		Maps.main.setLayoutProperty("Layer_area", "visibility", "none");
+		this.isVisible = false;
+	},
+};
+
+TREM.MapArea2 = {
+	cache       : new Map(),
+	isVisible   : false,
+	isTriggered : false,
+	blinkTimer  : null,
+	timer       : null,
+	PLoc        : {},
+	setArea(Json) {
+		console.log(Json.area);
+
+		let max_intensity_list = {};
+
+		for (let index = 0, keys = Object.keys(station), n = keys.length; index < n; index++) {
+			const uuid = keys[index];
+			const current_station_data = station[uuid];
+			const current_data = Json[uuid.split("-")[2]];
+			const Alert = current_data?.alert ?? false;
+			if (Alert) {
+				max_intensity_list[current_station_data.area] ??= Math.round(current_data.i);
+
+				if (max_intensity_list[current_station_data.area] < Math.round(current_data.i)) {
+					max_intensity_list[current_station_data.area] = Math.round(current_data.i);
+					this.cache.set(current_station_data.area, Math.round(current_data.i));
+				} else if (!max_intensity_list[current_station_data.area]) {
+					max_intensity_list[current_station_data.area] = Math.round(current_data.i);
+					this.cache.set(current_station_data.area, Math.round(current_data.i));
+				} else {
+					this.cache.set(current_station_data.area, max_intensity_list[current_station_data.area]);
+				}
+			}
+		}
+
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+			for (const areav2 of Json.area) {
+				const intensity = this.cache.get(areav2) ?? 1;
+
+				for (let id = 0; id < Object.keys(TREM.Resources.areav2).length; id++) {
+					const key = Object.keys(TREM.Resources.areav2)[id];
+
+					if (areav2 == key)
+						for (let id1 = 0; id1 < Object.keys(TREM.Resources.areav2[key]).length; id1++)
+							Maps.main.setFeatureState({
+								source : "Source_tw_town_areav2",
+								id     : TREM.Resources.areav2[key][id1],
+							}, { intensity: intensity });
+				}
+			}
+
+			this.show();
+
+			if (!this.blinkTimer)
+				this.blinkTimer = setInterval(() => {
+					if (this.isVisible)
+						this.hide();
+					else
+						this.show();
+				}, 500);
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
+			if (Object.keys(this.PLoc).length) this.PLoc = {};
+
+			if (areav2_geojson != null) {
+				areav2_geojson.remove();
+				areav2_geojson = null;
+			}
+
+			for (const areav2 of Json.area) {
+				const intensity = this.cache.get(areav2) ?? 1;
+
+				for (let id = 0; id < Object.keys(TREM.Resources.areav2).length; id++) {
+					const key = Object.keys(TREM.Resources.areav2)[id];
+
+					if (areav2 == key)
+						for (let id1 = 0; id1 < Object.keys(TREM.Resources.areav2[key]).length; id1++)
+							this.PLoc[TREM.Resources.areav2[key][id1]] = intensity;
+				}
+			}
+
+			areav2_geojson = L.geoJson.vt(MapData.tw_town, {
+				minZoom   : 4,
+				maxZoom   : 15,
+				tolerance : 20,
+				buffer    : 256,
+				debug     : 0,
+				zIndex    : 5,
+				style     : (properties) => {
+					const name = properties.TOWNCODE;
+
+					if (this.PLoc[name] == 0 || this.PLoc[name] == undefined)
+						return {
+							color       : "transparent",
+							weight      : 0,
+							opacity     : 0,
+							fillColor   : "transparent",
+							fillOpacity : 0,
+						};
+					return {
+						color       : TREM.Colors.secondary,
+						weight      : 0.8,
+						fillColor   : TREM.color(this.PLoc[name]),
+						fillOpacity : 1,
+					};
+				},
+			}).addTo(Maps.main);
+		}
+
+		this.isTriggered = true;
+
+		if (setting["Real-time.show"]) win.showInactive();
+
+		if (setting["Real-time.cover"])
+			if (!win.isFullScreen()) {
+				win.setAlwaysOnTop(true);
+				win.focus();
+				win.setAlwaysOnTop(false);
+			}
+
+		if (!win.isFocused()) win.flashFrame(true);
+
+		if (setting["audio.eew"]) TREM.Audios.areav2.play();
+
+		if (this.timer)
+			this.timer.refresh();
+		else
+			this.timer = setTimeout(this.clear, 10_000);
+	},
+	clear(id) {
+		if (id) {
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+				Maps.main.removeFeatureState({ source: "Source_tw_town_areav2", id });
+			this.cache.delete(id);
+		} else {
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+				Maps.main.removeFeatureState({ source: "Source_tw_town_areav2" });
+			delete this.cache;
+			this.cache = new Map();
+		}
+
+		if (this.timer) {
+			clearTimeout(this.timer);
+			delete this.timer;
+		}
+
+		if (!this.cache.size) {
+			if (this.blinkTimer)
+				clearTimeout(this.blinkTimer);
+			delete this.blinkTimer;
+		}
+
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+			Maps.main.setLayoutProperty("Layer_intensity_areav2", "visibility", "none");
+		} else if (areav2_geojson != null) {
+			areav2_geojson.remove();
+			areav2_geojson = null;
+			this.PLoc = {};
+		}
+
+		this.isTriggered = false;
+		this.isVisible = false;
+	},
+	show() {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+			Maps.main.setLayoutProperty("Layer_intensity_areav2", "visibility", "visible");
+		this.isVisible = true;
+	},
+	hide() {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+			Maps.main.setLayoutProperty("Layer_intensity_areav2", "visibility", "none");
 		this.isVisible = false;
 	},
 };
@@ -1273,6 +1446,11 @@ async function init() {
 					data      : MapData.tw_town,
 					tolerance : 0.5,
 				});
+				Maps.main.addSource("Source_tw_town_areav2", {
+					type      : "geojson",
+					data      : MapData.tw_town,
+					tolerance : 0.5,
+				});
 				Maps.main.addSource("Source_area", {
 					type : "geojson",
 					data : MapData.area,
@@ -1287,9 +1465,83 @@ async function init() {
 					},
 				}).getLayer("Layer_tw_county_Fill"));
 				Maps.main.addLayer({
-					id     : "Layer_intensity",
+					id     : "Layer_intensity_palert",
 					type   : "fill",
 					source : "Source_tw_town",
+					paint  : {
+						"fill-color": [
+							"match",
+							[
+								"coalesce",
+								["feature-state", "intensity"],
+								0,
+							],
+							9,
+							setting["theme.customColor"] ? setting["theme.int.9"]
+								: "#862DB3",
+							8,
+							setting["theme.customColor"] ? setting["theme.int.8"]
+								: "#DB1F1F",
+							7,
+							setting["theme.customColor"] ? setting["theme.int.7"]
+								: "#F55647",
+							6,
+							setting["theme.customColor"] ? setting["theme.int.6"]
+								: "#DB641F",
+							5,
+							setting["theme.customColor"] ? setting["theme.int.5"]
+								: "#E68439",
+							4,
+							setting["theme.customColor"] ? setting["theme.int.4"]
+								: "#E8D630",
+							3,
+							setting["theme.customColor"] ? setting["theme.int.3"]
+								: "#7BA822",
+							2,
+							setting["theme.customColor"] ? setting["theme.int.2"]
+								: "#2774C2",
+							1,
+							setting["theme.customColor"] ? setting["theme.int.1"]
+								: "#757575",
+							"transparent",
+						],
+						"fill-outline-color": [
+							"case",
+							[
+								">",
+								[
+									"coalesce",
+									["feature-state", "intensity"],
+									0,
+								],
+								0,
+							],
+							TREM.Colors.onSurfaceVariant,
+							"transparent",
+						],
+						"fill-opacity": [
+							"case",
+							[
+								">",
+								[
+									"coalesce",
+									["feature-state", "intensity"],
+									0,
+								],
+								0,
+							],
+							1,
+							0,
+						],
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+				Maps.main.addLayer({
+					id     : "Layer_intensity_areav2",
+					type   : "fill",
+					source : "Source_tw_town_areav2",
 					paint  : {
 						"fill-color": [
 							"match",
@@ -2149,6 +2401,10 @@ async function init() {
 	// TREM.Earthquake.emit("trem-eq", userJSON1);
 	// const userJSON = require(path.resolve(__dirname, "../js/1669621178753.json"));
 	// FCMdata(userJSON, type = "websocket");
+	// const userJSON1 = require(path.resolve(__dirname, "../js/test.json"));
+	// TREM.MapArea2.setArea(userJSON1);
+	// const userJSON2 = require(path.resolve(__dirname, "../js/1677759882722.json"));
+	// TREM.MapIntensity.palert(userJSON2);
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
 		navigator.clipboard.writeText(document.getElementById("rt-station-local-id").innerText).then(() => {
@@ -2321,7 +2577,7 @@ function handler(Json) {
 	const detection_location = Json.area ?? [];
 	const detection_list = Json.box ?? {};
 
-	if (detection_location.length) console.log(detection_location);
+	if (detection_location.length) TREM.MapArea2.setArea(Json);
 
 	if (Object.keys(detection_list).length) console.log(detection_list);
 
@@ -2863,7 +3119,7 @@ function handler(Json) {
 				const city = All[Index].loc.split(" ")[0];
 				const CPGA = (Idata[city] == undefined) ? 0 : Idata[city];
 
-				if (Json[All[Index].uuid.split("-")[2]].v > CPGA) {
+				if (Json[All[Index].uuid.split("-")[2]]?.v > CPGA) {
 					if (Idata[city] == undefined) Idata[city] = {};
 					Idata[city].pga = Json[All[Index].uuid.split("-")[2]].v;
 					Idata[city].intensity = All[Index].intensity;
@@ -3747,6 +4003,12 @@ ipcMain.on("testEEW", (event, list = []) => {
 	stopReplaybtn();
 	replaytestEEW = NOW().getTime();
 
+	if (TREM.MapIntensity.isTriggered)
+		TREM.MapIntensity.clear();
+
+	if (TREM.MapArea2.isTriggered)
+		TREM.MapArea2.clear();
+
 	if (!list.length)
 		setTimeout(() => {
 			dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
@@ -3815,7 +4077,7 @@ const updateMapColors = async (event, value) => {
 					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
 				}
 
-	Maps.main.setPaintProperty("Layer_intensity", "fill-outline-color", [
+	Maps.main.setPaintProperty("Layer_intensity_palert", "fill-outline-color", [
 		"case",
 		[
 			">",
@@ -3866,7 +4128,7 @@ ipcRenderer.on("config:color", (event, key, value) => {
 	}
 
 	if (Maps.main) {
-		Maps.main.setPaintProperty("Layer_intensity", "fill-color", [
+		Maps.main.setPaintProperty("Layer_intensity_palert", "fill-color", [
 			"match",
 			[
 				"coalesce",
@@ -4018,6 +4280,9 @@ function FCMdata(json, Unit) {
 		if (TREM.MapIntensity.isTriggered)
 			TREM.MapIntensity.clear();
 
+		if (TREM.MapArea2.isTriggered)
+			TREM.MapArea2.clear();
+
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
 		console.debug(json);
@@ -4108,7 +4373,6 @@ TREM.Earthquake.on("eew", (data) => {
 		ID              : "",
 		number          : "",
 		Timer           : Timer_run,
-		Timer_trem      : Timer_run,
 		distance        : [],
 		epicenterIcon   : null,
 		epicenterIconTW : null,
@@ -4440,27 +4704,16 @@ TREM.Earthquake.on("eew", (data) => {
 
 	main(data);
 
-	if (data.type != "trem-eew") {
+	EarthquakeList[data.id].Timer ??= setInterval(() => {
+		main(data);
+	}, speed);
+
+	if (EarthquakeList[data.id].Timer != null || EarthquakeList[data.id].Timer != undefined) {
+		clearInterval(EarthquakeList[data.id].Timer);
 		EarthquakeList[data.id].Timer = setInterval(() => {
 			main(data);
 		}, speed);
-	} else if (data.type == "trem-eew" && data.number > 23) {
-		if (!EarthquakeList[data.id]) EarthquakeList[data.id] = {
-			epicenter       : [],
-			Time            : 0,
-			ID              : "",
-			number          : "",
-			Timer           : Timer_run,
-			Timer_trem      : Timer_run,
-			distance        : [],
-			epicenterIcon   : null,
-			epicenterIconTW : null,
-		};
-		clearInterval(EarthquakeList[data.id].Timer_trem);
-		EarthquakeList[data.id].Timer_trem = setInterval(() => {
-			main(data);
-		}, speed);
-	} else {
+	} else if (EarthquakeList[data.id].Timer == null || EarthquakeList[data.id].Timer == undefined) {
 		EarthquakeList[data.id].Timer = setInterval(() => {
 			main(data);
 		}, speed);
@@ -5230,11 +5483,7 @@ function main(data) {
 			delete TREM.EEW.get(data.id).geojson;
 		}
 
-		if (data.type != "trem-eew")
-			clearInterval(EarthquakeList[data.id].Timer);
-		else if (data.number > 23)
-			clearInterval(EarthquakeList[data.id].Timer_trem);
-		else clearInterval(EarthquakeList[data.id].Timer);
+		clearInterval(EarthquakeList[data.id].Timer);
 		document.getElementById("box-10").innerHTML = "";
 
 		// if (EarthquakeList[data.id].Depth != null) Maps.main.removeLayer(EarthquakeList[data.id].Depth);

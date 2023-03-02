@@ -614,43 +614,6 @@ TREM.Report = {
 				paddingBottomRight : [document.getElementById("map-report").offsetWidth * zoomPredict, document.getElementById("map-report").offsetHeight * zoomPredict],
 			});
 		}
-
-		if (report.ID == undefined)
-			document.getElementById("report-replay").style.display = "none";
-
-		if (report.ID.length != 0) {
-			document.getElementById("report-replay").style.display = "block";
-
-			document.getElementById("report-replay").onclick = function() {
-				TREM.replayOverviewButton(report);
-			};
-		// if(report.data == undefined){
-		// 	document.getElementById("report-replay").style.display = "none"
-		// }
-		// if (report.data.length != 0) {
-		// 	document.getElementById("report-replay").style.display = "block"
-		// 	document.getElementById("report-replay").onclick = function(){
-		// 		replay = new Date(report.originTime).getTime() - 25000;
-		// 		replayT = NOW.getTime();
-		// 		stopReplaybtn();
-		// 	};
-		// }
-		} else if (report.trem.length != 0) {
-			document.getElementById("report-replay").style.display = "block";
-
-			document.getElementById("report-replay").onclick = function() {
-				TREM.replaytremOverviewButton(report);
-			};
-		} else if (report.identifier != undefined) {
-			document.getElementById("report-replay").style.display = "block";
-
-			document.getElementById("report-replay").onclick = function() {
-				const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
-				ipcRenderer.send("testoldtimeEEW", oldtime);
-			};
-		} else {
-			document.getElementById("report-replay").style.display = "none";
-		}
 	},
 };
 
