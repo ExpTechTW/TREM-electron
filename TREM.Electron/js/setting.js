@@ -453,7 +453,8 @@ function CheckSave(id) {
 		|| id == "map.in"
 		|| id == "map.TU"
 		|| id == "map.ta"
-		|| id == "map.pa")
+		|| id == "map.pa"
+		|| id == "map.va")
 		$("#MAPReloadButton").fadeIn(100);
 
 	if (id == "compatibility.hwaccel")
