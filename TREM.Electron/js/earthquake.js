@@ -637,7 +637,7 @@ TREM.MapArea2 = {
 	timer       : null,
 	PLoc        : {},
 	setArea(Json) {
-		console.log(Json.area);
+		console.log(Json);
 
 		const max_intensity_list = {};
 
