@@ -737,19 +737,6 @@ TREM.MapArea2 = {
 
 		this.isTriggered = true;
 
-		if (setting["Real-time.show"]) win.showInactive();
-
-		if (setting["Real-time.cover"])
-			if (!win.isFullScreen()) {
-				win.setAlwaysOnTop(true);
-				win.focus();
-				win.setAlwaysOnTop(false);
-			}
-
-		if (!win.isFocused()) win.flashFrame(true);
-
-		if (setting["audio.eew"]) TREM.Audios.areav2.play();
-
 		if (this.timer)
 			this.timer.refresh();
 		else
@@ -2222,20 +2209,24 @@ async function init() {
 					if (eewt.id == 0 || eewt.id == eew[Object.keys(eew)[index]].id || NOW().getTime() - eew[Object.keys(eew)[index]].time >= 10000) {
 						eewt.id = eew[Object.keys(eew)[index]].id;
 						const km = (NOW().getTime() - eew[Object.keys(eew)[index]].Time) * 4;
+						let lon = eew[Object.keys(eew)[index]].lon;
 
 						if (km > 300000)
-							finalZoom += 6;
+							finalZoom += 5.25;
 
 						else if (km > 250000)
-							finalZoom += 6.5;
+							finalZoom += 5.5;
 
 						else if (km > 200000)
-							finalZoom += 6.75;
+							finalZoom += 6;
 
 						else if (km > 150000)
-							finalZoom += 7;
+							finalZoom += 6.5;
 
 						else if (km > 100000)
+							finalZoom += 7;
+
+						else if (km > 50000)
 							finalZoom += 7.5;
 
 						else
@@ -2243,7 +2234,10 @@ async function init() {
 
 						sampleCount++;
 
-						finalBounds.extend([eew[Object.keys(eew)[index]].lon, eew[Object.keys(eew)[index]].lat]);
+						if (lon < 122.989722 && lon > 118.143597)
+							lon -= 0.9;
+
+						finalBounds.extend([lon, eew[Object.keys(eew)[index]].lat]);
 
 						/*
 						const num = Math.sqrt(Math.pow(23.608428 - eew[Object.keys(eew)[index]].lat, 2) + Math.pow(120.799168 - eew[Object.keys(eew)[index]].lon, 2));
@@ -2295,8 +2289,11 @@ async function init() {
 					if (eewt.id == 0 || eewt.id == eew[Object.keys(eew)[index]].id || NOW().getTime() - eew[Object.keys(eew)[index]].time >= 10000) {
 						eewt.id = eew[Object.keys(eew)[index]].id;
 						let Zoom = 9;
-						const X = 0;
+						// const X = 0;
 						const km = (NOW().getTime() - eew[Object.keys(eew)[index]].Time) * 4;
+
+						if (km > 50000)
+							Zoom = 8.5;
 
 						if (km > 100000)
 							Zoom = 8;
@@ -2315,9 +2312,9 @@ async function init() {
 						const num = Math.sqrt(Math.pow(23.608428 - eew[Object.keys(eew)[index]].lat, 2) + Math.pow(120.799168 - eew[Object.keys(eew)[index]].lon, 2));
 
 						if (num >= 5)
-							TREM.Earthquake.emit("focus", { center: [eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon], size: Zoom });
+							TREM.Earthquake.emit("focus", { center: [eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon], zoom: Zoom });
 						else
-							TREM.Earthquake.emit("focus", { center: [eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon], size: Zoom });
+							TREM.Earthquake.emit("focus", { center: [eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon], zoom: Zoom });
 							// TREM.Earthquake.emit("focus", { center: [(23.608428 + eew[Object.keys(eew)[index]].lat) / 2, ((120.799168 + eew[Object.keys(eew)[index]].lon) / 2) + X], size: Zoom });
 						eew[Object.keys(eew)[index]].time = NOW().getTime();
 					}
