@@ -2378,3 +2378,11 @@ button.hide + #report-detail-header-title {
 	transform: translateZ(0);
 	opacity: 1;
 }
+
+.progress_bar {
+    position: absolute;
+    border: 2px solid white;
+    border-radius: 3px;
+    align-items: flex-end;
+    display: grid;
+}

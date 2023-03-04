@@ -2,6 +2,9 @@ document.addEventListener("keydown", (event) => {
 	if (event.key == "F11")
 		ipcRenderer.send("toggleFullscreen");
 
+	if (event.key == "F10")
+		ipcRenderer.send("openDevtool");
+
 	if (event.ctrlKey && event.shiftKey && event.key.toLocaleLowerCase() == "i")
 		ipcRenderer.send("openDevtool");
 });

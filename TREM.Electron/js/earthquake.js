@@ -5314,12 +5314,38 @@ function main(data) {
 					);
 			} else {
 				const num = (NOW().getTime() - data.time) / 10 / EarthquakeList[data.id].distance[1].Stime;
+				const icon = L.divIcon({
+					className : "progress_bar",
+					html      : `<div style="background-color: aqua;height: ${num}%;"></div>`,
+					iconSize  : [5, 50],
+				});
 
-				if (!TREM.EEW.get(data.id).waveProgress)
-					TREM.EEW.get(data.id).waveProgress = new maplibregl.Marker({ element: $(`<div class="s-wave-progress-container"><div class="s-wave-progress" style="height:${num}%;"></div></div>`)[0] })
-						.setLngLat([+data.lon, +data.lat])
-						.addTo(Maps.main);
-				else TREM.EEW.get(data.id).waveProgress.getElement().firstChild.style.height = `${num}%`;
+				if (!TREM.EEW.get(data.id).waveProgress) {
+					if (EarthquakeList[data.id].CircleS || EarthquakeList[data.id].CircleSTW) {
+						EarthquakeList[data.id].CircleS.remove();
+						EarthquakeList[data.id].CircleS = null;
+						EarthquakeList[data.id].CircleSTW.remove();
+						EarthquakeList[data.id].CircleSTW = null;
+					}
+
+					if (EarthquakeList[data.id].CircleP || EarthquakeList[data.id].CirclePTW) {
+						EarthquakeList[data.id].CircleP.remove();
+						EarthquakeList[data.id].CircleP = null;
+						EarthquakeList[data.id].CirclePTW.remove();
+						EarthquakeList[data.id].CirclePTW = null;
+					}
+
+					if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+						TREM.EEW.get(data.id).waveProgress = new maplibregl.Marker({ element: $(`<div class="s-wave-progress-container"><div class="s-wave-progress" style="height:${num}%;"></div></div>`)[0] })
+							.setLngLat([+data.lon, +data.lat])
+							.addTo(Maps.main);
+					else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+						TREM.EEW.get(data.id).waveProgress = L.marker([+data.lat, +data.lon + 0.15], { icon: icon }).addTo(Maps.main);
+				} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+					TREM.EEW.get(data.id).waveProgress.getElement().firstChild.style.height = `${num}%`;
+				} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
+					TREM.EEW.get(data.id).waveProgress.setIcon(icon);
+				}
 			}
 		}
 
