@@ -3446,7 +3446,7 @@ function ReportList(earthquakeReportArr, palert) {
 			earthquakeReportArr[index].Time = palert.Time;
 		}
 
-		addReport(earthquakeReportArr[index],false,index);
+		addReport(earthquakeReportArr[index], false, index);
 	}
 
 	setLocale(setting["general.locale"]);
