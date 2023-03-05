@@ -499,7 +499,11 @@ ipcMain.on("screenshot", async () => {
 function emitAllWindow(channel, ...args) {
 	for (const [key, win] of TREM.Window[Symbol.iterator]())
 		if (win instanceof BrowserWindow)
-			win.webContents.send(channel, ...args);
+			try {
+				win.webContents.send(channel, ...args);
+			} catch (error) {
+				console.error(error);
+			}
 }
 
 function changelocale(value){
