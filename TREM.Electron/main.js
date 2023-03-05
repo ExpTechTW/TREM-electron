@@ -12,6 +12,9 @@ TREM.Utils = require("./Utils/Utils.js");
 TREM.Localization = new (require("./Localization/Localization"))(TREM.Configuration.data["general.locale"], TREM.getLocale());
 TREM.Window = new Map();
 TREM.isQuiting = !TREM.Configuration.data["windows.tray"];
+TREM.IPFScore = null;
+TREM.IPFScorecreate = null;
+TREM.multiaddr = null;
 
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
@@ -229,7 +232,19 @@ TREM.on("ready", () => {
 			autoUpdater.checkForUpdates();
 		}, time);
 	}
+
+	// IPFSget();
 });
+
+async function IPFSget() {
+	try {
+		TREM.IPFScore = await import('ipfs-core');
+		TREM.IPFScorecreate = await TREM.IPFScore.create();
+		TREM.multiaddr = await import('multiaddr');
+	} catch (err) {
+		console.error(err);
+	}
+}
 
 autoUpdater.on("update-available", (info) => {
 	if (TREM.Configuration.data["update.mode"] != "never")
@@ -313,6 +328,11 @@ ipcMain.on("openDevtool", () => {
 		if (currentWindow)
 			currentWindow.webContents.openDevTools({ mode: "detach" });
 	}
+});
+
+ipcMain.on("reloadpage", () => {
+	const currentWindow = BrowserWindow.getFocusedWindow();
+	if (currentWindow) currentWindow.webContents.reload();
 });
 
 ipcMain.on("openChildWindow", async (event, arg) => {
