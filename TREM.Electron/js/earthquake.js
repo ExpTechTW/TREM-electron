@@ -3446,13 +3446,13 @@ function ReportList(earthquakeReportArr, palert) {
 			earthquakeReportArr[index].Time = palert.Time;
 		}
 
-		addReport(earthquakeReportArr[index]);
+		addReport(earthquakeReportArr[index],false,index);
 	}
 
 	setLocale(setting["general.locale"]);
 }
 
-function addReport(report, prepend = false) {
+function addReport(report, prepend = false, index = 0) {
 	if (replay != 0 && new Date(report.originTime).getTime() > new Date(replay + (NOW().getTime() - replayT)).getTime()) return;
 
 	const Level = IntensityI(report.data[0]?.areaIntensity);
@@ -3587,6 +3587,18 @@ function addReport(report, prepend = false) {
 		const report_location = document.createElement("span");
 		report_location.className = "report-location";
 		report_location.innerText = `${star}${msg}`;
+
+		if (msg.length > 9 && index != 0) report_location.style = "font-size: 16px;";
+
+		if (msg.length > 10 && index != 0) report_location.style = "font-size: 14px;";
+
+		if (msg.length > 12 && index != 0) report_location.style = "font-size: 12px;";
+
+		if (msg.length > 9 && index == 0) report_location.style = "font-size: 20px;";
+
+		if (msg.length > 10 && index == 0) report_location.style = "font-size: 18px;";
+
+		if (msg.length > 12 && index == 0) report_location.style = "font-size: 16px;";
 		const report_time = document.createElement("span");
 		report_time.className = "report-time";
 		report_time.innerText = report.originTime.replace(/-/g, "/");
