@@ -15,10 +15,10 @@ for more information.
 `npm i @material/material-color-utilities` or `yarn add @material/material-color-utilities`
 
 ```typescript
-import { HCT } from "@material/material-color-utilities";
+import { Hct } from "@material/material-color-utilities";
 
 // Simple demonstration of HCT.
-const color = HCT.fromInt(0xff4285f4);
+const color = Hct.fromInt(0xff4285f4);
 console.log(`Hue: ${color.hue}`);
 console.log(`Chrome: ${color.chroma}`);
 console.log(`Tone: ${color.tone}`);
@@ -49,15 +49,6 @@ const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 applyTheme(theme, {target: document.body, dark: systemDark});
 
 ```
-
-## Troubleshooting
-
-If using node make sure to use the following flag:
-
-```
-node --experimental-specifier-resolution=node
-```
-
 
 ## Contributing
 

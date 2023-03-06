@@ -1,3 +1,4 @@
+// @ts-check
 /* eslint-disable no-undef */
 require("leaflet");
 require("leaflet-edgebuffer");
@@ -8,7 +9,7 @@ const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:t
 const { ExptechAPI } = require("@kamiya4047/exptech-api-wrapper");
 const Exptech = new ExptechAPI();
 const bytenode = require("bytenode");
-const maplibregl = require("maplibre-gl");
+
 TREM.Audios = {
   pga1   : new Audio("../audio/PGA1.wav"),
   pga2   : new Audio("../audio/PGA2.wav"),
@@ -484,31 +485,12 @@ class EEW {
 
 const win = BrowserWindow.fromId(process.env.window * 1);
 const roll = document.getElementById("rolllist");
+
 win.setAlwaysOnTop(false);
-
-let fullscreenTipTimeout;
-win.on("enter-full-screen", () => {
-  $("#fullscreen-notice").addClass("show");
-
-  if (fullscreenTipTimeout)
-    clearTimeout(fullscreenTipTimeout);
-
-  fullscreenTipTimeout = setTimeout(() => {
-    $("#fullscreen-notice").removeClass("show");
-  }, 3_000);
-});
-
-win.on("leave-full-screen", () => {
-  $("#fullscreen-notice").removeClass("show");
-
-  if (fullscreenTipTimeout) clearTimeout(fullscreenTipTimeout);
-});
 
 async function init() {
   const progressbar = document.getElementById("loading_progress");
   const progressStep = 5;
-
-  TREM.MapRenderingEngine = setting["map.engine"];
 
   // checks internet connectivity
   if (!window.navigator.onLine)
@@ -664,8 +646,8 @@ async function init() {
       preferCanvas       : true,
       zoomSnap           : 0.25,
       zoomDelta          : 0.5,
-      zoomAnimation      : true,
-      fadeAnimation      : setting["map.animation"],
+      zoomAnimation      : false,
+      fadeAnimation      : false,
       doubleClickZoom    : false,
       zoomControl        : false,
     })
@@ -814,7 +796,7 @@ async function init() {
     // #endregion
 
     for (const mapName of ["cn", "jp", "sk", "nk"]) {
-      MapBases.main.set(mapName, L.geoJson.vt(MapData[mapName], {
+      MapBases.main.set(mapName, L.geoJson(MapData[mapName], {
         edgeBufferTiles : 2,
         minZoom         : 4,
         maxZoom         : 12,
