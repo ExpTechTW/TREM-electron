@@ -617,62 +617,129 @@ function send() {
 
 	if (testtext_value == "NSSPE") Unit_type = "trem-eew";
 
-	if (document.getElementById("UUID").value != "")
-		data = {
-			APIkey        : "https://github.com/ExpTechTW",
-			Function      : "Send",
-			Type          : "test",
-			FormatVersion : 1,
-			UUID          : document.getElementById("UUID").value,
-			Value         : {
-				Function      : "earthquake",
-				Type          : "data",
-				type          : Unit_type,
-				time          : new Date(document.getElementById("Time").value).getTime(),
-				lon           : document.getElementById("EastLongitude").value,
-				lat           : document.getElementById("NorthLatitude").value,
-				depth         : document.getElementById("Depth").value,
-				scale         : document.getElementById("Scale").value,
+	if (!document.getElementById("tsunamialertbtn").checked) {
+		if (document.getElementById("UUID").value != "")
+			data = {
+				APIkey        : "https://github.com/ExpTechTW",
+				Function      : "Send",
+				Type          : "test",
 				FormatVersion : 1,
-				timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
-				"UTC+8"       : document.getElementById("Time").value,
-				number        : document.getElementById("Version").value,
-				id            : document.getElementById("ID").value,
-				Test          : document.getElementById("testbtn").checked,
-				Unit          : document.getElementById("testtext").value,
-				location      : document.getElementById("Location").value,
-				Alert         : document.getElementById("alertbtn").checked,
-				cancel        : document.getElementById("cancelbtn").checked,
-			},
-		};
-	else
-		data = {
-			APIkey        : "https://github.com/ExpTechTW",
-			Function      : "Send",
-			Type          : "test",
-			FormatVersion : 1,
-			UUID          : localStorage.UUID,
-			Value         : {
-				Function      : "earthquake",
-				Type          : "data",
-				type          : Unit_type,
-				time          : new Date(document.getElementById("Time").value).getTime(),
-				lon           : document.getElementById("EastLongitude").value,
-				lat           : document.getElementById("NorthLatitude").value,
-				depth         : document.getElementById("Depth").value,
-				scale         : document.getElementById("Scale").value,
+				UUID          : document.getElementById("UUID").value,
+				Value         : {
+					Function      : "earthquake",
+					Type          : "data",
+					type          : Unit_type,
+					time          : new Date(document.getElementById("Time").value).getTime(),
+					lon           : document.getElementById("EastLongitude").value,
+					lat           : document.getElementById("NorthLatitude").value,
+					depth         : document.getElementById("Depth").value,
+					scale         : document.getElementById("Scale").value,
+					FormatVersion : 1,
+					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
+					"UTC+8"       : document.getElementById("Time").value,
+					number        : document.getElementById("Version").value,
+					id            : document.getElementById("ID").value,
+					Test          : document.getElementById("testbtn").checked,
+					Unit          : document.getElementById("testtext").value,
+					location      : document.getElementById("Location").value,
+					Alert         : document.getElementById("alertbtn").checked,
+					cancel        : document.getElementById("cancelbtn").checked,
+				},
+			};
+		else
+			data = {
+				APIkey        : "https://github.com/ExpTechTW",
+				Function      : "Send",
+				Type          : "test",
 				FormatVersion : 1,
-				timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
-				"UTC+8"       : document.getElementById("Time").value,
-				number        : document.getElementById("Version").value,
-				id            : document.getElementById("ID").value,
-				Test          : document.getElementById("testbtn").checked,
-				Unit          : document.getElementById("testtext").value,
-				location      : document.getElementById("Location").value,
-				Alert         : document.getElementById("alertbtn").checked,
-				cancel        : document.getElementById("cancelbtn").checked,
-			},
-		};
+				UUID          : localStorage.UUID,
+				Value         : {
+					Function      : "earthquake",
+					Type          : "data",
+					type          : Unit_type,
+					time          : new Date(document.getElementById("Time").value).getTime(),
+					lon           : document.getElementById("EastLongitude").value,
+					lat           : document.getElementById("NorthLatitude").value,
+					depth         : document.getElementById("Depth").value,
+					scale         : document.getElementById("Scale").value,
+					FormatVersion : 1,
+					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
+					"UTC+8"       : document.getElementById("Time").value,
+					number        : document.getElementById("Version").value,
+					id            : document.getElementById("ID").value,
+					Test          : document.getElementById("testbtn").checked,
+					Unit          : document.getElementById("testtext").value,
+					location      : document.getElementById("Location").value,
+					Alert         : document.getElementById("alertbtn").checked,
+					cancel        : document.getElementById("cancelbtn").checked,
+				},
+			};
+	} else {
+		const tsunamiEN = document.getElementById("tsunami.EN").options[document.getElementById("tsunami.EN").selectedIndex].value;
+		const tsunamiE = document.getElementById("tsunami.E").options[document.getElementById("tsunami.E").selectedIndex].value;
+		const tsunamiES = document.getElementById("tsunami.ES").options[document.getElementById("tsunami.ES").selectedIndex].value;
+		const tsunamiN = document.getElementById("tsunami.N").options[document.getElementById("tsunami.N").selectedIndex].value;
+		const tsunamiW = document.getElementById("tsunami.W").options[document.getElementById("tsunami.W").selectedIndex].value;
+		const tsunamiWS = document.getElementById("tsunami.WS").options[document.getElementById("tsunami.WS").selectedIndex].value;
+
+		if (document.getElementById("UUID").value != "")
+			data = {
+				APIkey        : "https://github.com/ExpTechTW",
+				Function      : "Send",
+				Type          : "test",
+				FormatVersion : 1,
+				UUID          : document.getElementById("UUID").value,
+				Value         : {
+					Function      : "earthquake",
+					Type          : "data",
+					type          : "tsunami",
+					time          : new Date(document.getElementById("Time").value).getTime(),
+					lon           : document.getElementById("EastLongitude").value,
+					lat           : document.getElementById("NorthLatitude").value,
+					depth         : document.getElementById("Depth").value,
+					scale         : document.getElementById("Scale").value,
+					FormatVersion : 1,
+					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
+					"UTC+8"       : document.getElementById("Time").value,
+					number        : document.getElementById("Version").value,
+					id            : document.getElementById("ID").value,
+					Test          : document.getElementById("testbtn").checked,
+					Unit          : document.getElementById("testtext").value,
+					location      : document.getElementById("Location").value,
+					Alert         : document.getElementById("alertbtn").checked,
+					cancel        : document.getElementById("cancelbtn").checked,
+				},
+			};
+		else
+			data = {
+				APIkey        : "https://github.com/ExpTechTW",
+				Function      : "Send",
+				Type          : "test",
+				FormatVersion : 1,
+				UUID          : localStorage.UUID,
+				Value         : {
+					Function      : "earthquake",
+					Type          : "data",
+					type          : "tsunami",
+					lon           : document.getElementById("EastLongitude").value,
+					lat           : document.getElementById("NorthLatitude").value,
+					scale         : document.getElementById("Scale").value,
+					FormatVersion : 1,
+					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
+					number        : document.getElementById("Version").value,
+					area          : [
+						{ areaName: "東北沿海地區", waveHeight: tsunamiEN, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "東部沿海地區", waveHeight: tsunamiE, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "東南沿海地區", waveHeight: tsunamiES, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "北部沿海地區", waveHeight: tsunamiN, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "海峽沿海地區", waveHeight: tsunamiW, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "西南沿海地區", waveHeight: tsunamiWS, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+					],
+					cancel: document.getElementById("cancelbtn").checked,
+				},
+			};
+	}
+
 	axios.post("https://exptech.com.tw/api/v1/et", data)
 		.then((response) => {
 			if (response.data.response == "State Close") {
@@ -711,7 +778,14 @@ function send() {
 function resend() {
 	document.getElementById("testbtn").checked = true;
 	document.getElementById("alertbtn").checked = true;
+	document.getElementById("tsunamialertbtn").checked = false;
 	document.getElementById("cancelbtn").checked = false;
+	document.getElementById("tsunami.EN").options[0].selected = true;
+	document.getElementById("tsunami.E").options[0].selected = true;
+	document.getElementById("tsunami.ES").options[0].selected = true;
+	document.getElementById("tsunami.N").options[0].selected = true;
+	document.getElementById("tsunami.W").options[0].selected = true;
+	document.getElementById("tsunami.WS").options[0].selected = true;
 	document.getElementById("testtext").value = "測試模式";
 	document.getElementById("ID").value = "111000";
 	const utc = new Date();

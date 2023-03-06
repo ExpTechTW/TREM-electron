@@ -680,13 +680,13 @@ TREM.MapArea2 = {
 
 			this.show();
 
-			if (!this.blinkTimer)
-				this.blinkTimer = setInterval(() => {
-					if (this.isVisible)
-						this.hide();
-					else
-						this.show();
-				}, 500);
+			// if (!this.blinkTimer)
+			// 	this.blinkTimer = setInterval(() => {
+			// 		if (this.isVisible)
+			// 			this.hide();
+			// 		else
+			// 			this.show();
+			// 	}, 1000);
 		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 			if (Object.keys(this.PLoc).length) this.PLoc = {};
 
@@ -759,11 +759,11 @@ TREM.MapArea2 = {
 			delete this.timer;
 		}
 
-		if (!this.cache.size) {
-			if (this.blinkTimer)
-				clearTimeout(this.blinkTimer);
-			delete this.blinkTimer;
-		}
+		// if (!this.cache.size) {
+		// 	if (this.blinkTimer)
+		// 		clearTimeout(this.blinkTimer);
+		// 	delete this.blinkTimer;
+		// }
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			Maps.main.setLayoutProperty("Layer_intensity_areav2", "visibility", "none");
@@ -1442,6 +1442,192 @@ async function init() {
 				Maps.main.addSource("Source_area", {
 					type : "geojson",
 					data : MapData.area,
+				});
+				Maps.main.addSource("Source_EN", {
+					type : "geojson",
+					data : MapData.EN,
+				});
+				Maps.main.addLayer({
+					id     : "Layer_EN",
+					type   : "line",
+					source : "Source_EN",
+					paint  : {
+						"line-color": [
+							"match",
+							[
+								"coalesce",
+								["feature-state", "color"],
+								0,
+							],
+							3,
+							"#B131FF",
+							2,
+							"red",
+							1,
+							"#FFEF29",
+							"#5CEE18",
+						],
+						"line-width"   : 10,
+						"line-opacity" : 1,
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+				Maps.main.addSource("Source_E", {
+					type : "geojson",
+					data : MapData.E,
+				});
+				Maps.main.addLayer({
+					id     : "Layer_E",
+					type   : "line",
+					source : "Source_E",
+					paint  : {
+						"line-color": [
+							"match",
+							[
+								"coalesce",
+								["feature-state", "color"],
+								0,
+							],
+							3,
+							"#B131FF",
+							2,
+							"red",
+							1,
+							"#FFEF29",
+							"#5CEE18",
+						],
+						"line-width"   : 10,
+						"line-opacity" : 1,
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+				Maps.main.addSource("Source_ES", {
+					type : "geojson",
+					data : MapData.ES,
+				});
+				Maps.main.addLayer({
+					id     : "Layer_ES",
+					type   : "line",
+					source : "Source_ES",
+					paint  : {
+						"line-color": [
+							"match",
+							[
+								"coalesce",
+								["feature-state", "color"],
+								0,
+							],
+							3,
+							"#B131FF",
+							2,
+							"red",
+							1,
+							"#FFEF29",
+							"#5CEE18",
+						],
+						"line-width"   : 10,
+						"line-opacity" : 1,
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+				Maps.main.addSource("Source_N", {
+					type : "geojson",
+					data : MapData.N,
+				});
+				Maps.main.addLayer({
+					id     : "Layer_N",
+					type   : "line",
+					source : "Source_N",
+					paint  : {
+						"line-color": [
+							"match",
+							[
+								"coalesce",
+								["feature-state", "color"],
+								0,
+							],
+							3,
+							"#B131FF",
+							2,
+							"red",
+							1,
+							"#FFEF29",
+							"#5CEE18",
+						],
+						"line-width"   : 10,
+						"line-opacity" : 1,
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+				Maps.main.addSource("Source_W", {
+					type : "geojson",
+					data : MapData.W,
+				});
+				Maps.main.addLayer({
+					id     : "Layer_W",
+					type   : "line",
+					source : "Source_W",
+					paint  : {
+						"line-color": [
+							"match",
+							[
+								"coalesce",
+								["feature-state", "color"],
+								0,
+							],
+							3,
+							"#B131FF",
+							2,
+							"red",
+							1,
+							"#FFEF29",
+							"#5CEE18",
+						],
+						"line-width"   : 10,
+						"line-opacity" : 1,
+					},
+					layout: {
+						visibility: "none",
+					},
+				});
+				Maps.main.addSource("Source_WS", {
+					type : "geojson",
+					data : MapData.WS,
+				});
+				Maps.main.addLayer({
+					id     : "Layer_WS",
+					type   : "line",
+					source : "Source_WS",
+					paint  : {
+						"line-color": [
+							"match",
+							[
+								"coalesce",
+								["feature-state", "color"],
+								0,
+							],
+							3,
+							"#B131FF",
+							2,
+							"red",
+							1,
+							"#FFEF29",
+							"#5CEE18",
+						],
+						"line-width"   : 10,
+						"line-opacity" : 1,
+					},
+					layout: {
+						visibility: "none",
+					},
 				});
 				MapBases.main.set("tw_county_fill", Maps.main.addLayer({
 					id     : "Layer_tw_county_Fill",
@@ -2204,6 +2390,7 @@ async function init() {
 				const finalBounds = new maplibregl.LngLatBounds();
 				let finalZoom = 0;
 				let sampleCount = 0;
+				let trem_eew_type = false;
 
 				for (let index = 0; index < Object.keys(eew).length; index++)
 					if (eewt.id == 0 || eewt.id == eew[Object.keys(eew)[index]].id || NOW().getTime() - eew[Object.keys(eew)[index]].time >= 10000) {
@@ -2239,6 +2426,8 @@ async function init() {
 
 						finalBounds.extend([lon, eew[Object.keys(eew)[index]].lat]);
 
+						if (eew[Object.keys(eew)[index]].type == "trem-eew") trem_eew_type = true;
+
 						/*
 						const num = Math.sqrt(Math.pow(23.608428 - eew[Object.keys(eew)[index]].lat, 2) + Math.pow(120.799168 - eew[Object.keys(eew)[index]].lon, 2));
 
@@ -2252,9 +2441,33 @@ async function init() {
 
 				finalZoom = finalZoom / sampleCount;
 
-				if (finalZoom != Maps.main.getZoom() && !Maps.main.isEasing()) {
+				if (finalZoom != Maps.main.getZoom() && !Maps.main.isEasing() && !trem_eew_type) {
 					const camera = Maps.main.cameraForBounds(finalBounds, { padding: { top: 0, right: 100, bottom: 100, left: 0 } });
 					TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
+				} else if (TREM.MapArea.cache.size) {
+					map_move_back = true;
+					const bounds = (TREM.MapRenderingEngine == "mapbox-gl") ? new maplibregl.LngLatBounds() : new L.Bounds();
+
+					for (const [ id ] of TREM.MapArea.cache) {
+						const points = TREM.Resources.area[id].map(latlng => pointFormatter(latlng[0], latlng[1], TREM.MapRenderingEngine));
+						console.log(points);
+						bounds.extend([points[0], points[2]]);
+					}
+
+					const canvas = Maps.main.getCanvas();
+
+					const camera = Maps.main.cameraForBounds(bounds, {
+						padding: {
+							bottom : canvas.height / 6,
+							left   : canvas.width / 3,
+							top    : canvas.height / 6,
+							right  : canvas.width / 5,
+						},
+						maxZoom: 8.5,
+					});
+
+					if (camera.zoom != Maps.main.getZoom() && !Maps.main.isEasing())
+						TREM.Earthquake.emit("focus", camera, true);
 				}
 			} else if (TREM.MapArea.cache.size) {
 				map_move_back = true;
@@ -2269,9 +2482,9 @@ async function init() {
 
 				const camera = Maps.main.cameraForBounds(bounds, {
 					padding: {
-						bottom : canvas.height / 8,
-						left   : canvas.width / 12,
-						top    : canvas.height / 8,
+						bottom : canvas.height / 6,
+						left   : canvas.width / 3,
+						top    : canvas.height / 6,
 						right  : canvas.width / 5,
 					},
 					maxZoom: 8.5,
@@ -2310,6 +2523,43 @@ async function init() {
 						if (km > 300000)
 							Zoom = 6;
 						const num = Math.sqrt(Math.pow(23.608428 - eew[Object.keys(eew)[index]].lat, 2) + Math.pow(120.799168 - eew[Object.keys(eew)[index]].lon, 2));
+
+						if (eew[Object.keys(eew)[index]].type == "trem-eew") {
+							if (Object.keys(detected_box_list).length >= 1)
+								if (Object.keys(detected_box_list).length == 1) {
+									const X1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0]) / 2);
+									const Y1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1]) / 2);
+									TREM.Earthquake.emit("focus", { center: pointFormatter(X1, Y1, TREM.MapRenderingEngine), zoom: 9.5 });
+								} else if (Object.keys(detected_box_list).length >= 2) {
+									const X1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0]) / 2);
+									const Y1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1]) / 2);
+									const X2 = (TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[1].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][0]) / 2);
+									const Y2 = (TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[1].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][1]) / 2);
+									let focusScale = 9;
+
+									if (Object.keys(detected_box_list).length == 2) {
+										const num0 = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
+
+										if (num0 > 0.6) focusScale = 9;
+
+										if (num0 > 1) focusScale = 8.5;
+
+										if (num0 > 1.5) focusScale = 8;
+
+										if (num0 > 2.8) focusScale = 7;
+									} else {
+										if (Object.keys(detected_box_list).length >= 4) focusScale = 8;
+
+										if (Object.keys(detected_box_list).length >= 6) focusScale = 7.5;
+
+										if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
+									}
+
+									TREM.Earthquake.emit("focus", { center: pointFormatter((X1 + X2) / 2, (Y1 + Y2) / 2, TREM.MapRenderingEngine), zoom: focusScale });
+								}
+
+							continue;
+						}
 
 						if (num >= 5)
 							TREM.Earthquake.emit("focus", { center: [eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon], zoom: Zoom });
@@ -4582,6 +4832,7 @@ TREM.Earthquake.on("eew", (data) => {
 		Time : data.time,
 		id   : data.id,
 		km   : 0,
+		type : data.type,
 	};
 
 	if (data.depth != null) {
@@ -4953,31 +5204,7 @@ TREM.Earthquake.on("trem-eq", (data) => {
 });
 
 TREM.Earthquake.on("tsunami", (data) => {
-	if (data.number == 1) {
-		const now = new Date(json.time);
-		const Now3 = now.getFullYear()
-			+ "/" + (now.getMonth() + 1)
-			+ "/" + now.getDate()
-			+ " " + now.getHours()
-			+ ":" + now.getMinutes();
-		new Notification("海嘯警報", {
-			body   : `${Now3} 發生 ${data.scale} 地震\n\n東經: ${data.lon} 度\n北緯: ${data.lat} 度\n\n請迅速疏散至安全場所`,
-			icon   : "../TREM.ico",
-			silent : win.isFocused(),
-		});
-
-		if (setting["report.show"]) win.showInactive();
-
-		if (setting["report.cover"])
-			if (!win.isFullScreen()) {
-				win.setAlwaysOnTop(true);
-				win.focus();
-				win.setAlwaysOnTop(false);
-			}
-
-		if (setting["audio.report"]) audioPlay("../audio/Water.wav");
-		Mapsmainfocus();
-	}
+	console.log(data);
 
 	if (data.cancel) {
 		if (TSUNAMI.E)
@@ -5003,159 +5230,411 @@ TREM.Earthquake.on("tsunami", (data) => {
 		TSUNAMI = {};
 		Mapsmainfocus();
 	} else {
-		if (!TSUNAMI.warnIcon) {
-			const warnIcon = L.icon({
-				iconUrl   : "../image/warn.png",
-				iconSize  : [30, 30],
-				className : "tsunami",
-			});
-			TSUNAMI.warnIcon = L.marker([+data.lat, +data.lon], { icon: warnIcon }).addTo(Maps.main);
-		} else {
-			TSUNAMI.warnIcon.setLatLng([+data.lat, +data.lon]);
+		if (data.number == 1) {
+			if (setting["report.show"]) win.showInactive();
+
+			if (setting["report.cover"])
+				if (!win.isFullScreen()) {
+					win.setAlwaysOnTop(true);
+					win.focus();
+					win.setAlwaysOnTop(false);
+				}
+
+			if (setting["audio.report"]) audioPlay("../audio/Water.wav");
+			Mapsmainfocus();
 		}
 
-		if (!TSUNAMI.E) {
-			TSUNAMI.E = L.geoJson.vt(MapData.E, {
-				minZoom   : 4,
-				maxZoom   : 12,
-				tolerance : 20,
-				buffer    : 256,
-				debug     : 0,
-				style     : {
-					weight  : 10,
-					opacity : 1,
-					color   : Tcolor(data.area[0].areaColor),
-					fill    : false,
-				},
-			}).addTo(Maps.main);
-			L.DomUtil.addClass(TSUNAMI.E._container, "tsunami");
-		} else {
-			TSUNAMI.E.setStyle({
-				weight  : 10,
-				opacity : 1,
-				color   : Tcolor(data.area[0].areaColor),
-				fill    : false,
-			});
-		}
+		// if (!TSUNAMI.warnIcon) {
+		// 	const warnIcon = L.icon({
+		// 		iconUrl   : "../image/warn.png",
+		// 		iconSize  : [30, 30],
+		// 		className : "tsunami",
+		// 	});
+		// 	TSUNAMI.warnIcon = L.marker([+data.lat, +data.lon], { icon: warnIcon }).addTo(Maps.main);
+		// } else {
+		// 	TSUNAMI.warnIcon.setLatLng([+data.lat, +data.lon]);
+		// }
 
-		if (!TSUNAMI.EN) {
-			TSUNAMI.EN = L.geoJson.vt(MapData.EN, {
-				minZoom   : 4,
-				maxZoom   : 12,
-				tolerance : 20,
-				buffer    : 256,
-				debug     : 0,
-				style     : {
-					weight  : 10,
-					opacity : 1,
-					color   : Tcolor(data.area[1].areaColor),
-					fill    : false,
-				},
-			}).addTo(Maps.main);
-			L.DomUtil.addClass(TSUNAMI.EN._container, "tsunami");
-		} else {
-			TSUNAMI.EN.setStyle({
-				weight  : 10,
-				opacity : 1,
-				color   : Tcolor(data.area[1].areaColor),
-				fill    : false,
+		for (let i = 0; i < data.area.length; i++) {
+			if (!data.area[i].arrivalTime) continue;
+			const now = new Date(data.area[i].arrivalTime);
+			const Now3 = now.getFullYear()
+				+ "/" + (now.getMonth() + 1)
+				+ "/" + now.getDate()
+				+ " " + now.getHours()
+				+ ":" + now.getMinutes();
+			new Notification("海嘯警報", {
+				body   : `${Now3} 發生地震\n請${data.area[i].areaName}迅速疏散至安全場所`,
+				icon   : "../TREM.ico",
+				silent : win.isFocused(),
 			});
-		}
 
-		if (!TSUNAMI.ES) {
-			TSUNAMI.ES = L.geoJson.vt(MapData.ES, {
-				minZoom   : 4,
-				maxZoom   : 12,
-				tolerance : 20,
-				buffer    : 256,
-				debug     : 0,
-				style     : {
-					weight  : 10,
-					opacity : 1,
-					color   : Tcolor(data.area[2].areaColor),
-					fill    : false,
-				},
-			}).addTo(Maps.main);
-			L.DomUtil.addClass(TSUNAMI.ES._container, "tsunami");
-		} else {
-			TSUNAMI.ES.setStyle({
-				weight  : 10,
-				opacity : 1,
-				color   : Tcolor(data.area[2].areaColor),
-				fill    : false,
-			});
-		}
+			if (data.area[i].areaName == "東北沿海地區") {
+				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+					if (!Maps.main.getFeatureState({
+						source      : "Source_EN",
+						sourceLayer : "Layer_EN",
+						id          : "1",
+					})) {
+						Maps.main.setFeatureState({
+							source : "Source_EN",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_EN", "visibility", "visible");
+					} else {
+						Maps.main.removeFeatureState({ source: "Source_EN" });
+						Maps.main.setLayoutProperty("Layer_EN", "visibility", "none");
+						Maps.main.setFeatureState({
+							source : "Source_EN",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_EN", "visibility", "visible");
+					}
+				else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+					if (!TSUNAMI.EN) {
+						TSUNAMI.EN = L.geoJson.vt(MapData.EN, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.EN._container, "tsunami");
+					} else {
+						TSUNAMI.EN.remove();
+						TSUNAMI.EN = L.geoJson.vt(MapData.EN, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.EN._container, "tsunami");
+					}
 
-		if (!TSUNAMI.N) {
-			TSUNAMI.N = L.geoJson.vt(MapData.N, {
-				minZoom   : 4,
-				maxZoom   : 12,
-				tolerance : 20,
-				buffer    : 256,
-				debug     : 0,
-				style     : {
-					weight  : 10,
-					opacity : 1,
-					color   : Tcolor.vt(data.area[3].areaColor),
-					fill    : false,
-				},
-			}).addTo(Maps.main);
-			L.DomUtil.addClass(TSUNAMI.N._container, "tsunami");
-		} else {
-			TSUNAMI.N.setStyle({
-				weight  : 10,
-				opacity : 1,
-				color   : Tcolor(data.area[3].areaColor),
-				fill    : false,
-			});
-		}
+			} else if (data.area[i].areaName == "東部沿海地區") {
+				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+					if (!Maps.main.getFeatureState({
+						source      : "Source_E",
+						sourceLayer : "Layer_E",
+						id          : "1",
+					})) {
+						Maps.main.setFeatureState({
+							source : "Source_E",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_E", "visibility", "visible");
+					} else {
+						Maps.main.removeFeatureState({ source: "Source_E" });
+						Maps.main.setLayoutProperty("Layer_E", "visibility", "none");
+						Maps.main.setFeatureState({
+							source : "Source_E",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_E", "visibility", "visible");
+					}
+				else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+					if (!TSUNAMI.E) {
+						TSUNAMI.E = L.geoJson.vt(MapData.E, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.E._container, "tsunami");
+					} else {
+						TSUNAMI.E.remove();
+						TSUNAMI.E = L.geoJson.vt(MapData.E, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.E._container, "tsunami");
+					}
 
-		if (!TSUNAMI.WS) {
-			TSUNAMI.WS = L.geoJson.vt(MapData.WS, {
-				minZoom   : 4,
-				maxZoom   : 12,
-				tolerance : 20,
-				buffer    : 256,
-				debug     : 0,
-				style     : {
-					weight  : 10,
-					opacity : 1,
-					color   : Tcolor(data.area[4].areaColor),
-					fill    : false,
-				},
-			}).addTo(Maps.main);
-			L.DomUtil.addClass(TSUNAMI.WS._container, "tsunami");
-		} else {
-			TSUNAMI.WS.setStyle({
-				weight  : 10,
-				opacity : 1,
-				color   : Tcolor(data.area[4].areaColor),
-				fill    : false,
-			});
-		}
+			} else if (data.area[i].areaName == "東南沿海地區") {
+				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+					if (!Maps.main.getFeatureState({
+						source      : "Source_ES",
+						sourceLayer : "Layer_ES",
+						id          : "1",
+					})) {
+						Maps.main.setFeatureState({
+							source : "Source_ES",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_ES", "visibility", "visible");
+					} else {
+						Maps.main.removeFeatureState({ source: "Source_ES" });
+						Maps.main.setLayoutProperty("Layer_ES", "visibility", "none");
+						Maps.main.setFeatureState({
+							source : "Source_ES",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_ES", "visibility", "visible");
+					}
+				else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+					if (!TSUNAMI.ES) {
+						TSUNAMI.ES = L.geoJson.vt(MapData.ES, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.ES._container, "tsunami");
+					} else {
+						TSUNAMI.ES.remove();
+						TSUNAMI.ES = L.geoJson.vt(MapData.ES, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.ES._container, "tsunami");
+					}
 
-		if (!TSUNAMI.W) {
-			TSUNAMI.W = L.geoJson.vt(MapData.W, {
-				minZoom   : 4,
-				maxZoom   : 12,
-				tolerance : 20,
-				buffer    : 256,
-				debug     : 0,
-				style     : {
-					weight  : 10,
-					opacity : 1,
-					color   : Tcolor(data.area[5].areaColor),
-					fill    : false,
-				},
-			}).addTo(Maps.main);
-			L.DomUtil.addClass(TSUNAMI.W._container, "tsunami");
-		} else {
-			TSUNAMI.W.setStyle({
-				weight  : 10,
-				opacity : 1,
-				color   : Tcolor(data.area[5].areaColor),
-				fill    : false,
-			});
+			} else if (data.area[i].areaName == "北部沿海地區") {
+				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+					if (!Maps.main.getFeatureState({
+						source      : "Source_N",
+						sourceLayer : "Layer_N",
+						id          : "1",
+					})) {
+						Maps.main.setFeatureState({
+							source : "Source_N",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_N", "visibility", "visible");
+					} else {
+						Maps.main.removeFeatureState({ source: "Source_N" });
+						Maps.main.setLayoutProperty("Layer_N", "visibility", "none");
+						Maps.main.setFeatureState({
+							source : "Source_N",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_N", "visibility", "visible");
+					}
+				else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+					if (!TSUNAMI.N) {
+						TSUNAMI.N = L.geoJson.vt(MapData.N, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.N._container, "tsunami");
+					} else {
+						TSUNAMI.N.remove();
+						TSUNAMI.N = L.geoJson.vt(MapData.N, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.N._container, "tsunami");
+					}
+
+			} else if (data.area[i].areaName == "海峽沿海地區") {
+				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+					if (!Maps.main.getFeatureState({
+						source      : "Source_W",
+						sourceLayer : "Layer_W",
+						id          : "1",
+					})) {
+						Maps.main.setFeatureState({
+							source : "Source_W",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_W", "visibility", "visible");
+					} else {
+						Maps.main.removeFeatureState({ source: "Source_W" });
+						Maps.main.setLayoutProperty("Layer_W", "visibility", "none");
+						Maps.main.setFeatureState({
+							source : "Source_W",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_W", "visibility", "visible");
+					}
+				else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+					if (!TSUNAMI.W) {
+						TSUNAMI.W = L.geoJson.vt(MapData.W, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.W._container, "tsunami");
+					} else {
+						TSUNAMI.W.remove();
+						TSUNAMI.W = L.geoJson.vt(MapData.W, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.W._container, "tsunami");
+					}
+
+			} else if (data.area[i].areaName == "西南沿海地區") {
+				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+					if (!Maps.main.getFeatureState({
+						source      : "Source_WS",
+						sourceLayer : "Layer_WS",
+						id          : "1",
+					})) {
+						Maps.main.setFeatureState({
+							source : "Source_WS",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_WS", "visibility", "visible");
+					} else {
+						Maps.main.removeFeatureState({ source: "Source_WS" });
+						Maps.main.setLayoutProperty("Layer_WS", "visibility", "none");
+						Maps.main.setFeatureState({
+							source : "Source_WS",
+							id     : "1",
+						}, { color: tsunami_color_int(data.area[i].waveHeight) });
+						Maps.main.setLayoutProperty("Layer_WS", "visibility", "visible");
+					}
+				else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+					if (!TSUNAMI.WS) {
+						TSUNAMI.WS = L.geoJson.vt(MapData.WS, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.WS._container, "tsunami");
+					} else {
+						TSUNAMI.WS.remove();
+						TSUNAMI.WS = L.geoJson.vt(MapData.WS, {
+							minZoom   : 4,
+							maxZoom   : 12,
+							tolerance : 20,
+							buffer    : 256,
+							debug     : 0,
+							zIndex    : 5,
+							style     : (args) => ({
+								color       : tsunami_color(data.area[i].waveHeight),
+								weight      : 10,
+								opacity     : 1,
+								fillColor   : "transparent",
+								fillOpacity : 1,
+								fill        : false,
+							}),
+						}).addTo(Maps.main);
+						L.DomUtil.addClass(TSUNAMI.WS._container, "tsunami");
+					}
+			}
 		}
 	}
 });
@@ -5565,11 +6044,12 @@ function main(data) {
 	}
 }
 
-function Tcolor(text) {
-	return (text == "黃色") ? "yellow"
-		: (text == "橙色") ? "red"
-			: (text == "綠色") ? "transparent"
-				: "purple";
+function tsunami_color(color) {
+	return (color == "大於6公尺") ? "#B131FF" : (color == "3至6公尺") ? "red" : (color == "1至3公尺") ? "#FFEF29" : "#5CEE18";
+}
+
+function tsunami_color_int(color) {
+	return (color == "大於6公尺") ? 3 : (color == "3至6公尺") ? 2 : (color == "1至3公尺") ? 1 : 0;
 }
 
 function clear(ID, type) {
