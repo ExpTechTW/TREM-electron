@@ -44,17 +44,18 @@ function createWindow() {
     show           : false,
     icon           : "TREM.ico",
     webPreferences : {
-      preload              : path.join(__dirname, "preload.js"),
-      nodeIntegration      : true,
-      contextIsolation     : false,
-      enableRemoteModule   : true,
-      backgroundThrottling : false,
-      nativeWindowOpen     : true,
+      preload              : path.join(__dirname, "scripts", "preload.js"),
+      backgroundThrottling : false
     },
   });
 
-  require("@electron/remote/main").initialize();
-  require("@electron/remote/main").enable(MainWindow.webContents);
+  ipcMain.on("win:minimize", () => MainWindow.minimize());
+  ipcMain.on("win:maximize", () => MainWindow.maximize());
+  ipcMain.on("win:unmaximize", () => MainWindow.unmaximize());
+  ipcMain.on("win:close", () => MainWindow.close());
+  MainWindow.on("maximize", () => MainWindow.webContents.send("window-state-change", true));
+  MainWindow.on("unmaximize", () => MainWindow.webContents.send("window-state-change", false));
+
 
   process.env.window = MainWindow.id;
   MainWindow.loadFile("./views/index.html");
@@ -67,9 +68,11 @@ function createWindow() {
 
   if (process.platform === "win32")
     app.setAppUserModelId("TREM | 臺灣即時地震監測");
+
   MainWindow.on("resize", () => {
     MainWindow.webContents.invalidate();
   });
+
   MainWindow.on("close", (event) => {
 
     /*
@@ -165,7 +168,6 @@ function trayIcon() {
   TrayIcon.setToolTip(app.Localization.getString("Application_Title"));
   TrayIcon.setContextMenu(contextMenu);
 }
-
 
 // #region override prototype
 if (!Date.prototype.format)

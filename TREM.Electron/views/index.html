@@ -9,22 +9,26 @@
     <title>TREM</title>
 </head>
 <body>
-    <div id="app-container" class="has-bg">
-        <header id="titlebar">
-            <button id="hamburger-menu"><span class="win-ctrl-icon material-symbols-rounded">menu</span></button>
-            <div id="title-container">
-                <img src="../assets/TREM.ico" alt="TREM Icon" id="app-icon" draggable="false">
-                <span id="title">TREM 臺灣地震即時監測</span>
-            </div>
-            <div id="action-container">
-              <button id="win-minimize"><span class="win-ctrl-icon material-symbols-rounded">chrome_minimize</span></button>
-              <button id="win-maximize"><span class="win-ctrl-icon material-symbols-rounded">chrome_maximize</span></button>
-              <button id="win-close"><span class="win-ctrl-icon material-symbols-rounded">close</span></button>
-            </div>
-        </header>
-        <div id="view-container">
+  <div id="app-container" class="has-bg">
+      <header id="titlebar">
+          <button id="hamburger-menu"><span class="win-ctrl-icon material-symbols-rounded">menu</span></button>
+          <div id="title-container">
+              <img src="../assets/TREM.ico" alt="TREM Icon" id="app-icon" draggable="false">
+              <span id="title">TREM 臺灣地震即時監測</span>
+          </div>
+          <div id="action-container">
+            <button id="win-minimize"><span class="win-ctrl-icon material-symbols-rounded">chrome_minimize</span></button>
+            <button id="win-maximize"><span class="win-ctrl-icon material-symbols-rounded">chrome_maximize</span></button>
+            <button id="win-unmaximize" style="display: none;"><span class="win-ctrl-icon material-symbols-rounded">chrome_restore</span></button>
+            <button id="win-close"><span class="win-ctrl-icon material-symbols-rounded">close</span></button>
+          </div>
+      </header>
+      <div id="view-container">
 
-        </div>
-    </div>
+      </div>
+  </div>
 </body>
+
+<script src="../scripts/controls.js"></script>
+<script src="../scripts/renderer.js"></script>
 </html>
