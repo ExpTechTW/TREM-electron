@@ -11,6 +11,7 @@ const Exptech = new ExptechAPI();
 const axios = require("axios");
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
+const storage = require("electron-localstorage");
 TREM.Audios = {
 	pga1   : new Audio("../audio/PGA1.wav"),
 	pga2   : new Audio("../audio/PGA2.wav"),
@@ -3643,30 +3644,70 @@ function playNextAudio1() {
 
 // #region Report Data
 async function ReportGET(palert) {
-	try {
-		const res = await getReportData();
-		report_get_timestamp = Date.now();
+	await new Promise((c) => {
+		try {
+			const controller = new AbortController();
+			setTimeout(() => {
+				controller.abort();
+			}, 2500);
+			let _report_data = storage.getItem("report_data") ?? [];
+			const list = [];
+			for (let i = 0; i < _report_data.length; i++)
+				list.push(_report_data[i].identifier);
+			fetch("https://exptech.com.tw/api/v1/earthquake/reports", {
+				method  : "post",
+				headers : {
+					"Accept"       : "application/json",
+					"Content-Type" : "application/json",
+				},
+				body   : JSON.stringify({ list }),
+				signal : controller.signal })
+				.then((ans) => ans.json())
+				.then((ans) => {
+					for (let i = 0; i < ans.length; i++) {
+						if (Array.isArray(_report_data)){
+							_report_data.push(ans[i]);
+						} else {
+							_report_data = [];
+							_report_data.push(ans[i]);
+						}
+					}
 
-		if (!res) return setTimeout(ReportGET, 1000, palert);
-		dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
-		ReportList(res, palert);
-	} catch (error) {
-		dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
-		dump({ level: 2, message: error, origin: "EQReportFetcher" });
-		return setTimeout(ReportGET, 5000, palert);
-	}
-}
+					for (let i = 0; i < _report_data.length - 1; i++)
+						for (let _i = 0; _i < _report_data.length - 1; _i++)
+							if (new Date(_report_data[_i].originTime.replaceAll("/", "-")).getTime() < new Date(_report_data[_i + 1].originTime.replaceAll("/", "-")).getTime()) {
+								const temp = _report_data[_i + 1];
+								_report_data[_i + 1] = _report_data[_i];
+								_report_data[_i] = temp;
+							}
+					if (!_report_data) return setTimeout(ReportGET, 5000, palert);
 
-async function getReportData() {
-	try {
-		// console.log(document.cookie);
-		const list = await Exptech.v1.earthquake.getReports(+setting["cache.report"]);
-		TREM.Report.cache = new Map(list.map(v => [v.identifier, v]));
-		return list;
-	} catch (error) {
-		dump({ level: 2, message: error, origin: "EQReportFetcher" });
-		console.error(error);
-	}
+					storage.setItem("report_data", _report_data);
+
+					if (_report_data.length > setting["cache.report"]) {
+						const _report_data_temp = [];
+						for (let i = 0; i < setting["cache.report"]; i++)
+							_report_data_temp[i] = _report_data[i];
+						TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
+						ReportList(_report_data_temp);
+					} else {
+						TREM.Report.cache = new Map(_report_data.map(v => [v.identifier, v]));
+						ReportList(_report_data, palert);
+					}
+					dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
+					c(true);
+				})
+				.catch((err) => {
+					console.log(err);
+					c(false);
+				});
+			report_get_timestamp = Date.now();
+		} catch (error) {
+			dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
+			dump({ level: 2, message: error, origin: "EQReportFetcher" });
+			return setTimeout(ReportGET, 5000, palert);
+		}
+	});
 }
 
 ipcMain.on("ReportGET", () => {
@@ -3675,7 +3716,19 @@ ipcMain.on("ReportGET", () => {
 			Max  : TREM.MapIntensity.MaxI,
 			Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
 		});
-	else ReportGET();
+
+	const _report_data_GET = storage.getItem("report_data") ?? [];
+
+	if (_report_data_GET.length > setting["cache.report"]) {
+		const _report_data_temp = [];
+		for (let i = 0; i < setting["cache.report"]; i++)
+			_report_data_temp[i] = _report_data_GET[i];
+		TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
+		ReportList(_report_data_temp);
+	} else if (_report_data_GET.length < setting["cache.report"]) {
+		TREM.Report.cache = new Map(_report_data_GET.map(v => [v.identifier, v]));
+		ReportList(_report_data_GET);
+	}
 });
 // #endregion
 

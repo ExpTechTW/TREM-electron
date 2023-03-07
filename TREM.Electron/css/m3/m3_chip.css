@@ -152,6 +152,10 @@ button.chip.assist:focus::after {
 	outline: 0;
 }
 
+.chip.label input {
+	color-scheme: dark;
+}
+
 label.chip.filter, button.chip.assist {
 	position: relative;
 	margin-right: 8px;

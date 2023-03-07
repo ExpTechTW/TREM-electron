@@ -20,6 +20,8 @@ TREM.Report = {
 	_filterIntensityValue : 4,
 	_filterTREM           : false,
 	_filterCWB            : true,
+	_filterDate           : false,
+	_filterDateValue      : "",
 	_reportItemTemplate   : document.getElementById("template-report-list-item"),
 	get _mapPaddingLeft() {
 		return document.getElementById("map-report").offsetWidth / 2;
@@ -40,7 +42,8 @@ TREM.Report = {
 				.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 2.0 : this._filterMagnitudeValue == 2 ? v.magnitudeValue < 3.0 : this._filterMagnitudeValue == 3 ? v.magnitudeValue < 4.0 : this._filterMagnitudeValue == 45 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 				.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
 				.filter(v => this._filterTREM ? v.location.startsWith("地震資訊") : true)
-				.filter(v => this._filterCWB ? v.identifier.startsWith("CWB") : true);
+				.filter(v => this._filterCWB ? v.identifier.startsWith("CWB") : true)
+				.filter(v => this._filterDate ? v.originTime.split(" ")[0] == this._filterDateValue : true);
 
 			for (const report of reports) {
 				// if (setting["api.key"] == "" && report.data[0].areaIntensity == 0) continue;
@@ -52,7 +55,8 @@ TREM.Report = {
 					|| (this._filterMagnitude && !(this._filterMagnitudeValue == 1 ? report.magnitudeValue < 2.0 : this._filterMagnitudeValue == 2 ? report.magnitudeValue < 3.0 : this._filterMagnitudeValue == 3 ? report.magnitudeValue < 4.0 : this._filterMagnitudeValue == 45 ? report.magnitudeValue < 4.5 : report.magnitudeValue >= 4.5))
 					|| (this._filterIntensity && !(report.data[0]?.areaIntensity == this._filterIntensityValue))
 					|| (this._filterTREM && !(report.location.startsWith("地震資訊")))
-					|| (this._filterCWB && !(report.identifier.startsWith("CWB")))) {
+					|| (this._filterCWB && !(report.identifier.startsWith("CWB")))
+					|| (this._filterDate && !(report.originTime.split(" ")[0] == this._filterDateValue))) {
 					element.classList.add("hide");
 					element.style.display = "none";
 				} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -160,13 +164,16 @@ TREM.Report = {
 				return parent.click();
 		}
 
+		this._filterDateValue = this._filterDateValue.replace(/-/g, "/");
+
 		this.reportList = Array.from(this.cache, ([k, v]) => v)
 			.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
 			.filter(v => this._filterHasReplay ? v.ID?.length : true)
 			.filter(v => this._filterMagnitude ? this._filterMagnitudeValue == 1 ? v.magnitudeValue < 2.0 : this._filterMagnitudeValue == 2 ? v.magnitudeValue < 3.0 : this._filterMagnitudeValue == 3 ? v.magnitudeValue < 4.0 : this._filterMagnitudeValue == 45 ? v.magnitudeValue < 4.5 : v.magnitudeValue >= 4.5 : true)
 			.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
 			.filter(v => this._filterTREM ? v.location.startsWith("地震資訊") : true)
-			.filter(v => this._filterCWB ? v.identifier.startsWith("CWB") : true);
+			.filter(v => this._filterCWB ? v.identifier.startsWith("CWB") : true)
+			.filter(v => this._filterDate ? v.originTime.split(" ")[0] == this._filterDateValue : true);
 
 		this._updateReports(oldlist, this.reportList);
 	},

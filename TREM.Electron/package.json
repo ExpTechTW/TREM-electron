@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "6.0.97",
+  "version": "6.0.98",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "homepage": "https://exptech.com.tw/",
@@ -74,6 +74,7 @@
     "electron-fcm-push-receiver": "^2.1.7",
     "electron-log": "5.0.0-beta.16",
     "electron-updater": "^5.3.0",
+    "electron-localstorage": "^1.0.5",
     "expose-gc": "^1.0.0",
     "echarts": "^5.4.1",
     "jquery": "^3.6.3",

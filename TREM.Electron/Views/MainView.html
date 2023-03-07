@@ -395,6 +395,18 @@
                                             <span lang="zh-TW">CWB</span>
                                         </div>
                                     </label>
+                                    <label for="report-filter-date" id="report-label-filter-date" class="chip filter label md3-ripple">
+                                        <input type="checkbox" id="report-filter-date" onclick="TREM.Report._handleFilter('filterDate', this.checked)">
+                                        <div class="chip-label">
+                                            <span lang="en">date</span>
+                                            <span lang="ja">date</span>
+                                            <span lang="kr">date</span>
+                                            <span lang="ru">date</span>
+                                            <span lang="zh-CN">日期</span>
+                                            <span lang="zh-TW">日期</span>
+                                            <input type="date" id="report-filter-date-value" onclick="TREM.Report._handleFilter('filterDateValue', this.value)">
+                                        </div>
+                                    </label>
                                 </div>
                                 <hr class="divider">
                                 <div id="report-list-container"></div>

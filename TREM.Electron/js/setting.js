@@ -358,6 +358,13 @@ function init() {
 		}
 	})();
 	// #endregion
+
+	document.getElementById("client-uuid").addEventListener("click", () => {
+		navigator.clipboard.writeText(localStorage.UUID).then(() => {
+			console.log(localStorage.UUID);
+			console.log("複製成功");
+		});
+	});
 }
 
 function SelectSave(id) {
@@ -693,21 +700,21 @@ function send() {
 					Function      : "earthquake",
 					Type          : "data",
 					type          : "tsunami",
-					time          : new Date(document.getElementById("Time").value).getTime(),
 					lon           : document.getElementById("EastLongitude").value,
 					lat           : document.getElementById("NorthLatitude").value,
-					depth         : document.getElementById("Depth").value,
 					scale         : document.getElementById("Scale").value,
 					FormatVersion : 1,
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
-					"UTC+8"       : document.getElementById("Time").value,
 					number        : document.getElementById("Version").value,
-					id            : document.getElementById("ID").value,
-					Test          : document.getElementById("testbtn").checked,
-					Unit          : document.getElementById("testtext").value,
-					location      : document.getElementById("Location").value,
-					Alert         : document.getElementById("alertbtn").checked,
-					cancel        : document.getElementById("cancelbtn").checked,
+					area          : [
+						{ areaName: "東北沿海地區", waveHeight: tsunamiEN, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "東部沿海地區", waveHeight: tsunamiE, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "東南沿海地區", waveHeight: tsunamiES, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "北部沿海地區", waveHeight: tsunamiN, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "海峽沿海地區", waveHeight: tsunamiW, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						{ areaName: "西南沿海地區", waveHeight: tsunamiWS, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+					],
+					cancel: document.getElementById("cancelbtn").checked,
 				},
 			};
 		else
