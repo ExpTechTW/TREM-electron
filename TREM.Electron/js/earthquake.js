@@ -3657,21 +3657,20 @@ async function ReportGET(palert) {
 			fetch("https://exptech.com.tw/api/v1/earthquake/reports", {
 				method  : "post",
 				headers : {
-					"Accept"       : "application/json",
+					Accept         : "application/json",
 					"Content-Type" : "application/json",
 				},
 				body   : JSON.stringify({ list }),
 				signal : controller.signal })
 				.then((ans) => ans.json())
 				.then((ans) => {
-					for (let i = 0; i < ans.length; i++) {
-						if (Array.isArray(_report_data)){
+					for (let i = 0; i < ans.length; i++)
+						if (Array.isArray(_report_data)) {
 							_report_data.push(ans[i]);
 						} else {
 							_report_data = [];
 							_report_data.push(ans[i]);
 						}
-					}
 
 					for (let i = 0; i < _report_data.length - 1; i++)
 						for (let _i = 0; _i < _report_data.length - 1; _i++)
@@ -3680,6 +3679,7 @@ async function ReportGET(palert) {
 								_report_data[_i + 1] = _report_data[_i];
 								_report_data[_i] = temp;
 							}
+
 					if (!_report_data) return setTimeout(ReportGET, 5000, palert);
 
 					storage.setItem("report_data", _report_data);
@@ -3694,6 +3694,7 @@ async function ReportGET(palert) {
 						TREM.Report.cache = new Map(_report_data.map(v => [v.identifier, v]));
 						ReportList(_report_data, palert);
 					}
+
 					dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 					c(true);
 				})
