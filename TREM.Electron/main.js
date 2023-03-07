@@ -58,7 +58,8 @@ function createWindow() {
 
 
   process.env.window = MainWindow.id;
-  MainWindow.loadFile("./views/index.html");
+  // MainWindow.loadFile("./views/index.html");
+  MainWindow.loadURL("http://localhost:1234/");
   MainWindow.setAspectRatio(16 / 9);
   // MainWindow.setMenu(null);
   MainWindow.webContents.on("did-finish-load", () => {

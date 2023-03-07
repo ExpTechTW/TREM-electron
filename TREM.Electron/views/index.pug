@@ -1,0 +1,83 @@
+doctype html
+html(lang="zh-TW")
+  head
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible" content="IE=edge")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
+    link(rel="stylesheet" href="../stylesheets/index.sass")
+    link(rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="")
+    script(src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin="")
+    title TREM
+  body
+    div#app-container.has-bg
+      header#titlebar
+        button#hamburger-menu
+          span.nav-item-icon.material-symbols-rounded menu
+        #title-container
+          img(src="../assets/TREM.ico" alt="TREM Icon" id="app-icon" draggable="false")/
+          span#title TREM 臺灣地震即時監測
+        #action-container
+          button#win-minimize
+            span.win-ctrl-icon.material-symbols-rounded chrome_minimize
+          button#win-maximize
+            span.win-ctrl-icon.material-symbols-rounded chrome_maximize
+          button#win-unmaximize(style="display: none;")
+            span.win-ctrl-icon.material-symbols-rounded chrome_restore
+          button#win-close
+            span.win-ctrl-icon.material-symbols-rounded close
+      nav#navigator.expand
+        button#nav-map.nav-item.current(role="navigation")
+          span.nav-item-icon.material-symbols-rounded map
+          span.nav-item-label 地圖
+        hr
+        button#map-reports.nav-item(role="navigation")
+          span.nav-item-icon.material-symbols-rounded summarize
+          span.nav-item-label 地震報告
+      main#view
+        #time
+        #map-container
+          #legend
+            #max-int-marker.legend-marker
+            #avg-int-marker.legend-marker.hide
+            #min-int-marker.legend-marker.hide
+            .legend-item.seven 7
+            .legend-item.sixh 6
+            .legend-item.sixl 6
+            .legend-item.fiveh 5
+            .legend-item.fivel 5
+            .legend-item.four 4
+            .legend-item.three 3
+            .legend-item.two 2
+            .legend-item.one 1
+            .legend-item.zero 0
+          #map
+  script(type="module" src="../scripts/controls.js")
+  script(type="module" src="../scripts/renderer.js")
+  script.
+    document.body.style.backgroundSize = `${window.screen.width}px ${window.screen.height}px`;
+
+    document.getElementById("app-container").classList.add("has-bg");
+
+    const moveBackground = () => {
+      document.body.style.backgroundPosition = `${-window.screenX}px ${-window.screenY}px`;
+    };
+
+    const move = setInterval(moveBackground);
+
+    const blur = () => {
+      document.body.classList.add("blur");
+    };
+
+    const rmblur = () => {
+      document.body.classList.remove("blur");
+    };
+
+    window.addEventListener("focus", rmblur);
+    window.addEventListener("blur", blur);
+
+    window.addEventListener("beforeunload", () => {
+      window.removeEventListener("focus", rmblur);
+      window.removeEventListener("blur", blur);
+      clearInterval(move);
+    });

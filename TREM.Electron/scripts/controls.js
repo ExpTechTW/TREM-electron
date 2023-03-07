@@ -1,3 +1,7 @@
+document.getElementById("hamburger-menu").onclick = () => {
+  document.getElementById("navigator").classList.toggle("expand");
+};
+
 document.getElementById("win-minimize").onclick = () => {
   window.electron.browserWindow.minimize();
 };

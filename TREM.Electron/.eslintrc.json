@@ -6,37 +6,13 @@
     "browser": true
   },
   "parserOptions": {
-    "ecmaVersion": "latest"
+    "ecmaVersion": "latest",
+    "sourceType": "module"
   },
   "globals": {
-    "$": "readonly",
-    "app": "readonly",
-    "axios": "readonly",
-    "closeDialog": "readonly",
-    "dump": "readonly",
-    "fs": "readonly",
-    "getThemeColors": "readonly",
-    "geojson": "writable",
-    "init": "readonly",
-    "ipcRenderer": "readonly",
-    "ipcMain": "readonly",
-    "is_setting_disabled": "writable",
-    "L": "readonly",
-    "Localization": "readonly",
-    "NOW": "readonly",
-    "path": "readonly",
-    "ripple": "readonly",
-    "setLocale": "readonly",
-    "setThemeColor": "readonly",
-    "setting": "writable",
-    "showDialog": "readonly",
-    "TimerDesynced": "writable",
-    "toggleNav": "readonly",
-    "TREM": "readonly"
+    "L": "readonly"
   },
   "rules": {
-    "array-bracket-newline": ["warn", { "multiline": true, "minItems": 5 }],
-    "array-element-newline": ["warn", { "multiline": true, "minItems": 5 }],
     "arrow-body-style": "warn",
     "arrow-spacing": ["warn", { "before": true, "after": true }],
     "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
