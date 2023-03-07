@@ -1025,7 +1025,7 @@ async function init() {
 	await (async () => {
 		$("#loading").text(TREM.Localization.getString("Application_Connecting"));
 		dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
-		await ReportGET();
+		ReportGET();
 		progressbar.value = (1 / progressStep) * 1;
 	})().catch(e => dump({ level: 2, message: e }));
 
@@ -1052,7 +1052,7 @@ async function init() {
 					// if (NOW().getTime() - replayT > 180_000 && !Object.keys(eew).length) {
 					if (NOW().getTime() - replayT > 180_000) {
 						replay = 0;
-						ReportGET();
+						ipcMain.emit("ReportGET");
 						stopReplay();
 					}
 				} else {
@@ -3643,72 +3643,68 @@ function playNextAudio1() {
 // #endregion
 
 // #region Report Data
-async function ReportGET(palert) {
-	await new Promise((c) => {
-		try {
-			const controller = new AbortController();
-			setTimeout(() => {
-				controller.abort();
-			}, 2500);
-			let _report_data = storage.getItem("report_data") ?? [];
-			const list = [];
-			for (let i = 0; i < _report_data.length; i++)
-				list.push(_report_data[i].identifier);
-			fetch("https://exptech.com.tw/api/v1/earthquake/reports", {
-				method  : "post",
-				headers : {
-					Accept         : "application/json",
-					"Content-Type" : "application/json",
-				},
-				body   : JSON.stringify({ list }),
-				signal : controller.signal })
-				.then((ans) => ans.json())
-				.then((ans) => {
-					for (let i = 0; i < ans.length; i++)
-						if (Array.isArray(_report_data)) {
-							_report_data.push(ans[i]);
-						} else {
-							_report_data = [];
-							_report_data.push(ans[i]);
-						}
-
-					for (let i = 0; i < _report_data.length - 1; i++)
-						for (let _i = 0; _i < _report_data.length - 1; _i++)
-							if (new Date(_report_data[_i].originTime.replaceAll("/", "-")).getTime() < new Date(_report_data[_i + 1].originTime.replaceAll("/", "-")).getTime()) {
-								const temp = _report_data[_i + 1];
-								_report_data[_i + 1] = _report_data[_i];
-								_report_data[_i] = temp;
-							}
-
-					if (!_report_data) return setTimeout(ReportGET, 5000, palert);
-
-					storage.setItem("report_data", _report_data);
-
-					if (_report_data.length > setting["cache.report"]) {
-						const _report_data_temp = [];
-						for (let i = 0; i < setting["cache.report"]; i++)
-							_report_data_temp[i] = _report_data[i];
-						TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
-						ReportList(_report_data_temp);
+function ReportGET(palert = {}) {
+	try {
+		const controller = new AbortController();
+		setTimeout(() => {
+			controller.abort();
+		}, 2500);
+		let _report_data = storage.getItem("report_data") ?? [];
+		const list = [];
+		for (let i = 0; i < _report_data.length; i++)
+			list.push(_report_data[i].identifier);
+		fetch("https://exptech.com.tw/api/v1/earthquake/reports", {
+			method  : "post",
+			headers : {
+				Accept         : "application/json",
+				"Content-Type" : "application/json",
+			},
+			body   : JSON.stringify({ list }),
+			signal : controller.signal })
+			.then((ans) => ans.json())
+			.then((ans) => {
+				for (let i = 0; i < ans.length; i++)
+					if (Array.isArray(_report_data)) {
+						_report_data.push(ans[i]);
 					} else {
-						TREM.Report.cache = new Map(_report_data.map(v => [v.identifier, v]));
-						ReportList(_report_data, palert);
+						_report_data = [];
+						_report_data.push(ans[i]);
 					}
 
-					dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
-					c(true);
-				})
-				.catch((err) => {
-					console.log(err);
-					c(false);
-				});
-			report_get_timestamp = Date.now();
-		} catch (error) {
-			dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
-			dump({ level: 2, message: error, origin: "EQReportFetcher" });
-			return setTimeout(ReportGET, 5000, palert);
-		}
-	});
+				for (let i = 0; i < _report_data.length - 1; i++)
+					for (let _i = 0; _i < _report_data.length - 1; _i++)
+						if (new Date(_report_data[_i].originTime.replaceAll("/", "-")).getTime() < new Date(_report_data[_i + 1].originTime.replaceAll("/", "-")).getTime()) {
+							const temp = _report_data[_i + 1];
+							_report_data[_i + 1] = _report_data[_i];
+							_report_data[_i] = temp;
+						}
+
+				if (!_report_data) return setTimeout(ReportGET, 5000, palert);
+
+				storage.setItem("report_data", _report_data);
+
+				if (_report_data.length > setting["cache.report"]) {
+					const _report_data_temp = [];
+					for (let i = 0; i < setting["cache.report"]; i++)
+						_report_data_temp[i] = _report_data[i];
+					TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
+					ReportList(_report_data_temp, palert);
+				} else {
+					TREM.Report.cache = new Map(_report_data.map(v => [v.identifier, v]));
+					ReportList(_report_data, palert);
+				}
+
+				dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+		report_get_timestamp = Date.now();
+	} catch (error) {
+		dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
+		dump({ level: 2, message: error, origin: "EQReportFetcher" });
+		return setTimeout(ReportGET, 5000, palert);
+	}
 }
 
 ipcMain.on("ReportGET", () => {
@@ -4096,7 +4092,7 @@ const stopReplay = function() {
 
 	if (replay != 0) {
 		replay = 0;
-		ReportGET();
+		ipcMain.emit("ReportGET");
 	}
 
 	WarnAudio = Date.now() + 3000;
@@ -4129,7 +4125,7 @@ TREM.backindexButton = () => {
 ipcMain.on("testoldtimeEEW", (event, oldtime) => {
 	replay = oldtime - 25000;
 	replayT = NOW().getTime();
-	ReportGET();
+	ipcMain.emit("ReportGET");
 	stopReplaybtn();
 });
 
@@ -4590,7 +4586,7 @@ function FCMdata(json, Unit) {
 		console.log(json);
 		replay = json.replay_timestamp;
 		replayT = NOW().getTime();
-		ReportGET();
+		ipcMain.emit("ReportGET");
 		stopReplaybtn();
 	} else if (json.type == "report") {
 		if (TREM.MapIntensity.isTriggered)
@@ -6074,7 +6070,7 @@ function main(data) {
 
 			if (replay != 0) {
 				replay = 0;
-				ReportGET();
+				ipcMain.emit("ReportGET");
 			}
 
 			INFO = [];
