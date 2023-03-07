@@ -603,6 +603,38 @@ function setList(args, el, event) {
 				}
 
 	}
+
+	if (args == "Test1") {
+		if (!document.getElementById("tsunamialertbtn").checked) document.getElementById("tsunami.div").style.display = "none";
+
+		if (!document.getElementById("tsunami.EN.open").checked) document.getElementById("tsunami.EN").disabled = true;
+
+		if (!document.getElementById("tsunami.E.open").checked) document.getElementById("tsunami.E").disabled = true;
+
+		if (!document.getElementById("tsunami.ES.open").checked) document.getElementById("tsunami.ES").disabled = true;
+
+		if (!document.getElementById("tsunami.N.open").checked) document.getElementById("tsunami.N").disabled = true;
+
+		if (!document.getElementById("tsunami.W.open").checked) document.getElementById("tsunami.W").disabled = true;
+
+		if (!document.getElementById("tsunami.WS.open").checked) document.getElementById("tsunami.WS").disabled = true;
+	}
+}
+
+function tsunamialertbtn(checked) {
+	if (checked)
+		document.getElementById("tsunami.div").style.display = "";
+	else
+		document.getElementById("tsunami.div").style.display = "none";
+}
+
+function tsunamiopen(checked, name) {
+	const element = document.getElementById("tsunami." + name);
+
+	if (checked)
+		element.disabled = false;
+	else
+		element.disabled = true;
 }
 
 function send() {
@@ -689,6 +721,13 @@ function send() {
 		const tsunamiW = document.getElementById("tsunami.W").options[document.getElementById("tsunami.W").selectedIndex].value;
 		const tsunamiWS = document.getElementById("tsunami.WS").options[document.getElementById("tsunami.WS").selectedIndex].value;
 
+		const tsunamiENopen = document.getElementById("tsunami.EN.open").checked;
+		const tsunamiEopen = document.getElementById("tsunami.E.open").checked;
+		const tsunamiESopen = document.getElementById("tsunami.ES.open").checked;
+		const tsunamiNopen = document.getElementById("tsunami.N.open").checked;
+		const tsunamiWopen = document.getElementById("tsunami.W.open").checked;
+		const tsunamiWSopen = document.getElementById("tsunami.WS.open").checked;
+
 		if (document.getElementById("UUID").value != "")
 			data = {
 				APIkey        : "https://github.com/ExpTechTW",
@@ -707,12 +746,12 @@ function send() {
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 					number        : document.getElementById("Version").value,
 					area          : [
-						{ areaName: "東北沿海地區", waveHeight: tsunamiEN, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "東部沿海地區", waveHeight: tsunamiE, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "東南沿海地區", waveHeight: tsunamiES, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "北部沿海地區", waveHeight: tsunamiN, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "海峽沿海地區", waveHeight: tsunamiW, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "西南沿海地區", waveHeight: tsunamiWS, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						tsunamiENopen ? { areaName: "東北沿海地區", waveHeight: tsunamiEN, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiEopen ? { areaName: "東部沿海地區", waveHeight: tsunamiE, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiESopen ? { areaName: "東南沿海地區", waveHeight: tsunamiES, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiNopen ? { areaName: "北部沿海地區", waveHeight: tsunamiN, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiWopen ? { areaName: "海峽沿海地區", waveHeight: tsunamiW, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiWSopen ? { areaName: "西南沿海地區", waveHeight: tsunamiWS, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
 					],
 					cancel: document.getElementById("cancelbtn").checked,
 				},
@@ -735,12 +774,12 @@ function send() {
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 					number        : document.getElementById("Version").value,
 					area          : [
-						{ areaName: "東北沿海地區", waveHeight: tsunamiEN, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "東部沿海地區", waveHeight: tsunamiE, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "東南沿海地區", waveHeight: tsunamiES, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "北部沿海地區", waveHeight: tsunamiN, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "海峽沿海地區", waveHeight: tsunamiW, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
-						{ areaName: "西南沿海地區", waveHeight: tsunamiWS, arrivalTime: new Date(document.getElementById("Time").value).getTime() },
+						tsunamiENopen ? { areaName: "東北沿海地區", waveHeight: tsunamiEN, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiEopen ? { areaName: "東部沿海地區", waveHeight: tsunamiE, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiESopen ? { areaName: "東南沿海地區", waveHeight: tsunamiES, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiNopen ? { areaName: "北部沿海地區", waveHeight: tsunamiN, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiWopen ? { areaName: "海峽沿海地區", waveHeight: tsunamiW, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
+						tsunamiWSopen ? { areaName: "西南沿海地區", waveHeight: tsunamiWS, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
 					],
 					cancel: document.getElementById("cancelbtn").checked,
 				},
@@ -793,6 +832,25 @@ function resend() {
 	document.getElementById("tsunami.N").options[0].selected = true;
 	document.getElementById("tsunami.W").options[0].selected = true;
 	document.getElementById("tsunami.WS").options[0].selected = true;
+	document.getElementById("tsunami.EN.open").checked = false;
+	document.getElementById("tsunami.E.open").checked = false;
+	document.getElementById("tsunami.ES.open").checked = false;
+	document.getElementById("tsunami.N.open").checked = false;
+	document.getElementById("tsunami.W.open").checked = false;
+	document.getElementById("tsunami.WS.open").checked = false;
+
+	if (!document.getElementById("tsunami.EN.open").checked) document.getElementById("tsunami.EN").disabled = true;
+
+	if (!document.getElementById("tsunami.E.open").checked) document.getElementById("tsunami.E").disabled = true;
+
+	if (!document.getElementById("tsunami.ES.open").checked) document.getElementById("tsunami.ES").disabled = true;
+
+	if (!document.getElementById("tsunami.N.open").checked) document.getElementById("tsunami.N").disabled = true;
+
+	if (!document.getElementById("tsunami.W.open").checked) document.getElementById("tsunami.W").disabled = true;
+
+	if (!document.getElementById("tsunami.WS.open").checked) document.getElementById("tsunami.WS").disabled = true;
+	tsunamialertbtn(false);
 	document.getElementById("testtext").value = "測試模式";
 	document.getElementById("ID").value = "111000";
 	const utc = new Date();
