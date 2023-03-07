@@ -1025,7 +1025,7 @@ async function init() {
 	await (async () => {
 		$("#loading").text(TREM.Localization.getString("Application_Connecting"));
 		dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
-		ReportGET();
+		await ReportGET();
 		progressbar.value = (1 / progressStep) * 1;
 	})().catch(e => dump({ level: 2, message: e }));
 
