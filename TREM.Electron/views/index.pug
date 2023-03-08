@@ -27,13 +27,16 @@ html(lang="zh-TW")
           button#win-close
             span.win-ctrl-icon.material-symbols-rounded close
       nav#navigator.expand
-        button#nav-map.nav-item.current(role="navigation")
-          span.nav-item-icon.material-symbols-rounded map
-          span.nav-item-label 地圖
+        .nav-item-container
+          button#nav-map.nav-item.current(role="navigation")
+            span.nav-item-icon.material-symbols-rounded map
+            span.nav-item-label 地圖
         hr
-        button#map-reports.nav-item(role="navigation")
-          span.nav-item-icon.material-symbols-rounded summarize
-          span.nav-item-label 地震報告
+        .nav-item-container#nav-report-list
+        .nav-item-container
+          button#settings.nav-item(role="navigation")
+            span.nav-item-icon.material-symbols-rounded settings
+            span.nav-item-label 設定
       main#view
         #time
         #map-container
@@ -59,19 +62,11 @@ html(lang="zh-TW")
 
     document.getElementById("app-container").classList.add("has-bg");
 
-    const moveBackground = () => {
-      document.body.style.backgroundPosition = `${-window.screenX}px ${-window.screenY}px`;
-    };
-
+    const moveBackground = () => document.body.style.backgroundPosition = `${-window.screenX}px ${-window.screenY}px`;
     const move = setInterval(moveBackground);
 
-    const blur = () => {
-      document.body.classList.add("blur");
-    };
-
-    const rmblur = () => {
-      document.body.classList.remove("blur");
-    };
+    const blur = () => document.body.classList.add("blur");
+    const rmblur = () => document.body.classList.remove("blur");
 
     window.addEventListener("focus", rmblur);
     window.addEventListener("blur", blur);

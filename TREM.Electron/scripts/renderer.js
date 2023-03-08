@@ -1,25 +1,27 @@
-import { argbFromHex, themeFromSourceColor, applyTheme } from "../node_modules/@material/material-color-utilities";
+import { argbFromHex, themeFromSourceColor, applyTheme } from "@material/material-color-utilities";
 import * as L from "leaflet";
-import geojson from "../assets/geojson/geojson.js";
+import geojson from "../assets/geojson/geojson";
 import constants from "./constants";
 import chroma from "chroma-js";
+import ExptechAPI from "./api";
 
-const ready = async () => {
-  const grad_i
-= chroma
+const timer = {};
+const grad_i = chroma
   .scale(["#0500A3", "#00ceff", "#33ff34", "#fdff32", "#ff8532", "#fc5235", "#c03e3c", "#9b4544", "#9a4c86", "#b720e9"])
   .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+const exptech = new ExptechAPI();
 
+const ready = async () => {
   const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const data = {
 
     /**
-   * @type {Record<string, Station>} stations
-   */
-    stations: {}
+     * @type {Record<string, Station>} stations
+     */
+    stations : {},
+    reports  : await exptech.v1.earthquake.getReports()
   };
-  const timer = {};
 
   const map = L.map("map", {
     zoomDelta          : 0.5,
@@ -53,6 +55,7 @@ const ready = async () => {
   }).addTo(map);
 
   // #region ws
+
   /**
  * @type {WebSocket}
  */
@@ -147,6 +150,7 @@ const ready = async () => {
   timer.stations = setInterval(fetch_files, 300_000);
 
   let max_id;
+
   const chartAlerted = [];
 
   const rts = (rts_data) => {
@@ -276,10 +280,67 @@ const ready = async () => {
   // #endregion
 
   // #region navigator
-  const navigator = document.getElementById("navigator");
 
+  const navigator = document.getElementById("nav-report-list");
+  navigator.append(createReportNavItem(data.reports));
   // #endregion
 
 };
 
 document.addEventListener("DOMContentLoaded", ready);
+
+const createReportNavItem = (reports = []) => {
+  const frag = document.createDocumentFragment();
+
+  const makeButton = (report) => {
+
+    // button#map-reports.nav-item(role="navigation")
+    //   span.nav-item-icon.material-symbols-rounded summarize
+    //   .nav-item-label-container
+    //     span.nav-item-label ○○縣○○市
+    //     span.nav-item-sublabel 地震資訊
+
+    const data = {
+      icon     : "summarize",
+      label    : report.location,
+      sublabel : "地震資訊"
+    };
+
+    data.label = data.label.match(/\(位於(.+)\)/)[1];
+
+    if (report.location.startsWith("地震資訊"))
+      data.icon = "info";
+    else
+      data.sublabel = report.earthquakeNo;
+
+    const button = document.createElement("button");
+    button.className = "nav-item";
+    button.role = "navigation";
+
+    const icon = document.createElement("span");
+    icon.className = "nav-item-icon material-symbols-rounded";
+    icon.innerText = data.icon;
+
+    const label_container = document.createElement("div");
+    label_container.className = "nav-item-label-container";
+
+    const label = document.createElement("div");
+    label.className = "nav-item-label";
+    label.innerText = data.label;
+
+    const sublabel = document.createElement("div");
+    sublabel.className = "nav-item-sublabel";
+    sublabel.innerText = data.sublabel;
+
+    label_container.append(label, sublabel);
+    button.append(icon, label_container);
+    return button;
+  };
+
+  if (Array.isArray(reports))
+    reports.forEach(report => frag.append(makeButton(report)));
+  else
+    frag.append(makeButton(reports));
+
+  return frag;
+};
