@@ -2654,8 +2654,8 @@ async function init() {
 	// FCMdata(userJSON, type = "websocket");
 	// const userJSON1 = require(path.resolve(__dirname, "../js/test.json"));
 	// TREM.MapArea2.setArea(userJSON1);
-	// const userJSON2 = require(path.resolve(__dirname, "../js/1677759882722.json"));
-	// TREM.MapIntensity.palert(userJSON2);
+	// const userJSON2 = require(path.resolve(__dirname, "../js/123.json"));
+	// TREM.Intensity.handle(userJSON2);
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
 		navigator.clipboard.writeText(document.getElementById("rt-station-local-id").innerText).then(() => {
