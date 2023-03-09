@@ -55,6 +55,15 @@ html(lang="zh-TW")
             .legend-item.zero 0
           #map
         #settings-view.view-container
+    
+    svg#svg-defs
+      defs
+        radialGradient#pred-gradient
+          stop.pred-start(offset="0%")
+          stop.pred-stop(offset="100%")
+        radialGradient#alert-gradient
+          stop.alert-start(offset="0%")
+          stop.alert-stop(offset="100%")
   script(type="module" src="../scripts/controls.js")
   script(type="module" src="../scripts/renderer.js")
   script.

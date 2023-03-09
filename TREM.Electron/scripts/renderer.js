@@ -35,8 +35,9 @@ const ready = async () => {
   }));
 
   map.addSource("tw_county", {
-    type : "geojson",
-    data : geojson.tw_county
+    type      : "geojson",
+    data      : geojson.tw_county,
+    tolerance : 1.2
   });
 
   map.addLayer({
@@ -46,8 +47,19 @@ const ready = async () => {
     layout : {},
     paint  : {
       "fill-color"   : "#d0bcff",
-      "fill-opacity" : 0.1
-    }
+      "fill-opacity" : 0.1,
+    },
+  });
+
+  map.addLayer({
+    id     : "tw_county_line",
+    type   : "line",
+    source : "tw_county",
+    layout : {},
+    paint  : {
+      "line-color" : "#D0BCFF",
+      "line-width" : 1,
+    },
   });
 
   /*
@@ -319,8 +331,8 @@ const ready = async () => {
     circle.setAttribute("cx", centerPx.x);
     circle.setAttribute("cy", centerPx.y);
     circle.setAttribute("r", radiusPx);
-    circle.style.fill = "rgba(255,165,0,0.2)";
-    circle.style.stroke = "black";
+    circle.style.fill = "url(#pred-gradient)";
+    circle.style.stroke = "orange";
     circle.style.zIndex = 5000;
 
     // Add the circle to the SVG element and add the SVG element to the map container
@@ -351,7 +363,7 @@ const ready = async () => {
   let radius = 1;
   const circle = createCircle([121.184552, 24.842932], radius);
   setInterval(() => {
-    radius += 0.4;
+    radius += 0.2;
     circle.setRadius(radius);
   }, 100);
 };
