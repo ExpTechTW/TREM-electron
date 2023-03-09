@@ -309,23 +309,18 @@ const ready = async () => {
   const meterToPixel = 104.41103392;
 
   function createCircle(lnglat, radiusInKm) {
-    // Create an SVG element and set its attributes
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.style.position = "absolute";
     svg.style.pointerEvents = "none";
     svg.style.height = "100%";
     svg.style.width = "100%";
 
-    // Get the pixel coordinates of the center of the circle
     const centerPx = map.project(lnglat);
 
-    // Store the initial zoom level
     const initialZoom = map.getZoom();
 
-    // Calculate the radius in pixels based on the zoom level
     const radiusPx = (radiusInKm * 2000) / (initialZoom * meterToPixel);
 
-    // Create an SVG circle element and set its attributes
     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     circle.id = "test-circle";
     circle.setAttribute("cx", centerPx.x);
@@ -335,11 +330,9 @@ const ready = async () => {
     circle.style.stroke = "orange";
     circle.style.zIndex = 5000;
 
-    // Add the circle to the SVG element and add the SVG element to the map container
     svg.appendChild(circle);
     map.getCanvasContainer().appendChild(svg);
 
-    // Update the circle's position and radius when the map moves or zooms
     map.on("move", updateCircle);
     map.on("zoom", updateCircle);
 
@@ -353,19 +346,40 @@ const ready = async () => {
     }
 
     return {
-      setRadius: (newRadiusInKm) => {
+      setLngLat(newLnglat) {
+        lnglat = newLnglat;
+        updateCircle();
+      },
+      setRadius(newRadiusInKm) {
         radiusInKm = newRadiusInKm;
         updateCircle();
       },
+      setAlert(hasAlerted) {
+        circle.style.fill = hasAlerted ? "url(#alert-gradient)" : "url(#pred-gradient)";
+        circle.style.stroke = hasAlerted ? "red" : "orange";
+      },
+      remove() {
+        svg.remove();
+        circle.remove();
+      }
     };
   }
 
   let radius = 1;
   const circle = createCircle([121.184552, 24.842932], radius);
-  setInterval(() => {
+  const timersss = setInterval(() => {
     radius += 0.2;
     circle.setRadius(radius);
+
+    if (radius > 50) {
+      circle.remove();
+      clearInterval(timersss);
+    }
   }, 100);
+  setTimeout(() => circle.setLngLat([120.9, 24.6]), 1_000);
+  setTimeout(() => circle.setLngLat([121, 24.81]), 1_500);
+  setTimeout(() => circle.setLngLat([120.96, 24.7]), 2_500);
+  setTimeout(() => circle.setAlert(true), 2_500);
 };
 
 document.addEventListener("DOMContentLoaded", ready);
