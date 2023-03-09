@@ -6,10 +6,9 @@ html(lang="zh-TW")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
     link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
     link(rel="stylesheet" href="../stylesheets/index.sass")
-    link(rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="")
-    script(src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin="")
+    link(rel="stylesheet" href="../node_modules/maplibre-gl/dist/maplibre-gl.css")
     title TREM
-  body
+  body(style="background-image: url(https://i.imgur.com/SbSk6TK.png);")
     div#app-container.has-bg
       header#titlebar
         button#hamburger-menu
@@ -38,8 +37,8 @@ html(lang="zh-TW")
             span.nav-item-icon.material-symbols-rounded settings
             span.nav-item-label 設定
       main#view
-        #time
-        #map-container
+        #map-view.view-container.current
+          #time
           #legend
             #max-int-marker.legend-marker
             #avg-int-marker.legend-marker.hide
@@ -55,6 +54,7 @@ html(lang="zh-TW")
             .legend-item.one 1
             .legend-item.zero 0
           #map
+        #settings-view.view-container
   script(type="module" src="../scripts/controls.js")
   script(type="module" src="../scripts/renderer.js")
   script.

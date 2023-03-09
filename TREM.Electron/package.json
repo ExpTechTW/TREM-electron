@@ -73,6 +73,7 @@
     "jquery": "^3.6.1",
     "leaflet": "^1.9.3",
     "leaflet-edgebuffer": "^1.0.6",
+    "maplibre-gl": "^2.4.0",
     "node-datachannel": "^0.4.0",
     "tinycolor2": "^1.4.2",
     "ws": "^8.11.0"

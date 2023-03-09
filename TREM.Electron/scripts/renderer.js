@@ -1,5 +1,5 @@
 import { argbFromHex, themeFromSourceColor, applyTheme } from "@material/material-color-utilities";
-import * as L from "leaflet";
+import maplibregl from "maplibre-gl";
 import geojson from "../assets/geojson/geojson";
 import constants from "./constants";
 import chroma from "chroma-js";
@@ -20,32 +20,37 @@ const ready = async () => {
      * @type {Record<string, Station>} stations
      */
     stations : {},
-    reports  : await exptech.v1.earthquake.getReports()
+    reports  : await exptech.v1.earthquake.getReports(50)
   };
 
-  const map = L.map("map", {
-    zoomDelta          : 0.5,
-    zoomSnap           : 0.1,
-    preferCanvas       : true,
-    zoomControl        : false,
-    attributionControl : false
+  const map = new maplibregl.Map({
+    container : "map",
+    center    : [121, 25],
+    zoom      : 7.5
   });
 
-  map.setView([23.5, 121], 7);
+  map.on("click", () => map.panTo({
+    center : [120, 23.6],
+    zoom   : 7.5
+  }));
 
-  const tw = L.geoJSON(geojson.tw_county, {
-    smoothFactor : 1.5,
-    style        : {
-      color       : isDark ? "#d0bcff" : "#6750A4",
-      weight      : 1,
-      opacity     : 0.6,
-      fillColor   : isDark ? "#d0bcff" : "#6750A4",
-      fillOpacity : 0.1
+  map.addSource("tw_county", {
+    type : "geojson",
+    data : geojson.tw_county
+  });
+
+  map.addLayer({
+    id     : "tw_county",
+    type   : "fill",
+    source : "tw_county",
+    layout : {},
+    paint  : {
+      "fill-color"   : "#d0bcff",
+      "fill-opacity" : 0.1
     }
-  }).addTo(map);
+  });
 
-  const pane = map.createPane("stations");
-
+  /*
   const arealayer = L.geoJSON(geojson.area, {
     pane  : "stations",
     style : {
@@ -53,6 +58,7 @@ const ready = async () => {
       fill   : false
     },
   }).addTo(map);
+*/
 
   // #region ws
 
@@ -110,7 +116,7 @@ const ready = async () => {
         const wave_raw = {};
         for (let i = 0; i < parsed.raw.length; i++)
           wave_raw[parsed.raw[i].uuid] = parsed.raw[i].raw;
-        wave(wave_raw);
+        // wave(wave_raw);
       }
     });
   };
@@ -121,7 +127,7 @@ const ready = async () => {
 
   // #region rts
   /**
-   * @type {Record<string, L.Marker>} 地圖上測站
+   * @type {Record<string, maplibregl.Marker>} 地圖上測站
    */
   const markers = {};
 
@@ -165,7 +171,7 @@ const ready = async () => {
       const id = k[i];
       const station_data = data.stations[id];
 
-      if (markers[id] instanceof L.Marker) {
+      if (markers[id] instanceof maplibregl.Marker) {
         const el = markers[id].getElement();
 
         if (id in rts_data) {
@@ -178,7 +184,7 @@ const ready = async () => {
 
           if (rts_data[id].i < min.i) min = { id, i: rts_data[id].i };
 
-          markers[id].setZIndexOffset(rts_data[id].i + 5);
+          markers[id].getElement().style.zIndex = rts_data[id].i + 5;
 
           if (rts_data.Alert && rts_data[id].alert) {
             sum += rts_data[id].i;
@@ -200,18 +206,19 @@ const ready = async () => {
           el.style.backgroundColor = "";
         }
       } else {
-        markers[id] = L.marker([station_data.Lat, station_data.Long], {
-          icon: L.divIcon({
-            className : "station-marker",
-            iconSize  : [ 8, 8 ]
-          }),
-          zIndexOffset : 0,
-          keyboard     : false,
-          pane         : "stations"
-        }).addTo(map);
+        const element = document.createElement("div");
+        element.className = "station-marker";
+        element.style.height = "8px";
+        element.style.width = "8px";
+        element.style.borderRadius = "8px";
+        markers[id] = new maplibregl.Marker({ element })
+          .setLngLat([station_data.Long, station_data.Lat])
+          // .setPopup(new maplibregl.Popup({ closeOnClick: false, closeButton: false }).setHTML(station_tooltip))
+          .addTo(map);
       }
     }
 
+    /*
     arealayer.setStyle(localStorage.getItem("area") == "true" ? (feature) => ({
       stroke : area[feature.id] > 0,
       color  : [
@@ -232,6 +239,7 @@ const ready = async () => {
       stroke : false,
       fill   : false
     });
+    */
 
     if (max_id != null && max.id != null && max_id != max.id) {
       if (markers[max_id].getElement().classList.contains("max"))
@@ -283,8 +291,69 @@ const ready = async () => {
 
   const navigator = document.getElementById("nav-report-list");
   navigator.append(createReportNavItem(data.reports));
+
   // #endregion
 
+  const meterToPixel = 104.41103392;
+
+  function createCircle(lnglat, radiusInKm) {
+    // Create an SVG element and set its attributes
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.style.position = "absolute";
+    svg.style.pointerEvents = "none";
+    svg.style.height = "100%";
+    svg.style.width = "100%";
+
+    // Get the pixel coordinates of the center of the circle
+    const centerPx = map.project(lnglat);
+
+    // Store the initial zoom level
+    const initialZoom = map.getZoom();
+
+    // Calculate the radius in pixels based on the zoom level
+    const radiusPx = (radiusInKm * 2000) / (initialZoom * meterToPixel);
+
+    // Create an SVG circle element and set its attributes
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.id = "test-circle";
+    circle.setAttribute("cx", centerPx.x);
+    circle.setAttribute("cy", centerPx.y);
+    circle.setAttribute("r", radiusPx);
+    circle.style.fill = "rgba(255,165,0,0.2)";
+    circle.style.stroke = "black";
+    circle.style.zIndex = 5000;
+
+    // Add the circle to the SVG element and add the SVG element to the map container
+    svg.appendChild(circle);
+    map.getCanvasContainer().appendChild(svg);
+
+    // Update the circle's position and radius when the map moves or zooms
+    map.on("move", updateCircle);
+    map.on("zoom", updateCircle);
+
+    function updateCircle() {
+      const center = map.project(lnglat);
+      const zoom = map.getZoom();
+      const radius = (radiusInKm * 2000) / ((initialZoom * meterToPixel) * Math.pow(2, initialZoom - zoom));
+      circle.setAttribute("cx", center.x);
+      circle.setAttribute("cy", center.y);
+      circle.setAttribute("r", radius);
+    }
+
+    return {
+      setRadius: (newRadiusInKm) => {
+        radiusInKm = newRadiusInKm;
+        updateCircle();
+      },
+    };
+  }
+
+  let radius = 1;
+  const circle = createCircle([121.184552, 24.842932], radius);
+  setInterval(() => {
+    radius += 0.4;
+    circle.setRadius(radius);
+  }, 100);
 };
 
 document.addEventListener("DOMContentLoaded", ready);
@@ -301,17 +370,16 @@ const createReportNavItem = (reports = []) => {
     //     span.nav-item-sublabel 地震資訊
 
     const data = {
-      icon     : "summarize",
+      icon     : "description",
       label    : report.location,
-      sublabel : "地震資訊"
+      sublabel : report.originTime,
+      number   : (report.earthquakeNo % 1000) ? report.earthquakeNo : null
     };
 
     data.label = data.label.match(/\(位於(.+)\)/)[1];
 
     if (report.location.startsWith("地震資訊"))
       data.icon = "info";
-    else
-      data.sublabel = report.earthquakeNo;
 
     const button = document.createElement("button");
     button.className = "nav-item";
@@ -334,6 +402,14 @@ const createReportNavItem = (reports = []) => {
 
     label_container.append(label, sublabel);
     button.append(icon, label_container);
+
+    if (data.number) {
+      const tag = document.createElement("div");
+      tag.className = "nav-item-tag";
+      tag.innerText = data.number;
+      button.append(tag);
+    }
+
     return button;
   };
 
