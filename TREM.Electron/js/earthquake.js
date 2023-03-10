@@ -1081,7 +1081,7 @@ async function init() {
 						toggleNav(false);
 				}
 
-				const GetDataState = "";
+				let GetDataState = "";
 				const Warn = "";
 
 				// if (GetData_WS) {
@@ -1109,18 +1109,25 @@ async function init() {
 				// 	GetDataState += "⏰";
 				// }
 
+				if (setting["powersaving.mode"]) {
+					sleep(true);
+					GetDataState += "🔋";
+				} else if (!setting["powersaving.mode"]) {
+					sleep(false);
+					GetDataState += "";
+				}
+
+				// win.on("show", () => sleep(false));
+				// win.on("hide", () => sleep(true));
+				// win.on("minimize", () => sleep(true));
+				// win.on("restore", () => sleep(false));
+
 				const stationall = Object.keys(station).length;
 				const stationPercentage = Math.round(stationnow / stationall * 1000) / 10;
 
 				const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
-				// const formatCPUUsage = (data) => `${data} %`;
 				const memoryData = process.memoryUsage();
-				// const CPUData = formatCPUUsage(process.getCPUUsage().percentCPUUsage.toString().slice(0, 5));
 				const rss = formatMemoryUsage(memoryData.rss);
-				// const heapTotal = formatMemoryUsage(memoryData.heapTotal);
-				// const heapUsed = formatMemoryUsage(memoryData.heapUsed);
-				// const external = formatMemoryUsage(memoryData.external);
-				// const Delay = (isNaN(Ping)) ? Ping : (Date.now() - Ping) > 2500 ? "2500+ms" : Date.now() - Ping + "ms";
 				// const warn = (Warn) ? "⚠️" : "";
 				const error = (testEEWerror) ? "❌" : "";
 				// const unlock = (Unlock) ? "⚡" : "";
@@ -2027,7 +2034,7 @@ async function init() {
 					type : "geojson",
 					data : MapData.tw_county,
 				});
-				Maps.intensity.addSource("Source_tw_town", {
+				Maps.intensity.addSource("Intensity_Source_tw_town", {
 					type : "geojson",
 					data : MapData.tw_town,
 				});
@@ -2043,7 +2050,7 @@ async function init() {
 				Maps.intensity.addLayer({
 					id     : "Layer_intensity",
 					type   : "fill",
-					source : "Source_tw_town",
+					source : "Intensity_Source_tw_town",
 					paint  : {
 						"fill-color": [
 							"match",
@@ -2654,8 +2661,14 @@ async function init() {
 	// FCMdata(userJSON, type = "websocket");
 	// const userJSON1 = require(path.resolve(__dirname, "../js/test.json"));
 	// TREM.MapArea2.setArea(userJSON1);
-	// const userJSON2 = require(path.resolve(__dirname, "../js/123.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/123.json"));
+	// const userJSON1 = require(path.resolve(__dirname, "../js/2.json"));
+	// const userJSON2 = require(path.resolve(__dirname, "../js/1.json"));
+	// TREM.Intensity.handle(userJSON);
+	// TREM.Intensity.handle(userJSON1);
 	// TREM.Intensity.handle(userJSON2);
+	// ipcRenderer.send("intensity-Notification", userJSON);
+	// ipcRenderer.send("intensity-Notification", userJSON1);
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
 		navigator.clipboard.writeText(document.getElementById("rt-station-local-id").innerText).then(() => {
@@ -2681,19 +2694,29 @@ function PGAMain() {
 						Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
 
-						if ((NOW().getTime() - rts_ws_timestamp) > 10_000) {
+						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["powersaving.mode"]) {
 							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
-							// ipcMain.emit("restart");
 							reconnect();
 							PGAMainbkup();
+						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["powersaving.mode"]) {
+							stationnow = 0;
+							Response = {};
+							Ping = "sleep";
+						} else if (setting["powersaving.mode"]) {
+							Ping = "sleep";
 						}
+						// ipcMain.emit("restart");
 					} else {
 						for (const removedKey of Object.keys(Station)) {
 							Station[removedKey].remove();
 							delete Station[removedKey];
 						}
 
-						Ping = "🔒";
+						if (setting["powersaving.mode"])
+							Ping = "sleep";
+						else
+							Ping = "🔒";
+
 						stationnow = 0;
 						Response = {};
 					}
@@ -2745,19 +2768,29 @@ function PGAMainbkup() {
 						Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
 
-						if ((NOW().getTime() - rts_ws_timestamp) > 10_000) {
-							dump({ level: 0, message: "PGA timer backup time out 10s", origin: "PGATimer" });
-							// ipcMain.emit("restart");
+						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["powersaving.mode"]) {
+							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
 							reconnect();
-							PGAMain();
+							PGAMainbkup();
+						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["powersaving.mode"]) {
+							stationnow = 0;
+							Response = {};
+							Ping = "sleep";
+						} else if (setting["powersaving.mode"]) {
+							Ping = "sleep";
 						}
+						// ipcMain.emit("restart");
 					} else {
 						for (const removedKey of Object.keys(Station)) {
 							Station[removedKey].remove();
 							delete Station[removedKey];
 						}
 
-						Ping = "🔒";
+						if (setting["powersaving.mode"])
+							Ping = "sleep";
+						else
+							Ping = "🔒";
+
 						stationnow = 0;
 						Response = {};
 					}
@@ -3698,6 +3731,17 @@ function ReportGET(palert = {}) {
 			})
 			.catch((err) => {
 				console.log(err);
+
+				if (_report_data.length > setting["cache.report"]) {
+					const _report_data_temp = [];
+					for (let i = 0; i < setting["cache.report"]; i++)
+						_report_data_temp[i] = _report_data[i];
+					TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
+					ReportList(_report_data_temp, palert);
+				} else {
+					TREM.Report.cache = new Map(_report_data.map(v => [v.identifier, v]));
+					ReportList(_report_data, palert);
+				}
 			});
 		report_get_timestamp = Date.now();
 	} catch (error) {
@@ -4200,16 +4244,38 @@ ipcMain.on("report-Notification", (event, report) => {
 
 ipcMain.on("intensity-Notification", (event, intensity) => {
 	if (setting["webhook.url"] != "" && setting["intensity.Notification"]) {
-		console.log(intensity);
+		// console.log(intensity);
+		const info = intensity.raw.info;
+		const intensity1 = intensity.raw.intensity;
+		let description = "";
+
+		for (let index = 10, keys = Object.keys(intensity1), n = keys.length; index < n; index++) {
+			const intensity2 = Number(keys[index]);
+			const ids = intensity1[intensity2];
+			description += `${intensity2}級\n`;
+
+			for (const city in TREM.Resources.region)
+				for (const town in TREM.Resources.region[city]) {
+					const loc = TREM.Resources.region[city][town];
+
+					for (const id of ids)
+						if (loc.id == id)
+							description += `${city} ${town}\n`;
+				}
+		}
+
+		description += "\n";
+
 		dump({ level: 0, message: "Posting Notification intensity Webhook", origin: "Webhook" });
 		const msg = {
 			username   : "TREM | 臺灣即時地震監測",
 			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
-			content    : setting["tts.Notification"] ? ("震度速報" + intensity.raw.description
-			+ "時間" + new Date(`${intensity.raw.originTime}`).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" })
-			+ "芮氏規模" + intensity.raw.magnitude.magnitudeValue
-			+ "深度" + intensity.raw.depth.$t + "公里"
-			+ "震央位置" + "東經 " + intensity.raw.epicenter.epicenterLon.$t + "北緯" + intensity.raw.epicenter.epicenterLat.$t) : "震度速報",
+			content    : setting["tts.Notification"] ? ("震度速報"
+			+ "資料來源" + intensity.unit
+			+ (info.time != 0 ? "發震時間" : "接收時間") + new Date(info.time != 0 ? info.time : intensity.timestamp).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" })
+			+ "芮氏規模" + (info.scale != 0 ? info.scale : "未知")
+			+ "深度" + (info.depth != 0 ? info.depth + " 公里" : "未知")
+			+ "震央位置" + "東經" + (info.lon != 0 ? info.lon : "未知") + "北緯" + (info.lat != 0 ? info.lat : "未知")) : "震度速報",
 			tts    : setting["tts.Notification"],
 			embeds : [
 				{
@@ -4218,27 +4284,36 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 						url      : undefined,
 						icon_url : undefined,
 					},
-					description : intensity.raw.description,
-					fields      : [
+					fields: [
 						{
-							name   : "時間",
-							value  : new Date(`${intensity.raw.originTime}`).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" }),
+							name   : "資料來源",
+							value  : intensity.unit,
+							inline : true,
+						},
+						{
+							name   : info.time != 0 ? "發震時間" : "接收時間",
+							value  : new Date(info.time != 0 ? info.time : intensity.timestamp).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" }),
 							inline : true,
 						},
 						{
 							name   : "芮氏規模",
-							value  : intensity.raw.magnitude.magnitudeValue,
+							value  : info.scale != 0 ? info.scale : "未知",
 							inline : true,
 						},
 						{
 							name   : "深度",
-							value  : intensity.raw.depth.$t + " 公里",
+							value  : info.depth != 0 ? info.depth + " 公里" : "未知",
 							inline : true,
 						},
 						{
 							name   : "震央位置",
-							value  : "> 經度 **東經 " + intensity.raw.epicenter.epicenterLon.$t + "**\n> 緯度 **北緯 " + intensity.raw.epicenter.epicenterLat.$t + "**",
+							value  : "> 經度 **東經 " + (info.lon != 0 ? info.lon : "未知") + "**\n> 緯度 **北緯 " + (info.lat != 0 ? info.lat : "未知") + "**",
 							inline : false,
+						},
+						{
+							name   : "震度分布",
+							value  : description,
+							inline : true,
 						},
 					],
 				},
@@ -4572,6 +4647,7 @@ function FCMdata(json, Unit) {
 	} else if (json.type == "palert-app") {
 		console.log(json);
 	} else if (json.type == "pws") {
+		console.log(json);
 		TREM.PWS.addPWS(json.raw);
 	} else if (json.type == "intensity") {
 		dump({ level: 0, message: "Got Earthquake intensity", origin: "API" });

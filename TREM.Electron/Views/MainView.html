@@ -582,8 +582,59 @@
                                 <div id="intensity-overview-body">
                                     <div class="report-overview-item">
                                         <div class="report-overview-item-label">
-                                            <span class="report-overview-item-icon material-symbols-rounded">schedule</span>
+                                            <label for="intensity" id="intensity-label-cwb" class="chip filter md3-ripple" onclick="TREM.Intensity.handle(TREM.Intensity.cwb)">
+                                                <div class="chip-label">
+                                                    <span lang="en">?</span>
+                                                    <span lang="ja">?</span>
+                                                    <span lang="kr">?</span>
+                                                    <span lang="ru">?</span>
+                                                    <span lang="zh-CN">?</span>
+                                                    <span lang="zh-TW">cwb</span>
+                                                </div>
+                                            </label>
+                                            <label for="intensity" id="intensity-label-palert" class="chip filter md3-ripple" onclick="TREM.Intensity.handle(TREM.Intensity.palert)">
+                                                <div class="chip-label">
+                                                    <span lang="en">?</span>
+                                                    <span lang="ja">?</span>
+                                                    <span lang="kr">?</span>
+                                                    <span lang="ru">?</span>
+                                                    <span lang="zh-CN">?</span>
+                                                    <span lang="zh-TW">palert</span>
+                                                </div>
+                                            </label>
+                                            <label for="intensity" id="intensity-label-trem" class="chip filter md3-ripple" onclick="TREM.Intensity.handle(TREM.Intensity.trem)">
+                                                <div class="chip-label">
+                                                    <span lang="en">?</span>
+                                                    <span lang="ja">?</span>
+                                                    <span lang="kr">?</span>
+                                                    <span lang="ru">?</span>
+                                                    <span lang="zh-CN">?</span>
+                                                    <span lang="zh-TW">trem</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <hr class="divider">
+                                    <div class="report-overview-item">
+                                        <div class="report-overview-item-label">
+                                            <span class="report-overview-item-icon material-symbols-rounded">info</span>
                                             <span class="report-overview-item-label-text">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">資料來源</span>
+                                            </span>
+                                        </div>
+                                        <div class="report-overview-value">
+                                            <span id="intensity-overview-unit"></span>
+                                        </div>
+                                    </div>
+                                    <div class="report-overview-item">
+                                        <div class="report-overview-item-label">
+                                            <span class="report-overview-item-icon material-symbols-rounded">schedule</span>
+                                            <span class="report-overview-item-label-text" id="intensity-time">
                                                 <span lang="en">Time of Occurrence</span>
                                                 <span lang="ja">発生日時</span>
                                                 <span lang="kr">발생시각</span>

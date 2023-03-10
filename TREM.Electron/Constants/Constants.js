@@ -88,6 +88,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"powersaving.mode": {
+			type  : "toggle",
+			value : true,
+		},
 		"Real-time.show": {
 			type  : "toggle",
 			value : true,

@@ -478,11 +478,11 @@ ipcMain.on("screenshotEEW", async (event, json) => {
 	const folder = path.join(TREM.getPath("userData"), "EEW");
 	if (!fs.existsSync(folder))
 		fs.mkdirSync(folder);
-	const list = fs.readdirSync(folder);
-	for (let index = 0; index < list.length; index++) {
-		const date = fs.statSync(`${folder}/${list[index]}`);
-		if (Date.now() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
-	}
+	// const list = fs.readdirSync(folder);
+	// for (let index = 0; index < list.length; index++) {
+	// 	const date = fs.statSync(`${folder}/${list[index]}`);
+	// 	if (Date.now() - date.ctimeMs > 3600000) fs.unlinkSync(`${folder}/${list[index]}`);
+	// }
 	const filename = `${json.Function}_${json.ID}_${json.Version}_${json.Time}_${json.Shot}.png`;
 	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
 });
