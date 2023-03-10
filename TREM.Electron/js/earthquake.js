@@ -3682,6 +3682,10 @@ function ReportGET(palert = {}) {
 		setTimeout(() => {
 			controller.abort();
 		}, 2500);
+		if (!localStorage.fixReportGET) {
+			localStorage.fixReportGET = 1;
+			storage.setItem("report_data", []);
+		}
 		let _report_data = storage.getItem("report_data") ?? [];
 		const list = [];
 		for (let i = 0; i < _report_data.length; i++)
