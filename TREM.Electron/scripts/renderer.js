@@ -13,6 +13,9 @@ const grad_i = chroma
 const exptech = new ExptechAPI();
 
 const ready = async () => {
+  if (localStorage.getItem("uuid") == null)
+    localStorage.setItem("uuid", (await import("uuid")).v4());
+
   const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const data = {
@@ -27,11 +30,11 @@ const ready = async () => {
   const map = new maplibregl.Map({
     container : "map",
     center    : [120, 23.6],
-    zoom      : 7.5
+    zoom      : 6.75
   });
 
   map.on("click", () => map.panTo([120, 23.6], {
-    zoom: 7.5
+    zoom: 6.75
   }));
 
   map.addSource("tw_county", {
@@ -104,9 +107,9 @@ const ready = async () => {
       }, 15_000);
 
       const message = {
-        uuid     : window.navigator.userAgent,
+        uuid     : localStorage.getItem("uuid"),
         function : "subscriptionService",
-        value    : ["trem-rts-v2"],
+        value    : ["trem-rts-v2", "eew-v1"],
       };
 
       ws.send(JSON.stringify(message));
@@ -118,17 +121,16 @@ const ready = async () => {
       if (parsed.response == "Connection Succeeded") {
         console.debug("%c[WS]%c WebSocket has connected", "color: blueviolet", "color:unset");
       } else if (parsed.response == "Subscription Succeeded") {
-        console.debug("%c[WS]%c Subscribed to trem-rts-v2", "color: blueviolet", "color:unset");
+        console.debug("%c[WS]%c Subscription succeeded", "color: blueviolet", "color:unset");
       } else if (parsed.type == "ntp") {
-        console.debug("%c[WS]%c Heartbeat ACK received", "color: blueviolet", "color:unset");
+        console.debug("%c[WS]%c Heartbeat received", "color: blueviolet", "color:unset");
         clearTimeout(heartbeat);
-      } else if (parsed.type == "trem-rts") {
-        rts(parsed.raw);
-      } else if (parsed.type == "trem-rts-original") {
-        const wave_raw = {};
-        for (let i = 0; i < parsed.raw.length; i++)
-          wave_raw[parsed.raw[i].uuid] = parsed.raw[i].raw;
-        // wave(wave_raw);
+      } else {
+        switch (parsed.type) {
+          case "trem-rts": rts(parsed.raw); break;
+          case "eew": eew(parsed.raw); break;
+          default: break;
+        }
       }
     });
   };
@@ -299,6 +301,14 @@ const ready = async () => {
 
   // #endregion
 
+  // #region eew
+
+  const eew = (eew_data) => {
+    console.log(eew_data);
+  };
+
+  // #endregion
+
   // #region navigator
 
   const navigator = document.getElementById("nav-report-list");
@@ -312,7 +322,7 @@ const ready = async () => {
     radius += 2;
     circle.setRadius(radius);
 
-    if (radius > 500) {
+    if (radius > 100) {
       circle.remove();
       clearInterval(timersss);
     }

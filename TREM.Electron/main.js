@@ -1,7 +1,4 @@
 const { BrowserWindow, Menu, Notification, app, Tray, ipcMain, nativeImage, shell } = require("electron");
-const fetch = require("node-fetch").default;
-const fs = require("fs");
-const logger = require("electron-log");
 const path = require("path");
 
 let _hide = false;
