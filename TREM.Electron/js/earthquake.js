@@ -2728,7 +2728,7 @@ function PGAMain() {
 					}, 5000);
 					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
 						// TimerDesynced = true;
-						setTimeout(PGAMainbkup(), 10_000);
+						setTimeout(PGAMainbkup(), 5_000);
 					});
 
 					if (controller.signal.aborted || ans == undefined) {
@@ -2747,7 +2747,7 @@ function PGAMain() {
 			} catch (err) {
 				console.log(err);
 				// TimerDesynced = true;
-				setTimeout(PGAMainbkup(), 10_000);
+				setTimeout(PGAMainbkup(), 5_000);
 			}
 		}, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds());
 	}, 500);
@@ -2805,7 +2805,7 @@ function PGAMainbkup() {
 						Response = response.data;
 					}).catch((err) => {
 						// TimerDesynced = true;
-						setTimeout(PGAMain(), 10_000);
+						setTimeout(PGAMain(), 50_000);
 					});
 				}
 
@@ -2813,7 +2813,7 @@ function PGAMainbkup() {
 			} catch (err) {
 				console.log(err);
 				// TimerDesynced = true;
-				setTimeout(PGAMain(), 10_000);
+				setTimeout(PGAMain(), 50_000);
 			}
 		}, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds());
 	}, 500);
