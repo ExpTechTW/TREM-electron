@@ -2697,7 +2697,7 @@ function PGAMain() {
 						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["powersaving.mode"]) {
 							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
 							reconnect();
-							PGAMainbkup();
+							setTimeout(PGAMainbkup(), 10_000);
 						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["powersaving.mode"]) {
 							stationnow = 0;
 							Response = {};
@@ -2728,7 +2728,7 @@ function PGAMain() {
 					}, 5000);
 					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
 						// TimerDesynced = true;
-						PGAMainbkup();
+						setTimeout(PGAMainbkup(), 10_000);
 					});
 
 					if (controller.signal.aborted || ans == undefined) {
@@ -2747,7 +2747,7 @@ function PGAMain() {
 			} catch (err) {
 				console.log(err);
 				// TimerDesynced = true;
-				PGAMainbkup();
+				setTimeout(PGAMainbkup(), 10_000);
 			}
 		}, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds());
 	}, 500);
@@ -2771,7 +2771,7 @@ function PGAMainbkup() {
 						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["powersaving.mode"]) {
 							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
 							reconnect();
-							PGAMainbkup();
+							setTimeout(PGAMain(), 10_000);
 						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["powersaving.mode"]) {
 							stationnow = 0;
 							Response = {};
@@ -2805,7 +2805,7 @@ function PGAMainbkup() {
 						Response = response.data;
 					}).catch((err) => {
 						// TimerDesynced = true;
-						PGAMain();
+						setTimeout(PGAMain(), 10_000);
 					});
 				}
 
@@ -2813,7 +2813,7 @@ function PGAMainbkup() {
 			} catch (err) {
 				console.log(err);
 				// TimerDesynced = true;
-				PGAMain();
+				setTimeout(PGAMain(), 10_000);
 			}
 		}, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds());
 	}, 500);
