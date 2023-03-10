@@ -4,6 +4,7 @@ import geojson from "../assets/geojson/geojson";
 import constants from "./constants";
 import chroma from "chroma-js";
 import ExptechAPI from "./api";
+import Wave from "./classes/wave";
 
 const timer = {};
 const grad_i = chroma
@@ -25,13 +26,12 @@ const ready = async () => {
 
   const map = new maplibregl.Map({
     container : "map",
-    center    : [121, 25],
+    center    : [120, 23.6],
     zoom      : 7.5
   });
 
-  map.on("click", () => map.panTo({
-    center : [120, 23.6],
-    zoom   : 7.5
+  map.on("click", () => map.panTo([120, 23.6], {
+    zoom: 7.5
   }));
 
   map.addSource("tw_county", {
@@ -87,7 +87,7 @@ const ready = async () => {
     ws.addEventListener("close", () => {
       console.log(`%c[WS]%c WebSocket closed. Reconnect after ${retryTimeout / 1000}s`, "color: blueviolet", "color:unset");
       ws = null;
-      setTimeout(() => connect(retryTimeout), retryTimeout).unref();
+      setTimeout(() => connect(retryTimeout), retryTimeout);
     });
 
     ws.addEventListener("error", (err) => {
@@ -306,76 +306,17 @@ const ready = async () => {
 
   // #endregion
 
-  const meterToPixel = 104.41103392;
-
-  function createCircle(lnglat, radiusInKm) {
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.style.position = "absolute";
-    svg.style.pointerEvents = "none";
-    svg.style.height = "100%";
-    svg.style.width = "100%";
-
-    const centerPx = map.project(lnglat);
-
-    const initialZoom = map.getZoom();
-
-    const radiusPx = (radiusInKm * 2000) / (initialZoom * meterToPixel);
-
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.id = "test-circle";
-    circle.setAttribute("cx", centerPx.x);
-    circle.setAttribute("cy", centerPx.y);
-    circle.setAttribute("r", radiusPx);
-    circle.style.fill = "url(#pred-gradient)";
-    circle.style.stroke = "orange";
-    circle.style.zIndex = 5000;
-
-    svg.appendChild(circle);
-    map.getCanvasContainer().appendChild(svg);
-
-    map.on("move", updateCircle);
-    map.on("zoom", updateCircle);
-
-    function updateCircle() {
-      const center = map.project(lnglat);
-      const zoom = map.getZoom();
-      const radius = (radiusInKm * 2000) / ((initialZoom * meterToPixel) * Math.pow(2, initialZoom - zoom));
-      circle.setAttribute("cx", center.x);
-      circle.setAttribute("cy", center.y);
-      circle.setAttribute("r", radius);
-    }
-
-    return {
-      setLngLat(newLnglat) {
-        lnglat = newLnglat;
-        updateCircle();
-      },
-      setRadius(newRadiusInKm) {
-        radiusInKm = newRadiusInKm;
-        updateCircle();
-      },
-      setAlert(hasAlerted) {
-        circle.style.fill = hasAlerted ? "url(#alert-gradient)" : "url(#pred-gradient)";
-        circle.style.stroke = hasAlerted ? "red" : "orange";
-      },
-      remove() {
-        svg.remove();
-        circle.remove();
-      }
-    };
-  }
-
   let radius = 1;
-  const circle = createCircle([121.184552, 24.842932], radius);
+  const circle = new Wave(map, { center: [121.184552, 24.842932], radius, icon: true });
   const timersss = setInterval(() => {
-    radius += 0.2;
+    radius += 2;
     circle.setRadius(radius);
 
-    if (radius > 50) {
+    if (radius > 500) {
       circle.remove();
       clearInterval(timersss);
     }
-  }, 100);
+  }, 1_000);
   setTimeout(() => circle.setLngLat([120.9, 24.6]), 1_000);
   setTimeout(() => circle.setLngLat([121, 24.81]), 1_500);
   setTimeout(() => circle.setLngLat([120.96, 24.7]), 2_500);
