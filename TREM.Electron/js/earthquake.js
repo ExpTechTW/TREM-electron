@@ -1109,13 +1109,10 @@ async function init() {
 				// 	GetDataState += "⏰";
 				// }
 
-				if (setting["powersaving.mode"]) {
-					sleep(true);
+				if (setting["powersaving.mode"])
 					GetDataState += "🔋";
-				} else if (!setting["powersaving.mode"]) {
-					sleep(false);
+				else if (!setting["powersaving.mode"])
 					GetDataState += "";
-				}
 
 				// win.on("show", () => sleep(false));
 				// win.on("hide", () => sleep(true));
@@ -4177,6 +4174,13 @@ ipcMain.on("testoldtimeEEW", (event, oldtime) => {
 	replayT = NOW().getTime();
 	ipcMain.emit("ReportGET");
 	stopReplaybtn();
+});
+
+ipcMain.on("powersaving", (event, mode) => {
+	if (mode)
+		sleep(mode);
+	else
+		sleep(mode);
 });
 
 ipcMain.on("report-Notification", (event, report) => {
