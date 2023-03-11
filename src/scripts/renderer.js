@@ -29,11 +29,11 @@ const ready = async () => {
 
   const map = new maplibregl.Map({
     container : "map",
-    center    : [120, 23.6],
+    center    : [120.5, 23.6],
     zoom      : 6.75
   });
 
-  map.on("click", () => map.panTo([120, 23.6], {
+  map.on("click", () => map.panTo([120.5, 23.6], {
     zoom: 6.75
   }));
 
@@ -321,6 +321,18 @@ const ready = async () => {
 
   const navigator = document.getElementById("nav-report-list");
   navigator.append(createReportNavItem(data.reports));
+
+  navigator.navigate = (view) => {
+    const views = document.getElementById("view");
+    for (let i = 0, n = views.children.length;i < n;i++)
+      if (views.children[i].classList.contains("current"))
+        views.children[i].classList.remove("current");
+
+    view.classList.add("current");
+  };
+
+  document.getElementById("nav-map").addEventListener("click", () => navigator.navigate(document.getElementById("map-view")));
+  document.getElementById("nav-settings").addEventListener("click", () => navigator.navigate(document.getElementById("settings-view")));
 
   // #endregion
 
