@@ -134,7 +134,8 @@ const ready = async () => {
       } else {
         switch (parsed.type) {
           case "trem-rts": rts(parsed.raw); break;
-          case "eew-cwb": eew(parsed); break;
+          case "eew-cwb":
+          case "trem-eew": eew(parsed); break;
           default: console.log(parsed);
         }
       }
@@ -291,94 +292,15 @@ const ready = async () => {
    */
   const eewStore = new Map();
 
-  let apiTime = new Date();
+  const apiTime = new Date();
 
   const eew = (eew_data) => {
     if (eewStore.has(eew_data.id)) {
-      eewStore.get(eew_data.id).e.update(eew_data);
+      const e = eewStore.get(eew_data.id);
+      e.e.update(eew_data);
     } else {
-      const offset = Date.now() - eew_data.time;
-      const p = new Wave(map, { type: "p", center: [eew_data.lon, eew_data.lat], radius: 30 });
-      const s = new Wave(map, { type: "s", center: [eew_data.lon, eew_data.lat], radius: 18, icon: false });
-      const e = new EEW(eew_data);
-      const wave = { p: 7, s: 4 };
-
-      const _distance = [];
-      for (let index = 0; index < 1002; index++)
-        _distance[index]
-        = ((depth, distance) => {
-            const Za = 1 * depth;
-            let G0, G;
-            const Xb = distance;
-
-            if (depth <= 40) {
-              G0 = 5.10298;
-              G = 0.06659;
-            } else {
-              G0 = 7.804799;
-              G = 0.004573;
-            }
-
-            const Zc = -1 * (G0 / G);
-            const Xc = (Math.pow(Xb, 2) - 2 * (G0 / G) * Za - Math.pow(Za, 2)) / (2 * Xb);
-            let Theta_A = Math.atan((Za - Zc) / Xc);
-
-            if (Theta_A < 0) Theta_A = Theta_A + Math.PI;
-            Theta_A = Math.PI - Theta_A;
-            const Theta_B = Math.atan(-1 * Zc / (Xb - Xc));
-            let Ptime = (1 / G) * Math.log(Math.tan((Theta_A / 2)) / Math.tan((Theta_B / 2)));
-            const G0_ = G0 / 1.732;
-            const G_ = G / 1.732;
-            const Zc_ = -1 * (G0_ / G_);
-            const Xc_ = (Math.pow(Xb, 2) - 2 * (G0_ / G_) * Za - Math.pow(Za, 2)) / (2 * Xb);
-            let Theta_A_ = Math.atan((Za - Zc_) / Xc_);
-
-            if (Theta_A_ < 0) Theta_A_ = Theta_A_ + Math.PI;
-            Theta_A_ = Math.PI - Theta_A_;
-            const Theta_B_ = Math.atan(-1 * Zc_ / (Xb - Xc_));
-            let Stime = (1 / G_) * Math.log(Math.tan(Theta_A_ / 2) / Math.tan(Theta_B_ / 2));
-
-            if (distance / Ptime > 7) Ptime = distance / 7;
-
-            if (distance / Stime > 4) Stime = distance / 4;
-            return { Ptime: Ptime, Stime: Stime };
-          })(data.depth, index);
-
-      const t = setInterval(() => {
-        apiTime = new Date(ServerTime + (Date.now() - ServerT));
-
-        let p_dist = Math.floor(Math.sqrt(((apiTime.getTime() - eew_data.time) * wave.p) ** 2 - (eew_data.depth * 1000) ** 2));
-        let s_dist = Math.floor(Math.sqrt(((apiTime.getTime() - eew_data.time) * wave.s) ** 2 - (eew_data.depth * 1000) ** 2));
-
-        let pf, sf;
-
-        for (let _i = 1; _i < _distance.length; _i++) {
-          if (!pf && _distance[_i].Ptime > (apiTime.getTime() - eew_data.time) / 1000) {
-            p_dist = (_i - 1) * 1000;
-
-            if ((_i - 1) / _distance[_i - 1].Ptime > wave.p) p_dist = Math.round(Math.sqrt(((apiTime.getTime() - eew_data.time) * wave.p) ** 2 - (eew_data.depth * 1000) ** 2));
-            pf = true;
-          }
-
-          if (!sf && _distance[_i].Stime > (apiTime.getTime() - eew_data.time) / 1000) {
-            s_dist = (_i - 1) * 1000;
-
-            if ((_i - 1) / _distance[_i - 1].Stime > wave.s) s_dist = Math.round(Math.sqrt(((apiTime.getTime() - eew_data.time) * wave.s) ** 2 - (eew_data.depth * 1000) ** 2));
-            sf = true;
-          }
-
-          if (pf && sf) break;
-        }
-
-        if (p_dist > eew_data.depth)
-          p.setRadius(p_dist - eew_data.depth);
-
-        if (s_dist > eew_data.depth)
-          s.setRadius(s_dist - eew_data.depth);
-
-      }, 500);
-
-      eewStore.set(eew_data.id, { p, s, t, e });
+      const e = new EEW(eew_data, map, true);
+      eewStore.set(eew_data.id, { e });
     }
 
     console.log(eew_data);
