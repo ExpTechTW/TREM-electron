@@ -344,7 +344,7 @@ ipcMain.on("openDevtoolF10", () => {
 
 ipcMain.on("reloadpage", () => {
 	const currentWindow = BrowserWindow.getFocusedWindow();
-	if (currentWindow) currentWindow.webContents.reload();
+	if (currentWindow == MainWindow) currentWindow.webContents.reload();
 });
 
 ipcMain.on("openChildWindow", async (event, arg) => {

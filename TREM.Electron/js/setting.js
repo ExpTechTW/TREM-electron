@@ -513,17 +513,16 @@ function ChoiceSave(id, el) {
 
 	if (id == "update.mode") {
 		const element = document.getElementById("update.time");
-
-		if (value == "never") {
-			element.disabled = true;
-		} else if (value == "notify") {
-			element.disabled = false;
-		} else if (value == "download") {
-			element.disabled = false;
-		} else if (value == "install") {
-			element.disabled = false;
-		}
 		$("#UDReloadButton").fadeIn(100);
+
+		if (value == "never")
+			element.disabled = true;
+		else if (value == "notify")
+			element.disabled = false;
+		else if (value == "download")
+			element.disabled = false;
+		else if (value == "install")
+			element.disabled = false;
 	}
 }
 
