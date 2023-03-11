@@ -330,6 +330,12 @@ ipcMain.on("openDevtool", () => {
 	}
 });
 
+ipcMain.on("openDevtoolF10", () => {
+	const currentWindow = BrowserWindow.getFocusedWindow();
+	if (currentWindow)
+		currentWindow.webContents.openDevTools({ mode: "detach" });
+});
+
 ipcMain.on("reloadpage", () => {
 	const currentWindow = BrowserWindow.getFocusedWindow();
 	if (currentWindow) currentWindow.webContents.reload();
