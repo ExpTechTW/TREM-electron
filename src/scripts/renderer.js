@@ -1,10 +1,11 @@
 import { argbFromHex, themeFromSourceColor, applyTheme } from "@material/material-color-utilities";
 import maplibregl from "maplibre-gl";
-import geojson from "../assets/geojson/geojson";
+import geojson from "../assets/json/geojson";
 import constants from "./constants";
 import chroma from "chroma-js";
 import ExptechAPI from "./api";
 import Wave from "./classes/wave";
+import EEW from "./classes/eew";
 
 const timer = {};
 const grad_i = chroma
@@ -24,7 +25,7 @@ const ready = async () => {
      * @type {Record<string, Station>} stations
      */
     stations : {},
-    reports  : await exptech.v1.earthquake.getReports(20)
+    reports  : await exptech.v1.earthquake.getReports(60)
   };
 
   const map = new maplibregl.Map({
@@ -78,9 +79,10 @@ const ready = async () => {
   // #region ws
 
   /**
- * @type {WebSocket}
- */
+   * @type {WebSocket}
+   */
   let ws;
+  let ServerT = new Date(Date.now()), ServerTime = 0;
 
   const connect = (retryTimeout) => {
     ws = new WebSocket(constants.WebSocketTargetUrl);
@@ -120,10 +122,14 @@ const ready = async () => {
 
       if (parsed.response == "Connection Succeeded") {
         console.debug("%c[WS]%c WebSocket has connected", "color: blueviolet", "color:unset");
+        ServerT = Date.now();
+        ServerTime = parsed.time;
       } else if (parsed.response == "Subscription Succeeded") {
         console.debug("%c[WS]%c Subscription succeeded", "color: blueviolet", "color:unset");
       } else if (parsed.type == "ntp") {
         console.debug("%c[WS]%c Heartbeat received", "color: blueviolet", "color:unset");
+        ServerT = Date.now();
+        ServerTime = parsed.time;
         clearTimeout(heartbeat);
       } else {
         switch (parsed.type) {
@@ -232,29 +238,6 @@ const ready = async () => {
       }
     }
 
-    /*
-    arealayer.setStyle(localStorage.getItem("area") == "true" ? (feature) => ({
-      stroke : area[feature.id] > 0,
-      color  : [
-        "transparent",
-        "#00ceff",
-        "#33ff34",
-        "#fdff32",
-        "#ff8532",
-        "#fc5235",
-        "#c03e3c",
-        "#9b4544",
-        "#9a4c86",
-        "#b720e9"
-      ][area[feature.id]],
-      weight : 2,
-      fill   : false
-    }) : {
-      stroke : false,
-      fill   : false
-    });
-    */
-
     if (max_id != null && max.id != null && max_id != max.id) {
       if (markers[max_id].getElement().classList.contains("max"))
         markers[max_id].getElement().classList.remove("max");
@@ -303,13 +286,99 @@ const ready = async () => {
 
   // #region eew
 
+  /**
+   * @type {Map<string, { p: Wave, s: Wave, e: EEW }>}
+   */
   const eewStore = new Map();
 
-  const eew = (eew_data) => {
-    if (eewStore.has(eew_data.id)) {} else {
+  let apiTime = new Date();
 
+  const eew = (eew_data) => {
+    if (eewStore.has(eew_data.id)) {
+      eewStore.get(eew_data.id).e.update(eew_data);
+    } else {
+      const offset = Date.now() - eew_data.time;
       const p = new Wave(map, { type: "p", center: [eew_data.lon, eew_data.lat], radius: 30 });
       const s = new Wave(map, { type: "s", center: [eew_data.lon, eew_data.lat], radius: 18, icon: false });
+      const e = new EEW(eew_data);
+      const wave = { p: 7, s: 4 };
+
+      const _distance = [];
+      for (let index = 0; index < 1002; index++)
+        _distance[index]
+        = ((depth, distance) => {
+            const Za = 1 * depth;
+            let G0, G;
+            const Xb = distance;
+
+            if (depth <= 40) {
+              G0 = 5.10298;
+              G = 0.06659;
+            } else {
+              G0 = 7.804799;
+              G = 0.004573;
+            }
+
+            const Zc = -1 * (G0 / G);
+            const Xc = (Math.pow(Xb, 2) - 2 * (G0 / G) * Za - Math.pow(Za, 2)) / (2 * Xb);
+            let Theta_A = Math.atan((Za - Zc) / Xc);
+
+            if (Theta_A < 0) Theta_A = Theta_A + Math.PI;
+            Theta_A = Math.PI - Theta_A;
+            const Theta_B = Math.atan(-1 * Zc / (Xb - Xc));
+            let Ptime = (1 / G) * Math.log(Math.tan((Theta_A / 2)) / Math.tan((Theta_B / 2)));
+            const G0_ = G0 / 1.732;
+            const G_ = G / 1.732;
+            const Zc_ = -1 * (G0_ / G_);
+            const Xc_ = (Math.pow(Xb, 2) - 2 * (G0_ / G_) * Za - Math.pow(Za, 2)) / (2 * Xb);
+            let Theta_A_ = Math.atan((Za - Zc_) / Xc_);
+
+            if (Theta_A_ < 0) Theta_A_ = Theta_A_ + Math.PI;
+            Theta_A_ = Math.PI - Theta_A_;
+            const Theta_B_ = Math.atan(-1 * Zc_ / (Xb - Xc_));
+            let Stime = (1 / G_) * Math.log(Math.tan(Theta_A_ / 2) / Math.tan(Theta_B_ / 2));
+
+            if (distance / Ptime > 7) Ptime = distance / 7;
+
+            if (distance / Stime > 4) Stime = distance / 4;
+            return { Ptime: Ptime, Stime: Stime };
+          })(data.depth, index);
+
+      const t = setInterval(() => {
+        apiTime = new Date(ServerTime + (Date.now() - ServerT));
+
+        let p_dist = Math.floor(Math.sqrt(((apiTime.getTime() - eew_data.time) * wave.p) ** 2 - (eew_data.depth * 1000) ** 2));
+        let s_dist = Math.floor(Math.sqrt(((apiTime.getTime() - eew_data.time) * wave.s) ** 2 - (eew_data.depth * 1000) ** 2));
+
+        let pf, sf;
+
+        for (let _i = 1; _i < _distance.length; _i++) {
+          if (!pf && _distance[_i].Ptime > (apiTime.getTime() - eew_data.time) / 1000) {
+            p_dist = (_i - 1) * 1000;
+
+            if ((_i - 1) / _distance[_i - 1].Ptime > wave.p) p_dist = Math.round(Math.sqrt(((apiTime.getTime() - eew_data.time) * wave.p) ** 2 - (eew_data.depth * 1000) ** 2));
+            pf = true;
+          }
+
+          if (!sf && _distance[_i].Stime > (apiTime.getTime() - eew_data.time) / 1000) {
+            s_dist = (_i - 1) * 1000;
+
+            if ((_i - 1) / _distance[_i - 1].Stime > wave.s) s_dist = Math.round(Math.sqrt(((apiTime.getTime() - eew_data.time) * wave.s) ** 2 - (eew_data.depth * 1000) ** 2));
+            sf = true;
+          }
+
+          if (pf && sf) break;
+        }
+
+        if (p_dist > eew_data.depth)
+          p.setRadius(p_dist - eew_data.depth);
+
+        if (s_dist > eew_data.depth)
+          s.setRadius(s_dist - eew_data.depth);
+
+      }, 500);
+
+      eewStore.set(eew_data.id, { p, s, t, e });
     }
 
     console.log(eew_data);
@@ -335,22 +404,6 @@ const ready = async () => {
   document.getElementById("nav-settings").addEventListener("click", () => navigator.navigate(document.getElementById("settings-view")));
 
   // #endregion
-
-  let radius = 1;
-  const circle = new Wave(map, { center: [121.184552, 24.842932], radius, icon: true });
-  const timersss = setInterval(() => {
-    radius += 2;
-    circle.setRadius(radius);
-
-    if (radius > 100) {
-      circle.remove();
-      clearInterval(timersss);
-    }
-  }, 1_000);
-  setTimeout(() => circle.setLngLat([120.9, 24.6]), 1_000);
-  setTimeout(() => circle.setLngLat([121, 24.81]), 1_500);
-  setTimeout(() => circle.setLngLat([120.96, 24.7]), 2_500);
-  setTimeout(() => circle.setAlert(true), 2_500);
 };
 
 document.addEventListener("DOMContentLoaded", ready);
