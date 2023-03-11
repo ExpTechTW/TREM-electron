@@ -349,6 +349,11 @@ ipcMain.on("openRTSWindow", async (event, arg) => {
 	await createRTSWindow();
 });
 
+ipcMain.on("saveSetting", (event, arg) => {
+	fs.unlinkSync(path.join(TREM.getPath("userData"), "settings.json"));
+	fs.unlinkSync(path.join(TREM.getPath("userData"), "config.json"));
+});
+
 ipcMain.on("reset", (event, arg) => {
 	TREM.isQuiting = true;
 	TREM.quit();
