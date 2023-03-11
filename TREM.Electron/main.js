@@ -224,6 +224,12 @@ TREM.on("ready", () => {
 			setInterval(() => {
 				autoUpdater.checkForUpdates();
 			}, time);
+		} else {
+			autoUpdater.checkForUpdates();
+			const time = 3600_000;
+			setInterval(() => {
+				autoUpdater.checkForUpdates();
+			}, time);
 		}
 	} else {
 		autoUpdater.checkForUpdates();
@@ -352,6 +358,14 @@ ipcMain.on("openRTSWindow", async (event, arg) => {
 ipcMain.on("saveSetting", (event, arg) => {
 	fs.unlinkSync(path.join(TREM.getPath("userData"), "settings.json"));
 	fs.unlinkSync(path.join(TREM.getPath("userData"), "config.json"));
+});
+
+ipcMain.on("openScreenshotsFolder", (event, arg) => {
+	shell.openPath(path.join(TREM.getPath("userData"), "Screenshots"));
+});
+
+ipcMain.on("openEEWScreenshotsFolder", (event, arg) => {
+	shell.openPath(path.join(TREM.getPath("userData"), "EEW"));
 });
 
 ipcMain.on("reset", (event, arg) => {

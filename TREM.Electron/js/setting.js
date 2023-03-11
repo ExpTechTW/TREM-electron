@@ -254,7 +254,7 @@ function init() {
 	if (value == "never")
 		element1.disabled = true;
 	else if (value == "notify")
-		element1.disabled = true;
+		element1.disabled = false;
 	else if (value == "download")
 		element1.disabled = false;
 	else if (value == "install")
@@ -517,14 +517,13 @@ function ChoiceSave(id, el) {
 		if (value == "never") {
 			element.disabled = true;
 		} else if (value == "notify") {
-			element.disabled = true;
+			element.disabled = false;
 		} else if (value == "download") {
 			element.disabled = false;
-			$("#UDReloadButton").fadeIn(100);
 		} else if (value == "install") {
 			element.disabled = false;
-			$("#UDReloadButton").fadeIn(100);
 		}
+		$("#UDReloadButton").fadeIn(100);
 	}
 }
 
@@ -910,6 +909,14 @@ function reset() {
 
 function openLogFolder() {
 	shell.openPath(app.getPath("logs"));
+}
+
+function openScreenshotsFolder() {
+	ipcRenderer.send("openScreenshotsFolder");
+}
+
+function openEEWScreenshotsFolder() {
+	ipcRenderer.send("openEEWScreenshotsFolder");
 }
 
 function openSettingFile() {
