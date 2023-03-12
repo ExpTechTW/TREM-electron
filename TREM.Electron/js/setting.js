@@ -434,6 +434,16 @@ function CheckSave(id) {
 	if (id == "powersaving.mode" && !value)
 		ipcRenderer.send("powersaving", value);
 
+	if (id == "report.onlycwbchangeView" && value) {
+		document.getElementById("report.changeView").checked = false;
+		ipcRenderer.send("config:value", "report.changeView", false);
+	}
+
+	if (id == "report.changeView" && value) {
+		document.getElementById("report.onlycwbchangeView").checked = false;
+		ipcRenderer.send("config:value", "report.onlycwbchangeView", false);
+	}
+
 	if (id == "trem-eq.alert.Notification") {
 		const element = document.getElementById("trem-eq.Notification");
 		element.checked = false;

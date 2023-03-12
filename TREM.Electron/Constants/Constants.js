@@ -224,6 +224,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"report.onlycwbchangeView": {
+			type  : "toggle",
+			value : false,
+		},
 		"earthquake.siteEffect": {
 			type  : "toggle",
 			value : true,

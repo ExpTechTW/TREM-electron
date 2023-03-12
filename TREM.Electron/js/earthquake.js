@@ -4003,7 +4003,12 @@ function addReport(report, prepend = false, index = 0) {
 
 			TREM.Report.cache.set(report.identifier, report);
 
-			if (setting["report.changeView"]) {
+			if (report.identifier.startsWith("CWB") && setting["audio.onlycwbchangeView"]) {
+				TREM.Report.setView("eq-report-overview", report);
+				changeView("report", "#reportView_btn");
+				ReportTag = NOW().getTime();
+				console.log("ReportTag: ", ReportTag);
+			} else if (setting["report.changeView"]) {
 				TREM.Report.setView("eq-report-overview", report);
 				changeView("report", "#reportView_btn");
 				ReportTag = NOW().getTime();
@@ -4675,49 +4680,95 @@ function FCMdata(json, Unit) {
 		ipcMain.emit("ReportGET");
 		stopReplaybtn();
 	} else if (json.type == "report") {
-		if (TREM.MapIntensity.isTriggered)
-			TREM.MapIntensity.clear();
+		if (report.identifier.startsWith("CWB") && setting["audio.onlycwbchangeView"]) {
+			if (TREM.MapIntensity.isTriggered)
+				TREM.MapIntensity.clear();
 
-		if (TREM.MapArea2.isTriggered)
-			TREM.MapArea2.clear();
+			if (TREM.MapArea2.isTriggered)
+				TREM.MapArea2.clear();
 
-		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
-		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
-		console.debug(json);
+			if (setting["audio.report"]) audioPlay("../audio/Report.wav");
+			dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
+			console.debug(json);
 
-		if (setting["report.show"]) win.showInactive();
+			if (setting["report.show"]) win.showInactive();
 
-		if (setting["report.cover"])
-			if (!win.isFullScreen()) {
-				win.setAlwaysOnTop(true);
-				win.focus();
-				win.setAlwaysOnTop(false);
-			}
+			if (setting["report.cover"])
+				if (!win.isFullScreen()) {
+					win.setAlwaysOnTop(true);
+					win.focus();
+					win.setAlwaysOnTop(false);
+				}
 
-		const report = json.raw;
-		const location = json.location.match(/(?<=位於).+(?=\))/);
+			const report = json.raw;
+			const location = json.location.match(/(?<=位於).+(?=\))/);
 
-		if (!win.isFocused())
-			if (!report.location.startsWith("地震資訊"))
-				new Notification("地震報告",
-					{
-						body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
-						icon   : "../TREM.ico",
-						silent : win.isFocused(),
-					});
+			if (!win.isFocused())
+				if (!report.location.startsWith("地震資訊"))
+					new Notification("地震報告",
+						{
+							body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
+							icon   : "../TREM.ico",
+							silent : win.isFocused(),
+						});
 
-		addReport(report, true);
-		ipcRenderer.send("report-Notification", report);
+			addReport(report, true);
+			ipcRenderer.send("report-Notification", report);
 
-		setTimeout(() => {
-			ipcRenderer.send("screenshotEEW", {
-				Function : "report",
-				ID       : json.ID,
-				Version  : 1,
-				Time     : NOW().getTime(),
-				Shot     : 1,
-			});
-		}, 5000);
+			setTimeout(() => {
+				ipcRenderer.send("screenshotEEW", {
+					Function : "report",
+					ID       : json.ID,
+					Version  : 1,
+					Time     : NOW().getTime(),
+					Shot     : 1,
+				});
+			}, 5000);
+		} else {
+			if (TREM.MapIntensity.isTriggered)
+				TREM.MapIntensity.clear();
+
+			if (TREM.MapArea2.isTriggered)
+				TREM.MapArea2.clear();
+
+			if (setting["audio.report"]) audioPlay("../audio/Report.wav");
+			dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
+			console.debug(json);
+
+			if (setting["report.show"]) win.showInactive();
+
+			if (setting["report.cover"])
+				if (!win.isFullScreen()) {
+					win.setAlwaysOnTop(true);
+					win.focus();
+					win.setAlwaysOnTop(false);
+				}
+
+			const report = json.raw;
+			const location = json.location.match(/(?<=位於).+(?=\))/);
+
+			if (!win.isFocused())
+				if (!report.location.startsWith("地震資訊"))
+					new Notification("地震報告",
+						{
+							body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
+							icon   : "../TREM.ico",
+							silent : win.isFocused(),
+						});
+
+			addReport(report, true);
+			ipcRenderer.send("report-Notification", report);
+
+			setTimeout(() => {
+				ipcRenderer.send("screenshotEEW", {
+					Function : "report",
+					ID       : json.ID,
+					Version  : 1,
+					Time     : NOW().getTime(),
+					Shot     : 1,
+				});
+			}, 5000);
+		}
 	} else if (json.type.startsWith("eew") || json.type == "trem-eew") {
 		if (replay != 0 && !json.replay_timestamp) return;
 
