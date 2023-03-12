@@ -1142,6 +1142,7 @@ async function init() {
 					if (NOW().getTime() - Report > 600_000) {
 						investigation = false;
 						roll.removeChild(roll.children[0]);
+						Report = 0;
 
 						if (TREM.MapIntensity.isTriggered)
 							TREM.MapIntensity.clear();
