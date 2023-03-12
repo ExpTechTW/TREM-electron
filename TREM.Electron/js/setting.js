@@ -428,11 +428,11 @@ function CheckSave(id) {
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 
-	if (id == "powersaving.mode" && value)
-		ipcRenderer.send("powersaving", value);
+	if (id == "sleep.mode" && value)
+		ipcRenderer.send("sleep", value);
 
-	if (id == "powersaving.mode" && !value)
-		ipcRenderer.send("powersaving", value);
+	if (id == "sleep.mode" && !value)
+		ipcRenderer.send("sleep", value);
 
 	if (id == "report.onlycwbchangeView" && value) {
 		document.getElementById("report.changeView").checked = false;

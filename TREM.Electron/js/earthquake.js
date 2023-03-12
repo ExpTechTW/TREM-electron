@@ -1109,9 +1109,9 @@ async function init() {
 				// 	GetDataState += "⏰";
 				// }
 
-				if (setting["powersaving.mode"])
+				if (setting["sleep.mode"])
 					GetDataState += "🔋";
-				else if (!setting["powersaving.mode"])
+				else if (!setting["sleep.mode"])
 					GetDataState += "";
 
 				// win.on("show", () => sleep(false));
@@ -2691,15 +2691,15 @@ function PGAMain() {
 						Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
 
-						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["powersaving.mode"]) {
+						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["sleep.mode"]) {
 							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
 							reconnect();
 							PGAMainbkup();
-						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["powersaving.mode"]) {
+						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["sleep.mode"]) {
 							stationnow = 0;
 							Response = {};
 							Ping = "sleep";
-						} else if (setting["powersaving.mode"]) {
+						} else if (setting["sleep.mode"]) {
 							Ping = "sleep";
 						}
 						// ipcMain.emit("restart");
@@ -2709,7 +2709,7 @@ function PGAMain() {
 							delete Station[removedKey];
 						}
 
-						if (setting["powersaving.mode"])
+						if (setting["sleep.mode"])
 							Ping = "sleep";
 						else
 							Ping = "🔒";
@@ -2765,15 +2765,15 @@ function PGAMainbkup() {
 						Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
 
-						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["powersaving.mode"]) {
+						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["sleep.mode"]) {
 							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
 							reconnect();
 							PGAMain();
-						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["powersaving.mode"]) {
+						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["sleep.mode"]) {
 							stationnow = 0;
 							Response = {};
 							Ping = "sleep";
-						} else if (setting["powersaving.mode"]) {
+						} else if (setting["sleep.mode"]) {
 							Ping = "sleep";
 						}
 						// ipcMain.emit("restart");
@@ -2783,7 +2783,7 @@ function PGAMainbkup() {
 							delete Station[removedKey];
 						}
 
-						if (setting["powersaving.mode"])
+						if (setting["sleep.mode"])
 							Ping = "sleep";
 						else
 							Ping = "🔒";
@@ -4181,7 +4181,7 @@ ipcMain.on("testoldtimeEEW", (event, oldtime) => {
 	stopReplaybtn();
 });
 
-ipcMain.on("powersaving", (event, mode) => {
+ipcMain.on("sleep", (event, mode) => {
 	if (mode)
 		sleep(mode);
 	else
