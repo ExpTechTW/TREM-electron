@@ -1,3 +1,4 @@
+import constants from "../constants";
 import cross from "../factory";
 
 class Wave {
@@ -7,7 +8,7 @@ class Wave {
    * @param {*} radius
    * @param {Map} map
    */
-  constructor(map, { type = "p", center = [121, 23.5], radius = 1, icon = true, zIndex = 10000 }) {
+  constructor(map, { type = "p", center = [121, 23.5], radius = 1, circle = true, icon = true, zIndex = 10000 }) {
     this.type = type;
     this.lnglat = center;
     this.radius = radius;
@@ -25,23 +26,26 @@ class Wave {
 
     this._initialZoom = this.map.getZoom();
 
-    const radiusPx = (this.radius * 2000) / (this._initialZoom * 104.41103392);
+    const radiusPx = (this.radius * 2000) / (this._initialZoom * constants.pixelRatio);
 
-    this._circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    this._circle.id = "test-circle";
-    this._circle.setAttribute("cx", centerPx.x);
-    this._circle.setAttribute("cy", centerPx.y);
-    this._circle.setAttribute("r", radiusPx);
+    if (circle) {
+      this._circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      this._circle.id = "test-circle";
+      this._circle.setAttribute("cx", centerPx.x);
+      this._circle.setAttribute("cy", centerPx.y);
+      this._circle.setAttribute("r", radiusPx);
 
-    if (this.type == "p") {
-      this._circle.style.fill = "transparent";
-      this._circle.style.stroke = "cyan";
-    } else {
-      this._circle.style.fill = "url(#pred-gradient)";
-      this._circle.style.stroke = "orange";
+      if (this.type == "p") {
+        this._circle.style.fill = "transparent";
+        this._circle.style.stroke = "cyan";
+      } else {
+        this._circle.style.fill = "url(#pred-gradient)";
+        this._circle.style.stroke = "orange";
+      }
+
+      this._svg.appendChild(this._circle);
     }
 
-    this._svg.appendChild(this._circle);
 
     if (icon) {
       this._cross = cross({ scale: 0.3 });
@@ -59,10 +63,13 @@ class Wave {
   _updateCircle() {
     const center = this.map.project(this.lnglat);
     const zoom = this.map.getZoom();
-    const radius = (this.radius * 2000) / ((this._initialZoom * 104.41103392) * Math.pow(2, this._initialZoom - zoom));
-    this._circle.setAttribute("cx", center.x);
-    this._circle.setAttribute("cy", center.y);
-    this._circle.setAttribute("r", radius);
+    const radius = (this.radius * 2000) / ((this._initialZoom * constants.pixelRatio) * Math.pow(2, this._initialZoom - zoom));
+
+    if (this._circle) {
+      this._circle.setAttribute("cx", center.x);
+      this._circle.setAttribute("cy", center.y);
+      this._circle.setAttribute("r", radius);
+    }
 
     if (this._cross)
       this._cross.style.translate = `${center.x - 11.4}px ${center.y - 11.4}px`;
@@ -84,13 +91,20 @@ class Wave {
   }
 
   setAlert(hasAlerted) {
-    this._circle.style.fill = hasAlerted ? "url(#alert-gradient)" : "url(#pred-gradient)";
-    this._circle.style.stroke = hasAlerted ? "red" : "orange";
+    if (this._circle) {
+      this._circle.style.fill = hasAlerted ? "url(#alert-gradient)" : "url(#pred-gradient)";
+      this._circle.style.stroke = hasAlerted ? "red" : "orange";
+    }
   }
 
   remove() {
+    if (this._circle)
+      this._circle.remove();
+
+    if (this._cross)
+      this._cross.remove();
+
     this._svg.remove();
-    this._circle.remove();
   }
 }
 

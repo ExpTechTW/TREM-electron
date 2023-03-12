@@ -51,7 +51,18 @@ class EEW {
     this.epicenterIcon = { main: null, mini: null };
     this.location = data.Location;
     this.magnitude = data.scale;
-    this.source = (data.type == "eew-cwb") ? "中央氣象局" : (data.type == "eew-nied") ? "日本防災科研" : (data.type == "eew-jma") ? "日本氣象廳" : (data.type == "eew-kma") ? "韓國氣象廳" : (data.type == "eew-fjdzj") ? "中國福建省地震局" : (data.type == "eew-scdzj") ? "中國四川省地震局" : "未知單位";
+    this.source = {
+      "eew-cwb"   : "中央氣象局",
+      "eew-nied"  : "日本防災科研",
+      "eew-jma"   : "日本氣象廳",
+      "eew-kma"   : "韓國氣象廳",
+      "eew-fjdzj" : "中國福建省地震局",
+      "eew-scdzj" : "中國四川省地震局",
+      "trem-eew"  : "NSSPE"
+    }[data.type];
+
+    if (this.source == "NSSPE")
+      this.hasWaves = false;
 
     this.eventTime = new Date(data.time);
     this.apiTime = new Date(data.timeStamp);
@@ -65,10 +76,10 @@ class EEW {
       this._expected = new Map();
       this.#evalExpected();
 
-      if (this.hasWaves) {
+      if (this.hasWaves)
         this.#evalWaveDistances();
-        this.#createWaveCircles();
-      }
+
+      this.#createWaveCircles();
     }
 
     this.version = data.number;
@@ -140,58 +151,64 @@ class EEW {
   }
 
   #createWaveCircles() {
-    if (this.p instanceof Wave && this.s instanceof Wave) {
+    if (this.p instanceof Wave) {
       this.p.setLngLat(this.epicenter.toLngLatArray());
-      this.s.setLngLat(this.epicenter.toLngLatArray());
-      this.s.setAlert(this.alert);
-      return;
-    }
 
-    this.p = new Wave(this._map, { type: "p", center: this.epicenter.toLngLatArray(), radius: 1 });
-    this.s = new Wave(this._map, { type: "s", center: this.epicenter.toLngLatArray(), radius: 1, icon: false });
-
-    this._waveSpeed = { p: 7, s: 4 };
-
-    this._waveTick = () => {
-      const apiTime = new Date(Date.now());
-
-      let p_dist = Math.floor(Math.sqrt(((apiTime.getTime() - this.eventTime.getTime()) * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2));
-      let s_dist = Math.floor(Math.sqrt(((apiTime.getTime() - this.eventTime.getTime()) * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2));
-
-      let pf, sf;
-
-      for (let _i = 1; _i < this._distance.length; _i++) {
-        if (!pf && this._distance[_i].Ptime > (apiTime.getTime() - this.eventTime.getTime()) / 1000) {
-          p_dist = (_i - 1) * 1000;
-
-          if ((_i - 1) / this._distance[_i - 1].Ptime > this._waveSpeed.p)
-            p_dist = Math.round(Math.sqrt(((apiTime.getTime() - this.eventTime.getTime()) * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2));
-          pf = true;
-        }
-
-        if (!sf && this._distance[_i].Stime > (apiTime.getTime() - this.eventTime.getTime()) / 1000) {
-          s_dist = (_i - 1) * 1000;
-
-          if ((_i - 1) / this._distance[_i - 1].Stime > this._waveSpeed.s)
-            s_dist = Math.round(Math.sqrt(((apiTime.getTime() - this.eventTime.getTime()) * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2));
-          sf = true;
-        }
-
-        if (pf && sf) break;
+      if (this.hasWaves && this.s instanceof Wave) {
+        this.s.setLngLat(this.epicenter.toLngLatArray());
+        this.s.setAlert(this.alert);
       }
+    } else {
+      this.p = new Wave(this._map, { type: "p", center: this.epicenter.toLngLatArray(), radius: 0, ...((this.hasWaves) ? { circle: true } : { circle: false }) });
 
-      p_dist /= 1000;
-      s_dist /= 1000;
+      if (this.hasWaves)
+        this.s = new Wave(this._map, { type: "s", center: this.epicenter.toLngLatArray(), radius: 0, icon: false });
 
-      if (p_dist > this.depth)
-        this.p.setRadius(p_dist - this.depth);
+      if (this.hasWaves) {
+        this._waveSpeed = { p: 7, s: 4 };
 
-      if (s_dist > this.depth)
-        this.s.setRadius(s_dist - this.depth);
-    };
+        this._waveTick = () => {
+          const apiTime = this._map.serverTimestamp + Date.now() - this._map.localServerTimestamp;
 
-    this._waveTick();
-    this._waveInterval = setInterval(this._waveTick, 500);
+          let p_dist = Math.floor(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2));
+          let s_dist = Math.floor(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2));
+
+          let pf, sf;
+
+          for (let _i = 1; _i < this._distance.length; _i++) {
+            if (!pf && this._distance[_i].Ptime > (apiTime - this.eventTime.getTime()) / 1000) {
+              p_dist = (_i - 1) * 1000;
+
+              if ((_i - 1) / this._distance[_i - 1].Ptime > this._waveSpeed.p)
+                p_dist = Math.round(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2));
+              pf = true;
+            }
+
+            if (!sf && this._distance[_i].Stime > (apiTime - this.eventTime.getTime()) / 1000) {
+              s_dist = (_i - 1) * 1000;
+
+              if ((_i - 1) / this._distance[_i - 1].Stime > this._waveSpeed.s)
+                s_dist = Math.round(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2));
+              sf = true;
+            }
+
+            if (pf && sf) break;
+          }
+
+          p_dist /= 1000;
+          s_dist /= 1000;
+
+          if (p_dist > this.depth)
+            this.p.setRadius(p_dist - this.depth);
+
+          if (s_dist > this.depth)
+            this.s.setRadius(s_dist - this.depth);
+        };
+
+        this._waveTick();
+        this._waveInterval = setInterval(this._waveTick, 500);
+      }
+    }
   }
 
   update(data) {

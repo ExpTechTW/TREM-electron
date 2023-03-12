@@ -82,7 +82,9 @@ const ready = async () => {
    * @type {WebSocket}
    */
   let ws;
-  let ServerT = new Date(Date.now()), ServerTime = 0;
+
+  map.localServerTimestamp = Date.now();
+  map.serverTimestamp = Date.now();
 
   const connect = (retryTimeout) => {
     ws = new WebSocket(constants.WebSocketTargetUrl);
@@ -104,7 +106,7 @@ const ready = async () => {
         heartbeat = setTimeout(() => {
           console.warn("%c[WS]%c Heartbeat check failed! Closing WebSocket...", "color: blueviolet", "color:unset");
           clearInterval(ping);
-          ws.terminate();
+          ws.close();
         }, 10_000);
       }, 15_000);
 
@@ -122,14 +124,14 @@ const ready = async () => {
 
       if (parsed.response == "Connection Succeeded") {
         console.debug("%c[WS]%c WebSocket has connected", "color: blueviolet", "color:unset");
-        ServerT = Date.now();
-        ServerTime = parsed.time;
+        map.localServerTimestamp = Date.now();
+        map.serverTimestamp = parsed.time;
       } else if (parsed.response == "Subscription Succeeded") {
         console.debug("%c[WS]%c Subscription succeeded", "color: blueviolet", "color:unset");
       } else if (parsed.type == "ntp") {
         console.debug("%c[WS]%c Heartbeat received", "color: blueviolet", "color:unset");
-        ServerT = Date.now();
-        ServerTime = parsed.time;
+        map.localServerTimestamp = Date.now();
+        map.serverTimestamp = parsed.time;
         clearTimeout(heartbeat);
       } else {
         switch (parsed.type) {
@@ -382,6 +384,8 @@ const createReportNavItem = (reports = []) => {
       button.append(tag);
     }
 
+    if (report.ID.includes("1120347"))
+      console.log(report);
     return button;
   };
 

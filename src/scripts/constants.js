@@ -11,5 +11,7 @@ export default Object.freeze({
     { value: 7, label: "6-", text: "６弱" },
     { value: 8, label: "6+", text: "６強" },
     { value: 9, label: "7", text: "７級" }
-  ]
+  ],
+  // 104.41103392
+  pixelRatio: 104.41103392
 });
