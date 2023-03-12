@@ -4004,7 +4004,7 @@ function addReport(report, prepend = false, index = 0) {
 
 			TREM.Report.cache.set(report.identifier, report);
 
-			if (report.identifier.startsWith("CWB") && setting["audio.onlycwbchangeView"]) {
+			if (report.identifier.startsWith("CWB") && setting["report.onlycwbchangeView"]) {
 				TREM.Report.setView("eq-report-overview", report);
 				changeView("report", "#reportView_btn");
 				ReportTag = NOW().getTime();
@@ -4681,7 +4681,7 @@ function FCMdata(json, Unit) {
 		ipcMain.emit("ReportGET");
 		stopReplaybtn();
 	} else if (json.type == "report") {
-		if (report.identifier.startsWith("CWB") && setting["audio.onlycwbchangeView"]) {
+		if (json.raw.identifier.startsWith("CWB") && setting["report.onlycwbchangeView"]) {
 			if (TREM.MapIntensity.isTriggered)
 				TREM.MapIntensity.clear();
 
@@ -4725,7 +4725,7 @@ function FCMdata(json, Unit) {
 					Shot     : 1,
 				});
 			}, 5000);
-		} else {
+		} else if (!setting["report.onlycwbchangeView"]) {
 			if (TREM.MapIntensity.isTriggered)
 				TREM.MapIntensity.clear();
 
