@@ -10,6 +10,7 @@ const { ExptechAPI } = require("@kamiya4047/exptech-api-wrapper");
 const Exptech = new ExptechAPI();
 const axios = require("axios");
 const bytenode = require("bytenode");
+const crypto = require("crypto");
 const maplibregl = require("maplibre-gl");
 const storage = require("electron-localstorage");
 TREM.Audios = {
@@ -3686,11 +3687,19 @@ function ReportGET(palert = {}) {
 			storage.setItem("report_data", []);
 		}
 
-		let _report_data = storage.getItem("report_data") ?? [];
-		const list = [];
-		for (let i = 0; i < _report_data.length; i++)
-			list.push(_report_data[i].identifier);
-		fetch("https://exptech.com.tw/api/v1/earthquake/reports", {
+		let _report_data = [];
+		_report_data = storage.getItem("report_data");
+
+		if (typeof _report_data != "object") _report_data = [];
+
+		const list = {};
+
+		for (let i = 0; i < _report_data.length; i++) {
+			const md5 = crypto.createHash("md5");
+			list[_report_data[i].identifier] = md5.update(JSON.stringify(_report_data[i])).digest("hex");
+		}
+
+		fetch("https://exptech.com.tw/api/v2/earthquake/reports", {
 			method  : "post",
 			headers : {
 				Accept         : "application/json",
@@ -3700,13 +3709,18 @@ function ReportGET(palert = {}) {
 			signal : controller.signal })
 			.then((ans) => ans.json())
 			.then((ans) => {
+				for (let i = 0; i < ans.length; i++) {
+					const id = ans[i].identifier;
+
+					for (let _i = 0; _i < _report_data.length; _i++)
+						if (_report_data[_i].identifier == id) {
+							_report_data.splice(_i, 1);
+							break;
+						}
+				}
+
 				for (let i = 0; i < ans.length; i++)
-					if (Array.isArray(_report_data)) {
-						_report_data.push(ans[i]);
-					} else {
-						_report_data = [];
-						_report_data.push(ans[i]);
-					}
+					_report_data.push(ans[i]);
 
 				for (let i = 0; i < _report_data.length - 1; i++)
 					for (let _i = 0; _i < _report_data.length - 1; _i++)
@@ -3756,23 +3770,36 @@ function ReportGET(palert = {}) {
 }
 
 ipcMain.on("ReportGET", () => {
-	if (Report != 0)
-		ReportGET({
-			Max  : TREM.MapIntensity.MaxI,
-			Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
-		});
+	let _report_data_GET = [];
+	_report_data_GET = storage.getItem("report_data");
 
-	const _report_data_GET = storage.getItem("report_data") ?? [];
+	if (typeof _report_data_GET != "object") _report_data_GET = [];
 
 	if (_report_data_GET.length > setting["cache.report"]) {
 		const _report_data_temp = [];
+
 		for (let i = 0; i < setting["cache.report"]; i++)
 			_report_data_temp[i] = _report_data_GET[i];
+
 		TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
-		ReportList(_report_data_temp);
+
+		if (Report != 0)
+			ReportList(_report_data_GET, {
+				Max  : TREM.MapIntensity.MaxI,
+				Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
+			});
+		else
+			ReportList(_report_data_temp);
 	} else if (_report_data_GET.length < setting["cache.report"]) {
 		TREM.Report.cache = new Map(_report_data_GET.map(v => [v.identifier, v]));
-		ReportList(_report_data_GET);
+
+		if (Report != 0)
+			ReportList(_report_data_GET, {
+				Max  : TREM.MapIntensity.MaxI,
+				Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
+			});
+		else
+			ReportList(_report_data_GET);
 	}
 });
 // #endregion
