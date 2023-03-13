@@ -3672,7 +3672,7 @@ function playNextAudio1() {
 // #endregion
 
 // #region Report Data
-function ReportGET(palert = {}) {
+function ReportGET() {
 	try {
 		const controller = new AbortController();
 		setTimeout(() => {
@@ -3727,7 +3727,7 @@ function ReportGET(palert = {}) {
 							_report_data[_i] = temp;
 						}
 
-				if (!_report_data) return setTimeout(ReportGET, 5000, palert);
+				if (!_report_data) return setTimeout(ReportGET, 5000);
 
 				storage.setItem("report_data", _report_data);
 
@@ -3736,10 +3736,10 @@ function ReportGET(palert = {}) {
 					for (let i = 0; i < setting["cache.report"]; i++)
 						_report_data_temp[i] = _report_data[i];
 					TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
-					ReportList(_report_data_temp, palert);
+					ReportList(_report_data_temp);
 				} else {
 					TREM.Report.cache = new Map(_report_data.map(v => [v.identifier, v]));
-					ReportList(_report_data, palert);
+					ReportList(_report_data);
 				}
 
 				dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
@@ -3752,17 +3752,17 @@ function ReportGET(palert = {}) {
 					for (let i = 0; i < setting["cache.report"]; i++)
 						_report_data_temp[i] = _report_data[i];
 					TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
-					ReportList(_report_data_temp, palert);
+					ReportList(_report_data_temp);
 				} else {
 					TREM.Report.cache = new Map(_report_data.map(v => [v.identifier, v]));
-					ReportList(_report_data, palert);
+					ReportList(_report_data);
 				}
 			});
 		report_get_timestamp = Date.now();
 	} catch (error) {
 		dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
-		return setTimeout(ReportGET, 5000, palert);
+		return setTimeout(ReportGET, 5000);
 	}
 }
 
