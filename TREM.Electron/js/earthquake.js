@@ -165,10 +165,7 @@ TREM.MapIntensity = {
 					if (palertEntry.intensity > this.MaxI) {
 						this.MaxI = palertEntry.intensity;
 						Report = NOW().getTime();
-						ReportGET({
-							Max  : this.MaxI,
-							Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
-						});
+						ipcMain.emit("ReportGET");
 					}
 				}
 
