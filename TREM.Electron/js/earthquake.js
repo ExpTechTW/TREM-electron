@@ -427,16 +427,17 @@ TREM.MapIntensity = {
 		this.description = "";
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-			if (this.intensities.size) {
-				Maps.main.removeFeatureState({ source: "Source_tw_town" });
-				Maps.main.setLayoutProperty("Layer_intensity_palert", "visibility", "none");
-				this.intensities = new Map();
+			if (this.intensities != undefined)
+				if (this.intensities.size) {
+					Maps.main.removeFeatureState({ source: "Source_tw_town" });
+					Maps.main.setLayoutProperty("Layer_intensity_palert", "visibility", "none");
+					this.intensities = new Map();
 
-				if (this.timer) {
-					clearTimeout(this.timer);
-					delete this.timer;
+					if (this.timer) {
+						clearTimeout(this.timer);
+						delete this.timer;
+					}
 				}
-			}
 		} else if (palert_geojson != null) {
 			palert_geojson.remove();
 			palert_geojson = null;
@@ -1050,6 +1051,7 @@ async function init() {
 					// if (NOW().getTime() - replayT > 180_000 && !Object.keys(eew).length) {
 					if (NOW().getTime() - replayT > 180_000) {
 						replay = 0;
+						Report = 0;
 						ipcMain.emit("ReportGET");
 						stopReplay();
 					}
@@ -1142,7 +1144,7 @@ async function init() {
 						roll.removeChild(roll.children[0]);
 						Report = 0;
 
-						if (TREM.MapIntensity.isTriggered)
+						if (TREM.MapIntensity.isTriggered && TREM.MapIntensity.intensities.size != undefined)
 							TREM.MapIntensity.clear();
 					}
 				} else
@@ -3679,8 +3681,8 @@ function ReportGET() {
 			controller.abort();
 		}, 2500);
 
-		if (!localStorage.fixReportGET) {
-			localStorage.fixReportGET = 1;
+		if (!localStorage.fixReportGET0) {
+			localStorage.fixReportGET0 = 1;
 			storage.setItem("report_data", []);
 		}
 
@@ -3781,13 +3783,13 @@ ipcMain.on("ReportGET", () => {
 		TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
 
 		if (Report != 0)
-			ReportList(_report_data_GET, {
+			ReportList(_report_data_temp, {
 				Max  : TREM.MapIntensity.MaxI,
 				Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
 			});
 		else
 			ReportList(_report_data_temp);
-	} else if (_report_data_GET.length < setting["cache.report"]) {
+	} else {
 		TREM.Report.cache = new Map(_report_data_GET.map(v => [v.identifier, v]));
 
 		if (Report != 0)
@@ -3812,14 +3814,13 @@ const openURL = url => {
 function ReportList(earthquakeReportArr, palert) {
 	roll.replaceChildren();
 
-	for (let index = 0; index < earthquakeReportArr.length; index++) {
-		if (palert != undefined && index == earthquakeReportArr.length - 1) {
-			earthquakeReportArr[index].Max = palert.Max;
-			earthquakeReportArr[index].Time = palert.Time;
-		}
-
-		addReport(earthquakeReportArr[index], false, index);
+	if (palert != undefined) {
+		const palertReportArr = { Max: palert.Max, Time: palert.Time, data: [], location: "", ID: [], earthquakeNo: 0, originTime: palert.Time };
+		addReport(palertReportArr, false, 0);
 	}
+
+	for (let index = 0; index < earthquakeReportArr.length; index++)
+		addReport(earthquakeReportArr[index], false, index + 1);
 
 	setLocale(setting["general.locale"]);
 }
@@ -3845,7 +3846,7 @@ function addReport(report, prepend = false, index = 0) {
 	const Div = document.createElement("div");
 	Div.className = "md3-ripple ";
 
-	if (report.Time != undefined && report.report == undefined) {
+	if (report.Time != undefined && report.Max != undefined) {
 		const report_container = document.createElement("div");
 		report_container.className = "report-container locating";
 		const report_intensity_container = document.createElement("div");
@@ -4169,6 +4170,7 @@ const stopReplay = function() {
 
 	if (replay != 0) {
 		replay = 0;
+		Report = 0;
 		ipcMain.emit("ReportGET");
 	}
 
@@ -6232,6 +6234,7 @@ function main(data) {
 
 			if (replay != 0) {
 				replay = 0;
+				Report = 0;
 				ipcMain.emit("ReportGET");
 			}
 
