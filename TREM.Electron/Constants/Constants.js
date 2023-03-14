@@ -76,6 +76,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"accept.eew.trem": {
+			type  : "toggle",
+			value : false,
+		},
 		"shock.smoothing": {
 			type  : "toggle",
 			value : true,
@@ -209,6 +213,10 @@ const Constants = Object.freeze({
 			value : "0",
 		},
 		"tts.Notification": {
+			type  : "toggle",
+			value : false,
+		},
+		"trem-eew.No-Notification": {
 			type  : "toggle",
 			value : false,
 		},

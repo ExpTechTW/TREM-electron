@@ -4808,6 +4808,7 @@ function FCMdata(json, Unit) {
 			|| (json.type == "eew-kma" && !setting["accept.eew.KMA"])
 			|| (json.type == "eew-cwb" && !setting["accept.eew.CWB"])
 			|| (json.type == "eew-fjdzj" && !setting["accept.eew.FJDZJ"])
+			|| (json.type == "trem-eew" && !setting["accept.eew.trem"])
 		) return;
 
 		json.Unit = (json.type == "eew-scdzj") ? "四川省地震局 (SCDZJ)"
@@ -5239,64 +5240,108 @@ TREM.Earthquake.on("eew", (data) => {
 		},
 	});
 
-	setTimeout(() => {
-		if (setting["webhook.url"] != "") {
-			const Now1 = NOW().getFullYear()
-				+ "/" + (NOW().getMonth() + 1)
-				+ "/" + NOW().getDate()
-				+ " " + NOW().getHours()
-				+ ":" + NOW().getMinutes()
-				+ ":" + NOW().getSeconds();
+	if (setting["webhook.url"] != "")
+		setTimeout(() => {
+			if (!setting["trem-eew.No-Notification"]) {
+				const Now1 = NOW().getFullYear()
+					+ "/" + (NOW().getMonth() + 1)
+					+ "/" + NOW().getDate()
+					+ " " + NOW().getHours()
+					+ ":" + NOW().getMinutes()
+					+ ":" + NOW().getSeconds();
 
-			let msg = setting["webhook.body"];
-			msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
+				let msg = setting["webhook.body"];
+				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
 
-			// if (data.Function == "earthquake")
-			// 	if (data.Unit == "交通部中央氣象局")
-			// 		msg = msg.replace("%Provider%", "交通部中央氣象局");
-			// 	else
-			// 		msg = msg.replace("%Provider%", data.Unit);
-			if (data.type == "eew-cwb")
-				msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
-			else if (data.type == "eew-scdzj")
-				msg = msg.replace("%Provider%", "四川省地震局 (SCDZJ)");
-			else if (data.type == "eew-fjdzj")
-				msg = msg.replace("%Provider%", "福建省地震局 (FJDZJ)");
-			else if (data.type == "eew-nied")
-				msg = msg.replace("%Provider%", "防災科学技術研究所 (NIED)");
-			else if (data.type == "eew-jma")
-				msg = msg.replace("%Provider%", "気象庁(JMA)");
-			else if (data.type == "eew-kma")
-				msg = msg.replace("%Provider%", "기상청(KMA)");
-			else if (data.type == "trem-eew")
-				msg = msg.replace("%Provider%", "NSSPE(無震源參數推算)");
-			else if (data.type == "TREM")
-				msg = msg.replace("%Provider%", data.Unit);
-			else if (data.type == "eew")
-				msg = msg.replace("%Provider%", data.Unit);
-			else if (data.type == "eew-test")
-				msg = msg.replace("%Provider%", data.Unit);
+				if (data.type == "eew-cwb")
+					msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
+				else if (data.type == "eew-scdzj")
+					msg = msg.replace("%Provider%", "四川省地震局 (SCDZJ)");
+				else if (data.type == "eew-fjdzj")
+					msg = msg.replace("%Provider%", "福建省地震局 (FJDZJ)");
+				else if (data.type == "eew-nied")
+					msg = msg.replace("%Provider%", "防災科学技術研究所 (NIED)");
+				else if (data.type == "eew-jma")
+					msg = msg.replace("%Provider%", "気象庁(JMA)");
+				else if (data.type == "eew-kma")
+					msg = msg.replace("%Provider%", "기상청(KMA)");
+				else if (data.type == "trem-eew")
+					msg = msg.replace("%Provider%", "NSSPE(無震源參數推算)");
+				else if (data.type == "TREM")
+					msg = msg.replace("%Provider%", data.Unit);
+				else if (data.type == "eew")
+					msg = msg.replace("%Provider%", data.Unit);
+				else if (data.type == "eew-test")
+					msg = msg.replace("%Provider%", data.Unit);
 
-			msg = JSON.parse(msg);
-			msg.username = "TREM | 臺灣即時地震監測";
+				msg = JSON.parse(msg);
+				msg.username = "TREM | 臺灣即時地震監測";
 
-			msg.embeds[0].image.url = "";
-			msg.embeds[0].footer = {
-				text     : `ExpTech Studio ${Now1}`,
-				icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
-			};
-			msg.tts = setting["tts.Notification"];
-			msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
-			dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
-			fetch(setting["webhook.url"], {
-				method  : "POST",
-				headers : { "Content-Type": "application/json" },
-				body    : JSON.stringify(msg),
-			}).catch((error) => {
-				dump({ level: 2, message: error, origin: "Webhook" });
-			});
-		}
-	}, 2000);
+				msg.embeds[0].image.url = "";
+				msg.embeds[0].footer = {
+					text     : `ExpTech Studio ${Now1}`,
+					icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
+				};
+				msg.tts = setting["tts.Notification"];
+				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
+				dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
+				fetch(setting["webhook.url"], {
+					method  : "POST",
+					headers : { "Content-Type": "application/json" },
+					body    : JSON.stringify(msg),
+				}).catch((error) => {
+					dump({ level: 2, message: error, origin: "Webhook" });
+				});
+			} else if (setting["trem-eew.No-Notification"] && data.type != "trem-eew") {
+				const Now1 = NOW().getFullYear()
+					+ "/" + (NOW().getMonth() + 1)
+					+ "/" + NOW().getDate()
+					+ " " + NOW().getHours()
+					+ ":" + NOW().getMinutes()
+					+ ":" + NOW().getSeconds();
+
+				let msg = setting["webhook.body"];
+				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
+
+				if (data.type == "eew-cwb")
+					msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
+				else if (data.type == "eew-scdzj")
+					msg = msg.replace("%Provider%", "四川省地震局 (SCDZJ)");
+				else if (data.type == "eew-fjdzj")
+					msg = msg.replace("%Provider%", "福建省地震局 (FJDZJ)");
+				else if (data.type == "eew-nied")
+					msg = msg.replace("%Provider%", "防災科学技術研究所 (NIED)");
+				else if (data.type == "eew-jma")
+					msg = msg.replace("%Provider%", "気象庁(JMA)");
+				else if (data.type == "eew-kma")
+					msg = msg.replace("%Provider%", "기상청(KMA)");
+				else if (data.type == "TREM")
+					msg = msg.replace("%Provider%", data.Unit);
+				else if (data.type == "eew")
+					msg = msg.replace("%Provider%", data.Unit);
+				else if (data.type == "eew-test")
+					msg = msg.replace("%Provider%", data.Unit);
+
+				msg = JSON.parse(msg);
+				msg.username = "TREM | 臺灣即時地震監測";
+
+				msg.embeds[0].image.url = "";
+				msg.embeds[0].footer = {
+					text     : `ExpTech Studio ${Now1}`,
+					icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
+				};
+				msg.tts = setting["tts.Notification"];
+				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
+				dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
+				fetch(setting["webhook.url"], {
+					method  : "POST",
+					headers : { "Content-Type": "application/json" },
+					body    : JSON.stringify(msg),
+				}).catch((error) => {
+					dump({ level: 2, message: error, origin: "Webhook" });
+				});
+			}
+		}, 2000);
 });
 // #endregion
 
