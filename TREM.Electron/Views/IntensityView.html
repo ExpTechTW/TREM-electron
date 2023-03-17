@@ -1,0 +1,178 @@
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+        <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <link id="css-index" rel="stylesheet" href="../css/index.css" />
+    </head>
+
+    <body class="index darkmode">
+        <div id="nav-rail" class="nav-rail hide">
+        </div>
+        <div id="view">
+            <div class="time-container-2">
+                <div id="log2"></div>
+                <div id="time2"></div>
+                <div id="app-version2"></div>
+            </div>
+            <div id="intensity-detail">
+                <div id="intensity-detail-container">
+                    <div id="intensity-detail-header">
+                        <span id="intensity-detail-header-title">震度速報</span>
+                    </div>
+                    <div id="intensity-detail-body">
+                        <div id="intensity-overview" class="intensity-detail-panel">
+                            <hr class="divider">
+                            <div id="intensity-overview-body">
+                                <div class="report-overview-item">
+                                    <div class="report-overview-item-label">
+                                        <label for="intensity" id="intensity-label-cwb" class="chip filter md3-ripple" onclick="TREM.Intensity.handle(TREM.Intensity.cwb)">
+                                            <div class="chip-label">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">CWB</span>
+                                            </div>
+                                        </label>
+                                        <label for="intensity" id="intensity-label-palert" class="chip filter md3-ripple" onclick="TREM.Intensity.handle(TREM.Intensity.palert)">
+                                            <div class="chip-label">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">P-Alert</span>
+                                            </div>
+                                        </label>
+                                        <label for="intensity" id="intensity-label-trem" class="chip filter md3-ripple" onclick="TREM.Intensity.handle(TREM.Intensity.trem)">
+                                            <div class="chip-label">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">TREM</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <hr class="divider">
+                                <div class="report-overview-item">
+                                    <div class="report-overview-item-label">
+                                        <span class="report-overview-item-icon material-symbols-rounded">info</span>
+                                        <span class="report-overview-item-label-text">
+                                            <span lang="en">?</span>
+                                            <span lang="ja">?</span>
+                                            <span lang="kr">?</span>
+                                            <span lang="ru">?</span>
+                                            <span lang="zh-CN">?</span>
+                                            <span lang="zh-TW">資料來源</span>
+                                        </span>
+                                    </div>
+                                    <div class="report-overview-value">
+                                        <span id="intensity-overview-unit"></span>
+                                    </div>
+                                </div>
+                                <div class="report-overview-item">
+                                    <div class="report-overview-item-label">
+                                        <span class="report-overview-item-icon material-symbols-rounded">schedule</span>
+                                        <span class="report-overview-item-label-text" id="intensity-time">
+                                            <span lang="en">Time of Occurrence</span>
+                                            <span lang="ja">発生日時</span>
+                                            <span lang="kr">발생시각</span>
+                                            <span lang="ru">Time of occurrence</span>
+                                            <span lang="zh-CN">发震时间</span>
+                                            <span lang="zh-TW">發震時間</span>
+                                        </span>
+                                    </div>
+                                    <div class="report-overview-value">
+                                        <span id="intensity-overview-time"></span>
+                                        <span class="report-overview-unit">GMT+8</span>
+                                    </div>
+                                </div>
+                                <div class="report-overview-item">
+                                    <div class="report-overview-item-label">
+                                        <span class="report-overview-item-icon material-symbols-rounded">my_location</span>
+                                        <span class="report-overview-item-label-text">
+                                            <span lang="en">Epicenter Coordinate</span>
+                                            <span lang="ja">震央座標</span>
+                                            <span lang="kr">진원지</span>
+                                            <span lang="ru">Epicenter coordinates</span>
+                                            <span lang="zh-CN">震中位置</span>
+                                            <span lang="zh-TW">震央位置</span>
+                                        </span>
+                                    </div>
+                                    <div class="report-overview-value">
+                                        <span id="intensity-overview-latitude"></span>
+                                        <span class="report-overview-unit">°N</span>
+                                        <span id="intensity-overview-longitude"></span>
+                                        <span class="report-overview-unit">°E</span>
+                                    </div>
+                                </div>
+                                <div class="report-overview-item">
+                                    <div class="report-overview-item-label">
+                                        <span class="report-overview-item-icon material-symbols-rounded">crisis_alert</span>
+                                        <span class="report-overview-item-label-text">
+                                            <span lang="en">Magnitude</span>
+                                            <span lang="ja">マグニチュード</span>
+                                            <span lang="kr">규모</span>
+                                            <span lang="ru">Magnitude</span>
+                                            <span lang="zh-CN">里氏震级</span>
+                                            <span lang="zh-TW">芮氏規模</span>
+                                        </span>
+                                    </div>
+                                    <div class="report-overview-value">
+                                        <span class="report-overview-unit">M<sub>L</sub></span>
+                                        <span id="intensity-overview-magnitude"></span>
+                                    </div>
+                                </div>
+                                <div class="report-overview-item">
+                                    <div class="report-overview-item-label">
+                                        <span class="report-overview-item-icon material-symbols-rounded">keyboard_double_arrow_down</span>
+                                        <span class="report-overview-item-label-text">
+                                            <span lang="en">Focal Depth</span>
+                                            <span lang="ja">深さ</span>
+                                            <span lang="kr">진원깊이</span>
+                                            <span lang="ru">Focal Depth</span>
+                                            <span lang="zh-CN">震源深度</span>
+                                            <span lang="zh-TW">震源深度</span>
+                                        </span>
+                                    </div>
+                                    <div class="report-overview-value">
+                                        <span id="intensity-overview-depth"></span>
+                                        <span class="report-overview-unit">
+                                            <span lang="en">km</span>
+                                            <span lang="ja">km</span>
+                                            <span lang="kr">km</span>
+                                            <span lang="ru">km</span>
+                                            <span lang="zh-CN">公里</span>
+                                            <span lang="zh-TW">公里</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="map-intensity"></div>
+        </div>
+
+        <footer>
+        </footer>
+
+        <script src="../js/theme.js"></script>
+        <script src="../js/locale.js"></script>
+        <script src="../js/globals.js"></script>
+        <script src="../js/ui.js"></script>
+        <script src="../js/dump.js"></script>
+        <script src="../js/ripple.js"></script>
+        <script src="../js/intensity.js"></script>
+    </body>
+
+</html>

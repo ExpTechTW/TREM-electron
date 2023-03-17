@@ -1033,7 +1033,6 @@ async function init() {
 		$("#loading").text(TREM.Localization.getString("Application_Loading"));
 		const time = document.getElementById("time");
 		const time1 = document.getElementById("time1");
-		const time2 = document.getElementById("time2");
 
 		// clock
 		dump({ level: 0, message: "Initializing clock", origin: "Clock" });
@@ -1063,7 +1062,7 @@ async function init() {
 						time.classList.remove("desynced");
 					time.innerText = `${NOW().format("YYYY/MM/DD HH:mm:ss")}`;
 					time1.innerText = `${NOW().format("YYYY/MM/DD HH:mm:ss")}`;
-					time2.innerText = `${NOW().format("YYYY/MM/DD HH:mm:ss")}`;
+					ipcRenderer.send("TREMIntensitytime2", `${NOW().format("YYYY/MM/DD HH:mm:ss")}`);
 
 					if (replaytestEEW != 0 && NOW().getTime() - replaytestEEW > 180_000) {
 						testEEWerror = false;
@@ -1130,10 +1129,10 @@ async function init() {
 				// const unlock = (Unlock) ? "⚡" : "";
 				$("#log").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
 				$("#log1").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
-				$("#log2").text(`${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
+				ipcRenderer.send("TREMIntensitylog2", `${stationnow}/${stationall} | ${stationPercentage}% | ${rss}`);
 				$("#app-version").text(`${app.getVersion()} ${Ping} ${GetDataState} ${Warn} ${error}`);
 				$("#app-version1").text(`${app.getVersion()} ${Ping} ${GetDataState} ${Warn} ${error}`);
-				$("#app-version2").text(`${app.getVersion()} ${Ping} ${GetDataState} ${Warn} ${error}`);
+				ipcRenderer.send("TREMIntensityappversion2", `${app.getVersion()} ${Ping} ${GetDataState} ${Warn} ${error}`);
 			}, 500);
 
 		if (!Timers.tsunami)
@@ -1300,60 +1299,6 @@ async function init() {
 					})
 					.on("click", () => TREM.Report._focusMap())
 					.on("contextmenu", () => TREM.Report._focusMap());
-
-			if (!Maps.intensity)
-				Maps.intensity = new maplibregl.Map(
-					{
-						container : "map-intensity",
-						maxPitch  : 0,
-						maxBounds : [
-							50,
-							10,
-							180,
-							60,
-						],
-						zoom              : 6.5,
-						center            : [119, 24.132],
-						renderWorldCopies : false,
-						keyboard          : false,
-						doubleClickZoom   : false,
-					})
-					.on("click", (ev) => {
-						if (ev.originalEvent.target.tagName == "CANVAS")
-							Maps.intensity.flyTo({
-								center   : [119, 24.132],
-								zoom     : 6.5,
-								bearing  : 0,
-								speed    : 2,
-								curve    : 1,
-								easing   : (e) => Math.sin(e * Math.PI / 2),
-								duration : 500,
-							});
-					})
-					.on("zoom", () => {
-						if (Maps.intensity.getZoom() >= 11.5) {
-							for (const key in Station)
-								if (!Station[key].getPopup().isOpen())
-									Station[key].togglePopup();
-						} else {
-							for (const key in Station)
-								if (Station[key].getPopup().isOpen())
-									if (!Station[key].getPopup().persist)
-										Station[key].togglePopup();
-						}
-					})
-					.on("contextmenu", (ev) => {
-						if (ev.originalEvent.target.tagName == "CANVAS")
-							Maps.intensity.flyTo({
-								center   : [119, 24.132],
-								zoom     : 6.5,
-								bearing  : 0,
-								speed    : 2,
-								curve    : 1,
-								easing   : (e) => Math.sin(e * Math.PI / 2),
-								duration : 1000,
-							});
-					});
 
 			const resizeHandler = (ev) => {
 				if (ev && ev.propertyName != "margin-top") return;
@@ -2026,110 +1971,6 @@ async function init() {
 					},
 				}).getLayer("Layer_tw_county"));
 			}
-
-			if (!MapBases.intensity.length) {
-				Maps.intensity.addSource("Source_tw_county", {
-					type : "geojson",
-					data : MapData.tw_county,
-				});
-				Maps.intensity.addSource("Intensity_Source_tw_town", {
-					type : "geojson",
-					data : MapData.tw_town,
-				});
-				MapBases.intensity.set("tw_county_fill", Maps.intensity.addLayer({
-					id     : "Layer_tw_county_Fill",
-					type   : "fill",
-					source : "Source_tw_county",
-					paint  : {
-						"fill-color"   : TREM.Colors.surfaceVariant,
-						"fill-opacity" : 1,
-					},
-				}).getLayer("Layer_tw_county_Fill"));
-				Maps.intensity.addLayer({
-					id     : "Layer_intensity",
-					type   : "fill",
-					source : "Intensity_Source_tw_town",
-					paint  : {
-						"fill-color": [
-							"match",
-							[
-								"coalesce",
-								["feature-state", "intensity"],
-								0,
-							],
-							9,
-							setting["theme.customColor"] ? setting["theme.int.9"]
-								: "#862DB3",
-							8,
-							setting["theme.customColor"] ? setting["theme.int.8"]
-								: "#DB1F1F",
-							7,
-							setting["theme.customColor"] ? setting["theme.int.7"]
-								: "#F55647",
-							6,
-							setting["theme.customColor"] ? setting["theme.int.6"]
-								: "#DB641F",
-							5,
-							setting["theme.customColor"] ? setting["theme.int.5"]
-								: "#E68439",
-							4,
-							setting["theme.customColor"] ? setting["theme.int.4"]
-								: "#E8D630",
-							3,
-							setting["theme.customColor"] ? setting["theme.int.3"]
-								: "#7BA822",
-							2,
-							setting["theme.customColor"] ? setting["theme.int.2"]
-								: "#2774C2",
-							1,
-							setting["theme.customColor"] ? setting["theme.int.1"]
-								: "#757575",
-							"transparent",
-						],
-						"fill-outline-color": [
-							"case",
-							[
-								">",
-								[
-									"coalesce",
-									["feature-state", "intensity"],
-									0,
-								],
-								0,
-							],
-							TREM.Colors.onSurfaceVariant,
-							"transparent",
-						],
-						"fill-opacity": [
-							"case",
-							[
-								">",
-								[
-									"coalesce",
-									["feature-state", "intensity"],
-									0,
-								],
-								0,
-							],
-							1,
-							0,
-						],
-					},
-					layout: {
-						visibility: "none",
-					},
-				});
-				MapBases.intensity.set("tw_county_line", Maps.intensity.addLayer({
-					id     : "Layer_tw_county_Line",
-					type   : "line",
-					source : "Source_tw_county",
-					paint  : {
-						"line-color"   : TREM.Colors.primary,
-						"line-width"   : 0.75,
-						"line-opacity" : 1,
-					},
-				}).getLayer("Layer_tw_county_Line"));
-			}
 		} else {
 
 			if (!Maps.main) {
@@ -2227,29 +2068,6 @@ async function init() {
 					.on("contextmenu", () => TREM.Report._focusMap())
 					.on("click", () => TREM.Report._focusMap());
 				Maps.report._zoomAnimated = setting["map.animation"];
-			}
-
-			if (!Maps.intensity) {
-				Maps.intensity = L.map("map-intensity",
-					{
-						attributionControl : false,
-						closePopupOnClick  : false,
-						maxBounds          : [[30, 130], [10, 100]],
-						preferCanvas       : true,
-						zoomSnap           : 0.25,
-						zoomDelta          : 0.5,
-						zoomAnimation      : true,
-						fadeAnimation      : setting["map.animation"],
-						zoomControl        : false,
-						doubleClickZoom    : false,
-						keyboard           : false,
-					})
-					.fitBounds([[25.35, 119.4], [21.9, 122.22]], {
-						paddingTopLeft: [document.getElementById("map-intensity").offsetWidth / 2, 0],
-					})
-					.on("contextmenu", () => TREM.Intensity._focusMap())
-					.on("click", () => TREM.Intensity._focusMap());
-				Maps.intensity._zoomAnimated = setting["map.animation"];
 			}
 
 			MapBases = { main: [], mini: [], report: [], intensity: [] };
@@ -2353,22 +2171,6 @@ async function init() {
 						},
 					}).addTo(Maps.report));
 			}
-
-			if (!MapBases.intensity.length)
-				MapBases.intensity.push("tw_county",
-					L.geoJson.vt(MapData.tw_county, {
-						minZoom   : 7.5,
-						maxZoom   : 10,
-						tolerance : 20,
-						buffer    : 256,
-						debug     : 0,
-						style     : {
-							weight      : 0.8,
-							color       : TREM.Colors.primary,
-							fillColor   : TREM.Colors.surfaceVariant,
-							fillOpacity : 1,
-						},
-					}).addTo(Maps.intensity));
 		}
 
 	})().catch(e => dump({ level: 2, message: e }));
@@ -2659,10 +2461,21 @@ async function init() {
 	// FCMdata(userJSON, type = "websocket");
 	// const userJSON1 = require(path.resolve(__dirname, "../js/test.json"));
 	// TREM.MapArea2.setArea(userJSON1);
+	// setTimeout(() => {
+	// 	ipcRenderer.send("screenshotEEWI", {
+	// 		Function : "intensity",
+	// 		ID       : 1,
+	// 		Version  : 1,
+	// 		Time     : NOW().getTime(),
+	// 		Shot     : 1,
+	// 	});
+	// }, 1250);
 	// const userJSON = require(path.resolve(__dirname, "../js/123.json"));
 	// const userJSON1 = require(path.resolve(__dirname, "../js/2.json"));
 	// const userJSON2 = require(path.resolve(__dirname, "../js/1.json"));
-	// TREM.Intensity.handle(userJSON);
+	// ipcRenderer.send("TREMIntensityhandle", userJSON);
+	// ipcRenderer.send("TREMIntensityhandle", userJSON1);
+	// ipcRenderer.send("TREMIntensityhandle", userJSON2);
 	// TREM.Intensity.handle(userJSON1);
 	// TREM.Intensity.handle(userJSON2);
 	// ipcRenderer.send("intensity-Notification", userJSON);
@@ -4058,9 +3871,15 @@ function openSettingWindow() {
 
 // #region RTS
 function openRTSWindow() {
-	// document.getElementById("setting_btn").classList.add("hide");
 	win.setAlwaysOnTop(false);
 	ipcRenderer.send("openRTSWindow");
+	toggleNav(false);
+}
+
+// #region RTS
+function openIntensityWindow() {
+	win.setAlwaysOnTop(false);
+	ipcRenderer.send("openIntensityWindow");
 	toggleNav(false);
 }
 // ipcMain.on("setting_btn_remove_hide", () => {
@@ -4695,9 +4514,17 @@ function FCMdata(json, Unit) {
 		dump({ level: 0, message: "Got Earthquake intensity", origin: "API" });
 		console.log(json);
 
-		if (TREM.Intensity.isTriggered)
-			TREM.Intensity.clear();
-		TREM.Intensity.handle(json);
+		setTimeout(() => {
+			ipcRenderer.send("screenshotEEWI", {
+				Function : "intensity",
+				ID       : 1,
+				Version  : 1,
+				Time     : NOW().getTime(),
+				Shot     : 1,
+			});
+		}, 1250);
+
+		ipcRenderer.send("TREMIntensityhandle", json);
 		ipcRenderer.send("intensity-Notification", json);
 	} else if (json.type == "replay") {
 		dump({ level: 0, message: "Got Earthquake replay", origin: "API" });
@@ -4820,8 +4647,6 @@ function FCMdata(json, Unit) {
 								: (json.type == "trem-eew") ? "NSSPE(無震源參數推算)"
 									: (json.Unit) ? json.Unit : "";
 
-		if (TREM.Intensity.isTriggered)
-			TREM.Intensity.clear();
 		stopReplaybtn();
 		TREM.Earthquake.emit("eew", json);
 	} else {
@@ -5466,27 +5291,84 @@ TREM.Earthquake.on("tsunami", (data) => {
 	console.log(data);
 
 	if (data.cancel) {
-		if (TSUNAMI.E)
-			TSUNAMI.E.remove();
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+			if (Maps.main.getFeatureState({
+				source      : "Source_EN",
+				sourceLayer : "Layer_EN",
+				id          : "1",
+			})) {
+				Maps.main.removeFeatureState({ source: "Source_EN" });
+				Maps.main.setLayoutProperty("Layer_EN", "visibility", "none");
+			}
 
-		if (TSUNAMI.EN)
-			TSUNAMI.EN.remove();
+			if (Maps.main.getFeatureState({
+				source      : "Source_E",
+				sourceLayer : "Layer_E",
+				id          : "1",
+			})) {
+				Maps.main.removeFeatureState({ source: "Source_E" });
+				Maps.main.setLayoutProperty("Layer_E", "visibility", "none");
+			}
 
-		if (TSUNAMI.ES)
-			TSUNAMI.ES.remove();
+			if (Maps.main.getFeatureState({
+				source      : "Source_ES",
+				sourceLayer : "Layer_ES",
+				id          : "1",
+			})) {
+				Maps.main.removeFeatureState({ source: "Source_ES" });
+				Maps.main.setLayoutProperty("Layer_ES", "visibility", "none");
+			}
 
-		if (TSUNAMI.N)
-			TSUNAMI.N.remove();
+			if (Maps.main.getFeatureState({
+				source      : "Source_N",
+				sourceLayer : "Layer_N",
+				id          : "1",
+			})) {
+				Maps.main.removeFeatureState({ source: "Source_N" });
+				Maps.main.setLayoutProperty("Layer_N", "visibility", "none");
+			}
 
-		if (TSUNAMI.WS)
-			TSUNAMI.WS.remove();
+			if (Maps.main.getFeatureState({
+				source      : "Source_W",
+				sourceLayer : "Layer_W",
+				id          : "1",
+			})) {
+				Maps.main.removeFeatureState({ source: "Source_W" });
+				Maps.main.setLayoutProperty("Layer_W", "visibility", "none");
+			}
 
-		if (TSUNAMI.W)
-			TSUNAMI.W.remove();
+			if (Maps.main.getFeatureState({
+				source      : "Source_WS",
+				sourceLayer : "Layer_WS",
+				id          : "1",
+			})) {
+				Maps.main.removeFeatureState({ source: "Source_WS" });
+				Maps.main.setLayoutProperty("Layer_WS", "visibility", "none");
+			}
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
+			if (TSUNAMI.E)
+				TSUNAMI.E.remove();
 
-		if (TSUNAMI.warnIcon)
-			TSUNAMI.warnIcon.remove();
-		TSUNAMI = {};
+			if (TSUNAMI.EN)
+				TSUNAMI.EN.remove();
+
+			if (TSUNAMI.ES)
+				TSUNAMI.ES.remove();
+
+			if (TSUNAMI.N)
+				TSUNAMI.N.remove();
+
+			if (TSUNAMI.WS)
+				TSUNAMI.WS.remove();
+
+			if (TSUNAMI.W)
+				TSUNAMI.W.remove();
+
+			if (TSUNAMI.warnIcon)
+				TSUNAMI.warnIcon.remove();
+			TSUNAMI = {};
+		}
+
 		Mapsmainfocus();
 	} else {
 		if (data.number == 1) {
@@ -5523,7 +5405,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 				+ " " + now.getHours()
 				+ ":" + now.getMinutes();
 			new Notification("海嘯警報", {
-				body   : `${Now3} 發生地震\n請${data.area[i].areaName}迅速疏散至安全場所`,
+				body   : `${Now3} 發生地震\n請${data.area[i].areaName}迅速疏散至避難場所`,
 				icon   : "../TREM.ico",
 				silent : win.isFocused(),
 			});

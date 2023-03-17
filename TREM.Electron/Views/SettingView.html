@@ -2920,6 +2920,8 @@
                                                 <span lang="zh-TW">開關</span>
                                             </div>
                                         </div>
+                                        <input class="input-field" id="intensitybtn" type="checkbox" onclick="intensitybtn(this.checked)">
+                                        <span lang="zh-TW" style="color: rgb(var(--md-sys-color-on-background)); margin-right: 20px;">震度速報</span>
                                         <input class="input-field" id="testbtn" type="checkbox" checked>
                                         <span lang="zh-TW" style="color: rgb(var(--md-sys-color-on-background)); margin-right: 20px;">測試模式</span>
                                         <input class="input-field" id="alertbtn" type="checkbox" checked>
@@ -2928,6 +2930,40 @@
                                         <span lang="zh-TW" style="color: rgb(var(--md-sys-color-on-background)); margin-right: 20px;">海嘯警報</span>
                                         <input class="input-field" id="cancelbtn" type="checkbox">
                                         <span lang="zh-TW" style="color: rgb(var(--md-sys-color-on-background)); margin-right: 20px;">取消</span>
+                                    </div>
+                                </div>
+                                <div id="intensity.div">
+                                    <div class="control-container">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span lang="zh-TW">震度發報單位</span>
+                                                </div>
+                                                <div class="option-label-description">
+                                                    <span lang="zh-TW">震度發報單位</span>
+                                                </div>
+                                            </div>
+                                            <div class="control">
+                                                <select id="intensity.unit" name="intensity.unit">
+                                                    <option value="cwb">CWB</option>
+                                                    <option value="palert">P-Alert</option>
+                                                    <option value="trem">TREM</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-container">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span lang="zh-TW">震度</span>
+                                                </div>
+                                                <div class="option-label-description">
+                                                    <span lang="zh-TW">震度</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input class="input-field" id="intensitytext" type="text" value='{ "1":[2,3,7,16,343,344,345],"2":[341,346,347,348,349,350,351],"3":[342,352]}'>
                                     </div>
                                 </div>
                                 <div id="tsunami.div">
@@ -3088,30 +3124,34 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="control-container">
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span lang="zh-TW">發報單位</span>
+                                <div id="test.text">
+                                    <div class="control-container">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span lang="zh-TW">發報單位</span>
+                                                </div>
+                                                <div class="option-label-description">
+                                                    <span lang="zh-TW">發報單位</span>
+                                                </div>
                                             </div>
-                                            <div class="option-label-description">
-                                                <span lang="zh-TW">發報單位</span>
-                                            </div>
+                                            <input class="input-field" id="testtext" type="text" value="測試模式">
                                         </div>
-                                        <input class="input-field" id="testtext" type="text" value="測試模式">
                                     </div>
                                 </div>
-                                <div class="control-container">
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span lang="zh-TW">地震編號</span>
+                                <div id="ID.text">
+                                    <div class="control-container">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span lang="zh-TW">地震編號</span>
+                                                </div>
+                                                <div class="option-label-description">
+                                                    <span lang="zh-TW">地震編號</span>
+                                                </div>
                                             </div>
-                                            <div class="option-label-description">
-                                                <span lang="zh-TW">地震編號</span>
-                                            </div>
+                                            <input class="input-field" id="ID" type="text" value="111000">
                                         </div>
-                                        <input class="input-field" id="ID" type="text" value="111000">
                                     </div>
                                 </div>
                                 <div class="control-container">
@@ -3166,17 +3206,19 @@
                                         <input class="input-field" id="NorthLatitude" type="text" value="22.2">
                                     </div>
                                 </div>
-                                <div class="control-container">
-                                    <div class="option-container">
-                                        <div class="option-label">
-                                            <div class="option-label-title">
-                                                <span lang="zh-TW">位置</span>
+                                <div id="Location.text">
+                                    <div class="control-container">
+                                        <div class="option-container">
+                                            <div class="option-label">
+                                                <div class="option-label-title">
+                                                    <span lang="zh-TW">位置</span>
+                                                </div>
+                                                <div class="option-label-description">
+                                                    <span lang="zh-TW">位置</span>
+                                                </div>
                                             </div>
-                                            <div class="option-label-description">
-                                                <span lang="zh-TW">位置</span>
-                                            </div>
+                                            <input class="input-field" id="Location" type="text" value="未知區域">
                                         </div>
-                                        <input class="input-field" id="Location" type="text" value="未知區域">
                                     </div>
                                 </div>
                                 <div class="control-container">

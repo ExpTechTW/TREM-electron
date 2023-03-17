@@ -77,6 +77,10 @@ let SettingWindow = TREM.Window.get("setting");
  * @type {BrowserWindow}
  */
 let RTSWindow = TREM.Window.get("rts");
+/**
+ * @type {BrowserWindow}
+ */
+let IntensityWindow = TREM.Window.get("Intensity");
 
 TREM.setLoginItemSettings({
 	openAtLogin : TREM.Configuration.data["windows.startup"],
@@ -134,8 +138,6 @@ function createWindow() {
 			MainWindow.hide();
 			if (SettingWindow)
 				SettingWindow.close();
-			if (RTSWindow)
-				RTSWindow.close();
 			event.returnValue = false;
 		} else
 			TREM.quit();
@@ -202,6 +204,45 @@ function createRTSWindow() {
 	});
 }
 
+function createIntensityWindow() {
+	if (IntensityWindow instanceof BrowserWindow) return IntensityWindow.show();
+	IntensityWindow = TREM.Window.set("Intensity", new BrowserWindow({
+		title          : TREM.Localization.getString("Application_Title"),
+		width          : 1280,
+		minWidth       : 1280,
+		height         : 720,
+		minHeight      : 720,
+		resizable      : true,
+		show           : false,
+		icon           : "TREM.ico",
+		webPreferences : {
+			preload              : path.join(__dirname, "preload.js"),
+			nodeIntegration      : true,
+			contextIsolation     : false,
+			enableRemoteModule   : true,
+			backgroundThrottling : false,
+			nativeWindowOpen     : true,
+		},
+	})).get("Intensity");
+	require("@electron/remote/main").enable(IntensityWindow.webContents);
+	process.env.intensitywindow = IntensityWindow.id;
+	IntensityWindow.loadFile("./Views/IntensityView.html");
+	IntensityWindow.setAspectRatio(16 / 9);
+	IntensityWindow.setMenu(null);
+	IntensityWindow.webContents.on("did-finish-load", () => {
+		IntensityWindow.webContents.send("setting", TREM.Configuration._data);
+		// if (!_hide) setTimeout(() => IntensityWindow.show(), 500);
+	});
+	pushReceiver.setup(IntensityWindow.webContents);
+	IntensityWindow.on("resize", () => {
+		IntensityWindow.webContents.invalidate();
+	});
+	IntensityWindow.on("close", (event) => {
+		event.preventDefault();
+		IntensityWindow.hide();
+		event.returnValue = false;
+	});
+}
 
 const shouldQuit = TREM.requestSingleInstanceLock();
 if (!shouldQuit)
@@ -213,6 +254,7 @@ else {
 	TREM.whenReady().then(() => {
 		trayIcon();
 		createWindow();
+		createIntensityWindow();
 	});
 }
 
@@ -353,6 +395,10 @@ ipcMain.on("openChildWindow", async (event, arg) => {
 
 ipcMain.on("openRTSWindow", async (event, arg) => {
 	await createRTSWindow();
+});
+
+ipcMain.on("openIntensityWindow", async (event, arg) => {
+	await createIntensityWindow();
 });
 
 ipcMain.on("saveSetting", (event, arg) => {
@@ -512,6 +558,15 @@ ipcMain.on("screenshotEEW", async (event, json) => {
 	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
 });
 
+ipcMain.on("screenshotEEWI", async (event, json) => {
+	// return;
+	const folder = path.join(TREM.getPath("userData"), "EEW");
+	if (!fs.existsSync(folder))
+		fs.mkdirSync(folder);
+	const filename = `${json.Function}_${json.ID}_${json.Version}_${json.Time}_${json.Shot}.png`;
+	fs.writeFileSync(path.join(folder, filename), (await IntensityWindow.webContents.capturePage()).toPNG());
+});
+
 ipcMain.on("screenshot", async () => {
 	const folder = path.join(TREM.getPath("userData"), "Screenshots");
 	if (!fs.existsSync(folder))
@@ -606,6 +661,7 @@ function trayIcon() {
 					type  : "normal",
 					click : () => {
 						BrowserWindow.fromId(process.env.window * 1).setAlwaysOnTop(false);
+						BrowserWindow.fromId(process.env.intensitywindow * 1).setAlwaysOnTop(false);
 						ipcMain.emit("openChildWindow");
 					}
 				},

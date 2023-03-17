@@ -619,6 +619,20 @@ function setList(args, el, event) {
 	}
 
 	if (args == "Test1") {
+		if (document.getElementById("intensitybtn").checked) {
+			document.getElementById("intensity.div").style.display = "";
+			document.getElementById("test.text").style.display = "none";
+			document.getElementById("ID.text").style.display = "none";
+			document.getElementById("Location.text").style.display = "none";
+		}
+
+		if (!document.getElementById("intensitybtn").checked) {
+			document.getElementById("intensity.div").style.display = "none";
+			document.getElementById("test.text").style.display = "";
+			document.getElementById("ID.text").style.display = "";
+			document.getElementById("Location.text").style.display = "";
+		}
+
 		if (!document.getElementById("tsunamialertbtn").checked) document.getElementById("tsunami.div").style.display = "none";
 
 		if (!document.getElementById("tsunami.EN.open").checked) document.getElementById("tsunami.EN").disabled = true;
@@ -636,10 +650,37 @@ function setList(args, el, event) {
 }
 
 function tsunamialertbtn(checked) {
+	if (document.getElementById("intensitybtn").checked) {
+		document.getElementById("intensitybtn").checked = false;
+		document.getElementById("intensity.div").style.display = "none";
+		document.getElementById("test.text").style.display = "";
+		document.getElementById("ID.text").style.display = "";
+		document.getElementById("Location.text").style.display = "";
+	}
+
 	if (checked)
 		document.getElementById("tsunami.div").style.display = "";
 	else
 		document.getElementById("tsunami.div").style.display = "none";
+}
+
+function intensitybtn(checked) {
+	if (document.getElementById("tsunamialertbtn").checked) {
+		document.getElementById("tsunamialertbtn").checked = false;
+		document.getElementById("tsunami.div").style.display = "none";
+	}
+
+	if (checked) {
+		document.getElementById("intensity.div").style.display = "";
+		document.getElementById("test.text").style.display = "none";
+		document.getElementById("ID.text").style.display = "none";
+		document.getElementById("Location.text").style.display = "none";
+	} else {
+		document.getElementById("intensity.div").style.display = "none";
+		document.getElementById("test.text").style.display = "";
+		document.getElementById("ID.text").style.display = "";
+		document.getElementById("Location.text").style.display = "";
+	}
 }
 
 function tsunamiopen(checked, name) {
@@ -670,7 +711,54 @@ function send() {
 
 	if (testtext_value == "NSSPE") Unit_type = "trem-eew";
 
-	if (!document.getElementById("tsunamialertbtn").checked) {
+	let unit_name = "";
+	let raw = {};
+
+	if (document.getElementById("intensitybtn").checked) {
+		Unit_type = "intensity";
+		unit_name = document.getElementById("intensity.unit").options[document.getElementById("intensity.unit").selectedIndex].value;
+		raw = {
+			info: {
+				depth : document.getElementById("Depth").value,
+				lat   : document.getElementById("NorthLatitude").value,
+				lon   : document.getElementById("EastLongitude").value,
+				scale : document.getElementById("Scale").value,
+				time  : new Date(document.getElementById("Time").value).getTime(),
+			},
+			intensity: JSON.parse(document.getElementById("intensitytext").value),
+		};
+
+		if (document.getElementById("UUID").value != "")
+			data = {
+				APIkey        : "https://github.com/ExpTechTW",
+				Function      : "Send",
+				Type          : "test",
+				FormatVersion : 1,
+				UUID          : document.getElementById("UUID").value,
+				Value         : {
+					type      : Unit_type,
+					timestamp : new Date(document.getElementById("TimeStamp").value).getTime(),
+					unit      : unit_name,
+					raw       : raw,
+					number    : document.getElementById("Version").value,
+				},
+			};
+		else
+			data = {
+				APIkey        : "https://github.com/ExpTechTW",
+				Function      : "Send",
+				Type          : "test",
+				FormatVersion : 1,
+				UUID          : localStorage.UUID,
+				Value         : {
+					type      : Unit_type,
+					timestamp : new Date(document.getElementById("TimeStamp").value).getTime(),
+					unit      : unit_name,
+					raw       : raw,
+					number    : document.getElementById("Version").value,
+				},
+			};
+	} else if (!document.getElementById("tsunamialertbtn").checked) {
 		if (document.getElementById("UUID").value != "")
 			data = {
 				APIkey        : "https://github.com/ExpTechTW",
@@ -694,6 +782,8 @@ function send() {
 					id            : document.getElementById("ID").value,
 					Test          : document.getElementById("testbtn").checked,
 					Unit          : document.getElementById("testtext").value,
+					unit          : unit_name,
+					raw           : raw,
 					location      : document.getElementById("Location").value,
 					Alert         : document.getElementById("alertbtn").checked,
 					cancel        : document.getElementById("cancelbtn").checked,
@@ -722,6 +812,8 @@ function send() {
 					id            : document.getElementById("ID").value,
 					Test          : document.getElementById("testbtn").checked,
 					Unit          : document.getElementById("testtext").value,
+					unit          : unit_name,
+					raw           : raw,
 					location      : document.getElementById("Location").value,
 					Alert         : document.getElementById("alertbtn").checked,
 					cancel        : document.getElementById("cancelbtn").checked,
@@ -836,6 +928,7 @@ function send() {
 }
 
 function resend() {
+	document.getElementById("intensitybtn").checked = false;
 	document.getElementById("testbtn").checked = true;
 	document.getElementById("alertbtn").checked = true;
 	document.getElementById("tsunamialertbtn").checked = false;
@@ -865,6 +958,7 @@ function resend() {
 
 	if (!document.getElementById("tsunami.WS.open").checked) document.getElementById("tsunami.WS").disabled = true;
 	tsunamialertbtn(false);
+	intensitybtn(false);
 	document.getElementById("testtext").value = "測試模式";
 	document.getElementById("ID").value = "111000";
 	const utc = new Date();
