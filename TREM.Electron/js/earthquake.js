@@ -6,8 +6,6 @@ require("expose-gc");
 const { BrowserWindow, shell } = require("@electron/remote");
 const { default: turfCircle } = require("@turf/circle");
 const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:timers");
-const { ExptechAPI } = require("@kamiya4047/exptech-api-wrapper");
-const Exptech = new ExptechAPI();
 const axios = require("axios");
 const bytenode = require("bytenode");
 const crypto = require("crypto");

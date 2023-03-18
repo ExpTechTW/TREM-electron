@@ -1,7 +1,7 @@
 const { BrowserWindow, Menu, Notification, app: TREM, Tray, ipcMain, nativeImage, shell } = require("electron");
 const Configuration = require("./Configuration/Configuration");
 const { autoUpdater } = require("electron-updater");
-const fetch = require("node-fetch").default;
+const fetch = require("node-fetch");
 const fs = require("fs");
 const logger = require("electron-log");
 const path = require("path");
