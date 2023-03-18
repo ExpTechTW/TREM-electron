@@ -1932,6 +1932,7 @@ async function init() {
 					"ta",
 					"pa",
 					"va",
+					"ec",
 				]) {
 					Maps.report.addSource(`Source_${mapName}`, {
 						type      : "geojson",
@@ -2139,6 +2140,7 @@ async function init() {
 					"ta",
 					"pa",
 					"va",
+					"ec",
 				])
 					if (setting["map." + mapName])
 						MapBases.report.push(`${mapName}`, L.geoJson.vt(MapData[mapName], {
@@ -4489,6 +4491,7 @@ function FCMdata(json, Unit) {
 		dump({ level: 0, message: `Latency: ${NOW().getTime() - json.timestamp}ms`, origin: "API" });
 
 	if (json.type == "tsunami-info") {
+		console.log(json);
 		const now = new Date(json.time);
 		const Now0 = now.getFullYear()
 			+ "/" + (now.getMonth() + 1)
