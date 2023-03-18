@@ -457,6 +457,7 @@ ipcMain.on("config:value", (event, key, value) => {
 
 		case "map.engine": {
 			MainWindow.reload();
+			IntensityWindow.reload();
 			break;
 		}
 
