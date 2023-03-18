@@ -1,3 +1,6 @@
+require("leaflet");
+require("leaflet-edgebuffer");
+require("leaflet-geojson-vt");
 const maplibregl = require("maplibre-gl");
 const { BrowserWindow } = require("@electron/remote");
 
@@ -34,6 +37,23 @@ TREM.Audios = {
 };
 
 TREM.win = BrowserWindow.fromId(process.env.intensitywindow * 1);
+
+const color = function color(Intensity) {
+	return setting["theme.customColor"] ? setting[`theme.int.${Intensity}`]
+		: [
+			"#757575",
+			"#757575",
+			"#2774C2",
+			"#7BA822",
+			"#E8D630",
+			"#E68439",
+			"#DB641F",
+			"#F55647",
+			"#DB1F1F",
+			"#862DB3",
+		][Intensity];
+	// return ["#666666", "#0165CC", "#01BB02", "#EBC000", "#FF8400", "#E06300", "#FF0000", "#B50000", "#68009E"][Intensity ? Intensity - 1 : Intensity];
+};
 
 async function init() {
 	TREM.MapRenderingEngine = setting["map.engine"];
@@ -225,7 +245,7 @@ async function init() {
 		}
 
 		if (!MapBases.intensity.length)
-			MapBases.intensity.push("tw_county",
+			MapBases.intensity.set("tw_county",
 				L.geoJson.vt(MapData.tw_county, {
 					minZoom   : 7.5,
 					maxZoom   : 10,
@@ -443,7 +463,7 @@ TREM.Intensity = {
 							zIndexOffset: 5000,
 						}).addTo(Maps.intensity);
 
-					this.geojson = L.geoJson.vt(TREM.MapData.tw_town, {
+					this.geojson = L.geoJson.vt(MapData.tw_town, {
 						minZoom   : 7.5,
 						maxZoom   : 10,
 						tolerance : 20,
@@ -464,7 +484,7 @@ TREM.Intensity = {
 							return {
 								color       : TREM.Colors.secondary,
 								weight      : 0.8,
-								fillColor   : TREM.color(PLoc[name]),
+								fillColor   : color(PLoc[name]),
 								fillOpacity : 1,
 							};
 						},
@@ -512,10 +532,13 @@ TREM.Intensity = {
 				}
 			}
 
-			if (this.timer)
-				this.timer.refresh();
-			else
+			if (this.timer) {
+				clearTimeout(this.timer);
+				delete this.timer;
 				this.timer = setTimeout(() => this.clear, 60_000);
+			} else {
+				this.timer = setTimeout(() => this.clear, 60_000);
+			}
 		}
 	},
 
