@@ -5953,16 +5953,18 @@ function main(data) {
 				});
 
 				if (!TREM.EEW.get(data.id).waveProgress) {
-					if (EarthquakeList[data.id].CircleS || EarthquakeList[data.id].CircleSTW) {
+					if (EarthquakeList[data.id].CircleS) {
 						EarthquakeList[data.id].CircleS.remove();
 						EarthquakeList[data.id].CircleS = null;
+					} else if (EarthquakeList[data.id].CircleSTW) {
 						EarthquakeList[data.id].CircleSTW.remove();
 						EarthquakeList[data.id].CircleSTW = null;
 					}
 
-					if (EarthquakeList[data.id].CircleP || EarthquakeList[data.id].CirclePTW) {
+					if (EarthquakeList[data.id].CircleP) {
 						EarthquakeList[data.id].CircleP.remove();
 						EarthquakeList[data.id].CircleP = null;
+					} else if (EarthquakeList[data.id].CirclePTW) {
 						EarthquakeList[data.id].CirclePTW.remove();
 						EarthquakeList[data.id].CirclePTW = null;
 					}
