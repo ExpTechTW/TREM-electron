@@ -865,7 +865,7 @@ function balance() {
 		})
 		.catch((error) => {
 			console.log(error);
-			document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+			document.getElementById("exptechbalanceState").innerHTML = "未知錯誤(請聯絡開發者)";
 		});
 }
 
