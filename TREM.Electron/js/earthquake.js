@@ -664,6 +664,13 @@ TREM.MapArea2 = {
 			for (const areav2 of Json.area) {
 				const intensity = this.cache.get(areav2) ?? 1;
 
+			// for (let id0 = 0; id0 < Object.keys(max_intensity_list).length; id0++) {
+			// 	const key0 = Object.keys(max_intensity_list)[id0];
+			// 	const intensity = max_intensity_list[key0] ?? 1;
+			// 	console.log(key0);
+			// 	console.log(max_intensity_list[key0]);
+			// 	console.log(intensity);
+
 				for (let id = 0; id < Object.keys(TREM.Resources.areav2).length; id++) {
 					const key = Object.keys(TREM.Resources.areav2)[id];
 
@@ -2194,8 +2201,9 @@ async function init() {
 		if (mapLock || !setting["map.autoZoom"]) return;
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+			const finalBounds = new maplibregl.LngLatBounds();
+
 			if (Object.keys(eew).length != 0) {
-				const finalBounds = new maplibregl.LngLatBounds();
 				let finalZoom = 0;
 				let sampleCount = 0;
 				let trem_eew_type = false;
@@ -2249,22 +2257,22 @@ async function init() {
 
 				finalZoom = finalZoom / sampleCount;
 
-				if (finalZoom != Maps.main.getZoom() && !Maps.main.isEasing() && !trem_eew_type) {
+				if (finalZoom != Maps.main.getZoom() && !Maps.main.isEasing() && !trem_eew_type && !finalBounds.isEmpty()) {
+					console.log(finalBounds.isEmpty());
 					const camera = Maps.main.cameraForBounds(finalBounds, { padding: { top: 0, right: 100, bottom: 100, left: 0 } });
 					TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
 				} else if (TREM.MapArea.cache.size) {
 					map_move_back = true;
-					const bounds = (TREM.MapRenderingEngine == "mapbox-gl") ? new maplibregl.LngLatBounds() : new L.Bounds();
 
 					for (const [ id ] of TREM.MapArea.cache) {
 						const points = TREM.Resources.area[id].map(latlng => pointFormatter(latlng[0], latlng[1], TREM.MapRenderingEngine));
 						console.log(points);
-						bounds.extend([points[0], points[2]]);
+						finalBounds.extend([points[0], points[2]]);
 					}
 
 					const canvas = Maps.main.getCanvas();
 
-					const camera = Maps.main.cameraForBounds(bounds, {
+					const camera = Maps.main.cameraForBounds(finalBounds, {
 						padding: {
 							bottom : canvas.height / 6,
 							left   : canvas.width / 3,
@@ -2279,16 +2287,15 @@ async function init() {
 				}
 			} else if (TREM.MapArea.cache.size) {
 				map_move_back = true;
-				const bounds = (TREM.MapRenderingEngine == "mapbox-gl") ? new maplibregl.LngLatBounds() : new L.Bounds();
 
 				for (const [ id ] of TREM.MapArea.cache) {
 					const points = TREM.Resources.area[id].map(latlng => pointFormatter(latlng[0], latlng[1], TREM.MapRenderingEngine));
-					bounds.extend([points[0], points[2]]);
+					finalBounds.extend([points[0], points[2]]);
 				}
 
 				const canvas = Maps.main.getCanvas();
 
-				const camera = Maps.main.cameraForBounds(bounds, {
+				const camera = Maps.main.cameraForBounds(finalBounds, {
 					padding: {
 						bottom : canvas.height / 6,
 						left   : canvas.width / 3,
