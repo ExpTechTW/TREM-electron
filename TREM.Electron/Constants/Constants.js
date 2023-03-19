@@ -248,6 +248,22 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"exptech.name": {
+			type  : "string",
+			value : "",
+		},
+		"exptech.email": {
+			type  : "string",
+			value : "",
+		},
+		"exptech.pass": {
+			type  : "string",
+			value : "",
+		},
+		"exptech.pass.Hide": {
+			type  : "toggle",
+			value : true,
+		},
 		"webhook.url": {
 			type  : "string",
 			value : "",

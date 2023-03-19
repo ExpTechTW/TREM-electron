@@ -1718,6 +1718,275 @@
                             </div>
                             <div class="list-container" id="Connection">
                                 <div class="control-title">
+                                    <span lang="en">exptech</span>
+                                    <span lang="ja">exptech</span>
+                                    <span lang="kr">exptech</span>
+                                    <span lang="ru">exptech</span>
+                                    <span lang="zh-CN">exptech</span>
+                                    <span lang="zh-TW">exptech</span>
+                                </div>
+                                <div class="control-container">
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">名稱</span>
+                                                <span class="option-label-id">exptech.name</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">填入 名稱。</span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="exptech.name" type="text" onchange="TextSave('exptech.name')" placeholder="name" />
+                                    </div>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">電子郵件</span>
+                                                <span class="option-label-id">exptech.email</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">填入 電子郵件。</span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="exptech.email" type="email" onchange="TextSave('exptech.email')" placeholder="email" />
+                                    </div>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">密碼</span>
+                                                <span class="option-label-id">exptech.pass</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">填入 密碼。</span>
+                                            </span>
+                                        </div>
+                                        <div class="tremkey">
+                                            <div class="left">
+                                                <input class="input-field" id="exptech.pass" type="text" onchange="TextSave('exptech.pass')" placeholder="pass" style="width: 570px;" />
+                                            </div>
+                                            <div class="right">
+                                                <label class="md3 switch">
+                                                    <input type="checkbox" id="exptech.pass.Hide" onclick="CheckHide('exptech.pass.Hide')">
+                                                    <span class="slider">
+                                                        <span class="material-symbols-rounded icon">done</span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">驗證碼</span>
+                                                <span class="option-label-id">exptech.code</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">填入 驗證碼。</span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="exptech.code" type="text" placeholder="code" />
+                                    </div>
+                                    <div class="control-container" style="margin-left: 0;">
+                                        <div class="option-container">
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="sign-up-email" type="button" onclick="signupemail()" style="margin-top: 12px;">
+                                                <span class="filled-tonal-button-label">
+                                                    <span lang="zh-TW">綁定電子郵件</span>
+                                                </span>
+                                            </button>
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="sign-up" type="button" onclick="signup()" style="margin-top: 12px;">
+                                                <span class="filled-tonal-button-label">
+                                                    <span lang="zh-TW">註冊</span>
+                                                </span>
+                                            </button>
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="sign-in" type="button" onclick="signin()" style="margin-top: 12px;">
+                                                <span class="filled-tonal-button-label">
+                                                    <span lang="zh-TW">登入</span>
+                                                </span>
+                                            </button>
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="forget-email" type="button" onclick="forgetemail()" style="margin-top: 12px;">
+                                                <span class="filled-tonal-button-label">
+                                                    <span lang="zh-TW">忘記密碼</span>
+                                                </span>
+                                            </button>
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="forget" type="button" onclick="forget()" style="margin-top: 12px;">
+                                                <span class="filled-tonal-button-label">
+                                                    <span lang="zh-TW">重設密碼</span>
+                                                </span>
+                                            </button>
+                                            <div class="option-label" style="margin-left: 30px;">
+                                                <div class="option-label-title">
+                                                    <span lang="zh-TW">發送狀態</span>
+                                                </div>
+                                                <div class="option-label-description">
+                                                    <span id="exptechState">未發送</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="control-container" style="margin-left: 0;">
+                                        <div class="option-container">
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="balance" type="button" onclick="balance()" style="margin-top: 12px;">
+                                                <span class="filled-tonal-button-label">
+                                                    <span lang="zh-TW">查詢剩餘請求次數</span>
+                                                </span>
+                                            </button>
+                                            <div class="option-label" style="margin-left: 30px;">
+                                                <div class="option-label-title">
+                                                    <span lang="zh-TW">查詢狀態</span>
+                                                </div>
+                                                <div class="option-label-description">
+                                                    <span id="exptechbalanceState">未查詢</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">舊名稱</span>
+                                                <span class="option-label-id">exptech.old_name</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">填入 舊名稱。</span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="exptech.old_name" type="text" placeholder="old_name" />
+                                    </div>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">舊密碼</span>
+                                                <span class="option-label-id">exptech.old_pass</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">填入 舊密碼。</span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="exptech.old_pass" type="text" placeholder="old_pass" />
+                                    </div>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">新名稱</span>
+                                                <span class="option-label-id">exptech.new_name</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">填入 新名稱。</span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="exptech.new_name" type="text" placeholder="new_name" />
+                                    </div>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">新密碼</span>
+                                                <span class="option-label-id">exptech.new_pass</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">填入 新密碼。</span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="exptech.new_pass" type="text" placeholder="new_pass" />
+                                    </div>
+                                    <div class="control-container" style="margin-left: 0;">
+                                        <div class="option-container">
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="edit" type="button" onclick="edit()" style="margin-top: 12px;">
+                                                <span class="filled-tonal-button-label">
+                                                    <span lang="zh-TW">重設帳戶資訊</span>
+                                                </span>
+                                            </button>
+                                            <div class="option-label" style="margin-left: 30px;">
+                                                <div class="option-label-title">
+                                                    <span lang="zh-TW">發送狀態</span>
+                                                </div>
+                                                <div class="option-label-description">
+                                                    <span id="exptecheditState">未發送</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="control-title">
                                     <span lang="en">Webhook</span>
                                     <span lang="ja">ウェブフック</span>
                                     <span lang="kr">웹훅</span>

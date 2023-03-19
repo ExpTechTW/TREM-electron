@@ -667,9 +667,6 @@ TREM.MapArea2 = {
 			// for (let id0 = 0; id0 < Object.keys(max_intensity_list).length; id0++) {
 			// 	const key0 = Object.keys(max_intensity_list)[id0];
 			// 	const intensity = max_intensity_list[key0] ?? 1;
-			// 	console.log(key0);
-			// 	console.log(max_intensity_list[key0]);
-			// 	console.log(intensity);
 
 				for (let id = 0; id < Object.keys(TREM.Resources.areav2).length; id++) {
 					const key = Object.keys(TREM.Resources.areav2)[id];

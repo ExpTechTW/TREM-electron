@@ -137,6 +137,12 @@ function init() {
 							document.getElementById("api.key").type = "password";
 						else
 							document.getElementById("api.key").type = "text";
+
+					if (id == "exptech.pass.Hide")
+						if (setting[id])
+							document.getElementById("exptech.pass").type = "password";
+						else
+							document.getElementById("exptech.pass").type = "text";
 				}
 
 				if (id == "dev.mode")
@@ -494,10 +500,17 @@ function CheckSave(id) {
 function CheckHide(id) {
 	const value = document.getElementById(id).checked;
 
-	if (value)
-		document.getElementById("api.key").type = "password";
-	else
-		document.getElementById("api.key").type = "text";
+	if (id == "api.key.Hide")
+		if (value)
+			document.getElementById("api.key").type = "password";
+		else
+			document.getElementById("api.key").type = "text";
+
+	if (id == "exptech.pass.Hide")
+		if (value)
+			document.getElementById("exptech.pass").type = "password";
+		else
+			document.getElementById("exptech.pass").type = "text";
 	ipcRenderer.send("config:value", id, value);
 }
 
@@ -691,6 +704,185 @@ function tsunamiopen(checked, name) {
 		element.disabled = false;
 	else
 		element.disabled = true;
+}
+
+function signupemail() {
+	let data = {};
+	const exptech_name_value = document.getElementById("exptech.name").value;
+	const exptech_email_value = document.getElementById("exptech.email").value;
+	data = {
+		name  : exptech_name_value,
+		email : exptech_email_value,
+	};
+	axios.post("https://exptech.com.tw/api/v1/et/sign-up-email", data)
+		.then((response) => {
+			console.log(response);
+			if (response.data == "OK") {
+				document.getElementById("exptechState").innerHTML = "綁定電子郵件成功";
+				console.log("綁定電子郵件成功");
+			}
+		}).catch((error) => {
+			console.log(error);
+			if (error.response.data == "This email already in use!") {
+				document.getElementById("exptechState").innerHTML = "綁定電子郵件失敗(已使用)";
+				console.log("綁定電子郵件失敗(已使用)");
+			} else {
+				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+			}
+		});
+}
+
+function signup() {
+	let data = {};
+	const exptech_name_value = document.getElementById("exptech.name").value;
+	const exptech_pass_value = document.getElementById("exptech.pass").value;
+	const exptech_code_value = document.getElementById("exptech.code").value;
+	data = {
+		name : exptech_name_value,
+		pass : exptech_pass_value,
+		code : exptech_code_value,
+	};
+	axios.post("https://exptech.com.tw/api/v1/et/sign-up", data)
+		.then((response) => {
+			console.log(response);
+			if (response.data == "OK") {
+				document.getElementById("exptechState").innerHTML = "註冊成功";
+				console.log("註冊成功");
+			}
+		})
+		.catch((error) => {
+			console.log(error);
+			if (error.response.data == "Verify error!") {
+				document.getElementById("exptechState").innerHTML = "註冊驗證碼失敗";
+				console.log("註冊驗證碼失敗");
+			} else {
+				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+			}
+		});
+}
+
+function signin() {
+	let data = {};
+	const exptech_name_value = document.getElementById("exptech.name").value;
+	const exptech_pass_value = document.getElementById("exptech.pass").value;
+	data = {
+		name : exptech_name_value,
+		pass : exptech_pass_value,
+	};
+	axios.post("https://exptech.com.tw/api/v1/et/sign-in", data)
+		.then((response) => {
+			if (response.data) {
+				console.log(response.data.key);
+				ipcRenderer.send("config:value", "api.key", response.data.key);
+				document.getElementById("exptechState").innerHTML = "登入成功";
+				console.log("登入成功");
+			}
+		})
+		.catch((error) => {
+			console.log(error);
+			if (error.response.data == "Can't find this account!") {
+				document.getElementById("exptechState").innerHTML = "登入失敗(名稱找不到)";
+				console.log("登入失敗(找不到)");
+			} else {
+				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+			}
+		});
+}
+
+function forgetemail() {
+	let data = {};
+	const exptech_name_value = document.getElementById("exptech.name").value;
+	const exptech_email_value = document.getElementById("exptech.email").value;
+	data = {
+		name  : exptech_name_value,
+		email : exptech_email_value,
+	};
+	axios.post("https://exptech.com.tw/api/v1/et/forget-email", data)
+		.then((response) => {
+			console.log(response);
+			if (response.data == "OK") {
+				document.getElementById("exptechState").innerHTML = "忘記密碼發送成功";
+				console.log("忘記密碼發送成功");
+			}
+		}).catch((error) => {
+			console.log(error);
+			if (error.response.data == "Name error!") {
+				document.getElementById("exptechState").innerHTML = "忘記密碼發送失敗(名稱錯誤)";
+				console.log("忘記密碼發送失敗(名稱錯誤)");
+			} else {
+				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+			}
+		});
+}
+
+function forget() {
+	let data = {};
+	const exptech_name_value = document.getElementById("exptech.name").value;
+	const exptech_pass_value = document.getElementById("exptech.pass").value;
+	const exptech_code_value = document.getElementById("exptech.code").value;
+	data = {
+		name : exptech_name_value,
+		pass : exptech_pass_value,
+		code : exptech_code_value,
+	};
+	axios.post("https://exptech.com.tw/api/v1/et/forget", data)
+		.then((response) => {
+			console.log(response);
+			if (response.data == "OK") {
+				document.getElementById("exptechState").innerHTML = "重設密碼成功";
+				console.log("重設密碼成功");
+			}
+		})
+		.catch((error) => {
+			console.log(error);
+			if (error.response.data == "Verify error!") {
+				document.getElementById("exptechState").innerHTML = "重設密碼驗證碼失敗";
+				console.log("重設密碼驗證碼失敗");
+			} else {
+				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+			}
+		});
+}
+
+function balance() {
+	axios.get("https://exptech.com.tw/api/v1/et/balance?key=" + setting["api.key"])
+		.then((response) => {
+			console.log(response);
+			if (response.data) {
+				document.getElementById("exptechbalanceState").innerHTML = "查詢剩餘請求次數成功(剩餘" + response.data.balance + "次)";
+				console.log("查詢剩餘請求次數成功(剩餘" + response.data.balance + "次)");
+			}
+		})
+		.catch((error) => {
+			console.log(error);
+			document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+		});
+}
+
+function edit() {
+	let data = {};
+	const exptech_old_name_value = document.getElementById("exptech.old_name").value;
+	const exptech_old_pass_value = document.getElementById("exptech.old_pass").value;
+	const exptech_new_name_value = document.getElementById("exptech.new_name").value;
+	const exptech_new_pass_value = document.getElementById("exptech.new_pass").value;
+	data = {
+		old_name : exptech_old_name_value,
+		old_pass : exptech_old_pass_value,
+		new_name : exptech_new_name_value,
+		new_pass : exptech_new_pass_value,
+	};
+	axios.post("https://exptech.com.tw/api/v1/et/edit", data)
+		.then((response) => {
+			console.log(response);
+			if (response.data == "OK") {
+				document.getElementById("exptecheditState").innerHTML = "重設帳戶資訊成功";
+				console.log("重設帳戶資訊成功");
+			}
+		})
+		.catch((error) => {
+			console.log(error);
+			document.getElementById("exptecheditState").innerHTML = "未知錯誤(請聯絡開發者)";
+		});
 }
 
 function send() {
