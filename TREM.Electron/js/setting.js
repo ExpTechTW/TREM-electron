@@ -717,12 +717,14 @@ function signupemail() {
 	axios.post("https://exptech.com.tw/api/v1/et/sign-up-email", data)
 		.then((response) => {
 			console.log(response);
+
 			if (response.data == "OK") {
 				document.getElementById("exptechState").innerHTML = "綁定電子郵件成功";
 				console.log("綁定電子郵件成功");
 			}
 		}).catch((error) => {
 			console.log(error);
+
 			if (error.response.data == "This email already in use!") {
 				document.getElementById("exptechState").innerHTML = "綁定電子郵件失敗(已使用)";
 				console.log("綁定電子郵件失敗(已使用)");
@@ -745,6 +747,7 @@ function signup() {
 	axios.post("https://exptech.com.tw/api/v1/et/sign-up", data)
 		.then((response) => {
 			console.log(response);
+
 			if (response.data == "OK") {
 				document.getElementById("exptechState").innerHTML = "註冊成功";
 				console.log("註冊成功");
@@ -752,6 +755,7 @@ function signup() {
 		})
 		.catch((error) => {
 			console.log(error);
+
 			if (error.response.data == "Verify error!") {
 				document.getElementById("exptechState").innerHTML = "註冊驗證碼失敗";
 				console.log("註冊驗證碼失敗");
@@ -780,6 +784,7 @@ function signin() {
 		})
 		.catch((error) => {
 			console.log(error);
+
 			if (error.response.data == "Can't find this account!") {
 				document.getElementById("exptechState").innerHTML = "登入失敗(名稱找不到)";
 				console.log("登入失敗(找不到)");
@@ -800,12 +805,14 @@ function forgetemail() {
 	axios.post("https://exptech.com.tw/api/v1/et/forget-email", data)
 		.then((response) => {
 			console.log(response);
+
 			if (response.data == "OK") {
 				document.getElementById("exptechState").innerHTML = "忘記密碼發送成功";
 				console.log("忘記密碼發送成功");
 			}
 		}).catch((error) => {
 			console.log(error);
+
 			if (error.response.data == "Name error!") {
 				document.getElementById("exptechState").innerHTML = "忘記密碼發送失敗(名稱錯誤)";
 				console.log("忘記密碼發送失敗(名稱錯誤)");
@@ -828,6 +835,7 @@ function forget() {
 	axios.post("https://exptech.com.tw/api/v1/et/forget", data)
 		.then((response) => {
 			console.log(response);
+
 			if (response.data == "OK") {
 				document.getElementById("exptechState").innerHTML = "重設密碼成功";
 				console.log("重設密碼成功");
@@ -835,6 +843,7 @@ function forget() {
 		})
 		.catch((error) => {
 			console.log(error);
+
 			if (error.response.data == "Verify error!") {
 				document.getElementById("exptechState").innerHTML = "重設密碼驗證碼失敗";
 				console.log("重設密碼驗證碼失敗");
@@ -848,6 +857,7 @@ function balance() {
 	axios.get("https://exptech.com.tw/api/v1/et/balance?key=" + setting["api.key"])
 		.then((response) => {
 			console.log(response);
+
 			if (response.data) {
 				document.getElementById("exptechbalanceState").innerHTML = "查詢剩餘請求次數成功(剩餘" + response.data.balance + "次)";
 				console.log("查詢剩餘請求次數成功(剩餘" + response.data.balance + "次)");
@@ -874,6 +884,7 @@ function edit() {
 	axios.post("https://exptech.com.tw/api/v1/et/edit", data)
 		.then((response) => {
 			console.log(response);
+
 			if (response.data == "OK") {
 				document.getElementById("exptecheditState").innerHTML = "重設帳戶資訊成功";
 				console.log("重設帳戶資訊成功");

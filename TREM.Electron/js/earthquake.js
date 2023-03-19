@@ -664,9 +664,9 @@ TREM.MapArea2 = {
 			for (const areav2 of Json.area) {
 				const intensity = this.cache.get(areav2) ?? 1;
 
-			// for (let id0 = 0; id0 < Object.keys(max_intensity_list).length; id0++) {
-			// 	const key0 = Object.keys(max_intensity_list)[id0];
-			// 	const intensity = max_intensity_list[key0] ?? 1;
+				// for (let id0 = 0; id0 < Object.keys(max_intensity_list).length; id0++) {
+				// 	const key0 = Object.keys(max_intensity_list)[id0];
+				// 	const intensity = max_intensity_list[key0] ?? 1;
 
 				for (let id = 0; id < Object.keys(TREM.Resources.areav2).length; id++) {
 					const key = Object.keys(TREM.Resources.areav2)[id];
