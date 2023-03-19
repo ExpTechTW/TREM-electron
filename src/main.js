@@ -33,9 +33,9 @@ function createWindow() {
   MainWindow = new BrowserWindow({
     title          : "Taiwan Real-time Earthquake Monitoring",
     width          : 1280,
-    minWidth       : 1280,
+    minWidth       : 854,
     height         : 720,
-    minHeight      : 720,
+    minHeight      : 480,
     resizable      : true,
     frame          : false,
     show           : false,
@@ -50,14 +50,19 @@ function createWindow() {
   ipcMain.on("win:maximize", () => MainWindow.maximize());
   ipcMain.on("win:unmaximize", () => MainWindow.unmaximize());
   ipcMain.on("win:close", () => MainWindow.close());
+  ipcMain.on("win:focus", () => MainWindow.show());
+  ipcMain.on("win:show", () => MainWindow.showInactive());
+  ipcMain.on("win:moveTop", () => {
+    MainWindow.setAlwaysOnTop(true);
+    MainWindow.setAlwaysOnTop(false);
+  });
+  ipcMain.on("win:flashFrame", (ev, state) => MainWindow.flashFrame(state));
   MainWindow.on("maximize", () => MainWindow.webContents.send("window-state-change", true));
   MainWindow.on("unmaximize", () => MainWindow.webContents.send("window-state-change", false));
-
 
   process.env.window = MainWindow.id;
   // MainWindow.loadFile("./views/index.html");
   MainWindow.loadURL("http://localhost:1234/");
-  MainWindow.setAspectRatio(16 / 9);
   // MainWindow.setMenu(null);
   MainWindow.webContents.on("did-finish-load", () => {
 

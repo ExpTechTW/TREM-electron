@@ -14,6 +14,18 @@ contextBridge.exposeInMainWorld("electron", {
     close() {
       ipcRenderer.send("win:close");
     },
+    focus() {
+      ipcRenderer.send("win:focus");
+    },
+    show() {
+      ipcRenderer.send("win:show");
+    },
+    moveTop() {
+      ipcRenderer.send("win:moveTop");
+    },
+    flashFrame(state) {
+      ipcRenderer.send("win:flashFrame", state);
+    },
     onStateChanged(callback) {
       ipcRenderer.on("window-state-change", callback);
     }

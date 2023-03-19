@@ -46,15 +46,31 @@ class Wave {
       this._svg.appendChild(this._circle);
     }
 
+    let time;
 
     if (icon) {
       this._cross = cross({ scale: 0.3 });
       this._cross.style.translate = `${centerPx.x - 11.4}px ${centerPx.y - 11.4}px`;
 
+      const anims = document.getAnimations();
+
+      for (let i = 0; i < anims.length; i++)
+        if (anims[i].animationName == "blink")
+          if (anims[i].currentTime) {
+            time = anims[i].currentTime;
+            break;
+          }
+
       this._svg.appendChild(this._cross);
     }
 
     this.map.getCanvasContainer().appendChild(this._svg);
+
+    const anims = document.getAnimations();
+
+    for (let i = 0; i < anims.length; i++)
+      if (anims[i].animationName == "blink")
+        if (time) anims[i].currentTime = time;
 
     this.map.on("move", this._updateCircle.bind(this));
     this.map.on("zoom", this._updateCircle.bind(this));

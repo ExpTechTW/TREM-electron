@@ -1,9 +1,17 @@
+import { Map as maplibreMap } from "maplibre-gl";
 import region from "../../assets/json/region.json";
 import Distance from "../helpers/distance";
 import calcPGA from "../helpers/pga";
 import Wave from "./wave";
 
 class EEW {
+
+  /**
+   *
+   * @param {*} data
+   * @param {maplibreMap} map
+   * @param {boolean} waves
+   */
   constructor(data, map, waves = false) {
     this.hasWaves = waves;
     this._map = map;
@@ -80,6 +88,14 @@ class EEW {
         this.#evalWaveDistances();
 
       this.#createWaveCircles();
+
+      if (localStorage.getItem("eew.showWindow") == "true") {
+        window.electron.browserWindow.focus();
+        window.electron.browserWindow.flashFrame(true);
+
+        if (localStorage.getItem("eew.windowTop"))
+          window.electron.browserWindow.moveTop();
+      }
     }
 
     this.version = data.number;
@@ -95,13 +111,19 @@ class EEW {
         const pga = calcPGA(
           this.magnitude,
           d,
-          true ? l.siteEffect : undefined,
+          localStorage.getItem("eew.useSiteEffect") == "true" ? l.siteEffect : undefined,
         );
 
         const i = pga.toIntensity();
 
-        if (city == "雲林縣" && town == "斗六市")
+        if (city == localStorage.getItem("eew.localCity") && town == localStorage.getItem("eew.localTown"))
           this._local = l;
+
+        if (this.source == "中央氣象局")
+          this._map.setFeatureState({
+            source : "tw_town",
+            id     : l.code,
+          }, { intensity: i.value });
 
         this._expected.set(l.code, { distance: d, intensity: i, pga });
       }
@@ -165,7 +187,7 @@ class EEW {
         this.s = new Wave(this._map, { type: "s", center: this.epicenter.toLngLatArray(), radius: 0, icon: false });
 
       if (this.hasWaves) {
-        this._waveSpeed = { p: 7, s: 4 };
+        this._waveSpeed = { p: 6.5, s: 3.5 };
 
         this._waveTick = () => {
           const apiTime = this._map.serverTimestamp + Date.now() - this._map.localServerTimestamp;

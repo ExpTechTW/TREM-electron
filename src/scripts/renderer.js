@@ -7,10 +7,15 @@ import ExptechAPI from "./api";
 import Wave from "./classes/wave";
 import EEW from "./classes/eew";
 
+const setting = {};
+
 const timer = {};
 const grad_i = chroma
   .scale(["#0500A3", "#00ceff", "#33ff34", "#fdff32", "#ff8532", "#fc5235", "#c03e3c", "#9b4544", "#9a4c86", "#b720e9"])
   .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+const grad_v = chroma
+  .scale(["#0500A3", "#00ceff", "#33ff34", "#fdff32", "#ff8532", "#fc5235", "#c03e3c", "#9b4544", "#9a4c86", "#b720e9"])
+  .domain([0, 0.8, 2.5, 8.0, 25, 80, 120, 250, 340, 400]);
 const exptech = new ExptechAPI();
 
 const ready = async () => {
@@ -29,9 +34,13 @@ const ready = async () => {
   };
 
   const map = new maplibregl.Map({
-    container : "map",
-    center    : [120.5, 23.6],
-    zoom      : 6.75
+    container         : "map",
+    center            : [120.5, 23.6],
+    zoom              : 6.75,
+    maxPitch          : 0,
+    pitchWithRotate   : false,
+    dragRotate        : false,
+    renderWorldCopies : false
   });
 
   map.on("click", () => map.panTo([120.5, 23.6], {
@@ -44,6 +53,12 @@ const ready = async () => {
     tolerance : 1.2
   });
 
+  map.addSource("tw_town", {
+    type      : "geojson",
+    data      : geojson.tw_town,
+    tolerance : 1
+  });
+
   map.addLayer({
     id     : "tw_county",
     type   : "fill",
@@ -52,6 +67,81 @@ const ready = async () => {
     paint  : {
       "fill-color"   : "#d0bcff",
       "fill-opacity" : 0.1,
+    },
+  });
+
+  map.addLayer({
+    id     : "tw_town",
+    type   : "fill",
+    source : "tw_town",
+    paint  : {
+      "fill-color": [
+        "match",
+        [
+          "coalesce",
+          ["feature-state", "intensity"],
+          0,
+        ],
+        9,
+        setting["theme.customColor"] ? setting["theme.int.9"]
+          : "#862DB3",
+        8,
+        setting["theme.customColor"] ? setting["theme.int.8"]
+          : "#DB1F1F",
+        7,
+        setting["theme.customColor"] ? setting["theme.int.7"]
+          : "#F55647",
+        6,
+        setting["theme.customColor"] ? setting["theme.int.6"]
+          : "#DB641F",
+        5,
+        setting["theme.customColor"] ? setting["theme.int.5"]
+          : "#E68439",
+        4,
+        setting["theme.customColor"] ? setting["theme.int.4"]
+          : "#E8D630",
+        3,
+        setting["theme.customColor"] ? setting["theme.int.3"]
+          : "#7BA822",
+        2,
+        setting["theme.customColor"] ? setting["theme.int.2"]
+          : "#2774C2",
+        1,
+        setting["theme.customColor"] ? setting["theme.int.1"]
+          : "#757575",
+        "transparent",
+      ],
+      "fill-outline-color": [
+        "case",
+        [
+          ">",
+          [
+            "coalesce",
+            ["feature-state", "intensity"],
+            0,
+          ],
+          0,
+        ],
+        "#D0BCFF",
+        "transparent",
+      ],
+      "fill-opacity": [
+        "case",
+        [
+          ">",
+          [
+            "coalesce",
+            ["feature-state", "intensity"],
+            0,
+          ],
+          0,
+        ],
+        1,
+        0,
+      ],
+    },
+    layout: {
+      visibility: "visible",
     },
   });
 
@@ -183,8 +273,9 @@ const ready = async () => {
   const chartAlerted = [];
 
   const rts = (rts_data) => {
-    let max = { id: null, i: -4 };
-    let min = { id: null, i: 8 };
+    const type = localStorage.getItem("rts.type");
+    let max = { id: null, i: -4, v: 0 };
+    let min = { id: null, i: 8, v: 800 };
     let sum = 0;
     let count = 0;
     const area = {};
@@ -201,13 +292,32 @@ const ready = async () => {
           if (!el.classList.contains("has-data"))
             el.classList.add("has-data");
 
-          el.style.backgroundColor = grad_i(rts_data[id].i);
+          switch (type) {
+            case "pga": {
+              el.style.backgroundColor = grad_v(rts_data[id].v);
 
-          if (rts_data[id].i > max.i) max = { id, i: rts_data[id].i };
+              if (rts_data[id].v > max.v) max = { id, i: rts_data[id].i, v: rts_data[id].v };
 
-          if (rts_data[id].i < min.i) min = { id, i: rts_data[id].i };
+              if (rts_data[id].v < min.v) min = { id, i: rts_data[id].i, v: rts_data[id].v };
 
-          markers[id].getElement().style.zIndex = rts_data[id].i + 5;
+              markers[id].getElement().style.zIndex = rts_data[id].v + 5;
+              break;
+            }
+
+            case "int": {
+              el.style.backgroundColor = grad_i(rts_data[id].i);
+
+              if (rts_data[id].i > max.i) max = { id, i: rts_data[id].i, v: rts_data[id].v };
+
+              if (rts_data[id].i < min.i) min = { id, i: rts_data[id].i, v: rts_data[id].v };
+
+              markers[id].getElement().style.zIndex = rts_data[id].i + 5;
+              break;
+            }
+
+            default:
+              break;
+          }
 
           if (rts_data.Alert && rts_data[id].alert) {
             sum += rts_data[id].i;
@@ -290,7 +400,7 @@ const ready = async () => {
   // #region eew
 
   /**
-   * @type {Map<string, { p: Wave, s: Wave, e: EEW }>}
+   * @type {Map<string, { e: EEW }>}
    */
   const eewStore = new Map();
 
@@ -303,9 +413,8 @@ const ready = async () => {
     } else {
       const e = new EEW(eew_data, map, true);
       eewStore.set(eew_data.id, { e });
+      document.getElementById("nav-map").click();
     }
-
-    console.log(eew_data);
   };
 
   // #endregion
@@ -315,17 +424,54 @@ const ready = async () => {
   const navigator = document.getElementById("nav-report-list");
   navigator.append(createReportNavItem(data.reports));
 
-  navigator.navigate = (view) => {
-    const views = document.getElementById("view");
-    for (let i = 0, n = views.children.length;i < n;i++)
-      if (views.children[i].classList.contains("current"))
-        views.children[i].classList.remove("current");
+  navigator.navigate = function(viewName) {
+    const views = document.getElementsByClassName("current");
+    for (let i = 0, n = views.length; n > i; n--)
+      views[i].classList.remove("current");
 
-    view.classList.add("current");
+    document.getElementById(viewName).classList.add("current");
+    this.classList.add("current");
   };
 
-  document.getElementById("nav-map").addEventListener("click", () => navigator.navigate(document.getElementById("map-view")));
-  document.getElementById("nav-settings").addEventListener("click", () => navigator.navigate(document.getElementById("settings-view")));
+  /**
+   * @type {(this: HTMLElement, ev: MouseEvent) => void}
+   */
+  const onClickNavigate = function() {
+    navigator.navigate.call(this, this.getAttribute("target"));
+  };
+
+  document.getElementById("nav-map").addEventListener("click", onClickNavigate);
+  document.getElementById("nav-settings").addEventListener("click", onClickNavigate);
+
+  // #endregion
+
+  // #region settings
+
+  // init components
+  // radio
+  document
+    .querySelectorAll("input[type=\"radio\"]")
+    .forEach((element, key, parent) => {
+      if (localStorage.getItem(element.getAttribute("key")) == element.value)
+        element.checked = true;
+
+      element.addEventListener("click", function() {
+        console.log(this.getAttribute("key"));
+        localStorage.setItem(this.getAttribute("key"), this.value);
+      });
+    });
+
+  // switch
+  document
+    .querySelectorAll("input[type=\"checkbox\"]")
+    .forEach((element) => {
+      if (localStorage.getItem(element.getAttribute("key")) == "true")
+        element.checked = true;
+
+      element.addEventListener("click", function() {
+        localStorage.setItem(this.getAttribute("key"), this.checked);
+      });
+    });
 
   // #endregion
 };

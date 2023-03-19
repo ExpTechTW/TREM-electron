@@ -4,6 +4,8 @@ const cross = (options) => {
   if ("className" in options)
     options.className.split(" ").forEach(group.classList.add);
 
+  group.classList.add("blink");
+
   if ("scale" in options)
     group.style.scale = options.scale;
 
