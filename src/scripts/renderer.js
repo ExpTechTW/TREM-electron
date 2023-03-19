@@ -1,10 +1,10 @@
 import { argbFromHex, themeFromSourceColor, applyTheme } from "@material/material-color-utilities";
 import maplibregl from "maplibre-gl";
 import geojson from "../assets/json/geojson";
+import region from "../assets/json/region.json";
 import constants from "./constants";
 import chroma from "chroma-js";
 import ExptechAPI from "./api";
-import Wave from "./classes/wave";
 import EEW from "./classes/eew";
 
 const setting = {};
@@ -29,8 +29,9 @@ const ready = async () => {
     /**
      * @type {Record<string, Station>} stations
      */
-    stations : {},
-    reports  : await exptech.v1.earthquake.getReports(60)
+    stations    : {},
+    reports     : await exptech.v1.earthquake.getReports(60),
+    regionNames : {}
   };
 
   const map = new maplibregl.Map({
@@ -413,6 +414,15 @@ const ready = async () => {
     } else {
       const e = new EEW(eew_data, map, true);
       eewStore.set(eew_data.id, { e });
+
+      if (localStorage.getItem("eew.showWindow") == "true") {
+        window.electron.browserWindow.show();
+        window.electron.browserWindow.flashFrame(true);
+
+        if (localStorage.getItem("eew.windowTop"))
+          window.electron.browserWindow.moveTop();
+      }
+
       document.getElementById("nav-map").click();
     }
   };
@@ -472,6 +482,70 @@ const ready = async () => {
         localStorage.setItem(this.getAttribute("key"), this.checked);
       });
     });
+
+  // combobox
+  document
+    .querySelectorAll("input.combobox[type=\"text\"]")
+    .forEach((element) => {
+      element.addEventListener("focus", function() {
+        const combos = [...element.nextSibling.childNodes]
+          .filter((v) => v.nodeName == "COMBO");
+
+        let index = combos.findIndex((v) => v.classList.contains("selected"));
+        this.nextSibling.style.top = `-${(index < 0 ? 0 : index) * 42 + 6}px`;
+
+        while (this.nextSibling.getBoundingClientRect().top < 0 && index > 0) {
+          index--;
+          this.nextSibling.style.top = `-${index * 42 + 6}px`;
+        }
+
+        this.nextSibling.style.visibility = "visible";
+      });
+      element.addEventListener("blur", function() {
+        setTimeout(() => (this.nextSibling.style.visibility = ""), 100);
+      });
+    });
+
+  const makeComboBox = (el) => {
+    el.addEventListener("click", function() {
+      el.parentElement.previousElementSibling.value = this.innerText;
+      el.parentElement.previousElementSibling.dispatchEvent(new Event("change"));
+      el.parentElement.childNodes.forEach((element) => element.classList.remove("selected"));
+      this.classList.add("selected");
+      el.parentElement.previousElementSibling.style.visibility = "";
+    });
+  };
+
+  // combobox: city and town options
+  for (const city in region) {
+    data.regionNames[city] ??= [];
+    for (const town in region[city])
+      data.regionNames[city].push(town);
+  }
+
+  document.getElementById("location-city").value = localStorage.getItem("location.city") ?? "";
+  document.getElementById("location-city").nextElementSibling.replaceChildren(createComboOption(Object.keys(data.regionNames)));
+  document.getElementById("location-city").nextElementSibling.childNodes.forEach(makeComboBox);
+
+  if (data.regionNames[localStorage.getItem("location.city")].includes(localStorage.getItem("location.town"))) {
+    document.getElementById("location-town").value = localStorage.getItem("location.town");
+    document.getElementById("location-town").nextElementSibling.replaceChildren(createComboOption(data.regionNames[localStorage.getItem("location.city")]));
+    document.getElementById("location-town").nextElementSibling.childNodes.forEach(makeComboBox);
+  }
+
+  document.getElementById("location-city").addEventListener("change", function() {
+    localStorage.setItem(this.getAttribute("key"), this.value);
+    document.getElementById("location-town").value = "";
+    document.getElementById("location-town").nextElementSibling.replaceChildren(createComboOption(data.regionNames[this.value]));
+    document.getElementById("location-town").nextElementSibling.childNodes.forEach(makeComboBox);
+  });
+
+  document.getElementById("location-town").addEventListener("change", function() {
+    console.log("change", this.value);
+
+    if (data.regionNames[localStorage.getItem("location.city")].includes(this.value))
+      localStorage.setItem(this.getAttribute("key"), this.value);
+  });
 
   // #endregion
 };
@@ -539,6 +613,26 @@ const createReportNavItem = (reports = []) => {
     reports.forEach(report => frag.append(makeButton(report)));
   else
     frag.append(makeButton(reports));
+
+  return frag;
+};
+
+const createComboOption = (values) => {
+  const frag = document.createDocumentFragment();
+
+  const makeCombo = (val) => {
+    const button = document.createElement("combo");
+    button.className = `combo${localStorage.getItem("location.city") == val || localStorage.getItem("location.town") == val ? " selected" : ""}`;
+    button.setAttribute("value", val);
+    button.innerText = val;
+
+    return button;
+  };
+
+  if (Array.isArray(values))
+    values.forEach(v => frag.append(makeCombo(v)));
+  else
+    frag.append(makeCombo(values));
 
   return frag;
 };

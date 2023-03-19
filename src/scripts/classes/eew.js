@@ -88,14 +88,6 @@ class EEW {
         this.#evalWaveDistances();
 
       this.#createWaveCircles();
-
-      if (localStorage.getItem("eew.showWindow") == "true") {
-        window.electron.browserWindow.focus();
-        window.electron.browserWindow.flashFrame(true);
-
-        if (localStorage.getItem("eew.windowTop"))
-          window.electron.browserWindow.moveTop();
-      }
     }
 
     this.version = data.number;
