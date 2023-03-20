@@ -11,17 +11,26 @@ combobox
   
   input
     height: 18px
-    padding: 8px 12px
+    padding: 8px 16px
     border: 0 
+    opacity: 1
     color: #fff
     background-color: #fff1
     font-family: $system-font
     font-size: 14px
     border-radius: 6px
     user-select: none
+    cursor: pointer
+    transition: background-color 100ms ease-out, opacity 100ms ease-out
   
     &:focus, &:focus-visible
       outline: none
+
+    &:hover
+      background-color: #fff2
+
+    &:active
+      opacity: 0.6
 
   > .combobox-items
     position: absolute
@@ -33,10 +42,16 @@ combobox
     color: #fff
     background-color: #333
     border-radius: 6px
-    visibility: hidden
+    opacity: 0
     box-shadow: 0px 0px 28px 0px #0006
+    pointer-events: none
+    transition: opacity 75ms ease-out
     z-index: 99999
   
+    &.show
+      opacity: 1
+      pointer-events: all
+
     > .combo
       display: flex
       align-items: center
@@ -45,6 +60,8 @@ combobox
       margin-bottom: 0
       padding: 8px 12px
       border-radius: 6px
+      cursor: pointer
+      transition: background-color 100ms ease-out
   
       &:last-child
         margin-bottom: 4px
@@ -71,3 +88,4 @@ combobox
     position: absolute
     right: 8px
     margin: 12px 0
+    pointer-events: none

@@ -6,9 +6,6 @@
 
 $system-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
 
-.material-symbols-rounded
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48
-
 ::-webkit-scrollbar
   width: 6px
   background-color: transparent
@@ -121,7 +118,7 @@ body.blur
           height: 14px
           width: 3px
           border-radius: 3px
-          background-color: #D0BCFF
+          background-color: AccentColor
 
     &::-webkit-scrollbar
       display: none
@@ -158,7 +155,9 @@ body.blur
   background-color: rgba(255, 255, 255, 0.06)
 
 .nav-item-icon
-  font-size: 16px
+  flex-shrink: 0
+  height: 18px
+  width: 18px
   margin: 12px
 
 .nav-item-sublabel
@@ -328,6 +327,12 @@ svg#svg-defs
   height: 0
   width: 0
   pointer-events: none
+
+svg
+  fill: none
+
+  > path
+    fill: #fff
 
 stop.alert-start
   stop-color: rgba(255, 0, 0, 0.01)

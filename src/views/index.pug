@@ -4,7 +4,6 @@ html(lang="zh-TW")
     meta(charset="UTF-8")
     meta(http-equiv="X-UA-Compatible" content="IE=edge")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    link(rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200")
     link(rel="stylesheet" href="../stylesheets/index.sass")
     link(rel="stylesheet" href="../node_modules/maplibre-gl/dist/maplibre-gl.css")
     title TREM
@@ -12,29 +11,29 @@ html(lang="zh-TW")
     div#app-container.has-bg
       header#titlebar
         button#hamburger-menu
-          span.nav-item-icon.material-symbols-rounded menu
+          svg.nav-item-icon(viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M2.753 18h18.5a.75.75 0 0 1 .102 1.493l-.102.007h-18.5a.75.75 0 0 1-.102-1.493L2.753 18h18.5-18.5Zm0-6.497h18.5a.75.75 0 0 1 .102 1.493l-.102.007h-18.5a.75.75 0 0 1-.102-1.493l.102-.007h18.5-18.5Zm-.001-6.5h18.5a.75.75 0 0 1 .102 1.493l-.102.007h-18.5A.75.75 0 0 1 2.65 5.01l.102-.007h18.5-18.5Z")/
         #title-container
           img(src="../assets/TREM.ico" alt="TREM Icon" id="app-icon" draggable="false")/
           span#title TREM 臺灣地震即時監測
         #action-container
           button#win-minimize
-            svg(width="14" height="14" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M3.755 12.5h16.492a.75.75 0 0 0 0-1.5H3.755a.75.75 0 0 0 0 1.5Z" fill="#ffffff")/
+            svg(width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M3.755 12.5h16.492a.75.75 0 0 0 0-1.5H3.755a.75.75 0 0 0 0 1.5Z")/
           button#win-maximize
-            svg(width="14" height="14" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M5.75 3h12.5A2.75 2.75 0 0 1 21 5.75v12.5A2.75 2.75 0 0 1 18.25 21H5.75A2.75 2.75 0 0 1 3 18.25V5.75A2.75 2.75 0 0 1 5.75 3Zm0 1.5c-.69 0-1.25.56-1.25 1.25v12.5c0 .69.56 1.25 1.25 1.25h12.5c.69 0 1.25-.56 1.25-1.25V5.75c0-.69-.56-1.25-1.25-1.25H5.75Z" fill="#ffffff")/
+            svg(width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M5.75 3h12.5A2.75 2.75 0 0 1 21 5.75v12.5A2.75 2.75 0 0 1 18.25 21H5.75A2.75 2.75 0 0 1 3 18.25V5.75A2.75 2.75 0 0 1 5.75 3Zm0 1.5c-.69 0-1.25.56-1.25 1.25v12.5c0 .69.56 1.25 1.25 1.25h12.5c.69 0 1.25-.56 1.25-1.25V5.75c0-.69-.56-1.25-1.25-1.25H5.75Z")/
           button#win-unmaximize(style="display: none;")
-            svg(width="14" height="14" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M7.518 5H6.009a3.25 3.25 0 0 1 3.24-3h8.001A4.75 4.75 0 0 1 22 6.75v8a3.25 3.25 0 0 1-3 3.24v-1.508a1.75 1.75 0 0 0 1.5-1.732v-8a3.25 3.25 0 0 0-3.25-3.25h-8A1.75 1.75 0 0 0 7.518 5ZM5.25 6A3.25 3.25 0 0 0 2 9.25v9.5A3.25 3.25 0 0 0 5.25 22h9.5A3.25 3.25 0 0 0 18 18.75v-9.5A3.25 3.25 0 0 0 14.75 6h-9.5ZM3.5 9.25c0-.966.784-1.75 1.75-1.75h9.5c.967 0 1.75.784 1.75 1.75v9.5a1.75 1.75 0 0 1-1.75 1.75h-9.5a1.75 1.75 0 0 1-1.75-1.75v-9.5Z" fill="#ffffff")/
+            svg(width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M7.518 5H6.009a3.25 3.25 0 0 1 3.24-3h8.001A4.75 4.75 0 0 1 22 6.75v8a3.25 3.25 0 0 1-3 3.24v-1.508a1.75 1.75 0 0 0 1.5-1.732v-8a3.25 3.25 0 0 0-3.25-3.25h-8A1.75 1.75 0 0 0 7.518 5ZM5.25 6A3.25 3.25 0 0 0 2 9.25v9.5A3.25 3.25 0 0 0 5.25 22h9.5A3.25 3.25 0 0 0 18 18.75v-9.5A3.25 3.25 0 0 0 14.75 6h-9.5ZM3.5 9.25c0-.966.784-1.75 1.75-1.75h9.5c.967 0 1.75.784 1.75 1.75v9.5a1.75 1.75 0 0 1-1.75 1.75h-9.5a1.75 1.75 0 0 1-1.75-1.75v-9.5Z")/
           button#win-close
-            svg(width="14" height="14" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="m4.397 4.554.073-.084a.75.75 0 0 1 .976-.073l.084.073L12 10.939l6.47-6.47a.75.75 0 1 1 1.06 1.061L13.061 12l6.47 6.47a.75.75 0 0 1 .072.976l-.073.084a.75.75 0 0 1-.976.073l-.084-.073L12 13.061l-6.47 6.47a.75.75 0 0 1-1.06-1.061L10.939 12l-6.47-6.47a.75.75 0 0 1-.072-.976l.073-.084-.073.084Z" fill="#ffffff")/
+            svg(width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="m4.397 4.554.073-.084a.75.75 0 0 1 .976-.073l.084.073L12 10.939l6.47-6.47a.75.75 0 1 1 1.06 1.061L13.061 12l6.47 6.47a.75.75 0 0 1 .072.976l-.073.084a.75.75 0 0 1-.976.073l-.084-.073L12 13.061l-6.47 6.47a.75.75 0 0 1-1.06-1.061L10.939 12l-6.47-6.47a.75.75 0 0 1-.072-.976l.073-.084-.073.084Z")/
       nav#navigator.expand
         .nav-item-container
           button#nav-map.nav-item.current(role="navigation" target="map-view")
-            span.nav-item-icon.material-symbols-rounded map
+            svg.nav-item-icon(viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="m9.203 4 .047-.002.046.001a.73.73 0 0 1 .067.007l.016.004c.086.014.17.044.252.092l.051.034 5.07 3.565L19.82 4.14a.75.75 0 0 1 1.174.51l.007.104v10.632a.75.75 0 0 1-.238.548l-.08.066-5.5 3.866a.744.744 0 0 1-.828.023L9.25 16.297l-5.07 3.565a.75.75 0 0 1-1.174-.51l-.007-.104V8.616a.75.75 0 0 1 .238-.548l.08-.066 5.5-3.866a.762.762 0 0 1 .2-.101l.122-.028.064-.008Zm10.298 2.197-4 2.812v8.799l4-2.812v-8.8ZM8.5 6.193l-4 2.812v8.8l4-2.813V6.193Zm1.502 0v8.8l4 2.811V9.005l-4-2.812Z")/
             span.nav-item-label 地圖
         hr
         .nav-item-container#nav-report-list
         .nav-item-container
           button#nav-settings.nav-item(role="navigation" target="settings-view")
-            span.nav-item-icon.material-symbols-rounded settings
+            svg.nav-item-icon(viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M12.012 2.25c.734.008 1.465.093 2.182.253a.75.75 0 0 1 .582.649l.17 1.527a1.384 1.384 0 0 0 1.927 1.116l1.401-.615a.75.75 0 0 1 .85.174 9.792 9.792 0 0 1 2.204 3.792.75.75 0 0 1-.271.825l-1.242.916a1.381 1.381 0 0 0 0 2.226l1.243.915a.75.75 0 0 1 .272.826 9.797 9.797 0 0 1-2.204 3.792.75.75 0 0 1-.848.175l-1.407-.617a1.38 1.38 0 0 0-1.926 1.114l-.169 1.526a.75.75 0 0 1-.572.647 9.518 9.518 0 0 1-4.406 0 .75.75 0 0 1-.572-.647l-.168-1.524a1.382 1.382 0 0 0-1.926-1.11l-1.406.616a.75.75 0 0 1-.849-.175 9.798 9.798 0 0 1-2.204-3.796.75.75 0 0 1 .272-.826l1.243-.916a1.38 1.38 0 0 0 0-2.226l-1.243-.914a.75.75 0 0 1-.271-.826 9.793 9.793 0 0 1 2.204-3.792.75.75 0 0 1 .85-.174l1.4.615a1.387 1.387 0 0 0 1.93-1.118l.17-1.526a.75.75 0 0 1 .583-.65c.717-.159 1.45-.243 2.201-.252Zm0 1.5a9.135 9.135 0 0 0-1.354.117l-.109.977A2.886 2.886 0 0 1 6.525 7.17l-.898-.394a8.293 8.293 0 0 0-1.348 2.317l.798.587a2.881 2.881 0 0 1 0 4.643l-.799.588c.32.842.776 1.626 1.348 2.322l.905-.397a2.882 2.882 0 0 1 4.017 2.318l.11.984c.889.15 1.798.15 2.687 0l.11-.984a2.881 2.881 0 0 1 4.018-2.322l.905.396a8.296 8.296 0 0 0 1.347-2.318l-.798-.588a2.881 2.881 0 0 1 0-4.643l.796-.587a8.293 8.293 0 0 0-1.348-2.317l-.896.393a2.884 2.884 0 0 1-4.023-2.324l-.11-.976a8.988 8.988 0 0 0-1.333-.117ZM12 8.25a3.75 3.75 0 1 1 0 7.5 3.75 3.75 0 0 1 0-7.5Zm0 1.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z")/
             span.nav-item-label 設定
       main#view
         #map-view.view-container.current
@@ -56,68 +55,69 @@ html(lang="zh-TW")
           #map
         #settings-view.view-container
           .view-header 設定
-          setting
-            .setting-container
-              svg.setting-icon(width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M5.843 4.568a8.707 8.707 0 1 1 12.314 12.314l-1.187 1.174c-.875.858-2.01 1.962-3.406 3.312a2.25 2.25 0 0 1-3.128 0l-3.491-3.396c-.439-.431-.806-.794-1.102-1.09a8.707 8.707 0 0 1 0-12.314Zm11.253 1.06A7.207 7.207 0 1 0 6.904 15.822L8.39 17.29a753.98 753.98 0 0 0 3.088 3 .75.75 0 0 0 1.043 0l3.394-3.3c.47-.461.863-.85 1.18-1.168a7.207 7.207 0 0 0 0-10.192ZM12 7.999a3.002 3.002 0 1 1 0 6.004 3.002 3.002 0 0 1 0-6.003Zm0 1.5a1.501 1.501 0 1 0 0 3.004 1.501 1.501 0 0 0 0-3.003Z" fill="#ffffff")/
-              .setting-label
-                .setting-header 所在地
-                .setting-description 設定所在地資訊可以用於計算預估震度
-              .setting-action-content
-                combobox
-                  input.combobox#location-city(type="text" key="location.city" readonly)/
-                  .combobox-items
-                  svg.combobox-arrow(width="12" height="12" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M4.22 8.47a.75.75 0 0 1 1.06 0L12 15.19l6.72-6.72a.75.75 0 1 1 1.06 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L4.22 9.53a.75.75 0 0 1 0-1.06Z" fill="#ffffff")/
-                combobox
-                  input.combobox#location-town(type="text" key="location.town" readonly)/
-                  .combobox-items
-                  svg.combobox-arrow(width="12" height="12" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M4.22 8.47a.75.75 0 0 1 1.06 0L12 15.19l6.72-6.72a.75.75 0 1 1 1.06 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L4.22 9.53a.75.75 0 0 1 0-1.06Z" fill="#ffffff")/
-          setting(expandable)
-            .setting-container
-              svg.setting-icon(width="28" height="28" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M9.5 21h5v-5h-5v5ZM16 21h1.75A3.25 3.25 0 0 0 21 17.75V16h-5v5ZM21 14.5v-5h-5v5h5ZM21 8V6.25A3.25 3.25 0 0 0 17.75 3H16v5h5ZM14.5 3h-5v5h5V3ZM8 3H6.25A3.25 3.25 0 0 0 3 6.25V8h5V3ZM3 9.5v5h5v-5H3ZM3 16v1.75A3.25 3.25 0 0 0 6.25 21H8v-5H3ZM14.5 9.5v5h-5v-5h5Z" fill="#ffffff")/
-              .setting-label
-                .setting-header 模式
-                .setting-description 地圖上顯示的資料
-            .setting-expand
-              radio
-                input#type-int(type="radio" name="type" key="rts.type" value="int")
-                label(for="type-int")
-                  .label-container
-                    .label-header 震度
-                    .label-description 使用震度資料來顯示測站
-              radio
-                input#type-pga(type="radio" name="type" key="rts.type" value="pga")
-                label(for="type-pga")
-                  .label-container
-                    .label-header 加速度
-                    .label-description 使用加速度資料來顯示測站加速度
-          setting
-            .setting-container
-              svg.setting-icon(width="28" height="28" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M3 6.25A3.25 3.25 0 0 1 6.25 3h11.5A3.25 3.25 0 0 1 21 6.25v11.5A3.25 3.25 0 0 1 17.75 21H6.25A3.25 3.25 0 0 1 3 17.75V6.25ZM6.25 4.5A1.75 1.75 0 0 0 4.5 6.25v.25h15v-.25a1.75 1.75 0 0 0-1.75-1.75H6.25ZM19.5 8h-15v9.75c0 .966.784 1.75 1.75 1.75h11.5a1.75 1.75 0 0 0 1.75-1.75V8Z" fill="#ffffff")/
-              .setting-label
-                .setting-header 顯示視窗
-                .setting-description 在強震即時警報發布時顯示視窗
-              .setting-action-content
-                switch
-                  input#eew-show-window(type="checkbox" key="eew.showWindow" name="eew-show-window")
-                  label(for="eew-show-window")
-                    .switch-on 啟用
-                    .switch-off 停用
-                    .track
-          setting
-            .setting-container
-              svg.setting-icon(width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg")
-                path(d="M11.272 7.25a.75.75 0 0 1 .75-.75h4.728a.75.75 0 0 1 .75.75v4.729a.75.75 0 0 1-1.5 0V9.06l-5.22 5.22a.75.75 0 1 1-1.06-1.061L14.94 8h-2.918a.75.75 0 0 1-.75-.75Z" fill="#ffffff")/
-                path(d="M6.157 5.25A3.251 3.251 0 0 1 9.25 3h8.5A3.25 3.25 0 0 1 21 6.25v8.588a3.251 3.251 0 0 1-2 3.001v.136c0 1.05-.53 1.845-1.309 2.344-.75.48-1.717.686-2.693.68h-.002l-4.077-.004H7c-1.157 0-2.164-.362-2.89-1.045-.727-.686-1.11-1.64-1.11-2.7V8.5c0-.865.216-1.683.734-2.296.534-.633 1.31-.954 2.222-.954h.2ZM6 6.75h-.044c-.544 0-.871.179-1.076.421-.22.262-.38.694-.38 1.329v8.75c0 .69.242 1.234.64 1.608.4.377 1.017.637 1.86.637h3.92L15 19.5h.004c.788.004 1.445-.166 1.878-.444.372-.238.582-.55.614-.968H9.25A3.25 3.25 0 0 1 6 14.838V6.75ZM9.25 4.5A1.75 1.75 0 0 0 7.5 6.25v8.588c0 .967.784 1.75 1.75 1.75h8.5a1.75 1.75 0 0 0 1.75-1.75V6.25a1.75 1.75 0 0 0-1.75-1.75h-8.5Z" fill="#ffffff")/
-              .setting-label
-                .setting-header 最上層顯示
-                .setting-description 顯示視窗時將視窗移至最上層
-              .setting-action-content
-                switch
-                  input#eew-window-top(type="checkbox" key="eew.windowTop" name="eew-window-top")
-                  label(for="eew-window-top")
-                    .switch-on 啟用
-                    .switch-off 停用
-                    .track
+          .setting-list
+            setting
+              .setting-container
+                svg.setting-icon(width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M5.843 4.568a8.707 8.707 0 1 1 12.314 12.314l-1.187 1.174c-.875.858-2.01 1.962-3.406 3.312a2.25 2.25 0 0 1-3.128 0l-3.491-3.396c-.439-.431-.806-.794-1.102-1.09a8.707 8.707 0 0 1 0-12.314Zm11.253 1.06A7.207 7.207 0 1 0 6.904 15.822L8.39 17.29a753.98 753.98 0 0 0 3.088 3 .75.75 0 0 0 1.043 0l3.394-3.3c.47-.461.863-.85 1.18-1.168a7.207 7.207 0 0 0 0-10.192ZM12 7.999a3.002 3.002 0 1 1 0 6.004 3.002 3.002 0 0 1 0-6.003Zm0 1.5a1.501 1.501 0 1 0 0 3.004 1.501 1.501 0 0 0 0-3.003Z")/
+                .setting-label
+                  .setting-header 所在地
+                  .setting-description 設定所在地資訊可以用於計算預估震度
+                .setting-action-content
+                  combobox
+                    input.combobox#location-city(type="text" key="location.city" readonly)/
+                    .combobox-items
+                    svg.combobox-arrow(width="12" height="12" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M4.22 8.47a.75.75 0 0 1 1.06 0L12 15.19l6.72-6.72a.75.75 0 1 1 1.06 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L4.22 9.53a.75.75 0 0 1 0-1.06Z")/
+                  combobox
+                    input.combobox#location-town(type="text" key="location.town" readonly)/
+                    .combobox-items
+                    svg.combobox-arrow(width="12" height="12" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M4.22 8.47a.75.75 0 0 1 1.06 0L12 15.19l6.72-6.72a.75.75 0 1 1 1.06 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L4.22 9.53a.75.75 0 0 1 0-1.06Z")/
+            setting(expandable)
+              .setting-container
+                svg.setting-icon(width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M9.5 21h5v-5h-5v5ZM16 21h1.75A3.25 3.25 0 0 0 21 17.75V16h-5v5ZM21 14.5v-5h-5v5h5ZM21 8V6.25A3.25 3.25 0 0 0 17.75 3H16v5h5ZM14.5 3h-5v5h5V3ZM8 3H6.25A3.25 3.25 0 0 0 3 6.25V8h5V3ZM3 9.5v5h5v-5H3ZM3 16v1.75A3.25 3.25 0 0 0 6.25 21H8v-5H3ZM14.5 9.5v5h-5v-5h5Z")/
+                .setting-label
+                  .setting-header 模式
+                  .setting-description 地圖上顯示的資料
+              .setting-expand
+                radio
+                  input#type-int(type="radio" name="type" key="rts.type" value="int")
+                  label(for="type-int")
+                    .label-container
+                      .label-header 震度
+                      .label-description 使用震度資料來顯示測站
+                radio
+                  input#type-pga(type="radio" name="type" key="rts.type" value="pga")
+                  label(for="type-pga")
+                    .label-container
+                      .label-header 加速度
+                      .label-description 使用加速度資料來顯示測站加速度
+            setting
+              .setting-container
+                svg.setting-icon(width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"): path(d="M3 6.25A3.25 3.25 0 0 1 6.25 3h11.5A3.25 3.25 0 0 1 21 6.25v11.5A3.25 3.25 0 0 1 17.75 21H6.25A3.25 3.25 0 0 1 3 17.75V6.25ZM6.25 4.5A1.75 1.75 0 0 0 4.5 6.25v.25h15v-.25a1.75 1.75 0 0 0-1.75-1.75H6.25ZM19.5 8h-15v9.75c0 .966.784 1.75 1.75 1.75h11.5a1.75 1.75 0 0 0 1.75-1.75V8Z")/
+                .setting-label
+                  .setting-header 顯示視窗
+                  .setting-description 在強震即時警報發布時顯示視窗
+                .setting-action-content
+                  switch
+                    input#eew-show-window(type="checkbox" key="eew.showWindow" name="eew-show-window")
+                    label(for="eew-show-window")
+                      .switch-on 啟用
+                      .switch-off 停用
+                      .track
+            setting
+              .setting-container
+                svg.setting-icon(width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg")
+                  path(d="M11.272 7.25a.75.75 0 0 1 .75-.75h4.728a.75.75 0 0 1 .75.75v4.729a.75.75 0 0 1-1.5 0V9.06l-5.22 5.22a.75.75 0 1 1-1.06-1.061L14.94 8h-2.918a.75.75 0 0 1-.75-.75Z")/
+                  path(d="M6.157 5.25A3.251 3.251 0 0 1 9.25 3h8.5A3.25 3.25 0 0 1 21 6.25v8.588a3.251 3.251 0 0 1-2 3.001v.136c0 1.05-.53 1.845-1.309 2.344-.75.48-1.717.686-2.693.68h-.002l-4.077-.004H7c-1.157 0-2.164-.362-2.89-1.045-.727-.686-1.11-1.64-1.11-2.7V8.5c0-.865.216-1.683.734-2.296.534-.633 1.31-.954 2.222-.954h.2ZM6 6.75h-.044c-.544 0-.871.179-1.076.421-.22.262-.38.694-.38 1.329v8.75c0 .69.242 1.234.64 1.608.4.377 1.017.637 1.86.637h3.92L15 19.5h.004c.788.004 1.445-.166 1.878-.444.372-.238.582-.55.614-.968H9.25A3.25 3.25 0 0 1 6 14.838V6.75ZM9.25 4.5A1.75 1.75 0 0 0 7.5 6.25v8.588c0 .967.784 1.75 1.75 1.75h8.5a1.75 1.75 0 0 0 1.75-1.75V6.25a1.75 1.75 0 0 0-1.75-1.75h-8.5Z")/
+                .setting-label
+                  .setting-header 最上層顯示
+                  .setting-description 顯示視窗時將視窗移至最上層
+                .setting-action-content
+                  switch
+                    input#eew-window-top(type="checkbox" key="eew.windowTop" name="eew-window-top")
+                    label(for="eew-window-top")
+                      .switch-on 啟用
+                      .switch-off 停用
+                      .track
     svg#svg-defs
       defs
         radialGradient#pred-gradient

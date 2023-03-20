@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, systemPreferences, nativeTheme } = require("electron");
 
 contextBridge.exposeInMainWorld("electron", {
   browserWindow: {

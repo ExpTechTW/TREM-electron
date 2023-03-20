@@ -487,7 +487,9 @@ const ready = async () => {
   document
     .querySelectorAll("input.combobox[type=\"text\"]")
     .forEach((element) => {
-      element.addEventListener("focus", function() {
+      element.addEventListener("mouseup", function(ev) {
+        ev.preventDefault();
+
         const combos = [...element.nextSibling.childNodes]
           .filter((v) => v.nodeName == "COMBO");
 
@@ -499,10 +501,10 @@ const ready = async () => {
           this.nextSibling.style.top = `-${index * 42 + 6}px`;
         }
 
-        this.nextSibling.style.visibility = "visible";
+        this.nextSibling.classList.add("show");
       });
       element.addEventListener("blur", function() {
-        setTimeout(() => (this.nextSibling.style.visibility = ""), 100);
+        setTimeout(() => this.nextSibling.classList.remove("show"), 100);
       });
     });
 
@@ -512,7 +514,7 @@ const ready = async () => {
       el.parentElement.previousElementSibling.dispatchEvent(new Event("change"));
       el.parentElement.childNodes.forEach((element) => element.classList.remove("selected"));
       this.classList.add("selected");
-      el.parentElement.previousElementSibling.style.visibility = "";
+      el.parentElement.previousElementSibling.classList.remove("show");
     });
   };
 
@@ -534,6 +536,10 @@ const ready = async () => {
   }
 
   document.getElementById("location-city").addEventListener("change", function() {
+    console.log(this.value, localStorage.getItem("location.city"));
+
+    if (this.value == localStorage.getItem("location.city")) return;
+
     localStorage.setItem(this.getAttribute("key"), this.value);
     document.getElementById("location-town").value = "";
     document.getElementById("location-town").nextElementSibling.replaceChildren(createComboOption(data.regionNames[this.value]));
@@ -564,7 +570,7 @@ const createReportNavItem = (reports = []) => {
     //     span.nav-item-sublabel 地震資訊
 
     const data = {
-      icon     : "description",
+      icon     : "numbered",
       label    : report.location,
       sublabel : report.originTime,
       number   : (report.earthquakeNo % 1000) ? report.earthquakeNo : null
@@ -579,9 +585,16 @@ const createReportNavItem = (reports = []) => {
     button.className = "nav-item";
     button.role = "navigation";
 
-    const icon = document.createElement("span");
-    icon.className = "nav-item-icon material-symbols-rounded";
-    icon.innerText = data.icon;
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("viewBox", "0 0 24 24");
+    icon.classList.add("nav-item-icon");
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", data.icon == "numbered"
+      ? "M10.987 2.89a.75.75 0 1 0-1.474-.28L8.494 7.999 3.75 8a.75.75 0 1 0 0 1.5l4.46-.002-.946 5-4.514.002a.75.75 0 0 0 0 1.5l4.23-.002-.967 5.116a.75.75 0 1 0 1.474.278l1.02-5.395 5.474-.002-.968 5.119a.75.75 0 1 0 1.474.278l1.021-5.398 4.742-.002a.75.75 0 1 0 0-1.5l-4.458.002.946-5 4.512-.002a.75.75 0 1 0 0-1.5l-4.229.002.966-5.104a.75.75 0 0 0-1.474-.28l-1.018 5.385-5.474.002.966-5.107Zm-1.25 6.608 5.474-.003-.946 5-5.474.002.946-5Z"
+      : "M12 1.999c5.524 0 10.002 4.478 10.002 10.002 0 5.523-4.478 10.001-10.002 10.001-5.524 0-10.002-4.478-10.002-10.001C1.998 6.477 6.476 1.999 12 1.999Zm0 1.5a8.502 8.502 0 1 0 0 17.003A8.502 8.502 0 0 0 12 3.5Zm-.004 7a.75.75 0 0 1 .744.648l.007.102.003 5.502a.75.75 0 0 1-1.493.102l-.007-.101-.003-5.502a.75.75 0 0 1 .75-.75ZM12 7.003a.999.999 0 1 1 0 1.997.999.999 0 0 1 0-1.997Z");
+
+    icon.append(path);
 
     const label_container = document.createElement("div");
     label_container.className = "nav-item-label-container";
