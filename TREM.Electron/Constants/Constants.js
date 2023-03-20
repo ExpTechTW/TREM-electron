@@ -264,6 +264,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"exptech.balance": {
+			type  : "number",
+			value : -1,
+		},
 		"webhook.url": {
 			type  : "string",
 			value : "",

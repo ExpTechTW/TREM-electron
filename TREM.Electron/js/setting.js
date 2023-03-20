@@ -765,6 +765,9 @@ function signup() {
 		});
 }
 
+let last_count = -1
+let balance_time = null;
+
 function signin() {
 	let data = {};
 	const exptech_name_value = document.getElementById("exptech.name").value;
@@ -778,8 +781,14 @@ function signin() {
 			if (response.data) {
 				console.log(response.data.key);
 				ipcRenderer.send("config:value", "api.key", response.data.key);
-				document.getElementById("exptechState").innerHTML = "登入成功";
-				console.log("登入成功");
+
+				if (!balance_time) {
+					balance();
+					balance_time = setInterval(() => balance(), 5000);
+					document.getElementById("exptechState").innerHTML = "登入成功(查詢開始執行)";
+				} else {
+					document.getElementById("exptechState").innerHTML = "登入成功(查詢已執行)";
+				}
 			}
 		})
 		.catch((error) => {
@@ -796,10 +805,8 @@ function signin() {
 
 function forgetemail() {
 	let data = {};
-	const exptech_name_value = document.getElementById("exptech.name").value;
 	const exptech_email_value = document.getElementById("exptech.email").value;
 	data = {
-		name  : exptech_name_value,
 		email : exptech_email_value,
 	};
 	axios.post("https://exptech.com.tw/api/v1/et/forget-email", data)
@@ -855,13 +862,47 @@ function forget() {
 
 function balance() {
 	axios.get("https://exptech.com.tw/api/v1/et/balance?key=" + setting["api.key"])
-		.then((response) => {
-			console.log(response);
+		.then((res) => {
+			// console.log(res);
 
-			if (response.data) {
-				document.getElementById("exptechbalanceState").innerHTML = "查詢剩餘請求次數成功(剩餘" + response.data.balance + "次)";
-				console.log("查詢剩餘請求次數成功(剩餘" + response.data.balance + "次)");
+			last_count = setting["exptech.balance"] ?? -1;
+			const utc = new Date();
+			const NOW = new Date(utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000);
+			const Now = NOW.getFullYear()
+			+ "-" + (NOW.getMonth() + 1)
+			+ "-" + NOW.getDate()
+			+ " " + NOW.getHours()
+			+ ":" + NOW.getMinutes()
+			+ ":" + NOW.getSeconds();
+
+			if (setting["exptech.balance"] == -1) last_count = res.data.balance;
+
+			if (last_count != -1) {
+				if (last_count) {
+					if (last_count - res.data.balance) {
+						let _time = (res.data.balance / ((last_count - res.data.balance) * 12)).toFixed(1)
+						let _time_string = ""
+						if (_time < 60) _time_string = `${_time}分鐘`
+						else {
+							_time = (_time / 60).toFixed(1)
+							if (_time < 24) _time_string = `${_time}小時`
+							else {
+								_time = (_time / 24).toFixed(1)
+								_time_string = `${_time}天`
+							}
+						}
+						document.getElementById("exptechbalanceState").innerHTML = `剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: ${_time_string}\n每分鐘用量: ${(last_count - res.data.balance) * 12}次\n查詢時間: ${Now}`;
+						console.log(`剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: ${_time_string}\n每分鐘用量: ${(last_count - res.data.balance) * 12}次\n查詢時間: ${Now}`);
+					} else {
+						document.getElementById("exptechbalanceState").innerHTML = `剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: 未使用\n每分鐘用量: 未使用\n查詢時間: ${Now}`;
+						console.log(`剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: 未使用\n每分鐘用量: 未使用\n查詢時間: ${Now}`);
+					}
+				} else {
+					document.getElementById("exptechbalanceState").innerHTML = `剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: 已用完\n每分鐘用量: 已用完\n查詢時間: ${Now}`;
+					console.log(`剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: 已用完\n每分鐘用量: 已用完\n查詢時間: ${Now}`);
+				}
 			}
+			ipcRenderer.send("config:value", "exptech.balance", res.data.balance);
 		})
 		.catch((error) => {
 			console.log(error);
