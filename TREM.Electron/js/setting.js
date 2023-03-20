@@ -779,8 +779,8 @@ function signin() {
 	axios.post("https://exptech.com.tw/api/v1/et/sign-in", data)
 		.then((response) => {
 			if (response.data) {
-				console.log(response.data.key);
-				ipcRenderer.send("config:value", "api.key", response.data.key);
+				console.log(response.data);
+				ipcRenderer.send("config:value", "exptech.token", response.data.token);
 
 				if (!balance_time) {
 					balance();
@@ -859,9 +859,9 @@ function forget() {
 }
 
 function balance() {
-	axios.get("https://exptech.com.tw/api/v1/et/balance?key=" + setting["api.key"])
+	axios.get("https://exptech.com.tw/api/v1/et/balance?token=" + setting["exptech.token"])
 		.then((res) => {
-			// console.log(res);
+			console.log(res.data);
 
 			last_count = setting["exptech.balance"] ?? -1;
 			const utc = new Date();
@@ -906,10 +906,117 @@ function balance() {
 				}
 
 			ipcRenderer.send("config:value", "exptech.balance", res.data.balance);
+			const key_list = document.getElementById("key_list");
+			key_list.innerHTML = "";
+
+			if (!Object.keys(res.data.key_list).length) key_list.style.display = "none";
+
+			for (let i = 0; i < Object.keys(res.data.key_list).length; i++) {
+				const key = Object.keys(res.data.key_list)[i];
+				const div_0 = document.createElement("div");
+				div_0.className = "option-label-description";
+				const span_1 = document.createElement("span");
+				span_1.className = "filled-tonal-button-label";
+				span_1.innerHTML = `${res.data.key_list[key].name} | ${res.data.key_list[key].count}次/60秒`;
+				const button = document.createElement("button");
+				button.className = "filled-tonal-button setting-button md3-ripple";
+				button.style = "margin-left: 9px;";
+
+				button.onclick = () => {
+					copy_key(key);
+				};
+
+				const span_2 = document.createElement("span");
+				span_2.className = "filled-tonal-button-label";
+				span_2.innerHTML = "複製金鑰";
+				const button_1 = document.createElement("button");
+				button_1.className = "filled-tonal-button setting-button md3-ripple";
+				button_1.style = "margin-left: 9px;";
+
+				button_1.onclick = () => {
+					remove_key(key);
+				};
+
+				const span_3 = document.createElement("span");
+				span_3.className = "filled-tonal-button-label";
+				span_3.innerHTML = "刪除金鑰";
+				const span_4 = document.createElement("span");
+				span_4.className = "filled-tonal-button-label";
+				span_4.id = key;
+				button.appendChild(span_2);
+				button_1.appendChild(span_3);
+				div_0.appendChild(span_1);
+				div_0.appendChild(button);
+				div_0.appendChild(button_1);
+				div_0.appendChild(span_4);
+				key_list.appendChild(div_0);
+			}
 		})
 		.catch((error) => {
 			console.log(error);
 			document.getElementById("exptechbalanceState").innerHTML = "未知錯誤(請聯絡開發者)";
+		});
+}
+
+function copy_key(key) {
+	ipcRenderer.send("config:value", "api.key", key);
+	navigator.clipboard.writeText(key).then(() => {
+		console.log(key);
+		console.log("複製成功");
+	});
+	document.getElementById(key).innerHTML = `${key} 複製成功!`;
+}
+
+function keyadd() {
+	const exptech_keyname_value = document.getElementById("exptech.keyname").value;
+	axios.get(`https://exptech.com.tw/api/v1/et/key-add?token=${setting["exptech.token"]}&name=${exptech_keyname_value}`)
+		.then((res) => {
+			console.log(res);
+			document.getElementById("exptechState").innerHTML = `${exptech_keyname_value} 金鑰新增成功!`;
+		})
+		.catch((err) => {
+			console.log(err);
+
+			const res = err.request.response;
+
+			if (res == "Can't find this account!") {
+				document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
+				console.log("找不到此帳戶!");
+			} else if (res == "Format error!") {
+				document.getElementById("exptechState").innerHTML = "格式 錯誤!";
+				console.log("格式 錯誤!");
+			} else if (res == "Invaild symbol!") {
+				document.getElementById("exptechState").innerHTML = "非法字符!";
+				console.log("非法字符!");
+			} else if (res == "Too many keys!") {
+				document.getElementById("exptechState").innerHTML = "金鑰數量已達上限!";
+				console.log("金鑰數量已達上限!");
+			} else {
+				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+				console.log("未知錯誤(請聯絡開發者)");
+			}
+		});
+}
+
+function remove_key(key) {
+	const exptech_keyname_value = document.getElementById("exptech.keyname").value;
+	axios.get(`https://exptech.com.tw/api/v1/et/key-remove?token=${setting["exptech.token"]}&key=${key}`)
+		.then((res) => {
+			console.log(res);
+			document.getElementById(key).innerHTML = `${key} 刪除成功!`;
+		})
+		.catch((err) => {
+			console.log(err);
+
+			const res = err.request.response;
+
+			if (res == "Can't find this account!") {
+				document.getElementById(key).innerHTML = "找不到此帳戶!";
+				console.log("找不到此帳戶!");
+			} else {
+				document.getElementById(key).innerHTML = "未知錯誤(請聯絡開發者)";
+				console.log("未知錯誤(請聯絡開發者)");
+			}
 		});
 }
 

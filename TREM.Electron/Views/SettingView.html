@@ -1848,9 +1848,14 @@
                                                     <span lang="zh-TW">忘記密碼</span>
                                                 </span>
                                             </button>
-                                            <button class="filled-tonal-button setting-button md3-ripple" id="forget" type="button" onclick="forget()" style="margin-top: 12px;left: 9px;">
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="forget" type="button" onclick="forget()" style="margin-top: 12px;left: 9px;margin-right: 9px;">
                                                 <span class="filled-tonal-button-label">
                                                     <span lang="zh-TW">重設密碼</span>
+                                                </span>
+                                            </button>
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="key-add" type="button" onclick="keyadd()" style="margin-top: 12px;left: 9px;">
+                                                <span class="filled-tonal-button-label">
+                                                    <span lang="zh-TW">新增金鑰</span>
                                                 </span>
                                             </button>
                                         </div>
@@ -1862,6 +1867,28 @@
                                                 <span id="exptechState">未發送</span>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="option-container input-field">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">金鑰名稱</span>
+                                                <span class="option-label-id">exptech.keyname</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">填入 金鑰名稱。</span>
+                                            </span>
+                                        </div>
+                                        <input class="input-field" id="exptech.keyname" type="text" placeholder="keyname" />
                                     </div>
                                     <div class="control-container" style="margin-left: 0;">
                                         <div class="option-container">
@@ -1879,6 +1906,7 @@
                                                 <span id="exptechbalanceState">未查詢</span>
                                             </div>
                                         </div>
+                                        <div class="option-label" id="key_list"></div>
                                     </div>
                                     <div class="option-container input-field">
                                         <div class="option-label">
