@@ -765,7 +765,7 @@ function signup() {
 		});
 }
 
-let last_count = -1
+let last_count = -1;
 let balance_time = null;
 
 function signin() {
@@ -804,11 +804,9 @@ function signin() {
 }
 
 function forgetemail() {
-	let data = {};
+	const data = {};
 	const exptech_email_value = document.getElementById("exptech.email").value;
-	data = {
-		email : exptech_email_value,
-	};
+	data.email = exptech_email_value;
 	axios.post("https://exptech.com.tw/api/v1/et/forget-email", data)
 		.then((response) => {
 			console.log(response);
@@ -877,20 +875,25 @@ function balance() {
 
 			if (setting["exptech.balance"] == -1) last_count = res.data.balance;
 
-			if (last_count != -1) {
+			if (last_count != -1)
 				if (last_count) {
 					if (last_count - res.data.balance) {
-						let _time = (res.data.balance / ((last_count - res.data.balance) * 12)).toFixed(1)
-						let _time_string = ""
-						if (_time < 60) _time_string = `${_time}分鐘`
-						else {
-							_time = (_time / 60).toFixed(1)
-							if (_time < 24) _time_string = `${_time}小時`
-							else {
-								_time = (_time / 24).toFixed(1)
-								_time_string = `${_time}天`
+						let _time = (res.data.balance / ((last_count - res.data.balance) * 12)).toFixed(1);
+						let _time_string = "";
+
+						if (_time < 60) {
+							_time_string = `${_time}分鐘`;
+						} else {
+							_time = (_time / 60).toFixed(1);
+
+							if (_time < 24) {
+								_time_string = `${_time}小時`;
+							} else {
+								_time = (_time / 24).toFixed(1);
+								_time_string = `${_time}天`;
 							}
 						}
+
 						document.getElementById("exptechbalanceState").innerHTML = `剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: ${_time_string}\n每分鐘用量: ${(last_count - res.data.balance) * 12}次\n查詢時間: ${Now}`;
 						console.log(`剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: ${_time_string}\n每分鐘用量: ${(last_count - res.data.balance) * 12}次\n查詢時間: ${Now}`);
 					} else {
@@ -901,7 +904,7 @@ function balance() {
 					document.getElementById("exptechbalanceState").innerHTML = `剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: 已用完\n每分鐘用量: 已用完\n查詢時間: ${Now}`;
 					console.log(`剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: 已用完\n每分鐘用量: 已用完\n查詢時間: ${Now}`);
 				}
-			}
+
 			ipcRenderer.send("config:value", "exptech.balance", res.data.balance);
 		})
 		.catch((error) => {
