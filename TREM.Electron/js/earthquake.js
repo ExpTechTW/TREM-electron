@@ -4116,19 +4116,28 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 		const info = intensity.raw.info;
 		const intensity1 = intensity.raw.intensity;
 		let description = "";
+		let city0 = "";
 
-		for (let index = 10, keys = Object.keys(intensity1), n = keys.length; index < n; index++) {
+		for (let index = 0, keys = Object.keys(intensity1), n = keys.length; index < n; index++) {
 			const intensity2 = Number(keys[index]);
 			const ids = intensity1[intensity2];
-			description += `${intensity2}級\n`;
+			description += `\n${intensity2}級\n`;
 
 			for (const city in TREM.Resources.region)
 				for (const town in TREM.Resources.region[city]) {
 					const loc = TREM.Resources.region[city][town];
 
-					for (const id of ids)
-						if (loc.id == id)
-							description += `${city} ${town}\n`;
+					for (const id of ids) {
+						if (loc.id == id && city0 == city) {
+							description += ` ${town}`;
+						} else if (loc.id == id && city0 == ""){
+							description += `${city} ${town}`;
+							city0 = city;
+						} else if (loc.id == id && city0 != city){
+							description += `\n${city} ${town}`;
+							city0 = city;
+						}
+					}
 				}
 		}
 
