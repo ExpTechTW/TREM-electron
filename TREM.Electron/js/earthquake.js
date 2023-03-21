@@ -1937,6 +1937,7 @@ async function init() {
 					"pa",
 					"va",
 					"ec",
+					"af",
 				]) {
 					Maps.report.addSource(`Source_${mapName}`, {
 						type      : "geojson",
@@ -2145,6 +2146,7 @@ async function init() {
 					"pa",
 					"va",
 					"ec",
+					"af",
 				])
 					if (setting["map." + mapName])
 						MapBases.report.push(`${mapName}`, L.geoJson.vt(MapData[mapName], {
@@ -2212,16 +2214,16 @@ async function init() {
 						let lon = eew[Object.keys(eew)[index]].lon;
 
 						if (km > 300000)
-							finalZoom += 5.25;
-
-						else if (km > 250000)
-							finalZoom += 5.5;
-
-						else if (km > 200000)
 							finalZoom += 6;
 
-						else if (km > 150000)
+						else if (km > 250000)
+							finalZoom += 6.25;
+
+						else if (km > 200000)
 							finalZoom += 6.5;
+
+						else if (km > 150000)
+							finalZoom += 6.75;
 
 						else if (km > 100000)
 							finalZoom += 7;
@@ -2258,30 +2260,31 @@ async function init() {
 					console.log(finalBounds.isEmpty());
 					const camera = Maps.main.cameraForBounds(finalBounds, { padding: { top: 0, right: 100, bottom: 100, left: 0 } });
 					TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
-				} else if (TREM.MapArea.cache.size) {
-					map_move_back = true;
-
-					for (const [ id ] of TREM.MapArea.cache) {
-						const points = TREM.Resources.area[id].map(latlng => pointFormatter(latlng[0], latlng[1], TREM.MapRenderingEngine));
-						console.log(points);
-						finalBounds.extend([points[0], points[2]]);
-					}
-
-					const canvas = Maps.main.getCanvas();
-
-					const camera = Maps.main.cameraForBounds(finalBounds, {
-						padding: {
-							bottom : canvas.height / 6,
-							left   : canvas.width / 3,
-							top    : canvas.height / 6,
-							right  : canvas.width / 5,
-						},
-						maxZoom: 8.5,
-					});
-
-					if (camera.zoom != Maps.main.getZoom() && !Maps.main.isEasing())
-						TREM.Earthquake.emit("focus", camera, true);
 				}
+				//  else if (TREM.MapArea.cache.size) {
+				// 	map_move_back = true;
+
+				// 	for (const [ id ] of TREM.MapArea.cache) {
+				// 		const points = TREM.Resources.area[id].map(latlng => pointFormatter(latlng[0], latlng[1], TREM.MapRenderingEngine));
+				// 		console.log(points);
+				// 		finalBounds.extend([points[0], points[2]]);
+				// 	}
+
+				// 	const canvas = Maps.main.getCanvas();
+
+				// 	const camera = Maps.main.cameraForBounds(finalBounds, {
+				// 		padding: {
+				// 			bottom : canvas.height / 6,
+				// 			left   : canvas.width / 3,
+				// 			top    : canvas.height / 6,
+				// 			right  : canvas.width / 5,
+				// 		},
+				// 		maxZoom: 8.5,
+				// 	});
+
+				// 	if (camera.zoom != Maps.main.getZoom() && !Maps.main.isEasing())
+				// 		TREM.Earthquake.emit("focus", camera, true);
+				// }
 			} else if (TREM.MapArea.cache.size) {
 				map_move_back = true;
 

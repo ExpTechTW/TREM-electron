@@ -138,6 +138,18 @@ function init() {
 						else
 							document.getElementById("api.key").type = "text";
 
+					if (id == "exptech.name.Hide")
+						if (setting[id])
+							document.getElementById("exptech.name").type = "password";
+						else
+							document.getElementById("exptech.name").type = "text";
+
+					if (id == "exptech.email.Hide")
+						if (setting[id])
+							document.getElementById("exptech.email").type = "password";
+						else
+							document.getElementById("exptech.email").type = "text";
+
 					if (id == "exptech.pass.Hide")
 						if (setting[id])
 							document.getElementById("exptech.pass").type = "password";
@@ -484,7 +496,8 @@ function CheckSave(id) {
 		|| id == "map.ta"
 		|| id == "map.pa"
 		|| id == "map.va"
-		|| id == "map.ec")
+		|| id == "map.ec"
+		|| id == "map.af")
 		$("#MAPReloadButton").fadeIn(100);
 
 	if (id == "compatibility.hwaccel")
@@ -505,6 +518,18 @@ function CheckHide(id) {
 			document.getElementById("api.key").type = "password";
 		else
 			document.getElementById("api.key").type = "text";
+
+	if (id == "exptech.name.Hide")
+		if (value)
+			document.getElementById("exptech.name").type = "password";
+		else
+			document.getElementById("exptech.name").type = "text";
+
+	if (id == "exptech.email.Hide")
+		if (value)
+			document.getElementById("exptech.email").type = "password";
+		else
+			document.getElementById("exptech.email").type = "text";
 
 	if (id == "exptech.pass.Hide")
 		if (value)
@@ -918,37 +943,56 @@ function balance() {
 				const span_1 = document.createElement("span");
 				span_1.className = "filled-tonal-button-label";
 				span_1.innerHTML = `${res.data.key_list[key].name} | ${res.data.key_list[key].count}次/60秒`;
+
 				const button = document.createElement("button");
 				button.className = "filled-tonal-button setting-button md3-ripple";
 				button.style = "margin-left: 9px;";
 
 				button.onclick = () => {
-					copy_key(key);
+					copy_key(key, res.data.key_list[key].name);
 				};
 
 				const span_2 = document.createElement("span");
 				span_2.className = "filled-tonal-button-label";
-				span_2.innerHTML = "複製金鑰";
+				span_2.innerHTML = "寫入金鑰";
+
 				const button_1 = document.createElement("button");
 				button_1.className = "filled-tonal-button setting-button md3-ripple";
 				button_1.style = "margin-left: 9px;";
 
 				button_1.onclick = () => {
-					remove_key(key);
+					clipboard_key(key, res.data.key_list[key].name);
 				};
 
 				const span_3 = document.createElement("span");
 				span_3.className = "filled-tonal-button-label";
-				span_3.innerHTML = "刪除金鑰";
+				span_3.innerHTML = "複製金鑰";
+
+				const button_2 = document.createElement("button");
+				button_2.className = "filled-tonal-button setting-button md3-ripple";
+				button_2.style = "margin-left: 9px;";
+
+				button_2.onclick = () => {
+					remove_key(key, res.data.key_list[key].name);
+				};
+
 				const span_4 = document.createElement("span");
 				span_4.className = "filled-tonal-button-label";
-				span_4.id = key;
+				span_4.innerHTML = "刪除金鑰";
+
+				const span_5 = document.createElement("span");
+				span_5.className = "filled-tonal-button-label";
+				span_5.id = key;
+				span_5.style = "margin-left: 9px;";
+
 				button.appendChild(span_2);
 				button_1.appendChild(span_3);
+				button_2.appendChild(span_4);
 				div_0.appendChild(span_1);
 				div_0.appendChild(button);
 				div_0.appendChild(button_1);
-				div_0.appendChild(span_4);
+				div_0.appendChild(button_2);
+				div_0.appendChild(span_5);
 				key_list.appendChild(div_0);
 			}
 		})
@@ -958,13 +1002,18 @@ function balance() {
 		});
 }
 
-function copy_key(key) {
+function copy_key(key, name) {
+	document.getElementById("api.key").value = key;
 	ipcRenderer.send("config:value", "api.key", key);
+	document.getElementById(key).innerHTML = `${name} 寫入成功!`;
+}
+
+function clipboard_key(key, name) {
 	navigator.clipboard.writeText(key).then(() => {
 		console.log(key);
 		console.log("複製成功");
 	});
-	document.getElementById(key).innerHTML = `${key} 複製成功!`;
+	document.getElementById(key).innerHTML = `${name} 複製剪貼簿成功!`;
 }
 
 function keyadd() {
@@ -998,12 +1047,12 @@ function keyadd() {
 		});
 }
 
-function remove_key(key) {
+function remove_key(key, name) {
 	const exptech_keyname_value = document.getElementById("exptech.keyname").value;
 	axios.get(`https://exptech.com.tw/api/v1/et/key-remove?token=${setting["exptech.token"]}&key=${key}`)
 		.then((res) => {
 			console.log(res);
-			document.getElementById(key).innerHTML = `${key} 刪除成功!`;
+			document.getElementById(key).innerHTML = `${name} 刪除成功!`;
 		})
 		.catch((err) => {
 			console.log(err);

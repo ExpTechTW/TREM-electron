@@ -52,6 +52,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"map.af": {
+			type  : "toggle",
+			value : false,
+		},
 		"general.locale": {
 			type  : "select",
 			value : "zh-TW",
@@ -259,6 +263,14 @@ const Constants = Object.freeze({
 		"exptech.pass": {
 			type  : "string",
 			value : "",
+		},
+		"exptech.name.Hide": {
+			type  : "toggle",
+			value : true,
+		},
+		"exptech.email.Hide": {
+			type  : "toggle",
+			value : true,
 		},
 		"exptech.pass.Hide": {
 			type  : "toggle",
