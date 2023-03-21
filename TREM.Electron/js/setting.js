@@ -426,7 +426,7 @@ function SelectSave(id) {
 		let loc = "";
 
 		for (let index = 0; index < Object.keys(station).length; index++) {
-			const num = Math.abs(Loc[1] - station[Object.keys(station)[index]].Lat, 2) + Math.pow(Loc[2] - station[Object.keys(station)[index]].Long, 2);
+			const num = Math.abs(Loc.latitude - station[Object.keys(station)[index]].Lat, 2) + Math.pow(Loc.longitude - station[Object.keys(station)[index]].Long, 2);
 
 			if (stamp == 0) {
 				stamp = num;
