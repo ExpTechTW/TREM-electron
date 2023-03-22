@@ -3501,8 +3501,8 @@ function ReportGET() {
 			controller.abort();
 		}, 2500);
 
-		if (!localStorage.fixReportGET0) {
-			localStorage.fixReportGET0 = 1;
+		if (!localStorage.fixReportGET_0) {
+			localStorage.fixReportGET_0 = 1;
 			storage.setItem("report_data", []);
 		}
 
