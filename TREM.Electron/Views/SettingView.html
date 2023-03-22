@@ -2950,28 +2950,6 @@
                                         </div>
                                         <input class="input-field" id="exptech.code" type="text" placeholder="code" />
                                     </div>
-                                    <div class="option-container input-field">
-                                        <div class="option-label">
-                                            <span class="option-label-title">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">金鑰名稱</span>
-                                                <span class="option-label-id">exptech.keyname</span>
-                                            </span>
-                                            <span class="option-label-description">
-                                                <span lang="en">?</span>
-                                                <span lang="ja">?</span>
-                                                <span lang="kr">?</span>
-                                                <span lang="ru">?</span>
-                                                <span lang="zh-CN">?</span>
-                                                <span lang="zh-TW">填入 金鑰名稱。</span>
-                                            </span>
-                                        </div>
-                                        <input class="input-field" id="exptech.keyname" type="text" placeholder="keyname" />
-                                    </div>
                                     <div class="control-container" style="margin-left: 0;">
                                         <div class="option-container">
                                             <button class="filled-tonal-button setting-button md3-ripple" id="sign-up-email" type="button" onclick="signupemail()" style="margin-top: 12px;">
@@ -2999,9 +2977,9 @@
                                                     <span lang="zh-TW">重設密碼</span>
                                                 </span>
                                             </button>
-                                            <button class="filled-tonal-button setting-button md3-ripple" id="key-add" type="button" onclick="keyadd()" style="margin-top: 12px;left: 9px;">
+                                            <button class="filled-tonal-button setting-button md3-ripple" id="key-add" type="button" onclick="keyreset()" style="margin-top: 12px;left: 9px;">
                                                 <span class="filled-tonal-button-label">
-                                                    <span lang="zh-TW">新增金鑰</span>
+                                                    <span lang="zh-TW">重置金鑰</span>
                                                 </span>
                                             </button>
                                         </div>
@@ -3021,16 +2999,23 @@
                                                     <span lang="zh-TW">查詢剩餘請求次數</span>
                                                 </span>
                                             </button>
+                                            <label class="md3 switch" style="margin-top: 12px;">
+                                                <input type="checkbox" id="api.ip.Hide" onclick="CheckHide('api.ip.Hide')">
+                                                <span class="slider">
+                                                    <span class="material-symbols-rounded icon">done</span>
+                                                </span>
+                                            </label>
                                         </div>
                                         <div class="option-label" style="margin-left: 30px;">
                                             <div class="option-label-title">
                                                 <span lang="zh-TW">查詢狀態</span>
                                             </div>
                                             <div class="option-label-description">
-                                                <span id="exptechbalanceState">未查詢</span>
+                                                <span id="exptechbalanceState">未查詢</span><br>
+                                                <span style="color: red;font-size: 12px;">根據即時用量計算 僅供參考</span>
                                             </div>
                                         </div>
-                                        <div class="option-label" id="key_list"></div>
+                                        <div class="option-label" id="ip_list"></div>
                                     </div>
                                     <div class="option-container input-field">
                                         <div class="option-label">
@@ -3364,7 +3349,7 @@
                                             </div>
                                             <div class="control">
                                                 <select id="tsunami.EN" name="tsunami.EN">
-                                                    <option value="">無</option>
+                                                    <option value="小於1公尺">小於1公尺</option>
                                                     <option value="1至3公尺">1至3公尺</option>
                                                     <option value="3至6公尺">3至6公尺</option>
                                                     <option value="大於6公尺">大於6公尺</option>
@@ -3390,7 +3375,7 @@
                                             </div>
                                             <div class="control">
                                                 <select id="tsunami.E" name="tsunami.E">
-                                                    <option value="">無</option>
+                                                    <option value="小於1公尺">小於1公尺</option>
                                                     <option value="1至3公尺">1至3公尺</option>
                                                     <option value="3至6公尺">3至6公尺</option>
                                                     <option value="大於6公尺">大於6公尺</option>
@@ -3416,7 +3401,7 @@
                                             </div>
                                             <div class="control">
                                                 <select id="tsunami.ES" name="tsunami.ES">
-                                                    <option value="">無</option>
+                                                    <option value="小於1公尺">小於1公尺</option>
                                                     <option value="1至3公尺">1至3公尺</option>
                                                     <option value="3至6公尺">3至6公尺</option>
                                                     <option value="大於6公尺">大於6公尺</option>
@@ -3442,7 +3427,7 @@
                                             </div>
                                             <div class="control">
                                                 <select id="tsunami.N" name="tsunami.N">
-                                                    <option value="">無</option>
+                                                    <option value="小於1公尺">小於1公尺</option>
                                                     <option value="1至3公尺">1至3公尺</option>
                                                     <option value="3至6公尺">3至6公尺</option>
                                                     <option value="大於6公尺">大於6公尺</option>
@@ -3468,7 +3453,7 @@
                                             </div>
                                             <div class="control">
                                                 <select id="tsunami.W" name="tsunami.W">
-                                                    <option value="">無</option>
+                                                    <option value="小於1公尺">小於1公尺</option>
                                                     <option value="1至3公尺">1至3公尺</option>
                                                     <option value="3至6公尺">3至6公尺</option>
                                                     <option value="大於6公尺">大於6公尺</option>
@@ -3494,7 +3479,7 @@
                                             </div>
                                             <div class="control">
                                                 <select id="tsunami.WS" name="tsunami.WS">
-                                                    <option value="">無</option>
+                                                    <option value="小於1公尺">小於1公尺</option>
                                                     <option value="1至3公尺">1至3公尺</option>
                                                     <option value="3至6公尺">3至6公尺</option>
                                                     <option value="大於6公尺">大於6公尺</option>

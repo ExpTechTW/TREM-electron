@@ -280,9 +280,9 @@ const Constants = Object.freeze({
 			type  : "number",
 			value : -1,
 		},
-		"exptech.token": {
-			type  : "string",
-			value : "",
+		"api.ip.Hide": {
+			type  : "toggle",
+			value : true,
 		},
 		"webhook.url": {
 			type  : "string",

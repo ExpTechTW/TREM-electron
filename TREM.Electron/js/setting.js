@@ -805,7 +805,7 @@ function signin() {
 		.then((response) => {
 			if (response.data) {
 				console.log(response.data);
-				ipcRenderer.send("config:value", "exptech.token", response.data.token);
+				ipcRenderer.send("config:value", "api.key", response.data.key);
 
 				if (!balance_time) {
 					balance();
@@ -884,7 +884,7 @@ function forget() {
 }
 
 function balance() {
-	axios.get("https://exptech.com.tw/api/v1/et/balance?token=" + setting["exptech.token"])
+	axios.get("https://exptech.com.tw/api/v1/et/balance?key=" + setting["api.key"])
 		.then((res) => {
 			console.log(res.data);
 
@@ -931,75 +931,55 @@ function balance() {
 				}
 
 			ipcRenderer.send("config:value", "exptech.balance", res.data.balance);
-			const key_list = document.getElementById("key_list");
-			key_list.innerHTML = "";
+			const ip_list = document.getElementById("ip_list");
+			ip_list.innerHTML = "";
+			const div = document.createElement("div");
+			div.className = "option-label-description";
+			div.innerHTML = `IP位置 | 最後使用時間 | 累計使用次數`;
+			ip_list.append(div);
 
-			if (!Object.keys(res.data.key_list).length) key_list.style.display = "none";
+			if (!Object.keys(res.data.ip_list).length) ip_list.style.display = "none";
 
-			for (let i = 0; i < Object.keys(res.data.key_list).length; i++) {
-				const key = Object.keys(res.data.key_list)[i];
+			for (let i = 0; i < Object.keys(res.data.ip_list).length; i++) {
+				const key = Object.keys(res.data.ip_list)[i];
 				const div_0 = document.createElement("div");
 				div_0.className = "option-label-description";
 				const span_1 = document.createElement("span");
 				span_1.className = "filled-tonal-button-label";
-				span_1.innerHTML = `${res.data.key_list[key].name} | ${res.data.key_list[key].count}次/60秒`;
 
-				const button = document.createElement("button");
-				button.className = "filled-tonal-button setting-button md3-ripple";
-				button.style = "margin-left: 9px;";
+				if (setting["api.ip.Hide"]) {
+					let _ip = [];
+					let IP = "";
+					if (key.includes(".")) {
+						_ip = key.split(".");
+						IP = `${_ip[0]}.xxx.${_ip[2]}.xxx`;
+					} else {
+						_ip = key.split(":");
+						IP = `${_ip[0]}:xxx:${_ip[2]}:xxx:${_ip[4]}:xxx:xxx:xxx`;
+					}
+					span_1.innerHTML = `${IP} | ${Full(res.data.ip_list[key].time)} | ${res.data.ip_list[key].count}`;
+				} else {
+					span_1.innerHTML = `${key} | ${Full(res.data.ip_list[key].time)} | ${res.data.ip_list[key].count}`;
+				}
 
-				button.onclick = () => {
-					copy_key(key, res.data.key_list[key].name);
-				};
-
-				const span_2 = document.createElement("span");
-				span_2.className = "filled-tonal-button-label";
-				span_2.innerHTML = "寫入金鑰";
-
-				const button_1 = document.createElement("button");
-				button_1.className = "filled-tonal-button setting-button md3-ripple";
-				button_1.style = "margin-left: 9px;";
-
-				button_1.onclick = () => {
-					clipboard_key(key, res.data.key_list[key].name);
-				};
-
-				const span_3 = document.createElement("span");
-				span_3.className = "filled-tonal-button-label";
-				span_3.innerHTML = "複製金鑰";
-
-				const button_2 = document.createElement("button");
-				button_2.className = "filled-tonal-button setting-button md3-ripple";
-				button_2.style = "margin-left: 9px;";
-
-				button_2.onclick = () => {
-					remove_key(key, res.data.key_list[key].name);
-				};
-
-				const span_4 = document.createElement("span");
-				span_4.className = "filled-tonal-button-label";
-				span_4.innerHTML = "刪除金鑰";
-
-				const span_5 = document.createElement("span");
-				span_5.className = "filled-tonal-button-label";
-				span_5.id = key;
-				span_5.style = "margin-left: 9px;";
-
-				button.appendChild(span_2);
-				button_1.appendChild(span_3);
-				button_2.appendChild(span_4);
 				div_0.appendChild(span_1);
-				div_0.appendChild(button);
-				div_0.appendChild(button_1);
-				div_0.appendChild(button_2);
-				div_0.appendChild(span_5);
-				key_list.appendChild(div_0);
+				ip_list.appendChild(div_0);
 			}
 		})
 		.catch((error) => {
 			console.log(error);
 			document.getElementById("exptechbalanceState").innerHTML = "未知錯誤(請聯絡開發者)";
 		});
+}
+
+function Full(time = Date.now()) {
+	const now = new Date(time);
+	return now.getFullYear() +
+		"/" + (now.getMonth() + 1) +
+		"/" + now.getDate() +
+		" " + now.getHours() +
+		":" + now.getMinutes() +
+		":" + now.getSeconds();
 }
 
 function copy_key(key, name) {
@@ -1016,12 +996,11 @@ function clipboard_key(key, name) {
 	document.getElementById(key).innerHTML = `${name} 複製剪貼簿成功!`;
 }
 
-function keyadd() {
-	const exptech_keyname_value = document.getElementById("exptech.keyname").value;
-	axios.get(`https://exptech.com.tw/api/v1/et/key-add?token=${setting["exptech.token"]}&name=${exptech_keyname_value}`)
+function keyreset() {
+	axios.get(`https://exptech.com.tw/api/v1/et/key-reset?key=${setting["api.key"]}`)
 		.then((res) => {
 			console.log(res);
-			document.getElementById("exptechState").innerHTML = `${exptech_keyname_value} 金鑰新增成功!`;
+			document.getElementById("exptechState").innerHTML = "金鑰重置成功!";
 		})
 		.catch((err) => {
 			console.log(err);
@@ -1031,15 +1010,6 @@ function keyadd() {
 			if (res == "Can't find this account!") {
 				document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
 				console.log("找不到此帳戶!");
-			} else if (res == "Format error!") {
-				document.getElementById("exptechState").innerHTML = "格式 錯誤!";
-				console.log("格式 錯誤!");
-			} else if (res == "Invaild symbol!") {
-				document.getElementById("exptechState").innerHTML = "非法字符!";
-				console.log("非法字符!");
-			} else if (res == "Too many keys!") {
-				document.getElementById("exptechState").innerHTML = "金鑰數量已達上限!";
-				console.log("金鑰數量已達上限!");
 			} else {
 				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
 				console.log("未知錯誤(請聯絡開發者)");
