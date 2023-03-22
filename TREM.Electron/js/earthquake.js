@@ -2334,16 +2334,16 @@ async function init() {
 							Zoom = 8;
 
 						if (km > 150000)
-							Zoom = 7.5;
+							Zoom = 7.75;
 
 						if (km > 200000)
-							Zoom = 7;
+							Zoom = 7.5;
 
 						if (km > 250000)
-							Zoom = 6.5;
+							Zoom = 7.25;
 
 						if (km > 300000)
-							Zoom = 6;
+							Zoom = 7;
 						const num = Math.sqrt(Math.pow(23.608428 - eew[Object.keys(eew)[index]].lat, 2) + Math.pow(120.799168 - eew[Object.keys(eew)[index]].lon, 2));
 
 						if (eew[Object.keys(eew)[index]].type == "trem-eew") {
@@ -2964,13 +2964,32 @@ function handler(Json) {
 			}
 
 			if (max_intensity > intensitytag) {
-				if (setting["audio.realtime"])
-					if (max_intensity > 4 && intensitytag > 4)
+				if (setting["audio.realtime"]) {
+					const loc = detection_location[0] ?? "未知區域";
+
+					if (max_intensity > 4 && intensitytag > 4) {
 						TREM.Audios.int2.play();
-					else if (max_intensity > 1 && intensitytag > 1)
+						new Notification("🟥 強震檢測", {
+							body   : `${loc}`,
+							icon   : "../TREM.ico",
+							silent : win.isFocused(),
+						});
+					} else if (max_intensity > 1 && intensitytag > 1) {
 						TREM.Audios.int1.play();
-					else if (intensitytag == -1)
+						new Notification("🟨 震動檢測", {
+							body   : `${loc}`,
+							icon   : "../TREM.ico",
+							silent : win.isFocused(),
+						});
+					} else if (intensitytag == -1) {
 						TREM.Audios.int0.play();
+						new Notification("🟩 弱反應", {
+							body   : `${loc}`,
+							icon   : "../TREM.ico",
+							silent : win.isFocused(),
+						});
+					}
+				}
 
 				setTimeout(() => {
 					ipcRenderer.send("screenshotEEW", {
