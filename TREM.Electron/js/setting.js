@@ -936,7 +936,7 @@ function balance() {
 			ip_list.innerHTML = "";
 			const div = document.createElement("div");
 			div.className = "option-label-description";
-			div.innerHTML = `IP位置 | 最後使用時間 | 累計使用次數`;
+			div.innerHTML = "IP位置 | 最後使用時間 | 累計使用次數";
 			ip_list.append(div);
 
 			if (!Object.keys(res.data.ip_list).length) ip_list.style.display = "none";
@@ -951,6 +951,7 @@ function balance() {
 				if (setting["api.ip.Hide"]) {
 					let _ip = [];
 					let IP = "";
+
 					if (key.includes(".")) {
 						_ip = key.split(".");
 						IP = `${_ip[0]}.xxx.${_ip[2]}.xxx`;
@@ -958,6 +959,7 @@ function balance() {
 						_ip = key.split(":");
 						IP = `${_ip[0]}:xxx:${_ip[2]}:xxx:${_ip[4]}:xxx:xxx:xxx`;
 					}
+
 					span_1.innerHTML = `${IP} | ${Full(res.data.ip_list[key].time)} | ${res.data.ip_list[key].count}`;
 				} else {
 					span_1.innerHTML = `${key} | ${Full(res.data.ip_list[key].time)} | ${res.data.ip_list[key].count}`;
@@ -975,12 +977,12 @@ function balance() {
 
 function Full(time = Date.now()) {
 	const now = new Date(time);
-	return now.getFullYear() +
-		"/" + (now.getMonth() + 1) +
-		"/" + now.getDate() +
-		" " + now.getHours() +
-		":" + now.getMinutes() +
-		":" + now.getSeconds();
+	return now.getFullYear()
+		+ "/" + (now.getMonth() + 1)
+		+ "/" + now.getDate()
+		+ " " + now.getHours()
+		+ ":" + now.getMinutes()
+		+ ":" + now.getSeconds();
 }
 
 function keyreset() {
