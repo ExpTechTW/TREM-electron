@@ -805,6 +805,7 @@ function signin() {
 		.then((response) => {
 			if (response.data) {
 				console.log(response.data);
+				document.getElementById("api.key").value = response.data.key;
 				ipcRenderer.send("config:value", "api.key", response.data.key);
 
 				if (!balance_time) {
@@ -980,63 +981,6 @@ function Full(time = Date.now()) {
 		" " + now.getHours() +
 		":" + now.getMinutes() +
 		":" + now.getSeconds();
-}
-
-function copy_key(key, name) {
-	document.getElementById("api.key").value = key;
-	ipcRenderer.send("config:value", "api.key", key);
-	document.getElementById(key).innerHTML = `${name} 寫入成功!`;
-}
-
-function clipboard_key(key, name) {
-	navigator.clipboard.writeText(key).then(() => {
-		console.log(key);
-		console.log("複製成功");
-	});
-	document.getElementById(key).innerHTML = `${name} 複製剪貼簿成功!`;
-}
-
-function keyreset() {
-	axios.get(`https://exptech.com.tw/api/v1/et/key-reset?key=${setting["api.key"]}`)
-		.then((res) => {
-			console.log(res);
-			document.getElementById("exptechState").innerHTML = "金鑰重置成功!";
-		})
-		.catch((err) => {
-			console.log(err);
-
-			const res = err.request.response;
-
-			if (res == "Can't find this account!") {
-				document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
-				console.log("找不到此帳戶!");
-			} else {
-				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
-				console.log("未知錯誤(請聯絡開發者)");
-			}
-		});
-}
-
-function remove_key(key, name) {
-	const exptech_keyname_value = document.getElementById("exptech.keyname").value;
-	axios.get(`https://exptech.com.tw/api/v1/et/key-remove?token=${setting["exptech.token"]}&key=${key}`)
-		.then((res) => {
-			console.log(res);
-			document.getElementById(key).innerHTML = `${name} 刪除成功!`;
-		})
-		.catch((err) => {
-			console.log(err);
-
-			const res = err.request.response;
-
-			if (res == "Can't find this account!") {
-				document.getElementById(key).innerHTML = "找不到此帳戶!";
-				console.log("找不到此帳戶!");
-			} else {
-				document.getElementById(key).innerHTML = "未知錯誤(請聯絡開發者)";
-				console.log("未知錯誤(請聯絡開發者)");
-			}
-		});
 }
 
 function edit() {
