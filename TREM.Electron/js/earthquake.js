@@ -1012,6 +1012,13 @@ async function init() {
 
 	TREM.MapRenderingEngine = setting["map.engine"];
 
+	if (!localStorage.map_engine) {
+		localStorage.map_engine = 1;
+		TREM.MapRenderingEngine = "leaflet";
+		ipcRenderer.send("config:value", "map.engine", TREM.MapRenderingEngine);
+		ipcRenderer.send("reloadpage");
+	}
+
 	if (!window.navigator.onLine)
 		return showDialog(
 			"error",
