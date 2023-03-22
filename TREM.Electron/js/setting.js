@@ -983,6 +983,27 @@ function Full(time = Date.now()) {
 		":" + now.getSeconds();
 }
 
+function keyreset() {
+	axios.get(`https://exptech.com.tw/api/v1/et/key-reset?key=${setting["api.key"]}`)
+		.then((res) => {
+			console.log(res);
+			document.getElementById("exptechState").innerHTML = "金鑰重置成功!";
+		})
+		.catch((err) => {
+			console.log(err);
+
+			const res = err.request.response;
+
+			if (res == "Can't find this account!") {
+				document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
+				console.log("找不到此帳戶!");
+			} else {
+				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+				console.log("未知錯誤(請聯絡開發者)");
+			}
+		});
+}
+
 function edit() {
 	let data = {};
 	const exptech_old_name_value = document.getElementById("exptech.old_name").value;
