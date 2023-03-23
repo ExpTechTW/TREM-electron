@@ -1446,7 +1446,7 @@ const webhook = async () => {
 	const embeds = [
 		new EmbedBuilder()
 			.setDescription("這是一則由 TREM 發送的測試訊息")
-			.setColor("BLUE")
+			.setColor("Blue")
 			.setFooter({ text: "ExpTech Studio", iconURL: "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png" })
 			.setTimestamp(),
 	];

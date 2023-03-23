@@ -5063,7 +5063,7 @@ TREM.Earthquake.on("eew", (data) => {
 					+ ":" + NOW().getSeconds();
 
 				let msg = setting["webhook.body"];
-				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
+				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", data.type == "trem-eew" ? "?" : data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
 
 				if (data.type == "eew-cwb")
 					msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
@@ -5095,7 +5095,7 @@ TREM.Earthquake.on("eew", (data) => {
 					icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 				};
 				msg.tts = setting["tts.Notification"];
-				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
+				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "位於" + (data.type == "trem-eew" ? "?" : data.location) + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
 				dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
 				fetch(setting["webhook.url"], {
 					method  : "POST",
@@ -5113,7 +5113,7 @@ TREM.Earthquake.on("eew", (data) => {
 					+ ":" + NOW().getSeconds();
 
 				let msg = setting["webhook.body"];
-				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
+				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", data.type == "trem-eew" ? "?" : data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
 
 				if (data.type == "eew-cwb")
 					msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
@@ -5143,7 +5143,7 @@ TREM.Earthquake.on("eew", (data) => {
 					icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 				};
 				msg.tts = setting["tts.Notification"];
-				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
+				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "位於" + (data.type == "trem-eew" ? "?" : data.location) + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
 				dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
 				fetch(setting["webhook.url"], {
 					method  : "POST",
