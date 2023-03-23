@@ -11,6 +11,7 @@ const bytenode = require("bytenode");
 const crypto = require("crypto");
 const maplibregl = require("maplibre-gl");
 const storage = require("electron-localstorage");
+const Speech = require("speak-tts");
 TREM.Audios = {
 	pga1   : new Audio("../audio/PGA1.wav"),
 	pga2   : new Audio("../audio/PGA2.wav"),
@@ -28,6 +29,16 @@ TREM.Earthquake = new EventEmitter();
 TREM.EEW = new Map();
 TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
+
+const speecd_use = setting["audio.tts"] ?? false;
+const speech = new Speech.default();
+
+(async () => {
+	await speech.init();
+	speech.setLanguage("zh-TW");
+	speech.setVoice("Microsoft Hanhan - Chinese (Traditional, Taiwan)");
+	speech.setRate(1.8);
+})();
 
 // if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
 // 	const vm = require("vm");
@@ -2250,14 +2261,6 @@ async function init() {
 
 						if (eew[Object.keys(eew)[index]].type == "trem-eew") trem_eew_type = true;
 
-						/*
-						const num = Math.sqrt(Math.pow(23.608428 - eew[Object.keys(eew)[index]].lat, 2) + Math.pow(120.799168 - eew[Object.keys(eew)[index]].lon, 2));
-
-						if (num >= 5)
-							TREM.Earthquake.emit("focus", { center: pointFormatter(eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon, TREM.MapRenderingEngine), zoom: Zoom });
-						else
-							TREM.Earthquake.emit("focus", { center: pointFormatter((23.608428 + eew[Object.keys(eew)[index]].lat) / 2, ((120.799168 + eew[Object.keys(eew)[index]].lon) / 2) + X, TREM.MapRenderingEngine), zoom: Zoom });
-						*/
 						eew[Object.keys(eew)[index]].time = NOW().getTime();
 					}
 
@@ -2268,30 +2271,6 @@ async function init() {
 					const camera = Maps.main.cameraForBounds(finalBounds, { padding: { top: 0, right: 100, bottom: 100, left: 0 } });
 					TREM.Earthquake.emit("focus", { center: camera.center, zoom: finalZoom }, true);
 				}
-				//  else if (TREM.MapArea.cache.size) {
-				// 	map_move_back = true;
-
-				// 	for (const [ id ] of TREM.MapArea.cache) {
-				// 		const points = TREM.Resources.area[id].map(latlng => pointFormatter(latlng[0], latlng[1], TREM.MapRenderingEngine));
-				// 		console.log(points);
-				// 		finalBounds.extend([points[0], points[2]]);
-				// 	}
-
-				// 	const canvas = Maps.main.getCanvas();
-
-				// 	const camera = Maps.main.cameraForBounds(finalBounds, {
-				// 		padding: {
-				// 			bottom : canvas.height / 6,
-				// 			left   : canvas.width / 3,
-				// 			top    : canvas.height / 6,
-				// 			right  : canvas.width / 5,
-				// 		},
-				// 		maxZoom: 8.5,
-				// 	});
-
-				// 	if (camera.zoom != Maps.main.getZoom() && !Maps.main.isEasing())
-				// 		TREM.Earthquake.emit("focus", camera, true);
-				// }
 			} else if (TREM.MapArea.cache.size) {
 				map_move_back = true;
 
@@ -2346,52 +2325,13 @@ async function init() {
 							Zoom = 7;
 						const num = Math.sqrt(Math.pow(23.608428 - eew[Object.keys(eew)[index]].lat, 2) + Math.pow(120.799168 - eew[Object.keys(eew)[index]].lon, 2));
 
-						if (eew[Object.keys(eew)[index]].type == "trem-eew") {
-							if (Object.keys(detected_box_list).length >= 1)
-								if (Object.keys(detected_box_list).length == 1) {
-									const X1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0]) / 2);
-									const Y1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1]) / 2);
-									TREM.Earthquake.emit("focus", { center: pointFormatter(X1, Y1, TREM.MapRenderingEngine), zoom: 9.5 });
-								} else if (Object.keys(detected_box_list).length >= 2) {
-									const X1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0]) / 2);
-									const Y1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1]) / 2);
-									const X2 = (TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[1].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][0]) / 2);
-									const Y2 = (TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[1].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][1]) / 2);
-									let focusScale = 9;
-
-									if (Object.keys(detected_box_list).length == 2) {
-										const num0 = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
-
-										if (num0 > 0.6) focusScale = 9;
-
-										if (num0 > 1) focusScale = 8.5;
-
-										if (num0 > 1.5) focusScale = 8;
-
-										if (num0 > 2.8) focusScale = 7;
-									} else {
-										if (Object.keys(detected_box_list).length >= 4) focusScale = 8;
-
-										if (Object.keys(detected_box_list).length >= 6) focusScale = 7.5;
-
-										if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
-									}
-
-									TREM.Earthquake.emit("focus", { center: pointFormatter((X1 + X2) / 2, (Y1 + Y2) / 2, TREM.MapRenderingEngine), zoom: focusScale });
-								}
-
-							continue;
-						}
-
 						if (num >= 5)
 							TREM.Earthquake.emit("focus", { center: [eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon], zoom: Zoom });
 						else
 							TREM.Earthquake.emit("focus", { center: [eew[Object.keys(eew)[index]].lat, eew[Object.keys(eew)[index]].lon], zoom: Zoom });
-							// TREM.Earthquake.emit("focus", { center: [(23.608428 + eew[Object.keys(eew)[index]].lat) / 2, ((120.799168 + eew[Object.keys(eew)[index]].lon) / 2) + X], size: Zoom });
 						eew[Object.keys(eew)[index]].time = NOW().getTime();
 					}
 
-				map_move_back = true;
 			} else if (Object.keys(detected_box_list).length >= 1) {
 				if (Object.keys(detected_box_list).length == 1) {
 					const X1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0]) / 2);
@@ -2968,6 +2908,7 @@ function handler(Json) {
 					const loc = detection_location[0] ?? "未知區域";
 
 					if (max_intensity > 4 && intensitytag > 4) {
+						if (speecd_use) speech.speak({ text: `強震檢測，${loc}` });
 						TREM.Audios.int2.play();
 						new Notification("🟥 強震檢測", {
 							body   : `${loc}`,
@@ -2975,6 +2916,7 @@ function handler(Json) {
 							silent : win.isFocused(),
 						});
 					} else if (max_intensity > 1 && intensitytag > 1) {
+						if (speecd_use) speech.speak({ text: `震動檢測，${loc}` });
 						TREM.Audios.int1.play();
 						new Notification("🟨 震動檢測", {
 							body   : `${loc}`,
@@ -2982,6 +2924,7 @@ function handler(Json) {
 							silent : win.isFocused(),
 						});
 					} else if (intensitytag == -1) {
+						if (speecd_use) speech.speak({ text: `弱反應，${loc}` });
 						TREM.Audios.int0.play();
 						new Notification("🟩 弱反應", {
 							body   : `${loc}`,
@@ -4820,6 +4763,8 @@ TREM.Earthquake.on("eew", (data) => {
 	let body = `${notify ?? "未知"}地震，${Nmsg}\nM ${data.scale} ${data.location ?? "未知區域"}`;
 
 	if (data.depth == null) body = `${notify ?? "未知"}地震，${data.location ?? "未知區域"} (NSSPE)`;
+
+	if (speecd_use && data.type != "trem-eew") speech.speak({ text: `${data.location}，發生規模${data.scale.toFixed(1).replace(".", "點")}地震` });
 	new Notification("EEW 強震即時警報", {
 		body   : body,
 		icon   : "../TREM.ico",

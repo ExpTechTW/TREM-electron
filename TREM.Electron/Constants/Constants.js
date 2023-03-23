@@ -152,6 +152,10 @@ const Constants = Object.freeze({
 			type  : "range",
 			value : 1,
 		},
+		"audio.tts": {
+			type  : "toggle",
+			value : false,
+		},
 		"Real-time.station": {
 			type  : "select",
 			value : "L-711-6732340-12",

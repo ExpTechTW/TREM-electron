@@ -463,6 +463,11 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
+		case "audio.tts": {
+			MainWindow.reload();
+			break;
+		}
+
 		case "theme.color": {
 			emitAllWindow("config:theme", value);
 			break;
