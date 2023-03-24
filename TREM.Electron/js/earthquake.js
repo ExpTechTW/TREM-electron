@@ -1100,7 +1100,7 @@ async function init() {
 						toggleNav(false);
 				}
 
-				let GetDataState = "";
+				const GetDataState = "";
 				const Warn = "";
 
 				// if (GetData_WS) {
@@ -1128,10 +1128,10 @@ async function init() {
 				// 	GetDataState += "⏰";
 				// }
 
-				if (setting["sleep.mode"])
-					GetDataState += "🔋";
-				else if (!setting["sleep.mode"])
-					GetDataState += "";
+				// if (setting["sleep.mode"])
+				// 	GetDataState += "💤";
+				// else if (!setting["sleep.mode"])
+				// 	GetDataState += "";
 
 				// win.on("show", () => sleep(false));
 				// win.on("hide", () => sleep(true));
@@ -2456,19 +2456,26 @@ function PGAMain() {
 
 				if (ReplayTime == 0) {
 					if (rts_ws_timestamp) {
-						Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
+						const t0 = Math.abs(rts_response.Time - NOW().getTime());
+
+						if (t0 < 1500) Ping = `⚡ ${(t0 / 1000).toFixed(1)}s`;
+						else if (t0 < 7500) Ping = `⚠️ ${(t0 / 1000).toFixed(1)}s`;
+						else Ping = `📛 ${(t0 / 1000).toFixed(1)}s`;
+
+						// Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
 
 						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["sleep.mode"]) {
+							Ping = `❌ ${((NOW().getTime() - rts_ws_timestamp) / 1000).toFixed(1)}s`;
 							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
 							reconnect();
 							PGAMainbkup();
 						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["sleep.mode"]) {
 							stationnow = 0;
 							Response = {};
-							Ping = "sleep";
+							Ping = "💤";
 						} else if (setting["sleep.mode"]) {
-							Ping = "sleep";
+							Ping = "💤";
 						}
 						// ipcMain.emit("restart");
 					} else {
@@ -2478,7 +2485,7 @@ function PGAMain() {
 						}
 
 						if (setting["sleep.mode"])
-							Ping = "sleep";
+							Ping = "💤";
 						else
 							Ping = "🔒";
 
@@ -2502,7 +2509,10 @@ function PGAMain() {
 						Response = {};
 					} else {
 						ans = await ans.json();
-						Ping = NOW().getTime() - _t + "ms";
+						Ping = `⏰ ${(Math.abs(NOW().getTime() - _t) / 1000).toFixed(1)}s`;
+
+						// Ping = NOW().getTime() - _t + "ms";
+
 						// TimerDesynced = false;
 						Response = ans;
 					}
@@ -2530,19 +2540,26 @@ function PGAMainbkup() {
 
 				if (ReplayTime == 0) {
 					if (rts_ws_timestamp) {
-						Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
+						const t1 = Math.abs(rts_response.Time - NOW().getTime());
+
+						if (t1 < 1500) Ping = `⚡ ${(t1 / 1000).toFixed(1)}s`;
+						else if (t1 < 7500) Ping = `⚠️ ${(t1 / 1000).toFixed(1)}s`;
+						else Ping = `📛 ${(t1 / 1000).toFixed(1)}s`;
+
+						// Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
 
 						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["sleep.mode"]) {
+							Ping = `❌ ${((NOW().getTime() - rts_ws_timestamp) / 1000).toFixed(1)}s`;
 							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
 							reconnect();
 							PGAMain();
 						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["sleep.mode"]) {
 							stationnow = 0;
 							Response = {};
-							Ping = "sleep";
+							Ping = "💤";
 						} else if (setting["sleep.mode"]) {
-							Ping = "sleep";
+							Ping = "💤";
 						}
 						// ipcMain.emit("restart");
 					} else {
@@ -2552,7 +2569,7 @@ function PGAMainbkup() {
 						}
 
 						if (setting["sleep.mode"])
-							Ping = "sleep";
+							Ping = "💤";
 						else
 							Ping = "🔒";
 
@@ -2565,7 +2582,10 @@ function PGAMainbkup() {
 						method : "get",
 						url    : url,
 					}).then((response) => {
-						Ping = NOW().getTime() - _t + "ms";
+						Ping = `⏰ ${(Math.abs(NOW().getTime() - _t) / 1000).toFixed(1)}s`;
+
+						// Ping = NOW().getTime() - _t + "ms";
+
 						// TimerDesynced = false;
 						Response = response.data;
 					}).catch((err) => {
