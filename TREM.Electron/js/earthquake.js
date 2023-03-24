@@ -2509,7 +2509,7 @@ function PGAMain() {
 						Response = {};
 					} else {
 						ans = await ans.json();
-						Ping = `⏰ ${(Math.abs(NOW().getTime() - _t) / 1000).toFixed(1)}s`;
+						Ping = `🔁 ${(Math.abs(NOW().getTime() - _t) / 1000).toFixed(1)}s`;
 
 						// Ping = NOW().getTime() - _t + "ms";
 
@@ -2582,7 +2582,7 @@ function PGAMainbkup() {
 						method : "get",
 						url    : url,
 					}).then((response) => {
-						Ping = `⏰ ${(Math.abs(NOW().getTime() - _t) / 1000).toFixed(1)}s`;
+						Ping = `🔁 ${(Math.abs(NOW().getTime() - _t) / 1000).toFixed(1)}s`;
 
 						// Ping = NOW().getTime() - _t + "ms";
 
@@ -4028,6 +4028,10 @@ ipcMain.on("sleep", (event, mode) => {
 		sleep(mode);
 	else
 		sleep(mode);
+});
+
+ipcMain.on("apikey", (event) => {
+	apikey();
 });
 
 ipcMain.on("report-Notification", (event, report) => {
