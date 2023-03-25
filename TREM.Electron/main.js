@@ -534,7 +534,7 @@ ipcMain.on("config:value", (event, key, value) => {
 		}
 
 		case "api.key": {
-			ipcRenderer.send("apikey");
+			ipcMain.emit("apikey");
 			break;
 		}
 
