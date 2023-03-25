@@ -807,7 +807,6 @@ function signin() {
 				console.log(response.data);
 				document.getElementById("api.key").value = response.data.key;
 				ipcRenderer.send("config:value", "api.key", response.data.key);
-				ipcRenderer.send("apikey");
 
 				if (!balance_time) {
 					balance();

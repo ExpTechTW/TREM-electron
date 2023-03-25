@@ -533,6 +533,11 @@ ipcMain.on("config:value", (event, key, value) => {
 			break;
 		}
 
+		case "api.key": {
+			ipcRenderer.send("apikey");
+			break;
+		}
+
 		default:
 			break;
 	}
