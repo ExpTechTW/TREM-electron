@@ -546,6 +546,10 @@ function TextSave(id) {
 	if (id == "api.key")
 		if (value.length <= 0)
 			return;
+		else
+			setTimeout(() => {
+				ipcRenderer.send("apikey");
+			}, 1_000);
 	ipcRenderer.send("config:value", id, value);
 }
 
@@ -807,6 +811,9 @@ function signin() {
 				console.log(response.data);
 				document.getElementById("api.key").value = response.data.key;
 				ipcRenderer.send("config:value", "api.key", response.data.key);
+				setTimeout(() => {
+					ipcRenderer.send("apikey");
+				}, 1_000);
 
 				if (!balance_time) {
 					balance();
