@@ -423,6 +423,10 @@ ipcMain.on("restart", () => {
 	restart();
 });
 
+ipcMain.on("openreleases", () => {
+	shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${TREM.getVersion()}`);
+});
+
 TREM.Configuration.on("update", (data) => {
 	emitAllWindow("setting", data);
 	emitAllWindow("config:color", data["theme.customColor"]);

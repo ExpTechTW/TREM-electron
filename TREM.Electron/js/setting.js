@@ -1374,6 +1374,10 @@ function openSettingFile() {
 	ipcRenderer.send("config:open");
 }
 
+function openreleases() {
+	ipcRenderer.send("openreleases");
+}
+
 const restart = () => {
 	ipcRenderer.send("restart");
 };
