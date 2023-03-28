@@ -3506,10 +3506,11 @@ function ReportGET() {
 
 		const list = {};
 
-		for (let i = 0; i < 49; i++) {
-			const md5 = crypto.createHash("md5");
-			list[_report_data[i].identifier] = md5.update(JSON.stringify(_report_data[i])).digest("hex");
-		}
+		if (_report_data.length != 0)
+			for (let i = 0; i < 49; i++) {
+				const md5 = crypto.createHash("md5");
+				list[_report_data[i].identifier] = md5.update(JSON.stringify(_report_data[i])).digest("hex");
+			}
 
 		fetch("https://exptech.com.tw/api/v2/earthquake/reports", {
 			method  : "post",

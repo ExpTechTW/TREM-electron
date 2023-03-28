@@ -1353,6 +1353,7 @@ function reset() {
 		TREM.Localization.getString("Setting_Dialog_Reset_Description"),
 		1, "device_reset", () => {
 			setting = {};
+			localStorage.clear();
 			ipcRenderer.send("saveSetting");
 			restart();
 		});
