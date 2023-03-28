@@ -12,9 +12,6 @@ TREM.Utils = require("./Utils/Utils.js");
 TREM.Localization = new (require("./Localization/Localization"))(TREM.Configuration.data["general.locale"], TREM.getLocale());
 TREM.Window = new Map();
 TREM.isQuiting = !TREM.Configuration.data["windows.tray"];
-TREM.IPFScore = null;
-TREM.IPFScorecreate = null;
-TREM.multiaddr = null;
 
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
@@ -91,13 +88,6 @@ TREM.setLoginItemSettings({
 TREM.commandLine.appendSwitch("disable-frame-rate-limit");
 
 function createWindow() {
-	fetch("https://exptech.com.tw/get?Function=EEW").catch(() => {
-		setInterval(() => {
-			fetch("https://exptech.com.tw/get?Function=EEW").then(() => {
-				restart();
-			});
-		}, 5000);
-	});
 	MainWindow = TREM.Window.set("main", new BrowserWindow({
 		title          : TREM.Localization.getString("Application_Title"),
 		width          : 1280,
@@ -280,19 +270,7 @@ TREM.on("ready", () => {
 			autoUpdater.checkForUpdates();
 		}, time);
 	}
-
-	// IPFSget();
 });
-
-async function IPFSget() {
-	try {
-		TREM.IPFScore = await import('ipfs-core');
-		TREM.IPFScorecreate = await TREM.IPFScore.create();
-		TREM.multiaddr = await import('multiaddr');
-	} catch (err) {
-		console.error(err);
-	}
-}
 
 autoUpdater.on("update-available", (info) => {
 	if (TREM.Configuration.data["update.mode"] != "never")

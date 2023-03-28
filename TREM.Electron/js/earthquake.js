@@ -134,6 +134,7 @@ let testEEWerror = false;
 TREM.win = BrowserWindow.fromId(process.env.window * 1);
 let stationnow = 0;
 let RMTpgaTime = 0;
+let type_Unit = "";
 // #endregion
 
 TREM.Detector = {
@@ -1100,38 +1101,26 @@ async function init() {
 						toggleNav(false);
 				}
 
-				const GetDataState = "";
-				const Warn = "";
+				let GetDataState = "";
+				let Warn = "";
 
-				// if (GetData_WS) {
-				// 	GetData_WS = false;
-				// 	GetDataState += "🟩";
-				// }
+				if (!HTTP) Warn += "0";
+				if (!WS) Warn += "2";
+				if (!service_status.websocket.status) Warn += "1";
+				if (!FCM) Warn += "3";
+				if (!service_status.p2p.status) Warn += "4";
+				Warn = ((Warn == "") ? "" : ` | 📛 ${Warn}`);
 
-				// if (GetData_FCM) {
-				// 	GetData_FCM = false;
-				// 	GetDataState += "⬜";
-				// }
-
-				// if (GetData_P2P) {
-				// 	GetData_P2P = false;
-				// 	GetDataState += "🟨";
-				// }
-
-				// if (GetData_HTTP) {
-				// 	GetData_HTTP = false;
-				// 	GetDataState += "🟥";
-				// }
+				if (type_Unit == "http") GetDataState += "🟩 Http";
+				else if (type_Unit == "p2p") GetDataState += "🟦 P2P";
+				else if (type_Unit == "websocket") GetDataState += "⬜ WS";
+				else if (type_Unit == "fcm") GetDataState += "🟥 FCM";
+				type_Unit = "";
 
 				// if (GetData_time) {
 				// 	GetData_time = false;
 				// 	GetDataState += "⏰";
 				// }
-
-				// if (setting["sleep.mode"])
-				// 	GetDataState += "💤";
-				// else if (!setting["sleep.mode"])
-				// 	GetDataState += "";
 
 				// win.on("show", () => sleep(false));
 				// win.on("hide", () => sleep(true));
@@ -2459,8 +2448,8 @@ function PGAMain() {
 						const t0 = Math.abs(rts_response.Time - NOW().getTime());
 
 						if (t0 < 1500) Ping = `⚡ ${(t0 / 1000).toFixed(1)}s`;
-						else if (t0 < 7500) Ping = `⚠️ ${(t0 / 1000).toFixed(1)}s`;
-						else Ping = `📛 ${(t0 / 1000).toFixed(1)}s`;
+						else if (t0 < 7500) Ping = `📶 ${(t0 / 1000).toFixed(1)}s`;
+						else Ping = `⚠️ ${(t0 / 1000).toFixed(1)}s`;
 
 						// Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
@@ -2499,6 +2488,7 @@ function PGAMain() {
 						controller.abort();
 					}, 5000);
 					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
+						Ping = `❌ ${err.response.status}`;
 						// TimerDesynced = true;
 						PGAMainbkup();
 					});
@@ -2543,8 +2533,8 @@ function PGAMainbkup() {
 						const t1 = Math.abs(rts_response.Time - NOW().getTime());
 
 						if (t1 < 1500) Ping = `⚡ ${(t1 / 1000).toFixed(1)}s`;
-						else if (t1 < 7500) Ping = `⚠️ ${(t1 / 1000).toFixed(1)}s`;
-						else Ping = `📛 ${(t1 / 1000).toFixed(1)}s`;
+						else if (t1 < 7500) Ping = `📶 ${(t1 / 1000).toFixed(1)}s`;
+						else Ping = `⚠️ ${(t1 / 1000).toFixed(1)}s`;
 
 						// Ping = NOW().getTime() - rts_ws_timestamp + "ms " + "⚡";
 						Response = rts_response;
@@ -2589,6 +2579,7 @@ function PGAMainbkup() {
 						// TimerDesynced = false;
 						Response = response.data;
 					}).catch((err) => {
+						Ping = `❌ ${err.response.status}`;
 						// TimerDesynced = true;
 						PGAMain();
 					});
@@ -3502,7 +3493,7 @@ function ReportGET() {
 
 		const list = {};
 
-		for (let i = 0; i < _report_data.length; i++) {
+		for (let i = 0; i < 49; i++) {
 			const md5 = crypto.createHash("md5");
 			list[_report_data[i].identifier] = md5.update(JSON.stringify(_report_data[i])).digest("hex");
 		}
@@ -4495,8 +4486,10 @@ function FCMdata(json, Unit) {
 		});
 	}
 
-	if (json.timestamp != undefined)
+	if (json.timestamp != undefined) {
+		type_Unit = Unit;
 		dump({ level: 0, message: `Latency: ${NOW().getTime() - json.timestamp}ms`, origin: "API" });
+	}
 
 	if (json.type == "tsunami-info") {
 		console.log(json);
@@ -4788,7 +4781,12 @@ TREM.Earthquake.on("eew", (data) => {
 
 	if (data.depth == null) body = `${notify ?? "未知"}地震，${data.location ?? "未知區域"} (NSSPE)`;
 
-	if (speecd_use && data.type != "trem-eew") speech.speak({ text: `${data.location}，發生規模${data.scale.toFixed(1).replace(".", "點")}地震` });
+	if (speecd_use && data.type != "trem-eew") {
+		const speecd_scale = data.scale;
+
+		if (typeof speecd_scale == "string") speech.speak({ text: `${data.location}，發生規模${speecd_scale.replace(".", "點")}地震` });
+		else speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
+	}
 	new Notification("EEW 強震即時警報", {
 		body   : body,
 		icon   : "../TREM.ico",
