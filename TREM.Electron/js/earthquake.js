@@ -1107,17 +1107,27 @@ async function init() {
 				let Warn = "";
 
 				if (!HTTP) Warn += "0";
+
 				if (!WS0) Warn += "1";
+
 				if (!WS) Warn += "2";
+
 				if (!FCM) Warn += "3";
+
 				if (!service_status.websocket.status) Warn += "4";
+
 				if (!service_status.p2p.status) Warn += "5";
+
 				Warn = ((Warn == "") ? "" : ` | 📛 ${Warn}`);
 
 				if (type_Unit == "http") GetDataState += "🟩 Http";
+
 				else if (type_Unit == "p2p") GetDataState += "🟦 P2P";
+
 				else if (type_Unit == "websocket") GetDataState += "⬜ WS";
+
 				else if (type_Unit == "fcm") GetDataState += "🟥 FCM";
+
 				type_Unit = "";
 
 				// if (GetData_time) {
@@ -4790,6 +4800,7 @@ TREM.Earthquake.on("eew", (data) => {
 		if (typeof speecd_scale == "string") speech.speak({ text: `${data.location}，發生規模${speecd_scale.replace(".", "點")}地震` });
 		else speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
 	}
+
 	new Notification("EEW 強震即時警報", {
 		body   : body,
 		icon   : "../TREM.ico",
