@@ -1120,6 +1120,8 @@ async function init() {
 
 				Warn = ((Warn == "") ? "" : ` | 📛 ${Warn}`);
 
+				if (Warn == "") Warn = ` | up:${service_status.p2p.upstream} down:${service_status.p2p.downstream}`;
+
 				if (type_Unit == "http") GetDataState += "🟩 Http";
 
 				else if (type_Unit == "p2p") GetDataState += "🟦 P2P";
