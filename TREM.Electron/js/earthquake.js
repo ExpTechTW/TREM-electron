@@ -1022,6 +1022,8 @@ async function init() {
 	const progressStep = 5;
 	report_get_timestamp = 0;
 
+	serverinit();
+
 	TREM.MapRenderingEngine = setting["map.engine"];
 
 	if (!localStorage.map_engine) {
@@ -1105,10 +1107,11 @@ async function init() {
 				let Warn = "";
 
 				if (!HTTP) Warn += "0";
+				if (!WS0) Warn += "1";
 				if (!WS) Warn += "2";
-				if (!service_status.websocket.status) Warn += "1";
 				if (!FCM) Warn += "3";
-				if (!service_status.p2p.status) Warn += "4";
+				if (!service_status.websocket.status) Warn += "4";
+				if (!service_status.p2p.status) Warn += "5";
 				Warn = ((Warn == "") ? "" : ` | 📛 ${Warn}`);
 
 				if (type_Unit == "http") GetDataState += "🟩 Http";

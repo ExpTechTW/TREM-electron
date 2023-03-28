@@ -1,6 +1,6 @@
 const { getCurrentWindow, shell } = require("@electron/remote");
 const echarts = require("echarts");
-const WebSocket = require("ws");
+const WebSocket1 = require("ws_1");
 const win = getCurrentWindow();
 
 document.onreadystatechange = () => {
@@ -40,7 +40,7 @@ function handleWindowControls() {
 
 const wave_count = +localStorage.getItem("displayWaveCount") ?? 8;
 
-let ws = new WebSocket("wss://exptech.com.tw/api");
+let ws_1 = new WebSocket1("wss://exptech.com.tw/api");
 let Reconnect = 0;
 let ServerT = 0;
 
@@ -66,28 +66,28 @@ function reconnect() {
 	if (Date.now() - Reconnect < 500) return;
 	Reconnect = Date.now();
 
-	if (ws != null) {
-		ws.close();
-		ws = null;
+	if (ws_1 != null) {
+		ws_1.close();
+		ws_1 = null;
 	}
 
-	ws = new WebSocket("wss://exptech.com.tw/api");
+	ws_1 = new WebSocket1("wss://exptech.com.tw/api");
 	connect(1000);
 }
 
 const connect = (retryTimeout) => {
-	ws.onclose = function() {
+	ws_1.onclose = function() {
 		console.log(`WebSocket closed. Reconnect after ${retryTimeout / 1000}s`);
 		reconnect();
 	};
 
-	ws.onerror = function(err) {
+	ws_1.onerror = function(err) {
 		console.log(err);
 		reconnect();
 	};
 
-	ws.onopen = function() {
-		ws.send(JSON.stringify({
+	ws_1.onopen = function() {
+		ws_1.send(JSON.stringify({
 			uuid     : `TREM/${app.getVersion()} (${localStorage.UUID};)`,
 			function : "subscriptionService",
 			value    : ["trem-rts-original-v1"],
@@ -97,7 +97,7 @@ const connect = (retryTimeout) => {
 		}));
 	};
 
-	ws.onmessage = function(evt) {
+	ws_1.onmessage = function(evt) {
 		const parsed = JSON.parse(evt.data);
 		ServerT = Date.now();
 
