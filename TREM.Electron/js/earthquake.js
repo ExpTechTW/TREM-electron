@@ -4205,7 +4205,7 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 	}
 });
 
-ipcMain.on("update-available-Notification", (version, getVersion) => {
+ipcMain.on("update-available-Notification", (version, getVersion, info) => {
 	if (setting["webhook.url"] != undefined)
 		if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
 			dump({ level: 0, message: "Posting Notification Update Webhook", origin: "Webhook" });
@@ -4231,6 +4231,10 @@ ipcMain.on("update-available-Notification", (version, getVersion) => {
 				dump({ level: 2, message: error, origin: "Webhook" });
 			});
 		}
+	showDialog("success", `有可用的${info.releaseName}版本更新`, info.releaseNotes.replace("<p>", "").replaceAll("<br>", "").replace("</p>", ""),
+	1, "update", () => {
+		shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${version}`);
+	},"前往更新","暫緩更新");
 });
 
 ipcMain.on("update-not-available-Notification", (version, getVersion) => {

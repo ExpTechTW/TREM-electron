@@ -1,4 +1,4 @@
-const { BrowserWindow, Menu, Notification, app: TREM, Tray, ipcMain, nativeImage, shell } = require("electron");
+const { BrowserWindow, Menu, Notification, app: TREM, Tray, ipcMain, nativeImage, shell, globalShortcut } = require("electron");
 const Configuration = require("./Configuration/Configuration");
 const { autoUpdater } = require("electron-updater");
 const fetch = require("node-fetch");
@@ -270,6 +270,10 @@ TREM.on("ready", () => {
 			autoUpdater.checkForUpdates();
 		}, time);
 	}
+
+	globalShortcut.register("Tab", function() {
+		console.log("Tab is pressed");
+	})
 });
 
 autoUpdater.on("update-available", (info) => {
@@ -295,7 +299,7 @@ autoUpdater.on("update-available", (info) => {
 					logger.info(info);
 					shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${info.version}`);
 				}).show();
-				ipcMain.emit("update-available-Notification", info.version, getVersion);
+				ipcMain.emit("update-available-Notification", info.version, getVersion, info);
 				break;
 			}
 

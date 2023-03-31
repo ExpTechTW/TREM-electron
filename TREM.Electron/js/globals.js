@@ -70,8 +70,10 @@ const showDialog
  * @param {0|1} button Button type of the dialog
  * @param {?string} customIcon The icon of the dialog
  * @param {?dialogCallback} callback The callback function to run when the user omitted the dialog
+ * @param {string} buttonAccepttext The buttonAccepttext of the dialog
+ * @param {string} buttonCanceltext The buttonCanceltext of the dialog
  */
-= (type, title, message, button = 0, customIcon, callback = () => void 0) => {
+= (type, title, message, button = 0, customIcon, callback = () => void 0, buttonAccepttext, buttonCanceltext) => {
 	const container = document.getElementById("modal-overlay");
 	const icon = document.createElement("span");
 	icon.classList.add("material-symbols-rounded");
@@ -101,7 +103,7 @@ const showDialog
 		const Accept = document.createElement("button");
 		Accept.classList.add("flat-button");
 		Accept.id = "dialog-Accept";
-		Accept.textContent = TREM.Localization.getString("Dialog_Button_Confirm");
+		Accept.textContent = buttonAccepttext ?? TREM.Localization.getString("Dialog_Button_Confirm");
 
 		Accept.onclick = (...args) => {
 			closeDialog(...args);
@@ -113,7 +115,7 @@ const showDialog
 		const Cancel = document.createElement("button");
 		Cancel.classList.add("flat-button");
 		Cancel.id = "dialog-Cancel";
-		Cancel.textContent = TREM.Localization.getString("Dialog_Button_Cancel");
+		Cancel.textContent = buttonCanceltext ?? TREM.Localization.getString("Dialog_Button_Cancel");
 		Cancel.onclick = closeDialog;
 		buttons.appendChild(Cancel);
 	} else {
