@@ -2497,7 +2497,7 @@ function PGAMain() {
 						Response = {};
 					}
 				} else {
-					const url = geturl + ReplayTime + "&key=" + setting["api.key"];
+					const url = geturl + ReplayTime;// + "&key=" + setting["api.key"]
 					const controller = new AbortController();
 					setTimeout(() => {
 						controller.abort();
@@ -2582,7 +2582,7 @@ function PGAMainbkup() {
 						Response = {};
 					}
 				} else {
-					const url = geturl + ReplayTime + "&key=" + setting["api.key"];
+					const url = geturl + ReplayTime;// + "&key=" + setting["api.key"]
 					axios({
 						method : "get",
 						url    : url,
