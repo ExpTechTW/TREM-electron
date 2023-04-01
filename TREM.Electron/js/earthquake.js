@@ -2497,7 +2497,8 @@ function PGAMain() {
 						Response = {};
 					}
 				} else {
-					const url = geturl + ReplayTime;// + "&key=" + setting["api.key"]
+					const url = geturl + ReplayTime;
+					// + "&key=" + setting["api.key"]
 					const controller = new AbortController();
 					setTimeout(() => {
 						controller.abort();
@@ -2582,7 +2583,8 @@ function PGAMainbkup() {
 						Response = {};
 					}
 				} else {
-					const url = geturl + ReplayTime;// + "&key=" + setting["api.key"]
+					const url = geturl + ReplayTime;
+					// + "&key=" + setting["api.key"]
 					axios({
 						method : "get",
 						url    : url,
@@ -4231,10 +4233,11 @@ ipcMain.on("update-available-Notification", (version, getVersion, info) => {
 				dump({ level: 2, message: error, origin: "Webhook" });
 			});
 		}
+
 	showDialog("success", `有可用的${info.releaseName}版本更新`, info.releaseNotes.replace("<p>", "").replaceAll("<br>", "").replace("</p>", ""),
-	1, "update", () => {
-		shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${version}`);
-	},"前往更新","暫緩更新");
+		1, "update", () => {
+			shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${version}`);
+		}, "前往更新", "暫緩更新");
 });
 
 ipcMain.on("update-not-available-Notification", (version, getVersion) => {
