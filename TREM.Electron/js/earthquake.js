@@ -4660,8 +4660,12 @@ function FCMdata(json, Unit) {
 	} else if (json.type == "replay") {
 		dump({ level: 0, message: "Got Earthquake replay", origin: "API" });
 		console.log(json);
-		replay = json.replay_timestamp;
-		replayT = NOW().getTime();
+
+		if (!replayD) {
+			replay = json.replay_timestamp;
+			replayT = NOW().getTime();
+		}
+
 		ipcMain.emit("ReportGET");
 		stopReplaybtn();
 	} else if (json.type == "report") {

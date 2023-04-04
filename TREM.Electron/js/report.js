@@ -275,6 +275,10 @@ TREM.Report = {
 		const time_hold = time;
 		const _end_time = time + 205000;
 
+		const downloader_progress = document.getElementById("downloader_progress");
+		const progressStep = 206;
+		let progresstemp = 0;
+
 		if (!fs.existsSync("./replay_data")) fs.mkdirSync("./replay_data");
 
 		if (this.lock) return;
@@ -311,6 +315,9 @@ TREM.Report = {
 								fs.writeFile(`./replay_data/${time_hold}/${time}.json`, JSON.stringify(res), () => {
 									time += 1000;
 								});
+								progresstemp += (1 / progressStep) * 1;
+								downloader_progress.value = progresstemp;
+								downloader_progress.title = `${Math.round(progresstemp * 10000) / 100}%`;
 							}
 						});
 					})
