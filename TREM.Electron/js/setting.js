@@ -891,6 +891,23 @@ function forget() {
 		});
 }
 
+function gift() {
+	const exptech_gift_key_value = document.getElementById("exptech.gift.key").value;
+	axios.get("https://exptech.com.tw/api/v1/et/gift?key=" + setting["api.key"] + "&code=" + exptech_gift_key_value)
+	.then((res) => {
+		console.log(res.data);
+
+		document.getElementById("exptechState").innerHTML = "兌換成功!";
+	})
+	.catch((error) => {
+		console.log(error);
+		const res = error.request.response;
+		if (res == "This gift code invalid!") document.getElementById("exptechState").innerHTML = "兌換碼 無效!";
+		else if (res == "Can't find this account!") document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
+		else document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+	});
+}
+
 function balance() {
 	axios.get("https://exptech.com.tw/api/v1/et/balance?key=" + setting["api.key"])
 		.then((res) => {
@@ -1070,7 +1087,7 @@ function send() {
 				depth : document.getElementById("Depth").value,
 				lat   : document.getElementById("NorthLatitude").value,
 				lon   : document.getElementById("EastLongitude").value,
-				scale : document.getElementById("Scale").value,
+				scale : parseFloat(document.getElementById("Scale").value),
 				time  : new Date(document.getElementById("Time").value).getTime(),
 			},
 			intensity: JSON.parse(document.getElementById("intensitytext").value),
@@ -1122,7 +1139,7 @@ function send() {
 					lon           : document.getElementById("EastLongitude").value,
 					lat           : document.getElementById("NorthLatitude").value,
 					depth         : document.getElementById("Depth").value,
-					scale         : document.getElementById("Scale").value,
+					scale         : parseFloat(document.getElementById("Scale").value),
 					FormatVersion : 1,
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 					"UTC+8"       : document.getElementById("Time").value,
@@ -1152,7 +1169,7 @@ function send() {
 					lon           : document.getElementById("EastLongitude").value,
 					lat           : document.getElementById("NorthLatitude").value,
 					depth         : document.getElementById("Depth").value,
-					scale         : document.getElementById("Scale").value,
+					scale         : parseFloat(document.getElementById("Scale").value),
 					FormatVersion : 1,
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 					"UTC+8"       : document.getElementById("Time").value,
@@ -1195,7 +1212,7 @@ function send() {
 					type          : "tsunami",
 					lon           : document.getElementById("EastLongitude").value,
 					lat           : document.getElementById("NorthLatitude").value,
-					scale         : document.getElementById("Scale").value,
+					scale         : parseFloat(document.getElementById("Scale").value),
 					FormatVersion : 1,
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 					number        : document.getElementById("Version").value,
@@ -1223,7 +1240,7 @@ function send() {
 					type          : "tsunami",
 					lon           : document.getElementById("EastLongitude").value,
 					lat           : document.getElementById("NorthLatitude").value,
-					scale         : document.getElementById("Scale").value,
+					scale         : parseFloat(document.getElementById("Scale").value),
 					FormatVersion : 1,
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 					number        : document.getElementById("Version").value,

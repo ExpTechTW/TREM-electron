@@ -2162,6 +2162,17 @@ button.hide + #report-detail-header-title {
 	margin-bottom: 8px;
 }
 
+#report-list-filter, #report-overview-actions-1 {
+	display: flex;
+	flex-wrap: wrap;
+	user-select: none;
+}
+
+#report-list-filter > .chip, #report-overview-actions-1 > .chip {
+	margin-bottom: 8px;
+}
+
+
 #report-list {
 	max-width: 540px;
 }

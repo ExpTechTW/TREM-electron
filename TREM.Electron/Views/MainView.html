@@ -427,18 +427,6 @@
                                     </div>
                                 </div>
                                 <div id="report-overview-actions">
-                                    <button id="report-replay" class="chip assist md3-ripple" onclick="TREM.Report.replay(this.value)">
-                                        <span class="chip-icon material-symbols-rounded">replay</span>
-                                        <span class="chip-label">
-                                            <span lang="en">Replay</span>
-                                            <span lang="ja">リプレイ</span>
-                                            <span lang="kr">Replay</span> <!-- TODO: Untranslated, remove this comment after translation -->
-                                            <span lang="ru">Replay</span> <!-- TODO: Untranslated, remove this comment after translation -->
-                                            <span lang="zh-CN">重播</span> <!-- TODO: Untranslated, remove this comment after translation -->
-                                            <span lang="zh-TW">重播</span>
-                                        </span>
-                                        <span class="chip-icon material-symbols-rounded"></span>
-                                    </button>
                                     <button id="report-cwb" class="chip assist md3-ripple" onclick="openURL(this.value)">
                                         <span class="chip-icon material-symbols-rounded">description</span>
                                         <span class="chip-label">
@@ -462,6 +450,32 @@
                                             <span lang="zh-TW">地震測報中心</span>
                                         </span>
                                         <span class="chip-icon material-symbols-rounded">open_in_new</span>
+                                    </button>
+                                </div>
+                                <div id="report-overview-actions-1">
+                                    <button id="report-replay" class="chip assist md3-ripple" onclick="TREM.Report.replay(this.value)">
+                                        <span class="chip-icon material-symbols-rounded">replay</span>
+                                        <span class="chip-label">
+                                            <span lang="en">Replay</span>
+                                            <span lang="ja">リプレイ</span>
+                                            <span lang="kr">Replay</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                            <span lang="ru">Replay</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                            <span lang="zh-CN">重播</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                            <span lang="zh-TW">重播</span>
+                                        </span>
+                                        <span class="chip-icon material-symbols-rounded"></span>
+                                    </button>
+                                    <button id="report-replay-downloader" class="chip assist md3-ripple" onclick="TREM.Report.replaydownloader(this.value)" oncontextmenu="TREM.Report.replaydownloaderrm(this.value)">
+                                        <span id="report-replay-downloader-icon" class="chip-icon material-symbols-rounded">download</span>
+                                        <span class="chip-label">
+                                            <span lang="en">Replay</span>
+                                            <span lang="ja">リプレイ</span>
+                                            <span lang="kr">Replay</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                            <span lang="ru">Replay</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                            <span lang="zh-CN">重播</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                            <span id="report-replay-downloader-text" lang="zh-TW">下載</span>
+                                        </span>
+                                        <span class="chip-icon material-symbols-rounded"></span>
                                     </button>
                                 </div>
                                 <hr class="divider">

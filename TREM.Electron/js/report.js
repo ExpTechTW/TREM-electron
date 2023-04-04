@@ -5,6 +5,8 @@ TREM.Report = {
 	view              : "report-list",
 	reportList        : [],
 	reportListElement : document.getElementById("report-list-container"),
+	lock              : false,
+	clock             : null,
 
 	/**
 	 * @type {maplibregl.Marker[]}
@@ -251,7 +253,10 @@ TREM.Report = {
 
 		let list = [];
 
-		if (report.ID.length) {
+		if (report.download) {
+			const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
+			ipcRenderer.send("testoldtime", oldtime);
+		} else if (report.ID.length) {
 			list = list.concat(report.ID);
 			ipcRenderer.send("testEEW", list);
 		} else if (report.trem.length) {
@@ -261,6 +266,75 @@ TREM.Report = {
 			const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
 			ipcRenderer.send("testoldtimeEEW", oldtime);
 		}
+	},
+	replaydownloader(id) {
+		const report = this.cache.get(id);
+		console.log(report);
+
+		let time = new Date(report.originTime.replace(/-/g, "/")).getTime() - 25000;
+		const time_hold = time;
+		const _end_time = time + 205000;
+
+		if (!fs.existsSync("./replay_data")) fs.mkdirSync("./replay_data");
+
+		if (this.lock) return;
+
+		if (!report.download) {
+			document.getElementById("report-replay-downloader-text").innerHTML = "下載中...";
+			this.clock = setInterval(() => {
+				if (time > _end_time) {
+					clearInterval(this.clock);
+					console.log("Finish!");
+					document.getElementById("report-replay-downloader-icon").innerHTML = "download_done";
+					document.getElementById("report-replay-downloader-text").innerHTML = "下載完成!";
+					report.download = true;
+					this.cache.set(report.identifier, report);
+					this.lock = false;
+					return;
+				}
+				this.lock = true;
+				fetch(`https://exptech.com.tw/api/v2/trem/rts?time=${time}`)
+					.then(res => res.json())
+					.then(res => {
+						if (!fs.existsSync(`./replay_data/${time_hold}`)) fs.mkdirSync(`./replay_data/${time_hold}`);
+						fs.access(`./replay_data/${time_hold}/${time}.json`, (err) => {
+							if (!err) {
+								clearInterval(this.clock);
+								console.log("Finish!(is found it)");
+								document.getElementById("report-replay-downloader-text").innerHTML = "重複下載!";
+								report.download = true;
+								this.cache.set(report.identifier, report);
+								return;
+							} else if(err.code == "ENOENT") {
+								fs.writeFile(`./replay_data/${time_hold}/${time}.json`, JSON.stringify(res), () => {
+									time += 1000;
+								});
+							}
+						});
+					})
+					.catch(err => {
+						this.lock = false;
+						console.log(err.message);
+					});
+			}, 500);
+		} else {
+			console.log("Finish!(is download)");
+		}
+	},
+	replaydownloaderrm(id) {
+		const report = this.cache.get(id);
+		let time = new Date(report.originTime.replace(/-/g, "/")).getTime() - 25000;
+
+		fs.rm(`./replay_data/${time}/`, { recursive: true }, () => {
+			document.getElementById("report-replay-downloader-icon").innerHTML = "download";
+			document.getElementById("report-replay-downloader-text").innerHTML = "下載";
+			report.download = false;
+			this.cache.set(report.identifier, report);
+			if (this.lock) {
+				this.lock = false;
+				clearInterval(this.clock);
+			}
+		});
 	},
 	back() {
 		if (TREM.set_report_overview != 0)
@@ -518,6 +592,31 @@ TREM.Report = {
 		document.getElementById("report-detail-copy").value = report.identifier;
 
 		document.getElementById("report-replay").value = report.identifier;
+		document.getElementById("report-replay-downloader").value = report.identifier;
+
+		const timed = new Date(report.originTime.replace(/-/g, "/")).getTime() - 25000;
+		const _end_timed = timed + 205000;
+		fs.access(`./replay_data/${timed}/${timed}.json`, (err) => {
+			if (!err) {
+				document.getElementById("report-replay-downloader-icon").innerHTML = "download_done";
+				document.getElementById("report-replay-downloader-text").innerHTML = "已下載!";
+				report.download = true;
+				this.cache.set(report.identifier, report);
+				fs.access(`./replay_data/${timed}/${_end_timed}.json`, (err) => {
+					if (err) {
+						document.getElementById("report-replay-downloader-icon").innerHTML = "download";
+						document.getElementById("report-replay-downloader-text").innerHTML = "下載中...";
+						report.download = false;
+						this.cache.set(report.identifier, report);
+					}
+				  });
+			} else {
+				document.getElementById("report-replay-downloader-icon").innerHTML = "download";
+				document.getElementById("report-replay-downloader-text").innerHTML = "下載";
+				report.download = false;
+				this.cache.set(report.identifier, report);
+			}
+		  });
 
 		if (report.location.startsWith("地震資訊")) {
 			document.getElementById("report-cwb").style.display = "none";

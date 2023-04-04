@@ -1,13 +1,13 @@
 {
   "name": "trem",
-  "version": "6.0.133",
+  "version": "6.0.134",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "homepage": "https://exptech.com.tw/",
   "author": "ExpTechTW <ExpTech.tw@gmail.com>",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --dev",
+    "dev": "electron . --dev --key",
     "dist": "electron-builder -p always",
     "lint": "eslint --ext .js js/"
   },

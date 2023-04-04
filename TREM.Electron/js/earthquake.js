@@ -115,6 +115,8 @@ let EEWshotC = 0;
 let Response = {};
 let replay = 0;
 let replayT = 0;
+let replayD = false;
+let replayTemp = 0;
 let replaytestEEW = 0;
 TREM.toggleNavTime = 0;
 let Second = -1;
@@ -185,8 +187,10 @@ TREM.MapIntensity = {
 					let intensity_index = 0;
 
 					for (let index = this.MaxI; index != 0; index--) {
+						const intensity = `${IntensityI(index)}級`;
+
 						if (rawPalertData.intensity.length != intensity_index)
-							this.description += `${index}級\n`;
+							this.description += `${intensity.replace("-級", "弱").replace("+級", "強")}\n`;
 						let countyName_index = "";
 
 						for (const palertEntry of rawPalertData.intensity) {
@@ -244,6 +248,15 @@ TREM.MapIntensity = {
 					}).catch((error) => {
 						dump({ level: 2, message: error, origin: "Webhook" });
 					});
+				}
+
+				if (speecd_use && rawPalertData.final) {
+					const now = new Date(rawPalertData.time).format("YYYY/MM/DD HH:mm:ss");
+					speech.speak({ text: "震度速報"
+					+ "資料來源PAlert(最終報)"
+					+ "時間" + now
+					+ "觸發測站" + rawPalertData.tiggered
+					+ this.description });
 				}
 
 				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -1065,6 +1078,19 @@ async function init() {
 				if (TimerDesynced) {
 					if (!time.classList.contains("desynced"))
 						time.classList.add("desynced");
+				} else if (replayTemp) {
+					if (!time.classList.contains("replay"))
+						time.classList.add("replay");
+					time.innerText = `${new Date(replayTemp).format("YYYY/MM/DD HH:mm:ss")}`;
+
+					// if (NOW().getTime() - replayT > 180_000 && !Object.keys(eew).length) {
+					if (replayTemp - replay > 180_000) {
+						replayTemp = 0;
+						replay = 0;
+						Report = 0;
+						ipcMain.emit("ReportGET");
+						stopReplay();
+					}
 				} else if (replay) {
 					if (!time.classList.contains("replay"))
 						time.classList.add("replay");
@@ -2496,7 +2522,7 @@ function PGAMain() {
 						stationnow = 0;
 						Response = {};
 					}
-				} else {
+				} else if (!replayD) {
 					const url = geturl + ReplayTime;
 					// + "&key=" + setting["api.key"]
 					const controller = new AbortController();
@@ -2532,6 +2558,22 @@ function PGAMain() {
 			}
 		}, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds());
 	}, 500);
+
+	if (replayD) {
+		if (Timers.rts_clock) clearInterval(Timers.rts_clock);
+		Timers.rts_clock = setInterval(() => {
+			try {
+				const ReplayTimeD = (replayTemp == 0) ? 0 : replayTemp += 1000;
+				const userJSON = fs.readFileSync(`./replay_data/${replay}/${ReplayTimeD}.json`);
+				Ping = `🔁 cache`;
+				handler(JSON.parse(userJSON.toString()));
+			} catch (err) {
+				console.log(err);
+				// TimerDesynced = true;
+				PGAMainbkup();
+			}
+		}, 1000);
+	}
 }
 
 function PGAMainbkup() {
@@ -2582,7 +2624,7 @@ function PGAMainbkup() {
 						stationnow = 0;
 						Response = {};
 					}
-				} else {
+				} else if (!replayD) {
 					const url = geturl + ReplayTime;
 					// + "&key=" + setting["api.key"]
 					axios({
@@ -2610,6 +2652,22 @@ function PGAMainbkup() {
 			}
 		}, (NOW().getMilliseconds() > 500) ? 1000 - NOW().getMilliseconds() : 500 - NOW().getMilliseconds());
 	}, 500);
+
+	if (replayD) {
+		if (Timers.rts_clock) clearInterval(Timers.rts_clock);
+		Timers.rts_clock = setInterval(() => {
+			try {
+				const ReplayTimeD = (replayTemp == 0) ? 0 : replayTemp += 1000;
+				const userJSON = fs.readFileSync(`./replay_data/${replay}/${ReplayTimeD}.json`);
+				Ping = `🔁 cache`;
+				handler(JSON.parse(userJSON.toString()));
+			} catch (err) {
+				console.log(err);
+				// TimerDesynced = true;
+				PGAMain();
+			}
+		}, 1000);
+	}
 }
 
 function handler(Json) {
@@ -3728,6 +3786,18 @@ function addReport(report, prepend = false, index = 0) {
 		roll.prepend(Div);
 		investigation = true;
 	} else {
+		const timed = new Date(report.originTime.replace(/-/g, "/")).getTime() - 25000;
+		const timed_hold = timed;
+		fs.access(`./replay_data/${timed_hold}/${timed}.json`, (err) => {
+			if (!err) {
+				report.download = true;
+				TREM.Report.cache.set(report.identifier, report);
+			} else {
+				report.download = false;
+				TREM.Report.cache.set(report.identifier, report);
+			}
+		  });
+
 		const report_container = document.createElement("div");
 		report_container.className = "report-container";
 
@@ -3819,7 +3889,13 @@ function addReport(report, prepend = false, index = 0) {
 
 			let list = [];
 
-			if (report.ID.length) {
+			const reportD = TREM.Report.cache.get(report.identifier);
+			console.log(reportD);
+
+			if (reportD.download) {
+				const oldtime = new Date(report.originTime.replace(/-/g, "/")).getTime();
+				ipcRenderer.send("testoldtime", oldtime);
+			} else if (report.ID.length) {
 				list = list.concat(report.ID);
 				ipcRenderer.send("testEEW", list);
 			} else if (report.trem.length) {
@@ -3998,6 +4074,8 @@ const stopReplay = function() {
 		ipcMain.emit("ReportGET");
 	}
 
+	if (replayD) replayD = false;
+
 	WarnAudio = Date.now() + 3000;
 	axios.post(posturl + "stop", { uuid: localStorage.UUID })
 	// Exptech.v1.post("/trem/stop", { uuid: localStorage.UUID })
@@ -4030,6 +4108,16 @@ ipcMain.on("testoldtimeEEW", (event, oldtime) => {
 	replayT = NOW().getTime();
 	ipcMain.emit("ReportGET");
 	stopReplaybtn();
+});
+
+ipcMain.on("testoldtime", (event, oldtime) => {
+	replayD = true;
+	replay = oldtime - 25000;
+	replayTemp = replay;
+	replayT = NOW().getTime();
+	ipcMain.emit("ReportGET");
+	stopReplaybtn();
+	PGAMain();
 });
 
 ipcMain.on("sleep", (event, mode) => {
@@ -4113,37 +4201,48 @@ ipcMain.on("report-Notification", (event, report) => {
 });
 
 ipcMain.on("intensity-Notification", (event, intensity) => {
-	if (setting["webhook.url"] != "" && setting["intensity.Notification"]) {
-		// console.log(intensity);
-		const info = intensity.raw.info;
-		const intensity1 = intensity.raw.intensity;
-		let description = "";
-		let city0 = "";
+	// console.log(intensity);
+	const info = intensity.raw.info;
+	const intensity1 = intensity.raw.intensity;
+	let description = "";
+	let city0 = "";
+	let intensity1r = {};
+	const intensity1rkeys = Object.keys(intensity1).reverse();
 
-		for (let index = 0, keys = Object.keys(intensity1), n = keys.length; index < n; index++) {
-			const intensity2 = Number(keys[index]);
-			const ids = intensity1[intensity2];
-			description += `\n${intensity2}級\n`;
+	for (let index = 0; index < intensity1rkeys.length; index++) {
+		intensity1r[index] = intensity1[intensity1rkeys[index]];
+	}
 
-			for (const city in TREM.Resources.region)
-				for (const town in TREM.Resources.region[city]) {
-					const loc = TREM.Resources.region[city][town];
+	for (let index = 0, keys = Object.keys(intensity1r), n = keys.length; index < n; index++) {
+		const intensity2 = keys.length - Number(keys[index]);
+		const ids = intensity1r[Number(keys[index])];
+		const intensity3 = `${IntensityI(intensity2)}級`;
 
-					for (const id of ids)
-						if (loc.id == id && city0 == city) {
-							description += ` ${town}`;
-						} else if (loc.id == id && city0 == "") {
-							description += `${city} ${town}`;
-							city0 = city;
-						} else if (loc.id == id && city0 != city) {
-							description += `\n${city} ${town}`;
-							city0 = city;
-						}
-				}
-		}
+		description += `${intensity3.replace("-級", "弱").replace("+級", "強")}\n`;
 
+		for (const city in TREM.Resources.region)
+			for (const town in TREM.Resources.region[city]) {
+				const loc = TREM.Resources.region[city][town];
+
+				for (const id of ids)
+					if (loc.id == id && city0 == city) {
+						description += ` ${town}`;
+					} else if (loc.id == id && city0 == "") {
+						description += `${city} ${town}`;
+						city0 = city;
+					} else if (loc.id == id && city0 != city) {
+						description += `\n${city} ${town}`;
+						city0 = city;
+					}
+			}
+
+		city0 = "";
 		description += "\n";
+	}
 
+	description += "\n";
+
+	if (setting["webhook.url"] != "" && setting["intensity.Notification"]) {
 		dump({ level: 0, message: "Posting Notification intensity Webhook", origin: "Webhook" });
 		const msg = {
 			username   : "TREM | 臺灣即時地震監測",
@@ -4204,6 +4303,14 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 		}).catch((error) => {
 			dump({ level: 2, message: error, origin: "Webhook" });
 		});
+	}
+
+	if (speecd_use) {
+		const now = new Date(info.time).format("YYYY/MM/DD HH:mm:ss");
+		speech.speak({ text: "震度速報"
+		+ "資料來源" + intensity.unit
+		+ "時間" + now
+		+ "震度分布" + description });
 	}
 });
 

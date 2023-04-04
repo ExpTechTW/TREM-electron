@@ -31,7 +31,7 @@ let _hide = TREM.Configuration.data["windows.minimize"];
 let _devMode = false;
 
 if (process.argv.includes("--start")) _hide = true;
-if (process.argv.includes("--dev")) {
+if (process.argv.includes("--dev") && process.argv.includes("--key")) {
 	_devMode = true;
 	TREM.Configuration.data["dev.mode"] = _devMode;
 }else{
@@ -271,9 +271,9 @@ TREM.on("ready", () => {
 		}, time);
 	}
 
-	globalShortcut.register("Tab", function() {
-		console.log("Tab is pressed");
-	})
+	// globalShortcut.register("Tab", function() {
+	// 	console.log("Tab is pressed");
+	// })
 });
 
 autoUpdater.on("update-available", (info) => {
