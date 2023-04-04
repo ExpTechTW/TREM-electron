@@ -292,6 +292,9 @@ TREM.Report = {
 					this.lock = false;
 					return;
 				}
+
+				if (report.download) return;
+
 				this.lock = true;
 				fetch(`https://exptech.com.tw/api/v2/trem/rts?time=${time}`)
 					.then(res => res.json())
@@ -304,8 +307,7 @@ TREM.Report = {
 								document.getElementById("report-replay-downloader-text").innerHTML = "重複下載!";
 								report.download = true;
 								this.cache.set(report.identifier, report);
-								return;
-							} else if(err.code == "ENOENT") {
+							} else if (err.code == "ENOENT") {
 								fs.writeFile(`./replay_data/${time_hold}/${time}.json`, JSON.stringify(res), () => {
 									time += 1000;
 								});
@@ -323,13 +325,14 @@ TREM.Report = {
 	},
 	replaydownloaderrm(id) {
 		const report = this.cache.get(id);
-		let time = new Date(report.originTime.replace(/-/g, "/")).getTime() - 25000;
+		const time = new Date(report.originTime.replace(/-/g, "/")).getTime() - 25000;
 
 		fs.rm(`./replay_data/${time}/`, { recursive: true }, () => {
 			document.getElementById("report-replay-downloader-icon").innerHTML = "download";
 			document.getElementById("report-replay-downloader-text").innerHTML = "下載";
 			report.download = false;
 			this.cache.set(report.identifier, report);
+
 			if (this.lock) {
 				this.lock = false;
 				clearInterval(this.clock);
@@ -609,14 +612,14 @@ TREM.Report = {
 						report.download = false;
 						this.cache.set(report.identifier, report);
 					}
-				  });
+				});
 			} else {
 				document.getElementById("report-replay-downloader-icon").innerHTML = "download";
 				document.getElementById("report-replay-downloader-text").innerHTML = "下載";
 				report.download = false;
 				this.cache.set(report.identifier, report);
 			}
-		  });
+		});
 
 		if (report.location.startsWith("地震資訊")) {
 			document.getElementById("report-cwb").style.display = "none";

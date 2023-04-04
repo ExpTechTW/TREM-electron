@@ -894,18 +894,19 @@ function forget() {
 function gift() {
 	const exptech_gift_key_value = document.getElementById("exptech.gift.key").value;
 	axios.get("https://exptech.com.tw/api/v1/et/gift?key=" + setting["api.key"] + "&code=" + exptech_gift_key_value)
-	.then((res) => {
-		console.log(res.data);
+		.then((res) => {
+			console.log(res.data);
 
-		document.getElementById("exptechState").innerHTML = "兌換成功!";
-	})
-	.catch((error) => {
-		console.log(error);
-		const res = error.request.response;
-		if (res == "This gift code invalid!") document.getElementById("exptechState").innerHTML = "兌換碼 無效!";
-		else if (res == "Can't find this account!") document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
-		else document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
-	});
+			document.getElementById("exptechState").innerHTML = "兌換成功!";
+		})
+		.catch((error) => {
+			console.log(error);
+			const res = error.request.response;
+
+			if (res == "This gift code invalid!") document.getElementById("exptechState").innerHTML = "兌換碼 無效!";
+			else if (res == "Can't find this account!") document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
+			else document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+		});
 }
 
 function balance() {

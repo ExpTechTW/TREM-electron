@@ -2565,7 +2565,7 @@ function PGAMain() {
 			try {
 				const ReplayTimeD = (replayTemp == 0) ? 0 : replayTemp += 1000;
 				const userJSON = fs.readFileSync(`./replay_data/${replay}/${ReplayTimeD}.json`);
-				Ping = `🔁 cache`;
+				Ping = "🔁 cache";
 				handler(JSON.parse(userJSON.toString()));
 			} catch (err) {
 				console.log(err);
@@ -2659,7 +2659,7 @@ function PGAMainbkup() {
 			try {
 				const ReplayTimeD = (replayTemp == 0) ? 0 : replayTemp += 1000;
 				const userJSON = fs.readFileSync(`./replay_data/${replay}/${ReplayTimeD}.json`);
-				Ping = `🔁 cache`;
+				Ping = "🔁 cache";
 				handler(JSON.parse(userJSON.toString()));
 			} catch (err) {
 				console.log(err);
@@ -3796,7 +3796,7 @@ function addReport(report, prepend = false, index = 0) {
 				report.download = false;
 				TREM.Report.cache.set(report.identifier, report);
 			}
-		  });
+		});
 
 		const report_container = document.createElement("div");
 		report_container.className = "report-container";
@@ -4206,12 +4206,11 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 	const intensity1 = intensity.raw.intensity;
 	let description = "";
 	let city0 = "";
-	let intensity1r = {};
+	const intensity1r = {};
 	const intensity1rkeys = Object.keys(intensity1).reverse();
 
-	for (let index = 0; index < intensity1rkeys.length; index++) {
+	for (let index = 0; index < intensity1rkeys.length; index++)
 		intensity1r[index] = intensity1[intensity1rkeys[index]];
-	}
 
 	for (let index = 0, keys = Object.keys(intensity1r), n = keys.length; index < n; index++) {
 		const intensity2 = keys.length - Number(keys[index]);
