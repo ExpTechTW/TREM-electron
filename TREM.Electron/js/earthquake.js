@@ -3018,6 +3018,10 @@ function handler(Json) {
 							silent : win.isFocused(),
 						});
 					}
+
+					const _intensity = `${IntensityI(max_intensity)}級`;
+
+					if (speecd_use) speech.speak({ text: `觀測最大震度，${_intensity.replace("-級", "弱").replace("+級", "強")}` });
 				}
 
 				setTimeout(() => {
@@ -4198,6 +4202,10 @@ ipcMain.on("report-Notification", (event, report) => {
 			dump({ level: 2, message: error, origin: "Webhook" });
 		});
 	}
+
+	const location = report.location.match(/(?<=位於).+(?=\))/);
+
+	if (speecd_use) speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}` });
 });
 
 ipcMain.on("intensity-Notification", (event, intensity) => {
@@ -4701,6 +4709,8 @@ function FCMdata(json, Unit) {
 							silent : win.isFocused(),
 						});
 
+			if (speecd_use) speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}` });
+
 			addReport(report, true);
 			ipcRenderer.send("report-Notification", report);
 
@@ -4737,13 +4747,14 @@ function FCMdata(json, Unit) {
 			const location = json.location.match(/(?<=位於).+(?=\))/);
 
 			if (!win.isFocused())
-				if (!report.location.startsWith("地震資訊"))
-					new Notification("地震報告",
-						{
-							body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
-							icon   : "../TREM.ico",
-							silent : win.isFocused(),
-						});
+				new Notification("地震報告",
+					{
+						body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
+						icon   : "../TREM.ico",
+						silent : win.isFocused(),
+					});
+
+			if (speecd_use) speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}` });
 
 			addReport(report, true);
 			ipcRenderer.send("report-Notification", report);
@@ -4921,6 +4932,11 @@ TREM.Earthquake.on("eew", (data) => {
 		else speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
 	}
 
+	if (speecd_use && Number(data.scale) >= 7)
+		speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
+	else if (speecd_use && Number(data.scale) >= 6)
+		speech.speak({ text: "沿岸地區應慎防海水位突變" });
+
 	new Notification("EEW 強震即時警報", {
 		body   : body,
 		icon   : "../TREM.ico",
@@ -4981,6 +4997,8 @@ TREM.Earthquake.on("eew", (data) => {
 				}
 			}
 	}
+
+	if (MaxIntensity.value >= 4) if (speecd_use) speech.speak({ text: "注意強震，此地震可能造成災害" });
 
 	if (MaxIntensity.value >= 5) {
 		data.Alert = true;
@@ -5434,6 +5452,8 @@ TREM.Earthquake.on("tsunami", (data) => {
 	console.log(data);
 
 	if (data.cancel) {
+		if (speecd_use) speech.speak({ text: "海嘯警報已解除" });
+
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (Maps.main.getFeatureState({
 				source      : "Source_EN",
@@ -5514,6 +5534,8 @@ TREM.Earthquake.on("tsunami", (data) => {
 
 		Mapsmainfocus();
 	} else {
+		if (speecd_use) speech.speak({ text: "海嘯警報已發布，請迅速疏散至安全場所" });
+
 		if (data.number == 1) {
 			if (setting["report.show"]) win.showInactive();
 
