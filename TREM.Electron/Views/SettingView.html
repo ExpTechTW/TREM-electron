@@ -2857,6 +2857,46 @@
                                             </span>
                                         </label>
                                     </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">p2p mode</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">P2P模式</span>
+                                                <span class="option-label-id">p2p.mode</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">啟用P2P模式，使用 P2P模式 讓 TREM 接收P2P模式。
+                                                    如果你遇到了其他模式斷線的問題，請開啟此功能(此功能處於測試階段)。
+                                                    關閉此功能會讓錯誤碼出現4&5純屬正常。</span>
+                                            </div>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="p2p.mode" onclick="CheckSave('p2p.mode')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <button id="P2PReloadButton" class="filled-tonal-button setting-button md3-ripple" onclick="restart()" style="display:none; margin-top: 4px;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Restart</span>
+                                            <span lang="ja">再起動</span>
+                                            <span lang="kr">Restart</span>
+                                            <span lang="ru">Restart</span>
+                                            <span lang="zh-CN">重新啟動</span>
+                                            <span lang="zh-TW">重新啟動</span>
+                                        </span>
+                                    </button>
                                 </div>
                                 <div class="control-title">
                                     <span lang="en">exptech</span>

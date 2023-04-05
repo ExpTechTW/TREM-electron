@@ -1035,7 +1035,7 @@ async function init() {
 	const progressStep = 5;
 	report_get_timestamp = 0;
 
-	serverinit();
+	if (setting["p2p.mode"]) serverinit();
 
 	TREM.MapRenderingEngine = setting["map.engine"];
 
@@ -1140,9 +1140,19 @@ async function init() {
 
 				if (!FCM) Warn += "3";
 
-				if (!service_status.websocket.status) Warn += "4";
+				if (setting["p2p.mode"]) {
+					try {
+						if (!service_status.websocket.status) Warn += "4";
 
-				if (!service_status.p2p.status) Warn += "5";
+						if (!service_status.p2p.status) Warn += "5";
+					} catch (e) {
+						Warn += "4";
+						Warn += "5";
+					}
+				} else {
+					Warn += "4";
+					Warn += "5";
+				}
 
 				Warn = ((Warn == "") ? "" : ` | 📛 ${Warn}`);
 

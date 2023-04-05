@@ -103,6 +103,9 @@ const Constants = Object.freeze({
 		"sleep.mode": {
 			type  : "toggle",
 			value : false,
+		},"p2p.mode": {
+			type  : "toggle",
+			value : true,
 		},
 		"Real-time.show": {
 			type  : "toggle",

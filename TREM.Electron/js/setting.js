@@ -503,6 +503,9 @@ function CheckSave(id) {
 	if (id == "compatibility.hwaccel")
 		$("#HAReloadButton").fadeIn(100);
 
+	if (id == "p2p.mode")
+		$("#P2PReloadButton").fadeIn(100);
+
 	if (id == "theme.customColor")
 		if (value)
 			$("#intensity-palette-container").fadeIn(100).removeClass("hide");
@@ -609,6 +612,7 @@ function setList(args, el, event) {
 
 	changeel.children("div").each((i, e) => {
 		if (![
+			"P2PReloadButton",
 			"HAReloadButton",
 			"MEReloadButton",
 			"MAPReloadButton",
@@ -617,6 +621,7 @@ function setList(args, el, event) {
 			$(e).css("opacity", "0");
 		$(e).children().each((i2, e2) => {
 			if (![
+				"P2PReloadButton",
 				"HAReloadButton",
 				"MEReloadButton",
 				"MAPReloadButton",
@@ -645,6 +650,7 @@ function setList(args, el, event) {
 		if (child.length)
 			for (let j = 0; j < child.length; j++)
 				if (![
+					"P2PReloadButton",
 					"HAReloadButton",
 					"MEReloadButton",
 					"MAPReloadButton",
