@@ -4700,6 +4700,8 @@ function FCMdata(json, Unit) {
 			+ ":" + now.getMinutes();
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
 		new Notification("海嘯資訊", { body: `${Now0}\n${json.location} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
+
+		if (speecd_use) speech.speak({ text: `海嘯資訊${Now0} ${json.location} 發生 ${json.scale} 地震` });
 	} else if (json.type == "tsunami") {
 		TREM.Earthquake.emit("tsunami", json);
 	} else if (json.type == "trem-eq") {
@@ -5597,7 +5599,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 
 		Mapsmainfocus();
 	} else {
-		if (speecd_use) speech.speak({ text: "海嘯警報已發布，請迅速疏散至安全場所" });
+		if (speecd_use) speech.speak({ text: "海嘯警報已發布，請迅速疏散至避難場所" });
 
 		if (data.number == 1) {
 			if (setting["report.show"]) win.showInactive();
