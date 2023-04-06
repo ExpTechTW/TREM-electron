@@ -1164,6 +1164,10 @@ async function init() {
 
 				else if (type_Unit == "websocket") GetDataState += "⬜ WS";
 
+				else if (type_Unit == "websocket2") GetDataState += "⬜ WS2";
+
+				else if (type_Unit == "websocket3") GetDataState += "⬜ WS3";
+
 				else if (type_Unit == "fcm") GetDataState += "🟥 FCM";
 
 				type_Unit = "";
@@ -4991,9 +4995,9 @@ TREM.Earthquake.on("eew", (data) => {
 		else speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
 	}
 
-	if (speecd_use && Number(data.scale) >= 7)
+	if (speecd_use && Number(data.scale) >= 7 && data.number == 1)
 		speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
-	else if (speecd_use && Number(data.scale) >= 6)
+	else if (speecd_use && Number(data.scale) >= 6 && data.number == 1)
 		speech.speak({ text: "沿岸地區應慎防海水位突變" });
 
 	new Notification("EEW 強震即時警報", {
@@ -5057,7 +5061,7 @@ TREM.Earthquake.on("eew", (data) => {
 			}
 	}
 
-	if (MaxIntensity.value >= 4) if (speecd_use) speech.speak({ text: "注意強震，此地震可能造成災害" });
+	if (MaxIntensity.value >= 4 && data.number == 1) if (speecd_use) speech.speak({ text: "注意強震，此地震可能造成災害" });
 
 	if (MaxIntensity.value >= 5) {
 		data.Alert = true;

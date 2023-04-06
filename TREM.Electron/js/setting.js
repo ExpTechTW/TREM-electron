@@ -1115,7 +1115,7 @@ function send() {
 					timestamp : new Date(document.getElementById("TimeStamp").value).getTime(),
 					unit      : unit_name,
 					raw       : raw,
-					number    : document.getElementById("Version").value,
+					number    : parseInt(document.getElementById("Version").value),
 				},
 			};
 		else
@@ -1130,7 +1130,7 @@ function send() {
 					timestamp : new Date(document.getElementById("TimeStamp").value).getTime(),
 					unit      : unit_name,
 					raw       : raw,
-					number    : document.getElementById("Version").value,
+					number    : parseInt(document.getElementById("Version").value),
 				},
 			};
 	} else if (!document.getElementById("tsunamialertbtn").checked) {
@@ -1153,7 +1153,7 @@ function send() {
 					FormatVersion : 1,
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 					"UTC+8"       : document.getElementById("Time").value,
-					number        : document.getElementById("Version").value,
+					number        : parseInt(document.getElementById("Version").value),
 					id            : document.getElementById("ID").value,
 					Test          : document.getElementById("testbtn").checked,
 					Unit          : document.getElementById("testtext").value,
@@ -1183,7 +1183,7 @@ function send() {
 					FormatVersion : 1,
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
 					"UTC+8"       : document.getElementById("Time").value,
-					number        : document.getElementById("Version").value,
+					number        : parseInt(document.getElementById("Version").value),
 					id            : document.getElementById("ID").value,
 					Test          : document.getElementById("testbtn").checked,
 					Unit          : document.getElementById("testtext").value,
@@ -1225,7 +1225,7 @@ function send() {
 					scale         : parseFloat(document.getElementById("Scale").value),
 					FormatVersion : 1,
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
-					number        : document.getElementById("Version").value,
+					number        : parseInt(document.getElementById("Version").value),
 					area          : [
 						tsunamiENopen ? { areaName: "東北沿海地區", waveHeight: tsunamiEN, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
 						tsunamiEopen ? { areaName: "東部沿海地區", waveHeight: tsunamiE, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
@@ -1253,7 +1253,7 @@ function send() {
 					scale         : parseFloat(document.getElementById("Scale").value),
 					FormatVersion : 1,
 					timestamp     : new Date(document.getElementById("TimeStamp").value).getTime(),
-					number        : document.getElementById("Version").value,
+					number        : parseInt(document.getElementById("Version").value),
 					area          : [
 						tsunamiENopen ? { areaName: "東北沿海地區", waveHeight: tsunamiEN, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
 						tsunamiEopen ? { areaName: "東部沿海地區", waveHeight: tsunamiE, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
