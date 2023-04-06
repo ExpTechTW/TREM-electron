@@ -1348,7 +1348,7 @@ async function init() {
 						// 	130,
 						// 	30,
 						// ],
-						maxZoom            : 10,
+						maxZoom            : 12,
 						minZoom            : 1,
 						zoom               : 6.8,
 						center             : [121.596, 23.612],
@@ -2214,8 +2214,8 @@ async function init() {
 				])
 					if (setting["map." + mapName])
 						MapBases.report.push(`${mapName}`, L.geoJson.vt(MapData[mapName], {
-							minZoom   : 3,
-							maxZoom   : 10,
+							minZoom   : 1,
+							maxZoom   : 12,
 							tolerance : 20,
 							buffer    : 256,
 							debug     : 0,
@@ -2228,8 +2228,8 @@ async function init() {
 						}).addTo(Maps.report));
 				MapBases.report.push("tw_county",
 					L.geoJson.vt(MapData.tw_county, {
-						minZoom   : 3,
-						maxZoom   : 10,
+						minZoom   : 1,
+						maxZoom   : 12,
 						tolerance : 20,
 						buffer    : 256,
 						debug     : 0,
