@@ -325,8 +325,8 @@ const wave = (wave_data) => {
 		charts[i].setOption({
 			animation : false,
 			yAxis     : {
-				max : maxmin < (chartuuids[i].startsWith("H") ? 0.5 : 5) ? (chartuuids[i].startsWith("H") ? 0.5 : 5) : maxmin,
-				min : -(maxmin < (chartuuids[i].startsWith("H") ? 0.5 : 5) ? (chartuuids[i].startsWith("H") ? 0.5 : 5) : maxmin),
+				max : maxmin < (chartuuids[i].startsWith("H") ? 100 : 100000) ? (chartuuids[i].startsWith("H") ? 100 : 100000) : maxmin,
+				min : -(maxmin < (chartuuids[i].startsWith("H") ? 100 : 100000) ? (chartuuids[i].startsWith("H") ? 100 : 100000) : maxmin),
 			},
 			series: [
 				{
