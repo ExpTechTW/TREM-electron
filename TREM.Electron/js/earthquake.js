@@ -1996,6 +1996,9 @@ async function init() {
 					"va",
 					"ec",
 					"af",
+					"ru",
+					"cl",
+					"ar",
 				]) {
 					Maps.report.addSource(`Source_${mapName}`, {
 						type      : "geojson",
@@ -2205,6 +2208,9 @@ async function init() {
 					"va",
 					"ec",
 					"af",
+					"ru",
+					"cl",
+					"ar",
 				])
 					if (setting["map." + mapName])
 						MapBases.report.push(`${mapName}`, L.geoJson.vt(MapData[mapName], {
@@ -3581,6 +3587,18 @@ function ReportGET() {
 		if (typeof _report_data != "object") _report_data = [];
 
 		const list = {};
+		let _report_data_temp = [];
+		let j = 0;
+
+		if (_report_data.length != 0 && !setting["report.getInfo"]) {
+			for (let i = 0; i < _report_data.length; i++)
+				if (_report_data[i].identifier.startsWith("CWB")) {
+					_report_data_temp[j] = _report_data[i];
+					j += 1;
+				}
+
+			_report_data = _report_data_temp;
+		}
 
 		if (_report_data.length != 0)
 			for (let i = 0; i < 49; i++) {
@@ -3588,13 +3606,20 @@ function ReportGET() {
 				list[_report_data[i].identifier] = md5.update(JSON.stringify(_report_data[i])).digest("hex");
 			}
 
-		fetch("https://exptech.com.tw/api/v2/earthquake/reports", {
+		let bodyInfo;
+
+		if (setting["report.getInfo"])
+			bodyInfo = JSON.stringify({ list, key: setting["api.key"] != "" ? setting["api.key"] : "" });
+		else
+			bodyInfo = JSON.stringify({ list });
+
+		fetch("https://exptech.com.tw/api/v3/earthquake/reports", {
 			method  : "post",
 			headers : {
 				Accept         : "application/json",
 				"Content-Type" : "application/json",
 			},
-			body   : JSON.stringify({ list }),
+			body   : bodyInfo,
 			signal : controller.signal })
 			.then((ans) => ans.json())
 			.then((ans) => {
@@ -3624,7 +3649,7 @@ function ReportGET() {
 				storage.setItem("report_data", _report_data);
 
 				if (_report_data.length > setting["cache.report"]) {
-					const _report_data_temp = [];
+					_report_data_temp = [];
 					for (let i = 0; i < setting["cache.report"]; i++)
 						_report_data_temp[i] = _report_data[i];
 					TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
@@ -3640,7 +3665,7 @@ function ReportGET() {
 				console.log(err);
 
 				if (_report_data.length > setting["cache.report"]) {
-					const _report_data_temp = [];
+					_report_data_temp = [];
 					for (let i = 0; i < setting["cache.report"]; i++)
 						_report_data_temp[i] = _report_data[i];
 					TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
@@ -3660,10 +3685,33 @@ function ReportGET() {
 
 ipcMain.on("ReportGET", () => {
 	let _report_data_GET = [];
+	const _report_data_GET_temp = [];
+	let j = 0;
+	let getInfo = false;
 	_report_data_GET = storage.getItem("report_data");
 
 	if (typeof _report_data_GET != "object") _report_data_GET = [];
 
+	if (_report_data_GET.length != 0 && !setting["report.getInfo"]) {
+		for (let i = 0; i < _report_data_GET.length; i++)
+			if (_report_data_GET[i].identifier.startsWith("CWB")) {
+				_report_data_GET_temp[j] = _report_data_GET[i];
+				j += 1;
+			}
+
+		_report_data_GET = _report_data_GET_temp;
+		cacheReport(_report_data_GET);
+	} else if (_report_data_GET.length != 0 && setting["report.getInfo"]) {
+		for (let i = 0; i < _report_data_GET.length; i++)
+			if (_report_data_GET[i].location.startsWith("地震資訊"))
+				getInfo = true;
+
+		if (!getInfo) ReportGET();
+		else if (getInfo) cacheReport(_report_data_GET);
+	}
+});
+
+function cacheReport(_report_data_GET) {
 	if (_report_data_GET.length > setting["cache.report"]) {
 		const _report_data_temp = [];
 
@@ -3690,7 +3738,7 @@ ipcMain.on("ReportGET", () => {
 		else
 			ReportList(_report_data_GET);
 	}
-});
+}
 // #endregion
 
 // #region Report 點擊
@@ -4323,10 +4371,10 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 	}
 
 	if (speecd_use) {
-		const now = new Date(info.time).format("YYYY/MM/DD HH:mm:ss");
+		const now = new Date(info.time != 0 ? info.time : intensity.timestamp).format("YYYY/MM/DD HH:mm:ss");
 		speech.speak({ text: "震度速報"
 		+ "資料來源" + intensity.unit
-		+ "時間" + now
+		+ (info.time != 0 ? "發震時間" : "接收時間") + now
 		+ "震度分布" + description });
 	}
 });
@@ -4801,7 +4849,8 @@ function FCMdata(json, Unit) {
 						: (json.type == "eew-cwb") ? "中央氣象局 (CWB)"
 							: (json.type == "eew-fjdzj") ? "福建省地震局 (FJDZJ)"
 								: (json.type == "trem-eew") ? "NSSPE(無震源參數推算)"
-									: (json.Unit) ? json.Unit : "";
+									: (json.scale == 1) ? "PLUM(局部無阻尼運動傳播法)"
+										: (json.Unit) ? json.Unit : "";
 
 		stopReplaybtn();
 		TREM.Earthquake.emit("eew", json);

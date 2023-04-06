@@ -56,6 +56,18 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"map.ru": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.cl": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.ar": {
+			type  : "toggle",
+			value : false,
+		},
 		"general.locale": {
 			type  : "select",
 			value : "zh-TW",
@@ -248,6 +260,10 @@ const Constants = Object.freeze({
 			value : true,
 		},
 		"report.onlycwbchangeView": {
+			type  : "toggle",
+			value : false,
+		},
+		"report.getInfo": {
 			type  : "toggle",
 			value : false,
 		},

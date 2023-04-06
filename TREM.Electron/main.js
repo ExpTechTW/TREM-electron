@@ -437,7 +437,10 @@ ipcMain.on("config:value", (event, key, value) => {
 		case "map.pa":
 		case "map.va":
 		case "map.ec":
-		case "map.af": {
+		case "map.af":
+		case "map.ru":
+		case "map.cl":
+		case "map.ar": {
 			emitAllWindow("config:maplayer", key.slice(4), value);
 			MainWindow.reload();
 			break;
@@ -514,6 +517,13 @@ ipcMain.on("config:value", (event, key, value) => {
 
 		case "cache.report": {
 			TREM.Configuration.data["cache.report"] = value;
+			emitAllWindow("setting", TREM.Configuration._data);
+			ipcMain.emit("ReportGET");
+			break;
+		}
+
+		case "report.getInfo": {
+			TREM.Configuration.data["report.getInfo"] = value;
 			emitAllWindow("setting", TREM.Configuration._data);
 			ipcMain.emit("ReportGET");
 			break;
