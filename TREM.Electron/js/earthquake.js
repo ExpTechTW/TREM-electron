@@ -252,11 +252,42 @@ TREM.MapIntensity = {
 
 				if (speecd_use && rawPalertData.final) {
 					const now = new Date(rawPalertData.time).format("YYYY/MM/DD HH:mm:ss");
+					let intensity_index0 = 0;
+					let description0 = "";
+
+					for (let index = this.MaxI; index != 0; index--) {
+						const intensity0 = `${IntensityI(index)}級`;
+						let countyName_index0 = "";
+
+						for (const palertEntry of rawPalertData.intensity) {
+							const [countyName, townName] = palertEntry.loc.split(" ");
+
+							if (palertEntry.intensity == index) {
+								if (countyName_index0 == "") {
+									description0 += `${countyName} `;
+
+									if (rawPalertData.intensity.length != intensity_index0)
+										description0 += `${intensity0.replace("-級", "弱").replace("+級", "強")}\n`;
+								} else if (countyName_index0 == countyName) {
+									continue;
+								} else {
+									description0 += `\n${countyName} `;
+
+									if (rawPalertData.intensity.length != intensity_index0)
+										description0 += `${intensity0.replace("-級", "弱").replace("+級", "強")}\n`;
+								}
+
+								countyName_index0 = countyName;
+								intensity_index0 += 1;
+							}
+						}
+					}
+
 					speech.speak({ text: "震度速報"
 					+ "資料來源PAlert(最終報)"
 					+ "時間" + now
-					+ "觸發測站" + rawPalertData.tiggered
-					+ this.description });
+					+ "觸發測站" + rawPalertData.tiggered + "台震度分布"
+					+ description0 });
 				}
 
 				if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -2423,7 +2454,6 @@ async function init() {
 			}
 		}
 	}, 500);
-	global.gc();
 	// const userJSON = require(path.resolve(__dirname, "../js/1669484541389.json"));
 	// TREM.Intensity.handle(userJSON);
 	// ipcRenderer.send("intensity-Notification", userJSON);
@@ -2491,6 +2521,7 @@ async function init() {
 			console.log("複製成功");
 		});
 	});
+	global.gc();
 }
 // #endregion
 
@@ -4143,6 +4174,15 @@ const stopReplay = function() {
 	if (replayD) replayD = false;
 
 	WarnAudio = Date.now() + 3000;
+
+	if (setting["p2p.mode"])
+		try {
+			if (service_status.websocket.status)
+				axios.post(posturl + "stop", { uuid: localStorage.UUID_p2p }).catch((error) => dump({ level: 2, message: error, origin: "Verbose" }));
+		} catch (e) {
+			dump({ level: 2, message: e, origin: "Verbose" });
+		}
+
 	axios.post(posturl + "stop", { uuid: localStorage.UUID })
 	// Exptech.v1.post("/trem/stop", { uuid: localStorage.UUID })
 		.catch((error) => dump({ level: 2, message: error, origin: "Verbose" }));
@@ -4205,7 +4245,7 @@ ipcMain.on("report-Notification", (event, report) => {
 			username   : "TREM | 臺灣即時地震監測",
 			avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
 			content    : setting["tts.Notification"] ? ("地震報告"
-			+ ((report.data.length != 0) ? "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0].areaName + report.data[0].eqStation[0].stationName + IntensityI(report.data[0].areaIntensity) + "級。" : "發生規模" + report.magnitudeValue + "有感地震，最大震度" + "?級。")
+			+ ((report.data.length != 0) ? "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0].areaName + report.data[0].eqStation[0].stationName + IntensityI(report.data[0].areaIntensity) + "級。" : "發生規模" + report.magnitudeValue + "有感地震 ")
 			+ "編號"
 			+ (report.location.startsWith("地震資訊") ? "無（地震資訊）" : report.earthquakeNo % 1000 ? report.earthquakeNo : "無（小區域有感地震）")
 			+ "時間"
@@ -4214,8 +4254,8 @@ ipcMain.on("report-Notification", (event, report) => {
 			+ report.depth + " 公里"
 			+ "震央位置"
 			+ "經度 東經 " + report.epicenterLon + "緯度 北緯 " + report.epicenterLat + "即在" + report.location
-			+ ((report.data.length != 0) ? "最大震度" + IntensityI(report.data[0].areaIntensity) + "級地區" : "最大震度?級地區")
-			+ ((report.data.length != 0) ? report.data[0].areaName : "?級。")) : "地震報告",
+			+ ((report.data.length != 0) ? "最大震度" + IntensityI(report.data[0].areaIntensity) + "級地區" : "")
+			+ ((report.data.length != 0) ? report.data[0].areaName : "")) : "地震報告",
 			tts    : setting["tts.Notification"],
 			embeds : [
 				{
@@ -4224,7 +4264,7 @@ ipcMain.on("report-Notification", (event, report) => {
 						url      : undefined,
 						icon_url : undefined,
 					},
-					description : (report.data.length != 0) ? "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0].areaName + report.data[0].eqStation[0].stationName + IntensityI(report.data[0].areaIntensity) + "級。" : "發生規模" + report.magnitudeValue + "有感地震，最大震度" + "?級。",
+					description : (report.data.length != 0) ? "發生規模" + report.magnitudeValue + "有感地震，最大震度" + report.data[0].areaName + report.data[0].eqStation[0].stationName + IntensityI(report.data[0].areaIntensity) + "級。" : "發生規模" + report.magnitudeValue + "有感地震",
 					fields      : [
 						{
 							name   : "編號",
@@ -4247,8 +4287,8 @@ ipcMain.on("report-Notification", (event, report) => {
 							inline : false,
 						},
 						{
-							name   : (report.data.length != 0) ? "最大震度" + IntensityI(report.data[0].areaIntensity) + "級地區" : "最大震度?級地區",
-							value  : (report.data.length != 0) ? report.data[0].areaName : "?級。",
+							name   : (report.data.length != 0) ? "最大震度" + IntensityI(report.data[0].areaIntensity) + "級地區" : "",
+							value  : (report.data.length != 0) ? report.data[0].areaName : "",
 							inline : false,
 						},
 					],
@@ -4267,7 +4307,12 @@ ipcMain.on("report-Notification", (event, report) => {
 
 	const location = report.location.match(/(?<=位於).+(?=\))/);
 
-	if (speecd_use) speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}` });
+	if (report.data.length != 0 && speecd_use) {
+		const areaIntensity = `${IntensityI(report.data[0].areaIntensity)}級`;
+		speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}，最大震度${report.data[0].areaName + report.data[0].eqStation[0].stationName + areaIntensity.replace("-級", "弱").replace("+級", "強")}` });
+	} else if (speecd_use) {
+		speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}` });
+	}
 });
 
 ipcMain.on("intensity-Notification", (event, intensity) => {
@@ -4376,10 +4421,38 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 
 	if (speecd_use) {
 		const now = new Date(info.time != 0 ? info.time : intensity.timestamp).format("YYYY/MM/DD HH:mm:ss");
+		let description0 = "";
+
+		for (let index = 0, keys = Object.keys(intensity1r), n = keys.length; index < n; index++) {
+			const intensity2 = keys.length - Number(keys[index]);
+			const ids = intensity1r[Number(keys[index])];
+			const intensity3 = `${IntensityI(intensity2)}級`;
+
+			for (const city in TREM.Resources.region)
+				for (const town in TREM.Resources.region[city]) {
+					const loc = TREM.Resources.region[city][town];
+
+					for (const id of ids)
+						if (loc.id == id && city0 == city) {
+							continue;
+						} else if (loc.id == id && city0 == "") {
+							description0 += `${city}`;
+							description0 += `${intensity3.replace("-級", "弱").replace("+級", "強")}\n`;
+							city0 = city;
+						} else if (loc.id == id && city0 != city) {
+							description0 += `\n${city}`;
+							description0 += `${intensity3.replace("-級", "弱").replace("+級", "強")}\n`;
+							city0 = city;
+						}
+				}
+
+			city0 = "";
+		}
+
 		speech.speak({ text: "震度速報"
 		+ "資料來源" + intensity.unit
 		+ (info.time != 0 ? "發震時間" : "接收時間") + now
-		+ "震度分布" + description });
+		+ "震度分布" + description0 });
 	}
 });
 
@@ -4458,7 +4531,29 @@ ipcMain.on("testEEW", (event, list = []) => {
 	if (!list.length)
 		setTimeout(() => {
 			dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-			const data = {
+			let data = {};
+
+			if (setting["p2p.mode"])
+				try {
+					if (service_status.websocket.status) {
+						data = {
+							uuid: localStorage.UUID_p2p,
+						};
+						dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+						axios.post(posturl + "replay", data)
+							.then(() => {
+								testEEWerror = false;
+							})
+							.catch((error) => {
+								testEEWerror = true;
+								dump({ level: 2, message: error, origin: "Verbose" });
+							});
+					}
+				} catch (e) {
+					data = {};
+				}
+
+			data = {
 				uuid: localStorage.UUID,
 			};
 			dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
@@ -4476,7 +4571,30 @@ ipcMain.on("testEEW", (event, list = []) => {
 		for (let index = 0; index < list.length; index++)
 			setTimeout(() => {
 				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
-				const data = {
+				let data = {};
+
+				if (setting["p2p.mode"])
+					try {
+						if (service_status.websocket.status) {
+							data = {
+								uuid : localStorage.UUID_p2p,
+								id   : list[index],
+							};
+							dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+							axios.post(posturl + "replay", data)
+								.then(() => {
+									testEEWerror = false;
+								})
+								.catch((error) => {
+									testEEWerror = true;
+									dump({ level: 2, message: error, origin: "Verbose" });
+								});
+						}
+					} catch (e) {
+						data = {};
+					}
+
+				data = {
 					uuid : localStorage.UUID,
 					id   : list[index],
 				};
@@ -4491,7 +4609,6 @@ ipcMain.on("testEEW", (event, list = []) => {
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
 			}, 100);
-	delete localStorage.Testlist;
 });
 
 ipcRenderer.on("settingError", (event, error) => {
@@ -4741,29 +4858,29 @@ function FCMdata(json, Unit) {
 		ipcMain.emit("ReportGET");
 		stopReplaybtn();
 	} else if (json.type == "report") {
-		if (json.raw.identifier.startsWith("CWB") && setting["report.onlycwbchangeView"]) {
-			if (TREM.MapIntensity.isTriggered)
-				TREM.MapIntensity.clear();
+		if (TREM.MapIntensity.isTriggered)
+			TREM.MapIntensity.clear();
 
-			if (TREM.MapArea2.isTriggered)
-				TREM.MapArea2.clear();
+		if (TREM.MapArea2.isTriggered)
+			TREM.MapArea2.clear();
 
-			if (setting["audio.report"]) audioPlay("../audio/Report.wav");
-			dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
-			console.debug(json);
+		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
+		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
+		console.debug(json);
 
-			if (setting["report.show"]) win.showInactive();
+		if (setting["report.show"]) win.showInactive();
 
-			if (setting["report.cover"])
-				if (!win.isFullScreen()) {
-					win.setAlwaysOnTop(true);
-					win.focus();
-					win.setAlwaysOnTop(false);
-				}
+		if (setting["report.cover"])
+			if (!win.isFullScreen()) {
+				win.setAlwaysOnTop(true);
+				win.focus();
+				win.setAlwaysOnTop(false);
+			}
 
-			const report = json.raw;
-			const location = json.location.match(/(?<=位於).+(?=\))/);
+		const report = json.raw;
+		const location = json.location.match(/(?<=位於).+(?=\))/);
 
+		if (report.identifier.startsWith("CWB") && setting["report.onlycwbchangeView"]) {
 			if (!win.isFocused())
 				if (!report.location.startsWith("地震資訊"))
 					new Notification("地震報告",
@@ -4772,8 +4889,6 @@ function FCMdata(json, Unit) {
 							icon   : "../TREM.ico",
 							silent : win.isFocused(),
 						});
-
-			if (speecd_use) speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}` });
 
 			addReport(report, true);
 			ipcRenderer.send("report-Notification", report);
@@ -4788,28 +4903,6 @@ function FCMdata(json, Unit) {
 				});
 			}, 5000);
 		} else if (!setting["report.onlycwbchangeView"]) {
-			if (TREM.MapIntensity.isTriggered)
-				TREM.MapIntensity.clear();
-
-			if (TREM.MapArea2.isTriggered)
-				TREM.MapArea2.clear();
-
-			if (setting["audio.report"]) audioPlay("../audio/Report.wav");
-			dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
-			console.debug(json);
-
-			if (setting["report.show"]) win.showInactive();
-
-			if (setting["report.cover"])
-				if (!win.isFullScreen()) {
-					win.setAlwaysOnTop(true);
-					win.focus();
-					win.setAlwaysOnTop(false);
-				}
-
-			const report = json.raw;
-			const location = json.location.match(/(?<=位於).+(?=\))/);
-
 			if (!win.isFocused())
 				new Notification("地震報告",
 					{
@@ -4817,8 +4910,6 @@ function FCMdata(json, Unit) {
 						icon   : "../TREM.ico",
 						silent : win.isFocused(),
 					});
-
-			if (speecd_use) speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}` });
 
 			addReport(report, true);
 			ipcRenderer.send("report-Notification", report);
@@ -4992,15 +5083,26 @@ TREM.Earthquake.on("eew", (data) => {
 
 	if (speecd_use && data.type != "trem-eew") {
 		const speecd_scale = data.scale;
+		const speecd_number = data.number;
+		let find0 = INFO.findIndex(v => v.ID == data.id);
 
-		if (typeof speecd_scale == "string") speech.speak({ text: `${data.location}，發生規模${speecd_scale.replace(".", "點")}地震` });
-		else speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
+		if (find0 == -1) find0 = INFO.length;
+
+		if (speecd_number == 1)
+			speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
+		else if (INFO[find0]?.alert_magnitude != speecd_scale)
+			speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
+
+		if (Number(speecd_scale) >= 7 && speecd_number == 1)
+			speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
+		else if (Number(speecd_scale) >= 6 && speecd_number == 1)
+			speech.speak({ text: "沿岸地區應慎防海水位突變" });
+		else if (INFO[find0]?.alert_magnitude != speecd_scale)
+			if (Number(speecd_scale) >= 7)
+				speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
+			else if (Number(speecd_scale) >= 6)
+				speech.speak({ text: "沿岸地區應慎防海水位突變" });
 	}
-
-	if (speecd_use && Number(data.scale) >= 7 && data.number == 1)
-		speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
-	else if (speecd_use && Number(data.scale) >= 6 && data.number == 1)
-		speech.speak({ text: "沿岸地區應慎防海水位突變" });
 
 	new Notification("EEW 強震即時警報", {
 		body   : body,
