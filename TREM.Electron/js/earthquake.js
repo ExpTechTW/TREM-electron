@@ -5168,24 +5168,24 @@ TREM.Earthquake.on("eew", (data) => {
 
 	if (MaxIntensity.value >= 4 && data.number == 1) if (speecd_use) speech.speak({ text: "注意強震，此地震可能造成災害" });
 
-	if (MaxIntensity.value >= 5) {
-		data.Alert = true;
+	if (data.type != "trem-eew")
+		if (MaxIntensity.value >= 5) {
+			data.Alert = true;
 
-		if (!Info.Warn.includes(data.id)) {
-			Info.Warn.push(data.id);
+			if (!Info.Warn.includes(data.id)) {
+				Info.Warn.push(data.id);
 
-			if (!EEWAlert) {
-				EEWAlert = true;
+				if (!EEWAlert) {
+					EEWAlert = true;
 
-				if (setting["audio.eew"] && Alert)
-					if (data.type != "trem-eew")
-						for (let index = 0; index < 5; index++)
-							audioPlay("../audio/Alert.wav");
+					if (setting["audio.eew"] && Alert)
+							for (let index = 0; index < 5; index++)
+								audioPlay("../audio/Alert.wav");
+				}
 			}
+		} else {
+			data.Alert = false;
 		}
-	} else {
-		data.Alert = false;
-	}
 
 	let _time = -1;
 	let stamp = 0;
@@ -5284,7 +5284,7 @@ TREM.Earthquake.on("eew", (data) => {
 	INFO[find] = {
 		ID              : data.id,
 		alert_number    : data.number,
-		alert_intensity : (data.depth == null) ? data.max ?? 0 : MaxIntensity.value,
+		alert_intensity : (data.type == "trem-eew") ? data.max ?? 0 : MaxIntensity.value,
 		alert_location  : data.location ?? "未知區域",
 		alert_time      : time,
 		alert_sTime     : (data.type == "trem-eew") ? null : Math.floor(data.time + _speed(data.depth, distance).Stime * 1000),
