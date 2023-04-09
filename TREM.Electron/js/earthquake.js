@@ -137,6 +137,7 @@ TREM.win = BrowserWindow.fromId(process.env.window * 1);
 let stationnow = 0;
 let RMTpgaTime = 0;
 let type_Unit = "";
+let api_key_verify = false;
 // #endregion
 
 TREM.Detector = {
@@ -1391,6 +1392,8 @@ async function init() {
 						attributionControl : false,
 						doubleClickZoom    : false,
 						keyboard           : false,
+						dragRotate         : false,
+						touchZoomRotate    : false,
 					})
 					.on("click", () => TREM.Report._focusMap())
 					.on("contextmenu", () => TREM.Report._focusMap());
@@ -3668,8 +3671,12 @@ function ReportGET() {
 						}
 				}
 
-				for (let i = 0; i < ans.length; i++)
+				for (let i = 0; i < ans.length; i++) {
 					_report_data.push(ans[i]);
+
+					if (ans[i].location.startsWith("地震資訊"))
+						api_key_verify = true;
+				}
 
 				for (let i = 0; i < _report_data.length - 1; i++)
 					for (let _i = 0; _i < _report_data.length - 1; _i++)
@@ -4882,28 +4889,6 @@ function FCMdata(json, Unit) {
 
 		if (report.identifier.startsWith("CWB") && setting["report.onlycwbchangeView"]) {
 			if (!win.isFocused())
-				if (!report.location.startsWith("地震資訊"))
-					new Notification("地震報告",
-						{
-							body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
-							icon   : "../TREM.ico",
-							silent : win.isFocused(),
-						});
-
-			addReport(report, true);
-			ipcRenderer.send("report-Notification", report);
-
-			setTimeout(() => {
-				ipcRenderer.send("screenshotEEW", {
-					Function : "report",
-					ID       : json.ID,
-					Version  : 1,
-					Time     : NOW().getTime(),
-					Shot     : 1,
-				});
-			}, 5000);
-		} else if (!setting["report.onlycwbchangeView"]) {
-			if (!win.isFocused())
 				new Notification("地震報告",
 					{
 						body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
@@ -4923,6 +4908,50 @@ function FCMdata(json, Unit) {
 					Shot     : 1,
 				});
 			}, 5000);
+		} else if (!setting["report.onlycwbchangeView"]) {
+			if (report.location.startsWith("地震資訊") && api_key_verify) {
+				if (!win.isFocused())
+					new Notification("地震報告",
+						{
+							body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
+							icon   : "../TREM.ico",
+							silent : win.isFocused(),
+						});
+
+				addReport(report, true);
+				ipcRenderer.send("report-Notification", report);
+
+				setTimeout(() => {
+					ipcRenderer.send("screenshotEEW", {
+						Function : "report",
+						ID       : json.ID,
+						Version  : 1,
+						Time     : NOW().getTime(),
+						Shot     : 1,
+					});
+				}, 5000);
+			} else if (report.identifier.startsWith("CWB")) {
+				if (!win.isFocused())
+					new Notification("地震報告",
+						{
+							body   : `${location}發生規模 ${report.magnitudeValue.toFixed(1)} 有感地震，最大震度${report.data[0].areaName}${report.data[0].eqStation[0].stationName}${TREM.Constants.intensities[report.data[0].eqStation[0].stationIntensity].text}。`,
+							icon   : "../TREM.ico",
+							silent : win.isFocused(),
+						});
+
+				addReport(report, true);
+				ipcRenderer.send("report-Notification", report);
+
+				setTimeout(() => {
+					ipcRenderer.send("screenshotEEW", {
+						Function : "report",
+						ID       : json.ID,
+						Version  : 1,
+						Time     : NOW().getTime(),
+						Shot     : 1,
+					});
+				}, 5000);
+			}
 		}
 	} else if (json.type.startsWith("eew") || json.type == "trem-eew") {
 		if (replay != 0 && !json.replay_timestamp) return;
@@ -6365,30 +6394,40 @@ function main(data) {
 		});
 	}
 
-	const station_tooltip = `<div>${data.Unit}</div><div>注意 ${cursor}</div><div>第 ${data.number} 報</div><div>規模: ${data.scale == null ? "?" : data.scale}</div><div>深度: ${data.depth == null ? "?" : data.depth} km</div>`;
+	let epicenterIcon_tooltip = "";
 
 	// main map
 	if (!EarthquakeList[data.id].epicenterIcon)
-		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+			epicenterIcon_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>${data.Unit}</span><span>注意 ${cursor}</span><span>第 ${data.number} 報</span><span>規模: ${data.scale == null ? "?" : data.scale}</span><span>深度: ${data.depth == null ? "?" : data.depth} km</span></div>`;
+			const epicenterIcon_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
 			EarthquakeList[data.id].epicenterIcon = new maplibregl.Marker(
 				{
 					element: $(`<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>`)[0],
 				})
 				.setLngLat([+data.lon, +data.lat])
-				.setPopup(new maplibregl.Popup({ closeOnClick: false, closeButton: false }).setHTML(station_tooltip))
+				.setPopup(epicenterIcon_tooltip_popup.setHTML(epicenterIcon_tooltip))
 				.addTo(Maps.main);
-		else if (TREM.MapRenderingEngine == "leaflet")
+			EarthquakeList[data.id].epicenterIcon.getElement().addEventListener("mouseover", () => {
+				epicenterIcon_tooltip_popup.setLngLat([+data.lon, +data.lat]).setHTML(epicenterIcon_tooltip).addTo(Maps.main);
+			});
+			EarthquakeList[data.id].epicenterIcon.getElement().addEventListener("mouseleave", () => {
+				epicenterIcon_tooltip_popup.remove();
+			});
+		} else if (TREM.MapRenderingEngine == "leaflet") {
+			epicenterIcon_tooltip = `<div>${data.Unit}</div><div>注意 ${cursor}</div><div>第 ${data.number} 報</div><div>規模: ${data.scale == null ? "?" : data.scale}</div><div>深度: ${data.depth == null ? "?" : data.depth} km</div>`;
 			EarthquakeList[data.id].epicenterIcon = L.marker([+data.lat, +data.lon],
 				{
 					icon         : epicenterIcon,
 					zIndexOffset : 6000,
 				})
 				.addTo(Maps.main)
-				.bindTooltip(station_tooltip, {
+				.bindTooltip(epicenterIcon_tooltip, {
 					offset    : [8, 0],
 					permanent : false,
 					className : "eew-cursor-tooltip",
 				});
+		}
 
 	if (EarthquakeList[data.id].epicenterIcon.getElement().src != iconUrl)
 		EarthquakeList[data.id].epicenterIcon.getElement().src = iconUrl;

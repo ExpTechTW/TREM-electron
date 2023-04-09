@@ -1920,6 +1920,22 @@ body:not(.darkmode) #here-marker {
 	font-weight: 500;
 }
 
+.report-cursor-tooltip {
+	background-color: rgb(var(--md-sys-color-surface-variant)) !important;
+	border: none !important;
+	border-radius: 8px !important;
+	color: rgb(var(--md-sys-color-on-surface-variant)) !important;
+	padding: 8px !important;
+}
+
+.report-cursor-tooltip::before {
+	display: none !important;
+}
+
+.report-cursor-tooltip > div:first-child {
+	font-weight: 500;
+}
+
 svg#svg-defs {
 	position: absolute;
 	visibility: hidden;

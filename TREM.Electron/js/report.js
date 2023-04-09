@@ -658,16 +658,32 @@ TREM.Report = {
 			document.getElementById("report-scweb").value = `https://scweb.cwb.gov.tw/zh-tw/earthquake/details/${scweb_code}`;
 		}
 
+		let Station_i = 0;
+
 		if (report.data.length)
 			for (const data of report.data)
-				for (const eqStation of data.eqStation)
-					if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+				for (const eqStation of data.eqStation) {
+					let station_tooltip = "";
+					const Station = {};
+
+					if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+						station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>測站地名: ${data.areaName} ${eqStation.stationName}</span><span>距離震央: ${eqStation.distance} km</span></div>`;
+						const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
+						Station[Station_i] = new maplibregl.Marker({
+							element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
+						}).setLngLat([eqStation.stationLon, eqStation.stationLat]).setPopup(station_tooltip_popup.setHTML(station_tooltip)).addTo(Maps.report);
+						Station[Station_i].getElement().addEventListener("mouseover", () => {
+							station_tooltip_popup.setLngLat([eqStation.stationLon, eqStation.stationLat]).setHTML(station_tooltip).addTo(Maps.report);
+						});
+						Station[Station_i].getElement().addEventListener("mouseleave", () => {
+							station_tooltip_popup.remove();
+						});
 						this._markers.push(
-							new maplibregl.Marker({
-								element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
-							}).setLngLat([eqStation.stationLon, eqStation.stationLat]).addTo(Maps.report),
+							Station[Station_i],
 						);
-					else
+						Station_i += 1;
+					} else {
+						station_tooltip = `<div>測站地名: ${data.areaName} ${eqStation.stationName}</div><div>距離震央: ${eqStation.distance} km</div>`;
 						this._markers.push(L.marker(
 							[eqStation.stationLat, eqStation.stationLon],
 							{
@@ -676,7 +692,13 @@ TREM.Report = {
 									className : `map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}`,
 								}),
 								zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
-							}));
+							}).bindTooltip(station_tooltip, {
+							offset    : [8, 0],
+							permanent : false,
+							className : "report-cursor-tooltip",
+						}));
+					}
+				}
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			this._markers.push(
