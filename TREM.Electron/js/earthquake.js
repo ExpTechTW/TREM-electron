@@ -4175,13 +4175,13 @@ const stopReplay = function() {
 
 	WarnAudio = Date.now() + 3000;
 
-	if (setting["p2p.mode"])
-		try {
-			if (service_status.websocket.status)
-				axios.post(posturl + "stop", { uuid: localStorage.UUID_p2p }).catch((error) => dump({ level: 2, message: error, origin: "Verbose" }));
-		} catch (e) {
-			dump({ level: 2, message: e, origin: "Verbose" });
-		}
+	// if (setting["p2p.mode"])
+	// 	try {
+	// 		if (service_status.websocket.status)
+	// 			axios.post(posturl + "stop", { uuid: localStorage.UUID_p2p }).catch((error) => dump({ level: 2, message: error, origin: "Verbose" }));
+	// 	} catch (e) {
+	// 		dump({ level: 2, message: e, origin: "Verbose" });
+	// 	}
 
 	axios.post(posturl + "stop", { uuid: localStorage.UUID })
 	// Exptech.v1.post("/trem/stop", { uuid: localStorage.UUID })
@@ -4533,25 +4533,25 @@ ipcMain.on("testEEW", (event, list = []) => {
 			dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 			let data = {};
 
-			if (setting["p2p.mode"])
-				try {
-					if (service_status.websocket.status) {
-						data = {
-							uuid: localStorage.UUID_p2p,
-						};
-						dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-						axios.post(posturl + "replay", data)
-							.then(() => {
-								testEEWerror = false;
-							})
-							.catch((error) => {
-								testEEWerror = true;
-								dump({ level: 2, message: error, origin: "Verbose" });
-							});
-					}
-				} catch (e) {
-					data = {};
-				}
+			// if (setting["p2p.mode"])
+			// 	try {
+			// 		if (service_status.websocket.status) {
+			// 			data = {
+			// 				uuid: localStorage.UUID_p2p,
+			// 			};
+			// 			dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+			// 			axios.post(posturl + "replay", data)
+			// 				.then(() => {
+			// 					testEEWerror = false;
+			// 				})
+			// 				.catch((error) => {
+			// 					testEEWerror = true;
+			// 					dump({ level: 2, message: error, origin: "Verbose" });
+			// 				});
+			// 		}
+			// 	} catch (e) {
+			// 		data = {};
+			// 	}
 
 			data = {
 				uuid: localStorage.UUID,
@@ -4573,26 +4573,26 @@ ipcMain.on("testEEW", (event, list = []) => {
 				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 				let data = {};
 
-				if (setting["p2p.mode"])
-					try {
-						if (service_status.websocket.status) {
-							data = {
-								uuid : localStorage.UUID_p2p,
-								id   : list[index],
-							};
-							dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
-							axios.post(posturl + "replay", data)
-								.then(() => {
-									testEEWerror = false;
-								})
-								.catch((error) => {
-									testEEWerror = true;
-									dump({ level: 2, message: error, origin: "Verbose" });
-								});
-						}
-					} catch (e) {
-						data = {};
-					}
+				// if (setting["p2p.mode"])
+				// 	try {
+				// 		if (service_status.websocket.status) {
+				// 			data = {
+				// 				uuid : localStorage.UUID_p2p,
+				// 				id   : list[index],
+				// 			};
+				// 			dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
+				// 			axios.post(posturl + "replay", data)
+				// 				.then(() => {
+				// 					testEEWerror = false;
+				// 				})
+				// 				.catch((error) => {
+				// 					testEEWerror = true;
+				// 					dump({ level: 2, message: error, origin: "Verbose" });
+				// 				});
+				// 		}
+				// 	} catch (e) {
+				// 		data = {};
+				// 	}
 
 				data = {
 					uuid : localStorage.UUID,
@@ -4945,9 +4945,10 @@ function FCMdata(json, Unit) {
 					: (json.type == "eew-jma") ? "気象庁(JMA)"
 						: (json.type == "eew-cwb") ? "中央氣象局 (CWB)"
 							: (json.type == "eew-fjdzj") ? "福建省地震局 (FJDZJ)"
-								: (json.type == "trem-eew") ? "NSSPE(無震源參數推算)"
-									: (json.scale == 1) ? "PLUM(局部無阻尼運動傳播法)"
-										: (json.Unit) ? json.Unit : "";
+								: (json.type == "trem-eew" && json.number > 3) ? "TREM(實驗功能僅供參考)"
+									: (json.type == "trem-eew" && json.number <= 3) ? "NSSPE(無震源參數推算)"
+										: (json.scale == 1) ? "PLUM(局部無阻尼運動傳播法)"
+											: (json.Unit) ? json.Unit : "";
 
 		stopReplaybtn();
 		TREM.Earthquake.emit("eew", json);
@@ -5067,7 +5068,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 	let Nmsg = "";
 
-	if (data.type == "trem-eew") {
+	if (data.type == "trem-eew" && data.number <= 3) {
 		data.scale = null;
 		data.depth = null;
 	}
@@ -5138,7 +5139,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 		eewt.id = data.id;
 
-		if (data.depth != null)
+		if (data.type != "trem-eew")
 			if (setting["audio.eew"] && Alert) {
 				TREM.Audios.eew.play();
 				audioPlay1(`../audio/1/${level.label.replace("+", "").replace("-", "")}.wav`);
@@ -5177,8 +5178,9 @@ TREM.Earthquake.on("eew", (data) => {
 				EEWAlert = true;
 
 				if (setting["audio.eew"] && Alert)
-					for (let index = 0; index < 5; index++)
-						audioPlay("../audio/Alert.wav");
+					if (data.type != "trem-eew")
+						for (let index = 0; index < 5; index++)
+							audioPlay("../audio/Alert.wav");
 			}
 		}
 	} else {
@@ -5203,7 +5205,7 @@ TREM.Earthquake.on("eew", (data) => {
 		type : data.type,
 	};
 
-	if (data.depth != null) {
+	if (data.type != "trem-eew") {
 		value = Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000);
 
 		if (Second == -1 || value < Second)
@@ -5250,7 +5252,7 @@ TREM.Earthquake.on("eew", (data) => {
 
 	if (EarthquakeList[data.id].Timer != undefined || EarthquakeList[data.id].Timer != null) clearInterval(EarthquakeList[data.id].Timer);
 
-	if (data.type == "trem-eew" && EarthquakeList[data.id].epicenterIcon != undefined || EarthquakeList[data.id].epicenterIcon != null || EarthquakeList[data.id].epicenterIcon) {
+	if (EarthquakeList[data.id].epicenterIcon != undefined || EarthquakeList[data.id].epicenterIcon != null || EarthquakeList[data.id].epicenterIcon) {
 		EarthquakeList[data.id].epicenterIcon.remove();
 		EarthquakeList[data.id].epicenterIcon = null;
 	}
@@ -5285,9 +5287,9 @@ TREM.Earthquake.on("eew", (data) => {
 		alert_intensity : (data.depth == null) ? data.max ?? 0 : MaxIntensity.value,
 		alert_location  : data.location ?? "未知區域",
 		alert_time      : time,
-		alert_sTime     : (data.depth == null) ? null : Math.floor(data.time + _speed(data.depth, distance).Stime * 1000),
-		alert_pTime     : (data.depth == null) ? null : Math.floor(data.time + _speed(data.depth, distance).Ptime * 1000),
-		alert_local     : (data.depth == null) ? "na" : level.value,
+		alert_sTime     : (data.type == "trem-eew") ? null : Math.floor(data.time + _speed(data.depth, distance).Stime * 1000),
+		alert_pTime     : (data.type == "trem-eew") ? null : Math.floor(data.time + _speed(data.depth, distance).Ptime * 1000),
+		alert_local     : (data.type == "trem-eew") ? "na" : level.value,
 		alert_magnitude : data.scale ?? "?",
 		alert_depth     : data.depth ?? "?",
 		alert_provider  : data.Unit,
@@ -5331,7 +5333,7 @@ TREM.Earthquake.on("eew", (data) => {
 		_distance[index] = _speed(data.depth, index);
 	EarthquakeList[data.id].distance = _distance;
 
-	if (data.type == "trem-eew") EarthquakeList[data.id].distance = null;
+	if (data.type == "trem-eew" && data.number <= 3) EarthquakeList[data.id].distance = null;
 
 	main(data);
 
@@ -5404,7 +5406,7 @@ TREM.Earthquake.on("eew", (data) => {
 					+ ":" + NOW().getSeconds();
 
 				let msg = setting["webhook.body"];
-				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", data.type == "trem-eew" ? "?" : data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
+				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", (data.type == "trem-eew" && data.number <= 3)  ? "?" : data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
 
 				if (data.type == "eew-cwb")
 					msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
@@ -5418,13 +5420,9 @@ TREM.Earthquake.on("eew", (data) => {
 					msg = msg.replace("%Provider%", "気象庁(JMA)");
 				else if (data.type == "eew-kma")
 					msg = msg.replace("%Provider%", "기상청(KMA)");
-				else if (data.type == "trem-eew")
+				else if (data.type == "trem-eew" && data.number <= 3)
 					msg = msg.replace("%Provider%", "NSSPE(無震源參數推算)");
-				else if (data.type == "TREM")
-					msg = msg.replace("%Provider%", data.Unit);
-				else if (data.type == "eew")
-					msg = msg.replace("%Provider%", data.Unit);
-				else if (data.type == "eew-test")
+				else
 					msg = msg.replace("%Provider%", data.Unit);
 
 				msg = JSON.parse(msg);
@@ -5436,7 +5434,7 @@ TREM.Earthquake.on("eew", (data) => {
 					icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 				};
 				msg.tts = setting["tts.Notification"];
-				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "位於" + (data.type == "trem-eew" ? "?" : data.location) + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
+				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "位於" + ((data.type == "trem-eew" && data.number <= 3) ? "?" : data.location) + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
 				dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
 				fetch(setting["webhook.url"], {
 					method  : "POST",
@@ -5454,7 +5452,7 @@ TREM.Earthquake.on("eew", (data) => {
 					+ ":" + NOW().getSeconds();
 
 				let msg = setting["webhook.body"];
-				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", data.type == "trem-eew" ? "?" : data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
+				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
 
 				if (data.type == "eew-cwb")
 					msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
@@ -5468,11 +5466,7 @@ TREM.Earthquake.on("eew", (data) => {
 					msg = msg.replace("%Provider%", "気象庁(JMA)");
 				else if (data.type == "eew-kma")
 					msg = msg.replace("%Provider%", "기상청(KMA)");
-				else if (data.type == "TREM")
-					msg = msg.replace("%Provider%", data.Unit);
-				else if (data.type == "eew")
-					msg = msg.replace("%Provider%", data.Unit);
-				else if (data.type == "eew-test")
+				else
 					msg = msg.replace("%Provider%", data.Unit);
 
 				msg = JSON.parse(msg);
@@ -5484,7 +5478,7 @@ TREM.Earthquake.on("eew", (data) => {
 					icon_url : "https://raw.githubusercontent.com/ExpTechTW/API/master/image/Icon/ExpTech.png",
 				};
 				msg.tts = setting["tts.Notification"];
-				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "位於" + (data.type == "trem-eew" ? "?" : data.location) + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
+				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "位於" + data.location + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
 				dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
 				fetch(setting["webhook.url"], {
 					method  : "POST",
@@ -6113,7 +6107,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 });
 
 function main(data) {
-	if (TREM.EEW.get(INFO[TINFO]?.ID).Cancel == undefined || data.type != "trem-eew") {
+	if (TREM.EEW.get(INFO[TINFO]?.ID).Cancel == undefined && data.type != "trem-eew") {
 		if (data.depth != null) {
 
 			const wave = { p: 7, s: 4 };
@@ -6371,6 +6365,8 @@ function main(data) {
 		});
 	}
 
+	const station_tooltip = `<div>${data.Unit}</div><div>注意 ${cursor}</div><div>第 ${data.number} 報</div><div>規模: ${data.scale == null ? "?" : data.scale}</div><div>深度: ${data.depth == null ? "?" : data.depth} km</div>`;
+
 	// main map
 	if (!EarthquakeList[data.id].epicenterIcon)
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
@@ -6379,13 +6375,20 @@ function main(data) {
 					element: $(`<img class="epicenterIcon" height="40" width="40" src="${iconUrl}"></img>`)[0],
 				})
 				.setLngLat([+data.lon, +data.lat])
+				.setPopup(new maplibregl.Popup({ closeOnClick: false, closeButton: false }).setHTML(station_tooltip))
 				.addTo(Maps.main);
 		else if (TREM.MapRenderingEngine == "leaflet")
 			EarthquakeList[data.id].epicenterIcon = L.marker([+data.lat, +data.lon],
 				{
-					icon: epicenterIcon,
+					icon         : epicenterIcon,
+					zIndexOffset : 6000,
 				})
-				.addTo(Maps.main);
+				.addTo(Maps.main)
+				.bindTooltip(station_tooltip, {
+					offset    : [8, 0],
+					permanent : false,
+					className : "eew-cursor-tooltip",
+				});
 
 	if (EarthquakeList[data.id].epicenterIcon.getElement().src != iconUrl)
 		EarthquakeList[data.id].epicenterIcon.getElement().src = iconUrl;
@@ -6409,18 +6412,18 @@ function main(data) {
 
 	if (!Timers.epicenterBlinker)
 		Timers.epicenterBlinker = setInterval(() => {
-			const epicenter_blink_state = EarthquakeList[Object.keys(EarthquakeList)[0]]?.epicenterIcon?.getElement()?.classList?.contains("hide");
+			const epicenter_blink_state = EarthquakeList[Object.keys(EarthquakeList)[0]]?.epicenterIconTW?.getElement()?.classList?.contains("hide");
 
 			if (epicenter_blink_state != undefined)
 				for (const key in EarthquakeList) {
 					const el = EarthquakeList[key];
 
-					if (epicenter_blink_state) {
-						if (el.epicenterIcon.getElement().classList.contains("hide"))
-							el.epicenterIcon.getElement().classList.remove("hide");
-					} else if (!el.epicenterIcon.getElement().classList.contains("hide")) {
-						el.epicenterIcon.getElement().classList.add("hide");
-					}
+					// if (epicenter_blink_state) {
+					// 	if (el.epicenterIcon.getElement().classList.contains("hide"))
+					// 		el.epicenterIcon.getElement().classList.remove("hide");
+					// } else if (!el.epicenterIcon.getElement().classList.contains("hide")) {
+					// 	el.epicenterIcon.getElement().classList.add("hide");
+					// }
 
 					if (key == INFO[TINFO].ID) {
 						if (epicenter_blink_state) {
