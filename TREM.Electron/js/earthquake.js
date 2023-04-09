@@ -5179,8 +5179,8 @@ TREM.Earthquake.on("eew", (data) => {
 					EEWAlert = true;
 
 					if (setting["audio.eew"] && Alert)
-							for (let index = 0; index < 5; index++)
-								audioPlay("../audio/Alert.wav");
+						for (let index = 0; index < 5; index++)
+							audioPlay("../audio/Alert.wav");
 				}
 			}
 		} else {
@@ -5406,7 +5406,7 @@ TREM.Earthquake.on("eew", (data) => {
 					+ ":" + NOW().getSeconds();
 
 				let msg = setting["webhook.body"];
-				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", (data.type == "trem-eew" && data.number <= 3)  ? "?" : data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
+				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", (data.type == "trem-eew" && data.number <= 3) ? "?" : data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
 
 				if (data.type == "eew-cwb")
 					msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
