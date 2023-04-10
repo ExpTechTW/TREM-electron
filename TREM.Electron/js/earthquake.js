@@ -3690,15 +3690,18 @@ function ReportGET() {
 
 				storage.setItem("report_data", _report_data);
 
-				if (_report_data.length > setting["cache.report"]) {
-					_report_data_temp = [];
-					for (let i = 0; i < setting["cache.report"]; i++)
-						_report_data_temp[i] = _report_data[i];
-					TREM.Report.cache = new Map(_report_data_temp.map(v => [v.identifier, v]));
-					ReportList(_report_data_temp);
+				if (api_key_verify && setting["report.getInfo"]) {
+					cacheReport(_report_data);
 				} else {
-					TREM.Report.cache = new Map(_report_data.map(v => [v.identifier, v]));
-					ReportList(_report_data);
+					const _report_data_POST_temp = [];
+					for (let i = 0; i < _report_data.length; i++)
+						if (_report_data[i].identifier.startsWith("CWB")) {
+							_report_data_POST_temp[j] = _report_data[i];
+							j += 1;
+						}
+
+					_report_data = _report_data_POST_temp;
+					cacheReport(_report_data);
 				}
 
 				dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
@@ -3744,12 +3747,23 @@ ipcMain.on("ReportGET", () => {
 		_report_data_GET = _report_data_GET_temp;
 		cacheReport(_report_data_GET);
 	} else if (_report_data_GET.length != 0 && setting["report.getInfo"]) {
-		for (let i = 0; i < _report_data_GET.length; i++)
-			if (_report_data_GET[i].location.startsWith("地震資訊"))
-				getInfo = true;
+		if (api_key_verify) {
+			for (let i = 0; i < _report_data_GET.length; i++)
+				if (_report_data_GET[i].location.startsWith("地震資訊"))
+					getInfo = true;
 
-		if (!getInfo) ReportGET();
-		else if (getInfo) cacheReport(_report_data_GET);
+			if (!getInfo) ReportGET();
+			else if (getInfo) cacheReport(_report_data_GET);
+		} else {
+			for (let i = 0; i < _report_data_GET.length; i++)
+				if (_report_data_GET[i].identifier.startsWith("CWB")) {
+					_report_data_GET_temp[j] = _report_data_GET[i];
+					j += 1;
+				}
+
+			_report_data_GET = _report_data_GET_temp;
+			cacheReport(_report_data_GET);
+		}
 	}
 });
 
