@@ -674,7 +674,7 @@ TREM.Report = {
 					const Station = {};
 
 					if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
-						station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>測站地名: ${data.areaName} ${eqStation.stationName}</span><span>距離震央: ${eqStation.distance} km</span><span>震度: ${eqStation.stationIntensity}</span></div>`;
+						station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>測站地名: ${data.areaName} ${eqStation.stationName}</span><span>距離震央: ${eqStation.distance} km</span><span>震度: ${IntensityI(eqStation.stationIntensity)}</span></div>`;
 						const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
 						Station[Station_i] = new maplibregl.Marker({
 							element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
@@ -690,7 +690,7 @@ TREM.Report = {
 						);
 						Station_i += 1;
 					} else {
-						station_tooltip = `<div>測站地名: ${data.areaName} ${eqStation.stationName}</div><div>距離震央: ${eqStation.distance} km</div><div>震度: ${eqStation.stationIntensity}</div>`;
+						station_tooltip = `<div>測站地名: ${data.areaName} ${eqStation.stationName}</div><div>距離震央: ${eqStation.distance} km</div><div>震度: ${IntensityI(eqStation.stationIntensity)}</div>`;
 						this._markers.push(L.marker(
 							[eqStation.stationLat, eqStation.stationLon],
 							{
@@ -731,7 +731,7 @@ TREM.Report = {
 
 								if (info.uuid == uuid) {
 									const station_deta = this.station[uuid];
-									const station_markers_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>UUID: ${uuid}</span><span>鄉鎮: ${station_deta.Loc}</span><span>PGA: ${info.pga} gal</span><span>PGV: ${info.pgv} kine</span><span>震度: ${info.intensity}</span></div>`;
+									const station_markers_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>UUID: ${uuid}</span><span>鄉鎮: ${station_deta.Loc}</span><span>PGA: ${info.pga} gal</span><span>PGV: ${info.pgv} kine</span><span>震度: ${IntensityI(info.intensity)}</span></div>`;
 									const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
 									Station[Station_i0] = new maplibregl.Marker({
 										element: $(`<div class="map-intensity-icon ${info.intensity != 0 ? "pga" : ""} ${IntensityToClassString(info.intensity)}" style="height:16px;width:16px;z-index:${100 + info.intensity};"></div>`)[0],
@@ -782,7 +782,7 @@ TREM.Report = {
 
 								if (info.uuid == uuid) {
 									const station_deta = this.station[uuid];
-									const station_markers_tooltip = `<div>UUID: ${uuid}</div><div>鄉鎮: ${station_deta.Loc}</div><div>PGA: ${info.pga} gal</div><div>PGV: ${info.pgv} kine</div><div>震度: ${info.intensity}</div>`;
+									const station_markers_tooltip = `<div>UUID: ${uuid}</div><div>鄉鎮: ${station_deta.Loc}</div><div>PGA: ${info.pga} gal</div><div>PGV: ${info.pgv} kine</div><div>震度: ${IntensityI(info.intensity)}</div>`;
 									this._markers.push(L.marker(
 										[station_deta.Lat, uuid.startsWith("H") ? station_deta.Long + 0.005 : station_deta.Long],
 										{
