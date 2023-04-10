@@ -11,6 +11,7 @@ TREM.Report = {
 	/**
 	 * @type {maplibregl.Marker[]}
 	 */
+	_station_markers      : [],
 	_markers              : [],
 	_markersGroup         : null,
 	_lastFocus            : [],
@@ -554,6 +555,12 @@ TREM.Report = {
 			this._markers = [];
 		}
 
+		if (this._station_markers.length) {
+			for (const marker of this._station_markers)
+				marker.remove();
+			this._station_markers = [];
+		}
+
 		if (resetFoucs) {
 			this._lastFocus = [];
 			this._focusMap();
@@ -752,7 +759,44 @@ TREM.Report = {
 				paddingTopLeft     : [document.getElementById("map-report").offsetWidth / 2, document.getElementById("map-report").offsetHeight * zoomPredict],
 				paddingBottomRight : [document.getElementById("map-report").offsetWidth * zoomPredict, document.getElementById("map-report").offsetHeight * zoomPredict],
 			});
-		}
+
+			if (api_key_verify)
+				fetch(`https://exptech.com.tw/api/v1/file?path=/trem_report/${report.trem[0]}.json`)
+					.then(res => res.json())
+					.then(res => {
+						for (let index = 0; index < res.station.length; index++) {
+							const info = res.station[index];
+
+							for (let index = 0, keys = Object.keys(station), n = keys.length; index < n; index++) {
+								const uuid = keys[index];
+
+								if (info.uuid == uuid) {
+									const station_deta = station[uuid];
+									const station_markers_tooltip = `<div>測站UUID: ${uuid}</div><div>測站鄉鎮: ${station_deta.Loc}</div><div>測站pga: ${info.pga} gal</div>`;
+									this._station_markers.push(L.marker(
+										[station_deta.Lat, station_deta.Long],
+										{
+											icon: L.divIcon({
+												iconSize  : [16, 16],
+												className : `map-intensity-icon rt-icon pga ${IntensityToClassString(info.intensity)}`,
+											}),
+											keyboard: false,
+											zIndexOffset: 100 + IntensityToClassString(info.intensity),
+									}).bindTooltip(station_markers_tooltip, {
+										offset    : [8, 0],
+										permanent : false,
+										className : "report-cursor-tooltip",
+									}));
+								}
+							}
+						}
+
+						this._markersGroup = L.featureGroup(this._station_markers).addTo(Maps.report);
+					})
+					.catch(err => {
+						console.log(err.message);
+					});
+			}
 	},
 };
 
