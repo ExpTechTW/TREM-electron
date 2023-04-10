@@ -3694,6 +3694,7 @@ function ReportGET() {
 					cacheReport(_report_data);
 				} else {
 					const _report_data_POST_temp = [];
+
 					for (let i = 0; i < _report_data.length; i++)
 						if (_report_data[i].identifier.startsWith("CWB")) {
 							_report_data_POST_temp[j] = _report_data[i];
