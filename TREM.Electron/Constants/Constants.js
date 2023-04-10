@@ -267,6 +267,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"report.trem": {
+			type  : "toggle",
+			value : false,
+		},
 		"earthquake.siteEffect": {
 			type  : "toggle",
 			value : true,

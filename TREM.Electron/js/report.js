@@ -9,6 +9,7 @@ TREM.Report = {
 	clock             : null,
 	api_key_verify    : false,
 	station           : {},
+	report_trem       : false,
 
 	/**
 	 * @type {maplibregl.Marker[]}
@@ -716,7 +717,7 @@ TREM.Report = {
 				}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report),
 			);
 
-			if (this.api_key_verify && report.trem.length != 0)
+			if (this.api_key_verify && this.report_trem && report.trem.length != 0)
 				fetch(`https://exptech.com.tw/api/v1/file?path=/trem_report/${report.trem[0]}.json`)
 					.then(res => res.json())
 					.then(res => {
@@ -770,7 +771,7 @@ TREM.Report = {
 					zIndexOffset: 5000,
 				}));
 
-			if (this.api_key_verify && report.trem.length != 0)
+			if (this.api_key_verify && this.report_trem && report.trem.length != 0)
 				fetch(`https://exptech.com.tw/api/v1/file?path=/trem_report/${report.trem[0]}.json`)
 					.then(res => res.json())
 					.then(res => {

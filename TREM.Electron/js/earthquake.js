@@ -3648,6 +3648,8 @@ function ReportGET() {
 
 		if (setting["report.getInfo"])
 			bodyInfo = JSON.stringify({ list, key: setting["api.key"] != "" ? setting["api.key"] : "" });
+		else if (setting["api.key"] != "")
+			bodyInfo = JSON.stringify({ list, key: setting["api.key"] });
 		else
 			bodyInfo = JSON.stringify({ list });
 
@@ -3661,6 +3663,8 @@ function ReportGET() {
 			signal : controller.signal })
 			.then((ans) => ans.json())
 			.then((ans) => {
+				api_key_verify = false;
+
 				for (let i = 0; i < ans.length; i++) {
 					const id = ans[i].identifier;
 
@@ -3696,13 +3700,10 @@ function ReportGET() {
 					const _report_data_POST_temp = [];
 
 					for (let i = 0; i < _report_data.length; i++)
-						if (_report_data[i].identifier.startsWith("CWB")) {
-							_report_data_POST_temp[j] = _report_data[i];
-							j += 1;
-						}
+						if (_report_data[i].identifier.startsWith("CWB"))
+							_report_data_POST_temp[i] = _report_data[i];
 
-					_report_data = _report_data_POST_temp;
-					cacheReport(_report_data);
+					cacheReport(_report_data_POST_temp);
 				}
 
 				dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
@@ -3745,8 +3746,7 @@ ipcMain.on("ReportGET", () => {
 				j += 1;
 			}
 
-		_report_data_GET = _report_data_GET_temp;
-		cacheReport(_report_data_GET);
+		cacheReport(_report_data_GET_temp);
 	} else if (_report_data_GET.length != 0 && setting["report.getInfo"]) {
 		if (api_key_verify) {
 			for (let i = 0; i < _report_data_GET.length; i++)
@@ -3762,10 +3762,14 @@ ipcMain.on("ReportGET", () => {
 					j += 1;
 				}
 
-			_report_data_GET = _report_data_GET_temp;
-			cacheReport(_report_data_GET);
+			if (setting["api.key"] != "") ReportGET();
+			else cacheReport(_report_data_GET_temp);
 		}
 	}
+});
+
+ipcMain.on("ReportTREM", () => {
+	TREM.Report.report_trem = setting["report.trem"];
 });
 
 function cacheReport(_report_data_GET) {
@@ -3959,7 +3963,6 @@ function addReport(report, prepend = false, index = 0) {
 		report_intensity_value.className = "report-intensity-value";
 		report_intensity_value.innerText = Level;
 		report_intensity_container.append(report_intensity_title_container, report_intensity_value);
-
 
 		const report_detail_container = document.createElement("div");
 		report_detail_container.className = "report-detail-container";
@@ -6680,6 +6683,7 @@ const changeView = (args, el, event) => {
 
 	if (changeel.attr("id") == "report") {
 		TREM.Report.api_key_verify = api_key_verify;
+		TREM.Report.report_trem = setting["report.trem"];
 		TREM.Report.station = station;
 		toggleNav(false);
 	}
