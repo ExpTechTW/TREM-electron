@@ -7,6 +7,8 @@ TREM.Report = {
 	reportListElement : document.getElementById("report-list-container"),
 	lock              : false,
 	clock             : null,
+	api_key_verify    : false,
+	station           : {},
 
 	/**
 	 * @type {maplibregl.Marker[]}
@@ -760,19 +762,19 @@ TREM.Report = {
 				paddingBottomRight : [document.getElementById("map-report").offsetWidth * zoomPredict, document.getElementById("map-report").offsetHeight * zoomPredict],
 			});
 
-			if (api_key_verify)
+			if (this.api_key_verify)
 				fetch(`https://exptech.com.tw/api/v1/file?path=/trem_report/${report.trem[0]}.json`)
 					.then(res => res.json())
 					.then(res => {
-						for (let index = 0; index < res.station.length; index++) {
-							const info = res.station[index];
+						for (let index0 = 0; index0 < res.station.length; index0++) {
+							const info = res.station[index0];
 
-							for (let index = 0, keys = Object.keys(station), n = keys.length; index < n; index++) {
+							for (let index = 0, keys = Object.keys(this.station), n = keys.length; index < n; index++) {
 								const uuid = keys[index];
 
 								if (info.uuid == uuid) {
-									const station_deta = station[uuid];
-									const station_markers_tooltip = `<div>測站UUID: ${uuid}</div><div>測站鄉鎮: ${station_deta.Loc}</div><div>測站pga: ${info.pga} gal</div>`;
+									const station_deta = this.station[uuid];
+									const station_markers_tooltip = `<div>UUID: ${uuid}</div><div>鄉鎮: ${station_deta.Loc}</div><div>pga: ${info.pga} gal</div>`;
 									this._station_markers.push(L.marker(
 										[station_deta.Lat, station_deta.Long],
 										{
@@ -780,9 +782,9 @@ TREM.Report = {
 												iconSize  : [16, 16],
 												className : `map-intensity-icon rt-icon pga ${IntensityToClassString(info.intensity)}`,
 											}),
-											keyboard: false,
-											zIndexOffset: 100 + IntensityToClassString(info.intensity),
-									}).bindTooltip(station_markers_tooltip, {
+											keyboard     : false,
+											zIndexOffset : 100 + IntensityToClassString(info.intensity),
+										}).bindTooltip(station_markers_tooltip, {
 										offset    : [8, 0],
 										permanent : false,
 										className : "report-cursor-tooltip",
@@ -796,7 +798,7 @@ TREM.Report = {
 					.catch(err => {
 						console.log(err.message);
 					});
-			}
+		}
 	},
 };
 

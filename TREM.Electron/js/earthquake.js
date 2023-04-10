@@ -6678,8 +6678,11 @@ const changeView = (args, el, event) => {
 	currentel.removeClass("show");
 	changeel.addClass("show");
 
-	if (changeel.attr("id") == "report")
+	if (changeel.attr("id") == "report") {
+		TREM.Report.api_key_verify = api_key_verify;
+		TREM.Report.station = station;
 		toggleNav(false);
+	}
 
 	if (changeel.attr("id") == "intensity")
 		toggleNav(false);
