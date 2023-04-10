@@ -762,7 +762,7 @@ TREM.Report = {
 				paddingBottomRight : [document.getElementById("map-report").offsetWidth * zoomPredict, document.getElementById("map-report").offsetHeight * zoomPredict],
 			});
 
-			if (this.api_key_verify)
+			if (this.api_key_verify && report.trem.length != 0)
 				fetch(`https://exptech.com.tw/api/v1/file?path=/trem_report/${report.trem[0]}.json`)
 					.then(res => res.json())
 					.then(res => {
