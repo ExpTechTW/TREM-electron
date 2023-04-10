@@ -698,7 +698,7 @@ TREM.Report = {
 									iconSize  : [16, 16],
 									className : `map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}`,
 								}),
-								zIndexOffset: 100 + IntensityToClassString(eqStation.stationIntensity),
+								zIndexOffset: 100 + eqStation.stationIntensity,
 							}).bindTooltip(station_tooltip, {
 							offset    : [8, 0],
 							permanent : false,
@@ -791,7 +791,7 @@ TREM.Report = {
 												className : `map-intensity-icon rt-icon ${info.intensity != 0 ? "pga" : ""} ${IntensityToClassString(info.intensity)}`,
 											}),
 											keyboard     : false,
-											zIndexOffset : 100 + IntensityToClassString(info.intensity),
+											zIndexOffset : 100 + info.intensity,
 										}).bindTooltip(station_markers_tooltip, {
 										offset    : [8, 0],
 										permanent : false,
