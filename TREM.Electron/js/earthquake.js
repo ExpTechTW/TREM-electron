@@ -3698,10 +3698,13 @@ function ReportGET() {
 					cacheReport(_report_data);
 				} else {
 					const _report_data_POST_temp = [];
+					let k = 0;
 
 					for (let i = 0; i < _report_data.length; i++)
-						if (_report_data[i].identifier.startsWith("CWB"))
-							_report_data_POST_temp[i] = _report_data[i];
+						if (_report_data[i].identifier.startsWith("CWB")) {
+							_report_data_POST_temp[k] = _report_data[i];
+							k += 1;
+						}
 
 					cacheReport(_report_data_POST_temp);
 				}
