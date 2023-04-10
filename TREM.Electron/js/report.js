@@ -776,7 +776,7 @@ TREM.Report = {
 									const station_deta = this.station[uuid];
 									const station_markers_tooltip = `<div>UUID: ${uuid}</div><div>鄉鎮: ${station_deta.Loc}</div><div>pga: ${info.pga} gal</div>`;
 									this._station_markers.push(L.marker(
-										[station_deta.Lat, station_deta.Long],
+										[station_deta.Lat, uuid.startsWith("H") ? station_deta.Long + 0.005 : station_deta.Long],
 										{
 											icon: L.divIcon({
 												iconSize  : [16, 16],
