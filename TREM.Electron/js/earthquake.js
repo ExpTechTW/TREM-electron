@@ -3798,8 +3798,8 @@ ipcMain.on("ReportTREM", () => {
 				let Station_i0 = 0;
 
 				if (TREM.Report._markers.length) {
-					for (const marker of TREM.Report._markers)
-						marker.remove();
+					for (const marker0 of TREM.Report._markers)
+						marker0.remove();
 					TREM.Report._markers = [];
 				}
 
@@ -3831,8 +3831,8 @@ ipcMain.on("ReportTREM", () => {
 				let Station_i0 = 0;
 
 				if (TREM.Report._markers.length) {
-					for (const marker of TREM.Report._markers)
-						marker.remove();
+					for (const marker1 of TREM.Report._markers)
+						marker1.remove();
 					TREM.Report._markers = [];
 				}
 

@@ -759,6 +759,7 @@ TREM.Report = {
 										this._markers.push(this.report_trem_station[Station_i0]);
 										this._setupzoomPredict();
 									}
+
 									Station_i0 += 1;
 								}
 							}
