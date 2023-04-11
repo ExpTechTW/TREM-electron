@@ -1,19 +1,23 @@
 /* global maplibregl:false, Maps: false, IntensityToClassString: false, Maps.report: true, IntensityI: false, changeView: false, replay: true, replayT: true */
 
 TREM.Report = {
-	cache             : new Map(),
-	view              : "report-list",
-	reportList        : [],
-	reportListElement : document.getElementById("report-list-container"),
-	lock              : false,
-	clock             : null,
-	api_key_verify    : false,
-	station           : {},
-	report_trem       : false,
+	cache               : new Map(),
+	view                : "report-list",
+	reportList          : [],
+	reportListElement   : document.getElementById("report-list-container"),
+	lock                : false,
+	clock               : null,
+	api_key_verify      : false,
+	station             : {},
+	report_trem         : false,
+	report_trem_station : {},
+	report_station      : {},
+	epicenterIcon       : null,
 
 	/**
 	 * @type {maplibregl.Marker[]}
 	 */
+	_markersTREM          : [],
 	_markers              : [],
 	_markersGroup         : null,
 	_lastFocus            : [],
@@ -79,7 +83,7 @@ TREM.Report = {
 						this.setView("report-overview", report.identifier);
 					});
 					this._markers.push(marker);
-				} else {
+				} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 					this._markers.push(L.marker(
 						[report.epicenterLat, report.epicenterLon],
 						{
@@ -494,7 +498,7 @@ TREM.Report = {
 					this.setView("report-overview", report.identifier);
 				});
 				this._markers.push(marker);
-			} else {
+			} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 				this._markers.push(L.marker(
 					[report.epicenterLat, report.epicenterLon],
 					{
@@ -550,7 +554,7 @@ TREM.Report = {
 				},
 			];
 			Maps.report.fitBounds(...this._lastFocus);
-		} else {
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 			this._lastFocus = [[[25.35, 119.4], [21.9, 122.22]], { paddingTopLeft: [this._mapPaddingLeft, 0] }];
 			Maps.report.fitBounds(...this._lastFocus);
 		}
@@ -667,32 +671,32 @@ TREM.Report = {
 		}
 
 		let Station_i = 0;
+		this.report_station = {};
 
 		if (report.data.length)
 			for (const data of report.data)
 				for (const eqStation of data.eqStation) {
 					let station_tooltip = "";
-					const Station = {};
 
 					if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 						station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>測站地名: ${data.areaName} ${eqStation.stationName}</span><span>距離震央: ${eqStation.distance} km</span><span>震度: ${IntensityI(eqStation.stationIntensity)}</span></div>`;
 						const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
-						Station[Station_i] = new maplibregl.Marker({
+						this.report_station[Station_i] = new maplibregl.Marker({
 							element: $(`<div class="map-intensity-icon ${IntensityToClassString(eqStation.stationIntensity)}" style="height:16px;width:16px;z-index:${100 + eqStation.stationIntensity};"></div>`)[0],
 						}).setLngLat([eqStation.stationLon, eqStation.stationLat]).setPopup(station_tooltip_popup.setHTML(station_tooltip)).addTo(Maps.report);
-						Station[Station_i].getElement().addEventListener("mouseover", () => {
+						this.report_station[Station_i].getElement().addEventListener("mouseover", () => {
 							station_tooltip_popup.setLngLat([eqStation.stationLon, eqStation.stationLat]).setHTML(station_tooltip).addTo(Maps.report);
 						});
-						Station[Station_i].getElement().addEventListener("mouseleave", () => {
+						this.report_station[Station_i].getElement().addEventListener("mouseleave", () => {
 							station_tooltip_popup.remove();
 						});
 						this._markers.push(
-							Station[Station_i],
+							this.report_station[Station_i],
 						);
 						Station_i += 1;
-					} else {
+					} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 						station_tooltip = `<div>測站地名: ${data.areaName} ${eqStation.stationName}</div><div>距離震央: ${eqStation.distance} km</div><div>震度: ${IntensityI(eqStation.stationIntensity)}</div>`;
-						this._markers.push(L.marker(
+						this.report_station[Station_i] = L.marker(
 							[eqStation.stationLat, eqStation.stationLon],
 							{
 								icon: L.divIcon({
@@ -704,25 +708,31 @@ TREM.Report = {
 							offset    : [8, 0],
 							permanent : false,
 							className : "report-cursor-tooltip",
-						}));
+						});
+						this._markers.push(this.report_station[Station_i]);
+						Station_i += 1;
 					}
 				}
 
+		console.log(this.report_station);
+		this.epicenterIcon = null;
+		this.report_trem_station = {};
+
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+			this.epicenterIcon = new maplibregl.Marker({
+				element: $(TREM.Resources.icon.cross(
+					{ size: 32, className: "epicenterIcon", zIndexOffset: 5000 },
+				))[0],
+			}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report);
 			this._markers.push(
-				new maplibregl.Marker({
-					element: $(TREM.Resources.icon.cross(
-						{ size: 32, className: "epicenterIcon", zIndexOffset: 5000 },
-					))[0],
-				}).setLngLat([report.epicenterLon, report.epicenterLat]).addTo(Maps.report),
+				this.epicenterIcon,
 			);
 
-			if (this.api_key_verify && this.report_trem && report.trem.length != 0)
+			if (report.trem.length != 0)
 				fetch(`https://exptech.com.tw/api/v1/file?path=/trem_report/${report.trem[0]}.json`)
 					.then(res => res.json())
 					.then(res => {
 						let Station_i0 = 0;
-						const Station = {};
 
 						for (let index0 = 0; index0 < res.station.length; index0++) {
 							const info = res.station[index0];
@@ -734,18 +744,21 @@ TREM.Report = {
 									const station_deta = this.station[uuid];
 									const station_markers_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>UUID: ${uuid}</span><span>鄉鎮: ${station_deta.Loc}</span><span>PGA: ${info.pga} gal</span><span>PGV: ${info.pgv} kine</span><span>震度: ${IntensityI(info.intensity)}</span></div>`;
 									const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
-									Station[Station_i0] = new maplibregl.Marker({
+									this.report_trem_station[Station_i0] = new maplibregl.Marker({
 										element: $(`<div class="map-intensity-icon ${info.intensity != 0 ? "pga" : ""} ${IntensityToClassString(info.intensity)}" style="height:16px;width:16px;z-index:${100 + info.intensity};"></div>`)[0],
-									}).setLngLat([uuid.startsWith("H") ? station_deta.Long + 0.005 : station_deta.Long, station_deta.Lat]).setPopup(station_tooltip_popup.setHTML(station_markers_tooltip)).addTo(Maps.report);
-									Station[Station_i0].getElement().addEventListener("mouseover", () => {
+									}).setLngLat([uuid.startsWith("H") ? station_deta.Long + 0.005 : station_deta.Long, station_deta.Lat]).setPopup(station_tooltip_popup.setHTML(station_markers_tooltip));
+									this.report_trem_station[Station_i0].getElement().addEventListener("mouseover", () => {
 										station_tooltip_popup.setLngLat([uuid.startsWith("H") ? station_deta.Long + 0.005 : station_deta.Long, station_deta.Lat]).setHTML(station_markers_tooltip).addTo(Maps.report);
 									});
-									Station[Station_i0].getElement().addEventListener("mouseleave", () => {
+									this.report_trem_station[Station_i0].getElement().addEventListener("mouseleave", () => {
 										station_tooltip_popup.remove();
 									});
-									this._markers.push(
-										Station[Station_i0],
-									);
+
+									if (this.api_key_verify && this.report_trem) {
+										this.report_trem_station[Station_i0].addTo(Maps.report);
+										this._markers.push(this.report_trem_station[Station_i0]);
+										this._setupzoomPredict();
+									}
 									Station_i0 += 1;
 								}
 							}
@@ -756,11 +769,10 @@ TREM.Report = {
 					.catch(err => {
 						console.log(err.message);
 					});
-
 			else
 				this._setupzoomPredict();
-		} else {
-			this._markers.push(L.marker(
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
+			this.epicenterIcon = L.marker(
 				[report.epicenterLat, report.epicenterLon],
 				{
 					icon: L.divIcon({
@@ -769,12 +781,15 @@ TREM.Report = {
 						className : "epicenterIcon",
 					}),
 					zIndexOffset: 5000,
-				}));
+				});
+			this._markers.push(this.epicenterIcon);
 
-			if (this.api_key_verify && this.report_trem && report.trem.length != 0)
+			if (report.trem.length != 0)
 				fetch(`https://exptech.com.tw/api/v1/file?path=/trem_report/${report.trem[0]}.json`)
 					.then(res => res.json())
 					.then(res => {
+						let Station_i0 = 0;
+
 						for (let index0 = 0; index0 < res.station.length; index0++) {
 							const info = res.station[index0];
 
@@ -784,12 +799,12 @@ TREM.Report = {
 								if (info.uuid == uuid) {
 									const station_deta = this.station[uuid];
 									const station_markers_tooltip = `<div>UUID: ${uuid}</div><div>鄉鎮: ${station_deta.Loc}</div><div>PGA: ${info.pga} gal</div><div>PGV: ${info.pgv} kine</div><div>震度: ${IntensityI(info.intensity)}</div>`;
-									this._markers.push(L.marker(
+									this.report_trem_station[Station_i0] = L.marker(
 										[station_deta.Lat, uuid.startsWith("H") ? station_deta.Long + 0.005 : station_deta.Long],
 										{
 											icon: L.divIcon({
 												iconSize  : [16, 16],
-												className : `map-intensity-icon rt-icon ${info.intensity != 0 ? "pga" : ""} ${IntensityToClassString(info.intensity)}`,
+												className : `map-intensity-icon rt-icon report-trem-icon ${info.intensity != 0 ? "pga" : ""} ${IntensityToClassString(info.intensity)}`,
 											}),
 											keyboard     : false,
 											zIndexOffset : 100 + info.intensity,
@@ -797,7 +812,14 @@ TREM.Report = {
 										offset    : [8, 0],
 										permanent : false,
 										className : "report-cursor-tooltip",
-									}));
+									});
+
+									if (this.api_key_verify && this.report_trem) {
+										this._markers.push(this.report_trem_station[Station_i0]);
+										this._setupzoomPredict();
+									}
+
+									Station_i0 += 1;
 								}
 							}
 						}
@@ -807,10 +829,11 @@ TREM.Report = {
 					.catch(err => {
 						console.log(err.message);
 					});
-
 			else
 				this._setupzoomPredict();
 		}
+
+		console.log(this.report_trem_station);
 	},
 	_setupzoomPredict() {
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -838,7 +861,7 @@ TREM.Report = {
 				},
 				duration: 1000,
 			});
-		} else {
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 			this._markersGroup = L.featureGroup(this._markers).addTo(Maps.report);
 
 			const zoomPredict = (Maps.report.getBoundsZoom(this._markersGroup.getBounds()) - Maps.report.getMinZoom()) / (Maps.report.getMaxZoom() * (1.5 ** (Maps.report.getBoundsZoom(this._markersGroup.getBounds()) - Maps.report.getMinZoom())));

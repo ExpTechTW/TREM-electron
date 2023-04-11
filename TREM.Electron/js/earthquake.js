@@ -3773,6 +3773,81 @@ ipcMain.on("ReportGET", () => {
 
 ipcMain.on("ReportTREM", () => {
 	TREM.Report.report_trem = setting["report.trem"];
+
+	if (TREM.Report.view == "report-overview" || TREM.Report.view == "eq-report-overview")
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+			if (TREM.Report.report_trem && TREM.Report._markers.length != 0) {
+				let Station_i0 = 0;
+
+				for (let index = 0, keys = Object.keys(TREM.Report.report_trem_station), n = keys.length; index < n; index++) {
+					TREM.Report.report_trem_station[Station_i0].addTo(Maps.report);
+					TREM.Report._markers.push(TREM.Report.report_trem_station[Station_i0]);
+					Station_i0 += 1;
+				}
+
+				Station_i0 = 0;
+
+				for (let index = 0, keys = Object.keys(TREM.Report.report_station), n = keys.length; index < n; index++) {
+					TREM.Report.report_station[Station_i0].addTo(Maps.report);
+					TREM.Report._markers.push(TREM.Report.report_station[Station_i0]);
+					Station_i0 += 1;
+				}
+
+				TREM.Report._setupzoomPredict();
+			} else if (!TREM.Report.report_trem && TREM.Report._markers.length != 0) {
+				let Station_i0 = 0;
+
+				if (TREM.Report._markers.length) {
+					for (const marker of TREM.Report._markers)
+						marker.remove();
+					TREM.Report._markers = [];
+				}
+
+				TREM.Report.epicenterIcon.addTo(Maps.report);
+				TREM.Report._markers.push(TREM.Report.epicenterIcon);
+
+				for (let index = 0, keys = Object.keys(TREM.Report.report_station), n = keys.length; index < n; index++) {
+					TREM.Report.report_station[Station_i0].addTo(Maps.report);
+					TREM.Report._markers.push(TREM.Report.report_station[Station_i0]);
+					Station_i0 += 1;
+				}
+
+				TREM.Report._setupzoomPredict();
+			}
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
+			if (TREM.Report.report_trem && TREM.Report._markersGroup) {
+				let Station_i0 = 0;
+
+				for (let index = 0, keys = Object.keys(TREM.Report.report_trem_station), n = keys.length; index < n; index++) {
+					TREM.Report._markers.push(TREM.Report.report_trem_station[Station_i0]);
+					Station_i0 += 1;
+				}
+
+				TREM.Report._markersGroup = L.featureGroup(TREM.Report._markers).addTo(Maps.report);
+				TREM.Report._setupzoomPredict();
+			} else if (!TREM.Report.report_trem && TREM.Report._markersGroup) {
+				TREM.Report._markersGroup.removeFrom(Maps.report);
+
+				let Station_i0 = 0;
+
+				if (TREM.Report._markers.length) {
+					for (const marker of TREM.Report._markers)
+						marker.remove();
+					TREM.Report._markers = [];
+				}
+
+				TREM.Report.epicenterIcon.addTo(Maps.report);
+				TREM.Report._markers.push(TREM.Report.epicenterIcon);
+
+				for (let index = 0, keys = Object.keys(TREM.Report.report_station), n = keys.length; index < n; index++) {
+					TREM.Report._markers.push(TREM.Report.report_station[Station_i0]);
+					Station_i0 += 1;
+				}
+
+				TREM.Report._markersGroup = L.featureGroup(TREM.Report._markers).addTo(Maps.report);
+				TREM.Report._setupzoomPredict();
+			}
+		}
 });
 
 function cacheReport(_report_data_GET) {
