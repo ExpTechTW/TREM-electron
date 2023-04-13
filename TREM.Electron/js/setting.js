@@ -1161,6 +1161,7 @@ function send() {
 					raw           : raw,
 					location      : document.getElementById("Location").value,
 					Alert         : document.getElementById("alertbtn").checked,
+					final         : document.getElementById("finalbtn").checked,
 					cancel        : document.getElementById("cancelbtn").checked,
 				},
 			};
@@ -1191,6 +1192,7 @@ function send() {
 					raw           : raw,
 					location      : document.getElementById("Location").value,
 					Alert         : document.getElementById("alertbtn").checked,
+					final         : document.getElementById("finalbtn").checked,
 					cancel        : document.getElementById("cancelbtn").checked,
 				},
 			};
@@ -1234,7 +1236,8 @@ function send() {
 						tsunamiWopen ? { areaName: "海峽沿海地區", waveHeight: tsunamiW, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
 						tsunamiWSopen ? { areaName: "西南沿海地區", waveHeight: tsunamiWS, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
 					],
-					cancel: document.getElementById("cancelbtn").checked,
+					final  : document.getElementById("finalbtn").checked,
+					cancel : document.getElementById("cancelbtn").checked,
 				},
 			};
 		else
@@ -1262,7 +1265,8 @@ function send() {
 						tsunamiWopen ? { areaName: "海峽沿海地區", waveHeight: tsunamiW, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
 						tsunamiWSopen ? { areaName: "西南沿海地區", waveHeight: tsunamiWS, arrivalTime: new Date(document.getElementById("Time").value).getTime() } : {},
 					],
-					cancel: document.getElementById("cancelbtn").checked,
+					final  : document.getElementById("finalbtn").checked,
+					cancel : document.getElementById("cancelbtn").checked,
 				},
 			};
 	}
@@ -1307,6 +1311,7 @@ function resend() {
 	document.getElementById("testbtn").checked = true;
 	document.getElementById("alertbtn").checked = true;
 	document.getElementById("tsunamialertbtn").checked = false;
+	document.getElementById("finalbtn").checked = false;
 	document.getElementById("cancelbtn").checked = false;
 	document.getElementById("tsunami.EN").options[0].selected = true;
 	document.getElementById("tsunami.E").options[0].selected = true;

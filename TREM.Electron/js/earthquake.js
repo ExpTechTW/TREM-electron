@@ -5417,7 +5417,7 @@ TREM.Earthquake.on("eew", (data) => {
 		alert_local     : (data.type == "trem-eew") ? "na" : level.value,
 		alert_magnitude : data.scale ?? "?",
 		alert_depth     : data.depth ?? "?",
-		alert_provider  : data.Unit,
+		alert_provider  : (data.final) ? data.Unit + "(最終報)" : data.Unit,
 		alert_type      : classString,
 		"intensity-1"   : `<font color="white" size="7"><b>${MaxIntensity.label}</b></font>`,
 		"time-1"        : `<font color="white" size="2"><b>${time}</b></font>`,
@@ -5531,7 +5531,7 @@ TREM.Earthquake.on("eew", (data) => {
 					+ ":" + NOW().getSeconds();
 
 				let msg = setting["webhook.body"];
-				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", (data.type == "trem-eew" && data.number <= 3) ? "?" : data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number);
+				msg = msg.replace("%Depth%", data.depth == null ? "?" : data.depth).replace("%NorthLatitude%", data.lat).replace("%Time%", time).replace("%EastLongitude%", data.lon).replace("%location%", (data.type == "trem-eew" && data.number <= 3) ? "?" : data.location).replace("%Scale%", data.scale == null ? "?" : data.scale).replace("%Number%", data.number).replace("%Final%", (data.final) ? "(最終報)" : "");
 
 				if (data.type == "eew-cwb")
 					msg = msg.replace("%Provider%", "中央氣象局 (CWB)");
