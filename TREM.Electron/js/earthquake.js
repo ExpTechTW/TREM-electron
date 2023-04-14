@@ -2788,6 +2788,7 @@ function handler(Json) {
 		let size = 8;
 		let amount = 0;
 		let intensity = 0;
+		let intensitytest = 0;
 		const Alert = current_data?.alert ?? false;
 
 		// debugger;
@@ -2825,6 +2826,7 @@ function handler(Json) {
 													: (amount >= 5) ? 2
 														: (amount >= 2.2) ? 1
 															: 0;
+			intensitytest = (current_data.i) ? Math.round(current_data.i) : -5;
 			NA999 = (intensity == 9 && amount == 999) ? "Y" : "NA";
 			NA0999 = (intensity == 0 && amount == 999) ? "Y" : "NA";
 			size = (intensity == 0 || intensity == "NA" || amount == 999) ? 8 : 16;
@@ -3047,7 +3049,7 @@ function handler(Json) {
 				if (setting["audio.realtime"]) {
 					const loc = detection_location[0] ?? "未知區域";
 
-					if (max_intensity > 4 && intensitytag > 4) {
+					if (max_intensity > 4 || intensitytag > 4) {
 						if (speecd_use) speech.speak({ text: `強震檢測，${loc}` });
 						TREM.Audios.int2.play();
 						new Notification("🟥 強震檢測", {
@@ -3055,7 +3057,7 @@ function handler(Json) {
 							icon   : "../TREM.ico",
 							silent : win.isFocused(),
 						});
-					} else if (max_intensity > 1 && intensitytag > 1) {
+					} else if (max_intensity > 1 || intensitytag > 1) {
 						if (speecd_use) speech.speak({ text: `震動檢測，${loc}` });
 						TREM.Audios.int1.play();
 						new Notification("🟨 震動檢測", {
@@ -3100,7 +3102,29 @@ function handler(Json) {
 				if (!win.isFocused()) win.flashFrame(true);
 				intensitytag = max_intensity;
 			}
-		} else if (!Object.keys(detection_list).length) {
+		} else if ((detected_list[current_station_data.PGA]?.intensity ?? -4) < intensitytest && NA999 != "Y" && NA0999 != "Y" && intensitytest > -1 && amount < 999) {
+			if (setting["Real-time.alert"] && api_key_verify) {
+				detected_list[current_station_data.PGA] ??= {
+					intensity : intensitytest,
+					time      : NOW().getTime(),
+				};
+				new Notification("🐈 測站反應", {
+					body   : `${uuid}\nPGA: ${amount} gal\n最大震度: ${IntensityI(intensitytest)}\n時間:${now.format("YYYY/MM/DD HH:mm:ss")}`,
+					icon   : "../TREM.ico",
+					silent : win.isFocused(),
+				});
+				const Json_temp = Json;
+				Json_temp.area = [station[uuid].area];
+				Json_temp[uuid.split("-")[2]].alert = true;
+				Json_temp.Alert = true;
+				TREM.MapArea2.setArea(Json_temp);
+
+				if (speecd_use) speech.speak({ text: `測站反應，${station[uuid].area}` });
+
+				if ((detected_list[current_station_data.PGA].intensity ?? 0) < intensitytest)
+					detected_list[current_station_data.PGA].intensity = intensitytest;
+			}
+
 			intensitytag = -1;
 		}
 
@@ -4120,6 +4144,8 @@ function addReport(report, prepend = false, index = 0) {
 
 				roll.prepend(Div);
 			}
+
+			if (Report != 0) Report = 0;
 
 			TREM.Report.cache.set(report.identifier, report);
 
@@ -5208,9 +5234,11 @@ TREM.Earthquake.on("eew", (data) => {
 	if (data.depth == null) body = `${notify ?? "未知"}地震，${data.location ?? "未知區域"} (NSSPE)`;
 
 	if (speecd_use && data.type != "trem-eew") {
-		const speecd_scale = data.scale;
+		let speecd_scale = data.scale;
 		const speecd_number = data.number;
 		let find0 = INFO.findIndex(v => v.ID == data.id);
+
+		if (!Number.isNaN(speecd_scale)) speecd_scale = Number.parseFloat(speecd_scale);
 
 		if (find0 == -1) find0 = INFO.length;
 

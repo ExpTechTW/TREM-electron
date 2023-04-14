@@ -127,6 +127,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"Real-time.alert": {
+			type  : "toggle",
+			value : false,
+		},
 		"eew.show": {
 			type  : "toggle",
 			value : true,
