@@ -3108,8 +3108,8 @@ function handler(Json) {
 					intensity : intensitytest,
 					time      : NOW().getTime(),
 				};
-				new Notification("🐈 測站反應", {
-					body   : `${uuid}\nPGA: ${amount} gal\n最大震度: ${IntensityI(intensitytest)}\n時間:${now.format("YYYY/MM/DD HH:mm:ss")}`,
+				new Notification(`🐈 測站反應，${station[uuid].area}`, {
+					body   : `${uuid}\nPGA: ${amount} gal 最大震度: ${IntensityI(intensitytest)}\n時間:${now.format("YYYY/MM/DD HH:mm:ss")}\n${station[uuid].Loc}`,
 					icon   : "../TREM.ico",
 					silent : win.isFocused(),
 				});
@@ -3120,6 +3120,10 @@ function handler(Json) {
 				TREM.MapArea2.setArea(Json_temp);
 
 				if (speecd_use) speech.speak({ text: `測站反應，${station[uuid].area}` });
+
+				const _intensity = `${IntensityI(intensitytest)}級`;
+
+				if (speecd_use) speech.speak({ text: `最大震度，${_intensity.replace("-級", "弱").replace("+級", "強")}` });
 
 				if ((detected_list[current_station_data.PGA].intensity ?? 0) < intensitytest)
 					detected_list[current_station_data.PGA].intensity = intensitytest;
@@ -4300,6 +4304,12 @@ const stopReplay = function() {
 		ipcMain.emit("ReportGET");
 	}
 
+	if (TREM.MapIntensity.isTriggered)
+		TREM.MapIntensity.clear();
+
+	if (TREM.MapArea2.isTriggered)
+		TREM.MapArea2.clear();
+
 	if (replayD) replayD = false;
 
 	WarnAudio = Date.now() + 3000;
@@ -4548,7 +4558,7 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 		});
 	}
 
-	if (speecd_use) {
+	if (speecd_use && intensity.unit != "palert") {
 		const now = new Date(info.time != 0 ? info.time : intensity.timestamp).format("YYYY/MM/DD HH:mm:ss");
 		let description0 = "";
 
