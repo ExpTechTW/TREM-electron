@@ -11,6 +11,8 @@
     "Setting_Dialog_Error_Description": "無法解析設定檔，這可能是你在編輯時不小心刪掉了一些重要的符號，像是逗號、冒號或引號，或是設定檔損壞。\n\n錯誤：{0}",
     "Setting_Dialog_Reset_Title": "重置設定？",
     "Setting_Dialog_Reset_Description": "您確定您真的要重置所有設定嗎\n這個動作將無法挽回",
+    "Setting_Dialog_Real_time_alert_Title": "顯示測站反應？",
+    "Setting_Dialog_Real_time_alert_Description": "您確定您真的要顯示測站反應嗎\n這個動作將認定你知曉該功能的問題嚴重性",
     "Setting_Title": "TREM | 設定",
     "Setting_Update_Latest": "目前已是最新版",
     "Webhook_Dialog_Error_Title": "Webhook 錯誤",

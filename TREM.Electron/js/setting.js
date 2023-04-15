@@ -441,10 +441,40 @@ function SelectSave(id) {
 	}
 }
 
+let runconsti = 0;
+
+function Real_time_alert_run() {
+	Real_time_alert_showDialog(runconsti);
+	setTimeout(() => {
+		document.getElementById("Real-time.alert").checked = true;
+		Real_time_alert_showDialog(runconsti);
+		runconsti++;
+		if (runconsti < 3) Real_time_alert_run();
+	}, 30_000);
+}
+
+function Real_time_alert_showDialog(runconstij) {
+	showDialog("warn",
+		TREM.Localization.getString("Setting_Dialog_Real_time_alert_Title"),
+		TREM.Localization.getString("Setting_Dialog_Real_time_alert_Description"),
+		1, "warning", () => {
+			if (runconstij == 2) ipcRenderer.send("config:value", "Real-time.alert", true);
+			else document.getElementById("Real-time.alert").checked = false;
+		}, "確認", "取消", () => {
+			document.getElementById("Real-time.alert").checked = false;
+		});
+}
+
 function CheckSave(id) {
 	const value = document.getElementById(id).checked;
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
-	ipcRenderer.send("config:value", id, value);
+
+	if (id == "Real-time.alert" && value) {
+		runconsti = 0;
+		Real_time_alert_run();
+	} else {
+		ipcRenderer.send("config:value", id, value);
+	}
 
 	if (id == "sleep.mode" && value)
 		ipcRenderer.send("sleep", value);

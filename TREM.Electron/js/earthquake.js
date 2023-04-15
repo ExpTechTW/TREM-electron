@@ -2454,6 +2454,12 @@ async function init() {
 							detected_list_length += 1;
 							focusScale = 5;
 							yl = index;
+						} else if (Object.keys(detected_list)[index].toString() == "2") {
+							focusScale = 7.5;
+							xl = index;
+						} else if (Object.keys(detected_list)[index].toString() == "15") {
+							focusScale = 7.5;
+							yl = index;
 						}
 
 					const X1 = (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0]) / 2);
@@ -3126,7 +3132,7 @@ function handler(Json) {
 				current_station_data.PGA = 13379360;
 
 			if ((detected_list[current_station_data.PGA]?.intensity ?? -1) < intensitytest)
-				if (setting["Real-time.alert"] && !api_key_verify) {
+				if (setting["Real-time.alert"] && api_key_verify) {
 					detected_list[current_station_data.PGA] ??= {
 						intensity : intensitytest,
 						time      : NOW().getTime(),
@@ -4301,6 +4307,11 @@ ipcMain.once("start", () => {
 		if (localStorage.TOS_v1 == undefined) {
 			localStorage.TOS_v1 = true;
 			showDialog("warn", "使用條款 1.0", "• 使用本服務應視為用戶同意使用條款\n• TREM 是一款提供 地震檢知、地震預警、海嘯警報、震度速報、地震報告 的軟體\n• 禁止在未經允許的情況下二次分發 TREM 軟體內的任何資訊\n• 禁止違反 法律、公共秩序 或 道德 的行為\n• 禁止任何 開發團隊 合理認為不適當的行為\n• 如違反上述規定，則服務可能會暫停或終止");
+		}
+
+		if (localStorage.rts_alert_false == undefined) {
+			localStorage.rts_alert_false = true;
+			ipcRenderer.send("config:value", "Real-time.alert", false);
 		}
 
 		setInterval(() => {
