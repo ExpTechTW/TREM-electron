@@ -2422,10 +2422,9 @@ async function init() {
 					const Y1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1]) / 2);
 					TREM.Earthquake.emit("focus", { center: pointFormatter(X1, Y1, TREM.MapRenderingEngine), zoom: 9.5 });
 				} else if (Object.keys(detected_box_list).length >= 2) {
-					const X1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][0]) / 2);
-					const Y1 = (TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[0].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[0].toString()][0][1]) / 2);
-					const X2 = (TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[1].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][0]) / 2);
-					const Y2 = (TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[1].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[1].toString()][0][1]) / 2);
+					let detected_list_length = 0;
+					let xl = 0;
+					let yl = 1;
 					let focusScale = 9;
 
 					if (Object.keys(detected_box_list).length == 2) {
@@ -2445,6 +2444,22 @@ async function init() {
 
 						if (Object.keys(detected_box_list).length >= 8) focusScale = 7;
 					}
+
+					for (let index = 0; index < Object.keys(detected_list).length; index++)
+						if (Object.keys(detected_list)[index].toString() == "7735548") {
+							detected_list_length += 1;
+							focusScale = 5;
+							xl = index;
+						} else if (Object.keys(detected_list)[index].toString() == "13379360") {
+							detected_list_length += 1;
+							focusScale = 5;
+							yl = index;
+						}
+
+					const X1 = (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0]) / 2);
+					const Y1 = (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][1]) / 2);
+					const X2 = (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][0]) / 2);
+					const Y2 = (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][1]) / 2);
 
 					TREM.Earthquake.emit("focus", { center: pointFormatter((X1 + X2) / 2, (Y1 + Y2) / 2, TREM.MapRenderingEngine), zoom: focusScale });
 				}
@@ -2765,6 +2780,8 @@ function handler(Json) {
 	let stationnowindex = 0;
 	const detection_location = Json.area ?? [];
 	const detection_list = Json.box ?? {};
+	const Json_temp = Json;
+	Json_temp.area = detection_location;
 
 	if (detection_location.length) TREM.MapArea2.setArea(Json);
 
@@ -3102,32 +3119,39 @@ function handler(Json) {
 				if (!win.isFocused()) win.flashFrame(true);
 				intensitytag = max_intensity;
 			}
-		} else if ((detected_list[current_station_data.PGA]?.intensity ?? -4) < intensitytest && NA999 != "Y" && NA0999 != "Y" && intensitytest > -1 && amount < 999) {
-			if (setting["Real-time.alert"] && api_key_verify) {
-				detected_list[current_station_data.PGA] ??= {
-					intensity : intensitytest,
-					time      : NOW().getTime(),
-				};
-				new Notification(`🐈 測站反應，${station[uuid].area}`, {
-					body   : `${uuid}\nPGA: ${amount} gal 最大震度: ${IntensityI(intensitytest)}\n時間:${now.format("YYYY/MM/DD HH:mm:ss")}\n${station[uuid].Loc}`,
-					icon   : "../TREM.ico",
-					silent : win.isFocused(),
-				});
-				const Json_temp = Json;
-				Json_temp.area = [station[uuid].area];
-				Json_temp[uuid.split("-")[2]].alert = true;
-				Json_temp.Alert = true;
-				TREM.MapArea2.setArea(Json_temp);
+		} else if (NA999 != "Y" && NA0999 != "Y" && intensitytest > -1 && amount < 999) {
+			if (uuid.split("-")[2] == "7735548")
+				current_station_data.PGA = 7735548;
+			else if (uuid.split("-")[2] == "13379360")
+				current_station_data.PGA = 13379360;
 
-				if (speecd_use) speech.speak({ text: `測站反應，${station[uuid].area}` });
+			if ((detected_list[current_station_data.PGA]?.intensity ?? -1) < intensitytest)
+				if (setting["Real-time.alert"] && !api_key_verify) {
+					detected_list[current_station_data.PGA] ??= {
+						intensity : intensitytest,
+						time      : NOW().getTime(),
+					};
+					new Notification(`🐈 測站反應，${station[uuid].area}`, {
+						body   : `${uuid}\nPGA: ${amount} gal 最大震度: ${IntensityI(intensitytest)}\n時間:${now.format("YYYY/MM/DD HH:mm:ss")}\n${station[uuid].Loc}`,
+						icon   : "../TREM.ico",
+						silent : win.isFocused(),
+					});
+					const _intensity = `${IntensityI(intensitytest)}級`;
+					Json_temp[uuid.split("-")[2]].alert = true;
+					Json_temp.Alert = true;
 
-				const _intensity = `${IntensityI(intensitytest)}級`;
+					if (speecd_use) speech.speak({ text: `測站反應，${station[uuid].area}` });
 
-				if (speecd_use) speech.speak({ text: `最大震度，${_intensity.replace("-級", "弱").replace("+級", "強")}` });
+					if (speecd_use) speech.speak({ text: `最大震度，${_intensity.replace("-級", "弱").replace("+級", "強")}` });
 
-				if ((detected_list[current_station_data.PGA].intensity ?? 0) < intensitytest)
-					detected_list[current_station_data.PGA].intensity = intensitytest;
-			}
+					if ((detected_list[current_station_data.PGA].intensity ?? 0) < intensitytest)
+						detected_list[current_station_data.PGA].intensity = intensitytest;
+
+					if (Json_temp.area.length) Json_temp.area.push(station[uuid].area);
+					else Json_temp.area = [station[uuid].area];
+
+					TREM.MapArea2.setArea(Json_temp);
+				}
 
 			intensitytag = -1;
 		}
