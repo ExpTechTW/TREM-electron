@@ -449,6 +449,7 @@ function Real_time_alert_run() {
 		document.getElementById("Real-time.alert").checked = true;
 		Real_time_alert_showDialog(runconsti);
 		runconsti++;
+
 		if (runconsti < 3) Real_time_alert_run();
 	}, 30_000);
 }
