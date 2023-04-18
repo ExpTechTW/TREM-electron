@@ -351,7 +351,10 @@ async function init() {
 
 		if (!timer.Realtimestation)
 			timer.Realtimestation = setInterval(Real_time_station, 1_000);
-	})().catch(e => dump({ level: 2, message: e }));
+	})().catch(e => {
+		log(e, 3, "rts", "init");
+		dump({ level: 2, message: e });
+	});
 	setCharts([
 		Realtimestation1.split("-")[2],
 		Realtimestation2.split("-")[2],

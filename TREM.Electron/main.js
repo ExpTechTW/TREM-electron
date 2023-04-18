@@ -11,7 +11,7 @@ TREM.Configuration = new Configuration(TREM);
 TREM.Utils = require("./Utils/Utils.js");
 TREM.Localization = new (require("./Localization/Localization"))(TREM.Configuration.data["general.locale"], TREM.getLocale());
 TREM.Window = new Map();
-TREM.isQuiting = !TREM.Configuration.data["windows.tray"];
+TREM.isQuiting = TREM.Configuration.data["windows.tray"];
 
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
@@ -123,14 +123,14 @@ function createWindow() {
 		MainWindow.webContents.invalidate();
 	});
 	MainWindow.on("close", (event) => {
-		if (!TREM.isQuiting) {
+		if (TREM.isQuiting) {
 			event.preventDefault();
 			MainWindow.hide();
 			if (SettingWindow)
 				SettingWindow.close();
 			event.returnValue = false;
 		} else
-			TREM.quit();
+			TREM.exit(0);
 	});
 }
 
@@ -337,7 +337,6 @@ autoUpdater.on("update-downloaded", (info) => {
 });
 
 TREM.on("before-quit", () => {
-	TREM.isQuiting = true;
 	if (tray)
 		tray.destroy();
 });
@@ -367,8 +366,9 @@ ipcMain.on("openDevtoolF10", () => {
 });
 
 ipcMain.on("reloadpage", () => {
-	const currentWindow = BrowserWindow.getFocusedWindow();
-	if (currentWindow == MainWindow) currentWindow.webContents.reload();
+	restart();
+	// const currentWindow = BrowserWindow.getFocusedWindow();
+	// if (currentWindow == MainWindow) currentWindow.webContents.reload();
 });
 
 ipcMain.on("openChildWindow", async (event, arg) => {
@@ -397,7 +397,6 @@ ipcMain.on("openEEWScreenshotsFolder", (event, arg) => {
 });
 
 ipcMain.on("reset", (event, arg) => {
-	TREM.isQuiting = true;
 	TREM.quit();
 });
 
@@ -745,7 +744,6 @@ function trayIcon() {
 			label : TREM.Localization.getString("Tray_Exit"),
 			type  : "normal",
 			click : () => {
-				TREM.isQuiting = true;
 				TREM.exit(0);
 			},
 		},

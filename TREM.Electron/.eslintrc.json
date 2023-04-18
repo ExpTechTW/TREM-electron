@@ -13,6 +13,7 @@
 		"app": "readonly",
 		"axios": "readonly",
 		"closeDialog": "readonly",
+		"log": "readonly",
 		"dump": "readonly",
 		"fs": "readonly",
 		"getThemeColors": "readonly",

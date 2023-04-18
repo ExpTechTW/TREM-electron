@@ -269,6 +269,22 @@ async function init() {
 	};
 
 	document.getElementById("view").addEventListener("transitionend", resizeHandler);
+	const folder = path.join(app.getPath("userData"), "data");
+
+	if (setting["intensity.cwb"] != "") {
+		const json_cwb = require(path.resolve(folder, `${setting["intensity.cwb"]}.json`));
+		ipcRenderer.send("TREMIntensityload", json_cwb);
+	}
+
+	if (setting["intensity.palert"] != "") {
+		const json_palert = require(path.resolve(folder, `${setting["intensity.palert"]}.json`));
+		ipcRenderer.send("TREMIntensityload", json_palert);
+	}
+
+	if (setting["intensity.trem"] != "") {
+		const json_trem = require(path.resolve(folder, `${setting["intensity.trem"]}.json`));
+		ipcRenderer.send("TREMIntensityload", json_trem);
+	}
 }
 
 TREM.Intensity = {
@@ -381,6 +397,7 @@ TREM.Intensity = {
 				}
 
 				if (int.size) {
+					log(`Total ${int.size} triggered area`, 1, "Intensity", "handle");
 					dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
 
 					for (const [towncode, intensity] of int)
@@ -407,6 +424,7 @@ TREM.Intensity = {
 
 					this._markers = new maplibregl.Marker({ element: $(TREM.Resources.icon.cross({ size: 32, className: "epicenterIcon", zIndexOffset: 5000 }))[0] }).setLngLat([raw_info_Data.lon, raw_info_Data.lat]).addTo(Maps.intensity);
 				} else {
+					log(`Total ${int.size} triggered area`, 1, "Intensity", "handle");
 					dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
 
 					this._raw = raw;
@@ -437,6 +455,7 @@ TREM.Intensity = {
 				}
 
 				if (int.size) {
+					log(`Total ${int.size} triggered area`, 1, "Intensity", "handle");
 					dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
 
 					this._raw = raw;
@@ -490,6 +509,7 @@ TREM.Intensity = {
 						},
 					}).addTo(Maps.intensity);
 				} else {
+					log(`Total ${int.size} triggered area`, 1, "Intensity", "handle");
 					dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
 
 					this._raw = raw;
@@ -542,7 +562,223 @@ TREM.Intensity = {
 		}
 	},
 
+	load(rawIntensityData) {
+		console.log(rawIntensityData);
+
+		if (rawIntensityData.raw != undefined) {
+			let unit = rawIntensityData.unit;
+			const raw = rawIntensityData.raw;
+			const raw_intensity_Data = raw.intensity;
+			const raw_info_Data = raw.info;
+			const PLoc = {};
+			const int = new Map();
+			// console.log(raw_info_Data);
+
+			if (unit == "cwb")
+				TREM.Intensity.cwb = rawIntensityData;
+			else if (unit == "palert")
+				TREM.Intensity.palert = rawIntensityData;
+			else if (unit == "trem")
+				TREM.Intensity.trem = rawIntensityData;
+
+			if (this._raw != null) this.clear();
+
+			if (unit == "cwb") unit = "CWB";
+
+			if (unit == "palert") unit = "P-Alert";
+
+			if (unit == "trem") unit = "TREM";
+
+			for (let index = 0, keys = Object.keys(raw_intensity_Data), n = keys.length; index < n; index++) {
+				const intensity = Number(keys[index]);
+				const ids = raw_intensity_Data[intensity];
+
+				for (const city in TREM.Resources.region)
+					for (const town in TREM.Resources.region[city]) {
+						const loc = TREM.Resources.region[city][town];
+
+						for (const id of ids)
+							if (loc.id == id) {
+								int.set(loc.code, intensity);
+								PLoc[loc.code] = intensity;
+							}
+					}
+			}
+
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+				if (this.intensities.size)
+					for (let index = 0, keys = Object.keys(rawIntensityData), n = keys.length; index < n; index++) {
+						const towncode = keys[index] + "0";
+						const intensity = rawIntensityData[keys[index]];
+
+						if (int.get(towncode) != intensity) {
+							this.intensities.delete(towncode);
+							Maps.intensity.setFeatureState({
+								source : "Intensity_Source_tw_town",
+								id     : towncode,
+							}, { intensity: 0 });
+						}
+					}
+
+				if (this._markers != null) {
+					this._markers.remove();
+					this._markers = null;
+				}
+
+				if (int.size) {
+					log(`Total ${int.size} triggered area`, 1, "Intensity", "load");
+					dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
+
+					for (const [towncode, intensity] of int)
+						Maps.intensity.setFeatureState({
+							source : "Intensity_Source_tw_town",
+							id     : towncode,
+						}, { intensity });
+
+					Maps.intensity.setLayoutProperty("Layer_intensity", "visibility", "visible");
+
+					this._raw = raw;
+					this.intensities = int;
+
+					document.getElementById("intensity-overview").style.visibility = "visible";
+					document.getElementById("intensity-overview").classList.add("show");
+					document.getElementById("intensity-overview-unit").innerText = unit;
+					document.getElementById("intensity-time").innerText = raw_info_Data.time != 0 ? "發震時間" : "接收時間";
+					const time = new Date(raw_info_Data.time != 0 ? raw_info_Data.time : rawIntensityData.timestamp);
+					document.getElementById("intensity-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
+					document.getElementById("intensity-overview-latitude").innerText = raw_info_Data.lat != 0 ? raw_info_Data.lat : "未知";
+					document.getElementById("intensity-overview-longitude").innerText = raw_info_Data.lon != 0 ? raw_info_Data.lon : "未知";
+					document.getElementById("intensity-overview-magnitude").innerText = raw_info_Data.scale != 0 ? raw_info_Data.scale : "未知";
+					document.getElementById("intensity-overview-depth").innerText = raw_info_Data.depth != 0 ? raw_info_Data.depth : "未知";
+
+					this._markers = new maplibregl.Marker({ element: $(TREM.Resources.icon.cross({ size: 32, className: "epicenterIcon", zIndexOffset: 5000 }))[0] }).setLngLat([raw_info_Data.lon, raw_info_Data.lat]).addTo(Maps.intensity);
+				} else {
+					log(`Total ${int.size} triggered area`, 1, "Intensity", "load");
+					dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
+
+					this._raw = raw;
+					this.intensities = int;
+
+					document.getElementById("intensity-overview").style.visibility = "visible";
+					document.getElementById("intensity-overview").classList.add("show");
+					document.getElementById("intensity-overview-unit").innerText = unit;
+					document.getElementById("intensity-time").innerText = raw_info_Data.time != 0 ? "發震時間" : "接收時間";
+					const time = new Date(raw_info_Data.time != 0 ? raw_info_Data.time : rawIntensityData.timestamp);
+					document.getElementById("intensity-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
+					document.getElementById("intensity-overview-latitude").innerText = raw_info_Data.lat != 0 ? raw_info_Data.lat : "未知";
+					document.getElementById("intensity-overview-longitude").innerText = raw_info_Data.lon != 0 ? raw_info_Data.lon : "未知";
+					document.getElementById("intensity-overview-magnitude").innerText = raw_info_Data.scale != 0 ? raw_info_Data.scale : "未知";
+					document.getElementById("intensity-overview-depth").innerText = raw_info_Data.depth != 0 ? raw_info_Data.depth : "未知";
+
+					this._markers = new maplibregl.Marker({ element: $(TREM.Resources.icon.cross({ size: 32, className: "epicenterIcon", zIndexOffset: 5000 }))[0] }).setLngLat([raw_info_Data.lon, raw_info_Data.lat]).addTo(Maps.intensity);
+				}
+			} else {
+				if (this.geojson != null) {
+					this.geojson.remove();
+					this.geojson = null;
+				}
+
+				if (this._markers != null) {
+					this._markers.remove();
+					this._markers = null;
+				}
+
+				if (int.size) {
+					log(`Total ${int.size} triggered area`, 1, "Intensity", "load");
+					dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
+
+					this._raw = raw;
+
+					document.getElementById("intensity-overview").style.visibility = "visible";
+					document.getElementById("intensity-overview").classList.add("show");
+					document.getElementById("intensity-overview-unit").innerText = unit;
+					document.getElementById("intensity-time").innerText = raw_info_Data.time != 0 ? "發震時間" : "接收時間";
+					const time = new Date(raw_info_Data.time != 0 ? raw_info_Data.time : rawIntensityData.timestamp);
+					document.getElementById("intensity-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
+					document.getElementById("intensity-overview-latitude").innerText = raw_info_Data.lat != 0 ? raw_info_Data.lat : "未知";
+					document.getElementById("intensity-overview-longitude").innerText = raw_info_Data.lon != 0 ? raw_info_Data.lon : "未知";
+					document.getElementById("intensity-overview-magnitude").innerText = raw_info_Data.scale != 0 ? raw_info_Data.scale : "未知";
+					document.getElementById("intensity-overview-depth").innerText = raw_info_Data.depth != 0 ? raw_info_Data.depth : "未知";
+
+					this._markers = L.marker(
+						[raw_info_Data.lat, raw_info_Data.lon],
+						{
+							icon: L.divIcon({
+								html      : TREM.Resources.icon.oldcross,
+								iconSize  : [32, 32],
+								className : "epicenterIcon",
+							}),
+							zIndexOffset: 5000,
+						}).addTo(Maps.intensity);
+
+					this.geojson = L.geoJson.vt(MapData.tw_town, {
+						minZoom   : 7.5,
+						maxZoom   : 10,
+						tolerance : 20,
+						buffer    : 256,
+						debug     : 0,
+						zIndex    : 5,
+						style     : (properties) => {
+							const name = properties.TOWNCODE;
+
+							if (PLoc[name] == 0 || PLoc[name] == undefined)
+								return {
+									color       : "transparent",
+									weight      : 0,
+									opacity     : 0,
+									fillColor   : "transparent",
+									fillOpacity : 0,
+								};
+							return {
+								color       : TREM.Colors.secondary,
+								weight      : 0.8,
+								fillColor   : color(PLoc[name]),
+								fillOpacity : 1,
+							};
+						},
+					}).addTo(Maps.intensity);
+				} else {
+					log(`Total ${int.size} triggered area`, 1, "Intensity", "load");
+					dump({ level: 0, message: `Total ${int.size} triggered area`, origin: "Intensity" });
+
+					this._raw = raw;
+
+					document.getElementById("intensity-overview").style.visibility = "visible";
+					document.getElementById("intensity-overview").classList.add("show");
+					document.getElementById("intensity-overview-unit").innerText = unit;
+					document.getElementById("intensity-time").innerText = raw_info_Data.time != 0 ? "發震時間" : "接收時間";
+					const time = new Date(raw_info_Data.time != 0 ? raw_info_Data.time : rawIntensityData.timestamp);
+					document.getElementById("intensity-overview-time").innerText = time.toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
+					document.getElementById("intensity-overview-latitude").innerText = raw_info_Data.lat != 0 ? raw_info_Data.lat : "未知";
+					document.getElementById("intensity-overview-longitude").innerText = raw_info_Data.lon != 0 ? raw_info_Data.lon : "未知";
+					document.getElementById("intensity-overview-magnitude").innerText = raw_info_Data.scale != 0 ? raw_info_Data.scale : "未知";
+					document.getElementById("intensity-overview-depth").innerText = raw_info_Data.depth != 0 ? raw_info_Data.depth : "未知";
+
+					this._markers = L.marker(
+						[raw_info_Data.lat, raw_info_Data.lon],
+						{
+							icon: L.divIcon({
+								html      : TREM.Resources.icon.oldcross,
+								iconSize  : [32, 32],
+								className : "epicenterIcon",
+							}),
+							zIndexOffset: 5000,
+						}).addTo(Maps.intensity);
+				}
+			}
+
+			if (this.timer) {
+				clearTimeout(this.timer);
+				delete this.timer;
+				this.timer = setTimeout(() => this.clear, 60_000);
+			} else {
+				this.timer = setTimeout(() => this.clear, 60_000);
+			}
+		}
+	},
+
 	clear() {
+		log("Clearing Intensity map", 1, "Intensity", "clear");
 		dump({ level: 0, message: "Clearing Intensity map", origin: "Intensity" });
 
 		if (this.intensities.size) {
@@ -577,6 +813,12 @@ ipcMain.on("TREMIntensityhandle", (event, json) => {
 	if (TREM.Intensity.isTriggered)
 		TREM.Intensity.clear();
 	TREM.Intensity.handle(json);
+});
+
+ipcMain.on("TREMIntensityload", (event, json) => {
+	if (TREM.Intensity.isTriggered)
+		TREM.Intensity.clear();
+	TREM.Intensity.load(json);
 });
 
 ipcMain.on("TREMIntensitytime2", (event, time) => {

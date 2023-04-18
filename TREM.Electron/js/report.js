@@ -334,6 +334,8 @@ TREM.Report = {
 					.catch(err => {
 						this.lock = false;
 						console.log(err.message);
+						log(err, 3, "replaydownloader", "Report");
+						dump({ level: 2, message: err });
 					});
 			}, 500);
 		} else {
@@ -742,7 +744,10 @@ TREM.Report = {
 
 								if (info.uuid == uuid) {
 									const station_deta = this.station[uuid];
-									const station_markers_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>UUID: ${uuid}</span><span>鄉鎮: ${station_deta.Loc}</span><span>PGA: ${info.pga} gal</span><span>PGV: ${info.pgv} kine</span><span>震度: ${IntensityI(info.intensity)}</span></div>`;
+									const latlng = L.latLng(station_deta.Lat, station_deta.Long);
+									const latlng1 = L.latLng(report.epicenterLat, report.epicenterLon);
+									const distance = latlng.distanceTo(latlng1);
+									const station_markers_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container"><span>UUID: ${uuid}</span><span>鄉鎮: ${station_deta.Loc}</span><span>PGA: ${info.pga} gal</span><span>PGV: ${info.pgv} kine</span><span>震度: ${IntensityI(info.intensity)}</span><span>距離震央: ${(distance / 1000).toFixed(2)} km</span></div>`;
 									const station_tooltip_popup = new maplibregl.Popup({ closeOnClick: false, closeButton: false });
 									this.report_trem_station[Station_i0] = new maplibregl.Marker({
 										element: $(`<div class="map-intensity-icon ${info.intensity != 0 ? "pga" : ""} ${IntensityToClassString(info.intensity)}" style="height:16px;width:16px;z-index:${100 + info.intensity};"></div>`)[0],
@@ -769,6 +774,8 @@ TREM.Report = {
 					})
 					.catch(err => {
 						console.log(err.message);
+						log(err, 3, "report_trem_mapbox_gl", "Report");
+						dump({ level: 2, message: err });
 					});
 			else
 				this._setupzoomPredict();
@@ -799,7 +806,10 @@ TREM.Report = {
 
 								if (info.uuid == uuid) {
 									const station_deta = this.station[uuid];
-									const station_markers_tooltip = `<div>UUID: ${uuid}</div><div>鄉鎮: ${station_deta.Loc}</div><div>PGA: ${info.pga} gal</div><div>PGV: ${info.pgv} kine</div><div>震度: ${IntensityI(info.intensity)}</div>`;
+									const latlng = L.latLng(station_deta.Lat, station_deta.Long);
+									const latlng1 = L.latLng(report.epicenterLat, report.epicenterLon);
+									const distance = latlng.distanceTo(latlng1);
+									const station_markers_tooltip = `<div>UUID: ${uuid}</div><div>鄉鎮: ${station_deta.Loc}</div><div>PGA: ${info.pga} gal</div><div>PGV: ${info.pgv} kine</div><div>震度: ${IntensityI(info.intensity)}</div><div>距離震央: ${(distance / 1000).toFixed(2)} km</div>`;
 									this.report_trem_station[Station_i0] = L.marker(
 										[station_deta.Lat, uuid.startsWith("H") ? station_deta.Long + 0.005 : station_deta.Long],
 										{
@@ -829,6 +839,8 @@ TREM.Report = {
 					})
 					.catch(err => {
 						console.log(err.message);
+						log(err, 3, "report_trem_leaflet", "Report");
+						dump({ level: 2, message: err });
 					});
 			else
 				this._setupzoomPredict();

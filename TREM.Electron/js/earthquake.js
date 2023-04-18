@@ -19,6 +19,7 @@ TREM.Audios = {
 	int1   : new Audio("../audio/Shindo1.wav"),
 	int2   : new Audio("../audio/Shindo2.wav"),
 	eew    : new Audio("../audio/EEW.wav"),
+	note   : new Audio("../audio/Note.wav"),
 	update : new Audio("../audio/Update.wav"),
 	areav2 : new Audio("../audio/1/update.wav"),
 	palert : new Audio("../audio/palert.wav"),
@@ -104,7 +105,6 @@ try {
 
 let Location;
 let station = {};
-const station_time = {};
 let palert_geojson = null;
 let areav2_geojson = null;
 let investigation = false;
@@ -183,6 +183,7 @@ TREM.MapIntensity = {
 				}
 
 				if (setting["webhook.url"] != "" && setting["palert.Notification"]) {
+					log("Posting Notification palert Webhook", 1, "Webhook", "palert");
 					dump({ level: 0, message: "Posting Notification palert Webhook", origin: "Webhook" });
 					this.description = "";
 					let intensity_index = 0;
@@ -247,6 +248,7 @@ TREM.MapIntensity = {
 						headers : { "Content-Type": "application/json" },
 						body    : JSON.stringify(msg),
 					}).catch((error) => {
+						log(error, 3, "Webhook", "palert");
 						dump({ level: 2, message: error, origin: "Webhook" });
 					});
 				}
@@ -303,6 +305,7 @@ TREM.MapIntensity = {
 							}
 
 					if (int.size) {
+						log(`Total ${int.size} triggered stations`, 1, "P-Alert", "palert");
 						dump({ level: 0, message: `Total ${int.size} triggered stations`, origin: "P-Alert" });
 
 						for (const [towncode, intensity] of int)
@@ -474,6 +477,7 @@ TREM.MapIntensity = {
 		}
 	},
 	clear() {
+		log("Clearing P-Alert map", 1, "P-Alert", "palert");
 		dump({ level: 0, message: "Clearing P-Alert map", origin: "P-Alert" });
 
 		this.alertTime = 0;
@@ -518,6 +522,7 @@ TREM.PWS = {
 			url         : rawPWSData.link.href,
 			timer       : null,
 		};
+		log(`${pws.description}`, 1, "PWS", "addPWS");
 		dump({ level: 0, message: `${pws.description}`, origin: "PWS" });
 
 		if (Date.now() > pws.expireTime.getTime()) return;
@@ -560,6 +565,7 @@ TREM.PWS = {
 			const pws = this.cache.get(pwsId);
 
 			if (!pws) return;
+			log(`Clearing PWS id ${pwsId}`, 1, "PWS", "clear");
 			dump({ level: 0, message: `Clearing PWS id ${pwsId}`, origin: "PWS" });
 
 			for (const area of pws.areaCodes)
@@ -608,6 +614,7 @@ TREM.PWS = {
 		}
 
 		if (this.cache.size) {
+			log("Clearing PWS map", 1, "PWS", "clear");
 			dump({ level: 0, message: "Clearing PWS map", origin: "PWS" });
 
 			for (const [id, pws] of this.cache) {
@@ -1063,6 +1070,7 @@ win.on("leave-full-screen", () => {
 });
 
 async function init() {
+	log(app.getVersion(), 2, "TREM", "version");
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
 	report_get_timestamp = 0;
@@ -1091,10 +1099,14 @@ async function init() {
 	// Connect to server
 	await (async () => {
 		$("#loading").text(TREM.Localization.getString("Application_Connecting"));
+		log("Trying to connect to the server...", 1, "ResourceLoader", "init");
 		dump({ level: 0, message: "Trying to connect to the server...", origin: "ResourceLoader" });
 		await ReportGET();
 		progressbar.value = (1 / progressStep) * 1;
-	})().catch(e => dump({ level: 2, message: e }));
+	})().catch(e => {
+		log(e, 3, "ResourceLoader", "init");
+		dump({ level: 2, message: e });
+	});
 
 	// Timers
 	(() => {
@@ -1103,6 +1115,7 @@ async function init() {
 		const time1 = document.getElementById("time1");
 
 		// clock
+		log("Initializing clock", 1, "Clock", "init");
 		dump({ level: 0, message: "Initializing clock", origin: "Clock" });
 
 		if (!Timers.clock)
@@ -1274,30 +1287,39 @@ async function init() {
 	await (async () => {
 		TREM.Colors = await getThemeColors(setting["theme.color"], setting["theme.dark"]);
 
+		log("Loading Map Data...", 1, "ResourceLoader", "init");
+		log("Starting timer...", 0, "Timer", "init");
 		dump({ level: 0, message: "Loading Map Data...", origin: "ResourceLoader" });
 		dump({ level: 3, message: "Starting timer...", origin: "Timer" });
 		let perf_GEOJSON_LOAD = process.hrtime();
 		fs.readdirSync(path.join(__dirname, "../Resources/GeoJSON")).forEach((file, i, arr) => {
 			try {
 				MapData[path.parse(file).name] = require(path.join(__dirname, "../Resources/GeoJSON", file));
+				log(`Loaded ${file}`, 0, "ResourceLoader", "init");
 				dump({ level: 3, message: `Loaded ${file}`, origin: "ResourceLoader" });
 				progressbar.value = (1 / progressStep) * 3.6 + (((1 / progressStep) / arr.length) * (i + 1));
 			} catch (error) {
+				log(`An error occurred while loading file ${file}`, 3, "ResourceLoader", "init");
+				log(error, 3, "ResourceLoader", "init");
 				dump({ level: 2, message: `An error occurred while loading file ${file}`, origin: "ResourceLoader" });
 				dump({ level: 2, message: error, origin: "ResourceLoader" });
 				console.error(error);
+				log(`Skipping ${file}`, 0, "ResourceLoader", "init");
 				dump({ level: 3, message: `Skipping ${file}`, origin: "ResourceLoader" });
 			}
 		});
 		perf_GEOJSON_LOAD = process.hrtime(perf_GEOJSON_LOAD);
+		log(`ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, 0, "Timer", "init");
 		dump({ level: 3, message: `ResourceLoader took ${perf_GEOJSON_LOAD[0]}.${perf_GEOJSON_LOAD[1]}s`, origin: "Timer" });
 
 		// #region Maps
 
 		TREM.MapData = MapData;
 
+		log("Initializing map", 0, "Map", "init");
 		dump({ level: 3, message: "Initializing map", origin: "Map" });
 
+		log(TREM.Detector.webgl, 1, "WebGL", "init");
 		dump({ level: 0, message: TREM.Detector.webgl, origin: "WebGL" });
 
 		// if (TREM.Detector.webgl == false && TREM.MapRenderingEngine != "mapbox-gl")
@@ -2127,6 +2149,7 @@ async function init() {
 								}
 							}
 					});
+				Maps.main._fadeAnimated = setting["map.animation"];
 				Maps.main._zoomAnimated = setting["map.animation"];
 			}
 
@@ -2170,6 +2193,7 @@ async function init() {
 					})
 					.on("contextmenu", () => TREM.Report._focusMap())
 					.on("click", () => TREM.Report._focusMap());
+				Maps.report._fadeAnimated = setting["map.animation"];
 				Maps.report._zoomAnimated = setting["map.animation"];
 			}
 
@@ -2281,7 +2305,10 @@ async function init() {
 			}
 		}
 
-	})().catch(e => dump({ level: 2, message: e }));
+	})().catch(e => {
+		log(e, 3, "Colors&Map", "init");
+		dump({ level: 2, message: e });
+	});
 	progressbar.value = (1 / progressStep) * 4;
 
 	// Files
@@ -2290,7 +2317,10 @@ async function init() {
 
 		if (!Timers.fetchFiles)
 			Timers.fetchFiles = setInterval(fetchFiles, 10 * 60 * 1000);
-	})().catch(e => dump({ level: 2, message: e }));
+	})().catch(e => {
+		log(e, 3, "Files", "init");
+		dump({ level: 2, message: e });
+	});
 
 	progressbar.value = 1;
 
@@ -2427,6 +2457,11 @@ async function init() {
 					let yl = 1;
 					let focusScale = 9;
 
+					let X1 = (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0]) / 2);
+					let Y1 = (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][1]) / 2);
+					let X2 = (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][0]) / 2);
+					let Y2 = (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][1]) / 2);
+
 					if (Object.keys(detected_box_list).length == 2) {
 						const num = Math.sqrt(Math.pow(X1 - X2, 2) + Math.pow(Y1 - Y2, 2));
 
@@ -2462,10 +2497,12 @@ async function init() {
 							yl = index;
 						}
 
-					const X1 = (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0]) / 2);
-					const Y1 = (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][1]) / 2);
-					const X2 = (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][0]) / 2);
-					const Y2 = (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][1]) / 2);
+					if (xl != 0 || yl != 1) {
+						X1 = (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][0]) / 2);
+						Y1 = (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[xl].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[xl].toString()][0][1]) / 2);
+						X2 = (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][0] + (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][2][0] - TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][0]) / 2);
+						Y2 = (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][1] + (TREM.Resources.area[Object.keys(detected_list)[yl].toString()][1][1] - TREM.Resources.area[Object.keys(detected_list)[yl].toString()][0][1]) / 2);
+					}
 
 					TREM.Earthquake.emit("focus", { center: pointFormatter((X1 + X2) / 2, (Y1 + Y2) / 2, TREM.MapRenderingEngine), zoom: focusScale });
 				}
@@ -2550,6 +2587,7 @@ async function init() {
 // #endregion
 
 function PGAMain() {
+	log("Starting PGA timer", 1, "PGATimer", "PGAMain");
 	dump({ level: 0, message: "Starting PGA timer", origin: "PGATimer" });
 
 	if (Timers.rts_clock) clearInterval(Timers.rts_clock);
@@ -2572,7 +2610,8 @@ function PGAMain() {
 
 						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["sleep.mode"]) {
 							Ping = `❌ ${((NOW().getTime() - rts_ws_timestamp) / 1000).toFixed(1)}s`;
-							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
+							log("PGA timer time out 10s", 2, "PGATimer", "PGAMain");
+							dump({ level: 1, message: "PGA timer time out 10s", origin: "PGATimer" });
 							reconnect();
 							PGAMainbkup();
 						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["sleep.mode"]) {
@@ -2605,6 +2644,8 @@ function PGAMain() {
 						controller.abort();
 					}, 5000);
 					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
+						log(err, 3, "PGATimer", "PGAMain");
+						dump({ level: 2, message: err });
 						Ping = `❌ ${err.response.status}`;
 						// TimerDesynced = true;
 						PGAMainbkup();
@@ -2652,6 +2693,7 @@ function PGAMain() {
 }
 
 function PGAMainbkup() {
+	log("Starting PGA timer backup", 1, "PGATimer", "PGAMainbkup");
 	dump({ level: 0, message: "Starting PGA timer backup", origin: "PGATimer" });
 
 	if (Timers.rts_clock) clearInterval(Timers.rts_clock);
@@ -2674,7 +2716,8 @@ function PGAMainbkup() {
 
 						if ((NOW().getTime() - rts_ws_timestamp) > 10_000 && !setting["sleep.mode"]) {
 							Ping = `❌ ${((NOW().getTime() - rts_ws_timestamp) / 1000).toFixed(1)}s`;
-							dump({ level: 0, message: "PGA timer time out 10s", origin: "PGATimer" });
+							log("PGA timer backup time out 10s", 2, "PGATimer", "PGAMainbkup");
+							dump({ level: 1, message: "PGA timer backup time out 10s", origin: "PGATimer" });
 							reconnect();
 							PGAMain();
 						} else if ((NOW().getTime() - Response.Time) > 1_000 && setting["sleep.mode"]) {
@@ -2713,6 +2756,8 @@ function PGAMainbkup() {
 						// TimerDesynced = false;
 						Response = response.data;
 					}).catch((err) => {
+						log(err, 3, "PGATimer", "PGAMainbkup");
+						dump({ level: 2, message: err });
 						Ping = `❌ ${err.response.status}`;
 						// TimerDesynced = true;
 						PGAMain();
@@ -2781,6 +2826,10 @@ function handler(Json) {
 		}
 	}
 
+	if (localStorage.stationtime == undefined)
+		localStorage.stationtime = JSON.stringify({});
+
+	const station_time_json = JSON.parse(localStorage.stationtime);
 	let max_intensity = -1;
 	MaxIntensity1 = 0;
 	let stationnowindex = 0;
@@ -2797,9 +2846,6 @@ function handler(Json) {
 		const uuid = keys[index];
 		const current_station_data = station[uuid];
 		const current_data = Json[uuid.split("-")[2]];
-
-		if (station_time[uuid] == undefined)
-			station_time[uuid] = current_station_data;
 
 		// if (uuid == "H-979-11336952-11")
 		// 	console.log(current_data);
@@ -2819,20 +2865,22 @@ function handler(Json) {
 		if (current_data == undefined) {
 			level_class = "na";
 
+			if (station_time_json[uuid] == undefined) {
+				station_time_json[uuid] = Date.now();
+				localStorage.stationtime = JSON.stringify(station_time_json);
+			}
+
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 				station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container">${station[keys[index]].Loc}(${keys[index]})無資料</div>`;
 			else
-				station_tooltip = `<div>${station[keys[index]].Loc}(${keys[index]})無資料</div>`;
+				station_tooltip = `<div>${keys[index]}(${station[keys[index]].Loc})無資料</div><div>最近離線時間: ${new Date(station_time_json[uuid]).format("YYYY/MM/DD HH:mm:ss")}</div>`;
 			NA999 = "NA";
 			NA0999 = "NA";
 			size = 8;
 			amount = "--";
 			intensity = "-";
-
-			if (station_time[uuid].Json_Time == undefined)
-				station_time[uuid].Json_Time = Date.now();
 		} else {
-			station_time[uuid].Json_Time = Json.Time;
+			station_time_json[uuid] = Json.Time;
 			amount = +current_data.v;
 
 			if (amount > current_station_data.MaxPGA) current_station_data.MaxPGA = amount;
@@ -2975,7 +3023,7 @@ function handler(Json) {
 		}
 
 		const Level = IntensityI(intensity);
-		const now = new Date(station_time[uuid].Json_Time);
+		const now = new Date(station_time_json[uuid]);
 
 		// if (Unlock) {
 		// 	if (rtstation1 == "") {
@@ -3170,7 +3218,7 @@ function handler(Json) {
 			MAXPGA.long = station[keys[index]].Long;
 			MAXPGA.loc = station[keys[index]].Loc;
 			MAXPGA.intensity = intensity;
-			MAXPGA.time = new Date(station_time[uuid].Json_Time);
+			MAXPGA.time = new Date(station_time_json[uuid]);
 		}
 		// if (MaxIntensity1 > MAXPGA.intensity){
 		// 	MAXPGA.pga = amount;
@@ -3418,11 +3466,15 @@ function handler(Json) {
 async function fetchFiles() {
 	try {
 		Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+		log("Get Location File", 1, "Location", "fetchFiles");
 		dump({ level: 0, message: "Get Location File", origin: "Location" });
 		station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+		log("Get Station File", 1, "Location", "fetchFiles");
 		dump({ level: 0, message: "Get Station File", origin: "Location" });
 		PGAMain();
 	} catch (err) {
+		log(err, 3, "Location", "fetchFiles");
+		dump({ level: 2, message: err, origin: "Location" });
 		console.log(err);
 		await fetchFilesbackup();
 	}
@@ -3431,12 +3483,16 @@ async function fetchFiles() {
 async function fetchFilesbackup() {
 	try {
 		Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
+		log("Get Location backup File", 1, "Location", "fetchFilesbackup");
 		dump({ level: 0, message: "Get Location backup File", origin: "Location" });
 		station = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/station.json")).json();
+		log("Get Station backup File", 1, "Location", "fetchFilesbackup");
 		dump({ level: 0, message: "Get Station backup File", origin: "Location" });
 		PGAMain();
 	} catch (err) {
 		console.log(err);
+		log(err, 3, "Location", "fetchFilesbackup");
+		dump({ level: 2, message: err, origin: "Location" });
 		await fetchFiles();
 	}
 }
@@ -3451,17 +3507,23 @@ async function setUserLocationMarker(town, errcode = false) {
 		if (!errcode)
 			try {
 				Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
+				log("Get Location File 0", 1, "Location", "setUserLocationMarker");
 				dump({ level: 0, message: "Get Location File 0", origin: "Location" });
 			} catch (err) {
 				console.log(err);
+				log(err, 3, "Location", "setUserLocationMarker");
+				dump({ level: 2, message: err, origin: "Location" });
 				await setUserLocationMarker(town, true);
 			}
 		else
 			try {
 				Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
+				log("Get Location backup File 0", 1, "Location", "setUserLocationMarker");
 				dump({ level: 0, message: "Get Location backup File 0", origin: "Location" });
 			} catch (err) {
 				console.log(err);
+				log(err, 3, "Location", "setUserLocationMarker");
+				dump({ level: 2, message: err, origin: "Location" });
 				await setUserLocationMarker(town);
 			}
 
@@ -3489,7 +3551,8 @@ async function setUserLocationMarker(town, errcode = false) {
 				.addTo(Maps.main);
 		else if (TREM.MapRenderingEngine == "leaflet")
 			marker = L.marker([UserLocationLat, UserLocationLon], {
-				icon: L.divIcon({ html: "<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>" }),
+				icon     : L.divIcon({ html: "<img id=\"here-marker\" src=\"../image/here.png\" height=\"20\" width=\"20\" style=\"z-index: 5000;\"></img>" }),
+				keyboard : false,
 			})
 				.addTo(Maps.main);
 	} else if (TREM.MapRenderingEngine == "mapbox-gl") {
@@ -3498,6 +3561,7 @@ async function setUserLocationMarker(town, errcode = false) {
 		marker.setLatLng([UserLocationLat, UserLocationLon]);
 	}
 
+	log(`User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, 1, "Location", "setUserLocationMarker");
 	dump({ level: 0, message: `User location set to ${setting["location.city"]} ${town} (${UserLocationLat}, ${UserLocationLon})`, origin: "Location" });
 
 	if (!TREM.Detector.webgl)
@@ -3640,9 +3704,11 @@ function playNextAudio() {
 	audioDOM.src = nextAudioPath;
 
 	if (nextAudioPath.startsWith("../audio/1/") && setting["audio.eew"]) {
+		log(`Playing Audio > ${nextAudioPath}`, 1, "Audio", "playNextAudio");
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM.play();
 	} else if (!nextAudioPath.startsWith("../audio/1/")) {
+		log(`Playing Audio > ${nextAudioPath}`, 1, "Audio", "playNextAudio");
 		dump({ level: 0, message: `Playing Audio > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM.play();
 	}
@@ -3655,9 +3721,11 @@ function playNextAudio1() {
 	audioDOM1.playbackRate = 1.1;
 
 	if (nextAudioPath.startsWith("../audio/1/") && setting["audio.eew"]) {
+		log(`Playing Audio 1 > ${nextAudioPath}`, 1, "Audio", "playNextAudio1");
 		dump({ level: 0, message: `Playing Audio 1 > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
 	} else if (!nextAudioPath.startsWith("../audio/1/")) {
+		log(`Playing Audio 1 > ${nextAudioPath}`, 1, "Audio", "playNextAudio1");
 		dump({ level: 0, message: `Playing Audio 1 > ${nextAudioPath}`, origin: "Audio" });
 		audioDOM1.play();
 	}
@@ -3753,6 +3821,8 @@ function ReportGET() {
 				storage.setItem("report_data", _report_data);
 
 				if (api_key_verify && setting["report.getInfo"]) {
+					log("Reports fetched (api key verify)", 1, "EQReportFetcher", "ReportGET");
+					dump({ level: 0, message: "Reports fetched (api key verify)", origin: "EQReportFetcher" });
 					cacheReport(_report_data);
 				} else {
 					const _report_data_POST_temp = [];
@@ -3764,13 +3834,17 @@ function ReportGET() {
 							k += 1;
 						}
 
+					log("Reports fetched", 1, "EQReportFetcher", "ReportGET");
+					dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 					cacheReport(_report_data_POST_temp);
 				}
-
-				dump({ level: 0, message: "Reports fetched", origin: "EQReportFetcher" });
 			})
 			.catch((err) => {
 				console.log(err);
+				log("Error fetching reports", 3, "EQReportFetcher", "ReportGET");
+				log(err, 3, "EQReportFetcher", "ReportGET");
+				dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
+				dump({ level: 2, message: err, origin: "EQReportFetcher" });
 
 				if (_report_data.length > setting["cache.report"]) {
 					_report_data_temp = [];
@@ -3785,6 +3859,8 @@ function ReportGET() {
 			});
 		report_get_timestamp = Date.now();
 	} catch (error) {
+		log("Error fetching reports", 3, "EQReportFetcher", "ReportGET");
+		log(error, 3, "EQReportFetcher", "ReportGET");
 		dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
 		return setTimeout(ReportGET, 5000);
@@ -4320,10 +4396,12 @@ ipcMain.once("start", () => {
 				FCMdata(DATA, ServerType);
 			}
 		}, 0);
+		log(`Initializing ServerCore >> ${ServerVer}`, 1, "Initialization", "start");
 		dump({ level: 0, message: `Initializing ServerCore >> ${ServerVer}`, origin: "Initialization" });
 	} catch (error) {
 		showDialog("error", "發生錯誤", `初始化過程中發生錯誤，您可以繼續使用此應用程式，但無法保證所有功能皆能繼續正常運作。\n\n如果這是您第一次看到這個訊息，請嘗試重新啟動應用程式。\n如果這個錯誤持續出現，請到 TREM Discord 伺服器回報問題。\n\n錯誤訊息：${error}`);
 		$("#load").delay(1000).fadeOut(1000);
+		log(error, 3, "Initialization", "start");
 		dump({ level: 2, message: error, origin: "Initialization" });
 	}
 });
@@ -4359,7 +4437,10 @@ const stopReplay = function() {
 
 	axios.post(posturl + "stop", { uuid: localStorage.UUID })
 	// Exptech.v1.post("/trem/stop", { uuid: localStorage.UUID })
-		.catch((error) => dump({ level: 2, message: error, origin: "Verbose" }));
+		.catch((error) => {
+			log(error, 3, "Verbose", "stopReplay");
+			dump({ level: 2, message: error, origin: "Verbose" });
+		});
 
 	Mapsmainfocus();
 	testEEWerror = false;
@@ -4414,6 +4495,7 @@ ipcMain.on("apikey", (event) => {
 ipcMain.on("report-Notification", (event, report) => {
 	if (setting["webhook.url"] != "" && setting["report.Notification"]) {
 		console.log(report);
+		log("Posting Notification report Webhook", 1, "Webhook", "report-Notification");
 		dump({ level: 0, message: "Posting Notification report Webhook", origin: "Webhook" });
 		const msg = {
 			username   : "TREM | 臺灣即時地震監測",
@@ -4475,6 +4557,7 @@ ipcMain.on("report-Notification", (event, report) => {
 			headers : { "Content-Type": "application/json" },
 			body    : JSON.stringify(msg),
 		}).catch((error) => {
+			log(error, 3, "Webhook", "report-Notification");
 			dump({ level: 2, message: error, origin: "Webhook" });
 		});
 	}
@@ -4498,12 +4581,9 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 	const intensity1r = {};
 	const intensity1rkeys = Object.keys(intensity1).reverse();
 
-	for (let index = 0; index < intensity1rkeys.length; index++)
-		intensity1r[index] = intensity1[intensity1rkeys[index]];
-
-	for (let index = 0, keys = Object.keys(intensity1r), n = keys.length; index < n; index++) {
-		const intensity2 = keys.length - Number(keys[index]);
-		const ids = intensity1r[Number(keys[index])];
+	for (let index = 0; index < intensity1rkeys.length; index++) {
+		const intensity2 = Number(Object.keys(intensity1)[(intensity1rkeys.length - (1 + index))]);
+		const ids = intensity1[intensity1rkeys[index]];
 		const intensity3 = `${IntensityI(intensity2)}級`;
 
 		description += `${intensity3.replace("-級", "弱").replace("+級", "強")}\n`;
@@ -4531,6 +4611,7 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 	description += "\n";
 
 	if (setting["webhook.url"] != "" && setting["intensity.Notification"]) {
+		log("Posting Notification intensity Webhook", 1, "Webhook", "intensity-Notification");
 		dump({ level: 0, message: "Posting Notification intensity Webhook", origin: "Webhook" });
 		const msg = {
 			username   : "TREM | 臺灣即時地震監測",
@@ -4589,6 +4670,7 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 			headers : { "Content-Type": "application/json" },
 			body    : JSON.stringify(msg),
 		}).catch((error) => {
+			log(error, 3, "Webhook", "intensity-Notification");
 			dump({ level: 2, message: error, origin: "Webhook" });
 		});
 	}
@@ -4633,6 +4715,7 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 ipcMain.on("update-available-Notification", (version, getVersion, info) => {
 	if (setting["webhook.url"] != undefined)
 		if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
+			log("Posting Notification Update Webhook", 1, "Webhook", "update-available-Notification");
 			dump({ level: 0, message: "Posting Notification Update Webhook", origin: "Webhook" });
 			const getVersionbody = TREM.Localization.getString("Notification_Update_Body").format(getVersion, version) + `\nhttps://github.com/yayacat/TREM/releases/tag/v${version}`;
 			const msg = {
@@ -4653,6 +4736,7 @@ ipcMain.on("update-available-Notification", (version, getVersion, info) => {
 				headers : { "Content-Type": "application/json" },
 				body    : JSON.stringify(msg),
 			}).catch((error) => {
+				log(error, 3, "Webhook", "update-available-Notification");
 				dump({ level: 2, message: error, origin: "Webhook" });
 			});
 		}
@@ -4666,6 +4750,7 @@ ipcMain.on("update-available-Notification", (version, getVersion, info) => {
 ipcMain.on("update-not-available-Notification", (version, getVersion) => {
 	if (setting["webhook.url"] != undefined)
 		if (setting["webhook.url"] != "" && setting["checkForUpdates.Notification"]) {
+			log("Posting Notification No Update Webhook", 1, "Webhook", "update-not-available-Notification");
 			dump({ level: 0, message: "Posting Notification No Update Webhook", origin: "Webhook" });
 			const getVersionbody = TREM.Localization.getString("Notification_No_Update_Body").format(getVersion, version);
 			const msg = {
@@ -4686,6 +4771,7 @@ ipcMain.on("update-not-available-Notification", (version, getVersion) => {
 				headers : { "Content-Type": "application/json" },
 				body    : JSON.stringify(msg),
 			}).catch((error) => {
+				log(error, 3, "Webhook", "update-not-available-Notification");
 				dump({ level: 2, message: error, origin: "Webhook" });
 			});
 		}
@@ -4704,6 +4790,7 @@ ipcMain.on("testEEW", (event, list = []) => {
 
 	if (!list.length)
 		setTimeout(() => {
+			log("Start EEW Test", 1, "EEW", "testEEW");
 			dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
 			let data = {};
 
@@ -4730,6 +4817,7 @@ ipcMain.on("testEEW", (event, list = []) => {
 			data = {
 				uuid: localStorage.UUID,
 			};
+			log(`Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, 0, "Verbose", "testEEW");
 			dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 			axios.post(posturl + "replay", data)
 			// Exptech.v1.post("/trem/replay", data)
@@ -4738,13 +4826,15 @@ ipcMain.on("testEEW", (event, list = []) => {
 				})
 				.catch((error) => {
 					testEEWerror = true;
+					log(error, 3, "Verbose", "testEEW");
 					dump({ level: 2, message: error, origin: "Verbose" });
 				});
 		}, 100);
 	else
 		for (let index = 0; index < list.length; index++)
 			setTimeout(() => {
-				dump({ level: 0, message: "Start EEW Test", origin: "EEW" });
+				log("Start list EEW Test", 1, "EEW", "testEEW");
+				dump({ level: 0, message: "Start list EEW Test", origin: "EEW" });
 				let data = {};
 
 				// if (setting["p2p.mode"])
@@ -4772,6 +4862,7 @@ ipcMain.on("testEEW", (event, list = []) => {
 					uuid : localStorage.UUID,
 					id   : list[index],
 				};
+				log(`Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, 0, "Verbose", "testEEW");
 				dump({ level: 3, message: `Timer status: ${TimerDesynced ? "Desynced" : "Synced"}`, origin: "Verbose" });
 				axios.post(posturl + "replay", data)
 				// Exptech.v1.post("/trem/replay", data)
@@ -4780,6 +4871,7 @@ ipcMain.on("testEEW", (event, list = []) => {
 					})
 					.catch((error) => {
 						testEEWerror = true;
+						log(error, 3, "Verbose", "testEEW");
 						dump({ level: 2, message: error, origin: "Verbose" });
 					});
 			}, 100);
@@ -4802,32 +4894,34 @@ const updateMapColors = async (event, value) => {
 
 	TREM.Colors = await getThemeColors(accent, dark);
 
-	for (const mapName in MapBases)
-		for (const [key, layer] of MapBases[mapName])
-			if (Maps[mapName] instanceof maplibregl.Map)
-				if (layer.type == "fill" && key != "tw_county_fill") {
-					Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
-					Maps[mapName].setPaintProperty(layer.id, "fill-outline-color", TREM.Colors.secondary);
-				} else if (layer.type == "fill" && key == "tw_county_fill") {
-					Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
-				} else if (layer.type == "line" && key == "tw_county_line") {
-					Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
-				}
+	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+		for (const mapName in MapBases)
+			for (const [key, layer] of MapBases[mapName])
+				if (Maps[mapName] instanceof maplibregl.Map)
+					if (layer.type == "fill" && key != "tw_county_fill") {
+						Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
+						Maps[mapName].setPaintProperty(layer.id, "fill-outline-color", TREM.Colors.secondary);
+					} else if (layer.type == "fill" && key == "tw_county_fill") {
+						Maps[mapName].setPaintProperty(layer.id, "fill-color", TREM.Colors.surfaceVariant);
+					} else if (layer.type == "line" && key == "tw_county_line") {
+						Maps[mapName].setPaintProperty(layer.id, "line-color", TREM.Colors.primary);
+					}
 
-	Maps.main.setPaintProperty("Layer_intensity_palert", "fill-outline-color", [
-		"case",
-		[
-			">",
+		Maps.main.setPaintProperty("Layer_intensity_palert", "fill-outline-color", [
+			"case",
 			[
-				"coalesce",
-				["feature-state", "intensity"],
+				">",
+				[
+					"coalesce",
+					["feature-state", "intensity"],
+					0,
+				],
 				0,
 			],
-			0,
-		],
-		TREM.Colors.onSurfaceVariant,
-		"transparent",
-	]);
+			TREM.Colors.onSurfaceVariant,
+			"transparent",
+		]);
+	}
 };
 
 ipcRenderer.on("config:theme", updateMapColors);
@@ -4864,80 +4958,81 @@ ipcRenderer.on("config:color", (event, key, value) => {
 			$(`.${IntensityToClassString(IntensityN(key.replace("theme.int.", ""))).replace(" darkText", "").split(" ").join(".")}`).removeClass("darkText");
 	}
 
-	if (Maps.main) {
-		Maps.main.setPaintProperty("Layer_intensity_palert", "fill-color", [
-			"match",
-			[
-				"coalesce",
-				["feature-state", "intensity"],
-				0,
-			],
-			9,
-			setting["theme.customColor"] ? setting["theme.int.9"]
-				: "#862DB3",
-			8,
-			setting["theme.customColor"] ? setting["theme.int.8"]
-				: "#DB1F1F",
-			7,
-			setting["theme.customColor"] ? setting["theme.int.7"]
-				: "#F55647",
-			6,
-			setting["theme.customColor"] ? setting["theme.int.6"]
-				: "#DB641F",
-			5,
-			setting["theme.customColor"] ? setting["theme.int.5"]
-				: "#E68439",
-			4,
-			setting["theme.customColor"] ? setting["theme.int.4"]
-				: "#E8D630",
-			3,
-			setting["theme.customColor"] ? setting["theme.int.3"]
-				: "#7BA822",
-			2,
-			setting["theme.customColor"] ? setting["theme.int.2"]
-				: "#2774C2",
-			1,
-			setting["theme.customColor"] ? setting["theme.int.1"]
-				: "#757575",
-			"transparent",
-		]);
-		Maps.main.setPaintProperty("Layer_area", "line-color", [
-			"match",
-			[
-				"coalesce",
-				["feature-state", "intensity"],
-				0,
-			],
-			9,
-			setting["theme.customColor"] ? setting["theme.int.9"]
-				: "#862DB3",
-			8,
-			setting["theme.customColor"] ? setting["theme.int.8"]
-				: "#DB1F1F",
-			7,
-			setting["theme.customColor"] ? setting["theme.int.7"]
-				: "#F55647",
-			6,
-			setting["theme.customColor"] ? setting["theme.int.6"]
-				: "#DB641F",
-			5,
-			setting["theme.customColor"] ? setting["theme.int.5"]
-				: "#E68439",
-			4,
-			setting["theme.customColor"] ? setting["theme.int.4"]
-				: "#E8D630",
-			3,
-			setting["theme.customColor"] ? setting["theme.int.3"]
-				: "#7BA822",
-			2,
-			setting["theme.customColor"] ? setting["theme.int.2"]
-				: "#2774C2",
-			1,
-			setting["theme.customColor"] ? setting["theme.int.1"]
-				: "#757575",
-			"transparent",
-		]);
-	}
+	if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+		if (Maps.main) {
+			Maps.main.setPaintProperty("Layer_intensity_palert", "fill-color", [
+				"match",
+				[
+					"coalesce",
+					["feature-state", "intensity"],
+					0,
+				],
+				9,
+				setting["theme.customColor"] ? setting["theme.int.9"]
+					: "#862DB3",
+				8,
+				setting["theme.customColor"] ? setting["theme.int.8"]
+					: "#DB1F1F",
+				7,
+				setting["theme.customColor"] ? setting["theme.int.7"]
+					: "#F55647",
+				6,
+				setting["theme.customColor"] ? setting["theme.int.6"]
+					: "#DB641F",
+				5,
+				setting["theme.customColor"] ? setting["theme.int.5"]
+					: "#E68439",
+				4,
+				setting["theme.customColor"] ? setting["theme.int.4"]
+					: "#E8D630",
+				3,
+				setting["theme.customColor"] ? setting["theme.int.3"]
+					: "#7BA822",
+				2,
+				setting["theme.customColor"] ? setting["theme.int.2"]
+					: "#2774C2",
+				1,
+				setting["theme.customColor"] ? setting["theme.int.1"]
+					: "#757575",
+				"transparent",
+			]);
+			Maps.main.setPaintProperty("Layer_area", "line-color", [
+				"match",
+				[
+					"coalesce",
+					["feature-state", "intensity"],
+					0,
+				],
+				9,
+				setting["theme.customColor"] ? setting["theme.int.9"]
+					: "#862DB3",
+				8,
+				setting["theme.customColor"] ? setting["theme.int.8"]
+					: "#DB1F1F",
+				7,
+				setting["theme.customColor"] ? setting["theme.int.7"]
+					: "#F55647",
+				6,
+				setting["theme.customColor"] ? setting["theme.int.6"]
+					: "#DB641F",
+				5,
+				setting["theme.customColor"] ? setting["theme.int.5"]
+					: "#E68439",
+				4,
+				setting["theme.customColor"] ? setting["theme.int.4"]
+					: "#E8D630",
+				3,
+				setting["theme.customColor"] ? setting["theme.int.3"]
+					: "#7BA822",
+				2,
+				setting["theme.customColor"] ? setting["theme.int.2"]
+					: "#2774C2",
+				1,
+				setting["theme.customColor"] ? setting["theme.int.1"]
+					: "#757575",
+				"transparent",
+			]);
+		}
 });
 ipcRenderer.on("config:location", (event, value) => {
 	setUserLocationMarker(value);
@@ -4966,9 +5061,9 @@ function FCMdata(json, Unit) {
 	// eslint-disable-next-line no-empty-function
 	fs.writeFile(path.join(app.getPath("userData"), "server.json"), JSON.stringify(server_timestamp), () => {});
 	// GetData = true;
+	const filename = NOW().getTime();
 
 	if (json.response != "You have successfully subscribed to earthquake information") {
-		const filename = NOW().getTime();
 		json.data_unit = Unit;
 		json.delay = NOW().getTime() - json.timestamp;
 		fs.writeFile(path.join(folder, `${filename}.tmp`), JSON.stringify(json), (err) => {
@@ -4978,6 +5073,7 @@ function FCMdata(json, Unit) {
 
 	if (json.timestamp != undefined) {
 		type_Unit = Unit;
+		log(`Latency: ${NOW().getTime() - json.timestamp}ms`, 1, "API", "FCMdata");
 		dump({ level: 0, message: `Latency: ${NOW().getTime() - json.timestamp}ms`, origin: "API" });
 	}
 
@@ -4989,6 +5085,7 @@ function FCMdata(json, Unit) {
 			+ "/" + now.getDate()
 			+ " " + now.getHours()
 			+ ":" + now.getMinutes();
+		log("Got Tsunami Warning", 1, "API", "FCMdata");
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
 		new Notification("海嘯資訊", { body: `${Now0}\n${json.location} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
 
@@ -5005,6 +5102,7 @@ function FCMdata(json, Unit) {
 		console.log(json);
 		TREM.PWS.addPWS(json.raw);
 	} else if (json.type == "intensity") {
+		log("Got Earthquake intensity", 1, "API", "FCMdata");
 		dump({ level: 0, message: "Got Earthquake intensity", origin: "API" });
 		console.log(json);
 
@@ -5018,9 +5116,17 @@ function FCMdata(json, Unit) {
 			});
 		}, 1250);
 
+		if (json.unit == "cwb")
+			ipcRenderer.send("config:value", "intensity.cwb", filename.toString());
+		else if (json.unit == "palert")
+			ipcRenderer.send("config:value", "intensity.palert", filename.toString());
+		else if (json.unit == "trem")
+			ipcRenderer.send("config:value", "intensity.trem", filename.toString());
+
 		ipcRenderer.send("TREMIntensityhandle", json);
 		ipcRenderer.send("intensity-Notification", json);
 	} else if (json.type == "replay") {
+		log("Got Earthquake replay", 1, "API", "FCMdata");
 		dump({ level: 0, message: "Got Earthquake replay", origin: "API" });
 		console.log(json);
 
@@ -5039,6 +5145,7 @@ function FCMdata(json, Unit) {
 			TREM.MapArea2.clear();
 
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
+		log("Got Earthquake Report", 1, "API", "FCMdata");
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
 		console.debug(json);
 
@@ -5156,6 +5263,7 @@ function FCMdata(json, Unit) {
 
 // #region Event: eew
 TREM.Earthquake.on("eew", (data) => {
+	log("Got EEW", 1, "API", "eew");
 	dump({ level: 0, message: "Got EEW", origin: "API" });
 	console.log(data);
 	let Timer_run;
@@ -5301,6 +5409,8 @@ TREM.Earthquake.on("eew", (data) => {
 				speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
 			else if (Number(speecd_scale) >= 6)
 				speech.speak({ text: "沿岸地區應慎防海水位突變" });
+
+		if (data.type == "eew-cwb") audioPlay("../audio/cwbeew.wav");
 	}
 
 	new Notification("EEW 強震即時警報", {
@@ -5389,7 +5499,8 @@ TREM.Earthquake.on("eew", (data) => {
 	let stamp = 0;
 
 	if ((EarthquakeList[data.id].number ?? 1) < data.number) {
-		if (setting["audio.eew"] && Alert) TREM.Audios.update.play();
+		if (data.type == "trem-eew" && setting["audio.eew"] && Alert) TREM.Audios.note.play();
+		else if (setting["audio.eew"] && Alert) TREM.Audios.update.play();
 		EarthquakeList[data.id].number = data.number;
 	}
 
@@ -5633,12 +5744,14 @@ TREM.Earthquake.on("eew", (data) => {
 				};
 				msg.tts = setting["tts.Notification"];
 				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "位於" + ((data.type == "trem-eew" && data.number <= 3) ? "?" : data.location) + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
-				dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
+				log("Posting EEW Webhook", 1, "Webhook", "eew");
+				dump({ level: 0, message: "Posting EEW Webhook", origin: "Webhook" });
 				fetch(setting["webhook.url"], {
 					method  : "POST",
 					headers : { "Content-Type": "application/json" },
 					body    : JSON.stringify(msg),
 				}).catch((error) => {
+					log(error, 3, "Webhook", "eew");
 					dump({ level: 2, message: error, origin: "Webhook" });
 				});
 			} else if (setting["trem-eew.No-Notification"] && data.type != "trem-eew") {
@@ -5677,12 +5790,14 @@ TREM.Earthquake.on("eew", (data) => {
 				};
 				msg.tts = setting["tts.Notification"];
 				msg.content = setting["tts.Notification"] ? (time + "左右發生顯著有感地震東經" + data.lon + "北緯" + data.lat + "位於" + data.location + "深度" + (data.depth == null ? "?" : data.depth + "公里") + "規模" + (data.scale == null ? "?" : data.scale) + "第" + data.number + "報發報單位" + data.Unit + "慎防強烈搖晃，就近避難 [趴下、掩護、穩住]") : "";
+				log("Posting No trem-eew Webhook", 1, "Webhook", "eew");
 				dump({ level: 0, message: "Posting Webhook", origin: "Webhook" });
 				fetch(setting["webhook.url"], {
 					method  : "POST",
 					headers : { "Content-Type": "application/json" },
 					body    : JSON.stringify(msg),
 				}).catch((error) => {
+					log(error, 3, "Webhook", "eew");
 					dump({ level: 2, message: error, origin: "Webhook" });
 				});
 			}
@@ -5748,14 +5863,16 @@ TREM.Earthquake.on("trem-eq", (data) => {
 		};
 
 		if (setting["trem-eq.alert.Notification.Intensity"] <= Max_Intensity) {
+			log("Posting Notification trem-eq alert Webhook", 1, "Webhook", "trem-eq");
+			dump({ level: 0, message: "Posting Notification trem-eq alert Webhook", origin: "Webhook" });
 			fetch(setting["webhook.url"], {
 				method  : "POST",
 				headers : { "Content-Type": "application/json" },
 				body    : JSON.stringify(msg),
 			}).catch((error) => {
+				log(error, 3, "Webhook", "trem-eq");
 				dump({ level: 2, message: error, origin: "Webhook" });
 			});
-			dump({ level: 0, message: "Posting Notification trem-eq alert Webhook", origin: "Webhook" });
 		}
 	} else if (setting["webhook.url"] != "" && setting["trem-eq.Notification"] && setting["dev.mode"]) {
 		let state_station;
@@ -5796,14 +5913,16 @@ TREM.Earthquake.on("trem-eq", (data) => {
 				},
 			],
 		};
+		log("Posting dev mode Notification trem-eq alert Webhook", 1, "Webhook", "trem-eq");
+		dump({ level: 0, message: "Posting dev mode Notification trem-eq Webhook", origin: "Webhook" });
 		fetch(setting["webhook.url"], {
 			method  : "POST",
 			headers : { "Content-Type": "application/json" },
 			body    : JSON.stringify(msg),
 		}).catch((error) => {
+			log(error, 3, "Webhook", "trem-eq");
 			dump({ level: 2, message: error, origin: "Webhook" });
 		});
-		dump({ level: 0, message: "Posting Notification trem-eq Webhook", origin: "Webhook" });
 	}
 });
 

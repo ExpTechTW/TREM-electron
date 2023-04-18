@@ -84,6 +84,7 @@ let station;
  * 初始化設定
  */
 function init() {
+	log("Initializing", 1, "Setting", "init");
 	dump({ level: 0, message: "Initializing", origin: "Setting" });
 
 	if (is_setting_disabled) {
@@ -388,6 +389,7 @@ function init() {
 function SelectSave(id) {
 	const select = document.getElementById(id);
 	const value = select.options[select.selectedIndex].value;
+	log(`Value Changed ${id}: ${setting[id]} -> ${value}`, 1, "Setting", "SelectSave");
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 
@@ -468,6 +470,7 @@ function Real_time_alert_showDialog(runconstij) {
 
 function CheckSave(id) {
 	const value = document.getElementById(id).checked;
+	log(`Value Changed ${id}: ${setting[id]} -> ${value}`, 1, "Setting", "CheckSave");
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 
 	if (id == "Real-time.alert" && value) {
@@ -501,6 +504,7 @@ function CheckSave(id) {
 		else element.disabled = false;
 
 		ipcRenderer.send("config:value", "trem-eq.Notification", false);
+		log(`Value Changed trem-eq.Notification: ${setting["trem-eq.Notification"]} -> false`, 1, "Setting", "CheckSave");
 		dump({ level: 0, message: `Value Changed trem-eq.Notification: ${setting["trem-eq.Notification"]} -> false`, origin: "Setting" });
 	}
 
@@ -512,6 +516,7 @@ function CheckSave(id) {
 		else element.disabled = false;
 
 		ipcRenderer.send("config:value", "trem-eq.alert.Notification", false);
+		log(`Value Changed trem-eq.alert.Notification: ${setting["trem-eq.alert.Notification"]} -> false`, 1, "Setting", "CheckSave");
 		dump({ level: 0, message: `Value Changed trem-eq.alert.Notification: ${setting["trem-eq.alert.Notification"]} -> false`, origin: "Setting" });
 	}
 
@@ -578,6 +583,7 @@ function CheckHide(id) {
 
 function TextSave(id) {
 	const value = document.getElementById(id).value;
+	log(`Value Changed ${id}: ${setting[id]} -> ${value}`, 1, "Setting", "TextSave");
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 
 	if (id == "api.key")
@@ -592,12 +598,14 @@ function TextSave(id) {
 
 function KeyTextSave(id) {
 	const value = document.getElementById(id).value;
+	log(`Value Changed ${id}: ${setting[id]} -> ${value}`, 1, "Setting", "KeyTextSave");
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 }
 
 function ChoiceSave(id, el) {
 	const value = el.value;
+	log(`Value Changed ${id}: ${setting[id]} -> ${value}`, 1, "Setting", "ChoiceSave");
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 
@@ -618,6 +626,7 @@ function ChoiceSave(id, el) {
 
 function RangeSave(id) {
 	const value = document.getElementById(id).value;
+	log(`Value Changed ${id}: ${setting[id]} -> ${value}`, 1, "Setting", "RangeSave");
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, +value);
 }
@@ -634,6 +643,7 @@ function setList(args, el, event) {
 	if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")
 		return;
 
+	log(`Changed view to ${args}`, 1, "Setting", "setList");
 	dump({ level: 0, message: `Changed view to ${args}`, origin: "Setting" });
 	const currentel = $(".show");
 	const changeel = $(`#${args}`);
@@ -794,11 +804,16 @@ function signupemail() {
 		}).catch((error) => {
 			console.log(error);
 
-			if (error.response.data == "This email already in use!") {
-				document.getElementById("exptechState").innerHTML = "綁定電子郵件失敗(已使用)";
-				console.log("綁定電子郵件失敗(已使用)");
+			if (error.response.data == "This name already in use!") {
+				document.getElementById("exptechState").innerHTML = "綁定電子郵件失敗(用戶名稱已使用)";
+				console.log("綁定電子郵件失敗(用戶名稱已使用)");
+			} else if (error.response.data == "This email already in use!") {
+				document.getElementById("exptechState").innerHTML = "綁定電子郵件失敗(電子郵件已使用)";
+				console.log("綁定電子郵件失敗(電子郵件已使用)");
 			} else {
 				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+				log(error, 3, "Setting", "signupemail");
+				dump({ level: 2, message: error });
 			}
 		});
 }
@@ -830,6 +845,8 @@ function signup() {
 				console.log("註冊驗證碼失敗");
 			} else {
 				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+				log(error, 3, "Setting", "signup");
+				dump({ level: 2, message: error });
 			}
 		});
 }
@@ -872,6 +889,8 @@ function signin() {
 				console.log("登入失敗(找不到)");
 			} else {
 				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+				log(error, 3, "Setting", "signin");
+				dump({ level: 2, message: error });
 			}
 		});
 }
@@ -896,6 +915,8 @@ function forgetemail() {
 				console.log("忘記密碼發送失敗(名稱錯誤)");
 			} else {
 				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+				log(error, 3, "Setting", "forgetemail");
+				dump({ level: 2, message: error });
 			}
 		});
 }
@@ -927,6 +948,8 @@ function forget() {
 				console.log("重設密碼驗證碼失敗");
 			} else {
 				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+				log(error, 3, "Setting", "forget");
+				dump({ level: 2, message: error });
 			}
 		});
 }
@@ -943,9 +966,15 @@ function gift() {
 			console.log(error);
 			const res = error.request.response;
 
-			if (res == "This gift code invalid!") document.getElementById("exptechState").innerHTML = "兌換碼 無效!";
-			else if (res == "Can't find this account!") document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
-			else document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+			if (res == "This gift code invalid!") {
+				document.getElementById("exptechState").innerHTML = "兌換碼 無效!";
+			} else if (res == "Can't find this account!") {
+				document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
+			} else {
+				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
+				log(error, 3, "Setting", "gift");
+				dump({ level: 2, message: error });
+			}
 		});
 }
 
@@ -1037,6 +1066,8 @@ function balance() {
 		.catch((error) => {
 			console.log(error);
 			document.getElementById("exptechbalanceState").innerHTML = "未知錯誤(請聯絡開發者)";
+			log(error, 3, "Setting", "balance");
+			dump({ level: 2, message: error });
 		});
 }
 
@@ -1056,10 +1087,10 @@ function keyreset() {
 			console.log(res);
 			document.getElementById("exptechState").innerHTML = "金鑰重置成功!";
 		})
-		.catch((err) => {
-			console.log(err);
+		.catch((error) => {
+			console.log(error);
 
-			const res = err.request.response;
+			const res = error.request.response;
 
 			if (res == "Can't find this account!") {
 				document.getElementById("exptechState").innerHTML = "找不到此帳戶!";
@@ -1067,6 +1098,8 @@ function keyreset() {
 			} else {
 				document.getElementById("exptechState").innerHTML = "未知錯誤(請聯絡開發者)";
 				console.log("未知錯誤(請聯絡開發者)");
+				log(error, 3, "Setting", "keyreset");
+				dump({ level: 2, message: error });
 			}
 		});
 }
@@ -1095,6 +1128,8 @@ function edit() {
 		.catch((error) => {
 			console.log(error);
 			document.getElementById("exptecheditState").innerHTML = "未知錯誤(請聯絡開發者)";
+			log(error, 3, "Setting", "edit");
+			dump({ level: 2, message: error });
 		});
 }
 
@@ -1534,6 +1569,8 @@ const webhook = async () => {
 				TREM.Localization.getString("Webhook_Dialog_Success").format(m.id, m.channel_id));
 		}).catch(error => {
 			showDialog("error", "Webhook 測試", `Webhook 發送測試訊息時發生錯誤\n${error}`);
+			log(error, 3, "Setting", "webhook");
+			dump({ level: 2, message: error });
 		});
 };
 

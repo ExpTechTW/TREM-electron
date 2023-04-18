@@ -443,6 +443,18 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"intensity.cwb": {
+			type  : "string",
+			value : "",
+		},
+		"intensity.palert": {
+			type  : "string",
+			value : "",
+		},
+		"intensity.trem": {
+			type  : "string",
+			value : "",
+		},
 	},
 	intensities: [
 		{ value: 0, label: "0", get text() {
