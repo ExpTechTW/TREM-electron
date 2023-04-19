@@ -2906,7 +2906,7 @@ function handler(Json) {
 			if (station_time_json[uuid] == undefined) {
 				station_time_json[uuid] = Date.now();
 				localStorage.stationtime = JSON.stringify(station_time_json);
-			} else {
+			} else if (station_time_json[uuid] == 0) {
 				station_time_json[uuid] = Date.now();
 				localStorage.stationtime = JSON.stringify(station_time_json);
 			}
@@ -2921,7 +2921,8 @@ function handler(Json) {
 			amount = "--";
 			intensity = "-";
 		} else {
-			station_time_json[uuid] = Json.Time;
+			station_time_json[uuid] = 0;
+			localStorage.stationtime = JSON.stringify(station_time_json);
 			amount = +current_data.v;
 
 			if (amount > current_station_data.MaxPGA) current_station_data.MaxPGA = amount;
@@ -3064,7 +3065,7 @@ function handler(Json) {
 		}
 
 		const Level = IntensityI(intensity);
-		const now = new Date(station_time_json[uuid]);
+		const now = new Date(Json.Time);
 
 		// if (Unlock) {
 		// 	if (rtstation1 == "") {
@@ -3259,7 +3260,7 @@ function handler(Json) {
 			MAXPGA.long = station[keys[index]].Long;
 			MAXPGA.loc = station[keys[index]].Loc;
 			MAXPGA.intensity = intensity;
-			MAXPGA.time = new Date(station_time_json[uuid]);
+			MAXPGA.time = new Date(Json.Time);
 		}
 		// if (MaxIntensity1 > MAXPGA.intensity){
 		// 	MAXPGA.pga = amount;
