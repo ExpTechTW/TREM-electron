@@ -1829,6 +1829,15 @@ body:not(.darkmode) #here-marker {
     pointer-events: none;
 }
 
+.leaflet-popup-content-wrapper {
+    background: rgb(var(--md-sys-color-surface-variant));
+    color: rgb(var(--md-sys-color-on-surface-variant));
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    background: rgb(0 0 0 / 0%);
+}
+
 .marker-popup {
 	background-color: rgb(var(--md-sys-color-surface-variant));
 	box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);

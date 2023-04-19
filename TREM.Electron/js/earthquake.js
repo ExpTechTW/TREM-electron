@@ -527,47 +527,7 @@ TREM.PWS = {
 
 		if (Date.now() > pws.expireTime.getTime()) return;
 
-		for (const area of pws.areaCodes)
-			if (area.town) {
-				const { pws: pwsCount } = Maps.main.getFeatureState({
-					source : "Source_tw_town",
-					id     : area.code,
-				});
-				Maps.main.setFeatureState({
-					source : "Source_tw_town",
-					id     : area.code,
-				}, { pws: (pwsCount ?? 0) + 1 });
-				Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "visible");
-				pws.marker = new maplibregl.Marker({
-					element: $("<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>")[0],
-				})
-					.setLngLat([area.longitude, area.latitude])
-					.setPopup(new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: 360 }).setHTML(`<div class="marker-popup pws-popup"><strong>${pws.title}</strong>\n發報單位：${pws.sender}\n內文：${pws.description}\n發報時間：${pws.sentTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n失效時間：${pws.expireTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n\n<span class="url" onclick="openURL('${pws.url}')">報告連結</span></div>`))
-					.addTo(Maps.main);
-			} else {
-				const { pws: pwsCount } = Maps.main.getFeatureState({
-					source : "Source_tw_county",
-					id     : area.code,
-				});
-				Maps.main.setFeatureState({
-					source : "Source_tw_county",
-					id     : area.code,
-				}, { pws: (pwsCount ?? 0) + 1 });
-				Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "visible");
-			}
-
-		pws.timer = setTimeout(this.clear, pws.expireTime.getTime() - Date.now(), id);
-
-		this.cache.set(id, pws);
-	},
-	clear(pwsId) {
-		if (pwsId) {
-			const pws = this.cache.get(pwsId);
-
-			if (!pws) return;
-			log(`Clearing PWS id ${pwsId}`, 1, "PWS", "clear");
-			dump({ level: 0, message: `Clearing PWS id ${pwsId}`, origin: "PWS" });
-
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 			for (const area of pws.areaCodes)
 				if (area.town) {
 					const { pws: pwsCount } = Maps.main.getFeatureState({
@@ -577,15 +537,14 @@ TREM.PWS = {
 					Maps.main.setFeatureState({
 						source : "Source_tw_town",
 						id     : area.code,
-					}, { pws: pwsCount - 1 });
-
-					if (pws.marker) {
-						pws.marker.remove();
-						delete pws.marker;
-					}
-
-					if (!(pwsCount - 1))
-						Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
+					}, { pws: (pwsCount ?? 0) + 1 });
+					Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "visible");
+					pws.marker = new maplibregl.Marker({
+						element: $("<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>")[0],
+					})
+						.setLngLat([area.longitude, area.latitude])
+						.setPopup(new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: 360 }).setHTML(`<div class="marker-popup pws-popup"><strong>${pws.title}</strong>\n發報單位：${pws.sender}\n內文：${pws.description}\n發報時間：${pws.sentTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n失效時間：${pws.expireTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n\n<span class="url" onclick="openURL('${pws.url}')">報告連結</span></div>`))
+						.addTo(Maps.main);
 				} else {
 					const { pws: pwsCount } = Maps.main.getFeatureState({
 						source : "Source_tw_county",
@@ -594,51 +553,128 @@ TREM.PWS = {
 					Maps.main.setFeatureState({
 						source : "Source_tw_county",
 						id     : area.code,
-					}, { pws: pwsCount - 1 });
+					}, { pws: (pwsCount ?? 0) + 1 });
+					Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "visible");
+				}
+		else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+			for (const area of pws.areaCodes)
+				if (area.town)
+					pws.marker = L.marker([area.latitude, area.longitude], {
+						icon     : L.divIcon({ html: "<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>" }),
+						keyboard : false,
+					})
+						.addTo(Maps.main)
+						.bindPopup(`<div><strong>${pws.title}</strong>\n發報單位：${pws.sender}\n內文：${pws.description}\n發報時間：${pws.sentTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n失效時間：${pws.expireTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n\n<span class="url" onclick="openURL('${pws.url}')">報告連結</span></div>`, {
+							offset    : [8, 0],
+							permanent : false,
+							className : "marker-popup pws-popup",
+						});
 
-					if (pws.marker) {
+		pws.timer = setTimeout(TREM.PWS.clear, pws.expireTime.getTime() - Date.now(), id);
+
+		TREM.PWS.cache.set(id, pws);
+	},
+	clear(pwsId) {
+		if (pwsId) {
+			const pws = TREM.PWS.cache.get(pwsId);
+
+			if (!pws) return;
+			log(`Clearing PWS id ${pwsId}`, 1, "PWS", "clear");
+			dump({ level: 0, message: `Clearing PWS id ${pwsId}`, origin: "PWS" });
+
+			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
+				for (const area of pws.areaCodes)
+					if (area.town) {
+						const { pws: pwsCount } = Maps.main.getFeatureState({
+							source : "Source_tw_town",
+							id     : area.code,
+						});
+						Maps.main.setFeatureState({
+							source : "Source_tw_town",
+							id     : area.code,
+						}, { pws: pwsCount - 1 });
+
+						if (pws.marker) {
+							pws.marker.remove();
+							delete pws.marker;
+						}
+
+						if (!(pwsCount - 1))
+							Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
+					} else {
+						const { pws: pwsCount } = Maps.main.getFeatureState({
+							source : "Source_tw_county",
+							id     : area.code,
+						});
+						Maps.main.setFeatureState({
+							source : "Source_tw_county",
+							id     : area.code,
+						}, { pws: pwsCount - 1 });
+
+						if (pws.marker) {
+							pws.marker.remove();
+							delete pws.marker;
+						}
+
+						if (!(pwsCount - 1))
+							Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
+					}
+			else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+				for (const area of pws.areaCodes)
+					if (area.town && pws.marker) {
 						pws.marker.remove();
 						delete pws.marker;
 					}
-
-					if (!(pwsCount - 1))
-						Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
-				}
 
 			if (pws.timer) {
 				clearTimeout(pws.timer);
 				delete pws.timer;
 			}
 
-			this.cache.delete(pwsId);
+			TREM.PWS.cache.delete(pwsId);
 		}
 
-		if (this.cache.size) {
-			log("Clearing PWS map", 1, "PWS", "clear");
-			dump({ level: 0, message: "Clearing PWS map", origin: "PWS" });
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+			if (TREM.PWS.cache.size) {
+				log("Clearing PWS map", 1, "PWS", "clear");
+				dump({ level: 0, message: "Clearing PWS map", origin: "PWS" });
 
-			for (const [id, pws] of this.cache) {
-				for (const area of pws.areaCodes)
-					if (area.town)
-						Maps.main.setFeatureState({
-							source : "Source_tw_town",
-							id     : area.code,
-						}, { pws: 0 });
-					else
-						Maps.main.setFeatureState({
-							source : "Source_tw_county",
-							id     : area.code,
-						}, { pws: 0 });
+				for (const [id, pws] of TREM.PWS.cache) {
+					for (const area of pws.areaCodes)
+						if (area.town)
+							Maps.main.setFeatureState({
+								source : "Source_tw_town",
+								id     : area.code,
+							}, { pws: 0 });
+						else
+							Maps.main.setFeatureState({
+								source : "Source_tw_county",
+								id     : area.code,
+							}, { pws: 0 });
 
-				if (pws.timer) {
-					clearTimeout(pws.timer);
-					delete pws.timer;
+					if (pws.timer) {
+						clearTimeout(pws.timer);
+						delete pws.timer;
+					}
 				}
-			}
 
-			Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
-			Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
-			this.cache = new Map();
+				Maps.main.setLayoutProperty("Layer_pws_county", "visibility", "none");
+				Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "none");
+				TREM.PWS.cache = new Map();
+			}
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
+			if (TREM.PWS.cache.size) {
+				log("Clearing PWS map", 1, "PWS", "clear");
+				dump({ level: 0, message: "Clearing PWS map", origin: "PWS" });
+
+				for (const [id, pws] of TREM.PWS.cache)
+					if (pws.timer) {
+						clearTimeout(pws.timer);
+						delete pws.timer;
+					}
+
+				TREM.PWS.cache = new Map();
+			}
 		}
 	},
 };
@@ -2575,6 +2611,8 @@ async function init() {
 	// TREM.Intensity.handle(userJSON2);
 	// ipcRenderer.send("intensity-Notification", userJSON);
 	// ipcRenderer.send("intensity-Notification", userJSON1);
+	// const userJSON = require(path.resolve(__dirname, "../js/1681889049495.json"));
+	// TREM.PWS.addPWS(userJSON.raw);
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
 		navigator.clipboard.writeText(document.getElementById("rt-station-local-id").innerText).then(() => {
