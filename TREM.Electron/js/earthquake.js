@@ -2906,6 +2906,9 @@ function handler(Json) {
 			if (station_time_json[uuid] == undefined) {
 				station_time_json[uuid] = Date.now();
 				localStorage.stationtime = JSON.stringify(station_time_json);
+			} else {
+				station_time_json[uuid] = Date.now();
+				localStorage.stationtime = JSON.stringify(station_time_json);
 			}
 
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
