@@ -164,6 +164,7 @@ TREM.MapIntensity = {
 		if (rawPalertData.intensity?.length && !replay) {
 			if (rawPalertData.timestamp != this.alertTime) {
 				this.alertTime = rawPalertData.timestamp;
+				this.MaxI = 0;
 				const PLoc = {};
 				const int = new Map();
 
@@ -521,11 +522,15 @@ TREM.PWS = {
 			expireTime  : new Date(rawPWSData.expires.slice(0, rawPWSData.expires.length - 3)),
 			url         : rawPWSData.link.href,
 			timer       : null,
+			marker      : {},
+			areav2      : {},
 		};
 		log(`${pws.description}`, 1, "PWS", "addPWS");
 		dump({ level: 0, message: `${pws.description}`, origin: "PWS" });
 
 		if (Date.now() > pws.expireTime.getTime()) return;
+
+		let areaconst = 0;
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 			for (const area of pws.areaCodes)
@@ -539,12 +544,13 @@ TREM.PWS = {
 						id     : area.code,
 					}, { pws: (pwsCount ?? 0) + 1 });
 					Maps.main.setLayoutProperty("Layer_pws_town", "visibility", "visible");
-					pws.marker = new maplibregl.Marker({
+					pws.marker[areaconst] = new maplibregl.Marker({
 						element: $("<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>")[0],
 					})
 						.setLngLat([area.longitude, area.latitude])
 						.setPopup(new maplibregl.Popup({ closeButton: false, closeOnClick: false, maxWidth: 360 }).setHTML(`<div class="marker-popup pws-popup"><strong>${pws.title}</strong>\n發報單位：${pws.sender}\n內文：${pws.description}\n發報時間：${pws.sentTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n失效時間：${pws.expireTime.toLocaleString(undefined, { dateStyle: "long", timeStyle: "full", hour12: false, timeZone: "Asia/Taipei" })}\n\n<span class="url" onclick="openURL('${pws.url}')">報告連結</span></div>`))
 						.addTo(Maps.main);
+					areaconst += 1;
 				} else {
 					const { pws: pwsCount } = Maps.main.getFeatureState({
 						source : "Source_tw_county",
@@ -558,8 +564,8 @@ TREM.PWS = {
 				}
 		else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
 			for (const area of pws.areaCodes)
-				if (area.town)
-					pws.marker = L.marker([area.latitude, area.longitude], {
+				if (area.town) {
+					pws.marker[areaconst] = L.marker([area.latitude, area.longitude], {
 						icon     : L.divIcon({ html: "<img src=\"../image/warn.png\" height=\"32\" width=\"32\"></img>" }),
 						keyboard : false,
 					})
@@ -569,6 +575,34 @@ TREM.PWS = {
 							permanent : false,
 							className : "marker-popup pws-popup",
 						});
+					pws.areav2[areaconst] = L.geoJson.vt(MapData.tw_town, {
+						minZoom   : 4,
+						maxZoom   : 15,
+						tolerance : 20,
+						buffer    : 256,
+						debug     : 0,
+						zIndex    : 5,
+						style     : (properties) => {
+							const name = properties.TOWNCODE;
+
+							if (area.code != name)
+								return {
+									color       : "transparent",
+									weight      : 0,
+									opacity     : 0,
+									fillColor   : "transparent",
+									fillOpacity : 0,
+								};
+							return {
+								color       : "#efcc00",
+								weight      : 3,
+								fillColor   : "transparent",
+								fillOpacity : 0,
+							};
+						},
+					}).addTo(Maps.main);
+					areaconst += 1;
+				}
 
 		pws.timer = setTimeout(TREM.PWS.clear, pws.expireTime.getTime() - Date.now(), id);
 
@@ -581,6 +615,7 @@ TREM.PWS = {
 			if (!pws) return;
 			log(`Clearing PWS id ${pwsId}`, 1, "PWS", "clear");
 			dump({ level: 0, message: `Clearing PWS id ${pwsId}`, origin: "PWS" });
+			let areaconst = 0;
 
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 				for (const area of pws.areaCodes)
@@ -595,8 +630,9 @@ TREM.PWS = {
 						}, { pws: pwsCount - 1 });
 
 						if (pws.marker) {
-							pws.marker.remove();
-							delete pws.marker;
+							pws.marker[areaconst].remove();
+							delete pws.marker[areaconst];
+							areaconst += 1;
 						}
 
 						if (!(pwsCount - 1))
@@ -612,8 +648,9 @@ TREM.PWS = {
 						}, { pws: pwsCount - 1 });
 
 						if (pws.marker) {
-							pws.marker.remove();
-							delete pws.marker;
+							pws.marker[areaconst].remove();
+							delete pws.marker[areaconst];
+							areaconst += 1;
 						}
 
 						if (!(pwsCount - 1))
@@ -622,8 +659,11 @@ TREM.PWS = {
 			else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
 				for (const area of pws.areaCodes)
 					if (area.town && pws.marker) {
-						pws.marker.remove();
-						delete pws.marker;
+						pws.marker[areaconst].remove();
+						delete pws.marker[areaconst];
+						pws.areav2[areaconst].remove();
+						delete pws.areav2[areaconst];
+						areaconst += 1;
 					}
 
 			if (pws.timer) {
@@ -2554,9 +2594,9 @@ async function init() {
 	// const userJSON = require(path.resolve(__dirname, "../js/1669484541389.json"));
 	// TREM.Intensity.handle(userJSON);
 	// ipcRenderer.send("intensity-Notification", userJSON);
-	// const userJSON = require(path.resolve(__dirname, "../js/1675451253223.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1681965624647.json"));
 	// TREM.MapIntensity.palert(userJSON);
-	// const userJSON1 = require(path.resolve(__dirname, "../js/1674419911217.json"));
+	// const userJSON1 = require(path.resolve(__dirname, "../js/1681965685264.json"));
 	// TREM.MapIntensity.palert(userJSON1);
 	// const userJSON2 = require(path.resolve(__dirname, "../js/1674419931238.json"));
 	// TREM.MapIntensity.palert(userJSON2);
@@ -2611,7 +2651,7 @@ async function init() {
 	// TREM.Intensity.handle(userJSON2);
 	// ipcRenderer.send("intensity-Notification", userJSON);
 	// ipcRenderer.send("intensity-Notification", userJSON1);
-	// const userJSON = require(path.resolve(__dirname, "../js/1681889049495.json"));
+	// const userJSON = require(path.resolve(__dirname, "../js/1681959529950.json"));
 	// TREM.PWS.addPWS(userJSON.raw);
 
 	document.getElementById("rt-station-local").addEventListener("click", () => {
