@@ -8,7 +8,6 @@ const { default: turfCircle } = require("@turf/circle");
 const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:timers");
 const axios = require("axios");
 const bytenode = require("bytenode");
-const crypto = require("crypto");
 const maplibregl = require("maplibre-gl");
 const storage = require("electron-localstorage");
 const Speech = require("speak-tts");
@@ -335,7 +334,11 @@ TREM.MapIntensity = {
 
 							if (!win.isFocused()) win.flashFrame(true);
 
-							if (setting["audio.PAlert"]) TREM.Audios.palert.play();
+							if (setting["audio.PAlert"]) {
+								log("Playing Audio > palert", 1, "Audio", "palert");
+								dump({ level: 0, message: "Playing Audio > palert", origin: "Audio" });
+								TREM.Audios.palert.play();
+							}
 						}
 
 						setTimeout(() => {
@@ -364,7 +367,11 @@ TREM.MapIntensity = {
 
 						if (!win.isFocused()) win.flashFrame(true);
 
-						if (setting["audio.PAlert"]) TREM.Audios.palert.play();
+						if (setting["audio.PAlert"]) {
+							log("Playing Audio > palert", 1, "Audio", "palert");
+							dump({ level: 0, message: "Playing Audio > palert", origin: "Audio" });
+							TREM.Audios.palert.play();
+						}
 					} else {
 						palert_geojson.remove();
 					}
@@ -2660,6 +2667,7 @@ async function init() {
 			console.log("複製成功");
 		});
 	});
+	storageConfig.init();
 	global.gc();
 }
 // #endregion
@@ -3173,9 +3181,13 @@ function handler(Json) {
 				if (setting["audio.realtime"])
 					if (amount > 8 && PGALimit == 0) {
 						PGALimit = 1;
+						log("Playing Audio > pga1", 1, "Audio", "handler");
+						dump({ level: 0, message: "Playing Audio > pga1", origin: "Audio" });
 						TREM.Audios.pga1.play();
 					} else if (amount > 250 && PGALimit > 1) {
 						PGALimit = 2;
+						log("Playing Audio > pga2", 1, "Audio", "handler");
+						dump({ level: 0, message: "Playing Audio > pga2", origin: "Audio" });
 						TREM.Audios.pga2.play();
 					}
 
@@ -3204,6 +3216,8 @@ function handler(Json) {
 
 					if (max_intensity > 4 || intensitytag > 4) {
 						if (speecd_use) speech.speak({ text: `強震檢測，${loc}` });
+						log("Playing Audio > int2", 1, "Audio", "handler");
+						dump({ level: 0, message: "Playing Audio > int2", origin: "Audio" });
 						TREM.Audios.int2.play();
 						new Notification("🟥 強震檢測", {
 							body   : `${loc}`,
@@ -3212,6 +3226,8 @@ function handler(Json) {
 						});
 					} else if (max_intensity > 1 || intensitytag > 1) {
 						if (speecd_use) speech.speak({ text: `震動檢測，${loc}` });
+						log("Playing Audio > int1", 1, "Audio", "handler");
+						dump({ level: 0, message: "Playing Audio > int1", origin: "Audio" });
 						TREM.Audios.int1.play();
 						new Notification("🟨 震動檢測", {
 							body   : `${loc}`,
@@ -3220,6 +3236,8 @@ function handler(Json) {
 						});
 					} else if (intensitytag == -1) {
 						if (speecd_use) speech.speak({ text: `弱反應，${loc}` });
+						log("Playing Audio > int0", 1, "Audio", "handler");
+						dump({ level: 0, message: "Playing Audio > int0", origin: "Audio" });
 						TREM.Audios.int0.play();
 						new Notification("🟩 弱反應", {
 							body   : `${loc}`,
@@ -3467,12 +3485,20 @@ function handler(Json) {
 
 		if (All[0].intensity > PGAtag) {
 			if (setting["audio.realtime"])
-				if (All[0].intensity >= 5 && PGAtag < 5)
+				if (All[0].intensity >= 5 && PGAtag < 5) {
+					log("Playing Audio > int2", 1, "Audio", "handler");
+					dump({ level: 0, message: "Playing Audio > int2", origin: "Audio" });
 					TREM.Audios.int2.play();
-				else if (All[0].intensity >= 2 && PGAtag < 2)
+				} else if (All[0].intensity >= 2 && PGAtag < 2) {
+					log("Playing Audio > int1", 1, "Audio", "handler");
+					dump({ level: 0, message: "Playing Audio > int1", origin: "Audio" });
 					TREM.Audios.int1.play();
-				else if (PGAtag == -1)
+				} else if (PGAtag == -1) {
+					log("Playing Audio > int0", 1, "Audio", "handler");
+					dump({ level: 0, message: "Playing Audio > int0", origin: "Audio" });
 					TREM.Audios.int0.play();
+				}
+
 			setTimeout(() => {
 				ipcRenderer.send("screenshotEEW", {
 					Function : "station",
@@ -3901,6 +3927,7 @@ function ReportGET() {
 				if (!_report_data) return setTimeout(ReportGET, 5000);
 
 				storage.setItem("report_data", _report_data);
+				storageConfig.setItem("report_data", _report_data);
 
 				if (api_key_verify && setting["report.getInfo"]) {
 					log("Reports fetched (api key verify)", 1, "EQReportFetcher", "ReportGET");
@@ -5531,6 +5558,8 @@ TREM.Earthquake.on("eew", (data) => {
 
 		if (data.type != "trem-eew")
 			if (setting["audio.eew"] && Alert) {
+				log("Playing Audio > eew", 1, "Audio", "eew");
+				dump({ level: 0, message: "Playing Audio > eew", origin: "Audio" });
 				TREM.Audios.eew.play();
 				audioPlay1(`../audio/1/${level.label.replace("+", "").replace("-", "")}.wav`);
 
@@ -5581,8 +5610,16 @@ TREM.Earthquake.on("eew", (data) => {
 	let stamp = 0;
 
 	if ((EarthquakeList[data.id].number ?? 1) < data.number) {
-		if (data.type == "trem-eew" && setting["audio.eew"] && Alert) TREM.Audios.note.play();
-		else if (setting["audio.eew"] && Alert) TREM.Audios.update.play();
+		if (data.type == "trem-eew" && setting["audio.eew"] && Alert) {
+			log("Playing Audio > note", 1, "Audio", "eew");
+			dump({ level: 0, message: "Playing Audio > note", origin: "Audio" });
+			TREM.Audios.note.play();
+		} else if (setting["audio.eew"] && Alert) {
+			log("Playing Audio > update", 1, "Audio", "eew");
+			dump({ level: 0, message: "Playing Audio > update", origin: "Audio" });
+			TREM.Audios.update.play();
+		}
+
 		EarthquakeList[data.id].number = data.number;
 	}
 

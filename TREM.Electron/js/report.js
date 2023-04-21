@@ -716,7 +716,7 @@ TREM.Report = {
 					}
 				}
 
-		console.log(this.report_station);
+		// console.log(this.report_station);
 		this.epicenterIcon = null;
 		this.report_trem_station = {};
 
@@ -846,7 +846,7 @@ TREM.Report = {
 				this._setupzoomPredict();
 		}
 
-		console.log(this.report_trem_station);
+		// console.log(this.report_trem_station);
 	},
 	_setupzoomPredict() {
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
