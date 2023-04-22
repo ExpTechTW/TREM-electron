@@ -68,9 +68,11 @@ jobs:
       run: npm ci
     - name: Lint
       run: npm run lint
-    - name: Build
+    - name: Run action
+      uses: ./
       with:
         github_token: ${{ secrets.github_token }}
+    - name: Build
       run: npm run dist
     - name: Upload Artifact
       uses: actions/upload-artifact@master
