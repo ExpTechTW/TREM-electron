@@ -64,12 +64,13 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-        github_token: ${{ secrets.github_token }}
     - name: Restore dependencies
       run: npm ci
     - name: Lint
       run: npm run lint
     - name: Build
+      with:
+        github_token: ${{ secrets.github_token }}
       run: npm run dist
     - name: Upload Artifact
       uses: actions/upload-artifact@master
