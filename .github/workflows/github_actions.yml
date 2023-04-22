@@ -70,6 +70,8 @@ jobs:
       run: npm run lint
     - name: Build
       run: npm run dist
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
     - name: Upload Artifact
       uses: actions/upload-artifact@master
       with:
