@@ -1115,7 +1115,7 @@ function dynamicLoadJs(url, callback) {
 }
 
 // #region 初始化
-const _unlock = fs.existsSync(path.join(app.getPath("userData"), "unlock.tmp"));
+// const _unlock = fs.existsSync(path.join(app.getPath("userData"), "unlock.tmp"));
 
 // try {
 // 	dynamicLoadJs("server.js", () => {
@@ -2944,6 +2944,7 @@ function handler(Json) {
 		let amount = 0;
 		let intensity = 0;
 		let intensitytest = 0;
+		let now = new Date(Json.Time);
 		const Alert = current_data?.alert ?? false;
 
 		// debugger;
@@ -2958,6 +2959,8 @@ function handler(Json) {
 				station_time_json[uuid] = Date.now();
 				localStorage.stationtime = JSON.stringify(station_time_json);
 			}
+
+			now = new Date(station_time_json[uuid]);
 
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 				station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container">${station[keys[index]].Loc}(${keys[index]})無資料</div>`;
@@ -3113,7 +3116,6 @@ function handler(Json) {
 		}
 
 		const Level = IntensityI(intensity);
-		const now = new Date(Json.Time);
 
 		// if (Unlock) {
 		// 	if (rtstation1 == "") {
@@ -5339,6 +5341,8 @@ function FCMdata(json, Unit) {
 	} else if (json.type.startsWith("eew") || json.type == "trem-eew") {
 		if (replay != 0 && !json.replay_timestamp) return;
 
+		if (json.type == "trem-eew" && !api_key_verify) return;
+
 		// if (json.max < 3) return;
 
 		if (
@@ -5351,15 +5355,15 @@ function FCMdata(json, Unit) {
 			|| (json.type == "trem-eew" && !setting["accept.eew.trem"])
 		) return;
 
-		json.Unit = (json.type == "eew-scdzj") ? "四川省地震局 (SCDZJ)"
-			: (json.type == "eew-nied") ? "防災科学技術研究所 (NIED)"
-				: (json.type == "eew-kma") ? "기상청(KMA)"
-					: (json.type == "eew-jma") ? "気象庁(JMA)"
-						: (json.type == "eew-cwb") ? "中央氣象局 (CWB)"
-							: (json.type == "eew-fjdzj") ? "福建省地震局 (FJDZJ)"
-								: (json.type == "trem-eew" && json.number > 3) ? "TREM(實驗功能僅供參考)"
-									: (json.type == "trem-eew" && json.number <= 3) ? "NSSPE(無震源參數推算)"
-										: (json.scale == 1) ? "PLUM(局部無阻尼運動傳播法)"
+		json.Unit = (json.scale == 1) ? "PLUM(局部無阻尼運動傳播法)"
+			: (json.type == "eew-scdzj") ? "四川省地震局 (SCDZJ)"
+				: (json.type == "eew-nied") ? "防災科学技術研究所 (NIED)"
+					: (json.type == "eew-kma") ? "기상청(KMA)"
+						: (json.type == "eew-jma") ? "気象庁(JMA)"
+							: (json.type == "eew-cwb") ? "中央氣象局 (CWB)"
+								: (json.type == "eew-fjdzj") ? "福建省地震局 (FJDZJ)"
+									: (json.type == "trem-eew" && json.number > 3) ? "TREM(實驗功能僅供參考)"
+										: (json.type == "trem-eew" && json.number <= 3) ? "NSSPE(無震源參數推算)"
 											: (json.Unit) ? json.Unit : "";
 
 		stopReplaybtn();

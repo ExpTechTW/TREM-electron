@@ -13,6 +13,8 @@
     "Setting_Dialog_Reset_Description": "您確定您真的要重置所有設定嗎\n這個動作將無法挽回",
     "Setting_Dialog_Real_time_alert_Title": "顯示測站反應？",
     "Setting_Dialog_Real_time_alert_Description": "您確定您真的要顯示測站反應嗎\n這個動作將認定你知曉該功能的問題嚴重性",
+    "Setting_Dialog_trem_eq_Notification_Title": "地震檢知通知？",
+    "Setting_Dialog_trem_eq_Notification_Description": "您確定您真的要地震檢知通知嗎\n這個動作將認定你知曉該功能的問題嚴重性",
     "Setting_Title": "TREM | 設定",
     "Setting_Update_Latest": "目前已是最新版",
     "Webhook_Dialog_Error_Title": "Webhook 錯誤",

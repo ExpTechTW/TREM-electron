@@ -416,7 +416,7 @@ function SelectSave(id) {
 	for (let index = 1; index < 6; index++)
 		if (id == "Real-time.station." + index) {
 			const text = document.getElementById("Real-time.station." + index + ".text");
-			text.innerHTML = "即時測站波形圖" + index + "已設定 " + value;
+			text.innerHTML = `即時測站波形圖${index} 已設定 ${value}`;
 			text.style = "margin-top: 4px; color: rgb(var(--md-sys-color-on-background));";
 		}
 
@@ -444,16 +444,21 @@ function SelectSave(id) {
 }
 
 let runconsti = 0;
+let Real_time_alert;
 
 function Real_time_alert_run() {
 	Real_time_alert_showDialog(runconsti);
-	setTimeout(() => {
-		document.getElementById("Real-time.alert").checked = true;
-		Real_time_alert_showDialog(runconsti);
-		runconsti++;
 
-		if (runconsti < 3) Real_time_alert_run();
-	}, 30_000);
+	if (runconsti > 2)  {
+		clearTimeout(Real_time_alert);
+		delete Real_time_alert;
+	} else if (runconsti < 2) {
+		runconsti += 1;
+		Real_time_alert = setTimeout(() => {
+			document.getElementById("Real-time.alert").checked = true;
+			Real_time_alert_run();
+		}, 30_000);
+	}
 }
 
 function Real_time_alert_showDialog(runconstij) {
@@ -468,6 +473,48 @@ function Real_time_alert_showDialog(runconstij) {
 		});
 }
 
+let runconstk = 0;
+let trem_eq_Notification;
+
+function trem_eq_Notification_run() {
+	trem_eq_Notification_showDialog(runconstk);
+
+	if (runconstk > 2)  {
+		clearTimeout(trem_eq_Notification);
+		delete trem_eq_Notification;
+	} else if (runconstk < 2) {
+		runconstk += 1;
+		trem_eq_Notification = setTimeout(() => {
+			document.getElementById("trem-eq.Notification").checked = true;
+			trem_eq_Notification_run();
+		}, 30_000);
+	}
+}
+
+function trem_eq_Notification_showDialog(runconstil) {
+	showDialog("warn",
+		TREM.Localization.getString("Setting_Dialog_trem_eq_Notification_Title"),
+		TREM.Localization.getString("Setting_Dialog_trem_eq_Notification_Description"),
+		1, "warning", () => {
+			if (runconstil == 2) {
+				const element = document.getElementById("trem-eq.alert.Notification");
+				element.checked = false;
+
+				if (is_setting_disabled) element.disabled = true;
+				else element.disabled = false;
+
+				ipcRenderer.send("config:value", "trem-eq.alert.Notification", false);
+				log(`Value Changed trem-eq.alert.Notification: ${setting["trem-eq.alert.Notification"]} -> false`, 1, "Setting", "CheckSave");
+				dump({ level: 0, message: `Value Changed trem-eq.alert.Notification: ${setting["trem-eq.alert.Notification"]} -> false`, origin: "Setting" });
+				ipcRenderer.send("config:value", "trem-eq.Notification", true);
+			} else {
+				document.getElementById("trem-eq.Notification").checked = false;
+			}
+		}, "確認", "取消", () => {
+			document.getElementById("trem-eq.Notification").checked = false;
+		});
+}
+
 function CheckSave(id) {
 	const value = document.getElementById(id).checked;
 	log(`Value Changed ${id}: ${setting[id]} -> ${value}`, 1, "Setting", "CheckSave");
@@ -476,6 +523,17 @@ function CheckSave(id) {
 	if (id == "Real-time.alert" && value) {
 		runconsti = 0;
 		Real_time_alert_run();
+	} else if (id == "alert" && !value) {
+		clearTimeout(Real_time_alert);
+		delete Real_time_alert;
+		ipcRenderer.send("config:value", id, value);
+	} else if (id == "trem-eq.Notification" && value) {
+		runconstk = 0;
+		trem_eq_Notification_run();
+	} else if (id == "trem-eq.Notification" && !value) {
+		clearTimeout(trem_eq_Notification);
+		delete trem_eq_Notification;
+		ipcRenderer.send("config:value", id, value);
 	} else {
 		ipcRenderer.send("config:value", id, value);
 	}
@@ -506,18 +564,6 @@ function CheckSave(id) {
 		ipcRenderer.send("config:value", "trem-eq.Notification", false);
 		log(`Value Changed trem-eq.Notification: ${setting["trem-eq.Notification"]} -> false`, 1, "Setting", "CheckSave");
 		dump({ level: 0, message: `Value Changed trem-eq.Notification: ${setting["trem-eq.Notification"]} -> false`, origin: "Setting" });
-	}
-
-	if (id == "trem-eq.Notification") {
-		const element = document.getElementById("trem-eq.alert.Notification");
-		element.checked = false;
-
-		if (is_setting_disabled) element.disabled = true;
-		else element.disabled = false;
-
-		ipcRenderer.send("config:value", "trem-eq.alert.Notification", false);
-		log(`Value Changed trem-eq.alert.Notification: ${setting["trem-eq.alert.Notification"]} -> false`, 1, "Setting", "CheckSave");
-		dump({ level: 0, message: `Value Changed trem-eq.alert.Notification: ${setting["trem-eq.alert.Notification"]} -> false`, origin: "Setting" });
 	}
 
 	if (
