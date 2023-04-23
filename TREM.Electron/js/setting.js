@@ -449,9 +449,8 @@ let Real_time_alert;
 function Real_time_alert_run() {
 	Real_time_alert_showDialog(runconsti);
 
-	if (runconsti > 2)  {
+	if (runconsti > 2) {
 		clearTimeout(Real_time_alert);
-		delete Real_time_alert;
 	} else if (runconsti < 2) {
 		runconsti += 1;
 		Real_time_alert = setTimeout(() => {
@@ -479,9 +478,8 @@ let trem_eq_Notification;
 function trem_eq_Notification_run() {
 	trem_eq_Notification_showDialog(runconstk);
 
-	if (runconstk > 2)  {
+	if (runconstk > 2) {
 		clearTimeout(trem_eq_Notification);
-		delete trem_eq_Notification;
 	} else if (runconstk < 2) {
 		runconstk += 1;
 		trem_eq_Notification = setTimeout(() => {
@@ -525,14 +523,12 @@ function CheckSave(id) {
 		Real_time_alert_run();
 	} else if (id == "alert" && !value) {
 		clearTimeout(Real_time_alert);
-		delete Real_time_alert;
 		ipcRenderer.send("config:value", id, value);
 	} else if (id == "trem-eq.Notification" && value) {
 		runconstk = 0;
 		trem_eq_Notification_run();
 	} else if (id == "trem-eq.Notification" && !value) {
 		clearTimeout(trem_eq_Notification);
-		delete trem_eq_Notification;
 		ipcRenderer.send("config:value", id, value);
 	} else {
 		ipcRenderer.send("config:value", id, value);
