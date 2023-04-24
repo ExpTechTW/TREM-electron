@@ -19,6 +19,13 @@
       "./audio",
       "./package.json"
     ],
+    "mac": {
+      "publish": null,
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
     "dmg": {
       "contents": [
         {
@@ -36,18 +43,18 @@
     "win": {
       "publish": null,
       "target": [
-        {
-          "target": "nsis"
-        },
-        {
-          "target": "portable"
-        }
+        "nsis",
+        "portable"
       ],
       "icon": "TREM.ico"
     },
     "linux": {
       "publish": null,
-      "target": "deb",
+      "target": [
+        "deb",
+        "AppImage"
+      ],
+      "icon": "TREM.ico",
       "category": "Development",
       "maintainer": "ExpTechTW"
     },
