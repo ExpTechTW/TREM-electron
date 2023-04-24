@@ -413,12 +413,14 @@ function SelectSave(id) {
 		ipcRenderer.send("config:value", "location.town", town.options[town.selectedIndex].value);
 	}
 
-	for (let index = 1; index < 6; index++)
-		if (id == "Real-time.station." + index) {
-			const text = document.getElementById("Real-time.station." + index + ".text");
-			text.innerHTML = `即時測站波形圖${index} 已設定 ${value}`;
-			text.style = "margin-top: 4px; color: rgb(var(--md-sys-color-on-background));";
-		}
+	for (let i = 0; i < Object.keys(station).length; i++)
+		if (Object.keys(station)[i] == value)
+			for (let index = 1; index < 6; index++)
+				if (id == "Real-time.station." + index) {
+					const text = document.getElementById("Real-time.station." + index + ".text");
+					text.innerHTML = `即時測站波形圖${index} 已設定 ${Object.keys(station)[i]}`;
+					text.style = "margin-top: 4px; color: rgb(var(--md-sys-color-on-background));";
+				}
 
 	if (id == "location.city" || id == "location.town") {
 		const city = document.getElementById("location.city");
