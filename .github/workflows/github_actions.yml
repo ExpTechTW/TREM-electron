@@ -7,11 +7,13 @@ on:
     branches: [ "master",  "pre" ,  "pre.30" ]
 
 jobs:
+  defaults:
+    run:
+      working-directory: TREM.Electron
+
   Windows_x64:
     runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: TREM.Electron
+    
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
@@ -36,9 +38,7 @@ jobs:
 
   Linux_amd64:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: TREM.Electron
+
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
@@ -64,9 +64,7 @@ jobs:
 
   macOS_x64:
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: TREM.Electron
+
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
