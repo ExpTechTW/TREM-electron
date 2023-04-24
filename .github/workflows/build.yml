@@ -55,11 +55,31 @@ jobs:
           npx rimraf "dev/!(*.AppImage)"
           npx rimraf "dev/!(*.zip)"
       
-      - name: upload artifacts
+      - name: upload artifacts for Windows
         uses: actions/upload-artifact@v3.0.0
+        if: matrix.os == 'windows-latest'
         with:
           name: ${{ matrix.os }}
-          path: dev
+          path: |
+            D:/a/TREM/TREM/TREM.Electron/dev/*.exe
+            D:/a/TREM/TREM/TREM.Electron/dev/*.msi
+      - name: upload artifacts for MacOS
+        uses: actions/upload-artifact@v3.0.0
+        if: matrix.os == 'macos-latest'
+        with:
+          name: ${{ matrix.os }}
+          path: |
+            /Users/runner/work/TREM/TREM/TREM.Electron/dev/*.dmg
+            /Users/runner/work/TREM/TREM/TREM.Electron/dev/*.pkg
+      - name: upload artifacts for Linux
+        uses: actions/upload-artifact@v3.0.0
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          name: ${{ matrix.os }}
+          path: |
+            /home/runner/work/TREM/TREM/TREM.Electron/dev/*.deb
+            /home/runner/work/TREM/TREM/TREM.Electron/dev/*.AppImage
+            /home/runner/work/TREM/TREM/TREM.Electron/dev/*.rpm
 
       - name: release
         uses: softprops/action-gh-release@v0.1.15
