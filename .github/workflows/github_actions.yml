@@ -31,13 +31,7 @@ jobs:
         path: |
           D:/a/TREM/TREM/TREM.Electron/dev/*.exe
           D:/a/TREM/TREM/TREM.Electron/dev/*.zip
-    - name: release
-      uses: softprops/action-gh-release@v0.1.15
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: "dev/**"
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
   Linux_amd64:
     runs-on: ubuntu-latest
     defaults:
@@ -62,13 +56,6 @@ jobs:
         path: |
           /home/runner/work/TREM/TREM/TREM.Electron/dev/*.deb
           /home/runner/work/TREM/TREM/TREM.Electron/dev/*.zip
-    - name: release
-      uses: softprops/action-gh-release@v0.1.15
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: "dev/**"
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
   macOS_x64:
     runs-on: macos-latest
@@ -96,10 +83,3 @@ jobs:
         path: |
           /Users/runner/work/TREM/TREM/TREM.Electron/dev/*.dmg
           /Users/runner/work/TREM/TREM/TREM.Electron/dev/*.zip
-    - name: release
-      uses: softprops/action-gh-release@v0.1.15
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: "dev/**"
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
