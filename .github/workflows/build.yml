@@ -18,61 +18,48 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
+        node-version: "18"
 
     steps:
       - name: Check out git repository
-        uses: actions/checkout@v3.0.0
+        uses: actions/checkout@v3
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3.0.0
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: ${{ matrix.node-version }}
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Restore dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
 
       - name: Build Electron App
         run: npm run dist
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Cleanup Artifacts for Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          npx rimraf "dev/!(*.exe)"
-          npx rimraf "dev/!(*.zip)"
-          
-      - name: Cleanup Artifacts for MacOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          npx rimraf "dev/!(*.dmg)"
-          npx rimraf "dev/!(*.zip)"
-      
-      - name: Cleanup Artifacts for Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          npx rimraf "dev/!(*.deb)"
-          npx rimraf "dev/!(*.AppImage)"
-          npx rimraf "dev/!(*.zip)"
-      
       - name: upload artifacts for Windows
-        uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@master
         if: matrix.os == 'windows-latest'
         with:
           name: ${{ matrix.os }}
           path: |
             D:/a/TREM/TREM/TREM.Electron/dev/*.exe
             D:/a/TREM/TREM/TREM.Electron/dev/*.msi
+
       - name: upload artifacts for MacOS
-        uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@master
         if: matrix.os == 'macos-latest'
         with:
           name: ${{ matrix.os }}
           path: |
             /Users/runner/work/TREM/TREM/TREM.Electron/dev/*.dmg
             /Users/runner/work/TREM/TREM/TREM.Electron/dev/*.pkg
+
       - name: upload artifacts for Linux
-        uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@master
         if: matrix.os == 'ubuntu-latest'
         with:
           name: ${{ matrix.os }}
