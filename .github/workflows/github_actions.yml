@@ -28,7 +28,9 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: "TREM.Windows_x64.exe"
-        path: D:/a/TREM/TREM/TREM.Electron/dev/*.exe
+        path: |
+          D:/a/TREM/TREM/TREM.Electron/dev/*.exe
+          D:/a/TREM/TREM/TREM.Electron/dev/*.zip
 
   Linux_amd64:
     runs-on: ubuntu-latest
@@ -51,7 +53,9 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: "TREM.Linux_amd64.deb"
-        path: /home/runner/work/TREM/TREM/TREM.Electron/dev/*.deb
+        path: |
+          /home/runner/work/TREM/TREM/TREM.Electron/dev/*.deb
+          /home/runner/work/TREM/TREM/TREM.Electron/dev/*.zip
 
   macOS_x64:
     runs-on: macos-latest
@@ -76,4 +80,6 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: "TREM.macOS_x64.dmg"
-        path: /Users/runner/work/TREM/TREM/TREM.Electron/dev/*.dmg
+        path: |
+          /Users/runner/work/TREM/TREM/TREM.Electron/dev/*.dmg
+          /Users/runner/work/TREM/TREM/TREM.Electron/dev/*.zip

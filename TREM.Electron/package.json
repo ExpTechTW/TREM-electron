@@ -44,7 +44,8 @@
       "publish": null,
       "target": [
         "nsis",
-        "portable"
+        "portable",
+        "zip"
       ],
       "icon": "TREM.ico"
     },
@@ -52,7 +53,8 @@
       "publish": null,
       "target": [
         "deb",
-        "AppImage"
+        "AppImage",
+        "zip"
       ],
       "category": "Development",
       "maintainer": "ExpTechTW"
