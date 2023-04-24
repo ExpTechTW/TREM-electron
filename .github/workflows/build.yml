@@ -18,7 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
-        node-version: "18"
 
     steps:
       - name: Check out git repository
