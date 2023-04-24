@@ -54,7 +54,6 @@
         "deb",
         "AppImage"
       ],
-      "icon": "TREM.ico",
       "category": "Development",
       "maintainer": "ExpTechTW"
     },
