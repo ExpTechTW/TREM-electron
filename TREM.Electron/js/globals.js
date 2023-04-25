@@ -56,6 +56,8 @@ const closeDialog = event => {
 	$("#modal-overlay").fadeOut({ duration: 100, complete: () => container.replaceChildren() }).delay(100).show();
 };
 
+let showDialogtime;
+
 const showDialog
 
 /**
@@ -72,9 +74,10 @@ const showDialog
  * @param {?dialogCallback} callback The callback function to run when the user omitted the dialog
  * @param {string} buttonAccepttext The buttonAccepttext of the dialog
  * @param {string} buttonCanceltext The buttonCanceltext of the dialog
- * @param {?dialogCallback} callbackCancel The callback function to run when the user omitted the dialog
+ * @param {?dialogCallback} callbackCancel The callbackCancel function to run when the user omitted the dialog
+ * @param {int} time time type of the dialog
  */
-= (type, title, message, button = 0, customIcon, callback = () => void 0, buttonAccepttext, buttonCanceltext, callbackCancel = () => void 0) => {
+= (type, title, message, button = 0, customIcon, callback = () => void 0, buttonAccepttext, buttonCanceltext, callbackCancel = () => void 0, time = 0) => {
 	const container = document.getElementById("modal-overlay");
 	const icon = document.createElement("span");
 	icon.classList.add("material-symbols-rounded");
@@ -152,6 +155,14 @@ const showDialog
 	buttons.querySelector(":last-child").focus();
 	buttons.querySelector(":last-child").contentEditable = false;
 	lockScroll(true);
+
+	if (time != 0) {
+		time = time * 1000;
+		showDialogtime = setTimeout((...args) => {
+			lockScroll(false);
+			$("#modal-overlay").fadeOut({ duration: 100, complete: () => container.replaceChildren() }).delay(100).show();
+		}, time);
+	}
 };
 
 

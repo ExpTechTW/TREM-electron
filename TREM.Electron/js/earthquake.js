@@ -4855,7 +4855,7 @@ ipcMain.on("update-available-Notification", (version, getVersion, info) => {
 	showDialog("success", `有可用的${info.releaseName}版本更新`, info.releaseNotes.replace("<p>", "").replaceAll("<br>", "").replace("</p>", ""),
 		1, "update", () => {
 			shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${version}`);
-		}, "前往更新", "暫緩更新");
+		}, "前往更新", "暫緩更新", () => void 0, 60);
 });
 
 ipcMain.on("update-not-available-Notification", (version, getVersion) => {
@@ -6547,6 +6547,12 @@ TREM.Earthquake.on("tsunami", (data) => {
 });
 
 function main(data) {
+	if (showDialogtime) {
+		lockScroll(false);
+		$("#modal-overlay").fadeOut(0);
+		showDialogtime.close();
+	}
+
 	if (TREM.EEW.get(INFO[TINFO]?.ID).Cancel == undefined && data.type != "trem-eew") {
 		if (data.depth != null) {
 

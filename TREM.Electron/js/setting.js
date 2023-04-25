@@ -1513,6 +1513,10 @@ function openEEWScreenshotsFolder() {
 	ipcRenderer.send("openEEWScreenshotsFolder");
 }
 
+function openUpdateFolder() {
+	ipcRenderer.send("openUpdateFolder");
+}
+
 function openSettingFile() {
 	ipcRenderer.send("config:open");
 }
