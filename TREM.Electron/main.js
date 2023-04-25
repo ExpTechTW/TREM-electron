@@ -277,7 +277,17 @@ TREM.on("ready", () => {
 });
 
 autoUpdater.on("update-available", (info) => {
-	if (TREM.Configuration.data["update.mode"] != "never")
+	if (TREM.Configuration.data["update.mode"] != "never") {
+		const getVersion = TREM.getVersion();
+		new Notification({
+			title : TREM.Localization.getString("Notification_Update_Title"),
+			body  : TREM.Localization.getString("Notification_Update_Body").format(getVersion, info.version),
+			icon  : "TREM.ico",
+		}).on("click", () => {
+			logger.info(info);
+			shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${info.version}`);
+		}).show();
+
 		switch (TREM.Configuration.data["update.mode"]) {
 			case "install": {
 				autoUpdater.downloadUpdate();
@@ -290,15 +300,6 @@ autoUpdater.on("update-available", (info) => {
 			}
 
 			case "notify": {
-				const getVersion = TREM.getVersion();
-				new Notification({
-					title : TREM.Localization.getString("Notification_Update_Title"),
-					body  : TREM.Localization.getString("Notification_Update_Body").format(getVersion, info.version),
-					icon  : "TREM.ico",
-				}).on("click", () => {
-					logger.info(info);
-					shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${info.version}`);
-				}).show();
 				ipcMain.emit("update-available-Notification", info.version, getVersion, info);
 				break;
 			}
@@ -306,6 +307,7 @@ autoUpdater.on("update-available", (info) => {
 			default:
 				break;
 		}
+	}
 });
 
 autoUpdater.on("update-not-available", (info) => {
@@ -394,6 +396,20 @@ ipcMain.on("openScreenshotsFolder", (event, arg) => {
 
 ipcMain.on("openEEWScreenshotsFolder", (event, arg) => {
 	shell.openPath(path.join(TREM.getPath("userData"), "EEW"));
+});
+
+ipcMain.on("openUpdateFolder", (event, arg) => {
+	let result;
+
+	if (process.platform === "win32") {
+		result = process.env.LOCALAPPDATA || path.join(homedir, "AppData", "Local");
+	} else if (process.platform === "darwin") {
+		result = path.join(homedir, "Library", "Application Support", "Caches");
+	} else {
+		result = process.env.XDG_CACHE_HOME || path.join(homedir, ".cache");
+	}
+
+	shell.openPath(path.join(result, `${process.env.npm_package_name}-updater`));
 });
 
 ipcMain.on("reset", (event, arg) => {
