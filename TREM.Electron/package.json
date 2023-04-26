@@ -53,6 +53,7 @@
         "AppImage",
         "rpm"
       ],
+      "packageName": "TREM",
       "category": "Development",
       "maintainer": "ExpTechTW"
     },
