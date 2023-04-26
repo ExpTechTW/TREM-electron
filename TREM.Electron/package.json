@@ -83,7 +83,6 @@
     "echarts": "^5.4.1",
     "electron-common-ipc": "16.0.1-dev.8",
     "electron-fcm-push-receiver": "^2.1.7",
-    "electron-localstorage": "^1.0.5",
     "electron-log": "5.0.0-beta.16",
     "electron-updater": "^5.3.0",
     "expose-gc": "^1.0.0",

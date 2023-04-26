@@ -216,7 +216,7 @@ if (!String.prototype.format)
 
 const ver = "1.0.0";
 
-const storageConfig = {
+const storage = {
 	init: () => {
 		try {
 			let json = JSON.parse(localStorage.Config);

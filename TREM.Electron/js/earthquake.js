@@ -9,7 +9,6 @@ const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:t
 const axios = require("axios");
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
-const storage = require("electron-localstorage");
 const Speech = require("speak-tts");
 TREM.Audios = {
 	pga1   : new Audio("../audio/PGA1.wav"),
@@ -2665,7 +2664,7 @@ async function init() {
 			console.log("複製成功");
 		});
 	});
-	storageConfig.init();
+	storage.init();
 	global.gc();
 }
 // #endregion
@@ -3929,7 +3928,6 @@ function ReportGET() {
 				if (!_report_data) return setTimeout(ReportGET, 5000);
 
 				storage.setItem("report_data", _report_data);
-				storageConfig.setItem("report_data", _report_data);
 
 				if (api_key_verify && setting["report.getInfo"]) {
 					log("Reports fetched (api key verify)", 1, "EQReportFetcher", "ReportGET");
