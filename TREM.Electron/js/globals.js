@@ -1,4 +1,3 @@
-
 const { ipcMain } = require("@electron/remote");
 
 let setting, is_setting_disabled;
