@@ -19,7 +19,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Restore dependencies
-      run: npm ci
+      run: npm i
     - name: Lint
       run: npm run lint
     - name: Build
@@ -46,7 +46,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Restore dependencies
-      run: npm ci
+      run: npm i
     - name: Lint
       run: npm run lint
     - name: Build
@@ -74,7 +74,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Restore dependencies
-      run: npm ci
+      run: npm i
     - name: Lint
       run: npm run lint
     - name: Build
