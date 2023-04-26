@@ -1097,22 +1097,22 @@ class EEW {
 	}
 }
 
-function dynamicLoadJs(url, callback) {
-	const head = document.getElementsByTagName("footer")[0];
-	const script = document.createElement("script");
-	script.type = "text/javascript";
-	script.src = `../js/${url}`;
+// function dynamicLoadJs(url, callback) {
+// 	const head = document.getElementsByTagName("footer")[0];
+// 	const script = document.createElement("script");
+// 	script.type = "text/javascript";
+// 	script.src = `../js/${url}`;
 
-	if (typeof (callback) == "function")
-		script.onload = script.onreadystatechange = function() {
-			if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
-				callback();
-				script.onload = script.onreadystatechange = null;
-			}
-		};
+// 	if (typeof (callback) == "function")
+// 		script.onload = script.onreadystatechange = function() {
+// 			if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+// 				callback();
+// 				script.onload = script.onreadystatechange = null;
+// 			}
+// 		};
 
-	head.appendChild(script);
-}
+// 	head.appendChild(script);
+// }
 
 // #region 初始化
 // const _unlock = fs.existsSync(path.join(app.getPath("userData"), "unlock.tmp"));
@@ -1138,8 +1138,7 @@ let fullscreenTipTimeout;
 win.on("enter-full-screen", () => {
 	$("#fullscreen-notice").addClass("show");
 
-	if (fullscreenTipTimeout)
-		clearTimeout(fullscreenTipTimeout);
+	if (fullscreenTipTimeout) clearTimeout(fullscreenTipTimeout);
 
 	fullscreenTipTimeout = setTimeout(() => {
 		$("#fullscreen-notice").removeClass("show");
@@ -1153,7 +1152,6 @@ win.on("leave-full-screen", () => {
 });
 
 async function init() {
-	log(app.getVersion(), 2, "TREM", "version");
 	const progressbar = document.getElementById("loading_progress");
 	const progressStep = 5;
 	report_get_timestamp = 0;

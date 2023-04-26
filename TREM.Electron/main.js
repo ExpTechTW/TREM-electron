@@ -3,6 +3,7 @@ const Configuration = require("./Configuration/Configuration");
 const { autoUpdater } = require("electron-updater");
 const fetch = require("node-fetch");
 const fs = require("fs");
+const os = require("os");
 const logger = require("electron-log");
 const path = require("path");
 const pushReceiver = require("electron-fcm-push-receiver");
@@ -399,6 +400,7 @@ ipcMain.on("openEEWScreenshotsFolder", (event, arg) => {
 });
 
 ipcMain.on("openUpdateFolder", (event, arg) => {
+	const homedir = os.homedir();
 	let result;
 
 	if (process.platform === "win32") {

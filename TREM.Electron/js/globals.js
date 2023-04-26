@@ -1,12 +1,6 @@
-const $ = require("jquery");
-const EventEmitter = require("node:events");
-const { app } = require("@electron/remote");
-const fs = require("node:fs");
-const { ipcMain } = require("@electron/remote");
-const { ipcRenderer } = require("electron");
-const path = require("node:path");
 
-const TREM = new EventEmitter();
+const { ipcMain } = require("@electron/remote");
+
 let setting, is_setting_disabled;
 
 TREM.Resources = require(path.resolve(app.getAppPath(), "./Resources/Resources.js"));

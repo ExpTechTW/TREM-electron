@@ -1,3 +1,8 @@
+const $ = require("jquery");
+const { app } = require("@electron/remote");
+const fs = require("node:fs");
+const path = require("node:path");
+
 const latestLog = path.join(app.getPath("logs"), "latest.log");
 fs.writeFileSync(latestLog, "", { encoding: "utf8", flag: "w" });
 
@@ -11,7 +16,10 @@ for (let i = 0; i < list.length; i++) {
 
 const LogPath = () => path.join(app.getPath("logs"), `${log_time_string()}.log`);
 
-if (!fs.existsSync(LogPath())) fs.writeFileSync(LogPath(), "");
+if (!fs.existsSync(LogPath())) {
+	fs.writeFileSync(LogPath(), "");
+	log(app.getVersion(), 2, "TREM", "version");
+}
 
 function log(msg, type = 1, sender = "main", fun = "unknow") {
 	const _type = (type == 0) ? "Debug" : (type == 3) ? "Error" : (type == 2) ? "Warn" : "Info";
