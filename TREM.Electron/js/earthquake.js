@@ -3950,9 +3950,9 @@ function ReportGET() {
 			})
 			.catch((err) => {
 				console.log(err);
-				log("Error fetching reports", 3, "EQReportFetcher", "ReportGET");
+				log("Error fetching reports (fetch)", 3, "EQReportFetcher", "ReportGET");
 				log(err, 3, "EQReportFetcher", "ReportGET");
-				dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
+				dump({ level: 2, message: "Error fetching reports (fetch)", origin: "EQReportFetcher" });
 				dump({ level: 2, message: err, origin: "EQReportFetcher" });
 
 				if (_report_data.length > setting["cache.report"]) {
@@ -3968,9 +3968,9 @@ function ReportGET() {
 			});
 		report_get_timestamp = Date.now();
 	} catch (error) {
-		log("Error fetching reports", 3, "EQReportFetcher", "ReportGET");
+		log("Error fetching reports (try)", 3, "EQReportFetcher", "ReportGET");
 		log(error, 3, "EQReportFetcher", "ReportGET");
-		dump({ level: 2, message: "Error fetching reports", origin: "EQReportFetcher" });
+		dump({ level: 2, message: "Error fetching reports (try)", origin: "EQReportFetcher" });
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
 		return setTimeout(ReportGET, 5000);
 	}

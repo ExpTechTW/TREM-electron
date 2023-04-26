@@ -75,7 +75,6 @@
   "dependencies": {
     "@electron/remote": "^2.0.9",
     "@material/material-color-utilities": "^0.2.0",
-    "@material/web": "1.0.0-pre.4",
     "@turf/circle": "^6.5.0",
     "axios": "^1.0.0",
     "bytenode": "^1.4.1",
@@ -93,7 +92,6 @@
     "leaflet-edgebuffer": "^1.0.6",
     "leaflet-geojson-vt": "^1.1.0",
     "maplibre-gl": "^2.4.0",
-    "node-datachannel": "^0.4.1",
     "node-fetch": "^2.6.7",
     "speak-tts": "^2.0.8",
     "tinycolor2": "1.6.0",
