@@ -1,0 +1,33 @@
+{
+  "name": "leaflet-geojson-vt",
+  "version": "1.1.0",
+  "description": "This is the package for vector-tile.",
+  "main": "src/leaflet-geojson-vt.js",
+  "directories": {
+    "doc": "doc",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamtekson/leaflet-geojson-vt.git"
+  },
+  "keywords": [
+    "leaflet-geojson-vt",
+    "geojson-vt",
+    "geojson",
+    "leaflet",
+    "iamtekson"
+  ],
+  "author": "iamtekson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iamtekson/leaflet-geojson-vt/issues"
+  },
+  "homepage": "https://github.com/iamtekson/leaflet-geojson-vt#readme",
+  "devDependencies": {
+    "geojson-vt": "^3.2.1"
+  }
+}
