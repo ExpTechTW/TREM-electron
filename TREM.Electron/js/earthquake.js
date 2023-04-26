@@ -3858,6 +3858,8 @@ function ReportGET() {
 
 		if (typeof _report_data != "object") _report_data = [];
 
+		if (_report_data == null) _report_data = [];
+
 		const list = {};
 		let _report_data_temp = [];
 		let j = 0;
@@ -3968,11 +3970,14 @@ function ReportGET() {
 			});
 		report_get_timestamp = Date.now();
 	} catch (error) {
+		console.log(error);
 		log("Error fetching reports (try)", 3, "EQReportFetcher", "ReportGET");
 		log(error, 3, "EQReportFetcher", "ReportGET");
 		dump({ level: 2, message: "Error fetching reports (try)", origin: "EQReportFetcher" });
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
-		return setTimeout(ReportGET, 5000);
+		return setTimeout(() => {
+			ReportGET();
+		}, 5000);
 	}
 }
 
