@@ -43,45 +43,43 @@ function log(msg, type = 1, sender = "main", fun = "unknow") {
 
 function log_time_string() {
 	const now = new Date();
-	let _Now = now.getFullYear().toString();
+	let _Now = now.getFullYear();
 	_Now += "-";
-
-	if ((now.getMonth() + 1) < 10) _Now += "0" + (now.getMonth() + 1).toString();
-	else _Now += (now.getMonth() + 1).toString();
+	if ((now.getMonth() + 1) < 10) _Now += "0" + (now.getMonth() + 1);
+	else _Now += (now.getMonth() + 1);
 	_Now += "-";
-
-	if (now.getDate() < 10) _Now += "0" + now.getDate().toString();
-	else _Now += now.getDate().toString();
+	if (now.getDate() < 10) _Now += "0" + now.getDate();
+	else _Now += now.getDate();
 	_Now += "_";
-
-	if (now.getHours() < 10) _Now += "0" + now.getHours().toString();
-	else _Now += now.getHours().toString();
+	if (now.getHours() < 10) _Now += "0" + now.getHours();
+	else _Now += now.getHours();
 	return _Now;
 }
 
+function now_time(date) {
+	const utc = date ? new Date(date) : new Date();
+	const now = new Date(utc.getTime() + utc.getTimezoneOffset() * 60000 + 28800000);
+	return now.getTime();
+}
+
 function time_to_string(date) {
-	const now = new Date(date ?? Date.now());
-	let _Now = now.getFullYear().toString();
+	const now = new Date(date ? now_time(date) : now_time());
+	let _Now = now.getFullYear();
 	_Now += "/";
-
-	if ((now.getMonth() + 1) < 10) _Now += "0" + (now.getMonth() + 1).toString();
-	else _Now += (now.getMonth() + 1).toString();
+	if ((now.getMonth() + 1) < 10) _Now += "0" + (now.getMonth() + 1);
+	else _Now += (now.getMonth() + 1);
 	_Now += "/";
-
-	if (now.getDate() < 10) _Now += "0" + now.getDate().toString();
-	else _Now += now.getDate().toString();
+	if (now.getDate() < 10) _Now += "0" + now.getDate();
+	else _Now += now.getDate();
 	_Now += " ";
-
-	if (now.getHours() < 10) _Now += "0" + now.getHours().toString();
-	else _Now += now.getHours().toString();
+	if (now.getHours() < 10) _Now += "0" + now.getHours();
+	else _Now += now.getHours();
 	_Now += ":";
-
-	if (now.getMinutes() < 10) _Now += "0" + now.getMinutes().toString();
-	else _Now += now.getMinutes().toString();
+	if (now.getMinutes() < 10) _Now += "0" + now.getMinutes();
+	else _Now += now.getMinutes();
 	_Now += ":";
-
-	if (now.getSeconds() < 10) _Now += "0" + now.getSeconds().toString();
-	else _Now += now.getSeconds().toString();
+	if (now.getSeconds() < 10) _Now += "0" + now.getSeconds();
+	else _Now += now.getSeconds();
 	return _Now;
 }
 

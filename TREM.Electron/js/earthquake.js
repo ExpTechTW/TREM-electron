@@ -213,7 +213,7 @@ TREM.MapIntensity = {
 					}
 
 					// console.log(this.description);
-					const now = new Date(rawPalertData.time).format("YYYY/MM/DD HH:mm:ss");
+					const now = timeconvert(new Date(rawPalertData.time)).format("YYYY/MM/DD HH:mm:ss");
 					const msg = {
 						username   : "TREM | 臺灣即時地震監測",
 						avatar_url : "https://raw.githubusercontent.com/ExpTechTW/API/%E4%B8%BB%E8%A6%81%E7%9A%84-(main)/image/Icon/ExpTech.png",
@@ -253,7 +253,7 @@ TREM.MapIntensity = {
 				}
 
 				if (speecd_use && rawPalertData.final) {
-					const now = new Date(rawPalertData.time).format("YYYY/MM/DD HH:mm:ss");
+					const now = timeconvert(new Date(rawPalertData.time)).format("YYYY/MM/DD HH:mm:ss");
 					let intensity_index0 = 0;
 					let description0 = "";
 
@@ -1206,7 +1206,7 @@ async function init() {
 				} else if (replayTemp) {
 					if (!time.classList.contains("replay"))
 						time.classList.add("replay");
-					time.innerText = `${new Date(replayTemp).format("YYYY/MM/DD HH:mm:ss")}`;
+					time.innerText = `${timeconvert(new Date(replayTemp)).format("YYYY/MM/DD HH:mm:ss")}`;
 
 					// if (NOW().getTime() - replayT > 180_000 && !Object.keys(eew).length) {
 					if (replayTemp - replay > 180_000) {
@@ -1219,7 +1219,7 @@ async function init() {
 				} else if (replay) {
 					if (!time.classList.contains("replay"))
 						time.classList.add("replay");
-					time.innerText = `${new Date(replay + (NOW().getTime() - replayT)).format("YYYY/MM/DD HH:mm:ss")}`;
+					time.innerText = `${timeconvert(new Date(replay + (NOW().getTime() - replayT))).format("YYYY/MM/DD HH:mm:ss")}`;
 
 					// if (NOW().getTime() - replayT > 180_000 && !Object.keys(eew).length) {
 					if (NOW().getTime() - replayT > 180_000) {
@@ -1234,9 +1234,9 @@ async function init() {
 
 					if (time.classList.contains("desynced"))
 						time.classList.remove("desynced");
-					time.innerText = `${NOW().format("YYYY/MM/DD HH:mm:ss")}`;
-					time1.innerText = `${NOW().format("YYYY/MM/DD HH:mm:ss")}`;
-					ipcRenderer.send("TREMIntensitytime2", `${NOW().format("YYYY/MM/DD HH:mm:ss")}`);
+					time.innerText = `${timeconvert(NOW()).format("YYYY/MM/DD HH:mm:ss")}`;
+					time1.innerText = `${timeconvert(NOW()).format("YYYY/MM/DD HH:mm:ss")}`;
+					ipcRenderer.send("TREMIntensitytime2", `${timeconvert(NOW()).format("YYYY/MM/DD HH:mm:ss")}`);
 
 					if (replaytestEEW != 0 && NOW().getTime() - replaytestEEW > 180_000) {
 						testEEWerror = false;
@@ -2962,7 +2962,7 @@ function handler(Json) {
 			if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 				station_tooltip = `<div class="marker-popup rt-station-popup rt-station-detail-container">${station[keys[index]].Loc}(${keys[index]})無資料</div>`;
 			else
-				station_tooltip = `<div>${keys[index]}(${station[keys[index]].Loc})無資料</div><div>最近離線時間: ${new Date(station_time_json[uuid]).format("YYYY/MM/DD HH:mm:ss")}</div>`;
+				station_tooltip = `<div>${keys[index]}(${station[keys[index]].Loc})無資料</div><div>最近離線時間: ${timeconvert(new Date(station_time_json[uuid])).format("YYYY/MM/DD HH:mm:ss")}</div>`;
 			NA999 = "NA";
 			NA0999 = "NA";
 			size = 8;
@@ -3149,7 +3149,7 @@ function handler(Json) {
 					document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
 					document.getElementById("rt-station-local-id").innerText = keys[index];
 					document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
-					document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
+					document.getElementById("rt-station-local-time").innerText = timeconvert(now).format("HH:mm:ss");
 					document.getElementById("rt-station-local-pga").innerText = amount;
 				}
 			} else {
@@ -3163,7 +3163,7 @@ function handler(Json) {
 			document.getElementById("rt-station-local-intensity").className = `rt-station-intensity ${(amount < 999 && intensity != "NA") ? IntensityToClassString(intensity) : "na"}`;
 			document.getElementById("rt-station-local-id").innerText = keys[index];
 			document.getElementById("rt-station-local-name").innerText = station[keys[index]].Loc;
-			document.getElementById("rt-station-local-time").innerText = now.format("HH:mm:ss");
+			document.getElementById("rt-station-local-time").innerText = timeconvert(now).format("HH:mm:ss");
 			document.getElementById("rt-station-local-pga").innerText = amount;
 		}
 
@@ -3285,7 +3285,7 @@ function handler(Json) {
 						time      : NOW().getTime(),
 					};
 					new Notification(`🐈 測站反應，${station[uuid].area}`, {
-						body   : `${uuid}\nPGA: ${amount} gal 最大震度: ${IntensityI(intensitytest)}\n時間:${now.format("YYYY/MM/DD HH:mm:ss")}\n${station[uuid].Loc}`,
+						body   : `${uuid}\nPGA: ${amount} gal 最大震度: ${IntensityI(intensitytest)}\n時間:${timeconvert(now).format("YYYY/MM/DD HH:mm:ss")}\n${station[uuid].Loc}`,
 						icon   : "../TREM.ico",
 						silent : win.isFocused(),
 					});
@@ -3335,7 +3335,7 @@ function handler(Json) {
 		document.getElementById("rt-station-max-intensity").className = `rt-station-intensity ${(MAXPGA.pga < 999) ? IntensityToClassString(MAXPGA.intensity) : "na"}`;
 		document.getElementById("rt-station-max-id").innerText = MAXPGA.station;
 		document.getElementById("rt-station-max-name").innerText = MAXPGA.loc;
-		document.getElementById("rt-station-max-time").innerText = MAXPGA.time.format("HH:mm:ss");
+		document.getElementById("rt-station-max-time").innerText = timeconvert(MAXPGA.time).format("HH:mm:ss");
 		document.getElementById("rt-station-max-pga").innerText = MAXPGA.pga;
 	} else {
 		document.getElementById("rt-station-max-intensity").className = "rt-station-intensity na";
@@ -4108,7 +4108,7 @@ function cacheReport(_report_data_GET) {
 		if (Report != 0)
 			ReportList(_report_data_temp, {
 				Max  : TREM.MapIntensity.MaxI,
-				Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
+				Time : timeconvert(new Date(Report)).format("YYYY/MM/DD HH:mm:ss"),
 			});
 		else
 			ReportList(_report_data_temp);
@@ -4118,7 +4118,7 @@ function cacheReport(_report_data_GET) {
 		if (Report != 0)
 			ReportList(_report_data_GET, {
 				Max  : TREM.MapIntensity.MaxI,
-				Time : new Date(Report).format("YYYY/MM/DD HH:mm:ss"),
+				Time : timeconvert(new Date(Report)).format("YYYY/MM/DD HH:mm:ss"),
 			});
 		else
 			ReportList(_report_data_GET);
@@ -4788,7 +4788,7 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 	}
 
 	if (speecd_use && intensity.unit != "palert") {
-		const now = new Date(info.time != 0 ? info.time : intensity.timestamp).format("YYYY/MM/DD HH:mm:ss");
+		const now = timeconvert(new Date(info.time != 0 ? info.time : intensity.timestamp)).format("YYYY/MM/DD HH:mm:ss");
 		let description0 = "";
 
 		for (let index = 0, keys = Object.keys(intensity1r), n = keys.length; index < n; index++) {
@@ -7006,7 +7006,7 @@ function updateText() {
 	$("#alert-provider").text(`${INFO.length > 1 ? `${TINFO + 1} ` : ""}${INFO[TINFO].alert_provider}`);
 	$("#alert-number").text(`${INFO[TINFO].alert_number}`);
 	$("#alert-location").text(INFO[TINFO].alert_location);
-	$("#alert-time").text(INFO[TINFO].alert_time.format("YYYY/MM/DD HH:mm:ss"));
+	$("#alert-time").text(timeconvert(INFO[TINFO].alert_time).format("YYYY/MM/DD HH:mm:ss"));
 	$("#alert-magnitude").text(INFO[TINFO].alert_magnitude);
 	$("#alert-depth").text(INFO[TINFO].alert_depth);
 	$("#alert-box").addClass("show");
@@ -7108,4 +7108,8 @@ function pointFormatter(lat, lng, engine) {
 
 function NOW() {
 	return new Date(ServerTime + (Date.now() - ServerT));
+}
+
+function timeconvert(time) {
+	return new Date(time.toLocaleString("en-US", { timeZone: "Asia/Taipei" }));
 }
