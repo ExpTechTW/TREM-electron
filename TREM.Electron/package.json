@@ -23,6 +23,12 @@
       "target": [
         "dmg",
         "pkg"
+      ],
+      "arch": [
+        "x64",
+        "ia32",
+        "armv7l",
+        "arm64"
       ]
     },
     "dmg": {
@@ -45,6 +51,12 @@
         "portable",
         "msi"
       ],
+      "arch": [
+        "x64",
+        "ia32",
+        "armv7l",
+        "arm64"
+      ],
       "icon": "TREM.ico"
     },
     "linux": {
@@ -52,6 +64,12 @@
         "deb",
         "AppImage",
         "rpm"
+      ],
+      "arch": [
+        "x64",
+        "ia32",
+        "armv7l",
+        "arm64"
       ],
       "category": "Development",
       "maintainer": "ExpTechTW"
