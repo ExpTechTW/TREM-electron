@@ -25,7 +25,6 @@
           "target": "dmg",
           "arch": [
             "x64",
-            "ia32",
             "armv7l",
             "arm64"
           ]
@@ -34,7 +33,6 @@
           "target": "pkg",
           "arch": [
             "x64",
-            "ia32",
             "armv7l",
             "arm64"
           ]
@@ -62,7 +60,6 @@
           "arch": [
             "x64",
             "ia32",
-            "armv7l",
             "arm64"
           ]
         },
@@ -71,7 +68,6 @@
           "arch": [
             "x64",
             "ia32",
-            "armv7l",
             "arm64"
           ]
         },
@@ -80,7 +76,6 @@
           "arch": [
             "x64",
             "ia32",
-            "armv7l",
             "arm64"
           ]
         }
