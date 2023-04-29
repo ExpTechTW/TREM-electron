@@ -45,12 +45,15 @@ function log_time_string() {
 	const now = new Date();
 	let _Now = now.getFullYear();
 	_Now += "-";
+
 	if ((now.getMonth() + 1) < 10) _Now += "0" + (now.getMonth() + 1);
 	else _Now += (now.getMonth() + 1);
 	_Now += "-";
+
 	if (now.getDate() < 10) _Now += "0" + now.getDate();
 	else _Now += now.getDate();
 	_Now += "_";
+
 	if (now.getHours() < 10) _Now += "0" + now.getHours();
 	else _Now += now.getHours();
 	return _Now;
@@ -66,18 +69,23 @@ function time_to_string(date) {
 	const now = new Date(date ? now_time(date) : now_time());
 	let _Now = now.getFullYear();
 	_Now += "/";
+
 	if ((now.getMonth() + 1) < 10) _Now += "0" + (now.getMonth() + 1);
 	else _Now += (now.getMonth() + 1);
 	_Now += "/";
+
 	if (now.getDate() < 10) _Now += "0" + now.getDate();
 	else _Now += now.getDate();
 	_Now += " ";
+
 	if (now.getHours() < 10) _Now += "0" + now.getHours();
 	else _Now += now.getHours();
 	_Now += ":";
+
 	if (now.getMinutes() < 10) _Now += "0" + now.getMinutes();
 	else _Now += now.getMinutes();
 	_Now += ":";
+
 	if (now.getSeconds() < 10) _Now += "0" + now.getSeconds();
 	else _Now += now.getSeconds();
 	return _Now;
