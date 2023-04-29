@@ -41,27 +41,9 @@
     },
     "win": {
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        },
-        {
-          "target": "msi",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        }
+        "nsis",
+        "portable",
+        "msi"
       ],
       "icon": "TREM.ico"
     },
