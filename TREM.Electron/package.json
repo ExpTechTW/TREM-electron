@@ -21,14 +21,24 @@
     ],
     "mac": {
       "target": [
-        "dmg",
-        "pkg"
-      ],
-      "arch": [
-        "x64",
-        "ia32",
-        "armv7l",
-        "arm64"
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "ia32",
+            "armv7l",
+            "arm64"
+          ]
+        },
+        {
+          "target": "pkg",
+          "arch": [
+            "x64",
+            "ia32",
+            "armv7l",
+            "arm64"
+          ]
+        }
       ]
     },
     "dmg": {
@@ -47,29 +57,65 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "portable",
-        "msi"
-      ],
-      "arch": [
-        "x64",
-        "ia32",
-        "armv7l",
-        "arm64"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32",
+            "armv7l",
+            "arm64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64",
+            "ia32",
+            "armv7l",
+            "arm64"
+          ]
+        },
+        {
+          "target": "msi",
+          "arch": [
+            "x64",
+            "ia32",
+            "armv7l",
+            "arm64"
+          ]
+        }
       ],
       "icon": "TREM.ico"
     },
     "linux": {
       "target": [
-        "deb",
-        "AppImage",
-        "rpm"
-      ],
-      "arch": [
-        "x64",
-        "ia32",
-        "armv7l",
-        "arm64"
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "ia32",
+            "armv7l",
+            "arm64"
+          ]
+        },
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "ia32",
+            "armv7l",
+            "arm64"
+          ]
+        },
+        {
+          "target": "rpm",
+          "arch": [
+            "x64",
+            "ia32",
+            "armv7l",
+            "arm64"
+          ]
+        }
       ],
       "category": "Development",
       "maintainer": "ExpTechTW"
