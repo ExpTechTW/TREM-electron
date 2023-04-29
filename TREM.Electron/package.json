@@ -21,20 +21,8 @@
     ],
     "mac": {
       "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        },
-        {
-          "target": "pkg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        }
+        "dmg",
+        "pkg"
       ]
     },
     "dmg": {
@@ -71,8 +59,7 @@
           "target": "msi",
           "arch": [
             "x64",
-            "ia32",
-            "arm64"
+            "ia32"
           ]
         }
       ],
@@ -80,29 +67,9 @@
     },
     "linux": {
       "target": [
-        {
-          "target": "deb",
-          "arch": [
-            "x64",
-            "armv7l"
-          ]
-        },
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64",
-            "armv7l",
-            "arm64"
-          ]
-        },
-        {
-          "target": "rpm",
-          "arch": [
-            "x64",
-            "armv7l",
-            "arm64"
-          ]
-        }
+        "deb",
+        "AppImage",
+        "rpm"
       ],
       "category": "Development",
       "maintainer": "ExpTechTW"
