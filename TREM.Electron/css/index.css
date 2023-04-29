@@ -1548,6 +1548,10 @@ body:not(.darkmode) #here-marker {
 .rt-intensity-container.zero,
 #alert-local.zero,
 #rt-list div.zero,
+#rt-maxintensity.zero {
+	background-color: var(--custom-int-0);
+}
+
 .alert-box.one .alert-box-body,
 .rt-intensity-container.one,
 #alert-local.one,
@@ -1556,7 +1560,6 @@ body:not(.darkmode) #here-marker {
 #rolllist > div.one,
 .map-intensity-icon.one,
 .report-list-item.one .report-list-item-intensity,
-#rt-maxintensity.zero,
 #rt-maxintensity.one {
 	background-color: var(--custom-int-1);
 }

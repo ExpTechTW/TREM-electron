@@ -4449,8 +4449,9 @@ function IntensityToClassString(level) {
 							: (level == 3) ? "three"
 								: (level == 2) ? "two"
 									: (level == 1) ? "one"
-										: (level == "na") ? "na"
-											: "zero";
+										: (level == 0) ? "zero"
+											: (level == "na") ? "na"
+												: "na";
 
 	if (tinycolor(setting["theme.customColor"] ? setting[`theme.int.${level}`] : [
 		"#757575",
