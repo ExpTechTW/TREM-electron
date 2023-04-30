@@ -907,7 +907,7 @@ body:not(.darkmode) #here-marker {
 	display: flex;
 	flex-direction: column;
 	color: white;
-	background-color: rgba(var(--md-sys-color-surface), .75);
+	background-color: rgba(var(--md-sys-color-surface-variant), .75);
 	border-radius: 16px;
 	pointer-events: none;
 }
