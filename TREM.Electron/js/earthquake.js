@@ -350,7 +350,7 @@ TREM.MapIntensity = {
 							});
 						}, 1250);
 					}
-				} else {
+				} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 					if (palert_geojson == null) {
 						this.isTriggered = true;
 						changeView("main", "#mainView_btn");
@@ -451,7 +451,7 @@ TREM.MapIntensity = {
 
 				this.intensities = int;
 			}
-		} else {
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 			if (palert_geojson != null)
 				palert_geojson.remove();
 
@@ -504,9 +504,11 @@ TREM.MapIntensity = {
 						delete this.timer;
 					}
 				}
-		} else if (palert_geojson != null) {
-			palert_geojson.remove();
-			palert_geojson = null;
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
+			if (palert_geojson != null) {
+				palert_geojson.remove();
+				palert_geojson = null;
+			}
 		}
 	},
 };
@@ -913,13 +915,14 @@ TREM.MapArea2 = {
 		// 	delete this.blinkTimer;
 		// }
 
-		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
+		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl")
 			Maps.main.setLayoutProperty("Layer_intensity_areav2", "visibility", "none");
-		} else if (areav2_geojson != null) {
-			areav2_geojson.remove();
-			areav2_geojson = null;
-			this.PLoc = {};
-		}
+		else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet")
+			if (areav2_geojson != null) {
+				areav2_geojson.remove();
+				areav2_geojson = null;
+				this.PLoc = {};
+			}
 
 		this.isTriggered = false;
 		this.isVisible = false;
@@ -2176,7 +2179,7 @@ async function init() {
 					},
 				}).getLayer("Layer_tw_county"));
 			}
-		} else {
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 
 			if (!Maps.main) {
 				Maps.main = L.map("map",
@@ -2675,7 +2678,7 @@ function PGAMain() {
 
 	if (Timers.rts_clock) clearInterval(Timers.rts_clock);
 	Timers.rts_clock = setInterval(() => {
-		setTimeout(async () => {
+		setTimeout(() => {
 			try {
 				const _t = NOW().getTime();
 				const ReplayTime = (replay == 0) ? 0 : replay + (NOW().getTime() - replayT);
@@ -2726,7 +2729,7 @@ function PGAMain() {
 					setTimeout(() => {
 						controller.abort();
 					}, 5000);
-					let ans = await fetch(url, { signal: controller.signal }).catch((err) => {
+					let ans = fetch(url, { signal: controller.signal }).catch((err) => {
 						log(err, 3, "PGATimer", "PGAMain");
 						dump({ level: 2, message: err });
 						Ping = `❌ ${err.response.status}`;
@@ -2739,7 +2742,7 @@ function PGAMain() {
 						stationnow = 0;
 						Response = {};
 					} else {
-						ans = await ans.json();
+						ans = ans.json();
 						Ping = `🔁 ${(Math.abs(NOW().getTime() - _t) / 1000).toFixed(1)}s`;
 
 						// Ping = NOW().getTime() - _t + "ms";
@@ -2944,8 +2947,6 @@ function handler(Json) {
 		let now = new Date(Json.Time);
 		const Alert = current_data?.alert ?? false;
 
-		// debugger;
-
 		if (current_data == undefined) {
 			level_class = "na";
 
@@ -3056,7 +3057,7 @@ function handler(Json) {
 				Station[keys[index]].remove();
 				delete Station[keys[index]];
 			}
-		} else {
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 			if (!Station[keys[index]] && (!rts_remove_eew || Alert))
 				Station[keys[index]] = L.marker(
 					[station[keys[index]].Lat, station[keys[index]].Long],
@@ -3704,34 +3705,36 @@ TREM.Earthquake.on("focus", ({ bounds, center, zoom, options = {} } = {}, jump =
 					...options,
 				});
 
-	} else if (center) {
-		let X = 0;
+	} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
+		if (center) {
+			let X = 0;
 
-		if (zoom >= 6) X = 2.5;
+			if (zoom >= 6) X = 2.5;
 
-		if (zoom >= 6.5) X = 1.6;
+			if (zoom >= 6.5) X = 1.6;
 
-		if (zoom >= 7) X = 1.5;
+			if (zoom >= 7) X = 1.5;
 
-		if (zoom >= 7.5) X = 0.9;
+			if (zoom >= 7.5) X = 0.9;
 
-		if (zoom >= 8) X = 0.6;
+			if (zoom >= 8) X = 0.6;
 
-		if (zoom >= 8.5) X = 0.4;
+			if (zoom >= 8.5) X = 0.4;
 
-		if (zoom >= 9) X = 0.35;
+			if (zoom >= 9) X = 0.35;
 
-		if (zoom >= 9.5) X = 0.2;
+			if (zoom >= 9.5) X = 0.2;
 
-		Focus[0] = center[0];
-		Focus[1] = center[1] + X;
-		Focus[2] = zoom;
+			Focus[0] = center[0];
+			Focus[1] = center[1] + X;
+			Focus[2] = zoom;
 
-		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || zoom != Maps.main.getZoom())
-			Maps.main.setView([center[0], center[1]], zoom);
-	} else if (Focus.length != 0) {
-		if (Maps.main.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != Maps.main.getZoom())
-			Maps.main.setView([Focus[0], Focus[1]], Focus[2]);
+			if (Maps.main.getBounds().getCenter().lat.toFixed(2) != center[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != (center[1] + X).toFixed(2) || zoom != Maps.main.getZoom())
+				Maps.main.setView([center[0], center[1]], zoom);
+		} else if (Focus.length != 0) {
+			if (Maps.main.getBounds().getCenter().lat.toFixed(2) != Focus[0].toFixed(2) || Maps.main.getBounds().getCenter().lng.toFixed(2) != Focus[1].toFixed(2) || Focus[2] != Maps.main.getZoom())
+				Maps.main.setView([Focus[0], Focus[1]], Focus[2]);
+		}
 	}
 });
 
@@ -3748,7 +3751,7 @@ function Mapsmainfocus() {
 				duration : 1000,
 			},
 		});
-	} else {
+	} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 		TREM.Earthquake.emit("focus", { center: pointFormatter(23.608428, 120.799168, TREM.MapRenderingEngine), zoom: 7.75 });
 	}
 }
@@ -6609,7 +6612,7 @@ function main(data) {
 							EarthquakeList[data.id].CircleP.setLngLat([+data.lon, +data.lat]);
 							EarthquakeList[data.id].CircleP.setRadius(kmP);
 						}
-					} else {
+					} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 						if (!EarthquakeList[data.id].CircleP)
 							EarthquakeList[data.id].CircleP = L.circle([+data.lat, +data.lon], {
 								color     : "#6FB7B7",
@@ -6671,7 +6674,7 @@ function main(data) {
 						EarthquakeList[data.id].CircleS.setRadius(km);
 						EarthquakeList[data.id].CircleS.setAlert(data.Alert);
 					}
-				} else {
+				} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 					if (!EarthquakeList[data.id].CircleS)
 						EarthquakeList[data.id].CircleS = L.circle([+data.lat, +data.lon], {
 							color       : data.Alert ? "red" : "orange",
@@ -6833,7 +6836,7 @@ function main(data) {
 			EarthquakeList[data.id].epicenterIcon.getElement().addEventListener("mouseleave", () => {
 				epicenterIcon_tooltip_popup.remove();
 			});
-		} else if (TREM.MapRenderingEngine == "leaflet") {
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 			epicenterIcon_tooltip = `<div>${data.Unit}</div><div>注意 ${cursor}</div><div>第 ${data.number} 報</div><div>規模: ${data.scale == null ? "?" : data.scale}</div><div>深度: ${data.depth == null ? "?" : data.depth} km</div>`;
 			EarthquakeList[data.id].epicenterIcon = L.marker([+data.lat, +data.lon],
 				{

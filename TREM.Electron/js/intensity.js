@@ -220,7 +220,7 @@ async function init() {
 				},
 			}).getLayer("Layer_tw_county_Line"));
 		}
-	} else {
+	} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 		if (!Maps.intensity) {
 			Maps.intensity = L.map("map-intensity",
 				{
@@ -327,7 +327,7 @@ TREM.Intensity = {
 				},
 			];
 			Maps.intensity.fitBounds(...this._lastFocus);
-		} else {
+		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 			this._lastFocus = [[[25.35, 119.4], [21.9, 122.22]], { paddingTopLeft: [this._mapPaddingLeft, 0] }];
 			Maps.intensity.fitBounds(...this._lastFocus);
 		}
@@ -443,7 +443,7 @@ TREM.Intensity = {
 
 					this._markers = new maplibregl.Marker({ element: $(TREM.Resources.icon.cross({ size: 32, className: "epicenterIcon", zIndexOffset: 5000 }))[0] }).setLngLat([raw_info_Data.lon, raw_info_Data.lat]).addTo(Maps.intensity);
 				}
-			} else {
+			} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 				if (this.geojson != null) {
 					this.geojson.remove();
 					this.geojson = null;
@@ -672,7 +672,7 @@ TREM.Intensity = {
 
 					this._markers = new maplibregl.Marker({ element: $(TREM.Resources.icon.cross({ size: 32, className: "epicenterIcon", zIndexOffset: 5000 }))[0] }).setLngLat([raw_info_Data.lon, raw_info_Data.lat]).addTo(Maps.intensity);
 				}
-			} else {
+			} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 				if (this.geojson != null) {
 					this.geojson.remove();
 					this.geojson = null;
