@@ -1251,10 +1251,13 @@ async function init() {
 						console.log("IntensityTag1 end: ", NOW().getTime());
 						TREM.IntensityTag1 = 0;
 						changeView("main", "#mainView_btn");
+						globalgc();
 					}
 
-					if (TREM.toggleNavTime != 0 && NOW().getTime() - TREM.toggleNavTime > 5_000)
+					if (TREM.toggleNavTime != 0 && NOW().getTime() - TREM.toggleNavTime > 5_000) {
 						toggleNav(false);
+						globalgc();
+					}
 				}
 
 				let GetDataState = "";
@@ -1284,7 +1287,7 @@ async function init() {
 
 				Warn = ((Warn == "") ? "" : ` | 📛 ${Warn}`);
 
-				if (Warn == "") Warn = ` | up:${service_status.p2p.upstream} down:${service_status.p2p.downstream}`;
+				if (Warn == "") Warn = ` | ⬆: ${service_status.p2p.upstream} ⬇: ${service_status.p2p.downstream}`;
 
 				if (type_Unit == "http") GetDataState += "🟩 Http";
 
@@ -1337,10 +1340,13 @@ async function init() {
 
 						if (TREM.MapIntensity.isTriggered && TREM.MapIntensity.intensities.size != undefined)
 							TREM.MapIntensity.clear();
+
+						globalgc();
 					}
 				} else
 				if (Date.now() - report_get_timestamp > 300_000) {
 					ReportGET();
+					globalgc();
 				}
 
 				if (ReportTag != 0 && NOW().getTime() - ReportTag > 30_000) {
@@ -1348,6 +1354,7 @@ async function init() {
 					ReportTag = 0;
 					TREM.Report.setView("report-list");
 					changeView("main", "#mainView_btn");
+					globalgc();
 				}
 			}, 1_000);
 
@@ -2668,7 +2675,7 @@ async function init() {
 		});
 	});
 	storage.init();
-	global.gc();
+	globalgc();
 }
 // #endregion
 
@@ -2729,27 +2736,28 @@ function PGAMain() {
 					setTimeout(() => {
 						controller.abort();
 					}, 5000);
-					let ans = fetch(url, { signal: controller.signal }).catch((err) => {
-						log(err, 3, "PGATimer", "PGAMain");
-						dump({ level: 2, message: err });
-						Ping = `❌ ${err.response.status}`;
-						// TimerDesynced = true;
-						PGAMainbkup();
-					});
+					fetch(url, { signal: controller.signal }).then(res => res.json())
+						.then(res => {
+							if (controller.signal.aborted || res == undefined) {
+								Ping = "🔒";
+								stationnow = 0;
+								Response = {};
+							} else {
+								Ping = `🔁 ${(Math.abs(NOW().getTime() - _t) / 1000).toFixed(1)}s`;
 
-					if (controller.signal.aborted || ans == undefined) {
-						Ping = "🔒";
-						stationnow = 0;
-						Response = {};
-					} else {
-						ans = ans.json();
-						Ping = `🔁 ${(Math.abs(NOW().getTime() - _t) / 1000).toFixed(1)}s`;
+								// Ping = NOW().getTime() - _t + "ms";
 
-						// Ping = NOW().getTime() - _t + "ms";
-
-						// TimerDesynced = false;
-						Response = ans;
-					}
+								// TimerDesynced = false;
+								Response = res;
+							}
+						})
+						.catch((err) => {
+							log(err, 3, "PGATimer", "PGAMain");
+							dump({ level: 2, message: err });
+							Ping = `❌ ${err.response.status}`;
+							// TimerDesynced = true;
+							PGAMainbkup();
+						});
 				}
 
 				handler(Response);
@@ -4561,6 +4569,7 @@ const stopReplay = function() {
 	Mapsmainfocus();
 	testEEWerror = false;
 	unstopReplaybtn();
+	globalgc();
 };
 
 function unstopReplaybtn() {
@@ -5515,8 +5524,12 @@ TREM.Earthquake.on("eew", (data) => {
 
 		if (speecd_number == 1)
 			speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
-		else if (INFO[find0]?.alert_magnitude != speecd_scale)
+		else if (INFO[find0]?.alert_magnitude != speecd_scale && speecd_scale != 0)
 			speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
+		else if (INFO[find0]?.alert_magnitude != speecd_scale && speecd_scale == 0)
+			speech.speak({ text: `${data.Unit}，已取消警報` });
+		else if (data.cancel)
+			speech.speak({ text: `${data.Unit}，已取消警報` });
 
 		if (Number(speecd_scale) >= 7 && speecd_number == 1)
 			speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
@@ -5707,7 +5720,9 @@ TREM.Earthquake.on("eew", (data) => {
 		replay = 0;
 	}
 
-	if (data.Test)
+	if (data.cancel)
+		classString += "eew-cancel";
+	else if (data.Test)
 		classString += "eew-test";
 	else if (data.Alert)
 		classString += "eew-alert";
@@ -6979,7 +6994,6 @@ function main(data) {
 			rts_remove_eew = false;
 
 			stopReplay();
-			global.gc();
 		}
 	}
 }
@@ -7116,4 +7130,8 @@ function NOW() {
 
 function timeconvert(time) {
 	return new Date(time.toLocaleString("en-US", { timeZone: "Asia/Taipei" }));
+}
+
+function globalgc() {
+	global.gc();
 }
