@@ -515,6 +515,15 @@ function trem_eq_Notification_showDialog(runconstil) {
 		});
 }
 
+function stream_mode(value) {
+	if (value) {
+		ipcRenderer.send("config:value", "report.changeView", false);
+		ipcRenderer.send("config:value", "report.onlycwbchangeView", true);
+		ipcRenderer.send("config:value", "report.getInfo", false);
+		ipcRenderer.send("config:value", "Real-time.alert", false);
+	}
+}
+
 function CheckSave(id) {
 	const value = document.getElementById(id).checked;
 	log(`Value Changed ${id}: ${setting[id]} -> ${value}`, 1, "Setting", "CheckSave");
@@ -588,6 +597,9 @@ function CheckSave(id) {
 
 	if (id == "p2p.mode")
 		$("#P2PReloadButton").fadeIn(100);
+
+	if (id == "stream.mode")
+		stream_mode(value);
 
 	if (id == "theme.customColor")
 		if (value)

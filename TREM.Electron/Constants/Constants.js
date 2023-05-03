@@ -118,6 +118,9 @@ const Constants = Object.freeze({
 		},"p2p.mode": {
 			type  : "toggle",
 			value : true,
+		},"stream.mode": {
+			type  : "toggle",
+			value : false,
 		},
 		"Real-time.show": {
 			type  : "toggle",

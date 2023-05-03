@@ -69,8 +69,9 @@ const showDialog
  * @param {string} buttonCanceltext The buttonCanceltext of the dialog
  * @param {?dialogCallback} callbackCancel The callbackCancel function to run when the user omitted the dialog
  * @param {int} time time type of the dialog
+ * @param {int} containerlock containerlock type of the dialog
  */
-= (type, title, message, button = 0, customIcon, callback = () => void 0, buttonAccepttext, buttonCanceltext, callbackCancel = () => void 0, time = 0) => {
+= (type, title, message, button = 0, customIcon, callback = () => void 0, buttonAccepttext, buttonCanceltext, callbackCancel = () => void 0, time = 0, containerlock = 0) => {
 	const container = document.getElementById("modal-overlay");
 	const icon = document.createElement("span");
 	icon.classList.add("material-symbols-rounded");
@@ -124,7 +125,7 @@ const showDialog
 		const OK = document.createElement("button");
 		OK.classList.add("flat-button");
 		OK.id = "dialog-OK";
-		OK.textContent = TREM.Localization.getString("Dialog_Button_OK");
+		OK.textContent = buttonAccepttext ?? TREM.Localization.getString("Dialog_Button_OK");
 		OK.onclick = closeDialog;
 
 		OK.onclick = (...args) => {
@@ -140,7 +141,9 @@ const showDialog
 	dialog.appendChild(supportingText);
 	dialog.appendChild(buttons);
 	container.appendChild(dialog);
-	container.onclick = closeDialog;
+
+	if (containerlock == 0)
+		container.onclick = closeDialog;
 
 	$("#modal-overlay").fadeIn(50);
 
