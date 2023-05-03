@@ -127,6 +127,9 @@ function init() {
 					if (is_setting_disabled) element.disabled = true;
 					else element.disabled = false;
 
+					if (id == "stream.mode")
+						stream_mode(setting[id]);
+
 					if (id == "theme.customColor")
 						if (setting[id])
 							$("#intensity-palette-container").removeClass("hide");
@@ -517,10 +520,27 @@ function trem_eq_Notification_showDialog(runconstil) {
 
 function stream_mode(value) {
 	if (value) {
+		document.getElementById("report.changeView").checked = false;
+		document.getElementById("report.changeView").disabled = true;
 		ipcRenderer.send("config:value", "report.changeView", false);
+		document.getElementById("report.onlycwbchangeView").checked = true;
+		document.getElementById("report.onlycwbchangeView").disabled = true;
 		ipcRenderer.send("config:value", "report.onlycwbchangeView", true);
+		document.getElementById("report.getInfo").checked = false;
+		document.getElementById("report.getInfo").disabled = true;
 		ipcRenderer.send("config:value", "report.getInfo", false);
+		document.getElementById("report.trem").checked = false;
+		document.getElementById("report.trem").disabled = true;
+		ipcRenderer.send("config:value", "report.trem", false);
+		document.getElementById("Real-time.alert").checked = false;
+		document.getElementById("Real-time.alert").disabled = true;
 		ipcRenderer.send("config:value", "Real-time.alert", false);
+	} else if (!value) {
+		document.getElementById("report.changeView").disabled = false;
+		document.getElementById("report.onlycwbchangeView").disabled = false;
+		document.getElementById("report.getInfo").disabled = false;
+		document.getElementById("report.trem").disabled = false;
+		document.getElementById("Real-time.alert").disabled = false;
 	}
 }
 
