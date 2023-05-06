@@ -5475,7 +5475,7 @@ TREM.Earthquake.on("eew", (data) => {
 			MaxIntensity = int;
 	}
 
-	if (data.type != "trem-eew" || json.type != "eew-cwb" || json.type != "eew-fjdzj") {
+	if (data.type != "trem-eew" || data.type != "eew-cwb" || data.type != "eew-fjdzj") {
 		const int = TREM.Utils.PGAToIntensity(
 			TREM.Utils.pga(
 				data.scale,
