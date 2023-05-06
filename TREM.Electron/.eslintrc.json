@@ -30,6 +30,7 @@
 		"setLocale": "readonly",
 		"setThemeColor": "readonly",
 		"setting": "writable",
+		"storage": "writable",
 		"showDialog": "readonly",
 		"TimerDesynced": "writable",
 		"toggleNav": "readonly",

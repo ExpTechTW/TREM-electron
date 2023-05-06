@@ -3938,7 +3938,7 @@ function ReportGET() {
 							_report_data[_i] = temp;
 						}
 
-				if (!_report_data) return setTimeout(ReportGET, 5000);
+				if (!_report_data) return setTimeout(ReportGET, 10_000);
 
 				storage.setItem("report_data", _report_data);
 
@@ -3978,6 +3978,10 @@ function ReportGET() {
 					TREM.Report.cache = new Map(_report_data.map(v => [v.identifier, v]));
 					ReportList(_report_data);
 				}
+
+				return setTimeout(() => {
+					ReportGET();
+				}, 10_000);
 			});
 		report_get_timestamp = Date.now();
 	} catch (error) {
@@ -3988,7 +3992,7 @@ function ReportGET() {
 		dump({ level: 2, message: error, origin: "EQReportFetcher" });
 		return setTimeout(() => {
 			ReportGET();
-		}, 5000);
+		}, 10_000);
 	}
 }
 
@@ -4036,23 +4040,7 @@ ipcMain.on("ReportTREM", () => {
 	if (TREM.Report.view == "report-overview" || TREM.Report.view == "eq-report-overview")
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (TREM.Report.report_trem && TREM.Report._markers.length != 0) {
-				let Station_i0 = 0;
-
-				for (let index = 0, keys = Object.keys(TREM.Report.report_trem_station), n = keys.length; index < n; index++) {
-					TREM.Report.report_trem_station[Station_i0].addTo(Maps.report);
-					TREM.Report._markers.push(TREM.Report.report_trem_station[Station_i0]);
-					Station_i0 += 1;
-				}
-
-				Station_i0 = 0;
-
-				for (let index = 0, keys = Object.keys(TREM.Report.report_station), n = keys.length; index < n; index++) {
-					TREM.Report.report_station[Station_i0].addTo(Maps.report);
-					TREM.Report._markers.push(TREM.Report.report_station[Station_i0]);
-					Station_i0 += 1;
-				}
-
-				TREM.Report._setupzoomPredict();
+				TREM.Report._setuptremget(TREM.Report._report_Temp);
 			} else if (!TREM.Report.report_trem && TREM.Report._markers.length != 0) {
 				let Station_i0 = 0;
 
@@ -4075,15 +4063,7 @@ ipcMain.on("ReportTREM", () => {
 			}
 		} else if (!TREM.Detector.webgl || TREM.MapRenderingEngine == "leaflet") {
 			if (TREM.Report.report_trem && TREM.Report._markersGroup) {
-				let Station_i0 = 0;
-
-				for (let index = 0, keys = Object.keys(TREM.Report.report_trem_station), n = keys.length; index < n; index++) {
-					TREM.Report._markers.push(TREM.Report.report_trem_station[Station_i0]);
-					Station_i0 += 1;
-				}
-
-				TREM.Report._markersGroup = L.featureGroup(TREM.Report._markers).addTo(Maps.report);
-				TREM.Report._setupzoomPredict();
+				TREM.Report._setuptremget(TREM.Report._report_Temp);
 			} else if (!TREM.Report.report_trem && TREM.Report._markersGroup) {
 				TREM.Report._markersGroup.removeFrom(Maps.report);
 
@@ -4462,9 +4442,8 @@ function IntensityToClassString(level) {
 							: (level == 3) ? "three"
 								: (level == 2) ? "two"
 									: (level == 1) ? "one"
-										: (level == 0) ? "zero"
-											: (level == "na") ? "na"
-												: "na";
+										: (level == "na") ? "na"
+											: "zero";
 
 	if (tinycolor(setting["theme.customColor"] ? setting[`theme.int.${level}`] : [
 		"#757575",
@@ -5209,14 +5188,12 @@ function FCMdata(json, Unit) {
 		});
 	}
 
-	if (json.timestamp != undefined) {
-		type_Unit = Unit;
-		log(`Latency: ${NOW().getTime() - json.timestamp}ms`, 1, "API", "FCMdata");
-		dump({ level: 0, message: `Latency: ${NOW().getTime() - json.timestamp}ms`, origin: "API" });
-	}
+	type_Unit = Unit;
+	log(`Latency: ${NOW().getTime() - json.timestamp}ms`, 1, "API", "FCMdata");
+	dump({ level: 0, message: `Latency: ${NOW().getTime() - json.timestamp}ms`, origin: "API" });
+	console.log(json);
 
 	if (json.type == "tsunami-info") {
-		console.log(json);
 		const now = new Date(json.time);
 		const Now0 = now.getFullYear()
 			+ "/" + (now.getMonth() + 1)
@@ -5237,12 +5214,10 @@ function FCMdata(json, Unit) {
 	} else if (json.type == "palert-app") {
 		console.log(json);
 	} else if (json.type == "pws") {
-		console.log(json);
 		TREM.PWS.addPWS(json.raw);
 	} else if (json.type == "intensity") {
 		log("Got Earthquake intensity", 1, "API", "FCMdata");
 		dump({ level: 0, message: "Got Earthquake intensity", origin: "API" });
-		console.log(json);
 
 		setTimeout(() => {
 			ipcRenderer.send("screenshotEEWI", {
@@ -5266,7 +5241,6 @@ function FCMdata(json, Unit) {
 	} else if (json.type == "replay") {
 		log("Got Earthquake replay", 1, "API", "FCMdata");
 		dump({ level: 0, message: "Got Earthquake replay", origin: "API" });
-		console.log(json);
 
 		if (!replayD) {
 			replay = json.replay_timestamp;
@@ -5285,7 +5259,6 @@ function FCMdata(json, Unit) {
 		if (setting["audio.report"]) audioPlay("../audio/Report.wav");
 		log("Got Earthquake Report", 1, "API", "FCMdata");
 		dump({ level: 0, message: "Got Earthquake Report", origin: "API" });
-		console.debug(json);
 
 		if (setting["report.show"]) win.showInactive();
 
@@ -5395,8 +5368,6 @@ function FCMdata(json, Unit) {
 
 		stopReplaybtn();
 		TREM.Earthquake.emit("eew", json);
-	} else {
-		console.log(json);
 	}
 }
 // #endregion
@@ -5499,6 +5470,19 @@ TREM.Earthquake.on("eew", (data) => {
 		level = int;
 		distance = d;
 		value = Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000) - 2;
+
+		if (int.value > MaxIntensity.value)
+			MaxIntensity = int;
+	}
+
+	if (data.type != "trem-eew" || json.type != "eew-cwb" || json.type != "eew-fjdzj") {
+		const int = TREM.Utils.PGAToIntensity(
+			TREM.Utils.pga(
+				data.scale,
+				10,
+				1,
+			),
+		);
 
 		if (int.value > MaxIntensity.value)
 			MaxIntensity = int;
@@ -5745,7 +5729,7 @@ TREM.Earthquake.on("eew", (data) => {
 	let find = INFO.findIndex(v => v.ID == data.id);
 
 	if (find == -1) find = INFO.length;
-	const time = new Date((data.replay_time) ? data.replay_time : data.time).toLocaleString(undefined, { dateStyle: "long", timeStyle: "medium", hour12: false, timeZone: "Asia/Taipei" });
+	const time = new Date((data.replay_time) ? data.replay_time : data.time);
 	INFO[find] = {
 		ID              : data.id,
 		alert_number    : data.number,
@@ -5801,6 +5785,8 @@ TREM.Earthquake.on("eew", (data) => {
 	if (data.type == "trem-eew" && data.number <= 3) EarthquakeList[data.id].distance = null;
 
 	main(data);
+
+	if (EarthquakeList[data.id].Timer == undefined || EarthquakeList[data.id].Timer == null) EarthquakeList[data.id].Timer = Timer_run;
 
 	EarthquakeList[data.id].Timer ??= setInterval(() => {
 		main(data);

@@ -2073,6 +2073,10 @@ stop.pred-stop {
 	border: 1px solid rgb(var(--md-sys-color-on-surface-variant));
 }
 
+.map-intensity-icon:is([class*=trem]) {
+	border: 2px solid rgb(0, 0, 0);
+}
+
 .map-intensity-icon::before {
 	position: absolute;
 	display: inline-block;

@@ -224,7 +224,6 @@ function createIntensityWindow() {
 		IntensityWindow.webContents.send("setting", TREM.Configuration._data);
 		// if (!_hide) setTimeout(() => IntensityWindow.show(), 500);
 	});
-	pushReceiver.setup(IntensityWindow.webContents);
 	IntensityWindow.on("resize", () => {
 		IntensityWindow.webContents.invalidate();
 	});
@@ -369,9 +368,9 @@ ipcMain.on("openDevtoolF10", () => {
 });
 
 ipcMain.on("reloadpage", () => {
-	restart();
-	// const currentWindow = BrowserWindow.getFocusedWindow();
-	// if (currentWindow == MainWindow) currentWindow.webContents.reload();
+	// restart();
+	const currentWindow = BrowserWindow.getFocusedWindow();
+	if (currentWindow == MainWindow) currentWindow.webContents.reload();
 });
 
 ipcMain.on("openChildWindow", async (event, arg) => {
@@ -424,6 +423,10 @@ ipcMain.on("restart", () => {
 
 ipcMain.on("openreleases", () => {
 	shell.openExternal(`https://github.com/yayacat/TREM/releases/tag/v${TREM.getVersion()}`);
+});
+
+ipcMain.on('startPushReceiver', (event, arg) => {
+    pushReceiver.setup(MainWindow.webContents);
 });
 
 TREM.Configuration.on("update", (data) => {

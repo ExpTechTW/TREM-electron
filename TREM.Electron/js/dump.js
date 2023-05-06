@@ -6,41 +6,6 @@ const path = require("node:path");
 const latestLog = path.join(app.getPath("logs"), "latest.log");
 fs.writeFileSync(latestLog, "", { encoding: "utf8", flag: "w" });
 
-const list = fs.readdirSync(app.getPath("logs"));
-
-for (let i = 0; i < list.length; i++) {
-	const date = fs.statSync(`${app.getPath("logs")}/${list[i]}`);
-
-	if (Date.now() - date.ctimeMs > 86400 * 1000 * 7) fs.unlinkSync(`${app.getPath("logs")}\\${list[i]}`);
-}
-
-const LogPath = () => path.join(app.getPath("logs"), `${log_time_string()}.log`);
-
-if (!fs.existsSync(LogPath())) {
-	fs.writeFileSync(LogPath(), "");
-	log(app.getVersion(), 2, "TREM", "version");
-}
-
-function log(msg, type = 1, sender = "main", fun = "unknow") {
-	const _type = (type == 0) ? "Debug" : (type == 3) ? "Error" : (type == 2) ? "Warn" : "Info";
-	const _msg = `[${_type}][${time_to_string()}][${sender}/${fun}]: ${msg}`;
-
-	try {
-		if (type == 3)
-			console.log("\x1b[31m" + _msg + "\x1b[0m");
-		else if (type == 2)
-			console.log("\x1b[33m" + _msg + "\x1b[0m");
-		else if (type == 1)
-			console.log("\x1b[32m" + _msg + "\x1b[0m");
-		else if (type == 0)
-			console.debug("\x1b[34m" + _msg + "\x1b[0m");
-	} catch (err) {
-		console.log("\x1b[31m" + _msg + "\x1b[0m");
-	}
-
-	fs.appendFileSync(LogPath(), `${_msg}\r\n`, "utf8");
-}
-
 function log_time_string() {
 	const now = new Date();
 	let _Now = now.getFullYear();
@@ -90,6 +55,73 @@ function time_to_string(date) {
 	else _Now += now.getSeconds();
 	return _Now;
 }
+
+function removelog() {
+	const list = fs.readdirSync(app.getPath("logs"));
+	let remove_logs = 0;
+
+	for (let i = 0; i < list.length; i++) {
+		const date = fs.statSync(`${app.getPath("logs")}/${list[i]}`);
+
+		if (Date.now() - date.ctimeMs > 86400 * 1000 * 7) {
+			fs.unlinkSync(`${app.getPath("logs")}\\${list[i]}`);
+			remove_logs += 1;
+		}
+	}
+
+	log(`remove: ${remove_logs} logs`, 1, "dump", "removelog");
+}
+
+function removeEEW() {
+	const list = fs.readdirSync(path.join(app.getPath("userData"), "EEW"));
+	let remove_EEW = 0;
+
+	for (let i = 0; i < list.length; i++) {
+		const date = fs.statSync(`${path.join(app.getPath("userData"), "EEW")}\\${list[i]}`);
+
+		if (Date.now() - date.ctimeMs > 86400 * 1000 * 7) {
+			fs.unlinkSync(`${path.join(app.getPath("userData"), "EEW")}\\${list[i]}`);
+			remove_EEW += 1;
+		}
+	}
+
+	log(`remove: ${remove_EEW} EEW`, 1, "dump", "removeEEW");
+}
+
+const LogPath = () => path.join(app.getPath("logs"), `${log_time_string()}.log`);
+
+if (!fs.existsSync(LogPath())) {
+	fs.writeFileSync(LogPath(), "");
+	log(app.getVersion(), 2, "TREM", "version");
+}
+
+function log(msg, type = 1, sender = "main", fun = "unknow") {
+	const _type = (type == 0) ? "Debug" : (type == 3) ? "Error" : (type == 2) ? "Warn" : "Info";
+	const _msg = `[${_type}][${time_to_string()}][${sender}/${fun}]: ${msg}`;
+
+	try {
+		if (type == 3)
+			console.log("\x1b[31m" + _msg + "\x1b[0m");
+		else if (type == 2)
+			console.log("\x1b[33m" + _msg + "\x1b[0m");
+		else if (type == 1)
+			console.log("\x1b[32m" + _msg + "\x1b[0m");
+		else if (type == 0)
+			console.debug("\x1b[34m" + _msg + "\x1b[0m");
+	} catch (err) {
+		console.log("\x1b[31m" + _msg + "\x1b[0m");
+	}
+
+	fs.appendFileSync(LogPath(), `${_msg}\r\n`, "utf8");
+}
+
+removelog();
+removeEEW();
+
+setInterval(() => {
+	removelog();
+	removeEEW();
+}, 86400_000);
 
 /**
  * Dump a message.
