@@ -5479,7 +5479,7 @@ TREM.Earthquake.on("eew", (data) => {
 		const int = TREM.Utils.PGAToIntensity(
 			TREM.Utils.pga(
 				data.scale,
-				10,
+				data.depth,
 				1,
 			),
 		);
