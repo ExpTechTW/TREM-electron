@@ -375,7 +375,7 @@
                                             </select>
                                         </div>
                                     </label>
-                                    <label for="report-filter-TREM" class="chip filter md3-ripple">
+                                    <label for="report-filter-TREM" id="report-label-filter-TREM" class="chip filter md3-ripple">
                                         <input type="checkbox" id="report-filter-TREM" onclick="TREM.Report._handleFilter('filterTREM', this.checked)">
                                         <div class="chip-label">
                                             <span lang="en">TREM</span>
@@ -407,6 +407,18 @@
                                             <span lang="zh-CN">日期</span>
                                             <span lang="zh-TW">日期</span>
                                             <input type="date" id="report-filter-date-value" onchange="TREM.Report._handleFilter('filterDateValue', this.value)">
+                                        </div>
+                                    </label>
+                                    <label for="report-filter-month" id="report-label-filter-month" class="chip filter label md3-ripple">
+                                        <input type="checkbox" id="report-filter-month" onclick="TREM.Report._handleFilter('filterMonth', this.checked)">
+                                        <div class="chip-label">
+                                            <span lang="en">month</span>
+                                            <span lang="ja">month</span>
+                                            <span lang="kr">month</span>
+                                            <span lang="ru">month</span>
+                                            <span lang="zh-CN">月</span>
+                                            <span lang="zh-TW">月</span>
+                                            <input type="month" id="report-filter-month-value" onchange="TREM.Report._handleFilter('filterMonthValue', this.value)">
                                         </div>
                                     </label>
                                 </div>

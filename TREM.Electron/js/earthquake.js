@@ -5475,18 +5475,19 @@ TREM.Earthquake.on("eew", (data) => {
 			MaxIntensity = int;
 	}
 
-	if (data.type != "trem-eew" || data.type != "eew-cwb" || data.type != "eew-fjdzj" && setting["dev.mode"]) {
-		const int = TREM.Utils.PGAToIntensity(
-			TREM.Utils.pga(
-				data.scale,
-				10,
-				1,
-			),
-		);
+	if (setting["dev.mode"])
+		if (data.type != "trem-eew" || data.type != "eew-cwb" || data.type != "eew-fjdzj") {
+			const int = TREM.Utils.PGAToIntensity(
+				TREM.Utils.pga(
+					data.scale,
+					10,
+					1,
+				),
+			);
 
-		if (int.value > MaxIntensity.value)
-			MaxIntensity = int;
-	}
+			if (int.value > MaxIntensity.value)
+				MaxIntensity = int;
+		}
 
 	// TREM.MapIntensity.expected(GC);
 

@@ -32,6 +32,8 @@ TREM.Report = {
 	_filterCWB            : true,
 	_filterDate           : false,
 	_filterDateValue      : "",
+	_filterMonth          : false,
+	_filterMonthValue     : "",
 	_reportItemTemplate   : document.getElementById("template-report-list-item"),
 	_report_trem_data     : storage.getItem("report_trem_data") ?? [],
 	_report_Temp          : null,
@@ -55,7 +57,8 @@ TREM.Report = {
 				.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
 				.filter(v => this._filterTREM ? v.location.startsWith("地震資訊") : true)
 				.filter(v => this._filterCWB ? v.identifier.startsWith("CWB") : true)
-				.filter(v => this._filterDate ? v.originTime.split(" ")[0] == this._filterDateValue : true);
+				.filter(v => this._filterDate ? v.originTime.split(" ")[0] == this._filterDateValue : true)
+				.filter(v => this._filterMonth ? (v.originTime.split(" ")[0].split("/")[0] + "/" + v.originTime.split(" ")[0].split("/")[1]) == this._filterMonthValue : true);
 
 			for (const report of reports) {
 				// if (setting["api.key"] == "" && report.data[0].areaIntensity == 0) continue;
@@ -68,7 +71,8 @@ TREM.Report = {
 					|| (this._filterIntensity && !(report.data[0]?.areaIntensity == this._filterIntensityValue))
 					|| (this._filterTREM && !(report.location.startsWith("地震資訊")))
 					|| (this._filterCWB && !(report.identifier.startsWith("CWB")))
-					|| (this._filterDate && !(report.originTime.split(" ")[0] == this._filterDateValue))) {
+					|| (this._filterDate && !(report.originTime.split(" ")[0] == this._filterDateValue))
+					|| (this._filterMonth && !((report.originTime.split(" ")[0].split("/")[0] + "/" + report.originTime.split(" ")[0].split("/")[1]) == this._filterMonthValue))) {
 					element.classList.add("hide");
 					element.style.display = "none";
 				} else if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
@@ -178,6 +182,7 @@ TREM.Report = {
 		}
 
 		this._filterDateValue = this._filterDateValue.replace(/-/g, "/");
+		this._filterMonthValue = this._filterMonthValue.replace(/-/g, "/");
 
 		this.reportList = Array.from(this.cache, ([k, v]) => v)
 			.filter(v => this._filterHasNumber ? v.earthquakeNo % 1000 != 0 : true)
@@ -186,7 +191,8 @@ TREM.Report = {
 			.filter(v => this._filterIntensity ? v.data[0]?.areaIntensity == this._filterIntensityValue : true)
 			.filter(v => this._filterTREM ? v.location.startsWith("地震資訊") : true)
 			.filter(v => this._filterCWB ? v.identifier.startsWith("CWB") : true)
-			.filter(v => this._filterDate ? v.originTime.split(" ")[0] == this._filterDateValue : true);
+			.filter(v => this._filterDate ? v.originTime.split(" ")[0] == this._filterDateValue : true)
+			.filter(v => this._filterMonth ? (v.originTime.split(" ")[0].split("/")[0] + "/" + v.originTime.split(" ")[0].split("/")[1]) == this._filterMonthValue : true);
 
 		this._updateReports(oldlist, this.reportList);
 	},
@@ -890,12 +896,24 @@ TREM.Report = {
 			});
 		}
 	},
+	_setup_api_key_verify() {
+		if (!this.api_key_verify) {
+			const element = document.getElementById("report-label-filter-TREM");
+			element.classList.add("hide");
+			element.style.display = "none";
+		} else if (this.api_key_verify) {
+			const element = document.getElementById("report-label-filter-TREM");
+			element.classList.remove("hide");
+			element.style.display = "block";
+		}
+	},
 };
 
 TREM.on("viewChange", (oldView, newView) => {
 	switch (oldView) {
 		case "report": {
 			TREM.Report.unloadReports();
+			TREM.Report._setup_api_key_verify();
 			break;
 		}
 
@@ -907,6 +925,7 @@ TREM.on("viewChange", (oldView, newView) => {
 		case "report": {
 			TREM.Report.loadReports();
 			TREM.Report._focusMap();
+			TREM.Report._setup_api_key_verify();
 			break;
 		}
 
