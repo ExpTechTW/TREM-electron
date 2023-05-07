@@ -115,10 +115,12 @@ const Constants = Object.freeze({
 		"sleep.mode": {
 			type  : "toggle",
 			value : false,
-		},"p2p.mode": {
+		},
+		"p2p.mode": {
 			type  : "toggle",
 			value : true,
-		},"stream.mode": {
+		},
+		"stream.mode": {
 			type  : "toggle",
 			value : false,
 		},
