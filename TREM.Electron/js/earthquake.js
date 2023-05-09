@@ -9,7 +9,7 @@ const { setTimeout, setInterval, clearTimeout, clearInterval } = require("node:t
 const axios = require("axios");
 const bytenode = require("bytenode");
 const maplibregl = require("maplibre-gl");
-const Speech = require("speak-tts");
+
 TREM.Audios = {
 	pga1   : new Audio("../audio/PGA1.wav"),
 	pga2   : new Audio("../audio/PGA2.wav"),
@@ -30,13 +30,12 @@ TREM.Utils = require(path.resolve(__dirname, "../Utils/Utils.js"));
 localStorage.dirname = __dirname;
 
 const speecd_use = setting["audio.tts"] ?? false;
-const speech = new Speech.default();
 
 (async () => {
-	await speech.init();
-	speech.setLanguage("zh-TW");
-	speech.setVoice("Microsoft Hanhan - Chinese (Traditional, Taiwan)");
-	speech.setRate(1.8);
+	await TREM.speech.init();
+	TREM.speech.setLanguage("zh-TW");
+	TREM.speech.setVoice("Microsoft Hanhan - Chinese (Traditional, Taiwan)");
+	TREM.speech.setRate(1.8);
 })();
 
 // if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
@@ -58,7 +57,6 @@ const MapData = {};
 const Timers = {};
 let Stamp = 0;
 let rts_remove_eew = false;
-let t = null;
 let UserLocationLat = 25.0421407;
 let UserLocationLon = 121.5198716;
 let arrive = "";
@@ -117,9 +115,8 @@ let replayD = false;
 let replayTemp = 0;
 let replaytestEEW = 0;
 TREM.toggleNavTime = 0;
-let Second = -1;
 let mapLock = false;
-const eew = {};
+let eew = {};
 const eewt = { id: 0, time: 0 };
 let TSUNAMI = {};
 let Ping = "N/A";
@@ -285,7 +282,7 @@ TREM.MapIntensity = {
 						}
 					}
 
-					speech.speak({ text: "震度速報"
+					TREM.speech.speak({ text: "震度速報"
 					+ "資料來源PAlert(最終報)"
 					+ "時間" + now
 					+ "觸發測站" + rawPalertData.tiggered + "台震度分布"
@@ -3225,7 +3222,7 @@ function handler(Json) {
 					const loc = detection_location[0] ?? "未知區域";
 
 					if (max_intensity > 4 || intensitytag > 4) {
-						if (speecd_use) speech.speak({ text: `強震檢測，${loc}` });
+						if (speecd_use) TREM.speech.speak({ text: `強震檢測，${loc}` });
 						log("Playing Audio > int2", 1, "Audio", "handler");
 						dump({ level: 0, message: "Playing Audio > int2", origin: "Audio" });
 						TREM.Audios.int2.play();
@@ -3235,7 +3232,7 @@ function handler(Json) {
 							silent : win.isFocused(),
 						});
 					} else if (max_intensity > 1 || intensitytag > 1) {
-						if (speecd_use) speech.speak({ text: `震動檢測，${loc}` });
+						if (speecd_use) TREM.speech.speak({ text: `震動檢測，${loc}` });
 						log("Playing Audio > int1", 1, "Audio", "handler");
 						dump({ level: 0, message: "Playing Audio > int1", origin: "Audio" });
 						TREM.Audios.int1.play();
@@ -3245,7 +3242,7 @@ function handler(Json) {
 							silent : win.isFocused(),
 						});
 					} else if (intensitytag == -1) {
-						if (speecd_use) speech.speak({ text: `弱反應，${loc}` });
+						if (speecd_use) TREM.speech.speak({ text: `弱反應，${loc}` });
 						log("Playing Audio > int0", 1, "Audio", "handler");
 						dump({ level: 0, message: "Playing Audio > int0", origin: "Audio" });
 						TREM.Audios.int0.play();
@@ -3258,7 +3255,7 @@ function handler(Json) {
 
 					const _intensity = `${IntensityI(max_intensity)}級`;
 
-					if (speecd_use) speech.speak({ text: `觀測最大震度，${_intensity.replace("-級", "弱").replace("+級", "強")}` });
+					if (speecd_use) TREM.speech.speak({ text: `觀測最大震度，${_intensity.replace("-級", "弱").replace("+級", "強")}` });
 				}
 
 				setTimeout(() => {
@@ -3304,9 +3301,9 @@ function handler(Json) {
 					Json_temp[uuid.split("-")[2]].alert = true;
 					Json_temp.Alert = true;
 
-					if (speecd_use) speech.speak({ text: `測站反應，${station[uuid].area}` });
+					if (speecd_use) TREM.speech.speak({ text: `測站反應，${station[uuid].area}` });
 
-					if (speecd_use) speech.speak({ text: `最大震度，${_intensity.replace("-級", "弱").replace("+級", "強")}` });
+					if (speecd_use) TREM.speech.speak({ text: `最大震度，${_intensity.replace("-級", "弱").replace("+級", "強")}` });
 
 					if ((detected_list[current_station_data.PGA].intensity ?? 0) < intensitytest)
 						detected_list[current_station_data.PGA].intensity = intensitytest;
@@ -4683,9 +4680,9 @@ ipcMain.on("report-Notification", (event, report) => {
 
 	if (report.data.length != 0 && speecd_use) {
 		const areaIntensity = `${IntensityI(report.data[0].areaIntensity)}級`;
-		speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}，最大震度${report.data[0].areaName + report.data[0].eqStation[0].stationName + areaIntensity.replace("-級", "弱").replace("+級", "強")}` });
+		TREM.speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}，最大震度${report.data[0].areaName + report.data[0].eqStation[0].stationName + areaIntensity.replace("-級", "弱").replace("+級", "強")}` });
 	} else if (speecd_use) {
-		speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}` });
+		TREM.speech.speak({ text: `${location}發生規模 ${report.magnitudeValue.toFixed(1).replace(".", "點")}` });
 	}
 });
 
@@ -4822,7 +4819,7 @@ ipcMain.on("intensity-Notification", (event, intensity) => {
 			city0 = "";
 		}
 
-		speech.speak({ text: "震度速報"
+		TREM.speech.speak({ text: "震度速報"
 		+ "資料來源" + intensity.unit
 		+ (info.time != 0 ? "發震時間" : "接收時間") + now
 		+ "震度分布" + description0 });
@@ -5204,7 +5201,7 @@ function FCMdata(json, Unit) {
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
 		new Notification("海嘯資訊", { body: `${Now0}\n${json.location} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
 
-		if (speecd_use) speech.speak({ text: `海嘯資訊${Now0} ${json.location} 發生 ${json.scale} 地震` });
+		if (speecd_use) TREM.speech.speak({ text: `海嘯資訊${Now0} ${json.location} 發生 ${json.scale} 地震` });
 	} else if (json.type == "tsunami") {
 		TREM.Earthquake.emit("tsunami", json);
 	} else if (json.type == "trem-eq") {
@@ -5397,6 +5394,7 @@ TREM.Earthquake.on("eew", (data) => {
 		epicenterIcon   : null,
 		epicenterIconTW : null,
 	};
+
 	EarthquakeList[data.id].epicenter = [+data.lon, +data.lat];
 	EarthquakeList[data.id].Time = data.time;
 	EarthquakeList[data.id].ID = data.id;
@@ -5502,10 +5500,20 @@ TREM.Earthquake.on("eew", (data) => {
 		data.depth = null;
 	}
 
+	clearInterval(AudioT);
+	audio.main_lock = false;
+	AudioT = null;
+	clearInterval(AudioT1);
+	audio.minor_lock = false;
+	AudioT1 = null;
+	audio.main = [];
+	audio.minor = [];
+
 	if (value > 0)
 		Nmsg = `${value}秒後抵達`;
 	else
 		Nmsg = "已抵達 (預警盲區)";
+
 	const notify = (level.label.includes("+") || level.label.includes("-")) ? level.label.replace("+", "強").replace("-", "弱") : level.label + "級";
 	let body = `${notify ?? "未知"}地震，${Nmsg}\nM ${data.scale} ${data.location ?? "未知區域"}`;
 
@@ -5521,23 +5529,23 @@ TREM.Earthquake.on("eew", (data) => {
 		if (find0 == -1) find0 = INFO.length;
 
 		if (speecd_number == 1)
-			speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
+			TREM.speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
 		else if (INFO[find0]?.alert_magnitude != speecd_scale && speecd_scale != 0)
-			speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
+			TREM.speech.speak({ text: `${data.location}，發生規模${speecd_scale.toFixed(1).replace(".", "點")}地震` });
 		else if (INFO[find0]?.alert_magnitude != speecd_scale && speecd_scale == 0)
-			speech.speak({ text: `${data.Unit}，已取消警報` });
+			TREM.speech.speak({ text: `${data.Unit}，已取消警報` });
 		else if (data.cancel)
-			speech.speak({ text: `${data.Unit}，已取消警報` });
+			TREM.speech.speak({ text: `${data.Unit}，已取消警報` });
 
 		if (Number(speecd_scale) >= 7 && speecd_number == 1)
-			speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
+			TREM.speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
 		else if (Number(speecd_scale) >= 6 && speecd_number == 1)
-			speech.speak({ text: "沿岸地區應慎防海水位突變" });
+			TREM.speech.speak({ text: "沿岸地區應慎防海水位突變" });
 		else if (INFO[find0]?.alert_magnitude != speecd_scale)
 			if (Number(speecd_scale) >= 7)
-				speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
+				TREM.speech.speak({ text: "震源位置及規模表明，可能發生海嘯，沿岸地區應慎防海水位突變，並留意中央氣象局是否發布，海嘯警報" });
 			else if (Number(speecd_scale) >= 6)
-				speech.speak({ text: "沿岸地區應慎防海水位突變" });
+				TREM.speech.speak({ text: "沿岸地區應慎防海水位突變" });
 
 		if (data.type == "eew-cwb") audioPlay("../audio/cwbeew.wav");
 	}
@@ -5605,7 +5613,7 @@ TREM.Earthquake.on("eew", (data) => {
 			}
 	}
 
-	if (MaxIntensity.value >= 4 && data.number == 1) if (speecd_use) speech.speak({ text: "注意強震，此地震可能造成災害" });
+	if (MaxIntensity.value >= 4 && data.number == 1) if (speecd_use) TREM.speech.speak({ text: "注意強震，此地震可能造成災害" });
 
 	if (data.type != "trem-eew")
 		if (MaxIntensity.value >= 5) {
@@ -5644,57 +5652,73 @@ TREM.Earthquake.on("eew", (data) => {
 	}
 
 	eew[data.id] = {
-		lon  : Number(data.lon),
-		lat  : Number(data.lat),
-		time : 0,
-		Time : data.time,
-		id   : data.id,
-		km   : 0,
-		type : data.type,
+		lon    : Number(data.lon),
+		lat    : Number(data.lat),
+		time   : 0,
+		Time   : data.time,
+		id     : data.id,
+		km     : 0,
+		type   : data.type,
+		t      : eew[data.id]?.t ?? null,
+		value  : Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000),
+		Second : eew[data.id]?.Second ?? -1,
+		arrive : eew[data.id]?.arrive ?? "",
 	};
 
-	if (data.type != "trem-eew") {
-		value = Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000);
+	if (data.number != 1) {
+		clearInterval(eew[data.id].t);
+		eew[data.id].t = null;
+		eew[data.id].Second = -1;
+		eew[data.id].arrive = "";
+	}
 
-		if (Second == -1 || value < Second)
+	if (data.type != "trem-eew")
+		if (eew[data.id].Second == -1 || eew[data.id].value < eew[data.id].Second)
 			if (setting["audio.eew"] && Alert)
-				if (arrive == data.id || arrive == "") {
-					arrive = data.id;
+				if (eew[data.id].arrive == "") {
+					if (eew[data.id].t != null) {
+						clearInterval(eew[data.id].t);
+						eew[data.id].t = null;
+					}
 
-					if (t != null) clearInterval(t);
-					t = setInterval(() => {
-						value = Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000);
-						Second = value;
+					eew[data.id].t = setInterval(() => {
+						eew[data.id].value = Math.floor(_speed(data.depth, distance).Stime - (NOW().getTime() - data.time) / 1000);
 
-						if (stamp != value && !audio.minor_lock) {
-							stamp = value;
+						if (Math.sign(eew[data.id].value) != -1) {
+							eew[data.id].Second = eew[data.id].value;
 
-							if (_time >= 0) {
-								audioPlay("../audio/1/ding.wav");
-								_time++;
+							if (stamp != eew[data.id].value && !audio.minor_lock) {
+								stamp = eew[data.id].value;
 
-								if (_time >= 10)
-									clearInterval(t);
-							} else if (value < 100) {
-								if (value > 10) {
-									if (value.toString().substring(1, 2) == "0") {
-										audioPlay1(`../audio/1/${value.toString().substring(0, 1)}x.wav`);
-										audioPlay1("../audio/1/x0.wav");
+								if (eew[data.id].value < 100)
+									if (eew[data.id].value > 10) {
+										if (eew[data.id].value.toString().substring(1, 2) == "0") {
+											audioPlay1(`../audio/1/${eew[data.id].value.toString().substring(0, 1)}x.wav`);
+											audioPlay1("../audio/1/x0.wav");
+										} else {
+											audioPlay("../audio/1/ding.wav");
+										}
+									} else if (eew[data.id].value > 0) {
+										audioPlay1(`../audio/1/${eew[data.id].value.toString()}.wav`);
 									} else {
-										audioPlay("../audio/1/ding.wav");
+										eew[data.id].arrive = data.id;
+										audioPlay1("../audio/1/arrive.wav");
+										_time = 0;
+										eew[data.id].Second = -1;
 									}
-								} else if (value > 0) {
-									audioPlay1(`../audio/1/${value.toString()}.wav`);
-								} else {
-									arrive = data.id;
-									audioPlay1("../audio/1/arrive.wav");
-									_time = 0;
-								}
+							}
+						} else if (_time >= 0) {
+							audioPlay("../audio/1/ding.wav");
+							_time++;
+
+							if (_time >= 10) {
+								clearInterval(eew[data.id].t);
+								eew[data.id].t = null;
+								_time = -1;
 							}
 						}
 					}, 50);
 				}
-	}
 
 	const speed = setting["shock.smoothing"] ? 100 : 500;
 
@@ -6075,7 +6099,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 	console.log(data);
 
 	if (data.cancel) {
-		if (speecd_use) speech.speak({ text: "海嘯警報已解除" });
+		if (speecd_use) TREM.speech.speak({ text: "海嘯警報已解除" });
 
 		if (TREM.Detector.webgl || TREM.MapRenderingEngine == "mapbox-gl") {
 			if (Maps.main.getFeatureState({
@@ -6157,7 +6181,7 @@ TREM.Earthquake.on("tsunami", (data) => {
 
 		Mapsmainfocus();
 	} else {
-		if (speecd_use) speech.speak({ text: "海嘯警報已發布，請迅速疏散至避難場所" });
+		if (speecd_use) TREM.speech.speak({ text: "海嘯警報已發布，請迅速疏散至避難場所" });
 
 		if (data.number == 1) {
 			if (setting["report.show"]) win.showInactive();
@@ -6792,7 +6816,7 @@ function main(data) {
 					TREM.EEW.get(INFO[TINFO].ID).Cancel = true;
 
 					if (Object.keys(EarthquakeList).length == 1) {
-						clearInterval(t);
+						clearInterval(eew[data.id].t);
 						audio.main = [];
 						audio.minor = [];
 					}
@@ -6961,14 +6985,14 @@ function main(data) {
 
 		// if (EarthquakeList[data.id].Depth != null) Maps.main.removeLayer(EarthquakeList[data.id].Depth);
 		delete EarthquakeList[data.id];
-		delete eew[data.id];
 
 		if (Object.keys(EarthquakeList).length == 0) {
-			clearInterval(t);
+			for (let index = 0, keys = Object.keys(eew), n = keys.length; index < n; index++)
+				clearInterval(eew[keys[index]].t);
 			audio.main = [];
 			arrive = "";
 			audio.minor = [];
-			Second = -1;
+			eew = {};
 			EEWAlert = false;
 			// hide eew alert
 			Timers.ticker = null;

@@ -1076,6 +1076,7 @@ function balance() {
 					if (last_count - res.data.balance) {
 						let _time = (res.data.balance / ((last_count - res.data.balance) * 12)).toFixed(1);
 						let _time_string = "";
+						const _time_s = _time * 60000;
 
 						if (_time < 60) {
 							_time_string = `${_time}分鐘`;
@@ -1090,8 +1091,16 @@ function balance() {
 							}
 						}
 
-						document.getElementById("exptechbalanceState").innerHTML = `剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: ${_time_string}\n每分鐘用量: ${(last_count - res.data.balance) * 12}次\n查詢時間: ${Now}`;
-						console.log(`剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: ${_time_string}\n每分鐘用量: ${(last_count - res.data.balance) * 12}次\n查詢時間: ${Now}`);
+						const Nows = new Date((utc.getTime() + utc.getTimezoneOffset() * 60 * 1000 + 60 * 60 * 8 * 1000) + _time_s);
+						const _Nows_string = Nows.getFullYear()
+						+ "-" + (Nows.getMonth() + 1)
+						+ "-" + Nows.getDate()
+						+ " " + Nows.getHours()
+						+ ":" + Nows.getMinutes()
+						+ ":" + Nows.getSeconds();
+
+						document.getElementById("exptechbalanceState").innerHTML = `剩餘 API 請求次數: ${res.data.balance}次\n預估剩餘使用時間: ${_time_string}\n預估剩餘使用詳細時間: ${_Nows_string}\n每分鐘用量: ${(last_count - res.data.balance) * 12}次\n查詢時間: ${Now}`;
+						console.log(`剩餘 API 請求次數: ${res.data.balance}次\n預估剩餘使用時間: ${_time_string}\n預估剩餘使用詳細時間: ${_Nows_string}\n每分鐘用量: ${(last_count - res.data.balance) * 12}次\n查詢時間: ${Now}`);
 					} else {
 						document.getElementById("exptechbalanceState").innerHTML = `剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: 未使用\n每分鐘用量: 未使用\n查詢時間: ${Now}`;
 						console.log(`剩餘 API 請求次數: ${res.data.balance}次\n剩餘使用時間: 未使用\n每分鐘用量: 未使用\n查詢時間: ${Now}`);
