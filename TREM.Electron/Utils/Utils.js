@@ -3,7 +3,7 @@ const { intensities } = require("../Constants/Constants");
 
 const twoPointDistance = ({ lat: lat1, lon: lon1 }, { lat: lat2, lon: lon2 }) => (((lat1 - lat2) * 111) ** 2 + ((lon1 - lon2) * 101) ** 2) ** 0.5;
 const twoSideDistance = (side1, side2) => (side1 ** 2 + side2 ** 2) ** 0.5;
-const pga = (magnitde, distance, siteEffect = 1) => 12.44 * Math.exp(1.33 * magnitde) * Math.pow(distance, -1.837) * (siteEffect ?? 1);
+const pga = (magnitde, distance, siteEffect = 1.751) => 1.657 * Math.pow(Math.E, (1.533 * magnitde)) * Math.pow(distance, -1.607) * (siteEffect ?? 1.751);
 const PGAToIntensity = (value) => intensities[value >= 800 ? 9
 	: value <= 800 && value > 440 ? 8
 		: value <= 440 && value > 250 ? 7

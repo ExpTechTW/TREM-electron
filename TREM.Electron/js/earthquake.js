@@ -31,13 +31,6 @@ localStorage.dirname = __dirname;
 
 const speecd_use = setting["audio.tts"] ?? false;
 
-(async () => {
-	await TREM.speech.init();
-	TREM.speech.setLanguage("zh-TW");
-	TREM.speech.setVoice("Microsoft Hanhan - Chinese (Traditional, Taiwan)");
-	TREM.speech.setRate(1.8);
-})();
-
 // if (fs.existsSync(path.resolve(__dirname, "../../server.js"))) {
 // 	const vm = require("vm");
 // 	const v8 = require("v8");
@@ -2673,7 +2666,6 @@ async function init() {
 			console.log("複製成功");
 		});
 	});
-	storage.init();
 	globalgc();
 }
 // #endregion
@@ -5199,7 +5191,7 @@ function FCMdata(json, Unit) {
 			+ ":" + now.getMinutes();
 		log("Got Tsunami Warning", 1, "API", "FCMdata");
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-		new Notification("海嘯資訊", { body: `${Now0}\n${json.location} 發生 ${json.scale} 地震\n\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
+		new Notification("海嘯資訊", { body: `${Now0}\n${json.location} 發生 ${json.scale} 地震\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
 
 		if (speecd_use) TREM.speech.speak({ text: `海嘯資訊${Now0} ${json.location} 發生 ${json.scale} 地震` });
 	} else if (json.type == "tsunami") {

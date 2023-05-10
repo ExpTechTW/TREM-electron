@@ -4,9 +4,28 @@ const Speech = require("speak-tts");
 let setting, is_setting_disabled;
 
 TREM.Resources = require(path.resolve(app.getAppPath(), "./Resources/Resources.js"));
-TREM.speech = new Speech.default();
-
+TREM.speech = TREM.speech ?? new Speech.default();
 setting = app.Configuration._data;
+
+(async () => {
+	await TREM.speech.init().then(data => {
+		TREM.voices = data.voices;
+		console.log("Speech voices is ready", TREM.voices);
+
+		for (const key of Object.keys(TREM.voices)) {
+			if(TREM.voices[key].name == setting["audio.tts.voices"]) {
+				TREM.speech.setLanguage(TREM.voices[key].lang);
+				TREM.speech.setVoice(setting["audio.tts.voices"]);
+				console.log("Voices changed", TREM.voices[key]);
+			}
+		}
+	}).catch(e => {
+		console.error("An error occured while initializing : ", e);
+	});
+
+	TREM.speech.setRate(1.8);
+	console.log("Speech is ready", TREM.speech);
+})();
 
 ipcRenderer.on("setting", (event, data) => {
 	setting = data;
@@ -279,5 +298,7 @@ const storage = {
 		}
 	},
 };
+
+storage.init();
 
 // #endregion

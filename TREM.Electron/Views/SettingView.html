@@ -1942,6 +1942,42 @@
                                             </span>
                                         </label>
                                     </div>
+                                    <button class="filled-tonal-button setting-button md3-ripple" onclick="testAudioTTS()" style="margin: 5px 0 16px 0;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">play_arrow</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">?</span>
+                                            <span lang="ja">?</span>
+                                            <span lang="kr">?</span>
+                                            <span lang="ru">?</span>
+                                            <span lang="zh-CN">?</span>
+                                            <span lang="zh-TW">測試語音</span>
+                                        </span>
+                                    </button>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">切換語音朗讀</span>
+                                                <span class="option-label-id">audio.tts.voices</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">使語音朗讀切換之設定。</span>
+                                            </span>
+                                        </div>
+                                        <div class="control">
+                                            <select id="audio.tts.voices" name="voices" onchange="SelectSave('audio.tts.voices')">
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="list-container" id="Connection">

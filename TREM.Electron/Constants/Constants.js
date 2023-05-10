@@ -180,6 +180,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
+		"audio.tts.voices": {
+			type  : "select",
+			value : "Microsoft Hanhan - Chinese (Traditional, Taiwan)",
+		},
 		"Real-time.station": {
 			type  : "select",
 			value : "L-711-6732340-12",

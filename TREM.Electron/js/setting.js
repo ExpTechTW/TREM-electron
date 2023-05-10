@@ -379,6 +379,26 @@ function init() {
 			el5.appendChild(optgroup5);
 		}
 	})();
+
+	(async () => {
+		await TREM.speech.init().then(data => {
+			const el = document.getElementById("audio.tts.voices");
+			TREM.voices = data.voices;
+
+			for (const key of Object.keys(data.voices)) {
+				const option = document.createElement("option");
+				option.text = data.voices[key].name;
+				option.value = data.voices[key].name;
+
+				if (setting["audio.tts.voices"] == data.voices[key].name)
+					option.selected = true;
+				el.appendChild(option);
+			}
+		}).catch(e => {
+			console.error("An error occured while initializing : ", e);
+		});
+	})();
+
 	// #endregion
 
 	document.getElementById("client-uuid").addEventListener("click", () => {
@@ -395,6 +415,16 @@ function SelectSave(id) {
 	log(`Value Changed ${id}: ${setting[id]} -> ${value}`, 1, "Setting", "SelectSave");
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
+
+	if (id == "audio.tts.voices"){
+		for (const key of Object.keys(TREM.voices)) {
+			if(TREM.voices[key].name == value) {
+				TREM.speech.setLanguage(TREM.voices[key].lang);
+				TREM.speech.setVoice(value);
+				console.log("Voices changed", TREM.voices[key]);
+			}
+		}
+	}
 
 	if (id == "map.engine")
 		$("#MEReloadButton").fadeIn(100);
@@ -1621,6 +1651,12 @@ const testAudio = (audioString, el) => {
 		el.childNodes[1].textContent = "play_arrow";
 		el.childNodes[3].textContent = TREM.Localization.getString("Audio_Test");
 	}
+};
+
+const testAudioTTS = () => {
+	const speecd_use = setting["audio.tts"] ?? false;
+
+	if (speecd_use) TREM.speech.speak({ text: "This is a test voice sent by TREM" });
 };
 
 const webhook = async () => {
