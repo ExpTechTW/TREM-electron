@@ -416,15 +416,13 @@ function SelectSave(id) {
 	dump({ level: 0, message: `Value Changed ${id}: ${setting[id]} -> ${value}`, origin: "Setting" });
 	ipcRenderer.send("config:value", id, value);
 
-	if (id == "audio.tts.voices"){
-		for (const key of Object.keys(TREM.voices)) {
-			if(TREM.voices[key].name == value) {
+	if (id == "audio.tts.voices")
+		for (const key of Object.keys(TREM.voices))
+			if (TREM.voices[key].name == value) {
 				TREM.speech.setLanguage(TREM.voices[key].lang);
 				TREM.speech.setVoice(value);
 				console.log("Voices changed", TREM.voices[key]);
 			}
-		}
-	}
 
 	if (id == "map.engine")
 		$("#MEReloadButton").fadeIn(100);
