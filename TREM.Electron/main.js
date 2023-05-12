@@ -22,7 +22,7 @@ autoUpdater.logger = logger;
 // 	get() {
 // 	  return true;
 // 	}
-//   });
+// });
 
 /**
  * @type {Tray}
@@ -248,26 +248,67 @@ else {
 	});
 }
 
+function isNetworkError(errorObject) {
+    return errorObject.message === "net::ERR_INTERNET_DISCONNECTED" ||
+        errorObject.message === "net::ERR_PROXY_CONNECTION_FAILED" ||
+        errorObject.message === "net::ERR_CONNECTION_RESET" ||
+        errorObject.message === "net::ERR_CONNECTION_CLOSE" ||
+        errorObject.message === "net::ERR_NAME_NOT_RESOLVED" ||
+        errorObject.message === "net::ERR_CONNECTION_TIMED_OUT";
+}
+
+function checkForUpdates() {
+	try {
+		autoUpdater.checkForUpdates().catch((error) => {
+			if (isNetworkError(error)) {
+				console.log('Network Error');
+				console.log(error);
+			} else {
+				console.log('Unknown Error');
+				console.log(error == null ? "unknown" : (error.stack || error).toString());
+			}
+		});
+	} catch (error) {
+		console.error('Error while on checkForUpdates: ', error);
+	}
+}
+
+function downloadUpdate(cancellationToken) {
+	try {
+		autoUpdater.downloadUpdate(cancellationToken).catch((error) => {
+			if (isNetworkError(error)) {
+				console.log('Network Error');
+				console.log(error);
+			} else {
+				console.log('Unknown Error');
+				console.log(error == null ? "unknown" : (error.stack || error).toString());
+			}
+		});
+	} catch (error) {
+		console.error('Error while on downloadUpdate: ', error);
+	}
+}
+
 TREM.on("ready", () => {
 	if (TREM.Configuration.data["update.time"] != undefined) {
 		if (TREM.Configuration.data["update.time"] != 0){
-			autoUpdater.checkForUpdates();
+			checkForUpdates();
 			const time = TREM.Configuration.data["update.time"] * 3600_000;
 			setInterval(() => {
-				autoUpdater.checkForUpdates();
+				checkForUpdates();
 			}, time);
 		} else {
-			autoUpdater.checkForUpdates();
+			checkForUpdates();
 			const time = 3600_000;
 			setInterval(() => {
-				autoUpdater.checkForUpdates();
+				checkForUpdates();
 			}, time);
 		}
 	} else {
-		autoUpdater.checkForUpdates();
+		checkForUpdates();
 		const time = 3600_000;
 		setInterval(() => {
-			autoUpdater.checkForUpdates();
+			checkForUpdates();
 		}, time);
 	}
 
@@ -290,12 +331,12 @@ autoUpdater.on("update-available", (info) => {
 
 		switch (TREM.Configuration.data["update.mode"]) {
 			case "install": {
-				autoUpdater.downloadUpdate();
+				downloadUpdate(info.cancellationToken);
 				break;
 			}
 
 			case "download": {
-				autoUpdater.downloadUpdate();
+				downloadUpdate(info.cancellationToken);
 				break;
 			}
 
@@ -748,7 +789,7 @@ function trayIcon() {
 					label : TREM.Localization.getString("check_For_Updates"),
 					type  : "normal",
 					click : () => {
-						autoUpdater.checkForUpdates();
+						checkForUpdates();
 					}
 				}
 			]
