@@ -70,6 +70,7 @@ const Station = {};
 const detected_box_list = {};
 const detected_list = {};
 let Cancel = false;
+let Canceltime = 0;
 let RMT = 1;
 let PGALimit = 0;
 let PGAtag = -1;
@@ -1202,7 +1203,7 @@ async function init() {
 					time.innerText = `${timeconvert(new Date(replayTemp)).format("YYYY/MM/DD HH:mm:ss")}`;
 
 					// if (NOW().getTime() - replayT > 180_000 && !Object.keys(eew).length) {
-					if (replayTemp - replay > 180_000) {
+					if (replayTemp - replay > 240_000) {
 						replayTemp = 0;
 						replay = 0;
 						Report = 0;
@@ -1215,7 +1216,7 @@ async function init() {
 					time.innerText = `${timeconvert(new Date(replay + (NOW().getTime() - replayT))).format("YYYY/MM/DD HH:mm:ss")}`;
 
 					// if (NOW().getTime() - replayT > 180_000 && !Object.keys(eew).length) {
-					if (NOW().getTime() - replayT > 180_000) {
+					if (NOW().getTime() - replayT > 240_000) {
 						replay = 0;
 						Report = 0;
 						ipcMain.emit("ReportGET");
@@ -1231,7 +1232,7 @@ async function init() {
 					time1.innerText = `${timeconvert(NOW()).format("YYYY/MM/DD HH:mm:ss")}`;
 					ipcRenderer.send("TREMIntensitytime2", `${timeconvert(NOW()).format("YYYY/MM/DD HH:mm:ss")}`);
 
-					if (replaytestEEW != 0 && NOW().getTime() - replaytestEEW > 180_000) {
+					if (replaytestEEW != 0 && NOW().getTime() - replaytestEEW > 240_000) {
 						testEEWerror = false;
 						replaytestEEW = 0;
 						stopReplay();
@@ -6952,7 +6953,13 @@ function main(data) {
 		}, 300);
 	}
 
-	if (NOW().getTime() - data.time > 240_000 || Cancel) {
+	if (data.cancel) {
+		if (Canceltime == 0) Canceltime = NOW().getTime();
+
+		if (NOW().getTime() - Canceltime > 5_000) Cancel = true;
+	}
+
+	if (NOW().getTime() - data.timestamp > 240_000 || Cancel) {
 		TREM.Earthquake.emit("eewEnd", data.id, data.type);
 		// TREM.MapIntensity.clear();
 
@@ -6989,6 +6996,7 @@ function main(data) {
 			// hide eew alert
 			Timers.ticker = null;
 			Cancel = false;
+			Canceltime = 0;
 
 			if (replay != 0) {
 				replay = 0;
