@@ -3330,6 +3330,8 @@ function handler(Json) {
 		// 	MAXPGA.intensity = MaxIntensity1;
 		// 	MAXPGA.time = new Date(Json_Time * 1000);
 		// }
+
+		if (intensity < intensitytest) MAXPGA.intensity = intensitytest;
 	}
 
 	if (MAXPGA.station != "NA") {
