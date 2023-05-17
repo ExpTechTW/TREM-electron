@@ -637,7 +637,8 @@ function CheckSave(id) {
 		|| id == "map.af"
 		|| id == "map.ru"
 		|| id == "map.cl"
-		|| id == "map.ar")
+		|| id == "map.ar"
+		|| id == "map.gu")
 		$("#MAPReloadButton").fadeIn(100);
 
 	if (id == "compatibility.hwaccel")
