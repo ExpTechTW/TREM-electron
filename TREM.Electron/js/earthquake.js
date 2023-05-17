@@ -2977,17 +2977,18 @@ function handler(Json) {
 			if (amount > current_station_data.MaxPGA) current_station_data.MaxPGA = amount;
 			intensity = (Alert && Json.Alert) ? Math.round(current_data.i)
 				: (NOW().getTime() - current_data.TS * 1000 > 5000) ? "NA"
-					: (!Alert) ? 0
-						: (amount >= 800) ? 9
-							: (amount >= 440) ? 8
-								: (amount >= 250) ? 7
-									: (amount >= 140) ? 6
-										: (amount >= 80) ? 5
-											: (amount >= 25) ? 4
-												: (amount >= 8) ? 3
-													: (amount >= 5) ? 2
-														: (amount >= 2.2) ? 1
-															: 0;
+					: (!Alert) ? ((current_data.i > -1) ? Math.round(current_data.i) : 0)
+						: 0;
+							// : (amount >= 800) ? 9
+							// 	: (amount >= 440) ? 8
+							// 		: (amount >= 250) ? 7
+							// 			: (amount >= 140) ? 6
+							// 				: (amount >= 80) ? 5
+							// 					: (amount >= 25) ? 4
+							// 						: (amount >= 8) ? 3
+							// 							: (amount >= 5) ? 2
+							// 								: (amount >= 2.2) ? 1
+							// 									: 0;
 			intensitytest = (current_data.i) ? Math.round(current_data.i) : -5;
 			NA999 = (intensity == 9 && amount == 999) ? "Y" : "NA";
 			NA0999 = (intensity == 0 && amount == 999) ? "Y" : "NA";
@@ -3330,8 +3331,6 @@ function handler(Json) {
 		// 	MAXPGA.intensity = MaxIntensity1;
 		// 	MAXPGA.time = new Date(Json_Time * 1000);
 		// }
-
-		if (intensity < intensitytest) MAXPGA.intensity = intensitytest;
 	}
 
 	if (MAXPGA.station != "NA") {
