@@ -976,6 +976,33 @@
                                             </span>
                                         </label>
                                     </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">Real-time station local information</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-CN">?</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-TW">讀取本地測站資料</span>
+                                                <span class="option-label-id">Real-time.local</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">Real-time station local information and display real-time stations on the map.</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-CN">?</span> <!-- TODO: Untranslated, remove this comment after translation -->
+                                                <span lang="zh-TW">讀取本地測站資料顯示在地圖上的即時測站。</span>
+                                            </span>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="Real-time.local" onclick="CheckSave('Real-time.local')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
                                 </div>
                                 <div class="control-title">
                                     <span lang="en">?</span>
@@ -1493,7 +1520,7 @@
                                                 <span lang="ru">?</span>
                                                 <span lang="zh-CN">?</span>
                                                 <span lang="zh-TW">巴布亞紐幾內亞地圖</span>
-                                                <span class="option-label-id">map.pa</span>
+                                                <span class="option-label-id">map.papua</span>
                                             </span>
                                             <span class="option-label-description">
                                                 <span lang="en">?</span>
@@ -1506,7 +1533,7 @@
                                         </div>
                                         <div class="control">
                                             <label class="md3 checkbox">
-                                                <input type="checkbox" id="map.pa" onclick="CheckSave('map.pa')">
+                                                <input type="checkbox" id="map.papua" onclick="CheckSave('map.papua')">
                                                 <span></span>
                                             </label>
                                         </div>
@@ -1696,6 +1723,33 @@
                                         <div class="control">
                                             <label class="md3 checkbox">
                                                 <input type="checkbox" id="map.gu" onclick="CheckSave('map.gu')">
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <span class="option-label-title">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">巴拿馬地圖</span>
+                                                <span class="option-label-id">map.panama</span>
+                                            </span>
+                                            <span class="option-label-description">
+                                                <span lang="en">?</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">?</span>
+                                                <span lang="zh-TW">在地圖上顯示巴拿馬地圖。</span>
+                                            </span>
+                                        </div>
+                                        <div class="control">
+                                            <label class="md3 checkbox">
+                                                <input type="checkbox" id="map.panama" onclick="CheckSave('map.panama')">
                                                 <span></span>
                                             </label>
                                         </div>
@@ -3050,6 +3104,47 @@
                                         </label>
                                     </div>
                                     <button id="HAReloadButton" class="filled-tonal-button setting-button md3-ripple" onclick="restart()" style="display:none; margin-top: 4px;">
+                                        <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
+                                        <span class="filled-tonal-button-label">
+                                            <span lang="en">Restart</span>
+                                            <span lang="ja">再起動</span>
+                                            <span lang="kr">Restart</span>
+                                            <span lang="ru">Restart</span>
+                                            <span lang="zh-CN">重新啟動</span>
+                                            <span lang="zh-TW">重新啟動</span>
+                                        </span>
+                                    </button>
+                                    <div class="option-container">
+                                        <div class="option-label">
+                                            <div class="option-label-title">
+                                                <span lang="en">3D API</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">3D API</span>
+                                                <span lang="zh-TW">3D API</span>
+                                                <span class="option-label-id">compatibility.3DAPI</span>
+                                            </div>
+                                            <div class="option-label-description">
+                                                <span lang="en">Turns on 3D API, which uses your GPU to make TREM smoother.
+                                                    Turn this off if you are experiencing frame drops.</span>
+                                                <span lang="ja">?</span>
+                                                <span lang="kr">?</span>
+                                                <span lang="ru">?</span>
+                                                <span lang="zh-CN">启用3D API，使用 GPU 让 TREM 跑得更加流畅。
+                                                    如果你遇到了卡顿、帧数下降的问题，请关闭此功能。</span>
+                                                <span lang="zh-TW">啟用3D API，使用 GPU 讓 TREM 跑得更加順暢。
+                                                    如果你遇到了卡頓、幀數下降的問題，請關閉此功能。</span>
+                                            </div>
+                                        </div>
+                                        <label class="md3 switch">
+                                            <input type="checkbox" id="compatibility.3DAPI" onclick="CheckSave('compatibility.3DAPI')">
+                                            <span class="slider">
+                                                <span class="material-symbols-rounded icon">done</span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <button id="3DReloadButton" class="filled-tonal-button setting-button md3-ripple" onclick="restart()" style="display:none; margin-top: 4px;">
                                         <span class="material-symbols-rounded filled-tonal-button-icon">replay</span>
                                         <span class="filled-tonal-button-label">
                                             <span lang="en">Restart</span>

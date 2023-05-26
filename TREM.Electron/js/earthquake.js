@@ -167,7 +167,7 @@ TREM.MapIntensity = {
 
 					if (palertEntry.intensity > this.MaxI) {
 						this.MaxI = palertEntry.intensity;
-						Report = NOW().getTime();
+						Report = rawPalertData.time;
 						ipcMain.emit("ReportGET");
 					}
 				}
@@ -2135,7 +2135,8 @@ async function init() {
 					"in",
 					"TU",
 					"ta",
-					"pa",
+					"papua",
+					"panama",
 					"va",
 					"ec",
 					"af",
@@ -2350,7 +2351,8 @@ async function init() {
 					"in",
 					"TU",
 					"ta",
-					"pa",
+					"papua",
+					"panama",
 					"va",
 					"ec",
 					"af",
@@ -3579,9 +3581,17 @@ async function fetchFiles() {
 		Location = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/TW-EEW/master/locations.json")).json();
 		log("Get Location File", 1, "Location", "fetchFiles");
 		dump({ level: 0, message: "Get Location File", origin: "Location" });
-		station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
-		log("Get Station File", 1, "Location", "fetchFiles");
-		dump({ level: 0, message: "Get Station File", origin: "Location" });
+
+		if (setting["Real-time.local"]) {
+			station = require(path.resolve(__dirname, "../station.json"));
+			log("Get Local Station File", 1, "Location", "fetchFiles");
+			dump({ level: 0, message: "Get Local Station File", origin: "Location" });
+		} else {
+			station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+			log("Get Station File", 1, "Location", "fetchFiles");
+			dump({ level: 0, message: "Get Station File", origin: "Location" });
+		}
+
 		PGAMain();
 	} catch (err) {
 		log(err, 3, "Location", "fetchFiles");
@@ -3596,9 +3606,17 @@ async function fetchFilesbackup() {
 		Location = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/locations.json")).json();
 		log("Get Location backup File", 1, "Location", "fetchFilesbackup");
 		dump({ level: 0, message: "Get Location backup File", origin: "Location" });
-		station = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/station.json")).json();
-		log("Get Station backup File", 1, "Location", "fetchFilesbackup");
-		dump({ level: 0, message: "Get Station backup File", origin: "Location" });
+
+		if (setting["Real-time.local"]) {
+			station = require(path.resolve(__dirname, "../station.json"));
+			log("Get Local Station File", 1, "Location", "fetchFiles");
+			dump({ level: 0, message: "Get Local Station File", origin: "Location" });
+		} else {
+			station = await (await fetch("https://exptech.com.tw/api/v1/file?path=/resource/station.json")).json();
+			log("Get Station backup File", 1, "Location", "fetchFilesbackup");
+			dump({ level: 0, message: "Get Station backup File", origin: "Location" });
+		}
+
 		PGAMain();
 	} catch (err) {
 		console.log(err);
@@ -5195,9 +5213,9 @@ function FCMdata(json, Unit) {
 			+ ":" + now.getMinutes();
 		log("Got Tsunami Warning", 1, "API", "FCMdata");
 		dump({ level: 0, message: "Got Tsunami Warning", origin: "API" });
-		new Notification("海嘯資訊", { body: `${Now0}\n${json.location} 發生 ${json.scale} 地震\n東經: ${json.lon} 度\n北緯: ${json.lat} 度`, icon: "../TREM.ico" });
+		new Notification("海嘯資訊", { body: `${Now0}\n${json.location} 發生 ${json.scale} 地震\n東經: ${json.lon} 度 北緯: ${json.lat} 度`, icon: "../TREM.ico" });
 
-		if (speecd_use) TREM.speech.speak({ text: `海嘯資訊${Now0} ${json.location} 發生 ${json.scale} 地震` });
+		if (speecd_use) TREM.speech.speak({ text: `海嘯資訊${Now0} ${json.location} 發生 ${json.scale.replace(".", "點")} 地震` });
 	} else if (json.type == "tsunami") {
 		TREM.Earthquake.emit("tsunami", json);
 	} else if (json.type == "trem-eq") {

@@ -298,7 +298,9 @@ function init() {
 	})();
 
 	(async () => {
-		station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+		if (setting["Real-time.local"]) station = require(path.resolve(__dirname, "../station.json"));
+		else station = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+
 		const el = document.getElementById("Real-time.station");
 		const el1 = document.getElementById("Real-time.station.1");
 		const el2 = document.getElementById("Real-time.station.2");
@@ -621,6 +623,10 @@ function CheckSave(id) {
 		dump({ level: 0, message: `Value Changed trem-eq.Notification: ${setting["trem-eq.Notification"]} -> false`, origin: "Setting" });
 	}
 
+	if (id == "Real-time.local") {
+		ipcRenderer.send("Mainreloadpage");
+	}
+
 	if (
 		id == "map.jp"
 		|| id == "map.cn"
@@ -631,7 +637,8 @@ function CheckSave(id) {
 		|| id == "map.in"
 		|| id == "map.TU"
 		|| id == "map.ta"
-		|| id == "map.pa"
+		|| id == "map.papua"
+		|| id == "map.panama"
 		|| id == "map.va"
 		|| id == "map.ec"
 		|| id == "map.af"
@@ -643,6 +650,9 @@ function CheckSave(id) {
 
 	if (id == "compatibility.hwaccel")
 		$("#HAReloadButton").fadeIn(100);
+
+	if (id == "compatibility.3DAPI")
+		$("#3DReloadButton").fadeIn(100);
 
 	if (id == "p2p.mode")
 		$("#P2PReloadButton").fadeIn(100);
@@ -763,6 +773,7 @@ function setList(args, el, event) {
 		if (![
 			"P2PReloadButton",
 			"HAReloadButton",
+			"3DReloadButton",
 			"MEReloadButton",
 			"MAPReloadButton",
 			"UDReloadButton",
@@ -772,6 +783,7 @@ function setList(args, el, event) {
 			if (![
 				"P2PReloadButton",
 				"HAReloadButton",
+				"3DReloadButton",
 				"MEReloadButton",
 				"MAPReloadButton",
 				"UDReloadButton",
@@ -801,6 +813,7 @@ function setList(args, el, event) {
 				if (![
 					"P2PReloadButton",
 					"HAReloadButton",
+					"3DReloadButton",
 					"MEReloadButton",
 					"MAPReloadButton",
 					"UDReloadButton",

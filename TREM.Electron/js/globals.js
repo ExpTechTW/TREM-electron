@@ -10,20 +10,20 @@ setting = app.Configuration._data;
 (async () => {
 	await TREM.speech.init().then(data => {
 		TREM.voices = data.voices;
-		console.log("Speech voices is ready", TREM.voices);
+		// console.log("Speech voices is ready", TREM.voices);
 
 		for (const key of Object.keys(TREM.voices))
 			if (TREM.voices[key].name == setting["audio.tts.voices"]) {
 				TREM.speech.setLanguage(TREM.voices[key].lang);
 				TREM.speech.setVoice(setting["audio.tts.voices"]);
-				console.log("Voices changed", TREM.voices[key]);
+				// console.log("Voices changed", TREM.voices[key]);
 			}
 	}).catch(e => {
 		console.error("An error occured while initializing : ", e);
 	});
 
 	TREM.speech.setRate(1.8);
-	console.log("Speech is ready", TREM.speech);
+	// console.log("Speech is ready", TREM.speech);
 })();
 
 ipcRenderer.on("setting", (event, data) => {

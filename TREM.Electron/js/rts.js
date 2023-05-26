@@ -179,8 +179,11 @@ const Real_time_station = () => {
 
 const fetch_files = async () => {
 	try {
-		const res = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
+		let res;
 		const s = {};
+
+		if (app.Configuration.data["Real-time.local"]) res = require(path.resolve(__dirname, "../station.json"));
+		else res = await (await fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")).json();
 
 		if (res) {
 			for (let i = 0, k = Object.keys(res), n = k.length; i < n; i++) {
@@ -325,8 +328,8 @@ const wave = (wave_data) => {
 		charts[i].setOption({
 			animation : false,
 			yAxis     : {
-				max : maxmin < (chartuuids[i].startsWith("H") ? 1000 : 100000) ? (chartuuids[i].startsWith("H") ? 1000 : 100000) : maxmin,
-				min : -(maxmin < (chartuuids[i].startsWith("H") ? 1000 : 100000) ? (chartuuids[i].startsWith("H") ? 1000 : 100000) : maxmin),
+				max : maxmin < (chartuuids[i].startsWith("H") ? 1 : 1000) ? (chartuuids[i].startsWith("H") ? 1 : 1000) : maxmin,
+				min : -(maxmin < (chartuuids[i].startsWith("H") ? 1 : 1000) ? (chartuuids[i].startsWith("H") ? 1 : 1000) : maxmin),
 			},
 			series: [
 				{

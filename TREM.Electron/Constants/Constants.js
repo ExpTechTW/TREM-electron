@@ -40,7 +40,11 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : false,
 		},
-		"map.pa": {
+		"map.papua": {
+			type  : "toggle",
+			value : false,
+		},
+		"map.panama": {
 			type  : "toggle",
 			value : false,
 		},
@@ -116,6 +120,10 @@ const Constants = Object.freeze({
 			type  : "toggle",
 			value : true,
 		},
+		"compatibility.3DAPI": {
+			type  : "toggle",
+			value : true,
+		},
 		"sleep.mode": {
 			type  : "toggle",
 			value : false,
@@ -137,6 +145,10 @@ const Constants = Object.freeze({
 			value : true,
 		},
 		"Real-time.alert": {
+			type  : "toggle",
+			value : false,
+		},
+		"Real-time.local": {
 			type  : "toggle",
 			value : false,
 		},

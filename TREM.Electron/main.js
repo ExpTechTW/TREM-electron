@@ -59,8 +59,14 @@ fs.readFile(path.join(TREM.getPath("userData"), "server.json"), function (err, d
 });
 
 if (!TREM.Configuration.data["compatibility.hwaccel"]) {
+	TREM.disableDomainBlockingFor3DAPIs();
 	TREM.disableHardwareAcceleration();
 	logger.info("Hardware Acceleration is disabled.");
+}
+
+if (!TREM.Configuration.data["compatibility.3DAPI"]) {
+	TREM.disableDomainBlockingFor3DAPIs();
+	logger.info("3D API is disabled.");
 }
 
 /**
@@ -133,6 +139,9 @@ function createWindow() {
 		} else
 			TREM.exit(0);
 	});
+	MainWindow.on("unresponsive", () => {
+		restart();
+	});
 }
 
 function createSettingWindow() {
@@ -178,8 +187,12 @@ function createRTSWindow() {
 		show           : false,
 		icon           : "TREM.ico",
 		webPreferences : {
-			nodeIntegration  : true,
-			contextIsolation : false,
+			preload              : path.join(__dirname, "preload.js"),
+			nodeIntegration      : true,
+			contextIsolation     : false,
+			enableRemoteModule   : true,
+			backgroundThrottling : false,
+			nativeWindowOpen     : true,
 		},
 	})).get("rts");
 	require("@electron/remote/main").enable(RTSWindow.webContents);
@@ -414,6 +427,10 @@ ipcMain.on("reloadpage", () => {
 	if (currentWindow == MainWindow) currentWindow.webContents.reload();
 });
 
+ipcMain.on("Mainreloadpage", () => {
+	MainWindow.reload();
+});
+
 ipcMain.on("openChildWindow", async (event, arg) => {
 	await createSettingWindow();
 });
@@ -495,7 +512,8 @@ ipcMain.on("config:value", (event, key, value) => {
 		case "map.in":
 		case "map.TU":
 		case "map.ta":
-		case "map.pa":
+		case "map.papua":
+		case "map.panama":
 		case "map.va":
 		case "map.ec":
 		case "map.af":
@@ -635,6 +653,11 @@ ipcMain.on("screenshotEEW", async (event, json) => {
 	// }
 	const filename = `${json.Function}_${json.ID}_${json.Version}_${json.Time}_${json.Shot}.png`;
 	fs.writeFileSync(path.join(folder, filename), (await MainWindow.webContents.capturePage()).toPNG());
+
+	if (RTSWindow) {
+		const filenameRTS = `${json.Function}_${json.ID}_${json.Version}_${json.Time}_${json.Shot}_RTS.png`;
+		fs.writeFileSync(path.join(folder, filenameRTS), (await RTSWindow.webContents.capturePage()).toPNG());
+	}
 });
 
 ipcMain.on("screenshotEEWI", async (event, json) => {
