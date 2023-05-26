@@ -623,9 +623,8 @@ function CheckSave(id) {
 		dump({ level: 0, message: `Value Changed trem-eq.Notification: ${setting["trem-eq.Notification"]} -> false`, origin: "Setting" });
 	}
 
-	if (id == "Real-time.local") {
+	if (id == "Real-time.local")
 		ipcRenderer.send("Mainreloadpage");
-	}
 
 	if (
 		id == "map.jp"
