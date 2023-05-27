@@ -3310,6 +3310,27 @@ function handler(Json) {
 					else Json_temp.area = [station[uuid].area];
 
 					TREM.MapArea2.setArea(Json_temp);
+
+					setTimeout(() => {
+						ipcRenderer.send("screenshotEEW", {
+							Function : "station",
+							ID       : 1,
+							Version  : 1,
+							Time     : NOW().getTime(),
+							Shot     : 1,
+						});
+					}, 250);
+
+					if (setting["Real-time.show"]) win.showInactive();
+
+					if (setting["Real-time.cover"])
+						if (!win.isFullScreen()) {
+							win.setAlwaysOnTop(true);
+							win.focus();
+							win.setAlwaysOnTop(false);
+						}
+
+					if (!win.isFocused()) win.flashFrame(true);
 				}
 
 			intensitytag = -1;
