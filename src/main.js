@@ -31,17 +31,19 @@ app.setLoginItemSettings({
 
 function createWindow() {
   MainWindow = new BrowserWindow({
-    title          : "Taiwan Real-time Earthquake Monitoring",
-    width          : 1280,
-    minWidth       : 854,
-    height         : 720,
-    minHeight      : 480,
-    resizable      : true,
-    frame          : false,
-    show           : false,
-    icon           : "TREM.ico",
-    webPreferences : {
-      preload              : path.join(__dirname, "scripts", "preload.js"),
+    title              : "Taiwan Real-time Earthquake Monitoring",
+    width              : 1200,
+    minWidth           : 1200,
+    height             : 720,
+    minHeight          : 720,
+    resizable          : true,
+    show               : false,
+    icon               : "TREM.ico",
+    backgroundMaterial : "mica",
+    autoHideMenuBar    : true,
+    webPreferences     : {
+      nodeIntegration      : true,
+      contextIsolation     : false,
       backgroundThrottling : false
     },
   });
@@ -61,8 +63,7 @@ function createWindow() {
   MainWindow.on("unmaximize", () => MainWindow.webContents.send("window-state-change", false));
 
   process.env.window = MainWindow.id;
-  // MainWindow.loadFile("./views/index.html");
-  MainWindow.loadURL("http://localhost:1234/");
+  MainWindow.loadFile("./views/index.html");
   // MainWindow.setMenu(null);
   MainWindow.webContents.on("did-finish-load", () => {
 

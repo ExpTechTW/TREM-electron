@@ -1,0 +1,58 @@
+@import url("./icon.css");
+
+nav {
+  display: grid;
+  gap: 8px;
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
+nav > button {
+  all: unset;
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  opacity: .6;
+  color: var(--md-background);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity .2s,
+              width .2s;
+}
+
+nav > button::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background-color: var(--md-on-background);
+  pointer-events: none;
+  isolation: isolate;
+  z-index: -1;
+}
+
+nav > button > .icon {
+  margin: 8px;
+  font-size: 24px;
+  line-height: 24px;
+}
+
+nav > button > .nav-button-text {
+  opacity: 0;
+  transition: opacity .2s;
+}
+
+nav > button:hover {
+  width: 100%;
+  opacity: 1;
+}
+
+nav > button:hover > .nav-button-text {
+  opacity: 1;
+  margin-right: 16px;
+}

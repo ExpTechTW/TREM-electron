@@ -1,0 +1,8 @@
+.rts-marker {
+  all: unset;
+  height: 8px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  outline: 1px solid var(--md-outline);
+  overflow: hidden;
+}

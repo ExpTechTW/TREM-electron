@@ -1,0 +1,32 @@
+:root {
+ --md-primary: var(--md-primary-light);
+ --md-on-primary: var(--md-on-primary-light);
+ --md-primary-container: var(--md-primary-container-light);
+ --md-on-primary-container: var(--md-on-primary-container-light);
+ --md-secondary: var(--md-secondary-light);
+ --md-on-secondary: var(--md-on-secondary-light);
+ --md-secondary-container: var(--md-secondary-container-light);
+ --md-on-secondary-container: var(--md-on-secondary-container-light);
+ --md-tertiary: var(--md-tertiary-light);
+ --md-on-tertiary: var(--md-on-tertiary-light);
+ --md-tertiary-container: var(--md-tertiary-container-light);
+ --md-on-tertiary-container: var(--md-on-tertiary-container-light);
+ --md-error: var(--md-error-light);
+ --md-error-container: var(--md-error-container-light);
+ --md-on-error: var(--md-on-error-light);
+ --md-on-error-container: var(--md-on-error-container-light);
+ --md-background: var(--md-background-light);
+ --md-on-background: var(--md-on-background-light);
+ --md-surface: var(--md-surface-light);
+ --md-on-surface: var(--md-on-surface-light);
+ --md-surface-variant: var(--md-surface-variant-light);
+ --md-on-surface-variant: var(--md-on-surface-variant-light);
+ --md-outline: var(--md-outline-light);
+ --md-inverse-on-surface: var(--md-inverse-on-surface-light);
+ --md-inverse-surface: var(--md-inverse-surface-light);
+ --md-inverse-primary: var(--md-inverse-primary-light);
+ --md-shadow: var(--md-shadow-light);
+ --md-surface-tint: var(--md-surface-tint-light);
+ --md-outline-variant: var(--md-outline-variant-light);
+ --md-scrim: var(--md-scrim-light);
+}

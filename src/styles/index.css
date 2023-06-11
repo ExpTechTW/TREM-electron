@@ -1,0 +1,24 @@
+@import url("nav.css");
+@import url("map.css");
+
+body {
+  display: grid;
+  height: 100svh;
+  width: 100svw;
+  margin: 0;
+  color: var(--md-on-background);
+  background-color: var(--md-background);
+  font-family: "Noto Sans TC", sans-serif;
+  overflow: hidden;
+}
+
+.overlay-container {
+  position: relative;
+  z-index: 4294967296;
+}
+
+.map-container {
+  display: grid;
+  height: 100%;
+  width: 100%;
+}

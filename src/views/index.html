@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TREM</title>
+  <link rel="stylesheet" href="../styles/theme/theme.css">
+  <link rel="stylesheet" href="../styles/index.css">
+  <link rel="stylesheet" href="../node_modules/maplibre-gl/dist/maplibre-gl.css">
+</head>
+<body>
+  <div id="app-container">
+    <div class="overlay-container">
+      <nav>
+        <button id="reports" type="button"><div class="icon">earthquake</div><div class="nav-button-text">地震</div></button>
+        <button id="forecast" type="button"><div class="icon">rainy</div><div class="nav-button-text">天氣</div></button>
+        <button id="temperature" type="button"><div class="icon">thermostat</div><div class="nav-button-text">溫度</div></button>
+      </nav>
+    </div>
+    <div class="map-container">
+      <div id="map"></div>
+    </div>
+  </div>
+  <script>
+    require("../scripts/renderer.js");
+  </script>
+</body>
+</html>

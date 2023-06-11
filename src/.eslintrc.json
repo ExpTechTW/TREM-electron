@@ -15,6 +15,7 @@
   "rules": {
     "arrow-body-style": "warn",
     "arrow-spacing": ["warn", { "before": true, "after": true }],
+    "arrow-parens": ["warn", "always"],
     "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
     "comma-spacing": "error",
     "comma-style": "error",

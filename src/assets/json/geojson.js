@@ -1,5 +1,5 @@
-import tw_county from "./tw_county.json";
-import tw_town from "./tw_town.json";
-import area from "./area.json";
+const tw_county = require("./tw_county.json");
+const tw_town = require("./tw_town.json");
+const area = require("./area.json");
 
-export default { area, tw_county, tw_town };
+module.exports = { area, tw_county, tw_town };

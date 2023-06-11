@@ -1,6 +1,6 @@
-export default Object.freeze({
+module.exports = Object.freeze({
   WebSocketTargetUrl : "wss://exptech.com.tw/api",
-  intensities        : [
+  Intensities        : [
     { value: 0, label: "0", text: "０級" },
     { value: 1, label: "1", text: "１級" },
     { value: 2, label: "2", text: "２級" },
@@ -12,6 +12,9 @@ export default Object.freeze({
     { value: 8, label: "6+", text: "６強" },
     { value: 9, label: "7", text: "７級" }
   ],
+  DefaultViewBounds: [
+
+  ],
   // 104.41103392
-  pixelRatio: 104.41103392
+  PixelRatio: 104.41103392
 });

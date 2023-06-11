@@ -1,3 +1,5 @@
+const { Marker } = require("maplibre-gl");
+
 const cross = (options) => {
   const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
@@ -25,4 +27,10 @@ const cross = (options) => {
   return group;
 };
 
-export default cross;
+const rtsMarkerElement = () => {
+  const div = document.createElement("div");
+  div.className = "rts-marker";
+  return div;
+};
+
+module.exports = { cross, rtsMarkerElement };
