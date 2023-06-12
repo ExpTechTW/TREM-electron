@@ -21,7 +21,7 @@ const setMapLayers = (map) => {
     layout : {},
     paint  : {
       "fill-color"   : Colors.MapBackgroundColor,
-      "fill-opacity" : 0.16
+      "fill-opacity" : 1
     }
   });
 

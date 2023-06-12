@@ -1,7 +1,8 @@
+const { renderRtsData } = require("./helpers/map");
+const { v4 } = require("uuid");
 const EventEmitter = require("node:events");
 const WebSocket = require("ws");
 const constants = require("./constants");
-const { renderRtsData } = require("./helpers/map");
 
 class api extends EventEmitter {
   constructor(key, map) {
@@ -18,8 +19,11 @@ class api extends EventEmitter {
       if (this.ws.readyState == this.ws.OPEN) {
         console.debug("socket opened");
 
+        if (!localStorage.uuid)
+          localStorage.setItem("uuid", v4());
+
         const config = {
-          uuid     : localStorage.UUID + "-rts",
+          uuid     : localStorage.uuid + "-rts",
           function : "subscriptionService",
           value    : ["trem-rts-v2", "trem-eew-v1"],
           key      : this.key,
@@ -55,6 +59,23 @@ class api extends EventEmitter {
       }
 
       console.log();
+    });
+  }
+
+  getReports() {
+    return new Promise((resolve, reject) => {
+      fetch("https://exptech.com.tw/api/v3/earthquake/reports", {
+        method  : "GET",
+        headers : {
+          Accept         : "application/json",
+          "Content-Type" : "application/json",
+        }
+      }).then((res) => {
+        if (res.ok)
+          resolve(res.json());
+        else
+          reject(`${res.status} ${res.statusText}`);
+      });
     });
   }
 }

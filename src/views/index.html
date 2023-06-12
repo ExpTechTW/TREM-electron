@@ -15,12 +15,29 @@
         <button id="reports" type="button"><div class="icon">earthquake</div><div class="nav-button-text">地震</div></button>
         <button id="forecast" type="button"><div class="icon">rainy</div><div class="nav-button-text">天氣</div></button>
         <button id="temperature" type="button"><div class="icon">thermostat</div><div class="nav-button-text">溫度</div></button>
+        <button id="aqi" type="button"><div class="icon">masks</div><div class="nav-button-text">空氣品質</div></button>
+        <button id="settings" type="button"><div class="icon">settings</div><div class="nav-button-text">設定</div></button>
       </nav>
     </div>
     <div class="map-container">
       <div id="map"></div>
     </div>
   </div>
+
+
+  <svg id="svg-defs">
+    <defs>
+      <radialGradient id="pred-gradient">
+        <stop class="pred-start" offset="0%" />
+        <stop class="pred-stop" offset="100%" />
+      </radialGradient>
+      <radialGradient id="alert-gradient">
+        <stop class="alert-start" offset="0%" />
+        <stop class="alert-stop" offset="100%" />
+      </radialGradient>
+    </defs>
+  </svg>
+  
   <script>
     require("../scripts/renderer.js");
   </script>

@@ -1,5 +1,6 @@
-import constants from "../constants";
-import cross from "../factory";
+const { Map } = require("maplibre-gl");
+const { cross } = require("../factory");
+const constants = require("../constants");
 
 class Wave {
 
@@ -26,21 +27,31 @@ class Wave {
 
     this._initialZoom = this.map.getZoom();
 
-    const radiusPx = (this.radius * 2000) / (this._initialZoom * constants.pixelRatio);
+    const radiusPx = (this.radius * 2000) / (this._initialZoom * constants.PixelRatio);
 
     if (circle) {
       this._circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      this._circle.id = "test-circle";
       this._circle.setAttribute("cx", centerPx.x);
       this._circle.setAttribute("cy", centerPx.y);
       this._circle.setAttribute("r", radiusPx);
 
       if (this.type == "p") {
-        this._circle.style.fill = "transparent";
         this._circle.style.stroke = "cyan";
       } else {
-        this._circle.style.fill = "url(#pred-gradient)";
+        this._svgBackground = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        this._svgBackground.style.position = "absolute";
+        this._svgBackground.style.pointerEvents = "none";
+        this._svgBackground.style.height = "100%";
+        this._svgBackground.style.width = "100%";
+
+        this._circleBackground = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        this._circleBackground.setAttribute("cx", centerPx.x);
+        this._circleBackground.setAttribute("cy", centerPx.y);
+        this._circleBackground.setAttribute("r", radiusPx);
+        this._circleBackground.style.fill = "url(#pred-gradient)";
         this._circle.style.stroke = "orange";
+
+        this._svgBackground.appendChild(this._circleBackground);
       }
 
       this._svg.appendChild(this._circle);
@@ -64,6 +75,8 @@ class Wave {
       this._svg.appendChild(this._cross);
     }
 
+    if (this._svgBackground)
+      this.map.getCanvasContainer().prepend(this._svgBackground);
     this.map.getCanvasContainer().appendChild(this._svg);
 
     const anims = document.getAnimations();
@@ -79,12 +92,18 @@ class Wave {
   _updateCircle() {
     const center = this.map.project(this.lnglat);
     const zoom = this.map.getZoom();
-    const radius = (this.radius * 2000) / ((this._initialZoom * constants.pixelRatio) * Math.pow(2, this._initialZoom - zoom));
+    const radius = (this.radius * 2000) / ((this._initialZoom * constants.PixelRatio) * Math.pow(2, this._initialZoom - zoom));
 
     if (this._circle) {
       this._circle.setAttribute("cx", center.x);
       this._circle.setAttribute("cy", center.y);
       this._circle.setAttribute("r", radius);
+    }
+
+    if (this._circleBackground) {
+      this._circleBackground.setAttribute("cx", center.x);
+      this._circleBackground.setAttribute("cy", center.y);
+      this._circleBackground.setAttribute("r", radius);
     }
 
     if (this._cross)
@@ -107,13 +126,17 @@ class Wave {
   }
 
   setAlert(hasAlerted) {
-    if (this._circle) {
-      this._circle.style.fill = hasAlerted ? "url(#alert-gradient)" : "url(#pred-gradient)";
+    if (this._circle)
       this._circle.style.stroke = hasAlerted ? "red" : "orange";
-    }
+
+    if (this._circleBackground)
+      this._circleBackground.style.fill = hasAlerted ? "url(#alert-gradient)" : "url(#pred-gradient)";
   }
 
   remove() {
+    if (this._circleBackground)
+      this._circleBackground.remove();
+
     if (this._circle)
       this._circle.remove();
 
@@ -124,4 +147,4 @@ class Wave {
   }
 }
 
-export default Wave;
+module.exports = Wave;

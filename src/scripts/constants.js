@@ -1,3 +1,7 @@
+const { Map } = require("maplibre-gl");
+
+let _pixelRatio;
+
 module.exports = Object.freeze({
   WebSocketTargetUrl : "wss://exptech.com.tw/api",
   Intensities        : [
@@ -15,6 +19,5 @@ module.exports = Object.freeze({
   DefaultViewBounds: [
 
   ],
-  // 104.41103392
-  PixelRatio: 104.41103392
+  PixelRatio: 98.5
 });
