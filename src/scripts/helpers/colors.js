@@ -10,7 +10,7 @@ module.exports = {
     return shouldUseDarkColor() ? "#43474e" : "#43474e";
   },
   get MapOutlineColor() {
-    return shouldUseDarkColor() ? "#8d9199" : "#73777f";
+    return shouldUseDarkColor() ? "#bcc7db" : "#545f70";
   },
   get NoDataRtsColor() {
     return shouldUseDarkColor() ? "#5b5e66" : "#a8abb4";
