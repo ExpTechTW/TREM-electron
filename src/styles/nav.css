@@ -8,6 +8,7 @@ nav {
   top: 8px;
   left: 8px;
   height: calc(100svh - 16px);
+  pointer-events: none;
 }
 
 nav > button {
@@ -22,6 +23,7 @@ nav > button {
   color: var(--md-background);
   white-space: nowrap;
   cursor: pointer;
+  pointer-events: initial;
   transition: opacity .2s,
               width .2s;
 }
