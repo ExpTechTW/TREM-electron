@@ -6,10 +6,9 @@ const WebSocket = require("ws");
 const constants = require("./constants");
 
 class api extends EventEmitter {
-  constructor(key, map) {
+  constructor(key) {
     super();
     this.key = key;
-    this.map = map;
     this.initWebSocket();
   }
 
@@ -47,11 +46,11 @@ class api extends EventEmitter {
 
       switch (data.type) {
         case "trem-rts": {
-          renderRtsData(data.raw, this.map);
+          this.emit("rts", data.raw);
           break;
         }
 
-        case "ntp":break;
+        case "ntp": break;
 
         default: {
           console.log(data.response);

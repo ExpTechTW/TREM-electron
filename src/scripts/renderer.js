@@ -1,6 +1,7 @@
 const maplibre = require("maplibre-gl");
-const { setMapLayers, setDefaultMapView } = require("./helpers/map");
+const { setMapLayers, setDefaultMapView, renderRtsData } = require("./helpers/map");
 const Wave = require("./classes/wave");
+const api = new (require("./api"))(localStorage.getItem("key"));
 const map = new maplibre.Map({
   container         : document.getElementById("map"),
   center            : [120.5, 23.6],
@@ -14,8 +15,8 @@ const map = new maplibre.Map({
 setMapLayers(map);
 setDefaultMapView(map);
 
-const api = new (require("./api"))("", map);
 
+api.on("rts", (rts) => renderRtsData(rts, map));
 api.getReports().then(console.log);
 
 // test
