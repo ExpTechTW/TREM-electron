@@ -1,5 +1,6 @@
 const { renderRtsData } = require("./helpers/map");
 const { v4 } = require("uuid");
+const { createHash } = require("node:crypto");
 const EventEmitter = require("node:events");
 const WebSocket = require("ws");
 const constants = require("./constants");
@@ -64,18 +65,54 @@ class api extends EventEmitter {
 
   getReports() {
     return new Promise((resolve, reject) => {
-      fetch("https://exptech.com.tw/api/v3/earthquake/reports", {
-        method  : "GET",
-        headers : {
-          Accept         : "application/json",
-          "Content-Type" : "application/json",
-        }
-      }).then((res) => {
-        if (res.ok)
-          resolve(res.json());
-        else
-          reject(`${res.status} ${res.statusText}`);
-      });
+      caches.match("https://exptech.com.tw/api/v3/earthquake/reports")
+        .then(async (response) => {
+          const list = {};
+
+          const data = response ? await response.json() : [];
+
+          if (data.length)
+            for (const report of data) {
+              const md5 = createHash("md5");
+              list[report.identifier] = md5.update(JSON.stringify(report)).digest("hex");
+            }
+
+
+          const request = new Request("https://exptech.com.tw/api/v3/earthquake/reports", {
+            method  : "POST",
+            headers : {
+              Accept         : "application/json",
+              "Content-Type" : "application/json",
+            },
+            body: JSON.stringify({
+              key: this.key,
+              list
+            })
+          });
+
+          fetch(request).then(async (res) => {
+            if (res.ok) {
+              const resData = await res.json();
+              const dataToSave = data.concat(resData).filter((v, i, a) => a.map((r) => r.identifier).indexOf(v.identifier) == i);
+              const jsonResponse = new Response(JSON.stringify(dataToSave), {
+                headers: {
+                  "content-type": "application/json"
+                }
+              });
+
+              console.log(resData, dataToSave);
+              caches
+                .open("reports")
+                .then((cache) => {
+                  cache
+                    .put(request.url, jsonResponse)
+                    .then(() => resolve(res));
+                });
+            } else {
+              reject(`${res.status} ${res.statusText}`);
+            }
+          });
+        });
     });
   }
 }
