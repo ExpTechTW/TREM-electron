@@ -99,16 +99,20 @@ class api extends EventEmitter {
                 }
               });
 
-              console.log(resData, dataToSave);
               caches
                 .open("reports")
                 .then((cache) => {
-                  cache
-                    .put(request.url, jsonResponse)
-                    .then(() => resolve(res));
+                  cache.put(request.url, jsonResponse)
+                    .then(() => cache.match(request.url))
+                    .then((r) => r.json())
+                    .then((r) => {
+                      r.isCache = !resData.length;
+                      resolve(r);
+                    });
                 });
             } else {
-              reject(`${res.status} ${res.statusText}`);
+              data.isCache = true;
+              resolve();
             }
           });
         });
