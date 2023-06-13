@@ -1,4 +1,5 @@
 const { BrowserWindow, Menu, Notification, app, Tray, ipcMain, nativeImage, shell } = require("electron");
+const electronPushReceiver = require("electron-fcm-push-receiver");
 const path = require("path");
 
 let _hide = false;
@@ -65,8 +66,10 @@ function createWindow() {
   process.env.window = MainWindow.id;
   MainWindow.loadFile("./views/index.html");
   // MainWindow.setMenu(null);
-  MainWindow.webContents.on("did-finish-load", () => {
 
+  electronPushReceiver.setup(MainWindow.webContents);
+
+  MainWindow.webContents.on("did-finish-load", () => {
     if (!_hide) setTimeout(() => MainWindow.show(), 500);
   });
 

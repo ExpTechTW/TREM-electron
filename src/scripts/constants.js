@@ -1,9 +1,6 @@
-const { Map } = require("maplibre-gl");
-
-let _pixelRatio;
-
 module.exports = Object.freeze({
   WebSocketTargetUrl : "wss://exptech.com.tw/api",
+  FCMSenderId        : "583094702393",
   Intensities        : [
     { value: 0, label: "0", text: "０級" },
     { value: 1, label: "1", text: "１級" },

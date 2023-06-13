@@ -65,6 +65,7 @@
   "dependencies": {
     "@material/material-color-utilities": "^0.2.3",
     "chroma-js": "^2.4.2",
+    "electron-fcm-push-receiver": "^2.1.7",
     "maplibre-gl": "^2.4.0",
     "uuid": "^9.0.0",
     "ws": "^8.13.0"
