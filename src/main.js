@@ -1,4 +1,4 @@
-const { BrowserWindow, Menu, Notification, app, Tray, ipcMain, nativeImage, shell } = require("electron");
+const { BrowserWindow, Menu, Notification, app, Tray, ipcMain, nativeImage, shell, powerMonitor, powerSaveBlocker } = require("electron");
 const electronPushReceiver = require("electron-fcm-push-receiver");
 const path = require("path");
 
@@ -105,9 +105,22 @@ if (!shouldQuit) {
   app.on("second-instance", (event, argv, cwd) => {
     if (MainWindow != null) MainWindow.show();
   });
+  let psb;
   app.whenReady().then(() => {
     // trayIcon();
     createWindow();
+    powerMonitor.on("lock-screen", () => {
+      if (psb != null) powerSaveBlocker.stop(psb);
+      psb = powerSaveBlocker.start("prevent-display-sleep");
+    });
+    powerMonitor.on("suspend", () => {
+      if (psb != null) powerSaveBlocker.stop(psb);
+      powerSaveBlocker.start("prevent-app-suspension");
+    });
+    powerMonitor.on("resume", () => {
+      if (psb != null) powerSaveBlocker.stop(psb);
+      psb = null;
+    });
   });
 }
 
