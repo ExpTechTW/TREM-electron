@@ -64,7 +64,7 @@ class api extends EventEmitter {
 
   getReports() {
     return new Promise((resolve, reject) => {
-      caches.match("https://exptech.com.tw/api/v3/earthquake/reports")
+      caches.match(constants.API.ReportsURL)
         .then(async (response) => {
           const list = {};
 
@@ -77,7 +77,7 @@ class api extends EventEmitter {
             }
 
 
-          const request = new Request("https://exptech.com.tw/api/v3/earthquake/reports", {
+          const request = new Request(constants.API.ReportsURL, {
             method  : "POST",
             headers : {
               Accept         : "application/json",

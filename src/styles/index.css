@@ -1,5 +1,27 @@
 @import url("nav.css");
 @import url("map.css");
+@import url("panels.css");
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgba(0 0 0 / 16%);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background-color: var(--md-outline);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--md-on-surface);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--md-secondary);
+}
 
 body {
   display: grid;
@@ -8,7 +30,7 @@ body {
   margin: 0;
   color: var(--md-on-background);
   background-color: var(--md-background);
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: Lato, "Noto Sans TC", sans-serif;
   overflow: hidden;
 }
 

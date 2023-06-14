@@ -15,7 +15,7 @@ module.exports = {
   get NoDataRtsColor() {
     return shouldUseDarkColor() ? "#5b5e66" : "#a8abb4";
   },
-  IntensityColor(int) {
+  getIntensityColor(int) {
     return Number.isFinite(int) ? i(int) : "transparent";
   }
 };

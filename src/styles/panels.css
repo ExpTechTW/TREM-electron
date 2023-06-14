@@ -1,0 +1,10 @@
+@import url("./panels/reports.css");
+
+.panel {
+  position: absolute;
+}
+
+.scroll-wrapper {
+  height: inherit;
+  overflow: auto;
+}

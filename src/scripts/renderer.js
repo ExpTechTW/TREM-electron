@@ -5,6 +5,7 @@ const Wave = require("./classes/wave");
 const api = new (require("./api"))(localStorage.getItem("key"));
 const maplibre = require("maplibre-gl");
 const constants = require("./constants");
+const { switchView } = require("./helpers/ui");
 
 const map = new maplibre.Map({
   container         : document.getElementById("map"),
@@ -31,7 +32,16 @@ ipcRenderer.on(NOTIFICATION_RECEIVED, (_, Notification) => {
 });
 
 api.on("rts", (rts) => renderRtsData(rts, map));
-api.getReports().then(console.log);
+setInterval(() => {
+  api.getReports().then(console.log);
+}, 60_000);
+
+
+// element handlers
+
+for (const btn of document.querySelectorAll("nav > button"))
+  btn.addEventListener("click", () => switchView(btn.id, map));
+
 
 // test
 const w = new Wave(map, {
@@ -41,7 +51,7 @@ const w = new Wave(map, {
 });
 let t = 0;
 setInterval(() => {
-  if (t > 300)
+  if (t > 600)
     w.remove();
   else
     w.setRadius(w.radius + 0.15);

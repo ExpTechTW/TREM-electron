@@ -3,6 +3,7 @@ const { rtsMarkerElement } = require("../factory");
 const { tw_county } = require("../../assets/json/geojson");
 const Colors = require("./colors");
 const data = require("../file.js");
+const constants = require("../constants");
 
 /**
  * @param {Map} map
@@ -47,12 +48,12 @@ const renderRtsData = (rts, map) => {
     if (element == null) {
       const marker = rtsMarkerElement();
       marker.id = uuid;
-      marker.style.backgroundColor = Colors.IntensityColor(rts[id]?.i);
+      marker.style.backgroundColor = Colors.getIntensityColor(rts[id]?.i);
       marker.style.outlineColor = id in rts ? "" : Colors.NoDataRtsColor;
       marker.style.zIndex = (rts[id]?.v ?? 0.01) * 100;
       new Marker({ element: marker }).setLngLat([station.Long, station.Lat]).addTo(map);
     } else {
-      element.style.backgroundColor = Colors.IntensityColor(rts[id]?.i);
+      element.style.backgroundColor = Colors.getIntensityColor(rts[id]?.i);
       element.style.outlineColor = id in rts ? "" : Colors.NoDataRtsColor;
       element.style.zIndex = (rts[id]?.v ?? 0.01) * 100;
     }
@@ -60,7 +61,9 @@ const renderRtsData = (rts, map) => {
 };
 
 const setDefaultMapView = (map) => {
-  map.fitBounds([[119.4, 25.35], [122.22, 21.9]]);
+  map.fitBounds(constants.TaiwanBounds, {
+    padding: 24
+  });
 };
 
 module.exports = { setMapLayers, renderRtsData, setDefaultMapView };

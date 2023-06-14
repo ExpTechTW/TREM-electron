@@ -1,0 +1,301 @@
+#reports-panel {
+  top: 0;
+  right: -320px;
+  height: calc(100svh - 20px);
+  width: 300px;
+  margin: 8px;
+  margin-right: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  overflow: hidden;
+  user-select: none;
+  transition: right .2s;
+}
+
+#reports-panel.show {
+  right: 0;
+}
+
+#reports-list {
+  display: grid;
+  padding-right: 4px;
+  border-radius: 8px;
+  color: var(--md-on-surface);
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.report-item {
+  position: relative;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.report-item::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  height: 4px;
+  width: 100%;
+}
+
+#reports-panel::before,
+.report-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background-color: var(--md-surface-variant);
+  pointer-events: none;
+  isolation: isolate;
+  z-index: -1;
+  transition: opacity .1s;
+}
+
+#reports-panel::before {
+  opacity: .4;
+}
+
+.report-item::before {
+  opacity: .6;
+}
+
+.report-item,
+.report-cross g {
+  transition: opacity .1s;
+}
+
+.report-item:last-child {
+  margin-bottom: 4px;
+}
+
+.report-item.hightligh,
+.report-item:hover {
+  opacity: 1;
+}
+
+.report-item:first-child {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  grid-template-rows: repeat(3, 24px);
+  align-items: center;
+  padding: 4px;
+  padding-right: 8px;
+}
+
+.report-item:not(:first-child) {
+  display: grid;
+  grid-template-columns: 56px auto min-content;
+  grid-template-rows: repeat(2, 24px);
+  align-items: center;
+  padding: 4px;
+  padding-right: 8px;
+}
+
+#reports-list:has(> .report-item.hightlight) > .report-item:not(.hightlight),
+#reports-list:has(> .report-item:hover) > .report-item:not(:hover) {
+  opacity: .4;
+}
+
+.report-cross {
+  padding: 1px;
+  cursor: pointer;
+}
+
+.report-cross:hover g,
+.report-cross.hightlight g {
+  opacity: 1 !important;
+} 
+
+.maplibregl-canvas-container:has(>.report-cross:hover) > .report-cross:not(:hover) g,
+.maplibregl-canvas-container:has(>.report-cross.hightlight) > .report-cross:not(.hightlight) g {
+  opacity: .1 !important;
+} 
+
+.report-color {
+  position: relative;
+  border: 3px solid #000;
+  border-radius: 8px;
+}
+
+.report-location {
+  font-weight: 500px;
+}
+
+.report-time {
+  color: var(--md-on-surface-variant);
+}
+
+.report-magnitude,
+.report-depth {
+  font-size: 18px;
+  line-height: 18px;
+}
+
+.report-magnitude::before {
+  content: "M";
+  margin-right: 4px;
+  color: var(--md-outline);
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.report-depth::after {
+  content: "㎞";
+  margin-left: 4px;
+  color: var(--md-outline);
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.report-item:first-child > .report-color {
+  grid-area: 1 / 1 / 4 / 2;
+  height: 66px;
+  width: 66px;
+}
+
+.report-item:first-child > .report-location {
+  grid-area: 1 / 2 / 2 / 4;
+  font-size: 20px;
+  line-height: 20px;
+}
+
+.report-item:first-child > .report-time {
+  grid-area: 2 / 2 / 3 / 4;
+}
+
+.report-item:first-child > .report-magnitude {
+  grid-area: 3 / 2 / 4 / 3;
+}
+
+.report-item:first-child > .report-depth {
+  grid-area: 3 / 3 / 4 / 4;
+}
+
+.report-item:not(:first-child) > .report-color {
+  grid-area: 1 / 1 / 3 / 2;
+  height: 42px;
+  width: 42px;
+}
+
+.report-item:not(:first-child) > .report-location {
+  grid-area: 1 / 2 / 2 / 3;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.report-item:not(:first-child) > .report-time {
+  grid-area: 2 / 2 / 3 / 3;
+}
+
+.report-item:not(:first-child) > .report-magnitude {
+  grid-area: 1 / 3 / 3 / 4;
+  text-align: right;
+}
+
+.report-item:not(:first-child) > .report-depth {
+  display: none;
+}
+
+.report-color::before,
+.report-color::after {
+  left: 50%;
+  translate: -50%;
+  color: var(--md-on-surface);
+  font-weight: 700;
+  font-size: 24px;
+  text-shadow: 0 0 24px var(--md-on-surface);
+  line-height: 42px;
+}
+
+.report-color.has-number {
+  background-color: #ffc96b33;
+}
+
+.report-color.has-number::before,
+.report-color.has-number::after {
+  color: #ffc96b;
+}
+
+.report-color::after {
+  padding-left: 18px;
+  font-size: 16px;
+  line-height: 34px;
+}
+
+.report-item:first-child > .report-color::before {
+  font-size: 36px;
+  line-height: 66px;
+}
+
+.report-item:first-child > .report-color::after {
+  padding-left: 24px;
+  font-size: 28px;
+  line-height: 52px;
+}
+
+.int-0::before {
+  content: "0";
+  position: absolute;
+}
+
+.int-1::before {
+  content: "1";
+  position: absolute;
+}
+
+.int-2::before {
+  content: "2";
+  position: absolute;
+}
+
+.int-3::before {
+  content: "3";
+  position: absolute;
+}
+
+.int-4::before {
+  content: "4";
+  position: absolute;
+}
+
+.int-5::before,
+.int-6::before {
+  content: "5";
+  position: absolute;
+  padding-right: 2px;
+}
+
+.int-7::before,
+.int-8::before {
+  content: "6";
+  position: absolute;
+  padding-right: 2px;
+}
+
+.report-item:first-child > .int-5::before,
+.report-item:first-child > .int-6::before,
+.report-item:first-child > .int-7::before,
+.report-item:first-child > .int-8::before {
+  padding-right: 8px;
+}
+
+.int-9::before {
+  content: "7";
+  position: absolute;
+}
+
+.int-5::after,
+.int-7::after {
+  content: "−";
+  position: absolute;
+}
+
+.int-6::after,
+.int-8::after {
+  content: "+";
+  position: absolute;
+}
