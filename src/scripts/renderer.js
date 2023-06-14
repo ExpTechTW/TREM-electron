@@ -44,17 +44,26 @@ for (const btn of document.querySelectorAll("nav > button"))
 
 
 // test
-const w = new Wave(map, {
+const p = new Wave(map, {
+  type   : "p",
+  center : [120.8369472, 23.6996454],
+  radius : 22
+});
+const s = new Wave(map, {
   type   : "s",
   center : [120.8369472, 23.6996454],
   radius : 10
 });
 let t = 0;
 setInterval(() => {
-  if (t > 600)
-    w.remove();
-  else
-    w.setRadius(w.radius + 0.15);
+  if (t > 600) {
+    p.remove();
+    s.remove();
+  } else {
+    p.setRadius(p.radius + 0.22);
+    s.setRadius(s.radius + 0.14);
+  }
+
   t++;
 }, 100);
 

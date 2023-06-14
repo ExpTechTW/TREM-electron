@@ -25,6 +25,10 @@ circle {
   fill: var(--md-on-background)
 }
 
+.blink {
+  animation: 1s infinite blink
+}
+
 #svg-defs {
   position: fixed;
   visibility: hidden;
@@ -45,3 +49,17 @@ stop.pred-start{
 stop.pred-stop{
   stop-color: rgba(255 165 0 / 20%);
 }
+
+@keyframes blink{
+  0% {
+    visibility: visible;
+  }
+
+  50% {
+    visibility: hidden;
+  }
+
+  100% {
+    visibility: hidden;
+  }
+  }

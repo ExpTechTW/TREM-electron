@@ -60,7 +60,10 @@ class Wave {
     let time;
 
     if (icon) {
-      this._cross = cross({ scale: 0.3 });
+      this._cross = cross({
+        scale : 0.3,
+        blink : true
+      });
       this._cross.style.translate = `${centerPx.x - 11.4}px ${centerPx.y - 11.4}px`;
 
       const anims = document.getAnimations();
