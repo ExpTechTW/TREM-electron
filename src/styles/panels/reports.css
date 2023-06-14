@@ -207,17 +207,18 @@
   color: var(--md-on-surface);
   font-weight: 700;
   font-size: 24px;
-  text-shadow: 0 0 24px var(--md-on-surface);
+  text-shadow: 0 0 36px var(--md-on-surface);
   line-height: 42px;
 }
 
 .report-color.has-number {
-  background-color: #ffc96b33;
+  background-color: var(--md-secondary-container);
 }
 
 .report-color.has-number::before,
 .report-color.has-number::after {
-  color: #ffc96b;
+  color: var(--md-surface);
+  text-shadow: 0 0 16px var(--md-surface);
 }
 
 .report-color::after {

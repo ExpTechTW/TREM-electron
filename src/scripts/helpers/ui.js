@@ -38,6 +38,7 @@ const switchView = (view, map) => {
 
                   const color = document.createElement("div");
                   color.className = `report-color int-${constants.Intensities[report.data[0].areaIntensity].value} ${report.earthquakeNo % 1000 ? "has-number" : ""}`;
+                  color.style.backgroundColor = report.earthquakeNo % 1000 ? colors.getIntensityColor(report.data[0].areaIntensity - 1) : "transparent";
                   color.style.borderColor = colors.getIntensityColor(report.data[0].areaIntensity - 1);
                   color.title = `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`;
 

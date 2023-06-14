@@ -22,7 +22,7 @@ circle {
 }
 
 .cross-outer {
-  fill: #fff
+  fill: var(--md-on-background)
 }
 
 #svg-defs {

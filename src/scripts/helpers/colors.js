@@ -7,7 +7,7 @@ const i = chroma
 
 module.exports = {
   get MapBackgroundColor() {
-    return shouldUseDarkColor() ? "#43474e" : "#43474e";
+    return shouldUseDarkColor() ? "#43474e" : "#dfe2eb";
   },
   get MapOutlineColor() {
     return shouldUseDarkColor() ? "#bcc7db" : "#545f70";
