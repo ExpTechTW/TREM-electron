@@ -217,8 +217,8 @@
 
 .report-color.has-number::before,
 .report-color.has-number::after {
-  color: var(--md-surface);
-  text-shadow: 0 0 16px var(--md-surface);
+  color: #000;
+  text-shadow: 0 0 16px #0008;
 }
 
 .report-color::after {
