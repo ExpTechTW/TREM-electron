@@ -50,9 +50,15 @@ class api extends EventEmitter {
           break;
         }
 
-        case "ntp": break;
+        case "ntp": {
+          this.emit("ntp", data);
+          break;
+        }
 
         default: {
+          if (data.response == "Connection Succeeded")
+            this.emit("ntp", data);
+
           console.log(data.response);
           break;
         }

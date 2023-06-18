@@ -1,8 +1,8 @@
-import { Map as maplibreMap } from "maplibre-gl";
-import region from "../../assets/json/region.json";
-import Distance from "../helpers/distance";
-import calcPGA from "../helpers/pga";
-import Wave from "./wave";
+const { Map:maplibreMap } = require("maplibre-gl");
+const Distance = require("../helpers/distance");
+const Wave = require("./wave");
+const calcPGA = require("../helpers/pga");
+const region = require("../../assets/json/region.json");
 
 class EEW {
 
@@ -12,7 +12,7 @@ class EEW {
    * @param {maplibreMap} map
    * @param {boolean} waves
    */
-  constructor(data, map, waves = false) {
+  constructor(data, map, waves = true) {
     this.hasWaves = waves;
     this._map = map;
     this.#fromJson(data);
@@ -57,7 +57,7 @@ class EEW {
     this.depth = data.depth;
     this.epicenter = { latitude: data.lat, longitude: data.lon };
     this.epicenterIcon = { main: null, mini: null };
-    this.location = data.Location;
+    this.location = data.location;
     this.magnitude = data.scale;
     this.source = {
       "eew-cwb"   : "中央氣象局",
@@ -66,16 +66,20 @@ class EEW {
       "eew-kma"   : "韓國氣象廳",
       "eew-fjdzj" : "中國福建省地震局",
       "eew-scdzj" : "中國四川省地震局",
-      "trem-eew"  : "NSSPE"
+      "trem-eew"  : "TREM 地震預警"
     }[data.type];
 
-    if (this.source == "NSSPE")
-      this.hasWaves = false;
+    if (data.type == "trem-eew") {
+      if (data.model == "nsspe")
+        this.hasWaves = false;
+
+      this.model = data.model?.toUpperCase() ?? "EEW";
+    }
 
     this.eventTime = new Date(data.time);
     this.apiTime = new Date(data.timeStamp);
 
-    this.alert = data.Alert;
+    this.alert = data.type == "eew-cwb";
     this._from = data.data_unit;
     this._receiveTime = new Date(data.timestamp);
     this._replay = data.Replay;
@@ -111,11 +115,13 @@ class EEW {
         if (city == localStorage.getItem("eew.localCity") && town == localStorage.getItem("eew.localTown"))
           this._local = l;
 
-        if (this.source == "中央氣象局")
+        if (this.source == "中央氣象局") {
           this._map.setFeatureState({
             source : "tw_town",
             id     : l.code,
           }, { intensity: i.value });
+          this._map.setLayoutProperty("town", "visibility", "visible");
+        }
 
         this._expected.set(l.code, { distance: d, intensity: i, pga });
       }
@@ -173,17 +179,22 @@ class EEW {
         this.s.setAlert(this.alert);
       }
     } else {
-      this.p = new Wave(this._map, { type: "p", center: this.epicenter.toLngLatArray(), radius: 0, ...((this.hasWaves) ? { circle: true } : { circle: false }) });
+      this.p = new Wave(this._map, { id: this.id, type: "p", center: this.epicenter.toLngLatArray(), radius: 0, circle: this.hasWaves, model: this.model, location: this.location, magnitude: this.magnitude, depth: this.depth });
 
       if (this.hasWaves)
-        this.s = new Wave(this._map, { type: "s", center: this.epicenter.toLngLatArray(), radius: 0, icon: false });
+        this.s = new Wave(this._map, { id: this.id, type: "s", center: this.epicenter.toLngLatArray(), radius: 0, icon: false });
 
-      if (this.hasWaves) {
-        this._waveSpeed = { p: 6.5, s: 3.5 };
+      this._waveSpeed = { p: 6.5, s: 3.5 };
 
-        this._waveTick = () => {
-          const apiTime = this._map.serverTimestamp + Date.now() - this._map.localServerTimestamp;
+      this._waveTick = () => {
+        const apiTime = this._map.serverTimestamp + Date.now() - this._map.localServerTimestamp;
 
+        if ((apiTime - this.eventTime.getTime()) > 120_000) {
+          this.remove();
+          return;
+        }
+
+        if (this.hasWaves) {
           let p_dist = Math.floor(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2));
           let s_dist = Math.floor(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2));
 
@@ -217,17 +228,28 @@ class EEW {
 
           if (s_dist > this.depth)
             this.s.setRadius(s_dist - this.depth);
-        };
+        }
+      };
 
-        this._waveTick();
-        this._waveInterval = setInterval(this._waveTick, 500);
-      }
+      this._waveTick();
+      this._waveInterval = setInterval(this._waveTick, 500);
     }
   }
 
   update(data) {
     this.#fromJson(data);
   }
+
+  remove() {
+    if (this.p)
+      this.p.remove();
+
+    if (this.s)
+      this.s.remove();
+
+    if (this._waveInterval)
+      clearInterval(this._waveInterval);
+  }
 }
 
-export default EEW;
+module.exports = EEW;

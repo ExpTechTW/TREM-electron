@@ -52,7 +52,8 @@ nav > button > .nav-button-text {
   transition: opacity .2s;
 }
 
-nav > button:hover {
+nav > button:hover,
+nav > button.show {
   width: 100%;
   opacity: 1 !important;
 }
@@ -61,7 +62,8 @@ nav:hover > button {
   opacity: .6;
 }
 
-nav > button:hover > .nav-button-text {
+nav > button:hover > .nav-button-text,
+nav > button.show > .nav-button-text {
   display: block;
   opacity: 1;
   margin-right: 16px;

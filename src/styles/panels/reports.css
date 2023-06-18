@@ -115,6 +115,11 @@
   opacity: .1 !important;
 } 
 
+.report-cross:hover,
+.report-cross.hightlight {
+  z-index: 100 !important;
+}
+
 .report-color {
   position: relative;
   border: 3px solid #000;

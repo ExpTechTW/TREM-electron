@@ -2,7 +2,8 @@ module.exports = Object.freeze({
   WebSocketTargetUrl : "wss://exptech.com.tw/api",
   FCMSenderId        : "583094702393",
   API                : {
-    ReportsURL: "https://exptech.com.tw/api/v3/earthquake/reports"
+    ReportsURL : "https://exptech.com.tw/api/v3/earthquake/reports",
+    ReplayURL  : "https://exptech.com.tw/api/v1/trem/replay"
   },
   Intensities: [
     { value: 0, label: "0", text: "０級" },
@@ -16,6 +17,24 @@ module.exports = Object.freeze({
     { value: 8, label: "6+", text: "６強" },
     { value: 9, label: "7", text: "７級" }
   ],
+  Events: {
+    TremEew : "trem-eew",
+    CwbEew  : "eew-cwb"
+  },
+  Sources: {
+    "eew-cwb"   : "中央氣象局",
+    "eew-nied"  : "日本防災科研",
+    "eew-jma"   : "日本氣象廳",
+    "eew-kma"   : "韓國氣象廳",
+    "eew-fjdzj" : "中國福建省地震局",
+    "eew-scdzj" : "中國四川省地震局",
+    "trem-eew"  : "TREM 地震預警"
+  },
+  Models: {
+    EEW   : "強震即時警報",
+    PLUM  : "局部無阻尼運動傳播法",
+    NSSPE : "無震源參數推算",
+  },
   Magnitudes: [
     "極微地震",
     "微小地震",
@@ -35,6 +54,7 @@ module.exports = Object.freeze({
   PixelRatio   : 98.5,
   Views        : {
     Reports     : "reports",
+    Report      : "report",
     Forecast    : "forecast",
     Temperature : "temperature",
     AQI         : "aqi",

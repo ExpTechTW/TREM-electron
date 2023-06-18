@@ -1,5 +1,9 @@
 const { Marker } = require("maplibre-gl");
 
+/**
+ * @param {*} options
+ * @returns
+ */
 const cross = (options) => {
   const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
 

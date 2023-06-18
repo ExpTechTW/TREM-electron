@@ -19,4 +19,4 @@ class Distance {
   }
 }
 
-export default Distance;
+module.exports = Distance;

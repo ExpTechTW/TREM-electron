@@ -21,6 +21,10 @@ circle {
   fill: #f00;
 }
 
+.report-cross .cross-inner {
+  fill: var(--md-surface);
+}
+
 .cross-outer {
   fill: var(--md-on-background)
 }
@@ -34,23 +38,126 @@ circle {
   visibility: hidden;
 }
 
-stop.alert-start{
+stop.alert-start {
   stop-color: rgba(255 0 0 / 1%);
 }
 
-stop.alert-stop{
+stop.alert-stop {
   stop-color: rgba(255 0 0 / 20%);
 }
 
-stop.pred-start{
+stop.pred-start {
   stop-color: rgba(255 165 0 / 1%);
 }
 
-stop.pred-stop{
+stop.pred-stop {
   stop-color: rgba(255 165 0 / 20%);
 }
 
-@keyframes blink{
+.label-line {
+  stroke: #fff;
+  stroke-width: 1px;
+}
+
+.cross-label {
+  margin: 4px;
+  translate: 0 -15px;
+  z-index: 5000000;
+}
+
+.cross-label-container {
+  position: relative;
+  border-radius: 8px;
+  border-top-left-radius: 0;
+}
+
+.cross-label-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  opacity: .8;
+  background-color: var(--md-on-surface);
+  isolation: isolate;
+  z-index: -1;
+}
+
+.cross-label-header-container {
+  position: absolute;
+  top: -12px;
+  border-radius: 12px;
+  color: #000;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 14px;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.cross-label-header {
+  display: inline-block;
+  position: relative;
+  padding: 4px 8px;
+  border-radius: inherit;
+  z-index: 3;
+}
+
+.cross-label-magnitude {
+  display: inline-block;
+  position: relative;
+  margin-left: -16px;
+  padding: 4px 8px;
+  padding-left: 20px;
+  border-radius: inherit;
+  z-index: 2;
+}
+
+.cross-label-depth {
+  display: inline-block;
+  position: relative;
+  margin-left: -16px;
+  padding: 4px 8px;
+  padding-left: 20px;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.cross-label[style*="right:"] .cross-label-header {
+  right: 0;
+}
+
+.cross-label[style*="right:"] > .cross-label-container {
+  border-top-left-radius: 8px;
+  border-top-right-radius: 0;
+}
+
+.cross-label-header.eew {
+  background-color: salmon;
+}
+
+.cross-label-header.plum {
+  background-color: plum;
+}
+
+.cross-label-header.nsspe {
+  background-color: goldenrod;
+}
+
+.cross-label-location {
+  padding: 6px 8px;
+  padding-top: 16px;
+  border-radius: 12px;
+  color: var(--md-surface);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 16px;
+  z-index: 1;
+}
+
+@keyframes blink {
   0% {
     visibility: visible;
   }
@@ -62,4 +169,4 @@ stop.pred-stop{
   100% {
     visibility: hidden;
   }
-  }
+}
