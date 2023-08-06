@@ -9,9 +9,6 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "globals": {
-    "L": "readonly"
-  },
   "rules": {
     "arrow-body-style": "warn",
     "arrow-spacing": ["warn", { "before": true, "after": true }],

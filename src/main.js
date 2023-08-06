@@ -1,6 +1,6 @@
 const { BrowserWindow, Menu, Notification, app, Tray, ipcMain, nativeImage, shell, powerMonitor, powerSaveBlocker } = require("electron");
 const electronPushReceiver = require("electron-fcm-push-receiver");
-const path = require("path");
+const path = require("node:path");
 
 let _hide = false;
 let _devMode = false;
@@ -13,11 +13,6 @@ if (process.argv.includes("--dev")) _devMode = true;
  * @type {BrowserWindow}
  */
 let MainWindow;
-
-/**
- * @type {BrowserWindow}
- */
-let SettingWindow;
 
 /**
  * @type {Tray}

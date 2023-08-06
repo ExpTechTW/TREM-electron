@@ -1,19 +1,24 @@
 #reports-panel {
   top: 0;
-  right: -320px;
-  height: calc(100svh - 20px);
-  width: 300px;
+  right: 0;
+  translate: calc(clamp(300px, 25svw, 600px) + 24px);
+  height: calc(100svh - 24px);
+  width: clamp(300px, 25svw, 600px);
   margin: 8px;
-  margin-right: 4px;
   padding: 4px;
   border-radius: 8px;
   overflow: hidden;
   user-select: none;
-  transition: right .2s;
+  transition-property: translate, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
 #reports-panel.show {
-  right: 0;
+  translate: 0;
+  transition-property: translate, opacity;
+  transition-duration: 400ms, 200ms;
+  transition-timing-function: cubic-bezier(0.05, 0.7, 0.1, 1);
 }
 
 #reports-list {
@@ -23,6 +28,7 @@
   color: var(--md-on-surface);
   font-size: 16px;
   line-height: 16px;
+  transition: color .2s;
 }
 
 .report-item {
@@ -48,19 +54,20 @@
   height: 100%;
   width: 100%;
   border-radius: inherit;
-  background-color: var(--md-surface-variant);
   pointer-events: none;
   isolation: isolate;
   z-index: -1;
-  transition: opacity .1s;
+  transition: opacity .1s, background-color .2s;
 }
 
 #reports-panel::before {
-  opacity: .4;
+  opacity: .6;
+  background-color: var(--md-surface-variant);
 }
 
 .report-item::before {
-  opacity: .6;
+  opacity: .8;
+  background-color: var(--md-secondary-container);
 }
 
 .report-item,
@@ -80,7 +87,7 @@
 .report-item:first-child {
   display: grid;
   grid-template-columns: 80px 1fr 1fr;
-  grid-template-rows: repeat(3, 24px);
+  grid-template-rows: 32px 18px 24px;
   align-items: center;
   padding: 4px;
   padding-right: 8px;
@@ -126,12 +133,22 @@
   border-radius: 8px;
 }
 
-.report-location {
-  font-weight: 500px;
+.report-title {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.report-subtitle {
+  opacity: .6;
+  font-weight: 400;
+  font-size: 12px;
+  margin-left: 4px;
 }
 
 .report-time {
   color: var(--md-on-surface-variant);
+  font-size: 14px;
 }
 
 .report-magnitude,
@@ -162,10 +179,15 @@
   width: 66px;
 }
 
-.report-item:first-child > .report-location {
+.report-item:first-child > .report-title {
   grid-area: 1 / 2 / 2 / 4;
   font-size: 20px;
   line-height: 20px;
+}
+
+.report-item:first-child > .report-title > .report-subtitle {
+  font-size: 14px;
+  line-height: 14px;
 }
 
 .report-item:first-child > .report-time {
@@ -186,7 +208,7 @@
   width: 42px;
 }
 
-.report-item:not(:first-child) > .report-location {
+.report-item:not(:first-child) > .report-title {
   grid-area: 1 / 2 / 2 / 3;
   font-size: 16px;
   line-height: 16px;

@@ -15,5 +15,5 @@ fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/st
 module.exports = {
   get station() {
     return rtsData;
-  }
+  },
 };

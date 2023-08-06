@@ -7,6 +7,7 @@ const constants = require("../constants");
 const Wave = require("../classes/wave");
 const EEW = require("../classes/eew");
 const colors = require("./colors");
+const { switchView } = require("./ui");
 
 /**
  * @param {Map} map
@@ -109,7 +110,7 @@ const setMapLayers = (map) => {
     paint  : {
       "line-color"   : Colors.MapOutlineColor,
       "line-opacity" : 1,
-      "line-width"   : 1
+      "line-width"   : 0.6
     }
   });
 
@@ -137,6 +138,8 @@ const renderRtsData = (rts, map) => {
 };
 
 const renderEewData = (eew, waves, map) => {
+  switchView(null, map);
+
   if (!waves[eew.id])
     waves[eew.id] = new EEW(eew, map);
   else waves[eew.id].update(eew);

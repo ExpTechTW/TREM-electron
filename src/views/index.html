@@ -12,7 +12,7 @@
   <div id="app-container">
     <div class="overlay-container">
       <nav>
-        <button id="reports" type="button"><div class="icon">earthquake</div><div class="nav-button-text">地震</div></button>
+        <button id="reports" type="button"><div class="icon">earthquake</div><div class="nav-button-text">地震報告</div></button>
         <button id="forecast" type="button"><div class="icon">rainy</div><div class="nav-button-text">天氣</div></button>
         <button id="temperature" type="button"><div class="icon">thermostat</div><div class="nav-button-text">溫度</div></button>
         <button id="aqi" type="button"><div class="icon">masks</div><div class="nav-button-text">空氣品質</div></button>
@@ -26,6 +26,39 @@
       <div id="reports-panel" class="panel">
         <div class="scroll-wrapper">
           <div id="reports-list"></div>
+        </div>
+      </div>
+      <div id="settings-panel" class="panel">
+        <div class="scroll-wrapper">
+          <!-- API 金鑰 -->
+          <div class="setting-container">
+            <div class="setting-header">API金鑰</div>
+            <div id="settings-list">
+              <label for="input-key">
+                <span>API金鑰</span>
+                <input id="input-key" class="setting" type="password" name="password" data-setting="ApiKey" placeholder="API 金鑰">
+              </label>
+            </div>
+          </div>
+
+          <!-- 報告列表 -->
+          <div class="setting-container">
+            <div class="setting-header">地震報告列表樣式</div>
+            <div class="segmented choice-group">
+              <label class="choice" for="report-title-style-choice1">
+                <input type="radio" id="report-title-style-choice1" class="setting" name="report-title-style" data-setting="ReportTitleStyle" value="1">
+                <span>地點</span>
+              </label>
+              <label class="choice" for="report-title-style-choice2">
+                <input type="radio" id="report-title-style-choice2" class="setting" name="report-title-style" data-setting="ReportTitleStyle" value="2">
+                <span>編號</span>
+              </label>
+              <label class="choice" for="report-title-style-choice3">
+                <input type="radio" id="report-title-style-choice3" class="setting" name="report-title-style" data-setting="ReportTitleStyle" value="3">
+                <span>地點 + 編號</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </div>

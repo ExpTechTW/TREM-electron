@@ -1,0 +1,76 @@
+@import url("../components/segmented.css");
+
+#settings-panel {
+  top: 0;
+  right: 0;
+  translate: calc(clamp(400px, 30svw, 600px) + 24px);
+  height: calc(100svh - 24px);
+  width: clamp(400px, 30svw, 600px);
+  margin: 8px;
+  margin-right: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  overflow: hidden;
+  user-select: none;
+  transition-property: translate, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+#settings-panel.show {
+  translate: 0;
+  transition-property: translate, opacity;
+  transition-duration: 400ms, 200ms;
+  transition-timing-function: cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+#settings-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  opacity: .6;
+  background-color: var(--md-surface-variant);
+  pointer-events: none;
+  isolation: isolate;
+  z-index: -1;
+  transition: opacity .1s, background-color .2s;
+}
+
+#settings-list {
+  display: grid;
+  padding-right: 4px;
+  border-radius: 8px;
+  color: var(--md-on-surface);
+  font-size: 16px;
+  line-height: 16px;
+  transition: color .2s;
+}
+
+.setting-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px;
+  padding: 12px;
+}
+
+.setting-header {
+  display: flex;
+  gap: 8px;
+  position: relative;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 18px;
+}
+
+.setting-header::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  border-radius: 4px;
+  background-color: aquamarine;
+}

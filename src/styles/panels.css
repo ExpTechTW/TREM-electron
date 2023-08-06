@@ -1,16 +1,19 @@
 @import url("./panels/reports.css");
+@import url("./panels/settings.css");
 
 .panel {
   position: absolute;
   opacity: 0;
   pointer-events: none;
+  transition-property: opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
 .panel.show {
   opacity: 1;
   pointer-events: all;
 }
-
 
 .scroll-wrapper {
   height: inherit;

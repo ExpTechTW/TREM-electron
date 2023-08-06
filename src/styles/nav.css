@@ -1,31 +1,33 @@
 @import url("./icon.css");
 
 nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   position: absolute;
-  top: 8px;
-  left: 8px;
-  height: calc(100svh - 16px);
+  height: 100svh;
+  width: 100svw;
   pointer-events: none;
 }
 
 nav > button {
   all: unset;
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px 0fr;
   align-items: center;
   position: relative;
   height: 40px;
-  width: 40px;
+  margin: 8px;
   border-radius: 20px;
   opacity: .2;
   color: var(--md-background);
   white-space: nowrap;
   cursor: pointer;
   pointer-events: initial;
-  transition: opacity .2s,
-              width .2s;
+  transition-property: opacity, grid-template-columns;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+nav > button:not(:last-child) {
+  margin-bottom: 0;
 }
 
 nav > button::before {
@@ -47,33 +49,35 @@ nav > button > .icon {
 }
 
 nav > button > .nav-button-text {
-  display: none;
   opacity: 0;
-  transition: opacity .2s;
+  overflow: hidden;
+  transition-property: opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
 nav > button:hover,
-nav > button.show {
-  width: 100%;
+nav > button.active {
+  grid-template-columns: 40px 1fr;
   opacity: 1 !important;
 }
 
-nav:hover > button {
-  opacity: .6;
-}
 
 nav > button:hover > .nav-button-text,
-nav > button.show > .nav-button-text {
+nav > button.active > .nav-button-text {
   display: block;
   opacity: 1;
   margin-right: 16px;
 }
 
 #settings {
-  margin-top: auto;
+  position: absolute;
+  bottom: 0;
 }
 
 #settings:hover > .icon {
   rotate: 180deg;
-  transition: rotate .4s
+  transition-property: rotate;
+  transition-duration: 400ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }

@@ -71,10 +71,11 @@ class Wave {
       let y = centerPx.y - 5 * this.map.getZoom();
       let testNext = false;
 
-      const labelWidth = 120 / 2;
+      const labelHeight = 80 / 2;
+      const labelWidth = 160 / 2;
 
       // tests if top right is placeable
-      if (checkOverlap(x + labelWidth, y, "cross-label", `${this.id}-label`)) {
+      if (checkOverlap(x + labelWidth, y, labelHeight, labelWidth, "cross-label", `${this.id}-label`)) {
         x = centerPx.x - 10 * this.map.getZoom();
         y = centerPx.y - 5 * this.map.getZoom();
         testNext = true;
@@ -82,7 +83,7 @@ class Wave {
       }
 
       // tests if top left is placeable
-      if (testNext && checkOverlap(x - labelWidth, y, "cross-label", `${this.id}-label`)) {
+      if (testNext && checkOverlap(x + labelWidth, y, labelHeight, labelWidth, "cross-label", `${this.id}-label`)) {
         x = centerPx.x + 10 * this.map.getZoom();
         y = centerPx.y + 5 * this.map.getZoom();
       } else {
@@ -90,7 +91,7 @@ class Wave {
       }
 
       // tests if bottom right is placeable
-      if (testNext && checkOverlap(x + labelWidth, y, "cross-label", `${this.id}-label`)) {
+      if (testNext && checkOverlap(x + labelWidth, y, labelHeight, labelWidth, "cross-label", `${this.id}-label`)) {
         x = centerPx.x - 10 * this.map.getZoom();
         y = centerPx.y + 5 * this.map.getZoom();
       } else {
@@ -98,7 +99,7 @@ class Wave {
       }
 
       // tests if bottom left is placeable
-      if (testNext && checkOverlap(x - labelWidth, y, "cross-label", `${this.id}-label`)) {
+      if (testNext && checkOverlap(x + labelWidth, y, labelHeight, labelWidth, "cross-label", `${this.id}-label`)) {
         x = centerPx.x + 10 * this.map.getZoom();
         y = centerPx.y - 5 * this.map.getZoom();
       }
@@ -234,20 +235,18 @@ class Wave {
     let y = center.y - 5 * zoom;
     let testNext = false;
 
-
-    const labelHeight = 44 / 2;
-    const labelWidth = 120 / 2;
-
+    const labelHeight = 80 / 2;
+    const labelWidth = 160 / 2;
 
     // tests if top right is placeable
-    if (checkOverlap(x + labelWidth, y, "cross-label", `${this.id}-label`)) {
+    if (checkOverlap(x + labelWidth, y, labelHeight, labelWidth, "cross-label", `${this.id}-label`)) {
       x = center.x - 10 * zoom;
       y = center.y - 5 * zoom;
       testNext = true;
     }
 
     // tests if top left is placeable
-    if (testNext && checkOverlap(x - labelWidth, y, "cross-label", `${this.id}-label`)) {
+    if (testNext && checkOverlap(x + labelWidth, y, labelHeight, labelWidth, "cross-label", `${this.id}-label`)) {
       x = center.x + 10 * zoom;
       y = center.y + 5 * zoom;
     } else {
@@ -255,7 +254,7 @@ class Wave {
     }
 
     // tests if bottom right is placeable
-    if (testNext && checkOverlap(x + labelWidth, y, "cross-label", `${this.id}-label`)) {
+    if (testNext && checkOverlap(x + labelWidth, y, labelHeight, labelWidth, "cross-label", `${this.id}-label`)) {
       x = center.x - 10 * zoom;
       y = center.y + 5 * zoom;
     } else {
@@ -263,7 +262,7 @@ class Wave {
     }
 
     // tests if bottom left is placeable
-    if (testNext && checkOverlap(x - labelWidth, y, "cross-label", `${this.id}-label`)) {
+    if (testNext && checkOverlap(x + labelWidth, y, labelHeight, labelWidth, "cross-label", `${this.id}-label`)) {
       x = center.x + 10 * zoom;
       y = center.y - 5 * zoom;
     }

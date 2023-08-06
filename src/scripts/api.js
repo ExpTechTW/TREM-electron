@@ -9,7 +9,29 @@ class api extends EventEmitter {
   constructor(key) {
     super();
     this.key = key;
+    this.wsConfig = {
+      uuid     : localStorage.uuid + "-rts",
+      function : "subscriptionService",
+      value    : ["trem-rts-v2", "trem-eew-v1"],
+      key      : this.key,
+    };
     this.initWebSocket();
+  }
+
+  get key() {
+    return this._key;
+  }
+
+  set key(value) {
+    this._key = value;
+
+    if (this.ws instanceof WebSocket)
+      if (this.ws.readyState == this.ws.OPEN) {
+        if (!localStorage.uuid)
+          localStorage.setItem("uuid", v4());
+
+        this.ws.send(JSON.stringify(this.wsConfig));
+      }
   }
 
   initWebSocket() {
@@ -22,14 +44,7 @@ class api extends EventEmitter {
         if (!localStorage.uuid)
           localStorage.setItem("uuid", v4());
 
-        const config = {
-          uuid     : localStorage.uuid + "-rts",
-          function : "subscriptionService",
-          value    : ["trem-rts-v2", "trem-eew-v1"],
-          key      : this.key,
-        };
-
-        this.ws.send(JSON.stringify(config));
+        this.ws.send(JSON.stringify(this.wsConfig));
       }
     });
 
@@ -63,8 +78,6 @@ class api extends EventEmitter {
           break;
         }
       }
-
-      console.log();
     });
   }
 
@@ -81,7 +94,6 @@ class api extends EventEmitter {
               const md5 = createHash("md5");
               list[report.identifier] = md5.update(JSON.stringify(report)).digest("hex");
             }
-
 
           const request = new Request(constants.API.ReportsURL, {
             method  : "POST",

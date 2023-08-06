@@ -10,25 +10,38 @@ const getDepthLevel = (depth) =>
     .sort((a, b) => a - b)
     .indexOf(depth);
 
-const checkOverlap = (x, y, className, id) => {
-  let el = document.elementFromPoint(x, y);
+const checkOverlap = (x, y, h, w, className, id) => {
+  const rects = [...document.querySelectorAll(`.${className}`)].map((v) => v.getBoundingClientRect());
 
-  if (!el) return false;
+  const p = [
+    [x - w, y - h],
+    [x + w, y - h],
+    [x - w, y + h],
+    [x + w, y + h],
+  ];
 
-  if (el.className.includes("cross-label-"))
-    el = el.parentElement;
+  for (let i = 0; i < 4; i++) {
+    let el = document.elementFromPoint(p[i][0], p[i][1]);
 
-  if (el.className.includes("cross-label-"))
-    el = el.parentElement;
+    if (!el) continue;
 
-  if (el.classList.contains(className)) {
-    if (el.id == id)
-      return false;
+    if (el.className?.includes?.("cross-label-"))
+      el = el.parentElement;
 
-    return true;
-  } else {
-    return false;
+    if (el.className?.includes?.("cross-label-"))
+      el = el.parentElement;
+
+    if (el.classList.contains(className)) {
+      if (el.id == id)
+        return false;
+
+      return true;
+    } else {
+      continue;
+    }
   }
+
+  return false;
 };
 
 module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap };
