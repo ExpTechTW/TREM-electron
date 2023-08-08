@@ -29,34 +29,89 @@
         </div>
       </div>
       <div id="settings-panel" class="panel">
+        <div class="panel-header">
+          <span class="icon">settings</span>
+          <span class="panel-header-text">設定</span>
+        </div>
         <div class="scroll-wrapper">
-          <!-- API 金鑰 -->
-          <div class="setting-container">
-            <div class="setting-header">API金鑰</div>
-            <div id="settings-list">
-              <label for="input-key">
-                <span>API金鑰</span>
-                <input id="input-key" class="setting" type="password" name="password" data-setting="ApiKey" placeholder="API 金鑰">
-              </label>
+          <div class="settings-group group-api">
+            <div class="group-header">API</div>
+            <!-- API 金鑰 -->
+            <div class="setting-container">
+              <div class="setting-header">API金鑰</div>
+              <div id="settings-list">
+                <label for="input-key">
+                  <span class="label-text">API金鑰</span>
+                  <input id="input-key" class="setting" type="password" name="ApiKey" data-setting="ApiKey" placeholder="API 金鑰">
+                </label>
+              </div>
             </div>
           </div>
 
-          <!-- 報告列表 -->
-          <div class="setting-container">
-            <div class="setting-header">地震報告列表樣式</div>
-            <div class="segmented choice-group">
-              <label class="choice" for="report-title-style-choice1">
-                <input type="radio" id="report-title-style-choice1" class="setting" name="report-title-style" data-setting="ReportTitleStyle" value="1">
-                <span>地點</span>
-              </label>
-              <label class="choice" for="report-title-style-choice2">
-                <input type="radio" id="report-title-style-choice2" class="setting" name="report-title-style" data-setting="ReportTitleStyle" value="2">
-                <span>編號</span>
-              </label>
-              <label class="choice" for="report-title-style-choice3">
-                <input type="radio" id="report-title-style-choice3" class="setting" name="report-title-style" data-setting="ReportTitleStyle" value="3">
-                <span>地點 + 編號</span>
-              </label>
+
+          <div class="settings-group group-map">
+            <div class="group-header">地圖</div>
+            <!-- 測站模式 -->
+            <div class="setting-container">
+              <div class="setting-header">測站顯示模式</div>
+              <div class="segmented choice-group">
+                <label class="choice" for="rts-mode-choice1">
+                  <input type="radio" id="rts-mode-choice1" class="setting" name="RtsMode" data-setting="RtsMode" value="i">
+                  <span>震度</span>
+                </label>
+                <label class="choice" for="rts-mode-choice2">
+                  <input type="radio" id="rts-mode-choice2" class="setting" name="RtsMode" data-setting="RtsMode" value="v">
+                  <span>加速度</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group group-report">
+            <div class="group-header">地震報告</div>
+            <!-- 地震報告來源 -->
+            <div class="setting-container">
+              <div class="setting-header">地震報告來源</div>
+              <div class="segmented choice-group">
+                <label class="choice" for="report-source-choice1">
+                  <input type="checkbox" id="report-source-choice1" class="setting" name="ReportSource" data-setting="ReportShowCWB">
+                  <span>中央氣象局</span>
+                </label>
+                <label class="choice" for="report-source-choice2">
+                  <input type="checkbox" id="report-source-choice2" class="setting" name="ReportSource" data-setting="ReportShowTYA">
+                  <span>TYA 地震資訊</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 地震報告標題樣式 -->
+            <div class="setting-container">
+              <div class="setting-header">地震報告標題樣式</div>
+              <div class="segmented choice-group">
+                <label class="choice" for="report-title-style-choice1">
+                  <input type="radio" id="report-title-style-choice1" class="setting" name="ReportTitleStyle" data-setting="ReportTitleStyle" value="1">
+                  <span>地點</span>
+                </label>
+                <label class="choice" for="report-title-style-choice2">
+                  <input type="radio" id="report-title-style-choice2" class="setting" name="ReportTitleStyle" data-setting="ReportTitleStyle" value="2">
+                  <span>編號</span>
+                </label>
+                <label class="choice" for="report-title-style-choice3">
+                  <input type="radio" id="report-title-style-choice3" class="setting" name="ReportTitleStyle" data-setting="ReportTitleStyle" value="3">
+                  <span>地點 + 編號</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 地震報告顯示數量 -->
+            <div class="setting-container">
+              <div class="setting-header">地震報告數量</div>
+              <div id="settings-list">
+                <label for="input-report-count">
+                  <span class="label-text">顯示數量</span>
+                  <input id="input-report-count" class="setting" type="number" name="ReportCount" data-setting="ReportCount" placeholder="50" step="1" min="1" max="500">
+                </label>
+              </div>
             </div>
           </div>
         </div>

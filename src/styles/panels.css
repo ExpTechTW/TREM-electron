@@ -19,3 +19,20 @@
   height: inherit;
   overflow: auto;
 }
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 26px;
+}
+
+.panel-header > .icon {
+  height: 28px;
+  width: 28px;
+  margin-top: -3px;
+  font-size: 22pt;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}

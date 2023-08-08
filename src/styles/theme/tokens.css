@@ -1,17 +1,17 @@
 :root {
-  --md-source: #9dc6ff;
+  --md-source: #1660a5;
 
   /* primary */
   --md-ref-palette-primary0: #000;
   --md-ref-palette-primary10: #001c38;
   --md-ref-palette-primary20: #00315c;
-  --md-ref-palette-primary25: #003c6e;
+  --md-ref-palette-primary25: #003c6f;
   --md-ref-palette-primary30: #004882;
   --md-ref-palette-primary35: #005496;
   --md-ref-palette-primary40: #1660a5;
   --md-ref-palette-primary50: #3a79c0;
-  --md-ref-palette-primary60: #5793db;
-  --md-ref-palette-primary70: #73aef8;
+  --md-ref-palette-primary60: #5793dc;
+  --md-ref-palette-primary70: #74aef8;
   --md-ref-palette-primary80: #a3c9ff;
   --md-ref-palette-primary90: #d3e4ff;
   --md-ref-palette-primary95: #eaf1ff;
@@ -44,7 +44,7 @@
   --md-ref-palette-tertiary25: #483452;
   --md-ref-palette-tertiary30: #543f5e;
   --md-ref-palette-tertiary35: #604a6a;
-  --md-ref-palette-tertiary40: #6c5677;
+  --md-ref-palette-tertiary40: #6d5677;
   --md-ref-palette-tertiary50: #866f91;
   --md-ref-palette-tertiary60: #a188ab;
   --md-ref-palette-tertiary70: #bca2c7;
@@ -76,7 +76,7 @@
   /* neutral-variant */
   --md-ref-palette-neutral-variant0: #000;
   --md-ref-palette-neutral-variant10: #181c22;
-  --md-ref-palette-neutral-variant20: #2c3137;
+  --md-ref-palette-neutral-variant20: #2d3137;
   --md-ref-palette-neutral-variant25: #383c43;
   --md-ref-palette-neutral-variant30: #43474e;
   --md-ref-palette-neutral-variant35: #4f535a;
@@ -118,7 +118,7 @@
   --md-on-secondary-light: #fff;
   --md-secondary-container-light: #d8e3f8;
   --md-on-secondary-container-light: #111c2b;
-  --md-tertiary-light: #6c5677;
+  --md-tertiary-light: #6d5677;
   --md-on-tertiary-light: #fff;
   --md-tertiary-container-light: #f5d9ff;
   --md-on-tertiary-container-light: #261430;
@@ -173,123 +173,203 @@
   --md-outline-variant-dark: #43474e;
   --md-scrim-dark: #000;
 
+  /* Custom Colors Light */
+  --md-custom-pink: #9c4049;
+  --md-custom-green: #1e6c30;
+  --md-custom-light-blue: #00a8b8;
+  --md-custom-yellow: #795900;
+  --md-custom-cyan: #97b5a2;
+  --md-custom-orange: #885200;
+  --md-custom-blue: #4d57a9;
+  --md-custom-purple: #884588;
+
+  /* Custom Colors Dark */
+  --md-custom-pink-dark: #ffb0c8;
+  --md-custom-green-dark: #70dba7;
+  --md-custom-light-blue-dark: #5cd5fb;
+  --md-custom-yellow-dark: #ddc74d;
+  --md-custom-cyan-dark: #5cdbbe;
+  --md-custom-orange-dark: #ffb787;
+  --md-custom-blue-dark: #b0c6ff;
+  --md-custom-purple-dark: #e6b4ff;
+
+  /* On Custom Colors Light */
+  --md-custom-on-pink-light: #fff;
+  --md-custom-on-green-light: #fff;
+  --md-custom-on-light-blue-light: #fff;
+  --md-custom-on-yellow-light: #fff;
+  --md-custom-on-cyan-light: #fff;
+  --md-custom-on-orange-light: #fff;
+  --md-custom-on-blue-light: #fff;
+  --md-custom-on-purple-light: #fff;
+
+  /* On Custom Colors Dark */
+  --md-custom-on-pink-dark: #5e1133;
+  --md-custom-on-green-dark: #003824;
+  --md-custom-on-light-blue-dark: #003543;
+  --md-custom-on-yellow-dark: #383000;
+  --md-custom-on-cyan-dark: #00382d;
+  --md-custom-on-orange-dark: #502400;
+  --md-custom-on-blue-dark: #002d6f;
+  --md-custom-on-purple-dark: #491766;
+
+  /* Custom Colors Container Light */
+  --md-custom-pink-container-light: #ffd9e2;
+  --md-custom-green-container-light: #8df7c2;
+  --md-custom-light-blue-container-light: #b7eaff;
+  --md-custom-yellow-container-light: #fbe365;
+  --md-custom-cyan-container-light: #7bf8d9;
+  --md-custom-orange-container-light: #ffdcc7;
+  --md-custom-blue-container-light: #d9e2ff;
+  --md-custom-purple-container-light: #f5d9ff;
+
+  /* Custom Colors Container Dark */
+  --md-custom-pink-container-dark: #7b2949;
+  --md-custom-green-container-dark: #005235;
+  --md-custom-light-blue-container-dark: #004e60;
+  --md-custom-yellow-container-dark: #524700;
+  --md-custom-cyan-container-dark: #005143;
+  --md-custom-orange-container-dark: #723600;
+  --md-custom-blue-container-dark: #19438f;
+  --md-custom-purple-container-dark: #61317e;
+
+  /* On Custom Colors Container Light */
+  --md-custom-on-pink-container-light: #3e001d;
+  --md-custom-on-green-container-light: #002113;
+  --md-custom-on-light-blue-container-light: #001f28;
+  --md-custom-on-yellow-container-light: #211b00;
+  --md-custom-on-cyan-container-light: #002019;
+  --md-custom-on-orange-container-light: #311300;
+  --md-custom-on-blue-container-light: #001945;
+  --md-custom-on-purple-container-light: #30004a;
+
+  /* On Custom Colors Container Dark */
+  --md-custom-on-pink-container-dark: #ffd9e2;
+  --md-custom-on-green-container-dark: #8df7c2;
+  --md-custom-on-light-blue-container-dark: #b7eaff;
+  --md-custom-on-yellow-container-dark: #fbe365;
+  --md-custom-on-cyan-container-dark: #7bf8d9;
+  --md-custom-on-orange-container-dark: #ffdcc7;
+  --md-custom-on-blue-container-dark: #d9e2ff;
+  --md-custom-on-purple-container-dark: #f5d9ff;
+
   /* display - large */
-  --md-display-large-font-family-name: "Roboto";
-  --md-display-large-font-family-style: 400;
-  --md-display-large-font-weight: 400px;
-  --md-display-large-font-size: 57px;
-  --md-display-large-line-height: 64px;
-  --md-display-large-letter-spacing: -0.25px;
+  --md-sys-typescale-display-large-font-family-name: roboto;
+  --md-sys-typescale-display-large-font-family-style: regular;
+  --md-sys-typescale-display-large-font-weight: 400px;
+  --md-sys-typescale-display-large-font-size: 57px;
+  --md-sys-typescale-display-large-line-height: 64px;
+  --md-sys-typescale-display-large-letter-spacing: -0.25px;
 
   /* display - medium */
-  --md-display-medium-font-family-name: "Roboto";
-  --md-display-medium-font-family-style: 400;
-  --md-display-medium-font-weight: 400px;
-  --md-display-medium-font-size: 45px;
-  --md-display-medium-line-height: 52px;
-  --md-display-medium-letter-spacing: 0px;
+  --md-sys-typescale-display-medium-font-family-name: roboto;
+  --md-sys-typescale-display-medium-font-family-style: regular;
+  --md-sys-typescale-display-medium-font-weight: 400px;
+  --md-sys-typescale-display-medium-font-size: 45px;
+  --md-sys-typescale-display-medium-line-height: 52px;
+  --md-sys-typescale-display-medium-letter-spacing: 0px;
 
   /* display - small */
-  --md-display-small-font-family-name: "Roboto";
-  --md-display-small-font-family-style: 400;
-  --md-display-small-font-weight: 400px;
-  --md-display-small-font-size: 36px;
-  --md-display-small-line-height: 44px;
-  --md-display-small-letter-spacing: 0px;
+  --md-sys-typescale-display-small-font-family-name: roboto;
+  --md-sys-typescale-display-small-font-family-style: regular;
+  --md-sys-typescale-display-small-font-weight: 400px;
+  --md-sys-typescale-display-small-font-size: 36px;
+  --md-sys-typescale-display-small-line-height: 44px;
+  --md-sys-typescale-display-small-letter-spacing: 0px;
 
   /* headline - large */
-  --md-headline-large-font-family-name: "Roboto";
-  --md-headline-large-font-family-style: 400;
-  --md-headline-large-font-weight: 400px;
-  --md-headline-large-font-size: 32px;
-  --md-headline-large-line-height: 40px;
-  --md-headline-large-letter-spacing: 0px;
+  --md-sys-typescale-headline-large-font-family-name: roboto;
+  --md-sys-typescale-headline-large-font-family-style: regular;
+  --md-sys-typescale-headline-large-font-weight: 400px;
+  --md-sys-typescale-headline-large-font-size: 32px;
+  --md-sys-typescale-headline-large-line-height: 40px;
+  --md-sys-typescale-headline-large-letter-spacing: 0px;
 
   /* headline - medium */
-  --md-headline-medium-font-family-name: "Roboto";
-  --md-headline-medium-font-family-style: 400;
-  --md-headline-medium-font-weight: 400px;
-  --md-headline-medium-font-size: 28px;
-  --md-headline-medium-line-height: 36px;
-  --md-headline-medium-letter-spacing: 0px;
+  --md-sys-typescale-headline-medium-font-family-name: roboto;
+  --md-sys-typescale-headline-medium-font-family-style: regular;
+  --md-sys-typescale-headline-medium-font-weight: 400px;
+  --md-sys-typescale-headline-medium-font-size: 28px;
+  --md-sys-typescale-headline-medium-line-height: 36px;
+  --md-sys-typescale-headline-medium-letter-spacing: 0px;
 
   /* headline - small */
-  --md-headline-small-font-family-name: "Roboto";
-  --md-headline-small-font-family-style: 400;
-  --md-headline-small-font-weight: 400px;
-  --md-headline-small-font-size: 24px;
-  --md-headline-small-line-height: 32px;
-  --md-headline-small-letter-spacing: 0px;
+  --md-sys-typescale-headline-small-font-family-name: roboto;
+  --md-sys-typescale-headline-small-font-family-style: regular;
+  --md-sys-typescale-headline-small-font-weight: 400px;
+  --md-sys-typescale-headline-small-font-size: 24px;
+  --md-sys-typescale-headline-small-line-height: 32px;
+  --md-sys-typescale-headline-small-letter-spacing: 0px;
 
   /* body - large */
-  --md-body-large-font-family-name: "Roboto";
-  --md-body-large-font-family-style: 400;
-  --md-body-large-font-weight: 400px;
-  --md-body-large-font-size: 16px;
-  --md-body-large-line-height: 24px;
-  --md-body-large-letter-spacing: 0.50px;
+  --md-sys-typescale-body-large-font-family-name: roboto;
+  --md-sys-typescale-body-large-font-family-style: regular;
+  --md-sys-typescale-body-large-font-weight: 400px;
+  --md-sys-typescale-body-large-font-size: 16px;
+  --md-sys-typescale-body-large-line-height: 24px;
+  --md-sys-typescale-body-large-letter-spacing: 0.50px;
 
   /* body - medium */
-  --md-body-medium-font-family-name: "Roboto";
-  --md-body-medium-font-family-style: 400;
-  --md-body-medium-font-weight: 400px;
-  --md-body-medium-font-size: 14px;
-  --md-body-medium-line-height: 20px;
-  --md-body-medium-letter-spacing: 0.25px;
+  --md-sys-typescale-body-medium-font-family-name: roboto;
+  --md-sys-typescale-body-medium-font-family-style: regular;
+  --md-sys-typescale-body-medium-font-weight: 400px;
+  --md-sys-typescale-body-medium-font-size: 14px;
+  --md-sys-typescale-body-medium-line-height: 20px;
+  --md-sys-typescale-body-medium-letter-spacing: 0.25px;
 
   /* body - small */
-  --md-body-small-font-family-name: "Roboto";
-  --md-body-small-font-family-style: 400;
-  --md-body-small-font-weight: 400px;
-  --md-body-small-font-size: 12px;
-  --md-body-small-line-height: 16px;
-  --md-body-small-letter-spacing: 0.40px;
+  --md-sys-typescale-body-small-font-family-name: roboto;
+  --md-sys-typescale-body-small-font-family-style: regular;
+  --md-sys-typescale-body-small-font-weight: 400px;
+  --md-sys-typescale-body-small-font-size: 12px;
+  --md-sys-typescale-body-small-line-height: 16px;
+  --md-sys-typescale-body-small-letter-spacing: 0.40px;
 
   /* label - large */
-  --md-label-large-font-family-name: "Roboto";
-  --md-label-large-font-family-style: 500;
-  --md-label-large-font-weight: 500px;
-  --md-label-large-font-size: 14px;
-  --md-label-large-line-height: 20px;
-  --md-label-large-letter-spacing: 0.10px;
+  --md-sys-typescale-label-large-font-family-name: roboto;
+  --md-sys-typescale-label-large-font-family-style: medium;
+  --md-sys-typescale-label-large-font-weight: 500px;
+  --md-sys-typescale-label-large-font-size: 14px;
+  --md-sys-typescale-label-large-line-height: 20px;
+  --md-sys-typescale-label-large-letter-spacing: 0.10px;
 
   /* label - medium */
-  --md-label-medium-font-family-name: "Roboto";
-  --md-label-medium-font-family-style: 500;
-  --md-label-medium-font-weight: 500px;
-  --md-label-medium-font-size: 12px;
-  --md-label-medium-line-height: 16px;
-  --md-label-medium-letter-spacing: 0.50px;
+  --md-sys-typescale-label-medium-font-family-name: roboto;
+  --md-sys-typescale-label-medium-font-family-style: medium;
+  --md-sys-typescale-label-medium-font-weight: 500px;
+  --md-sys-typescale-label-medium-font-size: 12px;
+  --md-sys-typescale-label-medium-line-height: 16px;
+  --md-sys-typescale-label-medium-letter-spacing: 0.50px;
 
   /* label - small */
-  --md-label-small-font-family-name: "Roboto";
-  --md-label-small-font-family-style: 500;
-  --md-label-small-font-weight: 500px;
-  --md-label-small-font-size: 11px;
-  --md-label-small-line-height: 16px;
-  --md-label-small-letter-spacing: 0.50px;
+  --md-sys-typescale-label-small-font-family-name: roboto;
+  --md-sys-typescale-label-small-font-family-style: medium;
+  --md-sys-typescale-label-small-font-weight: 500px;
+  --md-sys-typescale-label-small-font-size: 11px;
+  --md-sys-typescale-label-small-line-height: 16px;
+  --md-sys-typescale-label-small-letter-spacing: 0.50px;
 
   /* title - large */
-  --md-title-large-font-family-name: "Roboto";
-  --md-title-large-font-family-style: 400;
-  --md-title-large-font-weight: 400px;
-  --md-title-large-font-size: 22px;
-  --md-title-large-line-height: 28px;
-  --md-title-large-letter-spacing: 0px;
+  --md-sys-typescale-title-large-font-family-name: roboto;
+  --md-sys-typescale-title-large-font-family-style: regular;
+  --md-sys-typescale-title-large-font-weight: 400px;
+  --md-sys-typescale-title-large-font-size: 22px;
+  --md-sys-typescale-title-large-line-height: 28px;
+  --md-sys-typescale-title-large-letter-spacing: 0px;
 
   /* title - medium */
-  --md-title-medium-font-family-name: "Roboto";
-  --md-title-medium-font-family-style: 500;
-  --md-title-medium-font-weight: 500px;
-  --md-title-medium-font-size: 16px;
-  --md-title-medium-line-height: 24px;
-  --md-title-medium-letter-spacing: 0.15px;
+  --md-sys-typescale-title-medium-font-family-name: roboto;
+  --md-sys-typescale-title-medium-font-family-style: medium;
+  --md-sys-typescale-title-medium-font-weight: 500px;
+  --md-sys-typescale-title-medium-font-size: 16px;
+  --md-sys-typescale-title-medium-line-height: 24px;
+  --md-sys-typescale-title-medium-letter-spacing: 0.15px;
 
   /* title - small */
-  --md-title-small-font-family-name: "Roboto";
-  --md-title-small-font-family-style: 500;
-  --md-title-small-font-weight: 500px;
-  --md-title-small-font-size: 14px;
-  --md-title-small-line-height: 20px;
-  --md-title-small-letter-spacing: 0.10px;
+  --md-sys-typescale-title-small-font-family-name: roboto;
+  --md-sys-typescale-title-small-font-family-style: medium;
+  --md-sys-typescale-title-small-font-weight: 500px;
+  --md-sys-typescale-title-small-font-size: 14px;
+  --md-sys-typescale-title-small-line-height: 20px;
+  --md-sys-typescale-title-small-letter-spacing: 0.10px;
 }

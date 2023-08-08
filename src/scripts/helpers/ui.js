@@ -28,6 +28,8 @@ const switchView = (view, map) => {
   for (const btn of document.querySelectorAll("nav > button"))
     btn.classList.remove("active");
 
+  map.getContainer().classList.remove("hide-rts");
+
   if (panel) {
     if (!isShown) {
       panel.classList.add("show");

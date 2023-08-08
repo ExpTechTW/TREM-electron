@@ -1,13 +1,13 @@
+@import url("../components/input.css");
 @import url("../components/segmented.css");
 
 #settings-panel {
   top: 0;
   right: 0;
-  translate: calc(clamp(400px, 30svw, 600px) + 24px);
+  translate: calc(clamp(360px, 30svw, 600px) + 24px);
   height: calc(100svh - 24px);
-  width: clamp(400px, 30svw, 600px);
+  width: clamp(360px, 30svw, 600px);
   margin: 8px;
-  margin-right: 4px;
   padding: 4px;
   border-radius: 8px;
   overflow: hidden;
@@ -50,27 +50,79 @@
   transition: color .2s;
 }
 
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px;
+  padding: 0 8px;
+}
+
+.settings-group:not(:first-child) {
+  margin-top: 24px;
+}
+
 .setting-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 8px;
-  padding: 12px;
 }
 
-.setting-header {
+.group-header {
   display: flex;
   gap: 8px;
   position: relative;
-  font-weight: 500;
-  font-size: 18px;
-  line-height: 18px;
+  color: var(--md-on-secondary-container);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 22px;
 }
 
-.setting-header::before {
+.group-header::before {
   content: "";
   display: inline-block;
   width: 4px;
   border-radius: 4px;
-  background-color: aquamarine;
+  background-color: var(--md-on-secondary-container);
+}
+
+.group-api {
+  --md-primary: var(--md-custom-pink);
+  --md-secondary-container: var(--md-custom-pink-container);
+  --md-on-secondary-container: var(--md-custom-on-pink-container);
+}
+
+.group-map {
+  --md-primary: var(--md-custom-green);
+  --md-secondary-container: var(--md-custom-green-container);
+  --md-on-secondary-container: var(--md-custom-on-green-container);
+}
+
+.group-report {
+  --md-primary: var(--md-custom-light-blue);
+  --md-secondary-container: var(--md-custom-light-blue-container);
+  --md-on-secondary-container: var(--md-custom-on-light-blue-container);
+}
+
+.setting-header {
+  display: flex;
+  gap: 4px;
+  position: relative;
+  color: var(--md-on-surface);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+label {
+  display: flex;
+  align-items: center;
+}
+
+label > .label-text {
+  flex: 1;
+  color: var(--md-on-surface-variant);
+  font-weight: 300;
+  font-size: 14px;
 }

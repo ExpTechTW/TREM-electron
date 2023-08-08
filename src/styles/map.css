@@ -5,7 +5,7 @@
   border-radius: 8px;
   outline: 1px solid var(--md-outline);
   overflow: hidden;
-  transition: opacity .2s;
+  transition: opacity .2s, background-color.1s;
 }
 
 #map.hide-rts .rts-marker {

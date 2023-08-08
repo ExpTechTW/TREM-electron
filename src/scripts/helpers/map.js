@@ -125,12 +125,12 @@ const renderRtsData = (rts, map) => {
     if (element == null) {
       const marker = rtsMarkerElement();
       marker.id = uuid;
-      marker.style.backgroundColor = Colors.getIntensityColor(rts[id]?.i);
+      marker.style.backgroundColor = ((localStorage.getItem("RtsMode") ?? "i") == "i") ? Colors.getIntensityColor(rts[id]?.i) : Colors.getAccerateColor(rts[id]?.i);
       marker.style.outlineColor = id in rts ? "" : Colors.NoDataRtsColor;
       marker.style.zIndex = (rts[id]?.v ?? 0.01) * 100;
       new Marker({ element: marker }).setLngLat([station.Long, station.Lat]).addTo(map);
     } else {
-      element.style.backgroundColor = Colors.getIntensityColor(rts[id]?.i);
+      element.style.backgroundColor = ((localStorage.getItem("RtsMode") ?? "i") == "i") ? Colors.getIntensityColor(rts[id]?.i) : Colors.getAccerateColor(rts[id]?.i);
       element.style.outlineColor = id in rts ? "" : Colors.NoDataRtsColor;
       element.style.zIndex = (rts[id]?.v ?? 0.01) * 100;
     }

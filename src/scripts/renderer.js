@@ -2,7 +2,7 @@ const { setMapLayers, setDefaultMapView, renderRtsData, renderEewData } = requir
 const { START_NOTIFICATION_SERVICE, NOTIFICATION_RECEIVED, NOTIFICATION_SERVICE_STARTED } = require("electron-fcm-push-receiver/src/constants");
 const { Marker, Map: MaplibreMap } = require("maplibre-gl");
 const { ElementBuilder } = require("./helpers/domhelper");
-const { cross } = require("./factory");
+const { cross, square } = require("./factory");
 const { getMagnitudeLevel, getDepthLevel } = require("./helpers/utils");
 const { ipcRenderer } = require("electron/renderer");
 const { switchView } = require("./helpers/ui");
@@ -53,7 +53,8 @@ const markers = {
 // #region init reports
 
 const updateReports = async () => {
-  const reports = await api.getReports();
+  const reports = (await api.getReports())
+    .filter((v) => (localStorage.getItem("ReportShowCWB") == "true") && !v.location.startsWith("地震資訊") || (localStorage.getItem("ReportShowTYA") == "true") && v.location.startsWith("地震資訊"));
   const frag = new DocumentFragment();
   const list = document.getElementById("reports-list");
 
@@ -62,28 +63,44 @@ const updateReports = async () => {
     delete markers.reports[identifier];
   }
 
-  for (let i = 0, n = reports.slice(0, 50).length, report = reports[i]; i < n; i++, report = reports[i]) {
+  let sliceTo = !((localStorage.getItem("ReportShowCWB") == "true") && (localStorage.getItem("ReportShowTYA") == "true"))
+    ? +(localStorage.getItem("ReportCount") ?? 50)
+    : 0;
+  let cwbCount = sliceTo;
+
+  while (cwbCount < +(localStorage.getItem("ReportCount") ?? 50))
+    for (const report of reports) {
+      sliceTo++;
+
+      if (report.location.startsWith("地震資訊"))
+        continue;
+      else
+        cwbCount++;
+    }
+
+  for (let i = 0, n = reports.slice(0, sliceTo).length, report = reports[i]; i < n; i++, report = reports[i]) {
     const isNumbered = Boolean(report.earthquakeNo % 1000);
+    const isTYA = report.location.startsWith("地震資訊");
 
     const item = new ElementBuilder()
       .setId(report.identifier)
       .setClass([ "report-item" ])
       // color
       .addChildren(new ElementBuilder()
-        .setClass([ "report-color", `int-${constants.Intensities[report.data[0].areaIntensity].value}`, isNumbered ? "has-number" : ""])
-        .setStyle("backgroundColor", isNumbered ? colors.getIntensityColor(report.data[0].areaIntensity - 1) : "transparent")
-        .setStyle("borderColor", colors.getIntensityColor(report.data[0].areaIntensity - 1))
-        .setAttribute("title", `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`))
+        .setClass([ "report-color", isTYA ? "int-unknown" : `int-${constants.Intensities[report.data[0].areaIntensity].value}`, isNumbered ? "has-number" : ""])
+        .setStyle("backgroundColor", isNumbered && !isTYA ? colors.getIntensityColor(report.data[0].areaIntensity - 1) : "transparent")
+        .setStyle("borderColor", isTYA ? "var(--md-outline)" : colors.getIntensityColor(report.data[0].areaIntensity - 1))
+        .setAttribute("title", isTYA ? "" : `${report.data[0].areaName} ${report.data[0].eqStation[0].stationName}`))
       // location
       .addChildren(new ElementBuilder()
         .setClass([ "report-title" ])
         .setContent(localStorage.getItem("ReportTitleStyle") == "1"
           ? report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"))
           : localStorage.getItem("ReportTitleStyle") == "2"
-            ? isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震"
+            ? isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震"
             : report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")")))
         .setAttribute("title", report.location.split(" (")[0])
-        .addChildren(localStorage.getItem("ReportTitleStyle") == "3" && isNumbered
+        .addChildren((localStorage.getItem("ReportTitleStyle") == "3" && (isNumbered))
           ? new ElementBuilder("span")
             .setClass([ "report-subtitle" ])
             .setContent(report.earthquakeNo)
@@ -108,7 +125,12 @@ const updateReports = async () => {
     // map icon
     if (!markers.reports[report.identifier])
       markers.reports[report.identifier] = new Marker({
-        element: cross({
+        element: isTYA ? cross({
+          className : "report-cross",
+          scale     : (report.magnitudeValue ** 2) / 72,
+          opacity   : (100 - i) / 100,
+          svg       : true
+        }) : cross({
           className  : "report-cross",
           scale      : (report.magnitudeValue ** 2) / 72,
           innerColor : isNumbered ? colors.getIntensityColor(report.data[0].areaIntensity - 1) : undefined,
@@ -125,7 +147,7 @@ const updateReports = async () => {
       .addEventListener("mouseenter", () => {
         item.addClass("hightlight");
         document.getElementById("reports-panel").querySelector(".scroll-wrapper").scrollTo({
-          top      : item.offsetTop - document.getElementById("reports-panel").offsetHeight / 2 + item.element.offsetHeight / 2,
+          top      : item.element.offsetTop - document.getElementById("reports-panel").offsetHeight / 2 + item.element.offsetHeight / 2,
           behavior : "smooth"
         });
       });
@@ -193,13 +215,16 @@ const initSettings = () => {
         break;
       }
 
+      case "checkbox": {
+        input.checked = localStorage.getItem(input.getAttribute("data-setting")) == "true";
+        break;
+      }
+
       default:
         break;
     }
 
     input.addEventListener("change", function() {
-      console.log(this.value);
-
       switch (this.type) {
         case "radio":
         case "text":
@@ -209,16 +234,23 @@ const initSettings = () => {
           break;
         }
 
+        case "checkbox": {
+          localStorage.setItem(this.getAttribute("data-setting"), this.checked);
+          break;
+        }
+
         default:
           break;
       }
 
-      switch (this.getAttribute("data-setting")) {
+      switch (this.name) {
         case "ApiKey": {
           api.key = this.value;
           break;
         }
 
+        case "ReportCount":
+        case "ReportSource":
         case "ReportTitleStyle": {
           updateReports();
           break;

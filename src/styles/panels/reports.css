@@ -1,12 +1,13 @@
 #reports-panel {
   top: 0;
   right: 0;
-  translate: calc(clamp(300px, 25svw, 600px) + 24px);
+  translate: calc(clamp(300px, 28svw, 600px) + 24px);
   height: calc(100svh - 24px);
-  width: clamp(300px, 25svw, 600px);
+  width: clamp(300px, 28svw, 600px);
   margin: 8px;
   padding: 4px;
   border-radius: 8px;
+  white-space: nowrap;
   overflow: hidden;
   user-select: none;
   transition-property: translate, opacity;
@@ -134,9 +135,11 @@
 }
 
 .report-title {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   font-weight: 500;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .report-subtitle {
@@ -263,6 +266,11 @@
   padding-left: 24px;
   font-size: 28px;
   line-height: 52px;
+}
+
+.int-unknown::before {
+  content: "?";
+  position: absolute;
 }
 
 .int-0::before {

@@ -81,58 +81,67 @@ class api extends EventEmitter {
     });
   }
 
-  getReports() {
+  getReports(fetchCwb = false) {
+    console.log("called getReports", fetchCwb);
     return new Promise((resolve, reject) => {
       caches.match(constants.API.ReportsURL)
         .then(async (response) => {
           const list = {};
 
-          const data = response ? await response.json() : [];
+          const req = async (cd, includeKey = true) => {
+            console.log("called req", includeKey);
+            const request = new Request(constants.API.ReportsURL, {
+              method  : "POST",
+              headers : {
+                Accept         : "application/json",
+                "Content-Type" : "application/json",
+              },
+              body: JSON.stringify({
+                key: (includeKey) ? this.key : null,
+                list
+              })
+            });
 
-          if (data.length)
-            for (const report of data) {
-              const md5 = createHash("md5");
-              list[report.identifier] = md5.update(JSON.stringify(report)).digest("hex");
-            }
+            const res = await fetch(request);
 
-          const request = new Request(constants.API.ReportsURL, {
-            method  : "POST",
-            headers : {
-              Accept         : "application/json",
-              "Content-Type" : "application/json",
-            },
-            body: JSON.stringify({
-              key: this.key,
-              list
-            })
-          });
-
-          fetch(request).then(async (res) => {
             if (res.ok) {
               const resData = await res.json();
-              const dataToSave = data.concat(resData).filter((v, i, a) => a.map((r) => r.identifier).indexOf(v.identifier) == i);
+              const dataToSave = resData.concat(cd)
+                .filter((v, i, a) => a.map((r) => r.identifier).indexOf(v.identifier) == i)
+                .sort((a, b) => new Date(b.originTime) - new Date(a.originTime));
+
+              console.log(dataToSave);
               const jsonResponse = new Response(JSON.stringify(dataToSave), {
                 headers: {
                   "content-type": "application/json"
                 }
               });
+              response = jsonResponse;
 
-              caches
-                .open("reports")
-                .then((cache) => {
-                  cache.put(request.url, jsonResponse)
-                    .then(() => cache.match(request.url))
-                    .then((r) => r.json())
-                    .then((r) => {
-                      r.isCache = !resData.length;
-                      resolve(r);
-                    });
-                });
+              const cache = await caches.open("reports");
+              await cache.put(request.url, jsonResponse);
+              dataToSave.isCache = !resData.length;
+              return dataToSave;
             } else {
-              data.isCache = true;
-              resolve();
+              cd.isCache = true;
+              return cd;
             }
-          });
+          };
+
+          const cacheData = response ? await response.json() : [];
+
+          if (cacheData.length || fetchCwb) {
+            for (const report of cacheData) {
+              const md5 = createHash("md5");
+              list[report.identifier] = md5.update(JSON.stringify(report)).digest("hex");
+            }
+
+            req(cacheData, !fetchCwb).then(resolve);
+          } else {
+            this.getReports(true)
+              .then((d) => req(d))
+              .then(resolve);
+          }
         });
     });
   }

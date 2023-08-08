@@ -1,0 +1,24 @@
+input[type="password"],
+input[type="number"],
+input[type="text"] {
+  all: unset;
+  margin: 1px;
+  padding: 8px;
+  border-radius: 8px;
+  background-color: transparent;
+  outline: 1px solid var(--md-outline);
+  font-family: Lato, "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  transition-property: outline, background-color;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="text"]:focus {
+  background-color: var(--md-secondary-container);
+  outline: 2px solid var(--md-primary);
+}
+
+

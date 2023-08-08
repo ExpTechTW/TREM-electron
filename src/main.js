@@ -29,7 +29,7 @@ function createWindow() {
   MainWindow = new BrowserWindow({
     title              : "Taiwan Real-time Earthquake Monitoring",
     width              : 1200,
-    minWidth           : 1200,
+    minWidth           : 800,
     height             : 720,
     minHeight          : 720,
     resizable          : true,
