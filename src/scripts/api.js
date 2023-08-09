@@ -39,7 +39,7 @@ class api extends EventEmitter {
 
     this.ws.once("open", () => {
       if (this.ws.readyState == this.ws.OPEN) {
-        console.debug("socket opened");
+        console.debug("[API] Socket --> open");
 
         if (!localStorage.uuid)
           localStorage.setItem("uuid", v4());
@@ -49,7 +49,7 @@ class api extends EventEmitter {
     });
 
     this.ws.once("close", () => {
-      console.debug("socket closed");
+      console.debug("[API] Socket --> close");
       this.ws.removeAllListeners();
       delete this.ws;
 
@@ -74,7 +74,7 @@ class api extends EventEmitter {
           if (data.response == "Connection Succeeded")
             this.emit("ntp", data);
 
-          console.log(data.response);
+          console.log(`[API] Socket --> message: ${data.response}`);
           break;
         }
       }
@@ -82,14 +82,12 @@ class api extends EventEmitter {
   }
 
   getReports(fetchCwb = false) {
-    console.log("called getReports", fetchCwb);
     return new Promise((resolve, reject) => {
       caches.match(constants.API.ReportsURL)
         .then(async (response) => {
           const list = {};
 
           const req = async (cd, includeKey = true) => {
-            console.log("called req", includeKey);
             const request = new Request(constants.API.ReportsURL, {
               method  : "POST",
               headers : {
@@ -110,7 +108,6 @@ class api extends EventEmitter {
                 .filter((v, i, a) => a.map((r) => r.identifier).indexOf(v.identifier) == i)
                 .sort((a, b) => new Date(b.originTime) - new Date(a.originTime));
 
-              console.log(dataToSave);
               const jsonResponse = new Response(JSON.stringify(dataToSave), {
                 headers: {
                   "content-type": "application/json"

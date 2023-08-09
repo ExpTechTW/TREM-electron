@@ -54,6 +54,8 @@ const markers = {
 // #region init reports
 
 const updateReports = async () => {
+  console.log("%c[Reports] Refreshing earthquake reports...", "color: cornflowerblue");
+
   const reports = (await api.getReports())
     .filter((v) => (localStorage.getItem("ReportShowCWB") == "true") && !v.location.startsWith("地震資訊") || (localStorage.getItem("ReportShowTYA") == "true") && v.location.startsWith("地震資訊"));
   const frag = new DocumentFragment();
@@ -126,6 +128,14 @@ const updateReports = async () => {
         .setAttribute("title", constants.Depths[getDepthLevel(report.depth)]));
 
     document.getElementById("reports-list-view").classList.remove("hide");
+    ipcRenderer.emit("report:clear.station");
+    ipcRenderer.emit("report:unhide.marker");
+
+    if (document.getElementById("reports-panel").classList.contains("show"))
+      map.fitBounds(constants.TaiwanBounds, {
+        padding : { top: 24, right: 324, bottom: 24, left: 24 },
+        animate : (localStorage.getItem("MapAnimation") ?? "true") == "true"
+      });
 
     // map icon
     if (!markers.reports[report.identifier])
@@ -232,6 +242,9 @@ const updateReports = async () => {
   }
 
   list.replaceChildren(frag);
+
+  console.log("%c[Reports] Successfully refreshed earthquake reports.", "color: greenyellow");
+  console.log(`%c[Reports] Next scheduled refresh will be at ${new Date(Date.now() + 300_000).toLocaleTimeString()}, 5 minutes later.`, "color: cornflowerblue");
 };
 
 ipcRenderer.on("report:unhide.marker", () => {
