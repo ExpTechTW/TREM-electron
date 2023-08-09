@@ -145,5 +145,23 @@ class api extends EventEmitter {
         });
     });
   }
+
+  requestReplay(ids) {
+    for (const id of ids) {
+      const data = {
+        method  : "POST",
+        headers : { "content-type": "application/json" },
+        body    : JSON.stringify({
+          uuid: localStorage.uuid,
+          id,
+        }),
+      };
+      fetch(constants.API.ReplayURL, data)
+        .then(() => console.log("posted", id))
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }
 }
 module.exports = api;

@@ -1,0 +1,51 @@
+/* Two views with Forward and backward transition only */ 
+
+.view-container.forward-backward {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.view-container.forward-backward > .view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 1;
+  z-index: 1;
+  transition-property: opacity, translate;
+  transition-duration: 400ms, 500ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* default state */
+
+.view-container.forward-backward > .view:not(.hide) {
+  transition-delay: 200ms, 0s;
+}
+
+.view-container.forward-backward > .view.hide,
+.view-container.forward-backward > .view:not(.hide) + .view {
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.view-container.forward-backward > .view:not(.hide) + .view {
+  translate: 50%;
+  transition-delay: 0s;
+}
+
+/* switched to second view */
+
+.view-container.forward-backward > .view.hide {
+  translate: -25%;
+}
+
+.view-container.forward-backward > .view.hide + .view {
+  translate: 0;
+  transition-delay: 200ms, 0s;
+}

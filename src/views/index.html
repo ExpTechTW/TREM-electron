@@ -24,8 +24,69 @@
         </div>
       </div>
       <div id="reports-panel" class="panel">
-        <div class="scroll-wrapper">
-          <div id="reports-list"></div>
+        <div class="view-container forward-backward">
+          <div id="reports-list-view" class="view">
+            <div class="scroll-wrapper">
+              <div id="reports-list"></div>
+            </div>
+          </div>
+          <div id="report-detail-view" class="view">
+            <button id="button-return-to-reports-list" class="button text-button secondary small" type="button" style="margin-top: 8px;"><span class="icon">arrow_back</span><span class="nav-button-text">返回列表</span></button>
+            
+            <!-- 報告編號-->
+            <div class="report-detail-header-container">
+              <div id="report-detail-subtitle"></div>
+              <div id="report-detail-title"></div>
+            </div>
+            <div class="scroll-wrapper">
+              <div class="report-detail-container">
+                <!-- 發震時間 -->
+                <div class="field" style="grid-area: 1 / 1 / 2 / 3;">
+                  <div class="icon">schedule</div>
+                  <div class="field-content">
+                    <span class="field-name">發震時間</span>
+                    <span id="report-detail-time" class="field-value"></span>
+                  </div>
+                </div>
+
+                <!-- 震央位置 -->
+                <div class="field" style="grid-area: 2 / 1 / 3 / 3;">
+                  <div class="icon">pin_drop</div>
+                  <div class="field-content">
+                    <span class="field-name">震央位置</span>
+                    <span id="report-detail-location" class="field-value"></span>
+                  </div>
+                </div>
+
+                <!-- 規模 -->
+                <div class="field">
+                  <div class="icon">crisis_alert</div>
+                  <div class="field-content">
+                    <span class="field-name">規模</span>
+                    <span><span class="field-unit">M<sub>L</sub></span><span id="report-detail-magnitude" class="field-value"></span></span>
+                  </div>
+                </div>
+                
+                <!-- 深度 -->
+                <div class="field">
+                  <div class="icon">height</div>
+                  <div class="field-content">
+                    <span class="field-name">深度</span>
+                    <span><span id="report-detail-depth" class="field-value"></span><span class="field-unit">km</span></span>
+                  </div>
+                </div>
+                
+                <!-- 規模 -->
+                <div class="field">
+                  <div class="icon">schedule</div>
+                  <div class="field-content">
+                    <span class="field-name">規模</span>
+                    <span id="report-detail-magnitude" class="field-value"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div id="settings-panel" class="panel">

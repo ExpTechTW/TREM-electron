@@ -10,6 +10,8 @@
   margin: 8px;
   padding: 4px;
   border-radius: 8px;
+  background-color: var(--md-surface);
+  box-shadow: 0 10px 20px rgb(0 0 0 / 19%), 0 6px 6px rgb(0 0 0 / 23%);
   overflow: hidden;
   user-select: none;
   transition-property: translate, opacity;
@@ -32,8 +34,8 @@
   height: 100%;
   width: 100%;
   border-radius: inherit;
-  opacity: .6;
-  background-color: var(--md-surface-variant);
+  opacity: 0.12;
+  background-color: var(--md-primary);
   pointer-events: none;
   isolation: isolate;
   z-index: -1;
@@ -49,7 +51,6 @@
   line-height: 16px;
   transition: color .2s;
 }
-
 
 .settings-group {
   display: flex;

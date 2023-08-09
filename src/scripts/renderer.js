@@ -94,17 +94,19 @@ const updateReports = async () => {
       // location
       .addChildren(new ElementBuilder()
         .setClass([ "report-title" ])
-        .setContent(localStorage.getItem("ReportTitleStyle") == "1"
-          ? report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"))
-          : localStorage.getItem("ReportTitleStyle") == "2"
-            ? isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震"
-            : report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")")))
+        .setContent(
+          (localStorage.getItem("ReportTitleStyle") == "1")
+            ? report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"))
+            : (localStorage.getItem("ReportTitleStyle") == "2")
+              ? isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震"
+              : report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")")))
         .setAttribute("title", report.location.split(" (")[0])
-        .addChildren((localStorage.getItem("ReportTitleStyle") == "3" && (isNumbered))
-          ? new ElementBuilder("span")
-            .setClass([ "report-subtitle" ])
-            .setContent(report.earthquakeNo)
-          : null)
+        .addChildren(
+          (localStorage.getItem("ReportTitleStyle") == "3")
+            ? new ElementBuilder("span")
+              .setClass([ "report-subtitle" ])
+              .setContent(isTYA ? "地震資訊" : isNumbered ? report.earthquakeNo : "小型有感")
+            : null)
       )
       // time
       .addChildren(new ElementBuilder()
@@ -171,21 +173,19 @@ const updateReports = async () => {
       time.style.cursor = "pointer";
       time.style.color = "yellow";
 
-      for (const id of [...report.ID, ...report.trem]) {
-        const data = {
-          method  : "POST",
-          headers : { "content-type": "application/json" },
-          body    : JSON.stringify({
-            uuid: localStorage.uuid,
-            id,
-          }),
-        };
-        fetch(constants.API.ReplayURL, data)
-          .then(() => console.log("posted", id))
-          .catch((err) => {
-            console.error(err);
-          });
-      }
+      for (const key in markers.reports)
+        if (key != report.identifier)
+          markers.reports[key].getElement().classList.add("hide");
+
+      document.getElementById("report-detail-subtitle").textContent = isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震";
+      document.getElementById("report-detail-title").textContent = report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"));
+      document.getElementById("report-detail-location").textContent = isTYA ? report.location.substring(report.location.indexOf("(") + 1, report.location.indexOf(")")) : report.location.substring(0, report.location.indexOf("(") - 1);
+      document.getElementById("report-detail-time").textContent = report.originTime;
+      document.getElementById("report-detail-magnitude").textContent = report.magnitudeValue.toFixed(1);
+      document.getElementById("report-detail-depth").textContent = report.depth;
+      document.getElementById("reports-list-view").classList.add("hide");
+      console.log(report);
+      // api.requestReplay([...report.ID, ...report.trem]);
     });
     frag.appendChild(item.toElement());
   }
@@ -196,6 +196,11 @@ const updateReports = async () => {
 updateReports();
 setInterval(updateReports, 300_000);
 
+document.getElementById("button-return-to-reports-list").addEventListener("click", () => {
+  document.getElementById("reports-list-view").classList.remove("hide");
+  for (const key in markers.reports)
+    markers.reports[key].getElement().classList.remove("hide");
+});
 // #endregion
 
 // #region init settings

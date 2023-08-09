@@ -1,6 +1,7 @@
 @import url("nav.css");
 @import url("map.css");
 @import url("panels.css");
+@import url("view.css");
 
 ::-webkit-scrollbar {
   width: 6px;
