@@ -1,10 +1,10 @@
 const { setMapLayers, setDefaultMapView, renderRtsData, renderEewData } = require("./helpers/map");
 const { START_NOTIFICATION_SERVICE, NOTIFICATION_RECEIVED, NOTIFICATION_SERVICE_STARTED } = require("electron-fcm-push-receiver/src/constants");
-const { Marker, Map: MaplibreMap } = require("maplibre-gl");
+const { Marker, Map: MaplibreMap, LngLatBounds } = require("maplibre-gl");
 const { ElementBuilder } = require("./helpers/domhelper");
-const { cross, square } = require("./factory");
+const { cross, square, reportStationMarkerElement } = require("./factory");
 const { getMagnitudeLevel, getDepthLevel } = require("./helpers/utils");
-const { ipcRenderer } = require("electron/renderer");
+const { ipcRenderer } = require("electron");
 const { switchView } = require("./helpers/ui");
 const api = new (require("./api"))(localStorage.getItem("ApiKey"));
 const colors = require("./helpers/colors");
@@ -47,7 +47,8 @@ api.on(constants.Events.TremEew, (data) => renderEewData(data, waves, map));
 api.on(constants.Events.CwbEew, (data) => renderEewData(data, waves, map));
 
 const markers = {
-  reports: {}
+  reports        : {},
+  reportStations : []
 };
 
 // #region init reports
@@ -124,6 +125,8 @@ const updateReports = async () => {
         .setContent(report.depth)
         .setAttribute("title", constants.Depths[getDepthLevel(report.depth)]));
 
+    document.getElementById("reports-list-view").classList.remove("hide");
+
     // map icon
     if (!markers.reports[report.identifier])
       markers.reports[report.identifier] = new Marker({
@@ -184,8 +187,24 @@ const updateReports = async () => {
       document.getElementById("report-detail-magnitude").textContent = report.magnitudeValue.toFixed(1);
       document.getElementById("report-detail-depth").textContent = report.depth;
       document.getElementById("reports-list-view").classList.add("hide");
+
       console.log(report);
+
+      const bounds = new LngLatBounds();
+      bounds.extend([report.epicenterLon, report.epicenterLat]);
+
+      // markers
+      for (const area of report.data)
+        for (const station of area.eqStation) {
+          ipcRenderer.emit("report:add.station", station);
+          bounds.extend([station.stationLon, station.stationLat]);
+        }
+
       // api.requestReplay([...report.ID, ...report.trem]);
+      map.fitBounds(bounds, {
+        padding : { top: 64, right: 364, bottom: 64, left: 64 },
+        maxZoom : 8.5,
+      });
     });
     frag.appendChild(item.toElement());
   }
@@ -193,13 +212,36 @@ const updateReports = async () => {
   list.replaceChildren(frag);
 };
 
+ipcRenderer.on("report:unhide.marker", () => {
+  for (const key in markers.reports)
+    markers.reports[key].getElement().classList.remove("hide");
+});
+
+ipcRenderer.on("report:add.station", (station) => {
+  const marker = reportStationMarkerElement(station.stationIntensity);
+  marker.style.zIndex = station.stationIntensity;
+  markers.reportStations.push(new Marker({
+    element: marker,
+  })
+    .setLngLat([station.stationLon, station.stationLat])
+    .addTo(map));
+});
+
+ipcRenderer.on("report:clear.station", () => {
+  for (const marker of markers.reportStations)
+    marker.remove();
+});
+
 updateReports();
 setInterval(updateReports, 300_000);
 
 document.getElementById("button-return-to-reports-list").addEventListener("click", () => {
   document.getElementById("reports-list-view").classList.remove("hide");
-  for (const key in markers.reports)
-    markers.reports[key].getElement().classList.remove("hide");
+  ipcRenderer.emit("report:clear.station");
+  ipcRenderer.emit("report:unhide.marker");
+  map.fitBounds(constants.TaiwanBounds, {
+    padding: { top: 24, right: 324, bottom: 24, left: 24 },
+  });
 });
 // #endregion
 

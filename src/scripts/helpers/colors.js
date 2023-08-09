@@ -12,7 +12,7 @@ const acc = chroma
 
 const ibg = chroma
   .scale(["#757575", "#2774C2", "#7BA822", "#E8D630", "#E68439", "#DB641F", "#DB1F1F", "#DB1F1F", "#862DB3"])
-  .domain([0, 0.8, 2.5, 8.0, 25, 80, 120, 250, 300, 400]);
+  .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
 module.exports = {
   get MapBackgroundColor() {

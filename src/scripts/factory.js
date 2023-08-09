@@ -63,4 +63,10 @@ const rtsMarkerElement = () => {
   return div;
 };
 
-module.exports = { cross, rtsMarkerElement };
+const reportStationMarkerElement = (intensity) => {
+  const div = document.createElement("div");
+  div.className = `report-station-marker intensity-marker intensity-${intensity}`;
+  return div;
+};
+
+module.exports = { cross, rtsMarkerElement, reportStationMarkerElement };

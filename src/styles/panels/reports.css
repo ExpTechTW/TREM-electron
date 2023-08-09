@@ -148,6 +148,10 @@
   pointer-events: none;
 }
 
+.overlay-container:has(>#reports-panel.show) + .map-container:has(.hide) .report-cross:not(.hide) {
+  z-index: 100 !important;
+}
+
 .overlay-container:has(>#reports-panel.show) + .map-container:has(.hide) .report-cross:not(.hide) g {
   opacity: 1 !important;
 }

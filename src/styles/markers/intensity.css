@@ -1,0 +1,96 @@
+.intensity-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  width: 16px;
+  border-radius: 4px;
+  background-color: gray;
+  outline: 2px solid var(--md-on-surface);
+}
+
+.intensity-marker::before {
+  font-family: Lato, sans-serif;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.intensity-marker.intensity-0 {
+  color: var(--md-on-surface-variant);
+  background-color: var(--md-surface-variant);
+}
+
+.intensity-marker.intensity-1 {
+  color: #fff;
+  background-color: #757575;
+}
+
+.intensity-marker.intensity-1::before {
+  content: "1";
+}
+
+.intensity-marker.intensity-2 {
+  color: #fff;
+  background-color: #2774C2;
+}
+
+.intensity-marker.intensity-2::before {
+  content: "2";
+}
+
+.intensity-marker.intensity-3 {
+  color: #fff;
+  background-color: #7BA822;
+}
+
+.intensity-marker.intensity-3::before {
+  content: "3";
+}
+
+.intensity-marker.intensity-4 {
+  color: #000;
+  background-color: #E8D630;
+}
+
+.intensity-marker.intensity-4::before {
+  content: "4";
+}
+
+.intensity-marker.intensity-5 {
+  color: #fff;
+  background-color: #E68439;
+}
+
+.intensity-marker.intensity-6 {
+  color: #fff;
+  background-color: #DB641F;
+}
+
+.intensity-marker.intensity-5::before,
+.intensity-marker.intensity-6::before {
+  content: "5";
+}
+
+.intensity-marker.intensity-7 {
+  color: #fff;
+  background-color: #DB1F1F;
+}
+
+.intensity-marker.intensity-8 {
+  color: #fff;
+  background-color: #DB1F1F;
+}
+
+.intensity-marker.intensity-7::before,
+.intensity-marker.intensity-8::before {
+  content: "6";
+}
+
+.intensity-marker.intensity-9 {
+  color: #fff;
+  background-color: #862DB3;
+}
+
+.intensity-marker.intensity-9::before {
+  content: "7";
+}

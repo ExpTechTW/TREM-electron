@@ -3,6 +3,7 @@ const { Marker } = require("maplibre-gl");
 const constants = require("../constants");
 const colors = require("./colors");
 const { getMagnitudeLevel, getDepthLevel } = require("./utils");
+const { ipcRenderer } = require("electron");
 
 const markers = {
   reports: {}
@@ -43,6 +44,15 @@ const switchView = (view, map) => {
             duration : 400
           });
 
+          document.getElementById("reports-list-view").style.transition = "none";
+          document.getElementById("report-detail-view").style.transition = "none";
+          document.getElementById("reports-list-view").classList.remove("hide");
+          ipcRenderer.emit("report:unhide.marker");
+          ipcRenderer.emit("report:clear.station");
+          setImmediate(() => {
+            document.getElementById("reports-list-view").style.transition = "";
+            document.getElementById("report-detail-view").style.transition = "";
+          });
           map.getContainer().classList.add("hide-rts");
           panel.querySelector(".scroll-wrapper").scrollTo({
             top: 0
@@ -85,6 +95,8 @@ const switchView = (view, map) => {
       panel.classList.remove("show");
       button.classList.remove("active");
       map.getContainer().classList.remove("hide-rts");
+      ipcRenderer.emit("report:unhide.marker");
+      ipcRenderer.emit("report:clear.station");
       map.fitBounds(constants.TaiwanBounds, {
         padding  : 24,
         duration : 400
@@ -96,6 +108,8 @@ const switchView = (view, map) => {
     for (const btn of document.querySelectorAll("nav > button"))
       btn.classList.remove("active");
     map.getContainer().classList.remove("hide-rts");
+    ipcRenderer.emit("report:unhide.marker");
+    ipcRenderer.emit("report:clear.station");
   }
 
 };
