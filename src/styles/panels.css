@@ -23,7 +23,7 @@
 .panel-header {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 8px 16px;
   font-weight: 700;
   font-size: 26px;
