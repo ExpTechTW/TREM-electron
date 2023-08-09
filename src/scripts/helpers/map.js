@@ -114,6 +114,16 @@ const setMapLayers = (map) => {
     }
   });
 
+  map.on("wheel", (e) => {
+    if ((localStorage.getItem("MapAnimation") ?? "true") != "true") {
+      e.preventDefault();
+
+      if (e.originalEvent.deltaY > 0)
+        map.setZoom(map.getZoom() - 0.5);
+      else
+        map.setZoom(map.getZoom() + 0.5);
+    }
+  });
 };
 
 const renderRtsData = (rts, map) => {
@@ -147,7 +157,8 @@ const renderEewData = (eew, waves, map) => {
 
 const setDefaultMapView = (map) => {
   map.fitBounds(constants.TaiwanBounds, {
-    padding: 24
+    padding : 24,
+    animate : (localStorage.getItem("MapAnimation") ?? "true") == "true"
   });
 };
 

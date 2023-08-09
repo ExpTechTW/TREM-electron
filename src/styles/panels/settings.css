@@ -1,5 +1,6 @@
 @import url("../components/input.css");
 @import url("../components/segmented.css");
+@import url("../components/switch.css");
 
 #settings-panel {
   top: 0;
@@ -34,7 +35,7 @@
   height: 100%;
   width: 100%;
   border-radius: inherit;
-  opacity: 0.12;
+  opacity: 0.08;
   background-color: var(--md-primary);
   pointer-events: none;
   isolation: isolate;
@@ -90,18 +91,24 @@
 
 .group-api {
   --md-primary: var(--md-custom-pink);
+  --md-on-primary: var(--md-custom-on-pink);
+  --md-primary-container: var(--md-custom-pink-container);
   --md-secondary-container: var(--md-custom-pink-container);
   --md-on-secondary-container: var(--md-custom-on-pink-container);
 }
 
 .group-map {
   --md-primary: var(--md-custom-green);
+  --md-on-primary: var(--md-custom-on-green);
+  --md-primary-container: var(--md-custom-green-container);
   --md-secondary-container: var(--md-custom-green-container);
   --md-on-secondary-container: var(--md-custom-on-green-container);
 }
 
 .group-report {
   --md-primary: var(--md-custom-light-blue);
+  --md-on-primary: var(--md-custom-on-light-blue);
+  --md-primary-container: var(--md-custom-light-blue-container);
   --md-secondary-container: var(--md-custom-light-blue-container);
   --md-on-secondary-container: var(--md-custom-on-light-blue-container);
 }

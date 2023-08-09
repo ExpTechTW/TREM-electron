@@ -17,7 +17,7 @@ const map = new MaplibreMap({
   maxPitch          : 0,
   pitchWithRotate   : false,
   dragRotate        : false,
-  renderWorldCopies : false
+  renderWorldCopies : false,
 });
 
 setMapLayers(map);
@@ -183,27 +183,49 @@ const updateReports = async () => {
       document.getElementById("report-detail-subtitle").textContent = isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震";
       document.getElementById("report-detail-title").textContent = report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"));
       document.getElementById("report-detail-location").textContent = isTYA ? report.location.substring(report.location.indexOf("(") + 1, report.location.indexOf(")")) : report.location.substring(0, report.location.indexOf("(") - 1);
+      document.getElementById("report-detail-longitude").textContent = Math.abs(report.epicenterLon);
+      document.getElementById("report-detail-longitude-unit").textContent = report.epicenterLon > 0 ? "E" : "W";
+      document.getElementById("report-detail-latitude").textContent = Math.abs(report.epicenterLat);
+      document.getElementById("report-detail-latitude-unit").textContent = report.epicenterLat > 0 ? "N" : "S";
       document.getElementById("report-detail-time").textContent = report.originTime;
       document.getElementById("report-detail-magnitude").textContent = report.magnitudeValue.toFixed(1);
       document.getElementById("report-detail-depth").textContent = report.depth;
       document.getElementById("reports-list-view").classList.add("hide");
-
       console.log(report);
 
       const bounds = new LngLatBounds();
       bounds.extend([report.epicenterLon, report.epicenterLat]);
 
-      // markers
-      for (const area of report.data)
-        for (const station of area.eqStation) {
-          ipcRenderer.emit("report:add.station", station);
-          bounds.extend([station.stationLon, station.stationLat]);
-        }
+      // stations
+      const fragment = new DocumentFragment();
+
+      const stationList = report.data
+        .reduce((acc, area) => (acc.push(...area.eqStation.map((eqStation) => (eqStation.areaName = area.areaName, eqStation))), acc), [])
+        .sort((a, b) => b.stationIntensity - a.stationIntensity);
+
+      for (const station of stationList) {
+        fragment.appendChild(new ElementBuilder()
+          .setClass([ "report-station", `intensity-${station.stationIntensity}` ])
+          .addChildren(new ElementBuilder()
+            .setClass([ "report-station-name" ])
+            .setContent(`${station.areaName} ${station.stationName}`)
+            .setStyle("flex", 1))
+          .addChildren(new ElementBuilder()
+            .setClass([ "report-station-intensity" ])
+            .setContent(constants.Intensities[station.stationIntensity].text))
+          .toElement());
+
+        ipcRenderer.emit("report:add.station", station);
+        bounds.extend([station.stationLon, station.stationLat]);
+      }
+
+      document.getElementById("report-station-list").replaceChildren(fragment);
 
       // api.requestReplay([...report.ID, ...report.trem]);
       map.fitBounds(bounds, {
         padding : { top: 64, right: 364, bottom: 64, left: 64 },
         maxZoom : 8.5,
+        animate : (localStorage.getItem("MapAnimation") ?? "true") == "true"
       });
     });
     frag.appendChild(item.toElement());
@@ -240,7 +262,8 @@ document.getElementById("button-return-to-reports-list").addEventListener("click
   ipcRenderer.emit("report:clear.station");
   ipcRenderer.emit("report:unhide.marker");
   map.fitBounds(constants.TaiwanBounds, {
-    padding: { top: 24, right: 324, bottom: 24, left: 24 },
+    padding : { top: 24, right: 324, bottom: 24, left: 24 },
+    animate : (localStorage.getItem("MapAnimation") ?? "true") == "true"
   });
 });
 // #endregion
@@ -301,6 +324,10 @@ const initSettings = () => {
         case "ReportTitleStyle": {
           updateReports();
           break;
+        }
+
+        case "MapAnimation": {
+
         }
 
         default:

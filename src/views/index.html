@@ -31,69 +31,64 @@
             </div>
           </div>
           <div id="report-detail-view" class="view">
-            <button id="button-return-to-reports-list" class="button text-button secondary small" type="button" style="margin-top: 8px;"><span class="icon">arrow_back</span><span class="nav-button-text">返回列表</span></button>
-            
+            <div class="view-actions">
+              <button id="button-return-to-reports-list" class="button text-button secondary small" type="button" style="margin-top: 8px;"><span class="icon">arrow_back</span><span class="nav-button-text">返回列表</span></button>
+            </div>
             <!-- 報告編號-->
             <div class="report-detail-header-container">
               <div id="report-detail-subtitle"></div>
               <div id="report-detail-title"></div>
             </div>
-            <div class="scroll-wrapper">
-              <div class="report-detail-container">
-                <!-- 發震時間 -->
-                <div class="field" style="grid-area: 1 / 1 / 2 / 3;">
-                  <div class="icon">schedule</div>
-                  <div class="field-content">
-                    <span class="field-name">發震時間</span>
-                    <span id="report-detail-time" class="field-value"></span>
-                  </div>
+            <div class="report-detail-container">
+              <!-- 發震時間 -->
+              <div class="field" style="grid-area: 1 / 1 / 2 / 3;">
+                <div class="icon">schedule</div>
+                <div class="field-content">
+                  <span class="field-name">發震時間</span>
+                  <span id="report-detail-time" class="field-value"></span>
                 </div>
+              </div>
 
-                <!-- 震央位置 -->
-                <div class="field" style="grid-area: 2 / 1 / 3 / 3;">
-                  <div class="icon">pin_drop</div>
-                  <div class="field-content">
-                    <span class="field-name">震央位置</span>
-                    <span id="report-detail-location" class="field-value"></span>
-                  </div>
+              <!-- 震央位置 -->
+              <div class="field" style="grid-area: 2 / 1 / 3 / 3;">
+                <div class="icon">pin_drop</div>
+                <div class="field-content">
+                  <span class="field-name">震央位置</span>
+                  <span id="report-detail-location" class="field-value"></span>
                 </div>
+              </div>
 
-                <!-- 規模 -->
-                <div class="field">
-                  <div class="icon">crisis_alert</div>
-                  <div class="field-content">
-                    <span class="field-name">規模</span>
-                    <span><span class="field-unit">M<sub>L</sub></span><span id="report-detail-magnitude" class="field-value"></span></span>
-                  </div>
+              <!-- 震央位置 -->
+              <div class="field" style="grid-area: 3 / 1 / 4 / 3;">
+                <div class="icon">my_location</div>
+                <div class="field-content">
+                  <span class="field-name">震央座標</span>
+                  <span><span id="report-detail-longitude" class="field-value"></span><span id="report-detail-longitude-unit" class="field-unit unit-degree"></span><span id="report-detail-latitude" class="field-value" style="margin-left: 8px;"></span><span id="report-detail-latitude-unit" class="field-unit unit-degree"></span></span>
                 </div>
-                
-                <!-- 深度 -->
-                <div class="field">
-                  <div class="icon">height</div>
-                  <div class="field-content">
-                    <span class="field-name">深度</span>
-                    <span><span id="report-detail-depth" class="field-value"></span><span class="field-unit">km</span></span>
-                  </div>
-                </div>
-                
-                <!-- 規模 -->
-                <div class="field">
-                  <div class="icon">schedule</div>
-                  <div class="field-content">
-                    <span class="field-name">規模</span>
-                    <span id="report-detail-magnitude" class="field-value"></span>
-                  </div>
-                </div>
+              </div>
 
-                <!-- 深度 -->
-                <div class="field">
-                  <div class="icon">height</div>
-                  <div class="field-content">
-                    <span class="field-name">深度</span>
-                    <span><span id="report-detail-depth" class="field-value"></span><span class="field-unit">km</span></span>
-                  </div>
+              <!-- 規模 -->
+              <div class="field">
+                <div class="icon">crisis_alert</div>
+                <div class="field-content">
+                  <span class="field-name">規模</span>
+                  <span><span class="field-unit">M<sub>L</sub></span><span id="report-detail-magnitude" class="field-value"></span></span>
                 </div>
-
+              </div>
+              
+              <!-- 深度 -->
+              <div class="field">
+                <div class="icon">keyboard_double_arrow_down</div>
+                <div class="field-content">
+                  <span class="field-name">深度</span>
+                  <span><span id="report-detail-depth" class="field-value"></span><span class="field-unit">km</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="report-detail-stations">
+              <div class="report-detail-stations-header">各地最大震度</div>
+              <div class="scroll-wrapper">
+                <div id="report-station-list" class="report-detail-station-container"></div>
               </div>
             </div>
           </div>
@@ -132,6 +127,22 @@
                 <label class="choice" for="rts-mode-choice2">
                   <input type="radio" id="rts-mode-choice2" class="setting" name="RtsMode" data-setting="RtsMode" value="v">
                   <span>加速度</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 動畫 -->
+            <div class="setting-container">
+              <div class="setting-header">動畫</div>
+              <div id="settings-list">
+                <label for="map-animation">
+                  <span class="label-text">動畫</span>
+                  <div class="switch">
+                    <input id="map-animation" class="setting" type="checkbox" name="MapAnimation" data-setting="MapAnimation">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
                 </label>
               </div>
             </div>

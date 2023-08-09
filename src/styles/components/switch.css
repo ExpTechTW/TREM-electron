@@ -1,0 +1,135 @@
+
+.switch {
+  user-select: none;
+  position: relative;
+  height: 32px;
+  width: 50px;
+  margin: 10px;
+  isolation: isolate;
+}
+
+.switch input {
+  display: none;
+}
+
+/* track */
+.switch span.slider {
+  position: absolute;
+  height: 28px;
+  width: 48px;
+  border: 2px solid var(--md-outline);
+  border-radius: 28px;
+  background-color: var(--md-surface-variant);
+  cursor: pointer;
+  transition: background-color .1s ease-in-out,
+      border-color .1s ease-in-out;
+}
+
+/* thumb */
+.switch span.slider::before {
+  position: absolute;
+  left: 0;
+  height: 16px;
+  width: 16px;
+  margin: 6px;
+  border-radius: 28px;
+  background-color: var(--md-outline);
+  transition: left 175ms cubic-bezier(0, .5, .5, 1.5),
+      background-color .1s ease-in-out,
+      height 50ms ease-in-out,
+      width 50ms ease-in-out,
+      margin 50ms ease-in-out;
+  content: "";
+}
+
+/* icon */
+.switch span.slider span.icon {
+  position: relative;
+  left: 0;
+  height: 16px;
+  width: 16px;
+  margin: 6px 0;
+  opacity: 0;
+  color: var(--md-surface-variant);
+  font-size: 16px;
+  transition: left 175ms cubic-bezier(0, .5, .5, 1.5);
+  text-align: center;
+}
+
+/* active track */
+.switch input:checked+span.slider {
+  background-color: var(--md-primary);
+  border-color: transparent;
+}
+
+/* active thumb */
+.switch input:checked+span.slider::before {
+  left: 20px;
+  height: 24px;
+  width: 24px;
+  margin: 2px;
+  background-color: var(--md-on-primary);
+}
+
+
+/* disabled thumb */
+.switch input:disabled+span.slider::before {
+  background-color: var(--md-on-surface) .38;
+}
+
+.switch input:disabled:checked+span.slider::before {
+  background-color: var(--md-surface) 1;
+}
+
+/* hover thumb */
+.switch input:not(:disabled):hover+span.slider::before {
+  background-color: var(--md-on-surface-variant);
+}
+
+/* click thumb */
+.switch input:not(:disabled):active+span.slider::before {
+  height: 28px;
+  width: 28px;
+  margin: 0;
+}
+
+/* active hover thumb */
+.switch input:not(:disabled):checked:hover+span.slider::before {
+  background-color: var(--md-primary-container);
+}
+
+/* active click thumb */
+.switch input:not(:disabled):checked:active+span.slider::before {
+  background-color: var(--md-primary-container);
+}
+
+/* active icon */
+.switch input:checked+span.slider span.icon {
+  left: 26px;
+  opacity: 1;
+  color: var(--md-on-primary-container);
+}
+
+/* disabled track */
+.switch input:disabled+span {
+  cursor: not-allowed;
+}
+
+.switch input:disabled+span.slider {
+  background-color: var(--md-surface-variant) .12;
+  border-color: var(--md-on-surface) .12;
+}
+
+.switch input:focus-visible + span.slider {
+  outline: 2px solid var(--md-primary);
+}
+
+.switch input:disabled:checked+span.slider {
+  background-color: var(--md-on-surface) .12;
+  border-color: var(--md-on-surface) 0;
+}
+
+/* disabled icon */
+.switch input:disabled:checked+span.slider span.icon {
+  color: var(--md-on-surface) .38;
+}

@@ -174,14 +174,14 @@
   --md-scrim-dark: #000;
 
   /* Custom Colors Light */
-  --md-custom-pink: #9c4049;
-  --md-custom-green: #1e6c30;
-  --md-custom-light-blue: #00a8b8;
-  --md-custom-yellow: #795900;
-  --md-custom-cyan: #97b5a2;
-  --md-custom-orange: #885200;
-  --md-custom-blue: #4d57a9;
-  --md-custom-purple: #884588;
+  --md-custom-pink-light: #9c4049;
+  --md-custom-green-light: #1e6c30;
+  --md-custom-light-blue-light: #00a8b8;
+  --md-custom-yellow-light: #795900;
+  --md-custom-cyan-light: #97b5a2;
+  --md-custom-orange-light: #885200;
+  --md-custom-blue-light: #4d57a9;
+  --md-custom-purple-light: #884588;
 
   /* Custom Colors Dark */
   --md-custom-pink-dark: #ffb0c8;

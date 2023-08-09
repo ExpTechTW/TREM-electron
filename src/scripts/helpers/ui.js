@@ -30,6 +30,7 @@ const switchView = (view, map) => {
     btn.classList.remove("active");
 
   map.getContainer().classList.remove("hide-rts");
+  ipcRenderer.emit("report:clear.station");
 
   if (panel) {
     if (!isShown) {
@@ -41,14 +42,14 @@ const switchView = (view, map) => {
         case constants.Views.Reports: {
           map.fitBounds(constants.TaiwanBounds, {
             padding  : { top: 24, right: 324, bottom: 24, left: 24 },
-            duration : 400
+            duration : 400,
+            animate  : (localStorage.getItem("MapAnimation") ?? "true") == "true"
           });
 
           document.getElementById("reports-list-view").style.transition = "none";
           document.getElementById("report-detail-view").style.transition = "none";
           document.getElementById("reports-list-view").classList.remove("hide");
           ipcRenderer.emit("report:unhide.marker");
-          ipcRenderer.emit("report:clear.station");
           setImmediate(() => {
             document.getElementById("reports-list-view").style.transition = "";
             document.getElementById("report-detail-view").style.transition = "";
@@ -83,7 +84,8 @@ const switchView = (view, map) => {
         case constants.Views.Settings: {
           map.fitBounds(constants.TaiwanBounds, {
             padding  : { top: 24, right: 324, bottom: 24, left: 24 },
-            duration : 400
+            duration : 400,
+            animate  : (localStorage.getItem("MapAnimation") ?? "true") == "true"
           });
 
           break;
@@ -96,10 +98,10 @@ const switchView = (view, map) => {
       button.classList.remove("active");
       map.getContainer().classList.remove("hide-rts");
       ipcRenderer.emit("report:unhide.marker");
-      ipcRenderer.emit("report:clear.station");
       map.fitBounds(constants.TaiwanBounds, {
         padding  : 24,
-        duration : 400
+        duration : 400,
+        animate  : (localStorage.getItem("MapAnimation") ?? "true") == "true"
       });
     }
   } else {
@@ -109,7 +111,6 @@ const switchView = (view, map) => {
       btn.classList.remove("active");
     map.getContainer().classList.remove("hide-rts");
     ipcRenderer.emit("report:unhide.marker");
-    ipcRenderer.emit("report:clear.station");
   }
 
 };
