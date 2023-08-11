@@ -8,12 +8,10 @@
 &nbsp;
 
 <div style="display: grid; grid-template-columns: 1fr 1fr;">
-<img alt="即時測站" title="即時測站" src="https://user-images.githubusercontent.com/58339640/202887682-1a93b021-bcb2-44e4-b3f2-f2897ad2c4db.png" style="width: 49%; height: auto;" />
-<img alt="地震速報" title="地震速報" src="https://user-images.githubusercontent.com/58339640/202887698-36edd8ad-507e-466d-b81c-1823603bc1f9.png" style="width: 49%; height: auto;" />
-<img alt="P-Alert" title="P-Alert" src="https://user-images.githubusercontent.com/58339640/202888023-09a9db49-bc0d-405f-a144-5aa28e8c729d.png" style="width: 49%; height: auto;" />
-<img alt="地震報告" title="地震報告" src="https://user-images.githubusercontent.com/58339640/202887652-6c691e34-8ba2-4e2b-91e5-a72cf75e39da.png" style="width: 49%; height: auto;" />
+<img alt="主畫面" title="主畫面" src="https://github.com/ExpTechTW/TREM/assets/58339640/1ca85752-5a18-4d49-aa7a-dda6054631b4" style="width: 49%; height: auto;" />
+<img alt="地震報告列表" title="地震報告列表" src="https://github.com/ExpTechTW/TREM/assets/58339640/f0a25ecd-f6a0-46f3-816e-a00086c1466f" style="width: 49%; height: auto;" />
+<img alt="地震報告" title="地震報告" src="https://github.com/ExpTechTW/TREM/assets/58339640/3ef317fe-bbb8-46c6-a35b-08f29e744be3" style="width: 49%; height: auto;" />
 </div>
-即時測站效果 https://youtu.be/gcaStCv-be8
 
 ## 關於 TREM
 
@@ -28,7 +26,11 @@ TREM 是一款開源地震速報軟體，提供給您即時的地震資訊，利
 * 使用 Webhook 將地震資訊連結到 Discord 伺服器裡
 * 自訂義主題顏色
 
+
 ## 安裝
+> [!NOTE]
+> 此為舊版下載連結
+
 ### 官方 | 官方推出的版本 較為穩定
 #### Windows
 到我們的 [Release](https://github.com/ExpTechTW/TREM/releases/latest) 頁面下載 TREM.Setup\
