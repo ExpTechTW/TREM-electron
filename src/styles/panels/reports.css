@@ -15,15 +15,30 @@
   overflow: hidden;
   user-select: none;
   isolation: isolate;
-  transition-property: translate, opacity;
+  transform-origin: top right;
+  transition-property: height, translate, scale, opacity;
   transition-duration: 200ms;
   transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 
-#reports-panel.show {
+#reports-panel.docked {
+  height: 202px;
   translate: 0;
-  transition-property: translate, opacity;
-  transition-duration: 400ms, 200ms;
+  opacity: 1;
+  scale: .8;
+  transition-property: height, translate, scale, opacity;
+}
+
+#reports-panel.docked:not(.show) #reports-list-view > .scroll-wrapper {
+  overflow: hidden;
+}
+
+#reports-panel.show {
+  height: calc(100svh - 24px);
+  translate: 0;
+  scale: 1;
+  transition-property: height, translate, scale, opacity;
+  transition-duration: 400ms, 400ms, 400ms, 200ms;
   transition-timing-function: cubic-bezier(0.05, 0.7, 0.1, 1);
 }
 
@@ -96,7 +111,6 @@
   grid-template-rows: 32px 18px 24px;
   align-items: center;
   padding: 4px;
-  padding-right: 8px;
 }
 
 .report-item:not(:first-child) {
@@ -105,7 +119,10 @@
   grid-template-rows: repeat(2, 24px);
   align-items: center;
   padding: 4px;
-  padding-right: 8px;
+}
+
+#reports-panel.docked:not(.show) .report-item:not(:first-child) {
+  opacity: 0.6;
 }
 
 #reports-list:has(> .report-item.hightlight) > .report-item:not(.hightlight),
@@ -151,7 +168,7 @@
 .overlay-container:has(>#reports-panel.show) + .map-container:has(.hide) .report-cross:not(.hide) {
   height: 26.6px !important;
   width: 26.6px !important;
-  z-index: 1 !important;
+  z-index: 100 !important;
 }
 
 .overlay-container:has(>#reports-panel.show) + .map-container:has(.hide) .report-cross:not(.hide) g {
@@ -263,6 +280,7 @@
 .report-item:not(:first-child) > .report-magnitude {
   grid-area: 1 / 3 / 3 / 4;
   text-align: right;
+  margin-right: 4px;
 }
 
 .report-item:not(:first-child) > .report-depth {
@@ -287,7 +305,7 @@
 .report-color.has-number::before,
 .report-color.has-number::after {
   color: #000;
-  text-shadow: 0 0 16px #0008;
+  text-shadow: 0 0 16px #0004;
 }
 
 .report-color::after {
@@ -461,7 +479,8 @@
 .report-detail-station-container {
   display: flex;
   flex-direction: column;
-  gap: 4px;}
+  gap: 4px;
+}
 
 .report-station {
   display: flex;

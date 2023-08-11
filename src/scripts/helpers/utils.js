@@ -44,4 +44,14 @@ const checkOverlap = (x, y, h, w, className, id) => {
   return false;
 };
 
-module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap };
+
+/**
+ *
+ * @param {string} timeString
+ * @example
+ * toISOTimestamp("2023/08/10 12:34:21")
+ * // 2023-08-10T12:34:21+08:00
+ */
+const toISOTimestamp = (timeString) => `${timeString.replace(/\//g, "-").split(" ").join("T")}+08:00`;
+
+module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap, toISOTimestamp };

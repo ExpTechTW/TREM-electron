@@ -2,13 +2,15 @@ const { setMapLayers, setDefaultMapView, renderRtsData, renderEewData } = requir
 const { START_NOTIFICATION_SERVICE, NOTIFICATION_RECEIVED, NOTIFICATION_SERVICE_STARTED } = require("electron-fcm-push-receiver/src/constants");
 const { Marker, Map: MaplibreMap, LngLatBounds } = require("maplibre-gl");
 const { ElementBuilder } = require("./helpers/domhelper");
-const { cross, square, reportStationMarkerElement } = require("./factory");
-const { getMagnitudeLevel, getDepthLevel } = require("./helpers/utils");
+const { cross, reportStationMarkerElement } = require("./factory");
+const { getMagnitudeLevel, getDepthLevel, toISOTimestamp } = require("./helpers/utils");
 const { ipcRenderer } = require("electron");
 const { switchView } = require("./helpers/ui");
 const api = new (require("./api"))(localStorage.getItem("ApiKey"));
 const colors = require("./helpers/colors");
 const constants = require("./constants");
+
+let replayTimer = false;
 
 const map = new MaplibreMap({
   container         : document.getElementById("map"),
@@ -38,7 +40,10 @@ ipcRenderer.on(NOTIFICATION_RECEIVED, (_, Notification) => {
 
 const waves = {};
 
-api.on("rts", (rts) => renderRtsData(rts, map));
+api.on("rts", (rts) => {
+  if (!replayTimer)
+    renderRtsData(rts, map);
+});
 api.on("ntp", (ntp) => {
   map.localServerTimestamp = Date.now();
   map.serverTimestamp = ntp.time;
@@ -181,11 +186,7 @@ const updateReports = async () => {
       markers.reports[report.identifier].getElement().classList.remove("hightlight");
     });
 
-    item.on("click", function() {
-      const time = this.querySelector(".report-time");
-      time.style.cursor = "pointer";
-      time.style.color = "yellow";
-
+    item.on("click", () => {
       for (const key in markers.reports)
         if (key != report.identifier)
           markers.reports[key].getElement().classList.add("hide");
@@ -231,20 +232,38 @@ const updateReports = async () => {
 
       document.getElementById("report-station-list").replaceChildren(fragment);
 
-      // api.requestReplay([...report.ID, ...report.trem]);
       map.fitBounds(bounds, {
         padding : { top: 64, right: 364, bottom: 64, left: 64 },
         maxZoom : 8.5,
         animate : (localStorage.getItem("MapAnimation") ?? "true") == "true"
       });
     });
+
+    item.on("contextmenu", function() {
+      const time = this.querySelector(".report-time");
+      time.style.cursor = "pointer";
+      time.style.color = "yellow";
+
+      api.requestReplay([...report.ID, ...report.trem]);
+
+      const replayStartTime = new Date(toISOTimestamp(report.originTime)).getTime() - 3_000;
+      let replayTimeOffset = 0;
+
+      const renderReplayRts = async () => {
+        renderRtsData(await api.getRts(replayStartTime + replayTimeOffset * 1000), map);
+        replayTimeOffset++;
+      };
+
+      renderReplayRts();
+      replayTimer = setInterval(renderReplayRts, 1000, replayTimeOffset);
+    });
+
     frag.appendChild(item.toElement());
   }
 
   list.replaceChildren(frag);
 
   console.log("%c[Reports] Successfully refreshed earthquake reports.", "color: greenyellow");
-  console.log(`%c[Reports] Next scheduled refresh will be at ${new Date(Date.now() + 300_000).toLocaleTimeString()}, 5 minutes later.`, "color: cornflowerblue");
 };
 
 ipcRenderer.on("report:unhide.marker", () => {
@@ -268,7 +287,25 @@ ipcRenderer.on("report:clear.station", () => {
 });
 
 updateReports();
-setInterval(updateReports, 300_000);
+const refreshReportTimer = (retry) => setTimeout(async () => {
+  try {
+    await updateReports();
+    console.log(`%c[Reports] Next scheduled refresh will be at ${new Date(Date.now() + 300_000).toLocaleTimeString()}, 5 minutes later.`, "color: cornflowerblue");
+    refreshReportTimer();
+  } catch (error) {
+    retry = (retry ?? -1) + 1;
+
+    if (retry > 3) {
+      console.warn("[Reports] Retry limit exceeded, skipping.");
+      console.warn(`[Reports] Skipped refresh, the next scheduled refresh will be at ${new Date(Date.now() + 300_000).toLocaleTimeString()}, 5 minutes later.`);
+      refreshReportTimer();
+    } else {
+      console.error(`[Reports] Refresh failed with ${error}, ${retry ? `retrying in ${retry * 5} seconds.` : "retrying."}`);
+      refreshReportTimer(retry);
+    }
+  }
+}, retry != undefined ? retry * 5000 : 300_000);
+refreshReportTimer();
 
 document.getElementById("button-return-to-reports-list").addEventListener("click", () => {
   document.getElementById("reports-list-view").classList.remove("hide");
@@ -284,6 +321,9 @@ document.getElementById("button-return-to-reports-list").addEventListener("click
 // #region init settings
 
 const initSettings = () => {
+  if ((localStorage.getItem("ReportPanelDocking") ?? "false") == "true")
+    document.getElementById("reports-panel").classList.add("docked");
+
   for (const input of document.querySelectorAll("input.setting")) {
     switch (input.type) {
       case "text":
@@ -339,8 +379,11 @@ const initSettings = () => {
           break;
         }
 
-        case "MapAnimation": {
-
+        case "ReportPanelDocking": {
+          if (this.checked)
+            document.getElementById("reports-panel").classList.add("docked");
+          else
+            document.getElementById("reports-panel").classList.remove("docked");
         }
 
         default:

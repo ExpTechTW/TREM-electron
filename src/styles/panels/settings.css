@@ -3,6 +3,8 @@
 @import url("../components/switch.css");
 
 #settings-panel {
+  display: flex;
+  flex-direction: column;
   top: 0;
   right: 0;
   translate: calc(clamp(360px, 30svw, 600px) + 24px);
@@ -25,6 +27,10 @@
   transition-property: translate, opacity;
   transition-duration: 400ms, 200ms;
   transition-timing-function: cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+#settings-panel > .scroll-wrapper {
+  min-height: 0;
 }
 
 #settings-panel::before {

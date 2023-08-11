@@ -9,6 +9,27 @@ const markers = {
   reports: {}
 };
 
+const resetReportViewport = (transition = true) => {
+  if (!transition) {
+    document.getElementById("reports-list-view").style.transition = "none";
+    document.getElementById("report-detail-view").style.transition = "none";
+  }
+
+  document.getElementById("reports-list-view").classList.remove("hide");
+  ipcRenderer.emit("report:clear.station");
+
+  if (!transition)
+    setImmediate(() => {
+      document.getElementById("reports-list-view").style.transition = "";
+      document.getElementById("report-detail-view").style.transition = "";
+    });
+
+  document.getElementById("reports-panel").querySelector(".scroll-wrapper").scrollTo({
+    top      : 0,
+    behavior : transition ? "smooth" : "instant"
+  });
+};
+
 /**
  * @param {string} view
  * @param {import("maplibre-gl").Map} map
@@ -30,10 +51,13 @@ const switchView = (view, map) => {
     btn.classList.remove("active");
 
   map.getContainer().classList.remove("hide-rts");
-  ipcRenderer.emit("report:clear.station");
+  ipcRenderer.emit("report:unhide.marker");
+  resetReportViewport();
 
   if (panel) {
     if (!isShown) {
+      // from other view
+      console.debug(`[View] Switching to ${view}.`);
       panel.classList.add("show");
       button.classList.add("active");
 
@@ -46,18 +70,9 @@ const switchView = (view, map) => {
             animate  : (localStorage.getItem("MapAnimation") ?? "true") == "true"
           });
 
-          document.getElementById("reports-list-view").style.transition = "none";
-          document.getElementById("report-detail-view").style.transition = "none";
-          document.getElementById("reports-list-view").classList.remove("hide");
-          ipcRenderer.emit("report:unhide.marker");
-          setImmediate(() => {
-            document.getElementById("reports-list-view").style.transition = "";
-            document.getElementById("report-detail-view").style.transition = "";
-          });
           map.getContainer().classList.add("hide-rts");
-          panel.querySelector(".scroll-wrapper").scrollTo({
-            top: 0
-          });
+          ipcRenderer.emit("report:unhide.marker");
+          resetReportViewport(false);
           break;
         }
 
@@ -94,10 +109,15 @@ const switchView = (view, map) => {
         default: break;
       }
     } else {
+      // toggle view
+      console.debug("[View] Toogle view.");
       panel.classList.remove("show");
       button.classList.remove("active");
+
       map.getContainer().classList.remove("hide-rts");
       ipcRenderer.emit("report:unhide.marker");
+      resetReportViewport();
+
       map.fitBounds(constants.TaiwanBounds, {
         padding  : 24,
         duration : 400,
@@ -105,12 +125,17 @@ const switchView = (view, map) => {
       });
     }
   } else {
+    // home
+    console.debug("[View] Switching to None.");
+    resetReportViewport();
     for (const p of document.querySelectorAll(".panel"))
       p.classList.remove("show");
     for (const btn of document.querySelectorAll("nav > button"))
       btn.classList.remove("active");
+
     map.getContainer().classList.remove("hide-rts");
     ipcRenderer.emit("report:unhide.marker");
+    resetReportViewport();
   }
 
 };
