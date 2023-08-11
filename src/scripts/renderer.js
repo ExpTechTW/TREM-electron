@@ -162,31 +162,7 @@ const updateReports = async () => {
         .setLngLat([report.epicenterLon, report.epicenterLat])
         .addTo(map);
 
-    markers.reports[report.identifier]
-      .getElement()
-      .addEventListener("mouseenter", () => {
-        item.addClass("hightlight");
-        document.getElementById("reports-panel").querySelector(".scroll-wrapper").scrollTo({
-          top      : item.element.offsetTop - document.getElementById("reports-panel").offsetHeight / 2 + item.element.offsetHeight / 2,
-          behavior : "smooth"
-        });
-      });
-
-    markers.reports[report.identifier]
-      .getElement()
-      .addEventListener("mouseleave", () => {
-        item.removeClass("hightlight");
-      });
-
-    item.on("mouseenter", () => {
-      markers.reports[report.identifier].getElement().classList.add("hightlight");
-    });
-
-    item.on("mouseleave", () => {
-      markers.reports[report.identifier].getElement().classList.remove("hightlight");
-    });
-
-    item.on("click", () => {
+    const openReport = () => {
       for (const key in markers.reports)
         if (key != report.identifier)
           markers.reports[key].getElement().classList.add("hide");
@@ -237,7 +213,37 @@ const updateReports = async () => {
         maxZoom : 8.5,
         animate : (localStorage.getItem("MapAnimation") ?? "true") == "true"
       });
+    };
+
+    markers.reports[report.identifier]
+      .getElement()
+      .addEventListener("mouseenter", () => {
+        item.addClass("hightlight");
+        document.getElementById("reports-panel").querySelector(".scroll-wrapper").scrollTo({
+          top      : item.element.offsetTop - document.getElementById("reports-panel").offsetHeight / 2 + item.element.offsetHeight / 2,
+          behavior : "smooth"
+        });
+      });
+
+    markers.reports[report.identifier]
+      .getElement()
+      .addEventListener("mouseleave", () => {
+        item.removeClass("hightlight");
+      });
+
+    markers.reports[report.identifier]
+      .getElement()
+      .addEventListener("click", openReport);
+
+    item.on("mouseenter", () => {
+      markers.reports[report.identifier].getElement().classList.add("hightlight");
     });
+
+    item.on("mouseleave", () => {
+      markers.reports[report.identifier].getElement().classList.remove("hightlight");
+    });
+
+    item.on("click", openReport);
 
     item.on("contextmenu", function() {
       const time = this.querySelector(".report-time");
