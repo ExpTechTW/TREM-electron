@@ -10,7 +10,7 @@
 <div style="display: grid; grid-template-columns: 1fr 1fr;">
 <img alt="主畫面" title="主畫面" src="https://github.com/ExpTechTW/TREM/assets/58339640/1ca85752-5a18-4d49-aa7a-dda6054631b4" style="width: 49%; height: auto;" />
 <img alt="地震報告列表" title="地震報告列表" src="https://github.com/ExpTechTW/TREM/assets/58339640/f0a25ecd-f6a0-46f3-816e-a00086c1466f" style="width: 49%; height: auto;" />
-<img alt="地震報告" title="地震報告" src="https://github.com/ExpTechTW/TREM/assets/58339640/3ef317fe-bbb8-46c6-a35b-08f29e744be3" style="width: 49%; height: auto;" />
+<img alt="地震報告" title="地震報告" src="https://github.com/ExpTechTW/TREM/assets/58339640/286ce107-36f8-4cfe-b0a2-53bdaec387f9" style="width: 49%; height: auto;" />
 </div>
 
 ## 關於 TREM
@@ -28,11 +28,10 @@ TREM 是一款開源地震速報軟體，提供給您即時的地震資訊，利
 
 
 ## 安裝
-> [!NOTE]
-> 此為舊版下載連結
-
 ### 官方 | 官方推出的版本 較為穩定
 #### Windows
+> [!NOTE]
+> 此為舊版下載連結
 到我們的 [Release](https://github.com/ExpTechTW/TREM/releases/latest) 頁面下載 TREM.Setup\
 下載完成後執行，就會開始安裝，安裝完成後會自動開啟 TREM
 
@@ -65,17 +64,8 @@ TREM 是一款開源地震速報軟體，提供給您即時的地震資訊，利
 9. 本程式內資源均由網際網路收集而來， 當權利人發現在本程式所提供的內容侵犯其著作權時，**請聯繫我們並請權利人提供相關文件連結**， 本站將依法採取措施移除相關內容或斷開相關鏈接
 
 ## 貢獻者
-- whes1015 `程式開發` `文檔`
-- Kamiya `介面設計` `程式開發` `日文翻譯` `英文翻譯`
-- Yowoapple `俄文翻譯`
-- NYJ36 `韓文翻譯`
-- PGpenguin72 `簡體中文翻譯`
-- yayacat `簡體中文翻譯` `社區`
-- eggrollpvp `資料處理` `文檔`
-- M789 `圖形設計`
-- JQuake `音效`
-- 地牛Wake Up! `音效`
-- pisces_ `設備提供`
+- whes1015 `技術支援` `文檔`
+- Kamiya `介面設計` `程式開發`
 
 ## 如何貢獻
 點擊 [Repo](https://github.com/ExpTechTW/TREM) 主頁右上角的 Code 按鈕後點擊 Download ZIP 來下載原始碼壓縮檔\
