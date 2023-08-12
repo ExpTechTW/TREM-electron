@@ -89,7 +89,7 @@ class EEW {
       this.#evalExpected();
 
       if (this.hasWaves)
-        this.#evalWaveDistances();
+        this._distance = EEW.evalWaveDistances(this.depth);
 
       this.#createWaveCircles();
     }
@@ -127,16 +127,16 @@ class EEW {
       }
   }
 
-  #evalWaveDistances() {
-    this._distance = [];
+  static evalWaveDistances(depth) {
+    const _distance = [];
     for (let index = 0; index < 1002; index++)
-      this._distance[index]
-        = ((depth, distance) => {
-          const Za = 1 * depth;
+      _distance[index]
+        = ((d, distance) => {
+          const Za = 1 * d;
           let G0, G;
           const Xb = distance;
 
-          if (depth <= 40) {
+          if (d <= 40) {
             G0 = 5.10298;
             G = 0.06659;
           } else {
@@ -167,7 +167,8 @@ class EEW {
 
           if (distance / Stime > 4) Stime = distance / 4;
           return { Ptime: Ptime, Stime: Stime };
-        })(this.depth, index);
+        })(depth, index);
+    return _distance;
   }
 
   #createWaveCircles() {
@@ -189,39 +190,38 @@ class EEW {
       this._waveTick = () => {
         const apiTime = this._map.serverTimestamp + Date.now() - this._map.localServerTimestamp;
 
-        if ((apiTime - this.eventTime.getTime()) > 120_000) {
+        const elapsedTime = apiTime - this.eventTime.getTime();
+
+        if (elapsedTime > 120_000) {
           this.remove();
           return;
         }
 
         if (this.hasWaves) {
-          let p_dist = Math.floor(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2));
-          let s_dist = Math.floor(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2));
+          let p_dist = Math.floor(Math.sqrt((elapsedTime * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2));
+          let s_dist = Math.floor(Math.sqrt((elapsedTime * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2));
 
           let pf, sf;
 
           for (let _i = 1; _i < this._distance.length; _i++) {
-            if (!pf && this._distance[_i].Ptime > (apiTime - this.eventTime.getTime()) / 1000) {
-              p_dist = (_i - 1) * 1000;
+            if (!pf && this._distance[_i].Ptime > elapsedTime / 1000) {
+              p_dist = _i - 1;
 
               if ((_i - 1) / this._distance[_i - 1].Ptime > this._waveSpeed.p)
-                p_dist = Math.round(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2));
+                p_dist = Math.round(Math.sqrt((elapsedTime * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2)) / 1000;
               pf = true;
             }
 
-            if (!sf && this._distance[_i].Stime > (apiTime - this.eventTime.getTime()) / 1000) {
-              s_dist = (_i - 1) * 1000;
+            if (!sf && this._distance[_i].Stime > elapsedTime / 1000) {
+              s_dist = _i - 1;
 
               if ((_i - 1) / this._distance[_i - 1].Stime > this._waveSpeed.s)
-                s_dist = Math.round(Math.sqrt(((apiTime - this.eventTime.getTime()) * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2));
+                s_dist = Math.round(Math.sqrt((elapsedTime * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2)) / 1000;
               sf = true;
             }
 
             if (pf && sf) break;
           }
-
-          p_dist /= 1000;
-          s_dist /= 1000;
 
           if (p_dist > this.depth)
             this.p.setRadius(p_dist - this.depth);

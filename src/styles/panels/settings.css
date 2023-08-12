@@ -49,8 +49,9 @@
   transition: opacity .1s, background-color .2s;
 }
 
-#settings-list {
+.settings-list {
   display: grid;
+  gap: 4px;
   padding-right: 4px;
   border-radius: 8px;
   color: var(--md-on-surface);

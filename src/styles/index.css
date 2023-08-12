@@ -31,7 +31,7 @@ body {
   width: 100svw;
   margin: 0;
   color: var(--md-on-background);
-  background-color: var(--md-background);
+  background: var(--md-background);
   font-family: Lato, "Noto Sans TC", sans-serif;
   overflow: hidden;
 }

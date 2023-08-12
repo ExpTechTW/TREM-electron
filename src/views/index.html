@@ -105,7 +105,7 @@
             <!-- API 金鑰 -->
             <div class="setting-container">
               <div class="setting-header">API金鑰</div>
-              <div id="settings-list">
+              <div class="settings-list">
                 <label for="input-key">
                   <span class="label-text">API金鑰</span>
                   <input id="input-key" class="setting" type="password" name="ApiKey" data-setting="ApiKey" placeholder="API 金鑰">
@@ -131,10 +131,35 @@
               </div>
             </div>
 
+            <!-- 速報時隱藏測站 -->
+            <div class="setting-container">
+              <div class="setting-header">測站隱藏時機</div>
+              <div class="settings-list">
+                <label for="hide-station-eew">
+                  <span class="label-text">在地震速報時隱藏</span>
+                  <div class="switch">
+                    <input id="hide-station-eew" class="setting" type="checkbox" name="HideStation" data-setting="HideStationEEW">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="hide-station-report">
+                  <span class="label-text">在地震報告畫面時隱藏</span>
+                  <div class="switch">
+                    <input id="hide-station-report" class="setting" type="checkbox" name="HideStation" data-setting="HideStationReport">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <!-- 動畫 -->
             <div class="setting-container">
               <div class="setting-header">動畫</div>
-              <div id="settings-list">
+              <div class="settings-list">
                 <label for="map-animation">
                   <span class="label-text">動畫</span>
                   <div class="switch">
@@ -187,7 +212,7 @@
             <!-- 地震報告顯示數量 -->
             <div class="setting-container">
               <div class="setting-header">地震報告數量</div>
-              <div id="settings-list">
+              <div class="settings-list">
                 <label for="input-report-count">
                   <span class="label-text">顯示數量</span>
                   <input id="input-report-count" class="setting" type="number" name="ReportCount" data-setting="ReportCount" placeholder="50" step="1" min="1" max="500">
@@ -197,7 +222,7 @@
             
             <div class="setting-container">
               <div class="setting-header">固定地震報告面板</div>
-              <div id="settings-list">
+              <div class="settings-list">
                 <label for="report-panel-docking">
                   <span class="label-text">固定</span>
                   <div class="switch">

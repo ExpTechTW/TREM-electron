@@ -9,6 +9,8 @@ const { switchView } = require("./helpers/ui");
 const api = new (require("./api"))(localStorage.getItem("ApiKey"));
 const colors = require("./helpers/colors");
 const constants = require("./constants");
+const Circle = require("./classes/circle");
+const EEW = require("./classes/eew");
 
 let replayTimer = false;
 
@@ -48,12 +50,14 @@ api.on("ntp", (ntp) => {
   map.localServerTimestamp = Date.now();
   map.serverTimestamp = ntp.time;
 });
+
 api.on(constants.Events.TremEew, (data) => renderEewData(data, waves, map));
 api.on(constants.Events.CwbEew, (data) => renderEewData(data, waves, map));
 
 const markers = {
   reports        : {},
-  reportStations : []
+  reportStations : [],
+  reportWaveTime : []
 };
 
 // #region init reports
@@ -208,6 +212,34 @@ const updateReports = async () => {
 
       document.getElementById("report-station-list").replaceChildren(fragment);
 
+
+      // wave time circles
+
+      const distances = EEW.evalWaveDistances(report.depth);
+
+      for (let seconds = 5; seconds <= 90; seconds += 5) {
+        let s_dist = Math.floor(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2));
+
+        for (let _i = 1; _i < distances.length; _i++)
+          if (distances[_i].Stime > seconds) {
+            s_dist = _i - 1;
+
+            if ((_i - 1) / distances[_i - 1].Stime > 3.5) {
+              s_dist = Math.round(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2)) / 1000;
+              break;
+            }
+          }
+
+        if (s_dist > report.depth)
+          markers.reportWaveTime.push(new Circle(map, {
+            id        : `report-wave-time-${seconds}s`,
+            className : "report-wave-time",
+            center    : [report.epicenterLon, report.epicenterLat],
+            radius    : s_dist - report.depth,
+            label     : `${seconds} 秒`
+          }));
+      }
+
       map.fitBounds(bounds, {
         padding : { top: 64, right: 364, bottom: 64, left: 64 },
         maxZoom : 8.5,
@@ -289,6 +321,8 @@ ipcRenderer.on("report:add.station", (station) => {
 
 ipcRenderer.on("report:clear.station", () => {
   for (const marker of markers.reportStations)
+    marker.remove();
+  for (const marker of markers.reportWaveTime)
     marker.remove();
 });
 
@@ -390,6 +424,7 @@ const initSettings = () => {
             document.getElementById("reports-panel").classList.add("docked");
           else
             document.getElementById("reports-panel").classList.remove("docked");
+          break;
         }
 
         default:

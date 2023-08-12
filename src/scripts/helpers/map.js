@@ -148,7 +148,8 @@ const renderRtsData = (rts, map) => {
 };
 
 const renderEewData = (eew, waves, map) => {
-  switchView(null, map);
+  if (!Object.keys(waves).length)
+    switchView(null, map);
 
   if (!waves[eew.id])
     waves[eew.id] = new EEW(eew, map);

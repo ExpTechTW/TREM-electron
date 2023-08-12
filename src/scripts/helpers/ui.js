@@ -70,7 +70,9 @@ const switchView = (view, map) => {
             animate  : (localStorage.getItem("MapAnimation") ?? "true") == "true"
           });
 
-          map.getContainer().classList.add("hide-rts");
+          if ((localStorage.getItem("HideStationReport") ?? "true") == "true")
+            map.getContainer().classList.add("hide-rts");
+
           ipcRenderer.emit("report:unhide.marker");
           resetReportViewport(false);
           break;

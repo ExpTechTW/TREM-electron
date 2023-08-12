@@ -33,8 +33,8 @@ module.exports = Object.freeze({
   },
   Models: {
     EEW   : "強震即時警報",
-    PLUM  : "局部無阻尼運動傳播法",
-    NSSPE : "無震源參數推算",
+    PLUM  : "PLUM 法",
+    NSSPE : "NSSPE",
   },
   Magnitudes: [
     "極微地震",

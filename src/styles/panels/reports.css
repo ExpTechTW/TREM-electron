@@ -121,6 +121,16 @@
   padding: 4px;
 }
 
+#reports-panel.docked:not(.show) .report-item {
+  display: none;
+}
+
+#reports-panel.docked:not(.show) .report-item:first-child,
+#reports-panel.docked:not(.show) .report-item:nth-child(2),
+#reports-panel.docked:not(.show) .report-item:nth-child(3) {
+  display: grid;
+}
+
 #reports-panel.docked:not(.show) .report-item:not(:first-child) {
   opacity: 0.6;
 }
@@ -534,3 +544,17 @@
 .report-station.intensity-9::before {
   background-color: #862DB3;
 }
+
+.report-wave-time circle {
+  stroke: var(--md-outline);
+}
+
+.report-wave-time text {
+  font-family: Lato, "Noto Sans TC", sans-serif;
+  font-size: 14px;
+  fill: var(--md-on-surface-variant);
+  stroke: var(--md-surface-variant);
+  stroke-width: 3px;
+  paint-order: stroke;
+}
+
