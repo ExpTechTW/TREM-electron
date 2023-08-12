@@ -73,7 +73,7 @@ class api extends EventEmitter {
           if (data.response == "Connection Succeeded")
             this.emit("ntp", data);
 
-          console.log(`[API] Socket --> message: ${data.response}`);
+          console.debug("[API] Socket --> message", data);
           break;
         }
       }

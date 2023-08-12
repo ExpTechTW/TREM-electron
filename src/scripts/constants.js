@@ -60,5 +60,17 @@ module.exports = Object.freeze({
     Temperature : "temperature",
     AQI         : "aqi",
     Settings    : "settings"
+  },
+  DefaultSettings: {
+    ApiKey             : "",
+    RtsMode            : "i",
+    HideStationEEW     : "true",
+    HideStationReport  : "true",
+    MapAnimation       : "true",
+    ReportShowCWB      : "true",
+    ReportShowTYA      : "false",
+    ReportTitleStyle   : "3",
+    ReportCount        : "50",
+    ReportPanelDocking : "false",
   }
 });

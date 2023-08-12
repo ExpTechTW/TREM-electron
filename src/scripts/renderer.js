@@ -66,7 +66,7 @@ const updateReports = async () => {
   console.log("%c[Reports] Refreshing earthquake reports...", "color: cornflowerblue");
 
   const reports = (await api.getReports())
-    .filter((v) => (localStorage.getItem("ReportShowCWB") == "true") && !v.location.startsWith("地震資訊") || (localStorage.getItem("ReportShowTYA") == "true") && v.location.startsWith("地震資訊"));
+    .filter((v) => ((localStorage.getItem("ReportShowCWB") ?? constants.DefaultSettings.ReportShowCWB) == "true") && !v.location.startsWith("地震資訊") || ((localStorage.getItem("ReportShowTYA") ?? constants.DefaultSettings.ReportShowTYA) == "true") && v.location.startsWith("地震資訊"));
   const frag = new DocumentFragment();
   const list = document.getElementById("reports-list");
 
@@ -75,22 +75,7 @@ const updateReports = async () => {
     delete markers.reports[identifier];
   }
 
-  let sliceTo = !((localStorage.getItem("ReportShowCWB") == "true") && (localStorage.getItem("ReportShowTYA") == "true"))
-    ? +(localStorage.getItem("ReportCount") ?? 50)
-    : 0;
-  let cwbCount = sliceTo;
-
-  while (cwbCount < +(localStorage.getItem("ReportCount") ?? 50))
-    for (const report of reports) {
-      sliceTo++;
-
-      if (report.location.startsWith("地震資訊"))
-        continue;
-      else
-        cwbCount++;
-    }
-
-  for (let i = 0, n = reports.slice(0, sliceTo).length, report = reports[i]; i < n; i++, report = reports[i]) {
+  for (let i = 0, n = reports.slice(0, +(localStorage.getItem("ReportCount") ?? constants.DefaultSettings.ReportCount)).length, report = reports[i]; i < n; i++, report = reports[i]) {
     const isNumbered = Boolean(report.earthquakeNo % 1000);
     const isTYA = report.location.startsWith("地震資訊");
 
@@ -107,17 +92,17 @@ const updateReports = async () => {
       .addChildren(new ElementBuilder()
         .setClass([ "report-title" ])
         .setContent(
-          (localStorage.getItem("ReportTitleStyle") == "1")
+          ((localStorage.getItem("ReportTitleStyle") ?? constants.DefaultSettings.ReportTitleStyle) == "1")
             ? report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"))
-            : (localStorage.getItem("ReportTitleStyle") == "2")
+            : ((localStorage.getItem("ReportTitleStyle") ?? constants.DefaultSettings.ReportTitleStyle) == "2")
               ? isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震"
               : report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")")))
         .setAttribute("title", report.location.split(" (")[0])
         .addChildren(
-          (localStorage.getItem("ReportTitleStyle") == "3")
+          ((localStorage.getItem("ReportTitleStyle") ?? constants.DefaultSettings.ReportTitleStyle) == "3")
             ? new ElementBuilder("span")
               .setClass([ "report-subtitle" ])
-              .setContent(isTYA ? "地震資訊" : isNumbered ? report.earthquakeNo : "小型有感")
+              .setContent(isTYA ? "地震資訊" : isNumbered ? report.earthquakeNo : "小型有感地震")
             : null)
       )
       // time
@@ -143,7 +128,7 @@ const updateReports = async () => {
     if (document.getElementById("reports-panel").classList.contains("show"))
       map.fitBounds(constants.TaiwanBounds, {
         padding : { top: 24, right: 324, bottom: 24, left: 24 },
-        animate : (localStorage.getItem("MapAnimation") ?? "true") == "true"
+        animate : (localStorage.getItem("MapAnimation") ?? constants.DefaultSettings.MapAnimation) == "true"
       });
 
     // map icon
@@ -214,36 +199,37 @@ const updateReports = async () => {
 
 
       // wave time circles
+      if (!isTYA) {
+        const distances = EEW.evalWaveDistances(report.depth);
 
-      const distances = EEW.evalWaveDistances(report.depth);
+        for (let seconds = 5; seconds <= 90; seconds += 5) {
+          let s_dist = Math.floor(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2));
 
-      for (let seconds = 5; seconds <= 90; seconds += 5) {
-        let s_dist = Math.floor(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2));
+          for (let _i = 1; _i < distances.length; _i++)
+            if (distances[_i].Stime > seconds) {
+              s_dist = _i - 1;
 
-        for (let _i = 1; _i < distances.length; _i++)
-          if (distances[_i].Stime > seconds) {
-            s_dist = _i - 1;
-
-            if ((_i - 1) / distances[_i - 1].Stime > 3.5) {
-              s_dist = Math.round(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2)) / 1000;
-              break;
+              if ((_i - 1) / distances[_i - 1].Stime > 3.5) {
+                s_dist = Math.round(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2)) / 1000;
+                break;
+              }
             }
-          }
 
-        if (s_dist > report.depth)
-          markers.reportWaveTime.push(new Circle(map, {
-            id        : `report-wave-time-${seconds}s`,
-            className : "report-wave-time",
-            center    : [report.epicenterLon, report.epicenterLat],
-            radius    : s_dist - report.depth,
-            label     : `${seconds} 秒`
-          }));
+          if (s_dist > report.depth)
+            markers.reportWaveTime.push(new Circle(map, {
+              id        : `report-wave-time-${seconds}s`,
+              className : "report-wave-time",
+              center    : [report.epicenterLon, report.epicenterLat],
+              radius    : s_dist - report.depth,
+              label     : `${seconds} 秒`
+            }));
+        }
       }
 
       map.fitBounds(bounds, {
         padding : { top: 64, right: 364, bottom: 64, left: 64 },
         maxZoom : 8.5,
-        animate : (localStorage.getItem("MapAnimation") ?? "true") == "true"
+        animate : (localStorage.getItem("MapAnimation") ?? constants.DefaultSettings.MapAnimation) == "true"
       });
     };
 
@@ -322,8 +308,10 @@ ipcRenderer.on("report:add.station", (station) => {
 ipcRenderer.on("report:clear.station", () => {
   for (const marker of markers.reportStations)
     marker.remove();
+  markers.reportStations = [];
   for (const marker of markers.reportWaveTime)
     marker.remove();
+  markers.reportWaveTime = [];
 });
 
 updateReports();
@@ -365,21 +353,23 @@ const initSettings = () => {
     document.getElementById("reports-panel").classList.add("docked");
 
   for (const input of document.querySelectorAll("input.setting")) {
+    const settingKey = input.getAttribute("data-setting");
+
     switch (input.type) {
       case "text":
       case "number":
       case "password": {
-        input.value = localStorage.getItem(input.getAttribute("data-setting")) ?? "";
+        input.value = localStorage.getItem(settingKey) ?? constants.DefaultSettings[settingKey];
         break;
       }
 
       case "radio": {
-        input.checked = input.value == localStorage.getItem(input.getAttribute("data-setting"));
+        input.checked = input.value == (localStorage.getItem(settingKey) ?? constants.DefaultSettings[settingKey]);
         break;
       }
 
       case "checkbox": {
-        input.checked = localStorage.getItem(input.getAttribute("data-setting")) == "true";
+        input.checked = (localStorage.getItem(settingKey) ?? constants.DefaultSettings[settingKey]) == "true";
         break;
       }
 
@@ -393,12 +383,12 @@ const initSettings = () => {
         case "text":
         case "number":
         case "password": {
-          localStorage.setItem(this.getAttribute("data-setting"), this.value);
+          localStorage.setItem(settingKey, this.value);
           break;
         }
 
         case "checkbox": {
-          localStorage.setItem(this.getAttribute("data-setting"), this.checked);
+          localStorage.setItem(settingKey, this.checked);
           break;
         }
 
