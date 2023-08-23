@@ -46,3 +46,21 @@ body {
   height: 100%;
   width: 100%;
 }
+
+@media (prefers-reduced-motion) {
+  *, *::before, *::after {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  body{
+    filter: contrast(1.5);
+  }
+}
+
+@media (prefers-contrast: less) {
+  body{
+    filter: contrast(0.8);
+  }
+}

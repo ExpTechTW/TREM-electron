@@ -59,6 +59,7 @@ class EEW {
     this.epicenterIcon = { main: null, mini: null };
     this.location = data.location;
     this.magnitude = data.scale;
+    this.type = data.type;
     this.source = {
       "eew-cwb"   : "中央氣象局",
       "eew-nied"  : "日本防災科研",
@@ -67,7 +68,7 @@ class EEW {
       "eew-fjdzj" : "中國福建省地震局",
       "eew-scdzj" : "中國四川省地震局",
       "trem-eew"  : "TREM 地震預警"
-    }[data.type];
+    }[this.type];
 
     if (data.type == "trem-eew") {
       if (data.model == "nsspe")
@@ -173,6 +174,7 @@ class EEW {
 
   #createWaveCircles() {
     if (this.p instanceof Wave) {
+      // already has wave circle
       this.p.setLngLat(this.epicenter.toLngLatArray());
 
       if (this.hasWaves && this.s instanceof Wave) {
@@ -180,6 +182,13 @@ class EEW {
         this.s.setAlert(this.alert);
       }
     } else {
+      // no existing wave circle
+
+      if (this.type == "eew-cwb")
+        new Audio("../assets/audio/trem_default/EEWCWB.wav").play();
+      else
+        new Audio("../assets/audio/trem_default/EEW.wav").play();
+
       this.p = new Wave(this._map, { id: this.id, type: "p", center: this.epicenter.toLngLatArray(), radius: 0, circle: this.hasWaves, model: this.model, location: this.location, magnitude: this.magnitude, depth: this.depth });
 
       if (this.hasWaves)

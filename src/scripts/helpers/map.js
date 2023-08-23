@@ -1,4 +1,4 @@
-const { Map, Marker } = require("maplibre-gl");
+const { Map, Marker, Popup } = require("maplibre-gl");
 const { rtsMarkerElement } = require("../factory");
 const { tw_county, tw_town } = require("../../assets/json/geojson");
 const Colors = require("./colors");
@@ -126,11 +126,19 @@ const setMapLayers = (map) => {
   });
 };
 
+let maxIntensity = 0;
+let audioIntensity = -1;
+
 const renderRtsData = (rts, map) => {
+  let newMaxIntensity = -5;
+
   for (const uuid in data.station) {
     const id = uuid.split("-")[2];
     const station = data.station[uuid];
     const element = document.getElementById(uuid);
+
+    if (rts[id]?.i > newMaxIntensity)
+      newMaxIntensity = rts[id].i;
 
     if (element == null) {
       const marker = rtsMarkerElement();
@@ -145,15 +153,39 @@ const renderRtsData = (rts, map) => {
       element.style.zIndex = (rts[id]?.v ?? 0.01) * 100;
     }
   }
+
+  if (newMaxIntensity > maxIntensity) {
+    maxIntensity = newMaxIntensity;
+
+    if (newMaxIntensity > 4) {
+      if (audioIntensity < 2)
+        new Audio("../assets/audio/trem_default/Shindo2.wav").play();
+
+      audioIntensity = 2;
+    } else if (newMaxIntensity > 2) {
+      if (audioIntensity < 1)
+        new Audio("../assets/audio/trem_default/Shindo1.wav").play();
+
+      audioIntensity = 1;
+    } else if (newMaxIntensity > 0) {
+      if (audioIntensity < 0)
+        new Audio("../assets/audio/trem_default/Shindo0.wav").play();
+
+      audioIntensity = 0;
+    }
+  }
 };
 
 const renderEewData = (eew, waves, map) => {
   if (!Object.keys(waves).length)
     switchView(null, map);
 
+
   if (!waves[eew.id])
     waves[eew.id] = new EEW(eew, map);
-  else waves[eew.id].update(eew);
+  else
+    waves[eew.id].update(eew);
+
 };
 
 const setDefaultMapView = (map) => {

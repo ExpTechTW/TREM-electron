@@ -44,6 +44,7 @@ const switchView = (view, map) => {
     isShown = panel.classList.contains("show");
   }
 
+
   for (const p of document.querySelectorAll(".panel"))
     p.classList.remove("show");
 

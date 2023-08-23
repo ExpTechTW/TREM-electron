@@ -432,7 +432,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 8px;
+  gap: 4px;
   margin: 0 12px;
 }
 
@@ -475,6 +475,7 @@
 .field-value {
   color: var(--md-on-surface);
   font-size: 16px;
+  line-height: 16px;
 }
 
 .report-detail-stations {
@@ -484,6 +485,10 @@
   margin: 8px 12px;
   margin-top: 0;
   min-height: 0;
+}
+
+.report-detail-stations:has(#report-station-list:empty) {
+  display: none;
 }
 
 .report-detail-station-container {
@@ -545,6 +550,18 @@
   background-color: #862DB3;
 }
 
+.report-station-name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.report-station-distance {
+  color: var(--md-outline);
+  font-size: 12px;
+}
+
 .report-wave-time circle {
   stroke: var(--md-outline);
 }
@@ -553,7 +570,7 @@
   font-family: Lato, "Noto Sans TC", sans-serif;
   font-size: 14px;
   fill: var(--md-on-surface-variant);
-  stroke: var(--md-surface-variant);
+  stroke: var(--md-surface);
   stroke-width: 3px;
   paint-order: stroke;
 }

@@ -54,7 +54,7 @@
   "devDependencies": {
     "@parcel/transformer-pug": "^2.8.3",
     "@parcel/transformer-sass": "^2.8.3",
-    "electron": "^25.1.0",
+    "electron": "^25.6.0",
     "electron-builder": "^23.6.0",
     "eslint": "^8.28.0",
     "parcel": "^2.8.3",

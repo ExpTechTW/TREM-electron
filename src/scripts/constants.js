@@ -1,4 +1,5 @@
 module.exports = Object.freeze({
+  AppVersion         : "0.0.1",
   WebSocketTargetUrl : "wss://exptech.com.tw/api",
   FCMSenderId        : "583094702393",
   API                : {
@@ -19,6 +20,7 @@ module.exports = Object.freeze({
     { value: 9, label: "7", text: "７級" }
   ],
   Events: {
+    Report  : "report",
     TremEew : "trem-eew",
     CwbEew  : "eew-cwb"
   },

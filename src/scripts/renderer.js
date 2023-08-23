@@ -46,9 +46,15 @@ api.on("rts", (rts) => {
   if (!replayTimer)
     renderRtsData(rts, map);
 });
+
 api.on("ntp", (ntp) => {
   map.localServerTimestamp = Date.now();
   map.serverTimestamp = ntp.time;
+});
+
+api.on(constants.Events.Report, (report) => {
+  if ((localStorage.getItem("") ?? constants.DefaultSettings.ViewSwitchReport) == "true")
+    openReport(report);
 });
 
 api.on(constants.Events.TremEew, (data) => renderEewData(data, waves, map));
@@ -61,6 +67,95 @@ const markers = {
 };
 
 // #region init reports
+
+const openReport = (report) => {
+  const isNumbered = Boolean(report.earthquakeNo % 1000);
+  const isTYA = report.location.startsWith("地震資訊");
+
+  for (const key in markers.reports)
+    if (key != report.identifier)
+      markers.reports[key].getElement().classList.add("hide");
+
+  document.getElementById("report-detail-subtitle").textContent = isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震";
+  document.getElementById("report-detail-title").textContent = report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"));
+  document.getElementById("report-detail-location").textContent = isTYA ? report.location.substring(report.location.indexOf("(") + 1, report.location.indexOf(")")) : report.location.substring(0, report.location.indexOf("(") - 1);
+  document.getElementById("report-detail-longitude").textContent = Math.abs(report.epicenterLon);
+  document.getElementById("report-detail-longitude-unit").textContent = report.epicenterLon > 0 ? "E" : "W";
+  document.getElementById("report-detail-latitude").textContent = Math.abs(report.epicenterLat);
+  document.getElementById("report-detail-latitude-unit").textContent = report.epicenterLat > 0 ? "N" : "S";
+  document.getElementById("report-detail-time").textContent = report.originTime;
+  document.getElementById("report-detail-magnitude").textContent = report.magnitudeValue.toFixed(1);
+  document.getElementById("report-detail-depth").textContent = report.depth;
+  document.getElementById("reports-list-view").classList.add("hide");
+  console.log(report);
+
+  const bounds = new LngLatBounds();
+  bounds.extend([report.epicenterLon, report.epicenterLat]);
+
+  // stations
+  const fragment = new DocumentFragment();
+
+  const stationList = report.data
+    .reduce((acc, area) => (acc.push(...area.eqStation.map((eqStation) => (eqStation.areaName = area.areaName, eqStation))), acc), [])
+    .sort((a, b) => b.stationIntensity - a.stationIntensity);
+
+  for (const station of stationList) {
+    fragment.appendChild(new ElementBuilder()
+      .setClass([ "report-station", `intensity-${station.stationIntensity}` ])
+      .addChildren(new ElementBuilder()
+        .setClass([ "report-station-name" ])
+        .setContent(`${station.areaName} ${station.stationName}`)
+        .addChildren(new ElementBuilder("span")
+          .setClass([ "report-station-distance" ])
+          .setContent(`震央距 ${station.distance} km`)))
+      .addChildren(new ElementBuilder()
+        .setClass([ "report-station-intensity" ])
+        .setContent(constants.Intensities[station.stationIntensity].text))
+      .toElement());
+
+    ipcRenderer.emit("report:add.station", station);
+    bounds.extend([station.stationLon, station.stationLat]);
+  }
+
+  document.getElementById("report-station-list").replaceChildren(fragment);
+
+
+  // wave time circles
+  if (!isTYA) {
+    const distances = EEW.evalWaveDistances(report.depth);
+
+    for (let seconds = 5; seconds <= 90; seconds += 5) {
+      let s_dist = Math.floor(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2));
+
+      for (let _i = 1; _i < distances.length; _i++)
+        if (distances[_i].Stime > seconds) {
+          s_dist = _i - 1;
+
+          if ((_i - 1) / distances[_i - 1].Stime > 3.5) {
+            s_dist = Math.round(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2)) / 1000;
+            break;
+          }
+        }
+
+      if (s_dist > report.depth)
+        markers.reportWaveTime.push(new Circle(map, {
+          id        : `report-wave-time-${seconds}s`,
+          className : "report-wave-time",
+          center    : [report.epicenterLon, report.epicenterLat],
+          radius    : s_dist - report.depth,
+          label     : `${seconds} 秒`
+        }));
+    }
+  } else {
+
+  }
+
+  map.fitBounds(bounds, {
+    padding : { top: 64, right: 364, bottom: 64, left: 64 },
+    maxZoom : 8.5,
+    animate : (localStorage.getItem("MapAnimation") ?? constants.DefaultSettings.MapAnimation) == "true"
+  });
+};
 
 const updateReports = async () => {
   console.log("%c[Reports] Refreshing earthquake reports...", "color: cornflowerblue");
@@ -151,88 +246,6 @@ const updateReports = async () => {
         .setLngLat([report.epicenterLon, report.epicenterLat])
         .addTo(map);
 
-    const openReport = () => {
-      for (const key in markers.reports)
-        if (key != report.identifier)
-          markers.reports[key].getElement().classList.add("hide");
-
-      document.getElementById("report-detail-subtitle").textContent = isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震";
-      document.getElementById("report-detail-title").textContent = report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"));
-      document.getElementById("report-detail-location").textContent = isTYA ? report.location.substring(report.location.indexOf("(") + 1, report.location.indexOf(")")) : report.location.substring(0, report.location.indexOf("(") - 1);
-      document.getElementById("report-detail-longitude").textContent = Math.abs(report.epicenterLon);
-      document.getElementById("report-detail-longitude-unit").textContent = report.epicenterLon > 0 ? "E" : "W";
-      document.getElementById("report-detail-latitude").textContent = Math.abs(report.epicenterLat);
-      document.getElementById("report-detail-latitude-unit").textContent = report.epicenterLat > 0 ? "N" : "S";
-      document.getElementById("report-detail-time").textContent = report.originTime;
-      document.getElementById("report-detail-magnitude").textContent = report.magnitudeValue.toFixed(1);
-      document.getElementById("report-detail-depth").textContent = report.depth;
-      document.getElementById("reports-list-view").classList.add("hide");
-      console.log(report);
-
-      const bounds = new LngLatBounds();
-      bounds.extend([report.epicenterLon, report.epicenterLat]);
-
-      // stations
-      const fragment = new DocumentFragment();
-
-      const stationList = report.data
-        .reduce((acc, area) => (acc.push(...area.eqStation.map((eqStation) => (eqStation.areaName = area.areaName, eqStation))), acc), [])
-        .sort((a, b) => b.stationIntensity - a.stationIntensity);
-
-      for (const station of stationList) {
-        fragment.appendChild(new ElementBuilder()
-          .setClass([ "report-station", `intensity-${station.stationIntensity}` ])
-          .addChildren(new ElementBuilder()
-            .setClass([ "report-station-name" ])
-            .setContent(`${station.areaName} ${station.stationName}`)
-            .setStyle("flex", 1))
-          .addChildren(new ElementBuilder()
-            .setClass([ "report-station-intensity" ])
-            .setContent(constants.Intensities[station.stationIntensity].text))
-          .toElement());
-
-        ipcRenderer.emit("report:add.station", station);
-        bounds.extend([station.stationLon, station.stationLat]);
-      }
-
-      document.getElementById("report-station-list").replaceChildren(fragment);
-
-
-      // wave time circles
-      if (!isTYA) {
-        const distances = EEW.evalWaveDistances(report.depth);
-
-        for (let seconds = 5; seconds <= 90; seconds += 5) {
-          let s_dist = Math.floor(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2));
-
-          for (let _i = 1; _i < distances.length; _i++)
-            if (distances[_i].Stime > seconds) {
-              s_dist = _i - 1;
-
-              if ((_i - 1) / distances[_i - 1].Stime > 3.5) {
-                s_dist = Math.round(Math.sqrt(((seconds * 1000) * 3.5) ** 2 - (report.depth * 1000) ** 2)) / 1000;
-                break;
-              }
-            }
-
-          if (s_dist > report.depth)
-            markers.reportWaveTime.push(new Circle(map, {
-              id        : `report-wave-time-${seconds}s`,
-              className : "report-wave-time",
-              center    : [report.epicenterLon, report.epicenterLat],
-              radius    : s_dist - report.depth,
-              label     : `${seconds} 秒`
-            }));
-        }
-      }
-
-      map.fitBounds(bounds, {
-        padding : { top: 64, right: 364, bottom: 64, left: 64 },
-        maxZoom : 8.5,
-        animate : (localStorage.getItem("MapAnimation") ?? constants.DefaultSettings.MapAnimation) == "true"
-      });
-    };
-
     markers.reports[report.identifier]
       .getElement()
       .addEventListener("mouseenter", () => {
@@ -251,7 +264,7 @@ const updateReports = async () => {
 
     markers.reports[report.identifier]
       .getElement()
-      .addEventListener("click", openReport);
+      .addEventListener("click", () => openReport(report));
 
     item.on("mouseenter", () => {
       markers.reports[report.identifier].getElement().classList.add("hightlight");
@@ -261,7 +274,7 @@ const updateReports = async () => {
       markers.reports[report.identifier].getElement().classList.remove("hightlight");
     });
 
-    item.on("click", openReport);
+    item.on("click", () => openReport(report));
 
     item.on("contextmenu", function() {
       const time = this.querySelector(".report-time");
@@ -349,8 +362,13 @@ document.getElementById("button-return-to-reports-list").addEventListener("click
 // #region init settings
 
 const initSettings = () => {
-  if ((localStorage.getItem("ReportPanelDocking") ?? "false") == "true")
+  if ((localStorage.getItem("ReportPanelDocking") ?? constants.DefaultSettings.ReportPanelDocking) == "true")
     document.getElementById("reports-panel").classList.add("docked");
+
+  if ((localStorage.getItem("ApiKey") ?? constants.DefaultSettings.ApiKey) == "") {
+    document.getElementById("report-source-choice2").disabled = true;
+    localStorage.setItem("ReportShowTYA", "false");
+  }
 
   for (const input of document.querySelectorAll("input.setting")) {
     const settingKey = input.getAttribute("data-setting");
@@ -399,6 +417,16 @@ const initSettings = () => {
       switch (this.name) {
         case "ApiKey": {
           api.key = this.value;
+
+          if ((this.value ?? constants.DefaultSettings.ApiKey) == "") {
+            document.getElementById("report-source-choice2").disabled = true;
+            document.getElementById("report-source-choice2").checked = false;
+            localStorage.setItem("ReportShowTYA", "false");
+            updateReports();
+          } else {
+            document.getElementById("report-source-choice2").disabled = false;
+          }
+
           break;
         }
 

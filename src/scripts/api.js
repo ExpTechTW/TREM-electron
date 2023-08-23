@@ -3,15 +3,16 @@ const { createHash } = require("node:crypto");
 const EventEmitter = require("node:events");
 const WebSocket = require("ws");
 const constants = require("./constants");
+const dgram = require("node:dgram");
 
 class api extends EventEmitter {
   constructor(key) {
     super();
     this.key = key;
     this.wsConfig = {
-      uuid     : localStorage.uuid + "-rts",
+      uuid     : `TREM/v${constants.AppVersion} (${localStorage.uuid})`,
       function : "subscriptionService",
-      value    : ["trem-rts-v2", "trem-eew-v1"],
+      value    : ["trem-rts-v2", "trem-eew-v1", "report-v1", "tsunami-v1"],
       key      : this.key,
     };
     this.initWebSocket();
