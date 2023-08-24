@@ -10,6 +10,10 @@
   transition: opacity .2s, background-color.1s;
 }
 
+.maplibregl-canvas:focus-visible {
+  outline: none;
+}
+
 #map.hide-rts .rts-marker {
   opacity: 0;
   pointer-events: none;

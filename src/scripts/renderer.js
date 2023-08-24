@@ -463,3 +463,9 @@ initSettings();
 
 for (const btn of document.querySelectorAll("nav > button"))
   btn.addEventListener("click", () => switchView(btn.id, map));
+
+document.addEventListener("keydown", (ev) => {
+  if (ev.key == "F12")
+    ipcRenderer.send("win:screenshot");
+
+});

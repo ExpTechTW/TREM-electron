@@ -1,5 +1,6 @@
 const { BrowserWindow, Menu, Notification, app, Tray, ipcMain, nativeImage, shell, powerMonitor, powerSaveBlocker } = require("electron");
 const electronPushReceiver = require("electron-fcm-push-receiver");
+const { writeFileSync, existsSync, mkdir, mkdirSync } = require("node:fs");
 const path = require("node:path");
 
 let _hide = false;
@@ -55,6 +56,18 @@ function createWindow() {
     MainWindow.setAlwaysOnTop(false);
   });
   ipcMain.on("win:flashFrame", (ev, state) => MainWindow.flashFrame(state));
+  ipcMain.on("win:screenshot", () => {
+    MainWindow.webContents.capturePage().then((image) => {
+      const dir = path.join(app.getPath("pictures"), "TREM");
+      const imagePath = path.join(dir, `screenshot_${Date.now()}.png`);
+
+      if (!existsSync(dir))
+        mkdirSync(dir);
+
+      writeFileSync(imagePath, image.toPNG());
+      shell.showItemInFolder(imagePath);
+    });
+  });
   MainWindow.on("maximize", () => MainWindow.webContents.send("window-state-change", true));
   MainWindow.on("unmaximize", () => MainWindow.webContents.send("window-state-change", false));
 
