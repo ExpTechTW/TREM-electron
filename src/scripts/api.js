@@ -70,6 +70,11 @@ class api extends EventEmitter {
           break;
         }
 
+        case constants.Events.Report: {
+          this.emit(constants.Events.Report, data);
+          break;
+        }
+
         default: {
           if (data.response == "Connection Succeeded")
             this.emit("ntp", data);
@@ -160,23 +165,23 @@ class api extends EventEmitter {
               response
                 .json()
                 .then(resolve);
+            else
+              fetch(url).then(async (res) => {
+                if (res.ok) {
+                  const resData = await res.json();
 
-            fetch(url).then(async (res) => {
-              if (res.ok) {
-                const resData = await res.json();
+                  const jsonResponse = new Response(JSON.stringify(resData), {
+                    headers: {
+                      "content-type": "application/json"
+                    }
+                  });
 
-                const jsonResponse = new Response(JSON.stringify(resData), {
-                  headers: {
-                    "content-type": "application/json"
-                  }
-                });
-
-                cache.put(url, jsonResponse);
-                resolve(resData);
-              } else {
-                reject(new Error(`The server responded with ${res.status}.`));
-              }
-            });
+                  cache.put(url, jsonResponse);
+                  resolve(resData);
+                } else {
+                  reject(new Error(`The server responded with ${res.status}.`));
+                }
+              });
           });
         });
     });

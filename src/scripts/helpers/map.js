@@ -1,6 +1,6 @@
-const { Map, Marker, Popup } = require("maplibre-gl");
+const { MapLibreMap, Marker, Popup } = require("maplibre-gl");
 const { rtsMarkerElement } = require("../factory");
-const { tw_county, tw_town } = require("../../assets/json/geojson");
+const { tw_county, tw_town, area } = require("../../assets/json/geojson");
 const Colors = require("./colors");
 const data = require("../file.js");
 const constants = require("../constants");
@@ -10,7 +10,7 @@ const colors = require("./colors");
 const { switchView } = require("./ui");
 
 /**
- * @param {Map} map
+ * @param {MapLibreMap} map
  */
 const setMapLayers = (map) => {
   map.addSource("tw_county", {
@@ -23,6 +23,11 @@ const setMapLayers = (map) => {
     type      : "geojson",
     data      : tw_town,
     tolerance : 1
+  });
+
+  map.addSource("tw_area", {
+    type : "geojson",
+    data : area,
   });
 
   map.addLayer({
@@ -114,6 +119,59 @@ const setMapLayers = (map) => {
     }
   });
 
+  map.addLayer({
+    id     : "area",
+    type   : "line",
+    source : "tw_area",
+    paint  : {
+      "line-color": [
+        "match",
+        [
+          "coalesce",
+          ["feature-state", "intensity"],
+          0,
+        ],
+        9,
+        colors.getIntensityBgColor(9),
+        8,
+        colors.getIntensityBgColor(8),
+        7,
+        colors.getIntensityBgColor(7),
+        6,
+        colors.getIntensityBgColor(6),
+        5,
+        colors.getIntensityBgColor(5),
+        4,
+        colors.getIntensityBgColor(4),
+        3,
+        colors.getIntensityBgColor(3),
+        2,
+        colors.getIntensityBgColor(2),
+        1,
+        colors.getIntensityBgColor(1),
+        "#6B7979",
+      ],
+      "line-width"   : 3,
+      "line-opacity" : [
+        "case",
+        [
+          ">=",
+          [
+            "coalesce",
+            ["feature-state", "intensity"],
+            -1,
+          ],
+          0,
+        ],
+        1,
+        0,
+      ],
+    },
+    layout: {
+      visibility: "none",
+    },
+  });
+
   map.on("wheel", (e) => {
     if ((localStorage.getItem("MapAnimation") ?? "true") != "true") {
       e.preventDefault();
@@ -128,9 +186,16 @@ const setMapLayers = (map) => {
 
 let maxIntensity = 0;
 let audioIntensity = -1;
+let detected_list = {};
 
 const renderRtsData = (rts, map) => {
   let newMaxIntensity = -5;
+  detected_list = {};
+
+  if (rts.Alert == false) {
+    maxIntensity = 0;
+    audioIntensity - 1;
+  }
 
   for (const uuid in data.station) {
     const id = uuid.split("-")[2];
@@ -152,40 +217,140 @@ const renderRtsData = (rts, map) => {
       element.style.outlineColor = id in rts ? "" : Colors.NoDataRtsColor;
       element.style.zIndex = (rts[id]?.v ?? 0.01) * 100;
     }
+
+    // 檢知框框
+
+    if (rts[id]?.i && (rts[id].i > 0 || rts[id].alert)) {
+      detected_list[station.PGA] ??= {
+        intensity : rts[id].i,
+        time      : 0,
+      };
+
+      if ((detected_list[station.PGA].intensity ?? 0) < rts[id].i)
+        detected_list[station.PGA].intensity = rts[id].i;
+      detected_list[station.PGA].time = Date.now();
+    }
+  }
+
+  const areas = area.features.reduce((acc, v) => (acc[v.id] = v.geometry.coordinates[0], acc), {});
+
+  if (Object.keys(detected_list).length) {
+    for (let index = 0, areaIds = Object.keys(detected_list), areaId = areaIds[0]; index < areaIds.length; index++, areaId = areaIds[index])
+      if (!detected_list[areaId].passed) {
+        let passed = false;
+
+        if (Object.keys(waves).length)
+          for (const waveKey in waves) {
+            if (!waves[waveKey].hasWaves) continue;
+
+            let SKIP = 0;
+
+            for (let i = 0; i < 4; i++) {
+              const dis = (
+                ((areas[areaId][i][0] - waves[waveKey].epicenter.latitude) * 111) ** 2
+                + ((areas[areaId][i][1] - waves[waveKey].epicenter.longitude) * 101) ** 2) ** (1 / 2);
+
+              if (waves[waveKey].s.radius * 500 > dis) SKIP++;
+            }
+
+            if (SKIP >= 4) {
+              passed = true;
+              break;
+            }
+          }
+
+        if (passed) {
+          detected_list[areaId].passed = true;
+          clearAreaIntensity(areaId, map);
+        } else {
+          setAreaIntensity(areaId, ~~detected_list[areaId]?.intensity, map);
+        }
+      }
+  } else {
+    for (let index = 0, areaIds = Object.keys(detected_list), areaId = areaIds[0]; index < areaIds.length; index++, areaId = areaIds[index])
+      clearAreaIntensity(areaId, map);
   }
 
   if (newMaxIntensity > maxIntensity) {
     maxIntensity = newMaxIntensity;
 
-    if (newMaxIntensity > 4) {
-      if (audioIntensity < 2)
-        new Audio("../assets/audio/trem_default/Shindo2.wav").play();
+    if (rts.Alert)
+      if (newMaxIntensity > 4) {
+        if (audioIntensity < 2)
+          new Audio("../assets/audio/trem_default/Shindo2.wav").play();
 
-      audioIntensity = 2;
-    } else if (newMaxIntensity > 2) {
-      if (audioIntensity < 1)
-        new Audio("../assets/audio/trem_default/Shindo1.wav").play();
+        switchView(null, map);
+        audioIntensity = 2;
+      } else if (newMaxIntensity > 2) {
+        if (audioIntensity < 1)
+          new Audio("../assets/audio/trem_default/Shindo1.wav").play();
 
-      audioIntensity = 1;
-    } else if (newMaxIntensity > 0) {
-      if (audioIntensity < 0)
-        new Audio("../assets/audio/trem_default/Shindo0.wav").play();
+        switchView(null, map);
+        audioIntensity = 1;
+      } else if (newMaxIntensity > 0) {
+        if (audioIntensity < 0)
+          new Audio("../assets/audio/trem_default/Shindo0.wav").play();
 
-      audioIntensity = 0;
-    }
+        switchView(null, map);
+        audioIntensity = 0;
+      }
   }
 };
 
-const renderEewData = (eew, waves, map) => {
+let waves = {};
+
+const renderEewData = (eew, w, map) => {
+  waves = w;
+
   if (!Object.keys(waves).length)
     switchView(null, map);
 
+  document.body.classList.add("has-eew");
 
   if (!waves[eew.id])
     waves[eew.id] = new EEW(eew, map);
   else
     waves[eew.id].update(eew);
 
+};
+
+let areaMap = new Map();
+let areaBlinkTimer;
+
+const setAreaIntensity = (id, intensity, map) => {
+  if (areaMap.get(id) == intensity) return;
+  map.setFeatureState({
+    source: "tw_area",
+    id,
+  }, { intensity });
+  areaMap.set(id, intensity);
+
+  if (!areaBlinkTimer) {
+    map.setLayoutProperty("area", "visibility", "visible");
+
+    areaBlinkTimer = setInterval(() => {
+      if (map.getLayoutProperty("area", "visibility") == "none")
+        map.setLayoutProperty("area", "visibility", "visible");
+      else
+        map.setLayoutProperty("area", "visibility", "none");
+    }, 500);
+  }
+};
+
+const clearAreaIntensity = (id, map) => {
+  if (id) {
+    map.removeFeatureState({ source: "tw_area", id });
+    areaMap.delete(id);
+  } else {
+    map.removeFeatureState({ source: "tw_area" });
+    areaMap = new Map();
+  }
+
+  if (!areaMap.size) {
+    if (areaBlinkTimer)
+      clearTimeout(areaBlinkTimer);
+    map.setLayoutProperty("area", "visibility", "none");
+  }
 };
 
 const setDefaultMapView = (map) => {

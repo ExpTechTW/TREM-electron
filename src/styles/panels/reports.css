@@ -42,6 +42,11 @@
   transition-timing-function: cubic-bezier(0.05, 0.7, 0.1, 1);
 }
 
+body.has-eew #reports-panel.docked:not(.show) {
+  opacity: 0;
+  pointer-events: none;
+}
+
 #reports-list {
   display: grid;
   padding-right: 4px;
@@ -179,6 +184,7 @@
   height: 26.6px !important;
   width: 26.6px !important;
   z-index: 100 !important;
+  filter: drop-shadow(0 0 4px #f006);
 }
 
 .overlay-container:has(>#reports-panel.show) + .map-container:has(.hide) .report-cross:not(.hide) g {
@@ -188,6 +194,7 @@
 
 .overlay-container:has(>#reports-panel.show) + .map-container:has(.hide) .report-cross:not(.hide) .cross-inner {
   fill: #f00 !important;
+  filter: drop-shadow(0 0 6px #f00a);
 }
 
 .overlay-container:has(>#reports-panel.show) + .map-container:has(.hide) .report-cross:not(.hide) .cross-outer {
@@ -564,6 +571,7 @@
 
 .report-wave-time circle {
   stroke: var(--md-outline);
+  filter: drop-shadow(0 0 2px rgb(0 0 0 / 40%));
 }
 
 .report-wave-time text {

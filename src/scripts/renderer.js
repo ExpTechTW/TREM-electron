@@ -42,19 +42,21 @@ ipcRenderer.on(NOTIFICATION_RECEIVED, (_, Notification) => {
 
 const waves = {};
 
-api.on("rts", (rts) => {
+api.on(constants.Events.Rts, (rts) => {
   if (!replayTimer)
     renderRtsData(rts, map);
 });
 
-api.on("ntp", (ntp) => {
+api.on(constants.Events.Ntp, (ntp) => {
   map.localServerTimestamp = Date.now();
   map.serverTimestamp = ntp.time;
 });
 
 api.on(constants.Events.Report, (report) => {
-  if ((localStorage.getItem("") ?? constants.DefaultSettings.ViewSwitchReport) == "true")
+  if ((localStorage.getItem("") ?? constants.DefaultSettings.ViewSwitchReport) == "true") {
+    new Audio("./assets/audio/trem_default/Report.wav").play();
     openReport(report);
+  }
 });
 
 api.on(constants.Events.TremEew, (data) => renderEewData(data, waves, map));

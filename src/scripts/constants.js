@@ -22,7 +22,9 @@ module.exports = Object.freeze({
   Events: {
     Report  : "report",
     TremEew : "trem-eew",
-    CwbEew  : "eew-cwb"
+    CwbEew  : "eew-cwb",
+    Rts     : "rts",
+    Ntp     : "ntp",
   },
   Sources: {
     "eew-cwb"   : "中央氣象局",
