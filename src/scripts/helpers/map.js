@@ -8,6 +8,7 @@ const Wave = require("../classes/wave");
 const EEW = require("../classes/eew");
 const colors = require("./colors");
 const { switchView } = require("./ui");
+const { playAudio } = require("./audio");
 
 /**
  * @param {MapLibreMap} map
@@ -277,19 +278,19 @@ const renderRtsData = (rts, map) => {
     if (rts.Alert)
       if (newMaxIntensity > 4) {
         if (audioIntensity < 2)
-          new Audio("../assets/audio/trem_default/Shindo2.wav").play();
+          playAudio("int2", localStorage.getItem("AudioInt2Volume") ?? constants.DefaultSettings.AudioInt2Volume);
 
         switchView(null, map);
         audioIntensity = 2;
       } else if (newMaxIntensity > 2) {
         if (audioIntensity < 1)
-          new Audio("../assets/audio/trem_default/Shindo1.wav").play();
+          playAudio("int1", localStorage.getItem("AudioInt1Volume") ?? constants.DefaultSettings.AudioInt1Volume);
 
         switchView(null, map);
         audioIntensity = 1;
       } else if (newMaxIntensity > 0) {
         if (audioIntensity < 0)
-          new Audio("../assets/audio/trem_default/Shindo0.wav").play();
+          playAudio("int0", localStorage.getItem("AudioInt0Volume") ?? constants.DefaultSettings.AudioInt0Volume);
 
         switchView(null, map);
         audioIntensity = 0;

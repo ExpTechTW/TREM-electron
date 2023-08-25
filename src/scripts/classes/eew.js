@@ -3,6 +3,8 @@ const Distance = require("../helpers/distance");
 const Wave = require("./wave");
 const calcPGA = require("../helpers/pga");
 const region = require("../../assets/json/region.json");
+const constants = require("../constants");
+const { playAudio } = require("../helpers/audio");
 
 class EEW {
 
@@ -93,6 +95,15 @@ class EEW {
         this._distance = EEW.evalWaveDistances(this.depth);
 
       this.#createWaveCircles();
+
+      if (data.number > 1) {
+        if (!(this.type == "trem-eew" && data.model == "nsspe" && (localStorage.getItem("AudioPlayUpdateNSSPE") ?? constants.DefaultSettings.AudioPlayUpdateNSSPE) == "true"))
+          playAudio("update", localStorage.getItem("AudioUpdateVolume") ?? constants.DefaultSettings.AudioUpdateVolume);
+      } else if (this.type == "eew-cwb") {
+        playAudio("cwb", localStorage.getItem("AudioEEWVolume") ?? constants.DefaultSettings.AudioEEWVolume);
+      } else {
+        playAudio("eew", localStorage.getItem("AudioEEWVolume") ?? constants.DefaultSettings.AudioEEWVolume);
+      }
     }
 
     this.version = data.number;
@@ -183,11 +194,6 @@ class EEW {
       }
     } else {
       // no existing wave circle
-
-      if (this.type == "eew-cwb")
-        new Audio("../assets/audio/trem_default/EEWCWB.wav").play();
-      else
-        new Audio("../assets/audio/trem_default/EEW.wav").play();
 
       this.p = new Wave(this._map, { id: this.id, type: "p", center: this.epicenter.toLngLatArray(), radius: 0, circle: this.hasWaves, model: this.model, location: this.location, magnitude: this.magnitude, depth: this.depth });
 

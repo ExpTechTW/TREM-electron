@@ -11,6 +11,7 @@ const colors = require("./helpers/colors");
 const constants = require("./constants");
 const Circle = require("./classes/circle");
 const EEW = require("./classes/eew");
+const { playAudio } = require("./helpers/audio");
 
 let replayTimer = false;
 
@@ -54,7 +55,7 @@ api.on(constants.Events.Ntp, (ntp) => {
 
 api.on(constants.Events.Report, (report) => {
   if ((localStorage.getItem("") ?? constants.DefaultSettings.ViewSwitchReport) == "true") {
-    new Audio("./assets/audio/trem_default/Report.wav").play();
+    playAudio("report", localStorage.getItem("AudioReportVolume") ?? constants.DefaultSettings.AudioReportVolume);
     openReport(report);
   }
 });

@@ -66,15 +66,20 @@ module.exports = Object.freeze({
     Settings    : "settings"
   },
   DefaultSettings: {
-    ApiKey             : "",
-    RtsMode            : "i",
-    HideStationEEW     : "true",
-    HideStationReport  : "true",
-    MapAnimation       : "true",
-    ReportShowCWB      : "true",
-    ReportShowTYA      : "false",
-    ReportTitleStyle   : "3",
-    ReportCount        : "50",
-    ReportPanelDocking : "false",
+    ApiKey               : "",
+    RtsMode              : "i",
+    HideStationEEW       : "true",
+    HideStationReport    : "true",
+    MapAnimation         : "true",
+    ReportShowCWB        : "true",
+    ReportShowTYA        : "false",
+    ReportTitleStyle     : "3",
+    ReportCount          : "50",
+    ReportPanelDocking   : "false",
+    AudioPlayUpdateNSSPE : "true",
+    AudioUpdateVolume    : "40",
+    AudioEEWVolume       : "100",
+    AudioInt0Volume      : "60",
+    AudioInt1Volume      : "60"
   }
 });
