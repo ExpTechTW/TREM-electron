@@ -36,9 +36,10 @@ module.exports = Object.freeze({
     "trem-eew"  : "TREM 地震預警"
   },
   Models: {
-    EEW   : "強震即時警報",
-    PLUM  : "PLUM 法",
-    NSSPE : "NSSPE",
+    EEW     : "強震即時警報",
+    TREMEEW : "TREM 地震預警",
+    PLUM    : "PLUM 法",
+    NSSPE   : "NSSPE",
   },
   Magnitudes: [
     "極微地震",
@@ -76,10 +77,20 @@ module.exports = Object.freeze({
     ReportTitleStyle     : "3",
     ReportCount          : "50",
     ReportPanelDocking   : "false",
-    AudioPlayUpdateNSSPE : "true",
+    AudioPlayUpdate      : "true",
+    AudioPlayUpdateNSSPE : "false",
     AudioUpdateVolume    : "40",
-    AudioEEWVolume       : "100",
+    AudioPlayEEW         : "true",
+    AudioEEWVolume       : "60",
+    AudioEEWTREMVolume   : "80",
+    AudioEEWCWBVolume    : "100",
+    AudioPlayReport      : "true",
+    AudioReportVolume    : "60",
+    AudioPlayInt0        : "true",
     AudioInt0Volume      : "60",
-    AudioInt1Volume      : "60"
+    AudioPlayInt1        : "true",
+    AudioInt1Volume      : "70",
+    AudioPlayInt2        : "true",
+    AudioInt2Volume      : "80"
   }
 });

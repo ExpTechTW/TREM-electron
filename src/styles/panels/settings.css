@@ -1,5 +1,6 @@
 @import url("../components/input.css");
 @import url("../components/segmented.css");
+@import url("../components/slider.css");
 @import url("../components/switch.css");
 
 #settings-panel {
@@ -118,6 +119,14 @@
   --md-primary-container: var(--md-custom-light-blue-container);
   --md-secondary-container: var(--md-custom-light-blue-container);
   --md-on-secondary-container: var(--md-custom-on-light-blue-container);
+}
+
+.group-audio {
+  --md-primary: var(--md-custom-yellow);
+  --md-on-primary: var(--md-custom-on-yellow);
+  --md-primary-container: var(--md-custom-yellow-container);
+  --md-secondary-container: var(--md-custom-yellow-container);
+  --md-on-secondary-container: var(--md-custom-on-yellow-container);
 }
 
 .setting-header {

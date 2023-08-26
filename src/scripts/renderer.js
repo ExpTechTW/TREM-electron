@@ -379,6 +379,7 @@ const initSettings = () => {
     switch (input.type) {
       case "text":
       case "number":
+      case "range":
       case "password": {
         input.value = localStorage.getItem(settingKey) ?? constants.DefaultSettings[settingKey];
         break;
@@ -403,6 +404,7 @@ const initSettings = () => {
         case "radio":
         case "text":
         case "number":
+        case "range":
         case "password": {
           localStorage.setItem(settingKey, this.value);
           break;
@@ -445,6 +447,11 @@ const initSettings = () => {
             document.getElementById("reports-panel").classList.add("docked");
           else
             document.getElementById("reports-panel").classList.remove("docked");
+          break;
+        }
+
+        case "AudioVolume": {
+          playAudio(this.getAttribute("data-audio"), this.value);
           break;
         }
 

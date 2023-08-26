@@ -57,6 +57,67 @@ const cross = (options) => {
   return group;
 };
 
+
+/**
+ * @param {*} options
+ * @returns
+ */
+const circle = (options) => {
+  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+  if ("className" in options)
+    if (!("svg" in options))
+      options.className.split(" ").forEach((v) => group.classList.add(v));
+
+  if ("blink" in options)
+    if (options.blink == true)
+      group.classList.add("blink");
+
+  if ("scale" in options)
+    group.style.scale = options.scale;
+
+  if ("opacity" in options)
+    group.style.opacity = options.opacity;
+
+  const inner = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  inner.setAttribute("cx", "0");
+  inner.setAttribute("cy", "0");
+  inner.setAttribute("r", "16");
+  inner.classList.add("circle-inner");
+
+  if ("innerColor" in options)
+    inner.style.fill = options.innerColor;
+
+  const outer = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  outer.setAttribute("cx", "0");
+  outer.setAttribute("cy", "0");
+  outer.setAttribute("r", "22");
+  outer.classList.add("circle-outer");
+
+  if ("outerColor" in options)
+    outer.style.fill = options.outerColor;
+
+  group.append(outer, inner);
+
+  if ("svg" in options)
+    if (options.svg == true) {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.appendChild(group);
+
+      if ("className" in options)
+        options.className.split(" ").forEach((v) => svg.classList.add(v));
+
+      if ("scale" in options) {
+        svg.style.height = 76 * options.scale;
+        svg.style.width = 76 * options.scale;
+      }
+
+      return svg;
+    }
+
+  return group;
+};
+
 const rtsMarkerElement = () => {
   const div = document.createElement("div");
   div.className = "rts-marker";
@@ -69,4 +130,4 @@ const reportStationMarkerElement = (intensity) => {
   return div;
 };
 
-module.exports = { cross, rtsMarkerElement, reportStationMarkerElement };
+module.exports = { cross, circle, rtsMarkerElement, reportStationMarkerElement };

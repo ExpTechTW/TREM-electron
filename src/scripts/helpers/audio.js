@@ -7,6 +7,7 @@ const AudioDictionary = {
   int2   : "../assets/audio/trem_default/Int2.wav",
   cwb    : "../assets/audio/trem_default/EEWCWB.wav",
   eew    : "../assets/audio/trem_default/EEW.wav",
+  eew2   : "../assets/audio/trem_default/EEW2.wav",
   report : "../assets/audio/trem_default/Report.wav",
 };
 

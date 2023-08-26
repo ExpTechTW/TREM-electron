@@ -27,10 +27,15 @@ circle {
   fill: #f00;
 }
 
+.circle-inner {
+  fill: #6bf;
+}
+
 .report-cross .cross-inner {
   fill: var(--md-surface);
 }
 
+.circle-outer,
 .cross-outer {
   fill: var(--md-on-background)
 }

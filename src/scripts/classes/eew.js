@@ -72,11 +72,17 @@ class EEW {
       "trem-eew"  : "TREM 地震預警"
     }[this.type];
 
-    if (data.type == "trem-eew") {
-      if (data.model == "nsspe")
-        this.hasWaves = false;
+    let _surpressUpdateAudio = false;
 
-      this.model = data.model?.toUpperCase() ?? "EEW";
+    if (data.type == "trem-eew") {
+      if (data.model == "nsspe") {
+        this.hasWaves = false;
+      } else if (this.model == "NSSPE" && data.model == "eew") {
+        playAudio("eew2", localStorage.getItem("AudioEEWTREMVolume") ?? constants.DefaultSettings.AudioEEWTREMVolume);
+        _surpressUpdateAudio = true;
+      }
+
+      this.model = data.model?.toUpperCase() ?? "TREMEEW";
     }
 
     this.eventTime = new Date(data.time);
@@ -97,8 +103,10 @@ class EEW {
       this.#createWaveCircles();
 
       if (data.number > 1) {
-        if (!(this.type == "trem-eew" && data.model == "nsspe" && (localStorage.getItem("AudioPlayUpdateNSSPE") ?? constants.DefaultSettings.AudioPlayUpdateNSSPE) == "true"))
-          playAudio("update", localStorage.getItem("AudioUpdateVolume") ?? constants.DefaultSettings.AudioUpdateVolume);
+        if (!_surpressUpdateAudio)
+          if ((this.type == "trem-eew" && (localStorage.getItem("AudioPlayUpdateNSSPE") ?? constants.DefaultSettings.AudioPlayUpdateNSSPE) == "true")
+              || (this.type != "trem-eew" && (localStorage.getItem("AudioPlayUpdate") ?? constants.DefaultSettings.AudioPlayUpdate) == "true"))
+            playAudio("update", localStorage.getItem("AudioUpdateVolume") ?? constants.DefaultSettings.AudioUpdateVolume);
       } else if (this.type == "eew-cwb") {
         playAudio("cwb", localStorage.getItem("AudioEEWVolume") ?? constants.DefaultSettings.AudioEEWVolume);
       } else {
@@ -187,6 +195,7 @@ class EEW {
     if (this.p instanceof Wave) {
       // already has wave circle
       this.p.setLngLat(this.epicenter.toLngLatArray());
+      this.p.setModel(this.model);
 
       if (this.hasWaves && this.s instanceof Wave) {
         this.s.setLngLat(this.epicenter.toLngLatArray());

@@ -241,6 +241,147 @@
               </div>
             </div>
           </div>
+
+          <div class="settings-group group-audio">
+            <div class="group-header">音效</div>
+            <!-- 地震速報 -->
+            <div class="setting-container">
+              <div class="setting-header">地震速報</div>
+              <div class="settings-list">
+                <label for="audio-play-eew">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-eew" class="setting" type="checkbox" name="AudioPlayEEW" data-setting="AudioPlayEEW">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-eew-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-eew-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioEEWVolume" data-audio="eew" list="volume-markers" />
+                </label>
+                <label for="audio-eew-trem-volume" class="slider-input">
+                  <span class="label-text">TREMEEW 音量</span>
+                  <input id="audio-eew-trem-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioEEWTREMVolume" data-audio="eew2" list="volume-markers" />
+                </label>
+                <label for="audio-eew-cwb-volume" class="slider-input">
+                  <span class="label-text">CWB 音量</span>
+                  <input id="audio-eew-cwb-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioEEWCWBVolume" data-audio="cwb" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 地震速報更新報 -->
+            <div class="setting-container">
+              <div class="setting-header">地震速報更新報</div>
+              <div class="settings-list">
+                <label for="audio-play-update">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-update" class="setting" type="checkbox" name="AudioPlayUpdate" data-setting="AudioPlayUpdate">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-play-update-nsspe">
+                  <span class="label-text">在 NSSPE 時播放</span>
+                  <div class="switch">
+                    <input id="audio-play-update-nsspe" class="setting" type="checkbox" name="AudioPlayUpdate" data-setting="AudioPlayUpdateNSSPE">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-update-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-update-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioUpdateVolume" data-audio="update" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 地震報告 -->
+            <div class="setting-container">
+              <div class="setting-header">地震報告</div>
+              <div class="settings-list">
+                <label for="audio-play-report">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-report" class="setting" type="checkbox" name="AudioPlayReport" data-setting="AudioPlayReport">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-report-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-report-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioReportVolume" data-audio="report" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 一級 -->
+            <div class="setting-container">
+              <div class="setting-header">一級檢測</div>
+              <div class="settings-list">
+                <label for="audio-play-int0">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-int0" class="setting" type="checkbox" name="AudioPlayInt0" data-setting="AudioPlayInt0">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-int0-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-int0-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioInt0Volume" data-audio="int0" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 二級 -->
+            <div class="setting-container">
+              <div class="setting-header">二級檢測</div>
+              <div class="settings-list">
+                <label for="audio-play-int1">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-int1" class="setting" type="checkbox" name="AudioPlayInt1" data-setting="AudioPlayInt1">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-int1-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-int1-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioInt1Volume" data-audio="int1" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 四級 -->
+            <div class="setting-container">
+              <div class="setting-header">四級檢測</div>
+              <div class="settings-list">
+                <label for="audio-play-int2">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-int2" class="setting" type="checkbox" name="AudioPlayInt2" data-setting="AudioPlayInt2">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-int2-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-int2-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioInt2Volume" data-audio="int2" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
       
@@ -267,7 +408,20 @@
       </radialGradient>
     </defs>
   </svg>
-  
+
+  <datalist id="volume-markers">
+    <option value="0" label="0"></option>
+    <option value="10" label="10"></option>
+    <option value="20" label="20"></option>
+    <option value="30" label="30"></option>
+    <option value="40" label="40"></option>
+    <option value="50" label="50"></option>
+    <option value="60" label="60"></option>
+    <option value="70" label="70"></option>
+    <option value="80" label="80"></option>
+    <option value="90" label="90"></option>
+    <option value="100" label="100"></option>
+  </datalist>
   <script>
     require("../scripts/renderer.js");
   </script>
