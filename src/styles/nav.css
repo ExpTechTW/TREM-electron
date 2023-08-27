@@ -95,7 +95,7 @@ nav > button.active > .nav-button-text {
 
 #settings {
   position: absolute;
-  bottom: 0;
+  bottom: 26px;
 }
 
 #settings:hover > .icon {

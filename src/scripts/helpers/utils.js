@@ -44,6 +44,22 @@ const checkOverlap = (x, y, h, w, className, id) => {
   return false;
 };
 
+const toFormattedTimeString = (ts) => {
+  const time = new Date(ts);
+  return [
+    [
+      time.getFullYear(),
+      `${time.getMonth() + 1 }`.padStart(2, "0"),
+      `${time.getDate()}`.padStart(2, "0"),
+    ].join("/"),
+    " ",
+    [
+      `${time.getHours()}`.padStart(2, "0"),
+      `${time.getMinutes()}`.padStart(2, "0"),
+      `${time.getSeconds()}`.padStart(2, "0"),
+    ].join(":")
+  ].join("");
+};
 
 /**
  *
@@ -54,4 +70,4 @@ const checkOverlap = (x, y, h, w, className, id) => {
  */
 const toISOTimestamp = (timeString) => `${timeString.replace(/\//g, "-").split(" ").join("T")}+08:00`;
 
-module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap, toISOTimestamp };
+module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap, toFormattedTimeString, toISOTimestamp };

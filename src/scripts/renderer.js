@@ -3,7 +3,7 @@ const { START_NOTIFICATION_SERVICE, NOTIFICATION_RECEIVED, NOTIFICATION_SERVICE_
 const { Marker, Map: MaplibreMap, LngLatBounds } = require("maplibre-gl");
 const { ElementBuilder } = require("./helpers/domhelper");
 const { cross, reportStationMarkerElement } = require("./factory");
-const { getMagnitudeLevel, getDepthLevel, toISOTimestamp } = require("./helpers/utils");
+const { getMagnitudeLevel, getDepthLevel, toISOTimestamp, toFormattedTimeString } = require("./helpers/utils");
 const { ipcRenderer } = require("electron");
 const { switchView } = require("./helpers/ui");
 const api = new (require("./api"))(localStorage.getItem("ApiKey"));
@@ -46,6 +46,8 @@ const waves = {};
 api.on(constants.Events.Rts, (rts) => {
   if (!replayTimer)
     renderRtsData(rts, map);
+
+  document.getElementById("current-time").textContent = toFormattedTimeString(Date.now() - map.localServerTimestamp + map.serverTimestamp);
 });
 
 api.on(constants.Events.Ntp, (ntp) => {
