@@ -70,4 +70,6 @@ body {
   left: 0;
   bottom: 0;
   margin: 8px;
+  text-shadow: 0 0 4px #000;
+  z-index: 4294967296;
 }
