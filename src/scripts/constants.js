@@ -70,7 +70,7 @@ module.exports = Object.freeze({
     ApiKey               : "",
     RtsMode              : "i",
     UseSiteEffect        : "true",
-    UseNewRegion         : "false",
+    UseNewDecayFormula   : "false",
     HideStationEEW       : "true",
     HideStationReport    : "true",
     MapAnimation         : "true",
