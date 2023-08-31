@@ -13,7 +13,7 @@ class Distance {
 
   to(point) {
     if (this.type == "coord")
-      return (((this.first.lat - point.lat) * 111) ** 2 + ((point.lon - point.lon) * 101) ** 2) ** 0.5;
+      return (((this.first.lat - point.lat) * 111) ** 2 + ((this.first.lon - point.lon) * 101) ** 2) ** 0.5;
     else
       return (this.first ** 2 + point ** 2) ** 0.5;
   }

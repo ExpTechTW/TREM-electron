@@ -121,7 +121,7 @@ class EEW {
       for (const town in region[city]) {
         const l = region[city][town];
         const d = Distance.from(
-          Distance.from({ lat: l.lat, lon: l.lon }).to({ lat: this.epicenter.latitude, lon: this.epicenter.longitude })
+          Distance.from({ lat: this.epicenter.latitude, lon: this.epicenter.longitude }).to({ lat: l.lat, lon: l.lon })
         ).to(this.depth);
 
         const pga = calcPGA(
