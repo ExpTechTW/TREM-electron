@@ -1,15 +1,14 @@
-const { Map:maplibreMap } = require("maplibre-gl");
+const { Map: maplibreMap } = require("maplibre-gl");
+const { playAudio } = require("../helpers/audio");
 const Distance = require("../helpers/distance");
 const Wave = require("./wave");
 const calcPGA = require("../helpers/pga");
 const region = require("../../assets/json/region.json");
 const constants = require("../constants");
-const { playAudio } = require("../helpers/audio");
 
 class EEW {
 
   /**
-   *
    * @param {*} data
    * @param {maplibreMap} map
    * @param {boolean} waves
@@ -209,7 +208,7 @@ class EEW {
       if (this.hasWaves)
         this.s = new Wave(this._map, { id: this.id, type: "s", center: this.epicenter.toLngLatArray(), radius: 0, icon: false });
 
-      this._waveSpeed = { p: 6.5, s: 3.5 };
+      this._waveSpeed = { p: 7, s: 4 };
 
       this._waveTick = () => {
         const apiTime = this._map.serverTimestamp + Date.now() - this._map.localServerTimestamp;

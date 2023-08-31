@@ -56,10 +56,11 @@ api.on(constants.Events.Ntp, (ntp) => {
 });
 
 api.on(constants.Events.Report, (report) => {
-  if ((localStorage.getItem("") ?? constants.DefaultSettings.ViewSwitchReport) == "true") {
+  if ((localStorage.getItem("AudioPlayReport") ?? constants.DefaultSettings.AudioPlayReport) == "true")
     playAudio("report", localStorage.getItem("AudioReportVolume") ?? constants.DefaultSettings.AudioReportVolume);
+
+  if ((localStorage.getItem("ViewSwitchReport") ?? constants.DefaultSettings.ViewSwitchReport) == "true")
     openReport(report);
-  }
 });
 
 api.on(constants.Events.TremEew, (data) => renderEewData(data, waves, map));

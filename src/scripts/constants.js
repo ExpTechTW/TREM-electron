@@ -77,6 +77,7 @@ module.exports = Object.freeze({
     ReportTitleStyle     : "3",
     ReportCount          : "50",
     ReportPanelDocking   : "false",
+    ViewSwitchReport     : "true",
     AudioPlayUpdate      : "true",
     AudioPlayUpdateNSSPE : "false",
     AudioUpdateVolume    : "40",

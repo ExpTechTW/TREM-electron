@@ -268,8 +268,7 @@ const renderRtsData = (rts, map) => {
         }
       }
   } else {
-    for (let index = 0, areaIds = Object.keys(detected_list), areaId = areaIds[0]; index < areaIds.length; index++, areaId = areaIds[index])
-      clearAreaIntensity(areaId, map);
+    clearAreaIntensity(null, map);
   }
 
   if (newMaxIntensity > maxIntensity) {
@@ -312,7 +311,6 @@ const renderEewData = (eew, w, map) => {
     waves[eew.id] = new EEW(eew, map);
   else
     waves[eew.id].update(eew);
-
 };
 
 let areaMap = new Map();

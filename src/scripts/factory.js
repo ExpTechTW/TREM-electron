@@ -80,8 +80,8 @@ const circle = (options) => {
     group.style.opacity = options.opacity;
 
   const inner = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  inner.setAttribute("cx", "0");
-  inner.setAttribute("cy", "0");
+  inner.setAttribute("cx", "36");
+  inner.setAttribute("cy", "36");
   inner.setAttribute("r", "16");
   inner.classList.add("circle-inner");
 
@@ -89,8 +89,8 @@ const circle = (options) => {
     inner.style.fill = options.innerColor;
 
   const outer = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  outer.setAttribute("cx", "0");
-  outer.setAttribute("cy", "0");
+  outer.setAttribute("cx", "36");
+  outer.setAttribute("cy", "36");
   outer.setAttribute("r", "22");
   outer.classList.add("circle-outer");
 
