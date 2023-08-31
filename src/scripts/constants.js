@@ -57,7 +57,7 @@ module.exports = Object.freeze({
     "深層地震"
   ],
   TaiwanBounds : [[119.4, 25.35], [122.22, 21.9]],
-  PixelRatio   : 98.5,
+  PixelRatio   : 197.1,
   Views        : {
     Reports     : "reports",
     Report      : "report",
