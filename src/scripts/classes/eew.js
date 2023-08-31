@@ -121,15 +121,23 @@ class EEW {
       for (const town in region[city]) {
         const l = region[city][town];
         const d = Distance.from(
-          Distance.from({ lat: l.latitude, lon: l.longitude }).to({ lat: this.epicenter.latitude, lon: this.epicenter.longitude })
+          Distance.from({ lat: l.lat, lon: l.lon }).to({ lat: this.epicenter.latitude, lon: this.epicenter.longitude })
         ).to(this.depth);
+
         const pga = calcPGA(
           this.magnitude,
+          this.depth,
           d,
-          localStorage.getItem("eew.useSiteEffect") == "true" ? l.siteEffect : undefined,
+          {
+            site : ((localStorage.getItem("UseSiteEffect") ?? constants.DefaultSettings.UseSiteEffect) == "true") ? l.site ?? 1 : 1,
+            d    : l.site_d,
+            s    : l.site_s
+          },
         );
 
         const i = pga.toIntensity();
+
+        console.log(i);
 
         if (city == localStorage.getItem("eew.localCity") && town == localStorage.getItem("eew.localTown"))
           this._local = l;
@@ -137,7 +145,7 @@ class EEW {
         if (this.source == "中央氣象局") {
           this._map.setFeatureState({
             source : "tw_town",
-            id     : l.code,
+            id     : l.id,
           }, { intensity: i.value });
           this._map.setLayoutProperty("town", "visibility", "visible");
         }

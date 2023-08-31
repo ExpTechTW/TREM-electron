@@ -69,6 +69,8 @@ module.exports = Object.freeze({
   DefaultSettings: {
     ApiKey               : "",
     RtsMode              : "i",
+    UseSiteEffect        : "true",
+    UseNewRegion         : "false",
     HideStationEEW       : "true",
     HideStationReport    : "true",
     MapAnimation         : "true",
