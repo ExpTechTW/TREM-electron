@@ -13,9 +13,10 @@ class EEW {
    * @param {maplibreMap} map
    * @param {boolean} waves
    */
-  constructor(data, map, waves = true) {
+  constructor(data, map, waves = true, eewList) {
     this.hasWaves = waves;
     this._map = map;
+    this._eewList = eewList;
     this.#fromJson(data);
   }
 
@@ -137,8 +138,6 @@ class EEW {
 
         const i = pga.toIntensity();
 
-        console.log(i);
-
         if (city == localStorage.getItem("eew.localCity") && town == localStorage.getItem("eew.localTown"))
           this._local = l;
 
@@ -219,7 +218,7 @@ class EEW {
       this._waveSpeed = { p: 7, s: 4 };
 
       this._waveTick = () => {
-        const apiTime = this._map.serverTimestamp + Date.now() - this._map.localServerTimestamp;
+        const apiTime = this._map.time.serverTimestamp + (Date.now() - this._map.time.localServerTimestamp);
 
         const elapsedTime = apiTime - this.eventTime.getTime();
 
@@ -263,7 +262,7 @@ class EEW {
       };
 
       this._waveTick();
-      this._waveInterval = setInterval(this._waveTick, 500);
+      this._waveInterval = setInterval(this._waveTick, 50);
     }
   }
 
@@ -280,6 +279,8 @@ class EEW {
 
     if (this._waveInterval)
       clearInterval(this._waveInterval);
+
+    delete this.eewList[this.id];
   }
 }
 

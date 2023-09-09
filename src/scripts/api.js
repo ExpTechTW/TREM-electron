@@ -187,6 +187,41 @@ class api extends EventEmitter {
     });
   }
 
+  getEarthquake(time, type = "all", force = false) {
+    return new Promise((resolve, reject) => {
+      if (!Number.isInteger(time))
+        reject(new TypeError("Expected to receive a number."));
+
+      const url = `${constants.API.EarthquakeURL}?${new URLSearchParams({ time, type })}`;
+      caches.open("earthquake")
+        .then((cache) => {
+          cache.match(url).then((response) => {
+            if (!force && response != undefined)
+              response
+                .json()
+                .then(resolve);
+            else
+              fetch(url).then(async (res) => {
+                if (res.ok) {
+                  const resData = await res.json();
+
+                  const jsonResponse = new Response(JSON.stringify(resData), {
+                    headers: {
+                      "content-type": "application/json"
+                    }
+                  });
+
+                  cache.put(url, jsonResponse);
+                  resolve(resData);
+                } else {
+                  reject(new Error(`The server responded with ${res.status}.`));
+                }
+              });
+          });
+        });
+    });
+  }
+
   requestReplay(ids) {
     for (const id of ids) {
       const data = {

@@ -240,18 +240,18 @@ const renderRtsData = (rts, map) => {
       if (!detected_list[areaId].passed) {
         let passed = false;
 
-        if (Object.keys(waves).length)
-          for (const waveKey in waves) {
-            if (!waves[waveKey].hasWaves) continue;
+        if (Object.keys(eewList).length)
+          for (const waveKey in eewList) {
+            if (!eewList[waveKey].hasWaves) continue;
 
             let SKIP = 0;
 
             for (let i = 0; i < 4; i++) {
               const dis = (
-                ((areas[areaId][i][0] - waves[waveKey].epicenter.latitude) * 111) ** 2
-                + ((areas[areaId][i][1] - waves[waveKey].epicenter.longitude) * 101) ** 2) ** (1 / 2);
+                ((areas[areaId][i][0] - eewList[waveKey].epicenter.latitude) * 111) ** 2
+                + ((areas[areaId][i][1] - eewList[waveKey].epicenter.longitude) * 101) ** 2) ** (1 / 2);
 
-              if (waves[waveKey].s.radius * 500 > dis) SKIP++;
+              if (eewList[waveKey].s.radius > dis) SKIP++;
             }
 
             if (SKIP >= 4) {
@@ -297,20 +297,18 @@ const renderRtsData = (rts, map) => {
   }
 };
 
-let waves = {};
+const eewList = {};
 
-const renderEewData = (eew, w, map) => {
-  waves = w;
-
-  if (!Object.keys(waves).length)
+const renderEewData = (eew, map) => {
+  if (!Object.keys(eewList).length)
     switchView(null, map);
 
   document.body.classList.add("has-eew");
 
-  if (!waves[eew.id])
-    waves[eew.id] = new EEW(eew, map);
+  if (eew.id in eewList)
+    eewList[eew.id].update(eew, eewList);
   else
-    waves[eew.id].update(eew);
+    eewList[eew.id] = new EEW(eew, map, eewList);
 };
 
 let areaMap = new Map();

@@ -12,6 +12,7 @@ const constants = require("./constants");
 const Circle = require("./classes/circle");
 const EEW = require("./classes/eew");
 const { playAudio } = require("./helpers/audio");
+// const Wave = require("./classes/wave");
 
 let replayTimer = false;
 
@@ -41,18 +42,38 @@ ipcRenderer.on(NOTIFICATION_RECEIVED, (_, Notification) => {
   }
 });
 
-const waves = {};
-
 api.on(constants.Events.Rts, (rts) => {
-  if (!replayTimer)
+  if (!replayTimer) {
     renderRtsData(rts, map);
 
-  document.getElementById("current-time").textContent = toFormattedTimeString(Date.now() - map.localServerTimestamp + map.serverTimestamp);
+    document.getElementById("current-time").textContent = toFormattedTimeString(Date.now() - map.time.localServerTimestamp + map.time.serverTimestamp);
+  }
 });
 
 api.on(constants.Events.Ntp, (ntp) => {
-  map.localServerTimestamp = Date.now();
-  map.serverTimestamp = ntp.time;
+  map.time ??= {
+    get localServerTimestamp() {
+      return (map._replayTimestamp != null) ? map._localReplayTimestamp : map._localServerTimestamp;
+    },
+    set localServerTimestamp(value) {
+      map._localServerTimestamp = value;
+    },
+    get serverTimestamp() {
+      return (map._replayTimestamp != null) ? map._replayTimestamp : map._serverTimestamp;
+    },
+    set serverTimestamp(value) {
+      map._serverTimestamp = value;
+    },
+    get replayTimestamp() {
+      return map._replayTimestamp;
+    },
+    set replayTimestamp(value) {
+      map._replayTimestamp = value;
+      map._localReplayTimestamp = Date.now();
+    }
+  };
+  map.time.localServerTimestamp = Date.now();
+  map.time.serverTimestamp = ntp.time;
 });
 
 api.on(constants.Events.Report, (report) => {
@@ -63,8 +84,8 @@ api.on(constants.Events.Report, (report) => {
     openReport(report);
 });
 
-api.on(constants.Events.TremEew, (data) => renderEewData(data, waves, map));
-api.on(constants.Events.CwbEew, (data) => renderEewData(data, waves, map));
+api.on(constants.Events.TremEew, (data) => renderEewData(data, map));
+api.on(constants.Events.CwbEew, (data) => renderEewData(data, map));
 
 const markers = {
   reports        : {},
@@ -93,7 +114,6 @@ const openReport = (report) => {
   document.getElementById("report-detail-magnitude").textContent = report.magnitudeValue.toFixed(1);
   document.getElementById("report-detail-depth").textContent = report.depth;
   document.getElementById("reports-list-view").classList.add("hide");
-  console.log(report);
 
   const bounds = new LngLatBounds();
   bounds.extend([report.epicenterLon, report.epicenterLat]);
@@ -124,7 +144,6 @@ const openReport = (report) => {
   }
 
   document.getElementById("report-station-list").replaceChildren(fragment);
-
 
   // wave time circles
   if (!isTYA) {
@@ -287,18 +306,22 @@ const updateReports = async () => {
       time.style.cursor = "pointer";
       time.style.color = "yellow";
 
-      api.requestReplay([...report.ID, ...report.trem]);
+      // api.requestReplay([...report.ID, ...report.trem]);
 
       const replayStartTime = new Date(toISOTimestamp(report.originTime)).getTime() - 3_000;
       let replayTimeOffset = 0;
+      map.time.replayTimestamp = replayStartTime;
 
-      const renderReplayRts = async () => {
+      const renderReplay = async () => {
         renderRtsData(await api.getRts(replayStartTime + replayTimeOffset * 1000), map);
+        for (const eewdata of (await api.getEarthquake(~~((replayStartTime + replayTimeOffset * 1000) / 1000))).eew)
+          renderEewData(eewdata, map);
         replayTimeOffset++;
+        document.getElementById("current-time").textContent = toFormattedTimeString(replayStartTime + replayTimeOffset * 1000);
       };
 
-      renderReplayRts();
-      replayTimer = setInterval(renderReplayRts, 1000, replayTimeOffset);
+      renderReplay();
+      replayTimer = setInterval(renderReplay, 1000, replayTimeOffset);
     });
 
     frag.appendChild(item.toElement());
@@ -480,3 +503,12 @@ document.addEventListener("keydown", (ev) => {
     ipcRenderer.send("win:screenshot");
 
 });
+
+/*
+  new Wave(map,
+    {
+      center : [121.53697954537512, 25.299654023819514],
+      type   : "s",
+      radius : 384.63
+    });
+*/
