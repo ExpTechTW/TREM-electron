@@ -7,7 +7,106 @@
   border-radius: 8px;
   outline: 1px solid var(--md-outline);
   overflow: hidden;
-  transition: opacity .2s, background-color.1s;
+  transition: height .2s, opacity .2s, background-color.1s;
+  
+  /* class contains intensity- */
+  &[class*="intensity"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 16px;
+    border-radius: 16px;
+
+    &::before {
+      font-weight: 700;
+    }
+  }
+
+  &.intensity-0 {
+    height: 8px;
+    background-color: #a2a2a2 !important;
+  }
+
+  &.intensity-1 {
+    color: #fff;
+    background-color: #757575 !important;
+    
+    &::before {
+      content: "1";
+    }
+  }
+  
+  &.intensity-2 {
+    color: #fff;
+    background-color: #2774C2 !important;
+    
+    &::before {
+      content: "2";
+    }
+  }
+  
+  &.intensity-3 {
+    color: #fff;
+    background-color: #7BA822 !important;
+
+    &::before {
+      content: "3";
+    }
+  }
+  
+  &.intensity-4 {
+    color: #000;
+    background-color: #E8D630 !important;
+
+    &::before {
+      content: "4";
+    }
+  }
+  
+  &.intensity-5 {
+    color: #fff;
+    background-color: #E68439 !important;
+
+  }
+  
+  &.intensity-6 {
+    color: #fff;
+    background-color: #DB641F !important;
+  }
+  
+  &.intensity-5::before,
+  &.intensity-6::before {
+    content: "5";
+  }
+  
+  &.intensity-7 {
+    color: #fff;
+    background-color: #DB1F1F !important;
+  }
+  
+  &.intensity-8 {
+    color: #fff;
+    background-color: #AE1919 !important;
+  }
+  
+  &.intensity-7::before,
+  &.intensity-8::before {
+    content: "6";
+  }
+  
+  &.intensity-9 {
+    color: #fff;
+    background-color: #862DB3 !important;
+
+    &::before {
+      content: "7";
+    }
+  }
+}
+
+body.has-eew .rts-marker:not([class*="intensity"]) {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .maplibregl-canvas:focus-visible {

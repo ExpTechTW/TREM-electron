@@ -1,3 +1,5 @@
+const constants = require("../constants");
+
 const getMagnitudeLevel = (magnitude) =>
   [1.99, 3.99, 4.99, 5.99, 6.99, 7.99]
     .concat(magnitude)
@@ -77,4 +79,6 @@ const extractLocationFromString = (str) => {
     return str.substring(str.indexOf("(") + 3, str.indexOf(")"));
 };
 
-module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap, toFormattedTimeString, toISOTimestamp, extractLocationFromString };
+const convertToIntensityInteger = (intensity) => (typeof intensity == "number" && intensity >= -0.5) ? constants.Intensities[(intensity < 0) ? 0 : (intensity < 4.5) ? Math.round(intensity) : (intensity < 5) ? 5 : (intensity < 5.5) ? 6 : (intensity < 6) ? 7 : (intensity < 6.5) ? 8 : 9] : null;
+
+module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap, toFormattedTimeString, toISOTimestamp, extractLocationFromString, convertToIntensityInteger };
