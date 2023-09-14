@@ -81,7 +81,7 @@ api.on(constants.Events.Report, (report) => {
     playAudio("report", localStorage.getItem("AudioReportVolume") ?? constants.DefaultSettings.AudioReportVolume);
 
   if ((localStorage.getItem("ViewSwitchReport") ?? constants.DefaultSettings.ViewSwitchReport) == "true")
-    openReport(report);
+    openReport(report.raw);
 });
 
 api.on(constants.Events.TremEew, (data) => renderEewData(data, map));
