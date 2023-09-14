@@ -171,7 +171,7 @@ class EEW {
           }
 
           const Zc = -1 * (G0 / G);
-          const Xc = (Math.pow(Xb, 2) - 2 * (G0 / G) * Za - Math.pow(Za, 2)) / (2 * Xb);
+          const Xc = ((Xb ** 2) - 2 * (G0 / G) * Za - (Za ** 2)) / (2 * Xb);
           let Theta_A = Math.atan((Za - Zc) / Xc);
 
           if (Theta_A < 0) Theta_A = Theta_A + Math.PI;
@@ -181,7 +181,7 @@ class EEW {
           const G0_ = G0 / 1.732;
           const G_ = G / 1.732;
           const Zc_ = -1 * (G0_ / G_);
-          const Xc_ = (Math.pow(Xb, 2) - 2 * (G0_ / G_) * Za - Math.pow(Za, 2)) / (2 * Xb);
+          const Xc_ = ((Xb ** 2) - 2 * (G0_ / G_) * Za - Math.pow(Za, 2)) / (2 * Xb);
           let Theta_A_ = Math.atan((Za - Zc_) / Xc_);
 
           if (Theta_A_ < 0) Theta_A_ = Theta_A_ + Math.PI;
