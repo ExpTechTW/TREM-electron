@@ -79,6 +79,6 @@ const extractLocationFromString = (str) => {
     return str.substring(str.indexOf("(") + 3, str.indexOf(")"));
 };
 
-const convertToIntensityInteger = (intensity) => (typeof intensity == "number" && intensity >= -0.5) ? constants.Intensities[(intensity < 0) ? 0 : (intensity < 4.5) ? Math.round(intensity) : (intensity < 5) ? 5 : (intensity < 5.5) ? 6 : (intensity < 6) ? 7 : (intensity < 6.5) ? 8 : 9] : null;
+const convertToIntensityInteger = (intensity) => (typeof intensity == "number" && intensity >= -0.8) ? constants.Intensities[(intensity < 0) ? 0 : (intensity < 4.5) ? Math.round(intensity) : (intensity < 5) ? 5 : (intensity < 5.5) ? 6 : (intensity < 6) ? 7 : (intensity < 6.5) ? 8 : 9] : null;
 
 module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap, toFormattedTimeString, toISOTimestamp, extractLocationFromString, convertToIntensityInteger };
