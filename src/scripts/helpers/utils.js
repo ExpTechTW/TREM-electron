@@ -70,4 +70,11 @@ const toFormattedTimeString = (ts) => {
  */
 const toISOTimestamp = (timeString) => `${timeString.replace(/\//g, "-").split(" ").join("T")}+08:00`;
 
-module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap, toFormattedTimeString, toISOTimestamp };
+const extractLocationFromString = (str) => {
+  if (str.indexOf("(") < 0)
+    return str.substring(0, str.indexOf("方") + 1);
+  else
+    return str.substring(str.indexOf("(") + 3, str.indexOf(")"));
+};
+
+module.exports = { getMagnitudeLevel, getDepthLevel, checkOverlap, toFormattedTimeString, toISOTimestamp, extractLocationFromString };

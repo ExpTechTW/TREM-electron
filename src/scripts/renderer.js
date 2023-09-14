@@ -3,7 +3,7 @@ const { START_NOTIFICATION_SERVICE, NOTIFICATION_RECEIVED, NOTIFICATION_SERVICE_
 const { Marker, Map: MaplibreMap, LngLatBounds } = require("maplibre-gl");
 const { ElementBuilder } = require("./helpers/domhelper");
 const { cross, reportStationMarkerElement } = require("./factory");
-const { getMagnitudeLevel, getDepthLevel, toISOTimestamp, toFormattedTimeString } = require("./helpers/utils");
+const { getMagnitudeLevel, getDepthLevel, toISOTimestamp, toFormattedTimeString, extractLocationFromString } = require("./helpers/utils");
 const { ipcRenderer } = require("electron");
 const { switchView } = require("./helpers/ui");
 const api = new (require("./api"))(localStorage.getItem("ApiKey"));
@@ -104,8 +104,8 @@ const openReport = (report) => {
       markers.reports[key].getElement().classList.add("hide");
 
   document.getElementById("report-detail-subtitle").textContent = isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震";
-  document.getElementById("report-detail-title").textContent = report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"));
-  document.getElementById("report-detail-location").textContent = isTYA ? report.location.substring(report.location.indexOf("(") + 1, report.location.indexOf(")")) : report.location.substring(0, report.location.indexOf("(") - 1);
+  document.getElementById("report-detail-title").textContent = extractLocationFromString(report.location);
+  document.getElementById("report-detail-location").textContent = isTYA ? report.location.substring(report.location.indexOf("(") + 1, report.location.indexOf(")")) : report.location.substring(0, report.location.indexOf("(") - 1) || report.location;
   document.getElementById("report-detail-longitude").textContent = Math.abs(report.epicenterLon);
   document.getElementById("report-detail-longitude-unit").textContent = report.epicenterLon > 0 ? "E" : "W";
   document.getElementById("report-detail-latitude").textContent = Math.abs(report.epicenterLat);
@@ -213,11 +213,11 @@ const updateReports = async () => {
         .setClass([ "report-title" ])
         .setContent(
           ((localStorage.getItem("ReportTitleStyle") ?? constants.DefaultSettings.ReportTitleStyle) == "1")
-            ? report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")"))
+            ? extractLocationFromString(report.location)
             : ((localStorage.getItem("ReportTitleStyle") ?? constants.DefaultSettings.ReportTitleStyle) == "2")
               ? isTYA ? "地震資訊" : isNumbered ? `編號 ${report.earthquakeNo}` : "小型有感地震"
-              : report.location.substring(report.location.indexOf("(") + 3, report.location.indexOf(")")))
-        .setAttribute("title", report.location.split(" (")[0])
+              : extractLocationFromString(report.location))
+        .setAttribute("title", extractLocationFromString(report.location))
         .addChildren(
           ((localStorage.getItem("ReportTitleStyle") ?? constants.DefaultSettings.ReportTitleStyle) == "3")
             ? new ElementBuilder("span")
