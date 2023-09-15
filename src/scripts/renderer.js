@@ -310,14 +310,24 @@ const updateReports = async () => {
 
       const replayStartTime = new Date(toISOTimestamp(report.originTime)).getTime() - 3_000;
       let replayTimeOffset = 0;
-      map.time.replayTimestamp = replayStartTime;
+      let noDataTimeOffset = 0;
+      map.time.replayTimestamp = replayStartTime - 3_000;
 
       const renderReplay = async () => {
-        renderRtsData(await api.getRts(replayStartTime + replayTimeOffset * 1000), map);
+        try {
+          renderRtsData(await api.getRts(replayStartTime + replayTimeOffset * 1000), map);
+          document.getElementById("current-time").textContent = toFormattedTimeString(replayStartTime + replayTimeOffset * 1000);
+        } catch (error) {
+          noDataTimeOffset++;
+
+          if (noDataTimeOffset >= 5)
+            renderRtsData({});
+        }
+
         for (const eewdata of (await api.getEarthquake(~~((replayStartTime + replayTimeOffset * 1000) / 1000))).eew)
           renderEewData(eewdata, map);
+
         replayTimeOffset++;
-        document.getElementById("current-time").textContent = toFormattedTimeString(replayStartTime + replayTimeOffset * 1000);
       };
 
       renderReplay();

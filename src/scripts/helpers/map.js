@@ -187,6 +187,7 @@ const setMapLayers = (map) => {
 };
 
 let maxIntensity = 0;
+let maxIntensityMap = {};
 let audioIntensity = -1;
 let detected_list = {};
 
@@ -196,8 +197,11 @@ const renderRtsData = (rts, map) => {
 
   if (rts.Alert == false) {
     maxIntensity = 0;
+    maxIntensityMap = {};
     audioIntensity - 1;
   }
+
+  console.clear();
 
   for (const uuid in data.station) {
     const id = uuid.split("-")[2];
@@ -207,16 +211,32 @@ const renderRtsData = (rts, map) => {
     if (rts[id]?.i > newMaxIntensity)
       newMaxIntensity = rts[id].i;
 
+    if (rts.Alert)
+      if (rts[id]?.v && rts[id].v > (maxIntensityMap[id]?.v ?? -5))
+        maxIntensityMap[id] = {
+          v         : rts[id].v,
+          // sys time, replay time doesn't matter
+          timestamp : Date.now()
+        };
+
     if (element == null) {
       const marker = rtsMarkerElement();
       marker.id = uuid;
       marker.style.backgroundColor = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? Colors.getIntensityColor(rts[id]?.i) : Colors.getAccerateColor(rts[id]?.i);
       marker.style.outlineColor = id in rts ? "" : Colors.NoDataRtsColor;
-      marker.style.zIndex = (rts[id]?.v ?? 0.01) * 100;
+      marker.style.zIndex = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? ((rts[id]?.i ?? -5) + 5) * 50 : (rts[id]?.v ?? 0.01) * 100;
       new Marker({ element: marker }).setLngLat([station.Long, station.Lat]).addTo(map);
     } else {
       const intensity = convertToIntensityInteger(rts[id]?.i);
       element.classList.remove("intensity-0", "intensity-1", "intensity-2", "intensity-3", "intensity-4", "intensity-5", "intensity-6", "intensity-7", "intensity-8", "intensity-9");
+
+      if (maxIntensityMap[id]?.timestamp)
+        if ((Date.now() - maxIntensityMap[id].timestamp) < 5_000) {
+          if (!element.classList.contains("alert"))
+            element.classList.add("alert");
+        } else {
+          element.classList.remove("alert");
+        }
 
       if (intensity)
         element.classList.add(`intensity-${intensity.value}`);

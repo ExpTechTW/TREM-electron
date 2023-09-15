@@ -16,15 +16,20 @@
     justify-content: center;
     height: 16px;
     border-radius: 16px;
+    outline: 2px solid #000;
 
     &::before {
       font-weight: 700;
     }
   }
 
+  &[class*="intensity"].alert {
+    outline: 3px solid #f22;
+  }
+
   &.intensity-0 {
     height: 8px;
-    background-color: #a2a2a2 !important;
+    background-color: #b6b6b6 !important;
   }
 
   &.intensity-1 {

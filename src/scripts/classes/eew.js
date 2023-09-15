@@ -177,7 +177,7 @@ class EEW {
           if (Theta_A < 0) Theta_A = Theta_A + Math.PI;
           Theta_A = Math.PI - Theta_A;
           const Theta_B = Math.atan(-1 * Zc / (Xb - Xc));
-          let Ptime = (1 / G) * Math.log(Math.tan((Theta_A / 2)) / Math.tan((Theta_B / 2)));
+          let Ptime = (1 / G) * Math.log(Math.tan(Theta_A / 2) / Math.tan(Theta_B / 2));
           const G0_ = G0 / 1.732;
           const G_ = G / 1.732;
           const Zc_ = -1 * (G0_ / G_);
@@ -192,7 +192,7 @@ class EEW {
           if (distance / Ptime > 7) Ptime = distance / 7;
 
           if (distance / Stime > 4) Stime = distance / 4;
-          return { Ptime: Ptime, Stime: Stime };
+          return { Ptime, Stime };
         })(depth, index);
     return _distance;
   }
