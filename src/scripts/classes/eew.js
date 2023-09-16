@@ -15,7 +15,7 @@ class EEW {
    * @param {maplibreMap} map
    * @param {boolean} waves
    */
-  constructor(data, map, waves = true, eewList) {
+  constructor(data, map, eewList, waves = true) {
     this.hasWaves = waves;
     this._map = map;
     this._eewList = eewList;
