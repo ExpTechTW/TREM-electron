@@ -357,7 +357,7 @@ class EEW {
     if (this._waveInterval)
       clearInterval(this._waveInterval);
 
-    delete this.eewList[this.id];
+    delete this._eewList[this.id];
   }
 }
 
