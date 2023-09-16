@@ -1,4 +1,4 @@
-const { MapLibreMap, Marker, Popup } = require("maplibre-gl");
+const { Map: MapLibreMap, Marker, Popup } = require("maplibre-gl");
 const { rtsMarkerElement } = require("../factory");
 const { tw_county, tw_town, area } = require("../../assets/json/geojson");
 const Colors = require("./colors");
@@ -21,12 +21,6 @@ const setMapLayers = (map) => {
     tolerance : 1
   });
 
-  map.addSource("tw_town", {
-    type      : "geojson",
-    data      : tw_town,
-    tolerance : 1
-  });
-
   map.addSource("tw_area", {
     type : "geojson",
     data : area,
@@ -41,72 +35,6 @@ const setMapLayers = (map) => {
       "fill-color"   : Colors.MapBackgroundColor,
       "fill-opacity" : 1
     }
-  });
-
-  map.addLayer({
-    id     : "town",
-    type   : "fill",
-    source : "tw_town",
-    layout : {
-      visibility: "none",
-    },
-    paint: {
-      "fill-color": [
-        "match",
-        [
-          "coalesce",
-          ["feature-state", "intensity"],
-          0,
-        ],
-        9,
-        colors.getIntensityBgColor(9),
-        8,
-        colors.getIntensityBgColor(8),
-        7,
-        colors.getIntensityBgColor(7),
-        6,
-        colors.getIntensityBgColor(6),
-        5,
-        colors.getIntensityBgColor(5),
-        4,
-        colors.getIntensityBgColor(4),
-        3,
-        colors.getIntensityBgColor(3),
-        2,
-        colors.getIntensityBgColor(2),
-        1,
-        colors.getIntensityBgColor(1),
-        "transparent",
-      ],
-      "fill-outline-color": [
-        "case",
-        [
-          ">",
-          [
-            "coalesce",
-            ["feature-state", "intensity"],
-            0,
-          ],
-          0,
-        ],
-        colors.MapOutlineColor,
-        "transparent",
-      ],
-      "fill-opacity": [
-        "case",
-        [
-          ">",
-          [
-            "coalesce",
-            ["feature-state", "intensity"],
-            0,
-          ],
-          0,
-        ],
-        1,
-        0,
-      ],
-    },
   });
 
   map.addLayer({
@@ -201,8 +129,6 @@ const renderRtsData = (rts, map) => {
     audioIntensity - 1;
   }
 
-  console.clear();
-
   for (const uuid in data.station) {
     const id = uuid.split("-")[2];
     const station = data.station[uuid];
@@ -243,7 +169,7 @@ const renderRtsData = (rts, map) => {
 
       element.style.backgroundColor = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? Colors.getIntensityColor(rts[id]?.i) : Colors.getAccerateColor(rts[id]?.i);
       element.style.outlineColor = id in rts ? "" : Colors.NoDataRtsColor;
-      element.style.zIndex = (rts[id]?.v ?? 0.01) * 100;
+      element.style.zIndex = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? ((rts[id]?.i ?? -5) + 5) * 50 : (rts[id]?.v ?? 0.01) * 100;
     }
 
     // 檢知框框

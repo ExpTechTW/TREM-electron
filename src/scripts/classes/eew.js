@@ -5,6 +5,8 @@ const Wave = require("./wave");
 const calcPGA = require("../helpers/pga");
 const region = require("../../assets/json/region.json");
 const constants = require("../constants");
+const colors = require("../helpers/colors");
+const { tw_town } = require("../../assets/json/geojson");
 
 class EEW {
 
@@ -83,6 +85,77 @@ class EEW {
       }
 
       this.model = data.model?.toUpperCase() ?? "TREMEEW";
+    } else if (this.type == "eew-cwb") {
+      if (!this._map.getSource(`${this.id}_town`))
+        this._map.addSource(`${this.id}_town`, {
+          type      : "geojson",
+          data      : tw_town,
+          tolerance : 1
+        });
+
+      if (!this._map.getLayer(`${this.id}_intensity`))
+        this._map.addLayer({
+          id     : `${this.id}_intensity`,
+          type   : "fill",
+          source : `${this.id}_town`,
+          paint  : {
+            "fill-color": [
+              "match",
+              [
+                "coalesce",
+                ["feature-state", "intensity"],
+                0,
+              ],
+              9,
+              colors.getIntensityBgColor(9),
+              8,
+              colors.getIntensityBgColor(8),
+              7,
+              colors.getIntensityBgColor(7),
+              6,
+              colors.getIntensityBgColor(6),
+              5,
+              colors.getIntensityBgColor(5),
+              4,
+              colors.getIntensityBgColor(4),
+              3,
+              colors.getIntensityBgColor(3),
+              2,
+              colors.getIntensityBgColor(2),
+              1,
+              colors.getIntensityBgColor(1),
+              "transparent",
+            ],
+            "fill-outline-color": [
+              "case",
+              [
+                ">",
+                [
+                  "coalesce",
+                  ["feature-state", "intensity"],
+                  0,
+                ],
+                0,
+              ],
+              colors.MapOutlineColor,
+              "transparent",
+            ],
+            "fill-opacity": [
+              "case",
+              [
+                ">",
+                [
+                  "coalesce",
+                  ["feature-state", "intensity"],
+                  0,
+                ],
+                0,
+              ],
+              1,
+              0,
+            ],
+          },
+        }, "county_outline");
     }
 
     this.eventTime = new Date(data.time);
@@ -141,13 +214,11 @@ class EEW {
         if (city == localStorage.getItem("eew.localCity") && town == localStorage.getItem("eew.localTown"))
           this._local = l;
 
-        if (this.source == "中央氣象局") {
+        if (this.type == "eew-cwb")
           this._map.setFeatureState({
-            source : "tw_town",
+            source : `${this.id}_town`,
             id     : l.id,
           }, { intensity: i.value });
-          this._map.setLayoutProperty("town", "visibility", "visible");
-        }
 
         this._expected.set(l.code, { distance: d, intensity: i, pga });
       }
@@ -276,6 +347,12 @@ class EEW {
 
     if (this.s)
       this.s.remove();
+
+    if (this._map.getLayer(`${this.id}_intensity`))
+      this._map.removeLayer(`${this.id}_intensity`);
+
+    if (this._map.getSource(`${this.id}_town`))
+      this._map.removeSource(`${this.id}_town`);
 
     if (this._waveInterval)
       clearInterval(this._waveInterval);
