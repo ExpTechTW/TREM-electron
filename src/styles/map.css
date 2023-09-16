@@ -153,6 +153,19 @@ circle {
   visibility: hidden;
 }
 
+.wave-circle > .s-wave {
+  stroke-width: 2;
+}
+
+.wave-circle.trem-eew > .s-wave {
+  stroke: rgb(124 169 35) !important;
+}
+
+.wave-circle-background.trem-eew > .s-wave-background {
+  /* stylelint-disable-next-line function-url-quotes */
+  fill: url(#trem-eew-gradient) !important;
+}
+
 stop.alert-start {
   stop-color: rgba(255 0 0 / 1%);
 }
@@ -167,6 +180,14 @@ stop.pred-start {
 
 stop.pred-stop {
   stop-color: rgba(255 165 0 / 20%);
+}
+
+stop.trem-eew-start {
+  stop-color: rgba(124 169 35 / 1%);
+}
+
+stop.trem-eew-stop {
+  stop-color: rgba(124 169 35 / 20%);
 }
 
 .label-line {

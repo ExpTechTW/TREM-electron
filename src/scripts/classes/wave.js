@@ -9,9 +9,10 @@ class Wave {
    * @param {*} radius
    * @param {Map} map
    */
-  constructor(map, { id, type = "p", center = [121, 23.5], radius = 1, circle = true, icon = true, zIndex = 10000, model = "EEW" }) {
+  constructor(map, { id, type = "p", center = [121, 23.5], radius = 1, circle = true, icon = true, zIndex = 10000, model = "EEW", classList = [] }) {
     this.id = id;
     this.type = type;
+    this.circle = circle;
     this.lnglat = center;
     this.radius = radius;
     this.zIndex = zIndex;
@@ -19,6 +20,7 @@ class Wave {
     this.map = map;
 
     this._svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    this._svg.classList.add("wave-circle", ...classList);
     this._svg.style.position = "absolute";
     this._svg.style.pointerEvents = "none";
     this._svg.style.height = "100%";
@@ -39,18 +41,23 @@ class Wave {
 
       if (this.type == "p") {
         this._circle.style.stroke = "cyan";
+        this._circle.classList.add("p-wave");
       } else {
         this._svgBackground = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        this._svgBackground.classList.add("wave-circle-background", ...classList);
         this._svgBackground.style.position = "absolute";
         this._svgBackground.style.pointerEvents = "none";
         this._svgBackground.style.height = "100%";
         this._svgBackground.style.width = "100%";
 
         this._circleBackground = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        this._circleBackground.classList.add("s-wave-background");
         this._circleBackground.setAttribute("cx", centerPx.x);
         this._circleBackground.setAttribute("cy", centerPx.y);
         this._circleBackground.setAttribute("r", radiusPx);
         this._circleBackground.style.fill = "url(#pred-gradient)";
+
+        this._circle.classList.add("s-wave");
         this._circle.style.stroke = "orange";
 
         this._svgBackground.appendChild(this._circleBackground);

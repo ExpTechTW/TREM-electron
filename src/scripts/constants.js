@@ -95,6 +95,7 @@ module.exports = Object.freeze({
     AudioPlayInt1        : "true",
     AudioInt1Volume      : "70",
     AudioPlayInt2        : "true",
-    AudioInt2Volume      : "80"
+    AudioInt2Volume      : "80",
+    UsePreciseMath       : "false"
   }
 });

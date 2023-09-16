@@ -2,12 +2,6 @@ const { Map } = require("maplibre-gl");
 const constants = require("../constants");
 
 class Circle {
-
-  /**
-   * @param {*} center
-   * @param {*} radius
-   * @param {Map} map
-   */
   constructor(map, { id, className = "", center = [121, 23.5], radius = 1, label, zIndex = 0 }) {
     this.id = id;
     this.lnglat = center;

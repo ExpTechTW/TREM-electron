@@ -83,6 +83,7 @@ class EEW {
       if (data.model == "nsspe") {
         this.hasWaves = false;
       } else if (this.model == "NSSPE" && data.model == "eew") {
+        this.hasWaves = true;
         playAudio("eew2", localStorage.getItem("AudioEEWTREMVolume") ?? constants.DefaultSettings.AudioEEWTREMVolume);
         _suppressUpdateAudio = true;
       }
@@ -229,21 +230,25 @@ class EEW {
 
   static evalWaveDistances(depth) {
     const _distance = [];
+    let root3 = 1.732;
+    let G0, G;
+
+    if ((localStorage.getItem("UsePreciseMath") ?? constants.DefaultSettings.UsePreciseMath) == "true")
+      root3 = 3 ** (1 / 2);
+
+    if (depth <= 40) {
+      G0 = 5.10298;
+      G = 0.06659;
+    } else {
+      G0 = 7.804799;
+      G = 0.004573;
+    }
+
     for (let index = 0; index < 1002; index++)
       _distance[index]
         = ((d, distance) => {
           const Za = 1 * d;
-          let G0, G;
           const Xb = distance;
-
-          if (d <= 40) {
-            G0 = 5.10298;
-            G = 0.06659;
-          } else {
-            G0 = 7.804799;
-            G = 0.004573;
-          }
-
           const Zc = -1 * (G0 / G);
           const Xc = ((Xb ** 2) - 2 * (G0 / G) * Za - (Za ** 2)) / (2 * Xb);
           let Theta_A = Math.atan((Za - Zc) / Xc);
@@ -252,8 +257,8 @@ class EEW {
           Theta_A = Math.PI - Theta_A;
           const Theta_B = Math.atan(-1 * Zc / (Xb - Xc));
           let Ptime = (1 / G) * Math.log(Math.tan(Theta_A / 2) / Math.tan(Theta_B / 2));
-          const G0_ = G0 / 1.732;
-          const G_ = G / 1.732;
+          const G0_ = G0 / root3;
+          const G_ = G / root3;
           const Zc_ = -1 * (G0_ / G_);
           const Xc_ = ((Xb ** 2) - 2 * (G0_ / G_) * Za - Math.pow(Za, 2)) / (2 * Xb);
           let Theta_A_ = Math.atan((Za - Zc_) / Xc_);
@@ -282,19 +287,24 @@ class EEW {
         this.s.setAlert(this.alert);
       }
     } else {
-      // no existing wave circle
-
-      this.p = new Wave(this._map, { id: this.id, type: "p", center: this.epicenter.toLngLatArray(), radius: 0, circle: this.hasWaves, model: this.model, location: this.location, magnitude: this.magnitude, depth: this.depth });
-
-      if (this.hasWaves)
-        this.s = new Wave(this._map, { id: this.id, type: "s", center: this.epicenter.toLngLatArray(), radius: 0, icon: false });
-
       this._waveSpeed = { p: 7, s: 4 };
 
       this._waveTick = () => {
-        const apiTime = this._map.time.serverTimestamp + (Date.now() - this._map.time.localServerTimestamp);
+        if (!this.p) {
+          this.p = new Wave(this._map, { id: this.id, type: "p", center: this.epicenter.toLngLatArray(), radius: 0, circle: this.hasWaves, model: this.model, location: this.location, magnitude: this.magnitude, depth: this.depth, classList: this.model == "EEW" ? ["trem-eew"] : [] });
+        } else if (!this.p.circle && this.hasWaves) {
+          this.p.remove();
+          delete this.p;
+          this.p = new Wave(this._map, { id: this.id, type: "p", center: this.epicenter.toLngLatArray(), radius: 0, model: this.model, location: this.location, magnitude: this.magnitude, depth: this.depth, classList: this.model == "EEW" ? ["trem-eew"] : [] });
+        }
 
-        const elapsedTime = apiTime - this.eventTime.getTime();
+        if (!this.s)
+          if (this.hasWaves)
+            this.s = new Wave(this._map, { id: this.id, type: "s", center: this.epicenter.toLngLatArray(), radius: 0, icon: false, classList: this.model == "EEW" ? ["trem-eew"] : [] });
+
+        const elapsedTime = this._map.time.now() - this.eventTime.getTime();
+
+        console.log(elapsedTime);
 
         if (elapsedTime > 120_000) {
           this.remove();
@@ -311,14 +321,17 @@ class EEW {
             if (!pf && this._distance[_i].Ptime > elapsedTime / 1000) {
               p_dist = _i - 1;
 
+              // the wave speed calculated is greater than 7 (standard)
               if ((_i - 1) / this._distance[_i - 1].Ptime > this._waveSpeed.p)
                 p_dist = Math.round(Math.sqrt((elapsedTime * this._waveSpeed.p) ** 2 - (this.depth * 1000) ** 2)) / 1000;
+
               pf = true;
             }
 
             if (!sf && this._distance[_i].Stime > elapsedTime / 1000) {
               s_dist = _i - 1;
 
+              // the wave speed calculated is greater than 4 (standard)
               if ((_i - 1) / this._distance[_i - 1].Stime > this._waveSpeed.s)
                 s_dist = Math.round(Math.sqrt((elapsedTime * this._waveSpeed.s) ** 2 - (this.depth * 1000) ** 2)) / 1000;
               sf = true;
@@ -336,7 +349,8 @@ class EEW {
       };
 
       this._waveTick();
-      this._waveInterval = setInterval(this._waveTick, 50);
+      this._waveInterval = setInterval(this._waveTick,
+        ((localStorage.getItem("UsePreciseMath") ?? constants.DefaultSettings.UsePreciseMath) == "true") ? 100 : 500);
     }
   }
 

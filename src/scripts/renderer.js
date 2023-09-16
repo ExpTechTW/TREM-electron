@@ -68,8 +68,11 @@ api.on(constants.Events.Ntp, (ntp) => {
       return map._replayTimestamp;
     },
     set replayTimestamp(value) {
-      map._replayTimestamp = value;
+      map._replayTimestamp = value + 1000;
       map._localReplayTimestamp = Date.now();
+    },
+    now() {
+      return this.serverTimestamp + (Date.now() - this.localServerTimestamp);
     }
   };
   map.time.localServerTimestamp = Date.now();
@@ -308,10 +311,10 @@ const updateReports = async () => {
 
       // api.requestReplay([...report.ID, ...report.trem]);
 
-      const replayStartTime = new Date(toISOTimestamp(report.originTime)).getTime() - 3_000;
+      map.time.replayTimestamp = new Date(toISOTimestamp(report.originTime)).getTime();
+      const replayStartTime = map.time.replayTimestamp - 3_000;
       let replayTimeOffset = 0;
       let noDataTimeOffset = 0;
-      map.time.replayTimestamp = replayStartTime - 3_000;
 
       const renderReplay = async () => {
         try {
@@ -321,7 +324,7 @@ const updateReports = async () => {
           noDataTimeOffset++;
 
           if (noDataTimeOffset >= 5)
-            renderRtsData({});
+            renderRtsData({}, map);
         }
 
         for (const eewdata of (await api.getEarthquake(~~((replayStartTime + replayTimeOffset * 1000) / 1000))).eew)
