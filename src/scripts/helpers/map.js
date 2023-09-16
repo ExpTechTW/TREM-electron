@@ -258,10 +258,12 @@ const renderEewData = (eew, map) => {
 
   document.body.classList.add("has-eew");
 
-  if (eew.id in eewList)
-    eewList[eew.id].update(eew, eewList);
-  else
+  if (eew.id in eewList) {
+    if (eew.number > eewList[eew.id].version)
+      eewList[eew.id].update(eew, eewList);
+  } else {
     eewList[eew.id] = new EEW(eew, map, eewList);
+  }
 };
 
 let areaMap = new Map();

@@ -361,9 +361,8 @@ class EEW {
       clearInterval(this._waveInterval);
 
     this.destroyed = true;
-    delete this._eewList[this.id];
 
-    if (Object.keys(this._eewList).length == 0)
+    if (Object.keys(this._eewList).filter((v) => this._eewList[v].destroyed != true).length == 0)
       document.body.classList.remove("has-eew");
   }
 }
