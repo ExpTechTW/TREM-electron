@@ -19,6 +19,7 @@ class EEW {
     this.hasWaves = waves;
     this._map = map;
     this._eewList = eewList;
+    this.destroyed = false;
     this.#fromJson(data);
   }
 
@@ -57,6 +58,8 @@ class EEW {
   }
 
   #fromJson(data) {
+    if (this.destroyed) return;
+
     this.id = data.id;
     this.depth = data.depth;
     this.epicenter = { latitude: data.lat, longitude: data.lon };
@@ -74,14 +77,14 @@ class EEW {
       "trem-eew"  : "TREM 地震預警"
     }[this.type];
 
-    let _surpressUpdateAudio = false;
+    let _suppressUpdateAudio = false;
 
     if (data.type == "trem-eew") {
       if (data.model == "nsspe") {
         this.hasWaves = false;
       } else if (this.model == "NSSPE" && data.model == "eew") {
         playAudio("eew2", localStorage.getItem("AudioEEWTREMVolume") ?? constants.DefaultSettings.AudioEEWTREMVolume);
-        _surpressUpdateAudio = true;
+        _suppressUpdateAudio = true;
       }
 
       this.model = data.model?.toUpperCase() ?? "TREMEEW";
@@ -176,7 +179,7 @@ class EEW {
       this.#createWaveCircles();
 
       if (data.number > 1) {
-        if (!_surpressUpdateAudio)
+        if (!_suppressUpdateAudio)
           if ((this.type == "trem-eew" && (localStorage.getItem("AudioPlayUpdateNSSPE") ?? constants.DefaultSettings.AudioPlayUpdateNSSPE) == "true")
               || (this.type != "trem-eew" && (localStorage.getItem("AudioPlayUpdate") ?? constants.DefaultSettings.AudioPlayUpdate) == "true"))
             playAudio("update", localStorage.getItem("AudioUpdateVolume") ?? constants.DefaultSettings.AudioUpdateVolume);
@@ -357,7 +360,11 @@ class EEW {
     if (this._waveInterval)
       clearInterval(this._waveInterval);
 
+    this.destroyed = true;
     delete this._eewList[this.id];
+
+    if (Object.keys(this._eewList).length == 0)
+      document.body.classList.remove("has-eew");
   }
 }
 
