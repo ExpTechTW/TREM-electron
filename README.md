@@ -1,3 +1,4 @@
+![](https://img.shields.io/github/downloads/ExpTechTW/TREM/total)
 > **Warning**  
 > 此項目當前已不再維護 請參考替代方案 [TREM-Lite](https://github.com/ExpTechTW/TREM-Lite)
 
