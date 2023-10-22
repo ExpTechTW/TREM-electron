@@ -1,0 +1,38 @@
+@import url("./panels/reports.css");
+@import url("./panels/settings.css");
+
+.panel {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transition-property: opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.panel.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.scroll-wrapper {
+  height: inherit;
+  overflow: auto;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 26px;
+}
+
+.panel-header > .icon {
+  height: 28px;
+  width: 28px;
+  margin-top: -3px;
+  font-size: 22pt;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}

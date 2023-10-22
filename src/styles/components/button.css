@@ -1,0 +1,73 @@
+.button {
+  --button-size: 18px;
+
+  all: unset;
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 40px;
+  isolation: isolate;
+  transition-property: color;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+
+.button:has(> .icon) {
+  padding-left: 8px;
+}
+
+.button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  opacity: 0;
+  background-color: var(--md-primary);
+  transition-property: background-color;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.button:hover::before {
+  opacity: .08;
+}
+
+.button:focus::before {
+  opacity: .12;
+}
+
+.button:active {
+  opacity: .6;
+}
+
+.button > .icon {
+  height: var(--button-size);
+  width: var(--button-size);
+  margin: 0 8px;
+}
+
+.text-button {
+  color: var(--md-primary);
+  font-size: var(--button-size);
+}
+
+.button.small {
+  --button-size: 14px;
+
+  height: 36px;
+  padding: 0 20px;
+}
+
+.button.small:has(> .icon) {
+  padding-left: 8px;
+}
+
+.button.secondary {
+  --md-primary: var(--md-secondary);
+}

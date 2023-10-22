@@ -1,0 +1,70 @@
+.segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  height: 36px;
+  border: 1px solid var(--md-outline);
+  border-radius: 36px;
+  overflow: hidden;
+}
+
+label.choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  color: var(--md-on-surface);
+  background-color: transparent;
+  font-size: 14px;
+  white-space: nowrap;
+  transition-property: background-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  cursor: pointer;
+}
+
+label.choice:not(:last-child) {
+  border-right: 1px solid var(--md-outline);
+}
+
+label.choice:has(> input[type="radio"]:checked),
+label.choice:has(> input[type="checkbox"]:checked) {
+  padding: 0 6px;
+  color: var(--md-on-secondary-container);
+  background-color: var(--md-secondary-container);
+}
+
+label.choice > input[type="radio"],
+label.choice > input[type="checkbox"] {
+  display: none;
+}
+
+label.choice::before {
+  content: "";
+  width: 0;
+  margin-right: 0;
+  /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+  font-family: "Material Symbols Rounded";
+  font-size: 14pt;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 16;
+  vertical-align: 2px;
+  overflow: hidden;
+  transition-property: width, margin-right;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+label.choice:has(> input[type="radio"]:checked)::before,
+label.choice:has(> input[type="checkbox"]:checked)::before {
+  content: "check";
+  width: 16px;
+  margin-right: 4px;
+}
+
+label.choice:has(> input[type="radio"]:disabled),
+label.choice:has(> input[type="checkbox"]:disabled) {
+  opacity: 0.38;
+  color: var(--md-on-surface);
+  cursor: not-allowed;
+  filter: saturate(0);
+}

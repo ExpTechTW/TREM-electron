@@ -1,0 +1,106 @@
+@import url("./icon.css");
+
+nav {
+  position: absolute;
+  height: 100svh;
+  width: 100svw;
+  pointer-events: none;
+}
+
+nav > button {
+  all: unset;
+  display: grid;
+  grid-template-columns: 40px 0fr;
+  align-items: center;
+  position: relative;
+  height: 40px;
+  margin: 8px;
+  border-radius: 20px;
+  opacity: .2;
+  color: var(--md-background);
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: initial;
+  transition-property: opacity, grid-template-columns;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+nav > button:not(:last-child) {
+  margin-bottom: 0;
+}
+
+nav > button::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background-color: var(--md-on-background);
+  pointer-events: none;
+  isolation: isolate;
+  z-index: -1;
+}
+
+nav > button > .icon {
+  margin: 8px;
+  font-size: 24px;
+  line-height: 24px;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'opsz' 24;
+  transition: font-variation-settings;
+  transition-duration: 100ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+nav > button:hover > .icon {
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'opsz' 24;
+}
+
+nav > button:active > .icon {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'opsz' 24;
+}
+
+nav > button.active > .icon {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'opsz' 24;
+}
+
+nav > button.active:hover > .icon {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'opsz' 24;
+}
+
+nav > button.active:active > .icon {
+  font-variation-settings: 'FILL' 1, 'wght' 300, 'opsz' 24;
+}
+
+nav > button > .nav-button-text {
+  opacity: 0;
+  overflow: hidden;
+  transition-property: opacity;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+nav > button:hover,
+nav > button.active {
+  grid-template-columns: 40px 1fr;
+  opacity: 1 !important;
+}
+
+nav > button:hover > .nav-button-text,
+nav > button.active > .nav-button-text {
+  display: block;
+  opacity: 1;
+  margin-right: 16px;
+}
+
+#settings {
+  position: absolute;
+  bottom: 26px;
+}
+
+#settings:hover > .icon {
+  rotate: 180deg;
+  transition-property: rotate;
+  transition-duration: 400ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TREM</title>
+  <link rel="stylesheet" href="../styles/theme/theme.css">
+  <link rel="stylesheet" href="../styles/index.css">
+  <link rel="stylesheet" href="../node_modules/maplibre-gl/dist/maplibre-gl.css">
+</head>
+<body>
+  <div id="app-container">
+    <div id="current-time"></div>
+    <div class="overlay-container">
+      <nav>
+        <button id="reports" type="button"><div class="icon">earthquake</div><div class="nav-button-text">地震報告</div></button>
+        <button id="forecast" type="button"><div class="icon">rainy</div><div class="nav-button-text">天氣</div></button>
+        <button id="temperature" type="button"><div class="icon">thermostat</div><div class="nav-button-text">溫度</div></button>
+        <button id="aqi" type="button"><div class="icon">masks</div><div class="nav-button-text">空氣品質</div></button>
+        <button id="settings" type="button"><div class="icon">settings</div><div class="nav-button-text">設定</div></button>
+      </nav>
+
+      <!-- 地震速報 -->
+      <div id="eew-panel" class="panel">
+        <div class="scroll-wrapper">
+          <div id="eew-list"></div>
+        </div>
+      </div>
+
+      <!-- 地震報告 -->
+      <div id="reports-panel" class="panel">
+        <div class="view-container forward-backward">
+          <div id="reports-list-view" class="view">
+            <div class="scroll-wrapper">
+              <div id="reports-list"></div>
+            </div>
+          </div>
+          <div id="report-detail-view" class="view">
+            <div class="view-actions">
+              <button id="button-return-to-reports-list" class="button text-button secondary small" type="button" style="margin-top: 8px;"><span class="icon">arrow_back</span><span class="nav-button-text">返回列表</span></button>
+            </div>
+            <!-- 報告編號-->
+            <div class="report-detail-header-container">
+              <div id="report-detail-subtitle"></div>
+              <div id="report-detail-title"></div>
+            </div>
+            <div class="report-detail-container">
+              <!-- 發震時間 -->
+              <div class="field" style="grid-area: 1 / 1 / 2 / 3;">
+                <div class="icon">schedule</div>
+                <div class="field-content">
+                  <span class="field-name">發震時間</span>
+                  <span id="report-detail-time" class="field-value"></span>
+                </div>
+              </div>
+
+              <!-- 震央位置 -->
+              <div class="field" style="grid-area: 2 / 1 / 3 / 3;">
+                <div class="icon">pin_drop</div>
+                <div class="field-content">
+                  <span class="field-name">震央位置</span>
+                  <span id="report-detail-location" class="field-value"></span>
+                </div>
+              </div>
+
+              <!-- 震央位置 -->
+              <div class="field" style="grid-area: 3 / 1 / 4 / 3;">
+                <div class="icon">my_location</div>
+                <div class="field-content">
+                  <span class="field-name">震央座標</span>
+                  <span><span id="report-detail-longitude" class="field-value"></span><span id="report-detail-longitude-unit" class="field-unit unit-degree"></span><span id="report-detail-latitude" class="field-value" style="margin-left: 8px;"></span><span id="report-detail-latitude-unit" class="field-unit unit-degree"></span></span>
+                </div>
+              </div>
+
+              <!-- 規模 -->
+              <div class="field">
+                <div class="icon">crisis_alert</div>
+                <div class="field-content">
+                  <span class="field-name">規模</span>
+                  <span><span class="field-unit">M<sub>L</sub></span><span id="report-detail-magnitude" class="field-value"></span></span>
+                </div>
+              </div>
+              
+              <!-- 深度 -->
+              <div class="field">
+                <div class="icon">keyboard_double_arrow_down</div>
+                <div class="field-content">
+                  <span class="field-name">深度</span>
+                  <span><span id="report-detail-depth" class="field-value"></span><span class="field-unit">km</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="report-detail-stations">
+              <div class="report-detail-stations-header">各地最大震度</div>
+              <div class="scroll-wrapper">
+                <div id="report-station-list" class="report-detail-station-container"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 設定 -->
+      <div id="settings-panel" class="panel">
+        <div class="panel-header">
+          <span class="icon">settings</span>
+          <span class="panel-header-text">設定</span>
+        </div>
+        <div class="scroll-wrapper">
+          <div class="settings-group group-api">
+            <div class="group-header">API</div>
+            <!-- API 金鑰 -->
+            <div class="setting-container">
+              <div class="setting-header">API金鑰</div>
+              <div class="settings-list">
+                <label for="input-key">
+                  <span class="label-text">API金鑰</span>
+                  <input id="input-key" class="setting" type="password" name="ApiKey" data-setting="ApiKey" placeholder="API 金鑰">
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group group-map">
+            <div class="group-header">地圖</div>
+            <!-- 測站模式 -->
+            <div class="setting-container">
+              <div class="setting-header">測站顯示模式</div>
+              <div class="segmented choice-group">
+                <label class="choice" for="rts-mode-choice1">
+                  <input type="radio" id="rts-mode-choice1" class="setting" name="RtsMode" data-setting="RtsMode" value="i">
+                  <span>震度</span>
+                </label>
+                <label class="choice" for="rts-mode-choice2">
+                  <input type="radio" id="rts-mode-choice2" class="setting" name="RtsMode" data-setting="RtsMode" value="v">
+                  <span>加速度</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 速報時隱藏測站 -->
+            <div class="setting-container">
+              <div class="setting-header">測站隱藏時機</div>
+              <div class="settings-list">
+                <label for="hide-station-eew">
+                  <span class="label-text">在地震速報時隱藏</span>
+                  <div class="switch">
+                    <input id="hide-station-eew" class="setting" type="checkbox" name="HideStation" data-setting="HideStationEEW">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="hide-station-report">
+                  <span class="label-text">在地震報告畫面時隱藏</span>
+                  <div class="switch">
+                    <input id="hide-station-report" class="setting" type="checkbox" name="HideStation" data-setting="HideStationReport">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 動畫 -->
+            <div class="setting-container">
+              <div class="setting-header">動畫</div>
+              <div class="settings-list">
+                <label for="map-animation">
+                  <span class="label-text">動畫</span>
+                  <div class="switch">
+                    <input id="map-animation" class="setting" type="checkbox" name="MapAnimation" data-setting="MapAnimation">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group group-report">
+            <div class="group-header">地震報告</div>
+            <!-- 地震報告來源 -->
+            <div class="setting-container">
+              <div class="setting-header">地震報告來源</div>
+              <div class="segmented choice-group">
+                <label class="choice" for="report-source-choice1">
+                  <input type="checkbox" id="report-source-choice1" class="setting" name="ReportSource" data-setting="ReportShowCWB">
+                  <span>中央氣象局</span>
+                </label>
+                <label class="choice" for="report-source-choice2">
+                  <input type="checkbox" id="report-source-choice2" class="setting" name="ReportSource" data-setting="ReportShowTYA">
+                  <span>TYA 地震資訊</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 地震報告標題樣式 -->
+            <div class="setting-container">
+              <div class="setting-header">地震報告標題樣式</div>
+              <div class="segmented choice-group">
+                <label class="choice" for="report-title-style-choice1">
+                  <input type="radio" id="report-title-style-choice1" class="setting" name="ReportTitleStyle" data-setting="ReportTitleStyle" value="1">
+                  <span>地點</span>
+                </label>
+                <label class="choice" for="report-title-style-choice2">
+                  <input type="radio" id="report-title-style-choice2" class="setting" name="ReportTitleStyle" data-setting="ReportTitleStyle" value="2">
+                  <span>編號</span>
+                </label>
+                <label class="choice" for="report-title-style-choice3">
+                  <input type="radio" id="report-title-style-choice3" class="setting" name="ReportTitleStyle" data-setting="ReportTitleStyle" value="3">
+                  <span>地點 + 編號</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 地震報告顯示數量 -->
+            <div class="setting-container">
+              <div class="setting-header">地震報告數量</div>
+              <div class="settings-list">
+                <label for="input-report-count">
+                  <span class="label-text">顯示數量</span>
+                  <input id="input-report-count" class="setting" type="number" name="ReportCount" data-setting="ReportCount" placeholder="50" step="1" min="1" max="500">
+                </label>
+              </div>
+            </div>
+            
+            <div class="setting-container">
+              <div class="setting-header">固定地震報告面板</div>
+              <div class="settings-list">
+                <label for="report-panel-docking">
+                  <span class="label-text">固定</span>
+                  <div class="switch">
+                    <input id="report-panel-docking" class="setting" type="checkbox" name="ReportPanelDocking" data-setting="ReportPanelDocking">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group group-audio">
+            <div class="group-header">音效</div>
+            <!-- 地震速報 -->
+            <div class="setting-container">
+              <div class="setting-header">地震速報</div>
+              <div class="settings-list">
+                <label for="audio-play-eew">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-eew" class="setting" type="checkbox" name="AudioPlayEEW" data-setting="AudioPlayEEW">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-eew-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-eew-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioEEWVolume" data-audio="eew" list="volume-markers" />
+                </label>
+                <label for="audio-eew-trem-volume" class="slider-input">
+                  <span class="label-text">TREMEEW 音量</span>
+                  <input id="audio-eew-trem-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioEEWTREMVolume" data-audio="eew2" list="volume-markers" />
+                </label>
+                <label for="audio-eew-cwb-volume" class="slider-input">
+                  <span class="label-text">CWB 音量</span>
+                  <input id="audio-eew-cwb-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioEEWCWBVolume" data-audio="cwb" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 地震速報更新報 -->
+            <div class="setting-container">
+              <div class="setting-header">地震速報更新報</div>
+              <div class="settings-list">
+                <label for="audio-play-update">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-update" class="setting" type="checkbox" name="AudioPlayUpdate" data-setting="AudioPlayUpdate">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-play-update-nsspe">
+                  <span class="label-text">在 NSSPE 時播放</span>
+                  <div class="switch">
+                    <input id="audio-play-update-nsspe" class="setting" type="checkbox" name="AudioPlayUpdate" data-setting="AudioPlayUpdateNSSPE">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-update-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-update-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioUpdateVolume" data-audio="update" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 地震報告 -->
+            <div class="setting-container">
+              <div class="setting-header">地震報告</div>
+              <div class="settings-list">
+                <label for="audio-play-report">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-report" class="setting" type="checkbox" name="AudioPlayReport" data-setting="AudioPlayReport">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-report-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-report-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioReportVolume" data-audio="report" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 一級 -->
+            <div class="setting-container">
+              <div class="setting-header">一級檢測</div>
+              <div class="settings-list">
+                <label for="audio-play-int0">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-int0" class="setting" type="checkbox" name="AudioPlayInt0" data-setting="AudioPlayInt0">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-int0-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-int0-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioInt0Volume" data-audio="int0" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 二級 -->
+            <div class="setting-container">
+              <div class="setting-header">二級檢測</div>
+              <div class="settings-list">
+                <label for="audio-play-int1">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-int1" class="setting" type="checkbox" name="AudioPlayInt1" data-setting="AudioPlayInt1">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-int1-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-int1-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioInt1Volume" data-audio="int1" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+            <!-- 四級 -->
+            <div class="setting-container">
+              <div class="setting-header">四級檢測</div>
+              <div class="settings-list">
+                <label for="audio-play-int2">
+                  <span class="label-text">啟用</span>
+                  <div class="switch">
+                    <input id="audio-play-int2" class="setting" type="checkbox" name="AudioPlayInt2" data-setting="AudioPlayInt2">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+                <label for="audio-int2-volume" class="slider-input">
+                  <span class="label-text">音量</span>
+                  <input id="audio-int2-volume" class="setting" type="range" name="AudioVolume" data-setting="AudioInt2Volume" data-audio="int2" list="volume-markers" />
+                </label>
+              </div>
+            </div>
+
+          </div>
+          
+
+          <div class="settings-group group-advance">
+            <div class="group-header">進階</div>
+
+            <!-- 動畫 -->
+            <div class="setting-container">
+              <div class="setting-header">使用較精確的數字計算</div>
+              <div class="settings-list">
+                <label for="precise-math">
+                  <span class="label-text">啟用（可能會造成卡頓）</span>
+                  <div class="switch">
+                    <input id="precise-math" class="setting" type="checkbox" name="UsePreciseMath" data-setting="UsePreciseMath">
+                    <span class="slider">
+                      <span class="material-symbols-rounded icon">done</span>
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      
+      <!-- 通知 -->
+      <div id="notice-toasts" class="toast-container">
+
+      </div>
+    </div>
+    <div class="map-container">
+      <div id="map"></div>
+    </div>
+  </div>
+
+
+  <svg id="svg-defs">
+    <defs>
+      <radialGradient id="pred-gradient">
+        <stop class="pred-start" offset="0%" />
+        <stop class="pred-stop" offset="100%" />
+      </radialGradient>
+      <radialGradient id="alert-gradient">
+        <stop class="alert-start" offset="0%" />
+        <stop class="alert-stop" offset="100%" />
+      </radialGradient>
+      <radialGradient id="trem-eew-gradient">
+        <stop class="trem-eew-start" offset="0%" />
+        <stop class="trem-eew-stop" offset="100%" />
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <datalist id="volume-markers">
+    <option value="0" label="0"></option>
+    <option value="10" label="10"></option>
+    <option value="20" label="20"></option>
+    <option value="30" label="30"></option>
+    <option value="40" label="40"></option>
+    <option value="50" label="50"></option>
+    <option value="60" label="60"></option>
+    <option value="70" label="70"></option>
+    <option value="80" label="80"></option>
+    <option value="90" label="90"></option>
+    <option value="100" label="100"></option>
+  </datalist>
+  <script>
+    require("../scripts/renderer.js");
+  </script>
+</body>
+</html>

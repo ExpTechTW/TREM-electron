@@ -1,0 +1,75 @@
+@import url("nav.css");
+@import url("map.css");
+@import url("panels.css");
+@import url("view.css");
+@import url("./components/no-data.css");
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgba(0 0 0 / 16%);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background-color: var(--md-outline);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--md-on-surface);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--md-secondary);
+}
+
+body {
+  display: grid;
+  height: 100svh;
+  width: 100svw;
+  margin: 0;
+  color: var(--md-on-background);
+  background: var(--md-background);
+  font-family: Lato, "Noto Sans TC", sans-serif;
+  overflow: hidden;
+}
+
+.overlay-container {
+  position: relative;
+  z-index: 4294967296;
+}
+
+.map-container {
+  display: grid;
+  height: 100%;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion) {
+  *, *::before, *::after {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  body{
+    filter: contrast(1.5);
+  }
+}
+
+@media (prefers-contrast: less) {
+  body{
+    filter: contrast(0.8);
+  }
+}
+
+#current-time {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 8px;
+  text-shadow: 0 0 4px #000;
+  z-index: 4294967296;
+}

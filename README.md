@@ -17,37 +17,31 @@
 &nbsp;
 
 <div style="display: grid; grid-template-columns: 1fr 1fr;">
-<img alt="即時測站" title="即時測站" src="https://user-images.githubusercontent.com/58339640/202887682-1a93b021-bcb2-44e4-b3f2-f2897ad2c4db.png" style="width: 49%; height: auto;" />
-<img alt="地震速報" title="地震速報" src="https://user-images.githubusercontent.com/58339640/202887698-36edd8ad-507e-466d-b81c-1823603bc1f9.png" style="width: 49%; height: auto;" />
-<img alt="P-Alert" title="P-Alert" src="https://user-images.githubusercontent.com/58339640/202888023-09a9db49-bc0d-405f-a144-5aa28e8c729d.png" style="width: 49%; height: auto;" />
-<img alt="地震報告" title="地震報告" src="https://user-images.githubusercontent.com/58339640/202887652-6c691e34-8ba2-4e2b-91e5-a72cf75e39da.png" style="width: 49%; height: auto;" />
+<img alt="主畫面" title="主畫面" src="https://github.com/ExpTechTW/TREM/assets/58339640/1ca85752-5a18-4d49-aa7a-dda6054631b4" style="width: 49%; height: auto;" />
+<img alt="地震報告列表" title="地震報告列表" src="https://github.com/ExpTechTW/TREM/assets/58339640/f0a25ecd-f6a0-46f3-816e-a00086c1466f" style="width: 49%; height: auto;" />
+<img alt="地震報告" title="地震報告" src="https://github.com/ExpTechTW/TREM/assets/58339640/286ce107-36f8-4cfe-b0a2-53bdaec387f9" style="width: 49%; height: auto;" />
 </div>
-即時測站效果 https://youtu.be/gcaStCv-be8
 
 ## 關於 TREM
 
 TREM 是一款開源地震速報軟體，提供給您即時的地震資訊，利用自製的測站，顯示各地的即時震度，在地震發生的第一時間取得各管道發布的強震即時警報訊息
  
 ## 功能
-* 即時地震資訊
-* 查看地震報告
-* 地震預警
-* 各地即時震度
-* 接收其他國家的地震速報
-* 使用 Webhook 將地震資訊連結到 Discord 伺服器裡
-* 自訂義主題顏色
+
+- 🗃️ **查看地震報告** —— 互動式地圖、優美的介面讓你更容易抓住重點。
+- ⚠️ **接收地震預警** —— 地震發生時即時通知，提前做好防災準備。
+- 📊 **各地即時震度** —— 隨時掌握各地震度，了解各地搖晃程度。
+- 🗺️ **國外地震資訊** —— 探索國外的地震動態，與國際連線！
 
 ## 安裝
-### 官方 | 官方推出的版本 較為穩定
+
 #### Windows
-到我們的 [Release](https://github.com/ExpTechTW/TREM/releases/latest) 頁面下載 TREM.Setup\
-下載完成後執行，就會開始安裝，安裝完成後會自動開啟 TREM
+
+開發中
 
 #### MacOS
-目前還沒有提供 MacOS 支援，敬請期待 :3
 
-### 社區 | 由開源社區維護的版本 適合嘗鮮
-- [yayacat](https://github.com/yayacat/TREM/releases)
+開發中
 
 ## 文檔
 * [TREM](https://hackmd.io/@n5w-HNYMQUmvhV6t1kor5g/Bkqtwduo9)
@@ -71,23 +65,19 @@ TREM 是一款開源地震速報軟體，提供給您即時的地震資訊，利
 8. 我們不斷對程式進行更新及優化，我們一直和使用者站在一起，為使用者的體驗而不斷努力
 9. 本程式內資源均由網際網路收集而來， 當權利人發現在本程式所提供的內容侵犯其著作權時，**請聯繫我們並請權利人提供相關文件連結**， 本站將依法採取措施移除相關內容或斷開相關鏈接
 
-## 貢獻者
-- whes1015 `程式開發` `文檔`
-- Kamiya `介面設計` `程式開發` `日文翻譯` `英文翻譯`
-- Yowoapple `俄文翻譯`
-- NYJ36 `韓文翻譯`
-- PGpenguin72 `簡體中文翻譯`
-- yayacat `簡體中文翻譯` `社區`
-- eggrollpvp `資料處理` `文檔`
-- M789 `圖形設計`
-- JQuake `音效`
-- 地牛Wake Up! `音效`
-- pisces_ `設備提供`
-
 ## 如何貢獻
+
 點擊 [Repo](https://github.com/ExpTechTW/TREM) 主頁右上角的 Code 按鈕後點擊 Download ZIP 來下載原始碼壓縮檔\
 或是使用 `git clone` 指令來複製一份原始碼到你的電腦上\
 修改變更後開啟 [Pull Request](https://github.com/ExpTechTW/TREM/pulls) 來把你的變更合併到我們下一次的更新裡面 :D
 
+## 合作
+
+- [ExpTech Studio](https://www.youtube.com/embed/live_stream?channel=UCkCzTx8RfC-Chd_hY01R80Q) YouTube 直播 (24小時)
+- [布丁Timyaya 地震記錄](https://www.youtube.com/channel/UCJUeRIt6jKSE-4jP7QB70kw) YouTube 錄播
+- [TEEWLAB速報實驗室](https://www.youtube.com/embed/live_stream?channel=UC9ssJN3nzsA83ZOBiRNDABg) YouTube 直播 (24小時)
+- [Yoyo0901](https://www.youtube.com/embed/live_stream?channel=UCE74C-snUczeXrfOYp4hYQQ) YouTube 直播 (24小時)
+
 ## 開源許可證
+
 開源許可證資訊請詳見 [LICENSE](LICENSE) 檔案
