@@ -1,12 +1,10 @@
 ![](https://img.shields.io/github/downloads/ExpTechTW/TREM/total)
-> **Warning**  
-> 此項目當前已不再維護 請參考替代方案 [TREM-Lite](https://github.com/ExpTechTW/TREM-Lite)
 
 > **Note**  
 > 目前的版本由於 API 變動，TREM 中的某些功能可能無法按預期運作。  
-> 目前正在進行全面重寫，發布日期尚未確定。如需更多資訊，請參閱 [`rewrite`](https://github.com/ExpTechTW/TREM/tree/rewrite) 分支。  
+> 目前正在進行全面重寫，發布日期尚未確定。
 > As a result of recent API changes, certain functionalities in TREM may not operate as intended.  
-> A full rewrite is presently underway, with the release date yet to be determined. For further information, please refer to [`rewrite`](https://github.com/ExpTechTW/TREM/tree/rewrite) branch.
+> A full rewrite is presently underway, with the release date yet to be determined.
 
 <img alt="Logo" src="https://upload.cc/i1/2022/08/11/DOqzZM.png" width="128px" height="128px" align="left"/>
 
