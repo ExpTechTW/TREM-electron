@@ -174,8 +174,6 @@ const openReport = (report) => {
           label     : `${seconds} 秒`
         }));
     }
-  } else {
-
   }
 
   map.fitBounds(bounds, {
