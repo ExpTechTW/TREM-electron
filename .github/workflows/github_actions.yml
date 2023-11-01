@@ -27,7 +27,6 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
-          name: "TREM.Windows_x64.exe"
           path: dist/*.exe
 
   Linux_amd64:
@@ -50,7 +49,6 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
-          name: "TREM.Linux_amd64.deb"
           path: dist/*.deb
 
   # macOS_x64:
