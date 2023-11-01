@@ -2,9 +2,9 @@ name: TREM
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 jobs:
   Windows_x64:
@@ -13,22 +13,22 @@ jobs:
       run:
         working-directory: TREM.Electron
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Restore dependencies
-      run: npm ci
-    - name: Lint
-      run: npm run lint
-    - name: Build
-      run: npm run dist
-    - name: Upload Artifact
-      uses: actions/upload-artifact@master
-      with:
-        name: "TREM.Windows_x64.exe"
-        path: D:/a/TREM/TREM/TREM.Electron/dev/*.exe
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Restore dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run dist
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: "TREM.Windows_x64.exe"
+          path: ./dist/*.exe
 
   Linux_amd64:
     runs-on: ubuntu-latest
@@ -36,22 +36,22 @@ jobs:
       run:
         working-directory: TREM.Electron
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: Restore dependencies
-      run: npm ci
-    - name: Lint
-      run: npm run lint
-    - name: Build
-      run: npm run dist
-    - name: Upload Artifact
-      uses: actions/upload-artifact@master
-      with:
-        name: "TREM.Linux_amd64.deb"
-        path: /home/runner/work/TREM/TREM/TREM.Electron/dev/*.deb
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Restore dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run dist
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: "TREM.Linux_amd64.deb"
+          path: ./dist/*.deb
 
   # macOS_x64:
   #   runs-on: macos-latest

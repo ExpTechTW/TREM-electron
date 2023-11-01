@@ -1,6 +1,6 @@
 {
   "name": "trem",
-  "version": "6.0.0-beta.10",
+  "version": "0.0.1",
   "description": "Taiwan Real-time Earthquake Monitoring ( 臺灣即時地震監測 )",
   "main": "main.js",
   "homepage": "https://exptech.com.tw/",
@@ -14,7 +14,17 @@
   "build": {
     "productName": "TREM",
     "appId": "tw.exptech.trem",
-    "asar": false,
+    "asar": true,
+    "files": [
+      "assets/**/*",
+      "audio/**/*",
+      "scripts/**/*",
+      "styles/**/*",
+      "views/*",
+      "main.js",
+      "package-lock.json",
+      "package.json"
+    ],
     "dmg": {
       "contents": [
         {
@@ -31,8 +41,11 @@
     },
     "win": {
       "publish": null,
-      "target": [],
-      "icon": "TREM.ico"
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/TREM.ico"
     },
     "linux": {
       "publish": null,
@@ -42,7 +55,7 @@
     },
     "directories": {
       "buildResources": "resources",
-      "output": "dev"
+      "output": "../dist"
     }
   },
   "repository": {
