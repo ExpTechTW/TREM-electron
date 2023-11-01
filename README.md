@@ -69,6 +69,10 @@ TREM 是一款開源地震速報軟體，提供給您即時的地震資訊，利
 或是使用 `git clone` 指令來複製一份原始碼到你的電腦上\
 修改變更後開啟 [Pull Request](https://github.com/ExpTechTW/TREM/pulls) 來把你的變更合併到我們下一次的更新裡面 :D
 
+<a href="https://github.com/ExpTechTW/TREM/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ExpTechTW/TREM" />
+</a>
+
 ## 合作
 
 - [ExpTech Studio](https://www.youtube.com/embed/live_stream?channel=UCkCzTx8RfC-Chd_hY01R80Q) YouTube 直播 (24小時)
