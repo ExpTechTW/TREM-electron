@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: TREM.Electron
+        working-directory: src
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
@@ -28,13 +28,13 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: "TREM.Windows_x64.exe"
-          path: ./dist/*.exe
+          path: ../dist/*.exe
 
   Linux_amd64:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: TREM.Electron
+        working-directory: src
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: "TREM.Linux_amd64.deb"
-          path: ./dist/*.deb
+          path: ../dist/*.deb
 
   # macOS_x64:
   #   runs-on: macos-latest
