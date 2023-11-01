@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: "TREM.Windows_x64.exe"
-          path: ../dist/*.exe
+          path: dist/*.exe
 
   Linux_amd64:
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: "TREM.Linux_amd64.deb"
-          path: ../dist/*.deb
+          path: dist/*.deb
 
   # macOS_x64:
   #   runs-on: macos-latest
