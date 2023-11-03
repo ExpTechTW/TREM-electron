@@ -14,16 +14,16 @@ jobs:
         working-directory: src
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: lts
       - name: Restore dependencies
         run: npm ci
       - name: Lint
         run: npm run lint
       - name: Build
-        run: npm run dist
+        run: npm run dist --win
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
@@ -43,15 +43,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      - name: install wine
+        run: |
+          sudo dpkg --add-architecture i386
+          wget -qO - https://dl.winehq.org/wine-builds/winehq.key | sudo apt-key add -
+          sudo add-apt-repository ppa:cybermax-dexter/sdl2-backport
+          sudo apt-add-repository "deb https://dl.winehq.org/wine-builds/ubuntu $(lsb_release -cs) main"
+          sudo apt install --install-recommends winehq-stable
       - name: Restore dependencies
         run: npm ci
       - name: Lint
         run: npm run lint
       - name: Build
-        run: npm run dist
+        run: npm run dist --linux
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
