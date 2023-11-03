@@ -23,7 +23,7 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Build
-        run: npm run dist --win
+        run: npx electron-builder --win
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
@@ -58,7 +58,7 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Build
-        run: npm run dist --linux
+        run: npx electron-builder --linux
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
