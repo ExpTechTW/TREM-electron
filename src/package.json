@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "dist": "electron-builder",
+    "dist": "electron-builder -wl",
     "lint": "eslint --ext .js scripts/"
   },
   "build": {
@@ -50,8 +50,11 @@
     },
     "linux": {
       "publish": null,
-      "target": "deb",
-      "category": "Development",
+      "target": [
+        "deb",
+        "pacman"
+      ],
+      "category": "Science",
       "maintainer": "ExpTechTW"
     },
     "directories": {
@@ -66,22 +69,19 @@
   "keywords": [],
   "license": "AGPL-3.0",
   "devDependencies": {
-    "@parcel/transformer-pug": "^2.8.3",
-    "@parcel/transformer-sass": "^2.8.3",
-    "electron": "^25.6.0",
-    "electron-builder": "^23.6.0",
-    "eslint": "^8.28.0",
-    "parcel": "^2.8.3",
-    "stylelint": "^15.7.0",
-    "stylelint-config-standard": "^33.0.0",
+    "electron": "^27.0.3",
+    "electron-builder": "^24.6.4",
+    "eslint": "^8.52.0",
+    "stylelint": "^15.11.0",
+    "stylelint-config-standard": "^34.0.0",
     "stylelint-order": "^6.0.3"
   },
   "dependencies": {
-    "@material/material-color-utilities": "^0.2.3",
+    "@material/material-color-utilities": "^0.2.7",
     "chroma-js": "^2.4.2",
     "electron-fcm-push-receiver": "^2.1.7",
-    "maplibre-gl": "^2.4.0",
-    "uuid": "^9.0.0",
-    "ws": "^8.13.0"
+    "maplibre-gl": "^3.5.2",
+    "uuid": "^9.0.1",
+    "ws": "^8.14.2"
   }
 }

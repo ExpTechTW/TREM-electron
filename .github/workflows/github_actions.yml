@@ -27,7 +27,13 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
-          path: dist/*.exe
+          name: win-x86_64-setup.exe
+          path: dist/TREM *.*.*.exe
+      - name: Upload Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: win-x86_64-portable.exe
+          path: dist/TREM Setup *.*.*.exe
 
   Linux_amd64:
     runs-on: ubuntu-latest
