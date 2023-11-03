@@ -14,10 +14,10 @@ jobs:
         working-directory: src
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js LTS
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: lts
+          node-version: 20
       - name: Restore dependencies
         run: npm ci
       - name: Lint
@@ -42,10 +42,10 @@ jobs:
         working-directory: src
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20
       - name: install wine
         run: |
           sudo dpkg --add-architecture i386
