@@ -51,8 +51,7 @@
     "linux": {
       "publish": null,
       "target": [
-        "deb",
-        "pacman"
+        "deb"
       ],
       "category": "Science",
       "maintainer": "ExpTechTW"
