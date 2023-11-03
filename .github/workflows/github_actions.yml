@@ -62,6 +62,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@master
         with:
+          name: linux-amd64.deb
           path: dist/*.deb
 
   # macOS_x64:
