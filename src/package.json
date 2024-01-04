@@ -54,6 +54,7 @@
         "deb"
       ],
       "category": "Science",
+      "icon": "assets/TREM.ico",
       "maintainer": "ExpTechTW"
     },
     "directories": {

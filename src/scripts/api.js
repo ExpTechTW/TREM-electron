@@ -86,70 +86,38 @@ class api extends EventEmitter {
     });
   }
 
-  getReports(fetchCwb = false) {
-    return new Promise((resolve, reject) => {
-      caches.match(constants.API.ReportsURL)
-        .then(async (response) => {
-          const list = {};
+  async getReports(fetchCwb = false) {
+    const url = `${constants.API.ReportsURL}?${new URLSearchParams({ key: fetchCwb ? this.key : "", limit: 50 })}`;
 
-          const req = async (cd, includeKey = true) => {
-            const request = new Request(constants.API.ReportsURL, {
-              method  : "POST",
-              headers : {
-                Accept         : "application/json",
-                "Content-Type" : "application/json",
-              },
-              body: JSON.stringify({
-                key: (includeKey) ? this.key : null,
-                list
-              })
-            });
+    const res = await fetch(url);
 
-            const res = await fetch(request);
+    if (!res.ok)
+      throw Error(`API Responded with ${res.status}.`);
 
-            if (res.ok) {
-              const resData = await res.json();
-              const dataToSave = resData.concat(cd)
-                .filter((v, i, a) => a.map((r) => r.identifier).indexOf(v.identifier) == i)
-                .sort((a, b) => new Date(b.originTime) - new Date(a.originTime));
+    /** @type {Array} */
+    let data = await res.json();
 
-              const jsonResponse = new Response(JSON.stringify(dataToSave), {
-                headers: {
-                  "content-type": "application/json"
-                }
-              });
-              response = jsonResponse;
+    const cacheResponse = await caches.match(url);
 
-              const cache = await caches.open("reports");
-              await cache.put(request.url, jsonResponse);
-              dataToSave.isCache = !resData.length;
-              return dataToSave;
-            } else {
-              cd.isCache = true;
-              return cd;
-            }
-          };
+    if (cacheResponse) {
+      const cacheData = await cacheResponse.json();
 
-          const cacheData = response ? await response.json() : [];
+      data = [...cacheData, ...data];
+    }
 
-          if (cacheData.length || fetchCwb) {
-            for (const report of cacheData) {
-              const md5 = createHash("md5");
-              list[report.identifier] = md5.update(JSON.stringify(report)).digest("hex");
-            }
+    data
+      .filter((v, i, a) => a.map((r) => r.identifier).indexOf(v.identifier) == i)
+      .sort((a, b) => new Date(b.originTime) - new Date(a.originTime));
 
-            req(cacheData, !fetchCwb)
-              .then(resolve)
-              .catch(reject);
-          } else {
-            this.getReports(true)
-              .then((d) => req(d))
-              .then(resolve)
-              .catch(reject);
-          }
-        })
-        .catch(reject);
+    const jsonResponse = new Response(JSON.stringify(data), {
+      headers: {
+        "content-type": "application/json"
+      }
     });
+
+    await (await caches.open("reports")).put(url, jsonResponse);
+
+    return data;
   }
 
   getRts(time, force = false) {

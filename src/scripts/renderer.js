@@ -42,13 +42,15 @@ ipcRenderer.on(NOTIFICATION_RECEIVED, (_, Notification) => {
   }
 });
 
-api.on(constants.Events.Rts, (rts) => {
-  if (!replayTimer) {
-    renderRtsData(rts, map);
+setInterval(async () => {
+  const rts = await api.getRts(Date.now());
 
-    document.getElementById("current-time").textContent = toFormattedTimeString(Date.now() - map.time.localServerTimestamp + map.time.serverTimestamp);
+  if (!replayTimer) {
+    renderRtsData(rts.station, map);
+
+    document.getElementById("current-time").textContent = toFormattedTimeString(Date.now() - map.time?.localServerTimestamp + map.time?.serverTimestamp);
   }
-});
+}, 1000);
 
 api.on(constants.Events.Ntp, (ntp) => {
   map.time ??= {

@@ -130,17 +130,16 @@ const renderRtsData = (rts, map) => {
   }
 
   for (const uuid in data.station) {
-    const id = uuid.split("-")[2];
     const station = data.station[uuid];
     const element = document.getElementById(uuid);
 
-    if (rts[id]?.i > newMaxIntensity)
-      newMaxIntensity = rts[id].i;
+    if (rts[uuid]?.i > newMaxIntensity)
+      newMaxIntensity = rts[uuid].i;
 
     if (rts.Alert)
-      if (rts[id]?.v && rts[id].v > (maxIntensityMap[id]?.v ?? -5))
-        maxIntensityMap[id] = {
-          v         : rts[id].v,
+      if (rts[uuid]?.pgv && rts[uuid].pgv > (maxIntensityMap[uuid]?.pgv ?? -5))
+        maxIntensityMap[uuid] = {
+          pgv       : rts[uuid].pgv,
           // sys time, replay time doesn't matter
           timestamp : Date.now()
         };
@@ -148,16 +147,16 @@ const renderRtsData = (rts, map) => {
     if (element == null) {
       const marker = rtsMarkerElement();
       marker.id = uuid;
-      marker.style.backgroundColor = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? Colors.getIntensityColor(rts[id]?.i) : Colors.getAccerateColor(rts[id]?.i);
-      marker.style.outlineColor = id in rts ? "" : Colors.NoDataRtsColor;
-      marker.style.zIndex = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? ((rts[id]?.i ?? -5) + 5) * 50 : (rts[id]?.v ?? 0.01) * 100;
-      new Marker({ element: marker }).setLngLat([station.Long, station.Lat]).addTo(map);
+      marker.style.backgroundColor = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? Colors.getIntensityColor(rts[uuid]?.i) : Colors.getAccerateColor(rts[uuid]?.pga, rts[uuid]?.pgv);
+      marker.style.outlineColor = uuid in rts ? "" : Colors.NoDataRtsColor;
+      marker.style.zIndex = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? ((rts[uuid]?.i ?? -5) + 5) * 50 : (rts[uuid]?.pgv ?? 0.01) * 100;
+      new Marker({ element: marker }).setLngLat([station.info[0].lon, station.info[0].lat]).addTo(map);
     } else {
-      const intensity = convertToIntensityInteger(rts[id]?.i);
+      const intensity = convertToIntensityInteger(rts[uuid]?.i);
       element.classList.remove("intensity-0", "intensity-1", "intensity-2", "intensity-3", "intensity-4", "intensity-5", "intensity-6", "intensity-7", "intensity-8", "intensity-9");
 
-      if (maxIntensityMap[id]?.timestamp)
-        if ((Date.now() - maxIntensityMap[id].timestamp) < 5_000) {
+      if (maxIntensityMap[uuid]?.timestamp)
+        if ((Date.now() - maxIntensityMap[uuid].timestamp) < 5_000) {
           if (!element.classList.contains("alert"))
             element.classList.add("alert");
         } else {
@@ -167,21 +166,21 @@ const renderRtsData = (rts, map) => {
       if (intensity)
         element.classList.add(`intensity-${intensity.value}`);
 
-      element.style.backgroundColor = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? Colors.getIntensityColor(rts[id]?.i) : Colors.getAccerateColor(rts[id]?.i);
-      element.style.outlineColor = id in rts ? "" : Colors.NoDataRtsColor;
-      element.style.zIndex = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? ((rts[id]?.i ?? -5) + 5) * 50 : (rts[id]?.v ?? 0.01) * 100;
+      element.style.backgroundColor = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? Colors.getIntensityColor(rts[uuid]?.i) : Colors.getAccerateColor(rts[uuid]?.i);
+      element.style.outlineColor = uuid in rts ? "" : Colors.NoDataRtsColor;
+      element.style.zIndex = ((localStorage.getItem("RtsMode") ?? constants.DefaultSettings.RtsMode) == "i") ? ((rts[uuid]?.i ?? -5) + 5) * 50 : (rts[uuid]?.pgv ?? 0.01) * 100;
     }
 
     // 檢知框框
 
-    if (rts[id]?.i && (rts[id].i > 0 || rts[id].alert)) {
+    if (rts[uuid]?.i && (rts[uuid].i > 0 || rts[uuid].alert)) {
       detected_list[station.PGA] ??= {
-        intensity : rts[id].i,
+        intensity : rts[uuid].i,
         time      : 0,
       };
 
-      if ((detected_list[station.PGA].intensity ?? 0) < rts[id].i)
-        detected_list[station.PGA].intensity = rts[id].i;
+      if ((detected_list[station.PGA].intensity ?? 0) < rts[uuid].i)
+        detected_list[station.PGA].intensity = rts[uuid].i;
       detected_list[station.PGA].time = Date.now();
     }
   }

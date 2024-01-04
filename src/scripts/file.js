@@ -5,7 +5,7 @@
 
 let rtsData = {};
 
-fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/Json/earthquake/station.json")
+fetch("https://raw.githubusercontent.com/ExpTechTW/API/master/resource/station.json")
   .then((res) => res.json())
   .then((v) => rtsData = v);
 

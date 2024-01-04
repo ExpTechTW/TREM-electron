@@ -1,11 +1,11 @@
 module.exports = Object.freeze({
+  WebSocketTargetUrl : "wss://ws.exptech.com.tw/websocket",
   AppVersion         : "0.0.1",
-  WebSocketTargetUrl : "wss://exptech.com.tw/api",
   FCMSenderId        : "583094702393",
   API                : {
-    RtsURL        : "https://exptech.com.tw/api/v3/trem/rts",
-    EarthquakeURL : "https://exptech.com.tw/api/v1/earthquake/info",
-    ReportsURL    : "https://exptech.com.tw/api/v3/earthquake/reports",
+    RtsURL        : "https://data.exptech.com.tw/api/v1/trem/rts",
+    EarthquakeURL : "https://data.exptech.com.tw/api/v1/eq/info",
+    ReportsURL    : "https://data.exptech.com.tw/api/v1/eq/report",
     ReplayURL     : "https://exptech.com.tw/api/v1/trem/replay"
   },
   Intensities: [
