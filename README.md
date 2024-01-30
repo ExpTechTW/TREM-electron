@@ -1,6 +1,6 @@
 ![](https://img.shields.io/github/downloads/ExpTechTW/TREM/total)
 
-> **Note**  
+> [!Note]  
 > 目前的版本由於 API 變動，TREM 中的某些功能可能無法按預期運作。  
 > 目前正在進行全面重寫，發布日期尚未確定。
 > As a result of recent API changes, certain functionalities in TREM may not operate as intended.  
