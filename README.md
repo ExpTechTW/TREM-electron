@@ -1,10 +1,8 @@
-![](https://img.shields.io/github/downloads/ExpTechTW/TREM/total)
-
-> [!Note]  
-> 目前的版本由於 API 變動，TREM 中的某些功能可能無法按預期運作。  
-> 目前正在進行全面重寫，發布日期尚未確定。
-> As a result of recent API changes, certain functionalities in TREM may not operate as intended.  
-> A full rewrite is presently underway, with the release date yet to be determined.
+> [!IMPORTANT]  
+> TREM Electron 版本已經棄用，目前正在進行全面重寫，發布日期尚未確定。\
+> 更多 TREM 產品資訊請參考 [ExpTechTW/TREM-tauri](https://github.com/ExpTechTW/TREM-tauri) 和 [ExpTechTW/TREM-Lite](https://github.com/ExpTechTW/TREM-Lite)\
+> TREM Electron version is deprecated. A full rewrite is presently underway, with the release date yet to be determined.\
+> For more information, please refer to [ExpTechTW/TREM-tauri](https://github.com/ExpTechTW/TREM-tauri) and [ExpTechTW/TREM-Lite](https://github.com/ExpTechTW/TREM-Lite)
 
 <img alt="Logo" src="https://upload.cc/i1/2022/08/11/DOqzZM.png" width="128px" height="128px" align="left"/>
 
